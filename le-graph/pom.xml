@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-graphdb</artifactId>
+    <artifactId>le-graph</artifactId>
     <name>le-${component-name}</name>
-    <description>LE GRAPH DB - Mostly Atlas dependency graph on AWS Neptune</description>
+    <description>LE GRAPH - Generic graph processing utilities via Gremlin</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
@@ -14,7 +14,7 @@
     </parent>
 
     <properties>
-        <component-name>graphdb</component-name>
+        <component-name>graph</component-name>
     </properties>
 
     <dependencies>
@@ -29,9 +29,19 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-graph</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-core</artifactId>
+            <version>${tinkerpop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-driver</artifactId>
+            <version>${tinkerpop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>tinkergraph-gremlin</artifactId>
+            <version>${tinkerpop.version}</version>
         </dependency>
     </dependencies>
 

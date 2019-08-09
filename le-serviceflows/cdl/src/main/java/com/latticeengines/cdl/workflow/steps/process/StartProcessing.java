@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -244,10 +245,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> businessCalenderChangedActions = getBusinessCalendarChangedActions(actions);
         grapherContext.setBusinessCalenderChanged(CollectionUtils.isNotEmpty(businessCalenderChangedActions));
 
-        List<Action> ratingActions = getRatingRelatedActions(actions);
-        List<String> segments = getActionImpactedSegmentNames(ratingActions);
+        List<String> engineIds = getActionImpactedEngineIds(actions);
+        List<String> segments = getActionImpactedSegmentNames(actions);
         grapherContext.setHasRatingEngineChange(
-                CollectionUtils.isNotEmpty(ratingActions) || CollectionUtils.isNotEmpty(segments));
+                CollectionUtils.isNotEmpty(engineIds) || CollectionUtils.isNotEmpty(segments));
+        putObjectInContext(ACTION_IMPACTED_ENGINES, engineIds);
+        putObjectInContext(ACTION_IMPACTED_SEGMENTS, segments);
 
         grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
 
@@ -385,11 +388,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }).collect(Collectors.toList());
     }
 
-    protected List<Action> getRatingRelatedActions(List<Action> actions) {
-        return actions.stream().filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
-                .collect(Collectors.toList());
-    }
-
     private List<Action> getPurchaseMetricsActions(List<Action> actions) {
         return actions.stream().filter(action -> action.getType() == ActionType.ACTIVITY_METRICS_CHANGE)
                 .collect(Collectors.toList());
@@ -398,6 +396,20 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private List<Action> getBusinessCalendarChangedActions(List<Action> actions) {
         return actions.stream().filter(action -> action.getType() == ActionType.BUSINESS_CALENDAR_CHANGE)
                 .collect(Collectors.toList());
+    }
+
+    private List<String> getActionImpactedEngineIds(List<Action> actions) {
+        List<String> engineIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            for (Action action: actions) {
+                if (ActionType.getRatingRelatedTypes().contains(action.getType())) {
+                    RatingEngineActionConfiguration configuration = //
+                            (RatingEngineActionConfiguration) action.getActionConfiguration();
+                    engineIds.add(configuration.getRatingEngineId());
+                }
+            }
+        }
+        return engineIds;
     }
 
     protected List<String> getActionImpactedSegmentNames(List<Action> actions) {
