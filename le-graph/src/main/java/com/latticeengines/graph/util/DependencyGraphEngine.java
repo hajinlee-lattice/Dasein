@@ -20,15 +20,16 @@ public class DependencyGraphEngine extends GraphEngine implements AutoCloseable 
      * First layer has no dependencies
      */
     public <T extends GraphNode> List<Set<T>> getDependencyLayers(Class<T> nodeClz, int maxLayers) {
+        final int finalMaxLayers = maxLayers > 0 ? maxLayers : Integer.MAX_VALUE;
         Map<T, Integer> depthMap = getDependencyDepth(nodeClz);
         int numLayers = depthMap.values().stream().mapToInt(Integer::intValue).max().orElse(0);
         if (numLayers > 0) {
             List<Set<T>> layers = new ArrayList<>();
-            for (int i = 0; i < Math.min(maxLayers, numLayers); i++) {
+            for (int i = 0; i < Math.min(finalMaxLayers, numLayers); i++) {
                 layers.add(new HashSet<>());
             }
             depthMap.forEach((node, depth) -> {
-                int layerIdx = Math.min(depth - 1, maxLayers - 1);
+                int layerIdx = Math.min(depth - 1, finalMaxLayers - 1);
                 layers.get(layerIdx).add(node);
             });
             return layers;

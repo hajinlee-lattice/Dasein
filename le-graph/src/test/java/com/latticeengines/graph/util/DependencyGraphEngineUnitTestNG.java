@@ -14,7 +14,7 @@ import com.latticeengines.common.exposed.graph.StringGraphNode;
 public class DependencyGraphEngineUnitTestNG {
 
     @Test(groups = "unit")
-    public void testLoadGraphNodes() {
+    public void testDependencyLayers() {
         try (DependencyGraphEngine graphEngine = new DependencyGraphEngine()) {
             GraphTraversalSource g = graphEngine.getTraverser();
 
@@ -41,7 +41,8 @@ public class DependencyGraphEngineUnitTestNG {
             Assert.assertEquals(g.V().toList().size(), 9);
             Assert.assertEquals(g.E().toList().size(), 6);
 
-            List<Set<StringGraphNode>> layers = graphEngine.getDependencyLayers(StringGraphNode.class, Integer.MAX_VALUE);
+            List<Set<StringGraphNode>> layers = //
+                    graphEngine.getDependencyLayers(StringGraphNode.class, Integer.MAX_VALUE);
             verifyLayerContains(layers.get(0), n5, n6, n8, n9);
             verifyLayerContains(layers.get(1), n3, n4, n7);
             verifyLayerContains(layers.get(2), n2);
@@ -50,6 +51,35 @@ public class DependencyGraphEngineUnitTestNG {
             layers = graphEngine.getDependencyLayers(StringGraphNode.class, 2);
             verifyLayerContains(layers.get(0), n5, n6, n8, n9);
             verifyLayerContains(layers.get(1), n1, n2, n3, n4, n7);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testCornerCases() {
+        try (DependencyGraphEngine graphEngine = new DependencyGraphEngine()) {
+            List<Set<StringGraphNode>> layers = //
+                    graphEngine.getDependencyLayers(StringGraphNode.class, Integer.MAX_VALUE);
+            Assert.assertNotNull(layers);
+            Assert.assertEquals(layers.size(), 0);
+
+            layers = graphEngine.getDependencyLayers(StringGraphNode.class, -1);
+            Assert.assertNotNull(layers);
+            Assert.assertEquals(layers.size(), 0);
+
+            StringGraphNode n1 = new StringGraphNode("1");
+            StringGraphNode n2 = new StringGraphNode("2");
+            StringGraphNode n3 = new StringGraphNode("3");
+            n1.addChild(n2);
+            n2.addChild(n3);
+            graphEngine.loadGraphNodes(Arrays.asList(n1, n2, n3));
+
+            layers = graphEngine.getDependencyLayers(StringGraphNode.class, 0);
+            Assert.assertNotNull(layers);
+            Assert.assertEquals(layers.size(), 3);
+
+            layers = graphEngine.getDependencyLayers(StringGraphNode.class, -1);
+            Assert.assertNotNull(layers);
+            Assert.assertEquals(layers.size(), 3);
         }
     }
 

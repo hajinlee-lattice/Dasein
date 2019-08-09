@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -47,14 +49,18 @@ public class GraphEngine implements AutoCloseable {
         return g;
     }
 
-    public void loadGraphNodes(Collection<? extends GraphNode> graphNodes) {
-        for (GraphNode graphNode: graphNodes) {
-            addOrGetNode(graphNode);
-        }
-        for (GraphNode graphNode: graphNodes) {
-            if (CollectionUtils.isNotEmpty(graphNode.getChildren())) {
-                for (GraphNode childNode: graphNode.getChildren()) {
-                    addOrGetEdge(graphNode, childNode, EDGE_LABEL);
+    public void loadGraphNodes(@NotNull Collection<? extends GraphNode> graphNodes) {
+        if (CollectionUtils.isNotEmpty(graphNodes)) {
+            for (GraphNode graphNode : graphNodes) {
+                addOrGetNode(graphNode);
+            }
+            for (GraphNode graphNode : graphNodes) {
+                if (CollectionUtils.isNotEmpty(graphNode.getChildren())) {
+                    for (GraphNode childNode : graphNode.getChildren()) {
+                        if (childNode != null) {
+                            addOrGetEdge(graphNode, childNode, EDGE_LABEL);
+                        }
+                    }
                 }
             }
         }
@@ -87,7 +93,7 @@ public class GraphEngine implements AutoCloseable {
         return edge;
     }
 
-    public void verifyNoCycles() throws GraphProcessingException {
+    void verifyNoCycles() throws GraphProcessingException {
         List<Path> cycles = getCycles();
         if (CollectionUtils.isNotEmpty(cycles)) {
             List<String> pathStrList = cycles.stream().map(this::pathToStr).collect(Collectors.toList());
