@@ -1,0 +1,71 @@
+.partner__screen {
+    /* background: red; */
+}
+.partner__screen--first {
+    /* background: red; */
+}
+.partner__screen--last {
+    height: 84vh;
+    display: flex;
+    padding: 0;
+    margin: 20px 10px 0 10px;
+}
+.partner__screen__header {
+    padding: 0px;
+    margin: 0;
+    flex: 0;
+    margin-bottom: 1.8em;
+}
+.partner__screen__header__title {
+    color: black;
+}
+.partner__screen__header__description {
+    /* background: red; */
+}
+.partner__screen__items {
+    flex: 1;
+    padding-right: 30px;
+    padding-left: 20px;
+}
+.partner__footer {
+    /* background: red; */
+}
+.partner__footer__step-indicator {
+    /* background: red; */
+}
+.partner__footer__step-indicator__dot {
+    /* background: red; */
+}
+.partner__footer__step-indicator__dot--active {
+    /* background: red; */
+}
+.partner__footer__button-group {
+    /* background: red; */
+}
+.partner__button {
+    /* background: red; */
+}
+.partner__button--cancel {
+    /* background: red; */
+}
+.partner__button--previous {
+    /* background: red; */
+}
+.partner__button--next {
+    /* background: red; */
+}
+.partner__button--finish,
+.partner__button--next {
+    background-color: #457eba;
+    border: 1px solid #457eba;
+    color: #ffffff;
+}
+.partner__button--finish:hover,
+.partner__button--next:hover {
+    background-color: #629acc;
+    border: 1px solid #629acc;
+}
+.form {
+    padding: 0 20px;
+    margin-right: 20px;
+}
