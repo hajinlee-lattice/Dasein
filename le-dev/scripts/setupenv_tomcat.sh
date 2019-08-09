@@ -6,9 +6,9 @@ ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.21
+    TOMCAT_VERSION=9.0.24
 
-    sudo rm -rf $CATALINA_HOME
+    sudo rm -rf ${CATALINA_HOME}
     sudo mkdir -p ${CATALINA_HOME} || true
     sudo chown -R ${USER} ${CATALINA_HOME} || true
 

@@ -19,7 +19,7 @@
         <Listener className="org.apache.catalina.mbeans.JmxRemoteLifecycleListener"
                   rmiRegistryPortPlatform="1098" rmiServerPortPlatform="1099"/>
         <Executor name="tomcatThreadPool" namePrefix="catalina-exec-" maxThreads="256" minSpareThreads="4"/>
-        <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
+        <Connector port="8443" protocol="org.apache.coyote.http11.Http11Nio2Protocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true" useAsyncIO="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
                    connectionTimeout="600000" compression="on" compressibleMimeType="text/plain,application/json">
