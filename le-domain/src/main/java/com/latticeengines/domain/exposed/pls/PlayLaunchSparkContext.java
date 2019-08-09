@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
@@ -80,11 +82,26 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("DestinationOrgId")
     private String destinationOrgId;
 
+    @JsonProperty("DestinationOrgName")
+    private String destinationOrgName;
+
     @JsonProperty("LaunchSystemName")
     private String launchSystemName;
 
     @JsonProperty("SfdcAccountID")
     private String sfdcAccountID;
+
+    @JsonProperty("AccountColsRecIncluded")
+    private List<ColumnMetadata> accountColsRecIncluded;
+
+    @JsonProperty("AccountColsRecNotIncludedStd")
+    private List<ColumnMetadata> accountColsRecNotIncludedStd;
+
+    @JsonProperty("AccountCoslRecNotIncludedNonStd")
+    private List<ColumnMetadata> accountColsRecNotIncludedNonStd;
+
+    @JsonProperty("ContactCols")
+    private List<ColumnMetadata> contactCols;
 
     public PlayLaunchSparkContext() {
     }
@@ -233,6 +250,38 @@ public class PlayLaunchSparkContext implements Serializable {
         this.sfdcAccountID = sfdcAccountID;
     }
 
+    public List<ColumnMetadata> getAccountColsRecIncluded() {
+        return this.accountColsRecIncluded;
+    }
+
+    public void setAccountColsRecIncluded(List<ColumnMetadata> accountColsRecIncluded) {
+        this.accountColsRecIncluded = accountColsRecIncluded;
+    }
+
+    public List<ColumnMetadata> getAccountColsRecNotIncludedStd() {
+        return this.accountColsRecNotIncludedStd;
+    }
+
+    public void setAccountColsRecNotIncludedStd(List<ColumnMetadata> accountColsRecNotIncludedStd) {
+        this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+    }
+
+    public List<ColumnMetadata> getAccountCoslRecNotIncludedNonStd() {
+        return this.accountColsRecNotIncludedNonStd;
+    }
+
+    public void setAccountCoslRecNotIncludedNonStd(List<ColumnMetadata> accountColsRecNotIncludedNonStd) {
+        this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+    }
+
+    public List<ColumnMetadata> getContactCols() {
+        return this.contactCols;
+    }
+
+    public void setContactCols(List<ColumnMetadata> contactCols) {
+        this.contactCols = contactCols;
+    }
+
     public String getModelId() {
         return this.modelId;
     }
@@ -265,6 +314,7 @@ public class PlayLaunchSparkContext implements Serializable {
         this.synchronizationDestination = synchronizationDestination;
         if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
             this.destinationOrgId = playLaunch.getDestinationOrgId();
+            this.destinationOrgName = playLaunch.getDestinationOrgName();
             this.destinationSysType = destinationSysType;
         }
         if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
