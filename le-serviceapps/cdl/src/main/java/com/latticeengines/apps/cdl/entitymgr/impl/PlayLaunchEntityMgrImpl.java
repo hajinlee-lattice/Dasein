@@ -106,7 +106,10 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     public List<PlayLaunch> getByStateAcrossTenants(LaunchState state, Long max) {
         List<PlayLaunch> launches = playLaunchDao.getByStateAcrossTenants(state, max);
 
-        launches.forEach(launch -> Hibernate.initialize(launch.getPlay()));
+        launches.forEach(launch -> {
+            Hibernate.initialize(launch.getPlay());
+            Hibernate.initialize(launch.getPlayLaunchChannel());
+        });
         return launches;
     }
 

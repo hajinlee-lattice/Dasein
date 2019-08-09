@@ -29,7 +29,7 @@ public interface FileUploadService {
     InputStream getImportErrorStream(String sourceFileName);
 
     SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-            CleanupOperationType cleanupOperationType);
+            CleanupOperationType cleanupOperationType, boolean enableEntityMatch);
 
     SourceFile createSourceFileFromS3(FileProperty fileProperty, String entity);
 }

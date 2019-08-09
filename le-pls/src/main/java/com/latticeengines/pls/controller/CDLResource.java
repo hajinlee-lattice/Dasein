@@ -293,8 +293,9 @@ public class CDLResource {
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            ApplicationId applicationId = cdlService.cleanupAllData(customerSpace.toString(), schemaInterpretation);
-            return ResponseDocument.successResponse(applicationId.toString());
+//            ApplicationId applicationId = cdlService.cleanupAllData(customerSpace.toString(), schemaInterpretation);
+            cdlService.cleanupAllByAction(customerSpace.toString(), schemaInterpretation);
+            return ResponseDocument.successResponse("");
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit cleanup all job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"Cleanup", e.getMessage()});
