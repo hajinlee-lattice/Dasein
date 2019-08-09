@@ -204,7 +204,7 @@ export default class ConnectionsComponent extends Component {
 		}
 	}
 	generateAuthTokenClickHandler() {
-		this.setState({ loadingIframe: true });
+		// this.setState({ loadingIframe: true });
 		let connectorName = ConnectorService.getConnectorName();
 		let isExternallyAuthenticatedSystem = ConnectorService.isExternallyAuthenticatedSystem(
 			connectorName
@@ -296,6 +296,7 @@ export default class ConnectionsComponent extends Component {
 						},
 						className: "launch-modal-systems",
 						template: () => {
+							this.setState({ loadingIframe: true });
 							return (
 								<IFrameComponent
 									onLoad={() => {
