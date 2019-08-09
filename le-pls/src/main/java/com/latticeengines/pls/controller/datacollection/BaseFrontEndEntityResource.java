@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -92,7 +94,7 @@ public abstract class BaseFrontEndEntityResource {
                 }
             }
         }
-        appendSegmentRestriction(frontEndQuery);
+        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery);
         frontEndQuery.setMainEntity(mainEntity);
         if (BusinessEntity.Contact.equals(mainEntity)) {
             Restriction accountRestriction;
@@ -131,7 +133,7 @@ public abstract class BaseFrontEndEntityResource {
                 }
             }
         }
-        appendSegmentRestriction(frontEndQuery);
+        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         if (CollectionUtils.isEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.setLookups(getDataLookups());
@@ -169,64 +171,50 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
+    private void appendSegmentRestrictionAndFreeTextSearch(FrontEndQuery frontEndQuery) {
+        // restrictions in the query
+        Restriction frontEndAccountRestriction = frontEndQuery.getAccountRestriction() != null
+                ? frontEndQuery.getAccountRestriction().getRestriction() : null;
+        Restriction frontEndContactRestriction = frontEndQuery.getContactRestriction() != null
+                ? frontEndQuery.getContactRestriction().getRestriction() : null;
+
+        // restrictions in the segment
+        Restriction segmentAccountRestriction = null;
+        Restriction segmentContactRestriction = null;
         if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())
                 && !NEW_SEGMENT_PLACEHOLDER.equals(frontEndQuery.getPreexistingSegmentName())) {
-            // Segment Restrictions
             Pair<Restriction, Restriction> segmentRestrictions = getSegmentRestrictions(
                     frontEndQuery.getPreexistingSegmentName());
-            Restriction segmentAccountRestriction = segmentRestrictions.getLeft();
-            Restriction segmentContactRestriction = segmentRestrictions.getRight();
+            segmentAccountRestriction = segmentRestrictions.getLeft();
+            segmentContactRestriction = segmentRestrictions.getRight();
+        }
 
-            Restriction freeTextAccountRestriction = //
-                    translateFreeTextSearchForAccount(frontEndQuery.getFreeFormTextSearch());
-            Restriction freeTextContactRestriction = //
-                    translateFreeTextSearchForContact(frontEndQuery.getFreeFormTextSearch());
-            frontEndQuery.setFreeFormTextSearch(null);
+        // free text search
+        Restriction freeTextAccountRestriction = //
+                translateFreeTextSearchForAccount(frontEndQuery.getFreeFormTextSearch());
+        Restriction freeTextContactRestriction = //
+                translateFreeTextSearchForContact(frontEndQuery.getFreeFormTextSearch());
+        frontEndQuery.setFreeFormTextSearch(null);
 
-            // Account
-            if (segmentAccountRestriction != null) {
-                Restriction frontEndAccountRestriction = frontEndQuery.getAccountRestriction() != null
-                        ? frontEndQuery.getAccountRestriction().getRestriction() : null;
-                if (frontEndAccountRestriction != null) {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(frontEndAccountRestriction, segmentAccountRestriction, freeTextAccountRestriction) //
-                            .build();
-                    frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
-                } else {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(segmentAccountRestriction, freeTextAccountRestriction) //
-                            .build();
-                    FrontEndRestriction feRestriction = frontEndQuery.getAccountRestriction();
-                    if (feRestriction == null) {
-                        feRestriction = new FrontEndRestriction();
-                    }
-                    feRestriction.setRestriction(totalRestriction);
-                    frontEndQuery.setAccountRestriction(feRestriction);
-                }
-            }
+        // merge together
+        Restriction finalAccountRestriction = tripleMergeRestrictions( //
+                segmentAccountRestriction, frontEndAccountRestriction, freeTextAccountRestriction //
+        );
+        Restriction finalContactRestriction = tripleMergeRestrictions( //
+                segmentContactRestriction, frontEndContactRestriction, freeTextContactRestriction //
+        );
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(finalAccountRestriction));
+        frontEndQuery.setContactRestriction(new FrontEndRestriction(finalContactRestriction));
+    }
 
-            // Contact
-            if (segmentContactRestriction != null) {
-                Restriction frontEndContactRestriction = frontEndQuery.getContactRestriction() != null
-                        ? frontEndQuery.getContactRestriction().getRestriction() : null;
-                if (frontEndContactRestriction != null) {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(frontEndContactRestriction, segmentContactRestriction, freeTextContactRestriction) //
-                            .build();
-                    frontEndQuery.getContactRestriction().setRestriction(totalRestriction);
-                } else {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(segmentAccountRestriction, segmentContactRestriction) //
-                            .build();
-                    FrontEndRestriction feRestriction = frontEndQuery.getContactRestriction();
-                    if (feRestriction == null) {
-                        feRestriction = new FrontEndRestriction();
-                    }
-                    feRestriction.setRestriction(totalRestriction);
-                    frontEndQuery.setContactRestriction(feRestriction);
-                }
-            }
+    private Restriction tripleMergeRestrictions(Restriction r1, Restriction r2, Restriction r3) {
+        List<Restriction> nonEmptyRs = Stream.of(r1, r2, r3).filter(Objects::nonNull).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(nonEmptyRs)) {
+            return Restriction.builder().and(Collections.emptyList()).build();
+        } else if (CollectionUtils.size(nonEmptyRs) == 1) {
+            return nonEmptyRs.get(0);
+        } else {
+            return Restriction.builder().and(nonEmptyRs).build();
         }
     }
 
