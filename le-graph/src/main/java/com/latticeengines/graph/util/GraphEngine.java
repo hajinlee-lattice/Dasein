@@ -77,7 +77,7 @@ public class GraphEngine implements AutoCloseable {
             vertex = g.V().has(clz, PROPERTY_ID, id).next();
         } else {
             vertex = g.addV(clz).property(PROPERTY_ID, id).property(PROPERTY_VALUE, graphNode).next();
-            log.info(String.format("Add a [%s] vertex v[%s]: %s", clz, vertex.id(), graphNode));
+            log.debug(String.format("Add a [%s] vertex v[%s]: %s", clz, vertex.id(), graphNode));
         }
         return vertex;
     }
@@ -90,8 +90,7 @@ public class GraphEngine implements AutoCloseable {
             edge = g.V(vOut).outE(label).where(__.inV().is(vIn)).next();
         } else {
             edge = g.addE(label).from(vOut).to(vIn).next();
-            log.info(String.format("Add a [%s] edge from v[%s] to v[%s]", label, vOut.id(), vIn.id()));
-
+            log.debug(String.format("Add a [%s] edge from v[%s] to v[%s]", label, vOut.id(), vIn.id()));
         }
         return edge;
     }
