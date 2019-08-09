@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
@@ -102,7 +104,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
 
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList(
-                AGG_DAILY_TRXN_TABLE_NAME, AGG_PERIOD_TRXN_TABLE_NAME));
+                AGG_DAILY_TRXN_TABLE_NAME, AGG_PERIOD_TRXN_TABLE_NAME, DAILY_TRXN_TABLE_NAME),
+                Collections.singletonList(PERIOD_TRXN_TABLE_NAME));
         shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
 
         if (shortCut) {
@@ -110,8 +113,19 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
             log.info("Found both daily and period aggregated tables in context, going thru short-cut mode.");
             sortedDailyTableName = tablesInCtx.get(0).getName();
             sortedPeriodTableName = tablesInCtx.get(1).getName();
-            finishing();
 
+            // link daily & period batch store tables
+            List<String> periodTableNames = getListObjectFromContext(PERIOD_TRXN_TABLE_NAME, String.class);
+            if (CollectionUtils.isNotEmpty(periodTableNames)) {
+                dataCollectionProxy.upsertTables(customerSpace.toString(), periodTableNames,
+                        TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+            }
+            String dailyTableName = getStringValueFromContext(DAILY_TRXN_TABLE_NAME);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), dailyTableName,
+                    TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+            log.info("Adding daily txn table = {} and period txn tables = {}", dailyTableName, periodTableNames);
+
+            finishing();
         } else {
 
             ChoreographerContext context = getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
@@ -235,6 +249,15 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         }
         sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
         exportToS3AndAddToContext(sortedPeriodTableName, AGG_PERIOD_TRXN_TABLE_NAME);
+
+        // export batch stores
+        exportToS3AndAddToContext(dailyTable.getName(), DAILY_TRXN_TABLE_NAME);
+        if (CollectionUtils.isNotEmpty(periodTables)) {
+            exportToS3AndAddToContext(periodTables.stream().map(Table::getName).collect(Collectors.toList()),
+                    PERIOD_TRXN_TABLE_NAME);
+        } else {
+            putObjectInContext(PERIOD_TRXN_TABLE_NAME, Collections.emptyList());
+        }
 
         finishing();
     }

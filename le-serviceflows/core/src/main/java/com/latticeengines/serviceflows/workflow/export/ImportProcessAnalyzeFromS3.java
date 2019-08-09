@@ -83,10 +83,7 @@ public class ImportProcessAnalyzeFromS3 extends BaseImportExportS3<ImportExportS
     }
 
     private void buildTablesForRetryRequests(List<ImportExportRequest> requests) {
-        Set<String> tableNamesForRetry = TABLE_NAMES_FOR_PA_RETRY.stream() //
-                .map(this::getStringValueFromContext) //
-                .filter(StringUtils::isNotBlank) //
-                .collect(Collectors.toSet());
+        Set<String> tableNamesForRetry = getTableNamesForPaRetry();
         if (CollectionUtils.isNotEmpty(tableNamesForRetry)) {
             log.info("Start to add " + CollectionUtils.size(tableNamesForRetry) + " tables for retry for tenant=" + customer);
             tableNamesForRetry.forEach(t -> addTableDir(t, requests));
