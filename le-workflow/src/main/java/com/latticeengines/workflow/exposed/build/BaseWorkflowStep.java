@@ -121,6 +121,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
+    public static final String ACTION_IMPACTED_SEGMENTS = "ACTION_IMPACTED_SEGMENTS";
+    public static final String ACTION_IMPACTED_ENGINES = "ACTION_IMPACTED_ENGINES";
+    public static final String RESCORE_ALL_RATINGS = "RESCORE_ALL_RATINGS";
     public static final String CURRENT_RATING_ITERATION = "CURRENT_RATING_ITERATION";
     public static final String INACTIVE_ENGINE_ATTRIBUTES = "INACTIVE_ENGINE_ATTRIBUTES";
     public static final String INACTIVE_ENGINES = "INACTIVE_ENGINES";
