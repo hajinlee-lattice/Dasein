@@ -1219,11 +1219,11 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         if (enableEntityMatch) {
-            table.addAttribute(attr(InterfaceName.ContactId.name()) //
+            table.addAttribute(attr(InterfaceName.CustomerContactId.name()) //
                     .allowedDisplayNames(
                             Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                     .type(Schema.Type.STRING) //
-                    .interfaceName(InterfaceName.ContactId) //
+                    .interfaceName(InterfaceName.CustomerContactId) //
                     .logicalType(LogicalDataType.Id) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
