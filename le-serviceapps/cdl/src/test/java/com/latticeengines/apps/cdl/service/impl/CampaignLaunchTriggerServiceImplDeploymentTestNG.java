@@ -3,7 +3,8 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -17,11 +18,13 @@ import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -31,34 +34,37 @@ import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class CampaignLaunchTriggerServiceImplTestNG extends CDLFunctionalTestNGBase {
+public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayLaunchChannelService playLaunchChannelService;
 
-    @Autowired
+    @Inject
     private CampaignLaunchTriggerService campaignLaunchTriggerService;
 
-    @Autowired
+    @Inject
     private PlayEntityMgr playEntityMgr;
 
-    @Autowired
+    @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayLaunchEntityMgr playLaunchEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayLaunchService playLaunchService;
 
-    @Autowired
+    @Inject
     private PlayTypeService playTypeService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
+
+    @Inject
+    private SegmentService segmentService;
 
     private Play play;
 
@@ -83,9 +89,12 @@ public class CampaignLaunchTriggerServiceImplTestNG extends CDLFunctionalTestNGB
     private String DISPLAY_NAME = "play Harder";
     private String CREATED_BY = "lattice@lattice-engines.com";
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithDummySegment();
+        setupTestEnvironment();
+
+        MetadataSegment createdSegment = segmentService.createOrUpdateSegment(constructSegment(SEGMENT_NAME));
+        MetadataSegment reTestSegment = segmentService.findByName(createdSegment.getName());
 
         types = playTypeService.getAllPlayTypes(mainCustomerSpace);
         play = new Play();
@@ -98,7 +107,7 @@ public class CampaignLaunchTriggerServiceImplTestNG extends CDLFunctionalTestNGB
         play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);
-        play.setTargetSegment(testSegment);
+        play.setTargetSegment(reTestSegment);
 
         playEntityMgr.create(play);
         Assert.assertNotNull(play);
@@ -130,10 +139,11 @@ public class CampaignLaunchTriggerServiceImplTestNG extends CDLFunctionalTestNGB
         Assert.assertNotNull(playLaunch1);
         playLaunch2 = playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel2, play);
         Assert.assertNotNull(playLaunch2);
+        Thread.sleep(1000);
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testTriggerQueuedLaunches() throws InterruptedException {
         List<PlayLaunch> queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
         Assert.assertEquals(queuedPlayLaunches.size(), 2);
@@ -165,7 +175,7 @@ public class CampaignLaunchTriggerServiceImplTestNG extends CDLFunctionalTestNGB
 
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void teardown() throws Exception {
         if (playLaunch1 != null && playLaunch1.getLaunchId() != null) {
             playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId(), false);
