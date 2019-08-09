@@ -28,18 +28,32 @@ export default class SystemsListComponent extends Component {
 		this.alfaFeature = FeatureFlagService.FlagIsEnabled(
 			FeatureFlagService.Flags().ALPHA_FEATURE
 		);
+		this.alphaFeature = FeatureFlagService.FlagIsEnabled(
+			FeatureFlagService.Flags().ALPHA_FEATURE
+		);
+		this.linkedInEnabled = FeatureFlagService.FlagIsEnabled(
+			FeatureFlagService.Flags().ENABLE_LINKEDIN_INTEGRATION
+		);
+		this.facebookEnabled = FeatureFlagService.FlagIsEnabled(
+			FeatureFlagService.Flags().ENABLE_FACEBOOK_INTEGRATION
+		);
 	}
 
 	getConnectors(response) {
 		let connectors = [];
 		let CRMs = response.data.CRM || [];
 		let MAPs = response.data.MAP || [];
+		let ADSs = response.data.ADS || [];
 		let FILE_SYSTEM = response.data.FILE_SYSTEM || [];
-		if (this.alfaFeature) {
-			connectors = FILE_SYSTEM.concat(CRMs, MAPs);
-		} else {
-			connectors = CRMs.concat(MAPs);
-		}
+
+		connectors = this.alphaFeature
+			? connectors.concat(FILE_SYSTEM)
+			: connectors;
+		connectors = connectors.concat(CRMs, MAPs);
+		connectors =
+			this.linkedInEnabled || this.facebookEnabled
+				? connectors.concat(ADSs)
+				: connectors;
 		return connectors;
 	}
 
