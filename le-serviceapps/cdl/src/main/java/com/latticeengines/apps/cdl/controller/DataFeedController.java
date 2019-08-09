@@ -5,6 +5,9 @@ import java.util.Date;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +44,8 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping("/customerspaces/{customerSpace}/datacollection/datafeed")
 public class DataFeedController {
 
+    private static final Logger log = LoggerFactory.getLogger(DataFeedController.class);
+
     private final ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter;
     private final OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter;
     private final EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
@@ -48,6 +53,9 @@ public class DataFeedController {
     private final CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;
+
+    @Value("${cdl.processAnalyze.retry.expired.time}")
+    private long retryExpiredTime;
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
@@ -187,7 +195,7 @@ public class DataFeedController {
                 && (DataFeed.Status.Initing.equals(dataFeed.getStatus()) || DataFeed.Status.Initialized.equals(dataFeed.getStatus()))) {
             String errorMessage = String.format(
                     "We can't start processAnalyze workflow for %s, need to import data first.", customerSpace);
-            throw new RuntimeException(errorMessage);
+            throw new IllegalStateException(errorMessage);
         }
     }
 
@@ -196,6 +204,7 @@ public class DataFeedController {
         if (dataFeed == null) {
             String errorMessage = String. format(
                     "we can't restart processAnalyze workflow for %s, dataFeed is empty.", customerSpace);
+            log.info(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         DataFeedExecution execution;
@@ -209,18 +218,21 @@ public class DataFeedController {
             String errorMessage = String.format("we can't restart processAnalyze workflow for %s, dataFeedExecution " +
                             "is empty."
                     , customerSpace);
+            log.info(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         if (!DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
             String errorMessage = String.format("we can't restart processAnalyze workflow for %s, last PA isn't fail. "
                     , customerSpace);
+            log.info(errorMessage);
             throw new RuntimeException(errorMessage);
         }
         long currentTime = new Date().getTime();
-        if (execution.getUpdated() == null || (execution.getUpdated().getTime() - (currentTime - 6*7*24*3600000L) < 0)) {
+        if (execution.getUpdated() == null || (execution.getUpdated().getTime() - (currentTime - retryExpiredTime * 1000) < 0)) {
             String errorMessage = String.format("we can't restart processAnalyze workflow for %s, last PA has been " +
-                            "more than 6 weeks. "
-                    , customerSpace);
+                            "more than %d second. "
+                    , customerSpace, retryExpiredTime);
+            log.info(errorMessage);
             throw new RuntimeException(errorMessage);
         }
     }
