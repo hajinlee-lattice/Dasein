@@ -1,6 +1,7 @@
 package com.latticeengines.graph.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traverser;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
@@ -20,8 +22,20 @@ public class DependencyGraphEngine extends GraphEngine implements AutoCloseable 
      * First layer has no dependencies
      */
     public <T extends GraphNode> List<Set<T>> getDependencyLayers(Class<T> nodeClz, int maxLayers) {
+        Map<T, Integer> depthMap = getDependencyDepth(nodeClz, null);
+        return divideToLayers(depthMap, maxLayers);
+    }
+
+    public <T extends GraphNode> List<Set<T>> getDependencyLayersForSubDAG(Class<T> nodeClz, int maxLayers, //
+                                                                             Collection<T> seed) {
+        Map<T, Integer> depthMap = seed == null //
+                ? getDependencyDepth(nodeClz, Collections.emptyList()) //
+                : getDependencyDepth(nodeClz, seed);
+        return divideToLayers(depthMap, maxLayers);
+    }
+
+    private <T extends GraphNode> List<Set<T>> divideToLayers(Map<T, Integer> depthMap, int maxLayers) {
         final int finalMaxLayers = maxLayers > 0 ? maxLayers : Integer.MAX_VALUE;
-        Map<T, Integer> depthMap = getDependencyDepth(nodeClz);
         int numLayers = depthMap.values().stream().mapToInt(Integer::intValue).max().orElse(0);
         if (numLayers > 0) {
             List<Set<T>> layers = new ArrayList<>();
@@ -38,17 +52,25 @@ public class DependencyGraphEngine extends GraphEngine implements AutoCloseable 
         }
     }
 
-    private <T extends GraphNode> Map<T, Integer> getDependencyDepth(Class<T> nodeClz) {
+    private <G extends GraphNode> Map<G, Integer> getDependencyDepth(Class<G> nodeClz, Collection<G> seed) {
         verifyNoCycles();
-        g.V().sideEffect(this::assignDepth) //
+        Collection<Vertex> seedVertices = null;
+        if (seed != null) {
+            seedVertices = getSubDAGVertices(seed, false);
+        }
+        GraphTraversal<Vertex, Vertex> root = seed == null ? g.V() : selectVertices(seedVertices);
+        root.sideEffect(this::assignDepth) //
                 .repeat(__.in(EDGE_LABEL).sideEffect(this::assignDepth)) //
                 .emit().path().toList();
-        List<Vertex> vertexList = g.V().toList();
-        Map<T, Integer> depMap = new HashMap<>();
+        root = seed == null ? g.V() : selectVertices(seedVertices);
+        List<Vertex> vertexList = root.toList();
+        Map<G, Integer> depMap = new HashMap<>();
         vertexList.forEach(vertex -> {
-            T graphNode = nodeClz.cast(vertex.property(PROPERTY_VALUE).value());
+            G graphNode = nodeClz.cast(vertex.property(PROPERTY_VALUE).value());
             Integer depth = (Integer) vertex.property(PROPERTY_DEPTH).value();
-            depMap.put(graphNode, depth);
+            if (depth != null) {
+                depMap.put(graphNode, depth);
+            }
         });
         return depMap;
     }

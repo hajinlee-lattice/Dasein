@@ -1,6 +1,8 @@
 package com.latticeengines.graph.util;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -51,6 +53,18 @@ public class DependencyGraphEngineUnitTestNG {
             layers = graphEngine.getDependencyLayers(StringGraphNode.class, 2);
             verifyLayerContains(layers.get(0), n5, n6, n8, n9);
             verifyLayerContains(layers.get(1), n1, n2, n3, n4, n7);
+
+            Collection<StringGraphNode> seed = Arrays.asList(n3, n8, n9);
+            layers = graphEngine.getDependencyLayersForSubDAG(StringGraphNode.class, 2, seed);
+            verifyLayerContains(layers.get(0), n3, n8, n9);
+            verifyLayerContains(layers.get(1), n1, n2, n7);
+
+            seed = Arrays.asList(n1, n9);
+            layers = graphEngine.getDependencyLayersForSubDAG(StringGraphNode.class, 2, seed);
+            Assert.assertEquals(layers.size(), 1);
+
+            layers = graphEngine.getDependencyLayersForSubDAG(StringGraphNode.class, 2, Collections.emptyList());
+            Assert.assertEquals(layers.size(), 0);
         }
     }
 

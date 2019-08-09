@@ -76,6 +76,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     @Value("${cdl.pa.default.max.iteration}")
     private int defaultMaxIteration;
 
+    @Value("${cdl.processAnalyze.partial.rating.update.enabled")
+    private boolean partialUpdateEnabled;
+
     private String customerSpace;
 
     @Override
@@ -83,8 +86,12 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         customerSpace = configuration.getCustomerSpace().toString();
         List<RatingModelContainer> activeModels = readActiveRatingModels();
         log.info("Found " + CollectionUtils.size(activeModels) + " active rating models.");
+        List<String> impactedSegments = getListObjectFromContext(ACTION_IMPACTED_SEGMENTS, String.class);
+        List<String> impactedEngines = getListObjectFromContext(ACTION_IMPACTED_ENGINES, String.class);
+        List<List<RatingModelContainer>> generations = //
+                splitIntoGenerations(activeModels, impactedSegments, impactedEngines);
         putObjectInContext(RATING_MODELS, activeModels);
-        putObjectInContext(RATING_MODELS_BY_ITERATION, splitIntoGenerations(activeModels));
+        putObjectInContext(RATING_MODELS_BY_ITERATION, generations);
         putObjectInContext(CURRENT_RATING_ITERATION, 0);
 
         initializeRatingLifts();
@@ -242,7 +249,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         return true;
     }
 
-    private List<List<RatingModelContainer>> splitIntoGenerations(List<RatingModelContainer> containers) {
+    private List<List<RatingModelContainer>> splitIntoGenerations(List<RatingModelContainer> containers, //
+                                                                  List<String> impactedSegments, //
+                                                                  List<String> impactedEngines) {
         List<List<RatingModelContainer>> iterations = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(containers)) {
             int maxIteration = configuration.getMaxIteration();
@@ -255,17 +264,21 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 iterations = Collections.singletonList(containers);
             } else {
                 try {
-                    List<List<String>> generations = getREDepGraphLayers(containers, maxIteration);
+                    List<Set<String>> generations = //
+                            getREDepGraphLayers(containers, impactedSegments, impactedEngines, maxIteration);
                     log.info("Got dependency graph layers: \n" + JsonUtils.pprint(generations));
                     if (CollectionUtils.isNotEmpty(generations) && generations.size() > 1) {
                         Map<String, RatingModelContainer> containerMap = new HashMap<>();
                         containers.forEach(
                                 container -> containerMap.put(container.getEngineSummary().getId(), container));
-                        for (List<String> generation : generations) {
+                        for (Set<String> generation : generations) {
                             List<RatingModelContainer> iteration = generation.stream() //
                                     .map(containerMap::get).collect(Collectors.toList());
                             iterations.add(iteration);
                         }
+                    } else if (CollectionUtils.isEmpty(generations)) {
+                        log.info("No rating engines to score, all iterations are dummy.");
+                        iterations = Collections.emptyList();
                     } else {
                         log.info("No more than 1 generation, run single pass.");
                         iterations = Collections.singletonList(containers);
@@ -279,18 +292,30 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         return iterations;
     }
 
-    private List<List<String>> getREDepGraphLayers(List<RatingModelContainer> containers, int maxIter) {
+    private List<Set<String>> getREDepGraphLayers(List<RatingModelContainer> containers, //
+                                                  List<String> impactedSegments, //
+                                                  List<String> impactedEngines, //
+                                                  int maxIter) {
         try (DependencyGraphEngine graphEngine = new DependencyGraphEngine()) {
-            Collection<StringGraphNode> nodes = getREDepGraph(containers);
-            graphEngine.loadGraphNodes(nodes);
-            List<Set<StringGraphNode>> layers = graphEngine.getDependencyLayers(StringGraphNode.class, maxIter);
+            Map<String, StringGraphNode> nodes = getREDepGraph(containers);
+            graphEngine.loadGraphNodes(nodes.values());
+            boolean rebuildAll = Boolean.TRUE.equals(getObjectFromContext(RESCORE_ALL_RATINGS, Boolean.class));
+            List<Set<StringGraphNode>> layers;
+            if (!rebuildAll && partialUpdateEnabled) {
+                Collection<StringGraphNode> seed = //
+                        getImpactedEngines(nodes, containers, impactedSegments, impactedEngines);
+                log.info("Going to only update impacted engines: " + seed);
+                layers = graphEngine.getDependencyLayersForSubDAG(StringGraphNode.class, maxIter, seed);
+            } else {
+                layers = graphEngine.getDependencyLayers(StringGraphNode.class, maxIter);
+            }
             return layers.stream().map(set -> //
-                    set.stream().map(PrimitiveGraphNode::getVal).collect(Collectors.toList()) //
+                    set.stream().map(PrimitiveGraphNode::getVal).collect(Collectors.toSet()) //
             ).collect(Collectors.toList());
         }
     }
 
-    private Collection<StringGraphNode> getREDepGraph(List<RatingModelContainer> containers) {
+    private Map<String, StringGraphNode> getREDepGraph(List<RatingModelContainer> containers) {
         final ConcurrentMap<String, StringGraphNode> nodes = new ConcurrentHashMap<>();
         final Set<String> engineIds = containers.stream() //
                 .map(container -> {
@@ -328,7 +353,21 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("dep-attrs", Math.min(8, engineIds.size()));
         ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
         threadPool.shutdown();
-        return nodes.values();
+        return nodes;
+    }
+
+    private Collection<StringGraphNode> getImpactedEngines(Map<String, StringGraphNode> nodes, //
+            List<RatingModelContainer> containers, List<String> impactedSegments, List<String> impactedEngines) {
+        log.info(String.format("Engines impacted by actions: %s", StringUtils.join(impactedEngines, ", ")));
+        for (RatingModelContainer container : containers) {
+            String segmentName = container.getEngineSummary().getSegmentName();
+            String engineId = container.getEngineSummary().getId();
+            if (!impactedEngines.contains(engineId) && impactedSegments.contains(segmentName)) {
+                impactedEngines.add(engineId);
+                log.info(String.format("%s is impacted due to the change in %s", engineId, segmentName));
+            }
+        }
+        return impactedEngines.stream().filter(nodes::containsKey).map(nodes::get).collect(Collectors.toList());
     }
 
     private void initializeRatingLifts() {

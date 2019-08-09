@@ -1,5 +1,6 @@
 package com.latticeengines.graph.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,6 +80,13 @@ public class GraphEngineUnitTestNG {
 
             Assert.assertEquals(g.V().toList().size(), 6);
             Assert.assertEquals(g.E().toList().size(), 4);
+
+            List<GraphNode> seed = Arrays.asList(n2, n6);
+            List<Vertex> vertices = new ArrayList<>(graphEngine.getSubDAGVertices(seed, true));
+            Assert.assertEquals(graphEngine.selectVertices(vertices).toList().size(), 5);
+
+            vertices = new ArrayList<>(graphEngine.getSubDAGVertices(seed, false));
+            Assert.assertEquals(graphEngine.selectVertices(vertices).toList().size(), 3);
         }
     }
 

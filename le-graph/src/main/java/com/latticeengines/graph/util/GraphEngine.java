@@ -6,6 +6,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
@@ -14,9 +15,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -119,6 +122,41 @@ public class GraphEngine implements AutoCloseable {
                 .emit(loops().is(P.gt(1))) //
                 .out().where(P.eq("a")) //
                 .path().dedup().by(unfold().order().by(T.id).dedup().fold()).toList();
+    }
+
+    /**
+     * Extract edge-induced sub-graph from given seed nodes
+     * This impl won't work if there are cycles
+     * @param seed
+     * @param forwardDirection: propagate to children (forward) or parent (backward)
+     * @return
+     */
+    Collection<Vertex> getSubDAGVertices(Collection<? extends GraphNode> seed, boolean forwardDirection) {
+        Set<Vertex> rootVertices = selectNodes(seed).toSet();
+        Set<Vertex> derivedVertices;
+        if (forwardDirection) {
+            derivedVertices = selectNodes(seed).repeat(__.out(EDGE_LABEL)).emit().toSet();
+        } else {
+            derivedVertices = selectNodes(seed).repeat(__.in(EDGE_LABEL)).emit().toSet();
+        }
+        rootVertices.addAll(derivedVertices);
+        return rootVertices;
+    }
+
+    private GraphTraversal<Vertex, Vertex> selectNodes(Collection<? extends GraphNode> seed) {
+        return g.V().filter(vertexTraverser -> {
+            GraphNode node = (GraphNode) vertexTraverser.get().property(PROPERTY_VALUE).value();
+            return seed.contains(node);
+        });
+    }
+
+    GraphTraversal<Vertex, Vertex> selectVertices(Collection<Vertex> vertices) {
+        Object[] vertexIds = vertices.stream().map(Element::id).toArray();
+        if (vertexIds.length > 0) {
+            return g.V(vertexIds);
+        } else {
+            return g.V("none");
+        }
     }
 
     @Override

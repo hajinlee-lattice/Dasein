@@ -8,6 +8,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.INACTIV
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ITERATION_RATING_MODELS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS_BY_ITERATION;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RESCORE_ALL_RATINGS;
 
 import java.util.Collection;
 import java.util.List;
@@ -99,7 +100,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean hasAccount = false;
 
     private boolean shouldReset = false;
-    private boolean shouldRebuild = false;
+    private boolean shouldRebuildAll = false;
+    private boolean shouldRebuildSome = false;
 
     private boolean shouldProcessAI = false;
     private boolean shouldProcessRuleBased = false;
@@ -131,7 +133,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         boolean skip;
         if (shouldReset) {
             skip = !isResetRatingStep(step) && !isCombineStatisticsStep(step);
-        } else if (shouldRebuild) {
+        } else if (shouldRebuildAll || shouldRebuildSome) {
             if (!hasAccount) {
                 skip = true;
             } else if (isResetRatingStep(step) || iterationFinished) {
@@ -167,7 +169,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             hasDataChange = hasDataChange();
             checkActionImpactedEngines(step);
             shouldReset = shouldReset(hasEngines);
-            shouldRebuild = shouldRebuild();
+            shouldRebuildAll = shouldRebuildAll();
+            shouldRebuildSome = shouldRebuildSome();
             hasAccount = hasAccount(step);
             String[] msgs = new String[] { //
                     "enforced=" + enforceRebuild, //
@@ -175,16 +178,20 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     "hasDataChange=" + hasDataChange, //
                     "hasActions=" + hasActions, //
                     "shouldReset=" + shouldReset, //
-                    "shouldRebuild=" + shouldRebuild, //
+                    "shouldRebuildAll=" + shouldRebuildAll, //
+                    "shouldRebuildSome=" + shouldRebuildSome, //
                     "hasAccount=" + hasAccount, //
             };
             log.info(StringUtils.join(msgs, ", "));
+            if (shouldRebuildAll) {
+                step.putObjectInContext(RESCORE_ALL_RATINGS, true);
+            }
             initialized = true;
         }
     }
 
     private void initializeIteration(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (shouldRebuild) {
+        if (shouldRebuildAll) {
             if (!iterationFinished) {
                 iteration = step.getObjectFromContext(CURRENT_RATING_ITERATION, Integer.class);
                 List<RatingModelContainer> containers = step.getListObjectFromContext(ITERATION_RATING_MODELS,
@@ -264,22 +271,30 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         return reset;
     }
 
-    private boolean shouldRebuild() {
+    private boolean shouldRebuildAll() {
         boolean rebuild = false;
         if (shouldReset) {
             log.info("Skip rebuild, because should reset.");
             rebuild = false;
         } else if (enforceRebuild) {
-            log.info("enforced to rebuild ratings.");
+            log.info("enforced to rebuild all ratings.");
             rebuild = true;
         } else if (hasDataChange) {
-            log.info("Going to rebuild, because has data change.");
-            rebuild = true;
-        } else if (hasActions) {
-            log.info("Going to rebuild, because has related actions.");
+            log.info("Going to rebuild all, because has data change.");
             rebuild = true;
         } else {
-            log.info("No reason to rebuild, skip.");
+            log.info("No reason to rebuild all.");
+        }
+        return rebuild;
+    }
+
+    private boolean shouldRebuildSome() {
+        boolean rebuild = false;
+        if (hasActions) {
+            log.info("Going to rebuild some, because has related actions.");
+            rebuild = true;
+        } else {
+            log.info("No reason to rebuild some.");
         }
         return rebuild;
     }
@@ -293,7 +308,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private boolean shouldProcessModelOfOneType(boolean hasModels, String modelType) {
-        boolean shouldProcess = shouldRebuild;
+        boolean shouldProcess = shouldRebuildAll;
         if (shouldProcess && !hasModels) {
             log.info("Has no " + modelType + " models, skip generating " + modelType + " ratings");
             shouldProcess = false;
