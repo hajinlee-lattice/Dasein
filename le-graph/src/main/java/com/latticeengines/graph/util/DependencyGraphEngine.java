@@ -52,7 +52,7 @@ public class DependencyGraphEngine extends GraphEngine implements AutoCloseable 
         }
     }
 
-    private <G extends GraphNode> Map<G, Integer> getDependencyDepth(Class<G> nodeClz, Collection<G> seed) {
+    private synchronized <G extends GraphNode> Map<G, Integer> getDependencyDepth(Class<G> nodeClz, Collection<G> seed) {
         verifyNoCycles();
         Collection<Vertex> seedVertices = null;
         if (seed != null) {
@@ -62,17 +62,18 @@ public class DependencyGraphEngine extends GraphEngine implements AutoCloseable 
         root.sideEffect(this::assignDepth) //
                 .repeat(__.in(EDGE_LABEL).sideEffect(this::assignDepth)) //
                 .emit().path().toList();
-        root = seed == null ? g.V() : selectVertices(seedVertices);
-        List<Vertex> vertexList = root.toList();
         Map<G, Integer> depMap = new HashMap<>();
-        vertexList.forEach(vertex -> {
+        g.V().has(PROPERTY_DEPTH).toList().forEach(vertex -> {
             G graphNode = nodeClz.cast(vertex.property(PROPERTY_VALUE).value());
             Integer depth = (Integer) vertex.property(PROPERTY_DEPTH).value();
-            if (depth != null) {
-                depMap.put(graphNode, depth);
-            }
+            depMap.put(graphNode, depth);
         });
+        removeDepth();
         return depMap;
+    }
+
+    private void removeDepth() {
+        g.V().properties(PROPERTY_DEPTH).drop().toList();
     }
 
     private void assignDepth(Traverser<Vertex> vertexTraverser) {
