@@ -8,7 +8,7 @@
     height: 84vh;
     display: flex;
     padding: 0;
-    margin: 0 10px;
+    margin: 20px 10px 0 10px;
 }
 .partner__screen__header {
     padding: 0px;
@@ -54,10 +54,16 @@
 .partner__button--next {
     /* background: red; */
 }
-.partner__button--finish {
+.partner__button--finish,
+.partner__button--next {
     background-color: #457eba;
     border: 1px solid #457eba;
     color: #ffffff;
+}
+.partner__button--finish:hover,
+.partner__button--next:hover {
+    background-color: #629acc;
+    border: 1px solid #629acc;
 }
 .form {
     padding: 0 20px;

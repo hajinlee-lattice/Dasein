@@ -9,7 +9,7 @@ import LeTileFooter from "common/widgets/container/tile/le-tile-footer";
 import LeButton from "common/widgets/buttons/le-button";
 import SystemMappingComponent from "./system-mapping.component";
 import ConfWindowService from "./confWindowService";
-import ConnectorService from "./connectors.service";
+import ConnectorService, { EDIT_MODE } from "./connectors.service";
 import httpService from "common/app/http/http-service";
 import Observer from "common/app/http/observer";
 
@@ -94,7 +94,8 @@ export default class SystemComponent extends Component {
 						ConfWindowService.getSolutionInstanceConfig().system = this.state.system;
 						let url = ConnectorService.getPopupUrl(
 							solutionInstanceId,
-							authorizationCode
+							authorizationCode,
+							ConnectorService.getIframeParams(EDIT_MODE, 2, 2)
 						);
 						httpService.unsubscribeObservable(observer);
 
@@ -103,7 +104,7 @@ export default class SystemComponent extends Component {
 								modalActions.closeModal(store);
 								// ConfWindowService.setUpdating(false);
 							},
-							className: "launch-modal",
+							className: "launch-modal-systems",
 							template: () => {
 								return (
 									<IFrameComponent

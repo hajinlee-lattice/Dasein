@@ -22,7 +22,8 @@ import ConnectorService, {
 	SALESFORCE,
 	ELOQUA,
 	LINKEDIN,
-	FACEBOOK
+	FACEBOOK,
+	CREATE_MODE
 } from "./connectors.service";
 
 import SystemsListComponent from "./systems-list.component";
@@ -47,7 +48,8 @@ export default class ConnectionsComponent extends Component {
 			accessToken: null,
 			authorizationCode: null,
 			solutionInstanceId: null,
-			openModal: false
+			openModal: false,
+			loadingIframe: false
 		};
 		this.connectors = ConnectorService.getList(
 			this.ConnectorsService.isExternalIntegrationEnabled()
@@ -85,9 +87,9 @@ export default class ConnectionsComponent extends Component {
 	};
 
 	handleIframeMessages(e) {
-		// if (e.origin != "https://embedded.tray.io") {
-		// 	return;
-		// }
+		if (e.origin != "https://embedded.tray.io") {
+			return;
+		}
 
 		if (e.data.type === "tray.configPopup.error") {
 			// Handle popup error message
@@ -180,7 +182,7 @@ export default class ConnectionsComponent extends Component {
 		this.setState({
 			iframeRef: ref.current
 		});
-		console.log("REFFFFFFF ", this.state);
+		// console.log("REFFFFFFF ", this.state);
 	}
 
 	clickHandler(name) {
@@ -202,6 +204,7 @@ export default class ConnectionsComponent extends Component {
 		}
 	}
 	generateAuthTokenClickHandler() {
+		this.setState({ loadingIframe: true });
 		let connectorName = ConnectorService.getConnectorName();
 		let isExternallyAuthenticatedSystem = ConnectorService.isExternallyAuthenticatedSystem(
 			connectorName
@@ -281,22 +284,24 @@ export default class ConnectionsComponent extends Component {
 						data.solutionInstanceId;
 					ConfWindowService.getSolutionInstanceConfig().registerLookupIdMap = true;
 					ConfWindowService.getSolutionInstanceConfig().accessToken = this.state.accessToken;
-					// configWindow.location = this.getPopupUrl(data.solutionInstanceId, data.authorizationCode);
 					let url = ConnectorService.getPopupUrl(
 						data.solutionInstanceId,
-						data.authorizationCode
+						data.authorizationCode,
+						ConnectorService.getIframeParams(CREATE_MODE, 2, 2)
 					);
 					httpService.unsubscribeObservable(observer);
 					let config = {
 						callback: action => {
 							modalActions.closeModal(store);
-							// ConfWindowService.setUpdating(false);
 						},
-						className: "launch-modal",
+						className: "launch-modal-systems",
 						template: () => {
 							return (
 								<IFrameComponent
 									onLoad={() => {
+										this.setState({
+											loadingIframe: false
+										});
 										console.log("Iframe loaded");
 									}}
 									src={url}
@@ -409,7 +414,8 @@ export default class ConnectionsComponent extends Component {
 										this.state.connectorSelected
 									) &&
 										(!this.state.accessToken ||
-											!this.state.userInfo))
+											!this.state.userInfo)) ||
+									this.state.loadingIframe
 								}
 								config={{
 									label: "Create",

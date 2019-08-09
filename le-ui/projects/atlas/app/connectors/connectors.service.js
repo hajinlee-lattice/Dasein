@@ -5,6 +5,9 @@ export const AWS_S3 = "AWS_S3";
 export const LINKEDIN = "LinkedIn";
 export const FACEBOOK = "Facebook";
 
+export const EDIT_MODE = "edit";
+export const CREATE_MODE = "create";
+
 import messageService from "common/app/utilities/messaging-service";
 import Message, {
 	MODAL,
@@ -209,10 +212,27 @@ class ConnectorService {
 		}
 	}
 
-	getPopupUrl(solutionInstanceId, authorizationCode, prams) {
-		return `https://app.tray.io/external/solutions/${
+	getIframeParams(mode, show, start) {
+		let params = "";
+		switch (mode) {
+			case EDIT_MODE:
+				params = `${"&show=["}${show}${"]&start="}${start}${"&customValidation=true"}`;
+				return params;
+			case CREATE_MODE:
+				params = `${"&customValidation=true"}`;
+				return params;
+
+			default:
+				return params;
+		}
+	}
+	getPopupUrl(solutionInstanceId, authorizationCode, params) {
+		//create only validation
+		//edit marketo 2,2
+		let baseUrl = `https://app.tray.io/external/solutions/${
 			this.partnerId
-		}/configure/${solutionInstanceId}?code=${authorizationCode}&show=[2]&start=2&customValidation=true`;
+		}/configure/${solutionInstanceId}?code=${authorizationCode}${params}`;
+		return baseUrl;
 	}
 }
 

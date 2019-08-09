@@ -50,7 +50,7 @@ class ConfWindowService {
 						"external_" +
 						this.solutionInstanceConfig.orgType.toLowerCase() +
 						"_authentication";
-					console.log(authenticationExternalId);
+					// console.log(authenticationExternalId);
 					var externalAuthentication = authValues.filter(function(
 						authValue
 					) {

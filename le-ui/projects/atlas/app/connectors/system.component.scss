@@ -1,40 +1,18 @@
-.launch-modal {
+.launch-modal-systems {
 	margin-top: -32px;
+	.le-title-container {
+		img {
+			width: 12%;
+		}
+	}
 	.le-modal-body {
 		height: 80vh;
-		// border: 1px solid red;
 		iframe {
 			position: absolute;
 			top: 60px;
 			left: 0;
 			width: 100%;
 			height: 100%;
-			// .partner__screen.partner__screen--first.partner__screen--last {
-			// 	height: 84vh;
-			// 	display: flex;
-			// 	padding: 0;
-			// 	margin: 0 10px;
-			// 	.partner__screen__header {
-			// 		border: 1px solid;
-			// 		padding: 0px;
-			// 		margin: 0;
-			// 		flex: 0;
-			// 		margin-bottom: 1.8em;
-			// 	}
-
-			// 	.partner__screen__items {
-			// 		flex: 1;
-			// 		// padding: 40px;
-			// 		form {
-			// 			margin: 0 15px;
-			// 		}
-			// 	}
-			// }
-			// .partner__button.partner__button--finish {
-			// 	background-color: #457eba;
-			// 	border: 1px solid #457eba;
-			// 	color: #ffffff;
-			// }
 		}
 	}
 }
