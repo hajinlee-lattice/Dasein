@@ -282,7 +282,7 @@ export default class ConnectionsComponent extends Component {
 					ConfWindowService.getSolutionInstanceConfig().registerLookupIdMap = true;
 					ConfWindowService.getSolutionInstanceConfig().accessToken = this.state.accessToken;
 					// configWindow.location = this.getPopupUrl(data.solutionInstanceId, data.authorizationCode);
-					let url = this.getPopupUrl(
+					let url = ConnectorService.getPopupUrl(
 						data.solutionInstanceId,
 						data.authorizationCode
 					);
@@ -339,33 +339,6 @@ export default class ConnectionsComponent extends Component {
 			{ UserAccessToken: userAccessToken }
 		);
 	}
-
-	// getIFrame() {
-	// 	let partnerId = "LatticeEngines";
-	// 	let url = `https://app.tray.io/external/solutions/${partnerId}/configure/${
-	// 		this.state.solutionInstanceId
-	// 	}?code=${this.state.authorizationCode}`;
-	// 	return (
-	// 		<div>
-	// 			<Iframe source={url} />
-	// 		</div>
-	// 	);
-	// }
-
-	getPopupUrl(solutionInstanceId, authorizationCode) {
-		let partnerId = "LatticeEngines";
-		return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}&customValidation=true`;
-	}
-
-	// getPopup(solutionInstanceId, authorizationCode) {
-	// 	let partnerId = "LatticeEngines";
-	// 	var url = `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}`;
-	// 	return (
-	// 		<div>
-	// 			<iframe src={url} width="500px" />
-	// 		</div>
-	// 	);
-	// }
 
 	getConnectros() {
 		let connectors = this.connectors.map((obj, index) => {

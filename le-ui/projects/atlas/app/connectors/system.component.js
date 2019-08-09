@@ -8,7 +8,6 @@ import LeTileBody from "common/widgets/container/tile/le-tile-body";
 import LeTileFooter from "common/widgets/container/tile/le-tile-footer";
 import LeButton from "common/widgets/buttons/le-button";
 import SystemMappingComponent from "./system-mapping.component";
-// import { openConfigWindow, solutionInstanceConfig } from "./configWindow";
 import ConfWindowService from "./confWindowService";
 import ConnectorService from "./connectors.service";
 import httpService from "common/app/http/http-service";
@@ -93,7 +92,7 @@ export default class SystemComponent extends Component {
 						ConfWindowService.getSolutionInstanceConfig().accessToken = this.state.accessToken;
 						ConfWindowService.getSolutionInstanceConfig().registerLookupIdMap = false;
 						ConfWindowService.getSolutionInstanceConfig().system = this.state.system;
-						let url = this.getPopupUrl(
+						let url = ConnectorService.getPopupUrl(
 							solutionInstanceId,
 							authorizationCode
 						);
@@ -167,16 +166,9 @@ export default class SystemComponent extends Component {
 		httpService.get("/tray/authorizationcode?userId=" + userId, observer);
 	}
 
-	getPopupUrl(solutionInstanceId, authorizationCode) {
-		let partnerId = "LatticeEngines";
-		return `https://app.tray.io/external/solutions/${partnerId}/configure/${solutionInstanceId}?code=${authorizationCode}&show=[2]&start=2&customValidation=true`;
-	}
-
 	mappingClosed(system) {
 		if (this.state.saving) {
 			let observer = new Observer(response => {
-				// httpService.printObservables();
-				// console.log('HEY ', response);
 				if (response.data) {
 					let tmp = response.data;
 					this.setState({

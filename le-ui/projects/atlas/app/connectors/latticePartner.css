@@ -11,7 +11,6 @@
     margin: 0 10px;
 }
 .partner__screen__header {
-    border: 1px solid;
     padding: 0px;
     margin: 0;
     flex: 0;
@@ -25,6 +24,8 @@
 }
 .partner__screen__items {
     flex: 1;
+    padding-right: 30px;
+    padding-left: 20px;
 }
 .partner__footer {
     /* background: red; */
@@ -58,6 +59,7 @@
     border: 1px solid #457eba;
     color: #ffffff;
 }
-form {
-    margin: 0 15px;
+.form {
+    padding: 0 20px;
+    margin-right: 20px;
 }

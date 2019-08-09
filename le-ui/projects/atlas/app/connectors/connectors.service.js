@@ -76,13 +76,13 @@ class ConnectorService {
 				}
 			};
 			this._connectorsList = [];
+			this.partnerId = "lattice-engines";
 		}
 
 		return ConnectorService.instance;
 	}
 	getImgByConnector(connectorName) {
 		let element = this._connectors[connectorName];
-		// console.log('CN ',connectorName, element);
 		if (element) {
 			return element.config.img;
 		} else {
@@ -207,6 +207,12 @@ class ConnectorService {
 			case AWS_S3:
 				return false;
 		}
+	}
+
+	getPopupUrl(solutionInstanceId, authorizationCode, prams) {
+		return `https://app.tray.io/external/solutions/${
+			this.partnerId
+		}/configure/${solutionInstanceId}?code=${authorizationCode}&show=[2]&start=2&customValidation=true`;
 	}
 }
 
