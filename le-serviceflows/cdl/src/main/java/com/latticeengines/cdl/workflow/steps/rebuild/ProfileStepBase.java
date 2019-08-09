@@ -234,22 +234,26 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
      * @return batch store table name
      */
     protected String ensureInactiveBatchStoreExists() {
+        return ensureInactiveTableRoleExists(getEntity().getBatchStore(), "batch store", getEntity().name());
+    }
+
+    protected String ensureInactiveTableRoleExists(TableRoleInCollection role, String targetDisplayName,
+            String entity) {
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
-        TableRoleInCollection batchStore = getEntity().getBatchStore();
-        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
         if (StringUtils.isBlank(tableName)) {
-            tableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
+            tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
             if (StringUtils.isNotBlank(tableName)) {
-                log.info("Found the batch store for entity {} in active version {}: {}", getEntity().name(), active,
+                log.info("Found the {} for entity {} in active version {}: {}", targetDisplayName, entity, active,
                         tableName);
                 cloneTableService.setActiveVersion(active);
                 cloneTableService.setCustomerSpace(customerSpace);
-                cloneTableService.linkInactiveTable(batchStore);
+                cloneTableService.linkInactiveTable(role);
             }
         } else {
-            log.info("Found the batch store for entity {} in inactive version {}: {}", getEntity().name(), inactive,
+            log.info("Found the {} for entity {} in inactive version {}: {}", targetDisplayName, entity, inactive,
                     tableName);
         }
         return tableName;

@@ -184,6 +184,13 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 PH_SERVING_TABLE_NAME, PH_DEPIVOTED_TABLE_NAME, PH_PROFILE_TABLE_NAME, PH_STATS_TABLE_NAME));
         shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
 
+        purchaseMetrics = metricsProxy.getActivityMetrics(customerSpace.toString(), ActivityType.PurchaseHistory);
+        if (purchaseMetrics == null) {
+            purchaseMetrics = new ArrayList<>();
+        }
+        // HasPurchased is the default metrics to calculate
+        purchaseMetrics.add(createHasPurchasedMetrics());
+
         if (shortCut) {
             log.info("Found serving, depivoted, profile and stats tables in workflow context, " + //
                     "going thru short-cut mode.");
@@ -200,6 +207,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                     BusinessEntity.DepivotedPurchaseHistory.getServingStore(), inactive);
             // set stats
             updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+
             // other finishing steps
             finishing();
         } else {
@@ -228,13 +236,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             if (CollectionUtils.isEmpty(periodStrategies)) {
                 throw new IllegalStateException("Cannot find period strategies");
             }
-
-            purchaseMetrics = metricsProxy.getActivityMetrics(customerSpace.toString(), ActivityType.PurchaseHistory);
-            if (purchaseMetrics == null) {
-                purchaseMetrics = new ArrayList<>();
-            }
-            // HasPurchased is the default metrics to calculate
-            purchaseMetrics.add(createHasPurchasedMetrics());
 
             periodTableNames = getPeriodTableNames();
             if (CollectionUtils.isEmpty(periodTableNames)) {
