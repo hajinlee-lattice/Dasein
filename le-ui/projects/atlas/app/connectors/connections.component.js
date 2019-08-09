@@ -51,10 +51,6 @@ export default class ConnectionsComponent extends Component {
 			openModal: false,
 			loadingIframe: false
 		};
-		this.connectors = ConnectorService.getList(
-			this.ConnectorsService.isExternalIntegrationEnabled()
-		);
-
 		this.setIframeMounted = this.setIframeMounted.bind(this);
 		this.handleIframeMessages = this.handleIframeMessages.bind(this);
 		this.connectors = ConnectorService.getList({

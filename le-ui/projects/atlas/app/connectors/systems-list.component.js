@@ -25,9 +25,6 @@ export default class SystemsListComponent extends Component {
 		this.getConnectors = this.getConnectors.bind(this);
 		let FeatureFlagService = ReactRouter.getRouter().ngservices
 			.FeatureFlagService;
-		this.alfaFeature = FeatureFlagService.FlagIsEnabled(
-			FeatureFlagService.Flags().ALPHA_FEATURE
-		);
 		this.alphaFeature = FeatureFlagService.FlagIsEnabled(
 			FeatureFlagService.Flags().ALPHA_FEATURE
 		);

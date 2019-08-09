@@ -132,6 +132,8 @@ class ConnectorService {
 	}
 
 	getList(externalIntegrationEnabled) {
+		debugger;
+		console.log("===> ", externalIntegrationEnabled);
 		if (this._connectorsList.length == 0) {
 			Object.keys(this._connectors).forEach(element => {
 				let el = this._connectors[element];
@@ -150,8 +152,11 @@ class ConnectorService {
 				}
 			});
 		}
+		console.log("", this._connectors);
+		console.log("", this._connectorsList);
 		return this._connectorsList;
 	}
+
 	sendMSG(callbackFn) {
 		let title = this.getConnectorCreationTitle("Settings");
 		let body = this.getConnectorCreationBody();
