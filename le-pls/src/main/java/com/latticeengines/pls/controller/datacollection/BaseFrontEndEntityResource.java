@@ -134,6 +134,16 @@ public abstract class BaseFrontEndEntityResource {
             }
         }
         appendSegmentRestrictionAndFreeTextSearch(frontEndQuery);
+        if (BusinessEntity.Contact.equals(getMainEntity())) {
+            Restriction accountRestriction;
+            if (frontEndQuery.getAccountRestriction() != null
+                    && frontEndQuery.getAccountRestriction().getRestriction() != null) {
+                accountRestriction = appendAccountNotNull(frontEndQuery.getAccountRestriction().getRestriction());
+            } else {
+                accountRestriction = accountNotNullBucket();
+            }
+            frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
+        }
         frontEndQuery.setMainEntity(getMainEntity());
         if (CollectionUtils.isEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.setLookups(getDataLookups());
