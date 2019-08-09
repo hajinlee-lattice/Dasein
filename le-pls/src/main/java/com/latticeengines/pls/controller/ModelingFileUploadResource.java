@@ -232,16 +232,17 @@ public class ModelingFileUploadResource {
                 && schemaInterpretation != SchemaInterpretation.DeleteTransactionTemplate) {
             throw new LedpException(LedpCode.LEDP_18173, new String[] { schemaInterpretation.name() });
         }
-
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         SourceFile sourceFile = uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName,
                 schemaInterpretation, "", file, false, outsizeFlag);
         try {
             SourceFile resultSourceFile = fileUploadService.uploadCleanupFileTemplate(sourceFile, schemaInterpretation,
-                    cleanupOperationType);
+                    cleanupOperationType, batonService.isEntityMatchEnabled(customerSpace));
             return ResponseDocument.successResponse(resultSourceFile);
         }  catch (LedpException ledp) {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
+            ledp.printStackTrace();
             throw new UIActionException(action, ledp.getCode());
         } catch (RuntimeException e) {
             LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { e.getMessage() });
