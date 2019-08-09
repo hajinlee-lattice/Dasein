@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -81,6 +82,8 @@ public class FrontEndQueryCreator {
         }
 
         addSort(playLaunchContext, accountFrontEndQuery, contactFrontEndQuery);
+        log.info("AccountFrontEndQuery=" + JsonUtils.serialize(accountFrontEndQuery));
+        log.info("ContactFrontEndQuery=" + JsonUtils.serialize(contactFrontEndQuery));
     }
 
     public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) {
@@ -177,8 +180,6 @@ public class FrontEndQueryCreator {
             if (MapUtils.isNotEmpty(fieldMaps)) {
                 fieldMaps.entrySet().iterator().forEachRemaining(entry -> accountLookups.addAll(entry.getValue()));
             }
-            log.info("accountLookups=" + Arrays.toString(accountLookups.toArray()));
-            log.info("contactLookups=" + Arrays.toString(contactLookups.toArray()));
         }
     }
 

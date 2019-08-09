@@ -96,13 +96,6 @@ public class CampaignLaunchProcessor {
     @Value("${datadb.datasource.type}")
     private String dataDbType;
 
-    // NOTE - do not increase this pagesize beyond 2.5K as it causes failure in
-    // count query for corresponding counts. Also do not increase it beyond 250
-    // otherwise contact fetch time increases significantly. After lot of trial
-    // and error we found 150 to be a good number
-    @Value("${playmaker.workflow.segment.pagesize:150}")
-    private long pageSize;
-
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
@@ -310,11 +303,6 @@ public class CampaignLaunchProcessor {
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);
         }
-    }
-
-    @VisibleForTesting
-    void setPageSize(long pageSize) {
-        this.pageSize = pageSize;
     }
 
     @VisibleForTesting
