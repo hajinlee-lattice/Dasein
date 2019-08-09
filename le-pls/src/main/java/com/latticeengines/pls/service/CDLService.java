@@ -62,4 +62,6 @@ public interface CDLService {
     void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem);
 
     void updateS3ImportSystemPriorityBasedOnSequence(String customerSpace, List<S3ImportSystem> systemList);
+
+    String getCurrentBundleFileContent(String customerSpace) throws Exception;
 }

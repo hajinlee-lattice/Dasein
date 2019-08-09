@@ -455,4 +455,28 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
         }
     }
+
+    @RequestMapping(value = "/bundlecsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get bundle file from s3")
+    public void getBundleCsvFile(
+            HttpServletRequest request, //
+            HttpServletResponse response) throws Exception {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        if (tenantId == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            String fileContent = cdlService.getCurrentBundleFileContent(tenantId);
+            // set a name for download file
+            String bundleName = "currentBundle.csv";
+            TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder builder = new TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder();
+            builder.setMimeType("application/csv").setFileName(bundleName).setFileContent(fileContent).setBatonService(batonService);
+            TemplateFileHttpDownloader downloader = new TemplateFileHttpDownloader(builder);
+            downloader.downloadFile(request, response);
+        } catch (Exception e) {
+            log.error("Download csv Failed: " + e.getMessage());
+            throw e;
+        }
+    }
 }
