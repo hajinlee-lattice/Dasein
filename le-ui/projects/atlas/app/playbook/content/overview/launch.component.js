@@ -67,7 +67,7 @@ function chron(frequency) {
 }
 
 function isAudience(externalSystemName, showlist) {
-    let list = ['Marketo','Facebook','LinkedIn'];
+    let list = ['Marketo'];//,'Facebook','LinkedIn'];
     if(showlist) {
         return list;
     }
