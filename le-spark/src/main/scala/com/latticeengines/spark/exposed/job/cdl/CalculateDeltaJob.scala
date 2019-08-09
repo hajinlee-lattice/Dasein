@@ -15,7 +15,7 @@ class CalculateDeltaJob extends AbstractSparkJob[CalculateDeltaJobConfig] {
     val newAccountUniverse = loadHdfsUnit(spark, config.getCurrentAccountUniverse.asInstanceOf[HdfsDataUnit])
     val newContactUniverse = if (config.getCurrentContactUniverse != null) loadHdfsUnit(spark, config.getCurrentAccountUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyContactsDF(spark)
     val previousAccountUniverse = if (config.getPreviousAccountUniverse != null) loadHdfsUnit(spark, config.getPreviousAccountUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyAccountsDF(spark)
-    val previousContactUniverse = if (config.getPreviousAccountUniverse != null) loadHdfsUnit(spark, config.getPreviousContactUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyContactsDF(spark)
+    val previousContactUniverse = if (config.getPreviousContactUniverse != null) loadHdfsUnit(spark, config.getPreviousContactUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyContactsDF(spark)
     val selectedDFAlias = "selectionDataFrame"
 
     val addedAccounts = newAccountUniverse.alias(selectedDFAlias).join(previousAccountUniverse, Seq(InterfaceName.AccountId.name()), "left")

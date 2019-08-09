@@ -210,7 +210,7 @@ public class PlayResource {
 
     @GetMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Update a play launch channel for a given play and channel id")
+    @ApiOperation(value = "Get the play launch channel by the given play id and channel id")
     public PlayLaunchChannel getPlayLaunchChannelById(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {

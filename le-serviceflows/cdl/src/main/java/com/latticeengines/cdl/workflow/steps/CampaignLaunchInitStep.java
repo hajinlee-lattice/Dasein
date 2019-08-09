@@ -101,6 +101,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
 
             // 1. Generate FrontEndQueries for Account and Contact in the PlayLaunchContext
             campaignLaunchProcessor.prepareFrontEndQueries(playLaunchContext, version);
+            log.info("Query for Accounts to Launch: " + playLaunchContext.getAccountFrontEndQuery());
+            log.info("Query for Contact to Launch: " + playLaunchContext.getContactFrontEndQuery());
 
             SparkJobResult createRecJobResult = executeSparkJob(playLaunchContext);
 
