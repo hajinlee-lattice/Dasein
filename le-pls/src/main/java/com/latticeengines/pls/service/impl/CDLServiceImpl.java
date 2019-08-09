@@ -689,6 +689,7 @@ public class CDLServiceImpl implements CDLService {
         Table table = getCurrentConsolidateProductTable(customerSpace);
         if (table == null) {
             log.info("no metadata table in batch store! ");
+            return StringUtils.EMPTY;
         }
 
         List<Extract> extracts = table.getExtracts();
