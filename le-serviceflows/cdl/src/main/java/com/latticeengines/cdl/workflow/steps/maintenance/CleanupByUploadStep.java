@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -39,6 +40,8 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.CleanupByUploadWrapperConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
@@ -46,6 +49,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
@@ -71,6 +75,9 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     private CleanupByUploadConfiguration cleanupByUploadConfiguration;
 
@@ -101,9 +108,23 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
             if (!batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
                 if (tableRows > 0) {
                     DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace);
-                    dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), cleanupTableName,
-                            batchStore, version);
+                    DynamoDataUnit dataUnit = null;
+                    if (batchStore.equals(BusinessEntity.Account.getBatchStore())) {
+                        // if replaced account batch store, need to link dynamo table
+                        String oldBatchStoreName = dataCollectionProxy.getTableName(customerSpace, batchStore, version);
+                        dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace, oldBatchStoreName, DataUnit.StorageType.Dynamo);
+                        if (dataUnit != null) {
+                            dataUnit.setLinkedTable(StringUtils.isBlank(dataUnit.getLinkedTable()) ? //
+                                    dataUnit.getName() : dataUnit.getLinkedTable());
+                            dataUnit.setName(cleanupTableName);
+                        }
+                    }
+                    dataCollectionProxy.upsertTable(customerSpace, cleanupTableName, batchStore, version);
+                    if (dataUnit != null) {
+                        dataUnitProxy.create(customerSpace, dataUnit);
+                    }
                 } else {
+                    // TODO: should convert to a lazy delete all operation
                     log.info("Result table is empty, remove " + batchStore.name() + " from data collection!");
                     dataCollectionProxy.resetTable(configuration.getCustomerSpace().toString(), batchStore);
                 }
