@@ -295,9 +295,8 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         try {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
             if(CollectionUtils.isNotEmpty(target.getPartitionKeys())){
-                path = path + "/**";
+                path = path + StringUtils.repeat("/**", target.getPartitionKeys().size());
             }
-            log.info("Path: {}",path);
             if (DataUnit.DataFormat.PARQUET.equals(target.getDataFormat())) {
                 log.info("Read parquet files in " + path + " as avro records.");
                 return ParquetUtils.iteratorParquetFiles(yarnConfiguration, PathUtils.toParquetGlob(path));
@@ -320,12 +319,12 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return true;
     }
 
-    protected List<String> hdfsOutputsAsInputs(List<HdfsDataUnit> units, String... partitionKeys){
+    protected List<String> hdfsOutputsAsInputs(List<HdfsDataUnit> units){
         inputUnits = new HashMap<>();
-        int seq = inputSeq.getAndIncrement();
         List<String> names = new ArrayList<>();
         units.forEach(unit -> {
-            String recordName = "PartitionInput" + seq;
+            int seq = inputSeq.getAndIncrement();
+            String recordName = "Input" + seq;
             String dirPath = getWorkspace() + "/" + recordName;
             try {
                 HdfsUtils.fileExists(yarnConfiguration, unit.getPath());
@@ -344,9 +343,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
             HdfsDataUnit dataUnit = new HdfsDataUnit();
             dataUnit.setName(recordName);
             dataUnit.setPath(dirPath);
-            if (partitionKeys.length > 0) {
-                dataUnit.setPartitionKeys(Arrays.asList(partitionKeys));
-            }
+            dataUnit.setPartitionKeys(unit.getPartitionKeys());
             inputUnits.put(recordName,dataUnit);
             names.add(recordName);
         });

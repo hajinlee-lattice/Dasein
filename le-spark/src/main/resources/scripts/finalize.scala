@@ -26,21 +26,19 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   val df = t._2
   val path = tgt.get("Path").asText()
   val fmt = if (tgt.get("DataFormat") != null) tgt.get("DataFormat").asText().toLowerCase() else "avro"
-//  val partitionKeys = if (tgt.get("PartitionKeys") == null) List() else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
-//  if (partitionKeys.isEmpty) {
-//    df.write.format(fmt).save(path)
-//    println("----- BEGIN SCRIPT OUTPUT -----")
-//    println("Not partition")
-//    println("----- END SCRIPT OUTPUT -----")
-//  }
-//  else {
-//    df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
-//  }
+  val partitionKeys = if (tgt.get("PartitionKeys") == null) List() else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
+  if (partitionKeys.isEmpty) {
+    df.write.format(fmt).save(path)
+  }
+  else {
+    df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
+  }
   val df2 = spark.read.format(fmt).load(path)
   val json = mapper.createObjectNode()
   json.put("StorageType", "Hdfs")
   json.put("Path", path)
   json.put("Count", df2.count())
+  json.set("PartitionKeys",mapper.valueToTree(partitionKeys))
   if (!"avro".equals(fmt)) {
     json.put("DataFormat", tgt.get("DataFormat"))
   }

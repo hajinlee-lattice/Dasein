@@ -1,6 +1,7 @@
 package com.latticeengines.spark.testframework;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -15,109 +16,62 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
 
     protected List<String> inputs;
 
+    protected List<HdfsDataUnit> inputSources;
+
     @Override
     protected List<String> getInputOrder() {
         return inputs;
     }
 
-    private Boolean verifyOutput1(HdfsDataUnit target) {
-        AtomicInteger count = new AtomicInteger();
-        verifyAndReadTarget(target).forEachRemaining(record -> {
-            count.incrementAndGet();
-            log.info("Record: {}",record);
+    protected Function<HdfsDataUnit, Boolean> verifier;
 
-//            String key = record.get("Field1").toString();
-//            Long cnt = (Long) record.get("Cnt");
-//            switch (key) {
-//                case "1":
-//                    Assert.assertEquals(cnt.longValue(), 2);
-//                    break;
-//                case "2":
-//                    Assert.assertEquals(cnt.longValue(), 1);
-//                    break;
-//                case "3":
-//                    Assert.assertEquals(cnt.longValue(), 1);
-//                    break;
-//                default:
-//                    Assert.fail("Unexpected group by key value: " + key);
-//            }
-        });
-        Assert.assertEquals(count.get(), 3);
-        return true;
-    }
-
-    private Boolean verifyOutput2(HdfsDataUnit target) {
-        AtomicInteger count = new AtomicInteger();
-        verifyAndReadTarget(target).forEachRemaining(record -> {
-            count.incrementAndGet();
-            String key = record.get("Field1").toString();
-            Integer max1 = (Integer) record.get("Max1");
-            Integer max2 = (Integer) record.get("Max2");
-            switch (key) {
-                case "1":
-                    Assert.assertEquals(max1.intValue(), 2);
-                    Assert.assertEquals(max2.intValue(), 1);
-                    break;
-                case "2":
-                    Assert.assertEquals(max1.intValue(), 3);
-                    Assert.assertEquals(max2.intValue(), 2);
-                    break;
-                case "3":
-                    Assert.assertNull(max1);
-                    Assert.assertEquals(max2.intValue(), 3);
-                    break;
-                default:
-                    Assert.fail("Unexpected group by key value: " + key);
-            }
-        });
-        Assert.assertEquals(count.get(), 3);
-        return true;
-    }
-
+    protected Integer dataCnt;
 
     @Override
     protected void verifyOutput(String output) {
         Assert.assertEquals(output, "This is my output!");
     }
 
-    @Override
-    protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(this::verifyOutput1, this::verifyOutput2);
-    }
-
-
-    protected void uploadInputAvro() {
+    protected Integer uploadInputAvro() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("Id", Long.class), //
                 Pair.of("Field1", String.class), //
-                Pair.of("Field2", Long.class) //
+                Pair.of("Field2", Long.class) ,//
+                Pair.of("Field3", Float.class) ,//
+                Pair.of("Field4", Double.class) , //
+                Pair.of("Field5", Integer.class) //
         );
         Object[][] data = new Object[][] { //
-                { 0L, "1", 1L }, //
-                { 1L, "1", 2L }, //
-                { 2L, "2", 3L }, //
+                { 0L, "a", 1L ,	0.0f , 0.2d , 0 }, //
+                { 1L, "b", 2L ,	0.1f , 0.2d , 0 }, //
+                { 2L, "b", 3L ,	0.2f , 0.4d , 1 }, //
+                { 3L, "c", 3L ,	0.1f , 0.3d , 4 }, //
+                { 4L, "a", 2L ,	0.1f , 0.3d , 2 }, //
         };
-        String data1 = uploadHdfsDataUnit(data, fields);
 
-//        fields = Arrays.asList( //
-//                Pair.of("Id", Long.class), //
-//                Pair.of("Field1", String.class), //
-//                Pair.of("Field2", Integer.class) //
-//        );
-//        data = new Object[][] { //
-//                { 0L, "1", 1 }, //
-//                { 1L, "2", 2 }, //
-//                { 2L, "3", 3 }, //
-//        };
-//        String data2 = uploadHdfsDataUnit(data, fields);
+        Object[][] preData = getData(data);
 
-        inputs = Arrays.asList(data1);
+        String data0 = uploadHdfsDataUnit(preData, fields);
+
+        inputs = Arrays.asList(data0);
+
+        return preData.length;
     }
 
-    protected void uploadOutputAsInput(List<HdfsDataUnit> inputs, String... partitionKeys){
+    private Object[][] getData(Object[][] data){
+        Object[][] result = new Object[1000][];
+        for(Integer i=0;i<1000;i++){
+            Object[] row = data[i%5];
+            row[0] = Long.valueOf(i);
+            result[i]=row.clone();
+        }
+        return result;
+    }
+
+    protected void uploadOutputAsInput(List<HdfsDataUnit> inputs){
         try {
             if(CollectionUtils.isNotEmpty(inputs)) {
-                this.inputs = hdfsOutputsAsInputs(inputs, partitionKeys);
+                this.inputs = hdfsOutputsAsInputs(inputs);
             }
             else{
                 throw new RuntimeException("You have no inputs");
@@ -125,5 +79,39 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
         } catch (RuntimeException e) {
             throw new RuntimeException("Upload Output as Input fail.",e);
         }
+    }
+
+    protected Boolean verifyOutput1(HdfsDataUnit target) {
+        List<String> keys = target.getPartitionKeys();
+        Assert.assertEquals(keys, Arrays.asList("Field1","Field2","Field3","Field4","Field5"));
+        AtomicInteger count = new AtomicInteger();
+        verifyAndReadTarget(target).forEachRemaining(record -> {
+            count.incrementAndGet();
+            log.info("Record: {}",record);
+            Assert.assertTrue(record.get("Id") instanceof Long);
+        });
+        Assert.assertEquals(count.get(), dataCnt.intValue());
+        return true;
+    }
+
+    protected Boolean verifyOutput2(HdfsDataUnit target) {
+        AtomicInteger count = new AtomicInteger();
+        verifyAndReadTarget(target).forEachRemaining(record -> {
+            count.incrementAndGet();
+            log.info("Record: {}",record);
+            Assert.assertTrue(record.get("Id") instanceof Long);
+            Assert.assertTrue(record.get("Field1") instanceof org.apache.avro.util.Utf8);
+            Assert.assertTrue(record.get("Field2") instanceof Integer);
+            Assert.assertTrue(record.get("Field3") instanceof Double);
+            Assert.assertTrue(record.get("Field4") instanceof Double);
+            Assert.assertTrue(record.get("Field5") instanceof Integer);
+        });
+        Assert.assertEquals(count.get(), dataCnt.intValue());
+        return true;
+    }
+
+    @Override
+    protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
+        return Collections.singletonList(verifier);
     }
 }

@@ -31,7 +31,7 @@ def loadHdfsUnit(unit: JsonNode): DataFrame = {
   val fmt = if (unit.get("DataFormat") != null) unit.get("DataFormat").asText.toLowerCase else "avro"
   val partitionKeys = if (unit.get("PartitionKeys") == null) List() else unit.get("PartitionKeys").elements.asScala.map(_.asText()).toList
 
-  if (!partitionKeys.isEmpty) {
+  if (partitionKeys.isEmpty) {
     val suffix = "." + fmt
     if (!path.endsWith(suffix)) {
       if (path.endsWith("/")) {
@@ -72,6 +72,5 @@ println("----- END SCRIPT OUTPUT -----")
 val lattice: LatticeContext = new LatticeContext(scriptInput, scriptParams, scriptTargets)
 
 def setPartitionTargets(index: Int, partitionKeys: Seq[String],lattice: LatticeContext): Unit = {
-  val array = mapper.valueToTree[ArrayNode](partitionKeys, classOf[ArrayNode])
-  lattice.targets(index).set("PartitionKeys", array)
+  lattice.targets(index).set("PartitionKeys", mapper.valueToTree(partitionKeys))
 }
