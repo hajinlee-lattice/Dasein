@@ -96,13 +96,15 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
     }
 
     @Override
-    public void buildRequests(CustomerSpace customerSpace, List<ExportRequest> requests) {
-        buildAnalyticsRequests(requests, customerSpace);
+    public void buildRequests(CustomerSpace customerSpace, List<ExportRequest> requests, boolean onlyAtlas) {
         buildAtlasRequests(requests, customerSpace);
+        if (!onlyAtlas) {
+            buildAnalyticsRequests(requests, customerSpace);
+        }
     }
 
     @Override
-    public void executeRequests(List<ExportRequest> requests, boolean onlyAtlas) {
+    public void executeRequests(List<ExportRequest> requests) {
         if (CollectionUtils.isEmpty(requests)) {
             log.info("There's no tenant dir found.");
             return;
@@ -114,7 +116,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                 StringUtils.join(tenants, ","), requests.size()));
         List<HdfsS3Exporter> exporters = new ArrayList<>();
         for (ExportRequest request : requests) {
-            exporters.add(new HdfsS3Exporter(request, onlyAtlas));
+            exporters.add(new HdfsS3Exporter(request));
         }
         ThreadPoolUtils.runRunnablesInParallel(getS3ExportWorkers(), exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
         log.info(String.format("Finished to export from hdfs to s3. tenantIds=%s", StringUtils.join(tenants, ",")));
@@ -261,15 +263,13 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         private String customer;
         private String tenantId;
         private String name;
-        private boolean onlyAtlas;
 
-        HdfsS3Exporter(ExportRequest request, boolean onlyAtlas) {
+        HdfsS3Exporter(ExportRequest request) {
             this.srcDir = request.srcDir;
             this.tgtDir = request.tgtDir;
             this.customer = request.customerSpace.toString();
             this.tenantId = request.customerSpace.getTenantId();
             this.name = request.name;
-            this.onlyAtlas = onlyAtlas;
         }
 
         @Override
