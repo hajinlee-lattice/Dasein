@@ -51,12 +51,17 @@ public class MergeUserRefinedAttributes extends BaseWorkflowStep<MergeUserRefine
                 List<ApprovedUsage> approvedUsage = userRefinedAttributes.get(eventTableAttribute.getName())
                         .getApprovedUsageList();
                 eventTableAttribute.setApprovedUsage( //
-                        CollectionUtils.isEmpty(approvedUsage) //
+                        CollectionUtils.isEmpty(approvedUsage) || approvedUsage.get(0) == null //
                                 ? ApprovedUsage.NONE //
                                 : approvedUsage.get(0));
             } else {
-                log.error(String.format("Attribute %s not found in attributes from previous Iteration's event table",
+                log.warn(String.format(
+                        "Attribute %s not found in attributes from previous Iteration's event table.",
                         eventTableAttribute.getName()));
+                List<String> approvedUsages = eventTableAttribute.getApprovedUsage();
+                if (CollectionUtils.isEmpty(approvedUsages) || approvedUsages.get(0) == null) {
+                    eventTableAttribute.setApprovedUsage(ApprovedUsage.NONE);
+                }
             }
         }
         eventTable.setName(eventTable.getName() + "_With_UserRefinedAttributes");
