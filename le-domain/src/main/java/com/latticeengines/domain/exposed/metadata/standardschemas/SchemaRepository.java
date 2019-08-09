@@ -1064,6 +1064,17 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerContactId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                    .type(Schema.Type.STRING) //
+                    .defaultValueStr("").interfaceName(InterfaceName.CustomerContactId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID")) //
                 .type(Schema.Type.STRING) //
@@ -1207,6 +1218,16 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Id) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerContactId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CustomerContactId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "PRODUCT_ID", "PRODUCT ID")) //
                 .type(Schema.Type.STRING) //
