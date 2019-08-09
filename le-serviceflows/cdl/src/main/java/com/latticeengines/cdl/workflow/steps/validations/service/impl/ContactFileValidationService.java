@@ -160,6 +160,7 @@ public class ContactFileValidationService
                 InterfaceName.ContactId.name();
         String contactId = getFieldValue(record, contactIdName);
         if (StringUtils.isEmpty(contactId) && !InterfaceName.ContactId.name().equals(contactId)) {
+            // This is for legacy tenant that enable the GA flag and the migration is not complete.
             contactId = getFieldValue(record, InterfaceName.ContactId.name());
         }
         return StringUtils.isEmpty(contactId) ? "" : contactId;
