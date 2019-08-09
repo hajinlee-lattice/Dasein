@@ -1,19 +1,8 @@
 /**
-x need linked in and facebook logos (just need beter linkedin)
-x keep target system in sync option, what do do when once (carmen: hide it)
-x linked in can do accounts or contacts, not both
-- facebook should be hardcoded to send contacts // audiencetype
-
-x Must have account id should be included by default
 - add description behavior is wrong
-
-Marketo
-x Select Program Marketo Demo 2019 and the whole screen goes blank
 
 All Channels
 ? Include unscored accounts should be enabled/included if the campaign has no models ? blocked, /pls/count failing
-x Click on marketo launch settings and then click on eloqua launch settings. Now eloqua settings shows marketo settings
-x S3 folder sometimes disappears and will come back.
 ? Retain last launch settings: When you eventually go back to the setting, the previous settings are no longer available. ? we don't get these settings back, exzcept the ones we do which we retain
 ? When you disable always on, all the previous launch data is removed, but eventually comes back after a delay ? blocked because all launches always fail
 */
@@ -78,7 +67,7 @@ function chron(frequency) {
 }
 
 function isAudience(externalSystemName, showlist) {
-    let list = ['Marketo']; //,'Facebook','LinkedIn'];
+    let list = ['Marketo'];//,'Facebook','LinkedIn'];
     if(showlist) {
         return list;
     }
@@ -118,6 +107,7 @@ class LaunchComponent extends Component {
             launchSchedule: null,
             launchingState: 'unlaunching',
             launchType: null,
+            keepInSync: true,
             programs: null,
             staticList: null,
             showNewAudienceName: true,
@@ -586,7 +576,7 @@ class LaunchComponent extends Component {
         if(this.state.launchSchedule) {
             return (
                 <div className={'keep-in-sync'}>
-                    <input type={'checkbox'} onChange={this.clickKeepInSync} />Keep target system in sync
+                    <input id={'keepInSync'} type={'checkbox'} onChange={this.clickKeepInSync} checked={this.state.keepInSync} /> <label for={'keepInSync'}>Keep target system in sync</label>
                     <i className={'more-info show-tooltip left top'}> i
                         <div className={'tooltip_'}>
                             <div className={'cover'}>
@@ -650,13 +640,17 @@ class LaunchComponent extends Component {
     }
 
     launch = (play, connection, opts) => {
+        var debug = true;
         // FIXME crappy hack to select all buckets because of setState recursion
         var coverageObj = this.getCoverage(this.state.launchAccountsCoverage);
         this.state.selectedBuckets = this.state.selectedBuckets.splice(0,4);
-        this.state.launchingState = 'launching';
+        if(!debug) {
+            this.state.launchingState = 'launching';
+        }
         this.setState(this.state);
 
         var opts = opts || {},
+            debug = opts.debug || debug,
             play = opts.play || store.getState().playbook.play,
             ratings = store.getState().playbook.ratings,
             launchObj = opts.launchObj || {
@@ -722,7 +716,7 @@ class LaunchComponent extends Component {
                 topNCount: launchObj.topNCount,
                 launchType: this.state.launchType || 'FULL', // keep in sync = DIFFERENTIAL, not checked = 'FULL'
                 channelConfig: channelConfig,
-                debug: false
+                debug: debug
             }, closeModal);
         }
     }
@@ -773,8 +767,22 @@ class LaunchComponent extends Component {
     }
 
     clickLaunchSchedule= (e) => {
-        var schedule = (e.target.value === 'Once' ? null : e.target.value);
+        var schedule = (e.target.value === 'Once' ? null : e.target.value),
+            launchType;
+
         this.state.launchSchedule = chron(schedule);
+
+        if(e.target.value === 'Once') {
+            launchType = 'FULL';
+        } else {
+            if(this.state.keepInSync) {
+                launchType = 'DIFFERENTIAL';
+            } else {
+                launchType = 'FULL';
+            }
+        }
+
+        this.state.launchType = launchType;
         if(!schedule) {
             this.state.launchType = 'FULL';
         }
@@ -790,8 +798,9 @@ class LaunchComponent extends Component {
         // keep in sync = DIFFERENTIAL, not checked = 'FULL'
         if(e.target.checked) {
             this.state.launchType = 'DIFFERENTIAL';
-            this.setState(this.state);
         }
+        this.state.keepInSync = e.target.checked;
+        this.setState(this.state);
     }
 
     getCoverageType(accountsCoverage) {
