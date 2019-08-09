@@ -372,6 +372,15 @@ class TrayRouter {
             }.bind(this));
         }.bind(this));
 
+
+        this.router.get('/facebook/audiences', function(req, res){
+            res.send([]);
+        }.bind(this));
+
+        this.router.get('/linkedin/audiences', function(req, res){
+            res.send([]);
+        }.bind(this));
+
         return this.router;
     }
 

@@ -121,6 +121,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     private int concurrentProcessAnalyzeJobs;
 
+    @Value("${cdl.processAnalyze.retry.expired.time}")
+    private long retryExpiredTime;
+
     private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
     @Override
@@ -508,7 +511,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private boolean checkRetryPendingTime(long lastFinishedTime) {
-        return lastFinishedTime - (schedulingPATimeClock.getCurrentTime() - 6*7*24*3600000L) > 0;
+        return lastFinishedTime - (schedulingPATimeClock.getCurrentTime() - retryExpiredTime * 1000) > 0;
     }
 
     private String getSchedulingGroup(String schedulerName) {
