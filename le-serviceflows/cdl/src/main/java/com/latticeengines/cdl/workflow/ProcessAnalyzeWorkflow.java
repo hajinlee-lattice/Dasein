@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.choreographers.ProcessAnalyzeChoreographer;
 import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
+import com.latticeengines.cdl.workflow.steps.maintenance.CleanupAllStep;
 import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
@@ -93,6 +94,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private CommitEntityMatchWorkflow commitEntityMatchWorkflow;
 
+    @Inject
+    private CleanupAllStep cleanupAllStep;
+
     @Value("${cdl.aps.use.spark}")
     private boolean apsUseSpark;
 
@@ -101,6 +105,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
         AbstractStep<? extends BaseStepConfiguration> apsStep = apsUseSpark ? apsGeneration : awsApsGeneratorStep;
         return new WorkflowBuilder(name(), config) //
                 .next(startProcessing) //
+                .next(cleanupAllStep) //
                 .next(importProcessAnalyzeFromS3) //
                 .next(matchEntityWorkflow) //
                 .next(processAccountWorkflow) //

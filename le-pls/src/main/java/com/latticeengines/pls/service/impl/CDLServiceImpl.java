@@ -269,6 +269,26 @@ public class CDLServiceImpl implements CDLService {
         return cdlProxy.cleanupAllData(customerSpace, entity, email);
     }
 
+    @Override
+    public void cleanupAllByAction(String customerSpace, SchemaInterpretation schemaInterpretation) {
+        BusinessEntity entity;
+        switch (schemaInterpretation) {
+            case Account:
+                entity = BusinessEntity.Account;
+                break;
+            case Contact:
+                entity = BusinessEntity.Contact;
+                break;
+            case Transaction:
+                entity = BusinessEntity.Transaction;
+                break;
+            default:
+                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        }
+        String email = MultiTenantContext.getEmailAddress();
+        cdlProxy.cleanupAllByAction(customerSpace, entity, email);
+    }
+
     @VisibleForTesting
     CSVImportConfig generateImportConfig(String customerSpace, String templateFileName, String dataFileName,
                                          String email) {
