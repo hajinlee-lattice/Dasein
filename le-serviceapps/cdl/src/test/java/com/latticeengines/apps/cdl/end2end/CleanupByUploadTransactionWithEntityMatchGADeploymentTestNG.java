@@ -68,7 +68,7 @@ public class CleanupByUploadTransactionWithEntityMatchGADeploymentTestNG extends
     public void runTest() throws Exception {
         masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
         prepareCleanupTemplate();
-//        cleanupACPDAndVerify();
+        cleanupACPDAndVerify();
         cleanupMinDateAccountAndVerify();
         cleanupMinDateAndVerify();
     }
