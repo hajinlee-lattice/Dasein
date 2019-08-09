@@ -583,7 +583,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setMigrationMode() {
-        migrationMode = MigrationTrack.Status.STARTED.equals(metadataProxy.getMigrationStatus(customerSpace.toString()));
+        MigrationTrack.Status status = metadataProxy.getMigrationStatus(customerSpace.toString());
+        log.info("Tenant's migration status is {}.", status);
+        migrationMode = MigrationTrack.Status.STARTED.equals(status);
+        log.info("Migration mode is {}", migrationMode ? "on" : "off");
     }
 
     private void verifyActiveDataCollectionVersion() {
