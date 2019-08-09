@@ -337,7 +337,9 @@ public class CDLResource {
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (LedpException e) {
             log.error("Failed to create S3ImportSystem: " + e.getMessage());
-            throw e;
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+                    Status.Error, e.getMessage());
+            throw new UIActionException(action, e.getCode());
         }
     }
 
