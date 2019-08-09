@@ -123,11 +123,11 @@ public class TimeSeriesUtils {
                         }
                     }
                 } catch (Exception e) {
-                    log.error("Failed to clean period data for file " + fileName, e);
+                    throw new RuntimeException("Failed to clean period data for file " + fileName, e);
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to clean period data", e);
+            throw new RuntimeException("Failed to clean period data", e);
         }
         return rowCounts;
     }
@@ -181,7 +181,7 @@ public class TimeSeriesUtils {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to collect period data", e);
+            throw new RuntimeException("Failed to collect period data", e);
         }
     }
 
@@ -230,7 +230,7 @@ public class TimeSeriesUtils {
                 HdfsUtils.copyFiles(yarnConfiguration, fileName, targetDir);
             }
         } catch (Exception e) {
-            log.error("Failed to collect period data", e);
+            throw new RuntimeException("Failed to collect period data", e);
         }
     }
 
@@ -279,8 +279,7 @@ public class TimeSeriesUtils {
             syncWrites(pendingWrites);
             return true;
         } catch (Exception e) {
-            log.error("Failed to distribute to period store", e);
-            return false;
+            throw new RuntimeException("Failed to distribute to period store", e);
         }
     }
 
@@ -351,8 +350,7 @@ public class TimeSeriesUtils {
             syncWrites(pendingWrites);
             return true;
         } catch (Exception e) {
-            log.error("Failed to distribute to period store", e);
-            return false;
+            throw new RuntimeException("Failed to distribute to period store", e);
         }
     }
 
@@ -409,8 +407,7 @@ public class TimeSeriesUtils {
             try {
                 pendingWrite.get();
             } catch (Exception e) {
-                log.error("Error waiting for pending writes", e);
-                continue;
+                throw new RuntimeException("Error waiting for pending writes", e);
             }
         }
         pendingWrites.clear();
@@ -429,8 +426,7 @@ public class TimeSeriesUtils {
                     avroFiles.get(0), maxPeriod, avroFiles.get(avroFiles.size() - 1)));
             return Pair.of(minPeriod, maxPeriod);
         } catch (Exception e) {
-            log.error("Failed to find earlies period", e);
-            return null;
+            throw new RuntimeException("Failed to find earlies period", e);
         }
     }
 
@@ -511,7 +507,7 @@ public class TimeSeriesUtils {
                     AvroUtils.appendToHdfsFile(yarnConfiguration, fileName, records);
                 }
             } catch (Exception e) {
-                log.error("Failed to distribute period data to " + fileName, e);
+                throw new RuntimeException("Failed to distribute period data to " + fileName, e);
             }
             return Boolean.TRUE;
         }
