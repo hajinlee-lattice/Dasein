@@ -7,7 +7,6 @@ import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.metadata.Attribute;
