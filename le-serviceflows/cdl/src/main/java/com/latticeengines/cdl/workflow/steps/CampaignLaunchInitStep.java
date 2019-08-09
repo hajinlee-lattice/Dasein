@@ -88,11 +88,10 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info("Inside CampaignLaunchInitStep execute()");
             Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
 
-            log.info(String.format("For tenant: %s", customerSpace.toString()));
-            log.info(String.format("For playId: %s", playName));
-            log.info(String.format("For playLaunchId: %s", playLaunchId));
+            log.info(String.format("For tenant: %s", customerSpace.toString()) + "\n"
+                    + String.format("For playId: %s", playName) + "\n"
+                    + String.format("For playLaunchId: %s", playLaunchId));
 
-            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
 
             long totalAccountsAvailableForLaunch = playLaunchContext.getPlayLaunch().getAccountsSelected();
@@ -100,34 +99,10 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info(String.format("Total available accounts available for Launch: %d, contacts: %d",
                     totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch));
 
+            // 1. Generate FrontEndQueries for Account and Contact in the PlayLaunchContext
             campaignLaunchProcessor.prepareFrontEndQueries(playLaunchContext, version);
-            SparkJobResult createRecJobResult = retry.execute(ctx -> {
-                if (ctx.getRetryCount() > 0) {
-                    log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
-                    log.warn("Previous failure:", ctx.getLastThrowable());
-                }
-                try {
-                    startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                    // 1. form FrontEndQuery for Account and Contact
-                    // 2. get DataFrame for Account and Contact
-                    HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
-                    log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
-                    HdfsDataUnit contactDataUnit = null;
-                    String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                    if (StringUtils.isBlank(contactTableName)) {
-                        log.info("No contact table available in Redshift.");
-                    } else {
-                        contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
-                        log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
-                    }
-                    // 3. generate avro out of DataFrame with predefined format
-                    // for Recommendations
-                    return executeSparkJob(CreateRecommendationsJob.class,
-                            generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchContext));
-                } finally {
-                    stopSparkSQLSession();
-                }
-            });
+
+            SparkJobResult createRecJobResult = executeSparkJob(playLaunchContext);
 
             long launchedAccountNum = createRecJobResult.getTargets().get(0).getCount();
             log.info("Total Account launched: " + launchedAccountNum);
@@ -152,25 +127,63 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             if (launchedAccountNum <= 0L) {
                 throw new LedpException(LedpCode.LEDP_18159, new Object[] { launchedAccountNum, 0L });
             } else {
-                PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-                playLaunch.setAccountsLaunched(launchedAccountNum);
-                playLaunch.setContactsLaunched(launchedContactNum);
-                campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext,
-                        System.currentTimeMillis(), targetPath);
-                long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
-                playLaunch.setAccountsSuppressed(suppressedAccounts);
-                long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
-                playLaunch.setContactsSuppressed(suppressedContacts);
-                campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
-                log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
-                log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
-
-                successUpdates(customerSpace, playName, playLaunchId);
+                runScoopExport(playLaunchContext, tenant, launchedAccountNum, launchedContactNum,
+                        totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch, targetPath);
+                successUpdates(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
             }
         } catch (Exception ex) {
             failureUpdates(customerSpace, playName, playLaunchId, ex);
             throw new LedpException(LedpCode.LEDP_18157, ex);
         }
+    }
+
+    private void runScoopExport(PlayLaunchContext playLaunchContext, Tenant tenant, //
+            long launchedAccountNum, long launchedContactNum, //
+            long totalAccountsAvailableForLaunch, long totalContactsAvailableForLaunch, String targetPath)
+            throws Exception {
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        playLaunch.setAccountsLaunched(launchedAccountNum);
+        playLaunch.setContactsLaunched(launchedContactNum);
+        campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext, System.currentTimeMillis(),
+                targetPath);
+        long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
+        playLaunch.setAccountsSuppressed(suppressedAccounts);
+        long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
+        playLaunch.setContactsSuppressed(suppressedContacts);
+        campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
+        log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
+        log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
+    }
+
+    private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                log.warn("Previous failure:", ctx.getLastThrowable());
+            }
+            try {
+                startSparkSQLSession(getHdfsPaths(attrRepo), false);
+
+                // 2. get DataFrame for Account and Contact
+                HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
+                log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
+                HdfsDataUnit contactDataUnit = null;
+                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+                if (StringUtils.isBlank(contactTableName)) {
+                    log.info("No contact table available in Redshift.");
+                } else {
+                    contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
+                    log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
+                }
+
+                // 3. generate avro out of DataFrame with predefined format for Recommendations
+                return executeSparkJob(CreateRecommendationsJob.class,
+                        generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchContext));
+            } finally {
+                stopSparkSQLSession();
+            }
+        });
     }
 
     private CreateRecommendationConfig generateCreateRecommendationConfig(HdfsDataUnit accountDataUnit,

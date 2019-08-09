@@ -25,7 +25,7 @@ public class SalesforceChannelConfig implements ChannelConfig {
         this.accountLimit = accountLimit;
     }
 
-    public Boolean isSupressAccountWithoutAccountId() {
+    public Boolean isSupressAccountsWithoutLookupId() {
         return supressAccountsWithoutLookupId;
     }
 
@@ -44,7 +44,7 @@ public class SalesforceChannelConfig implements ChannelConfig {
         SalesforceChannelConfig newSalesforceChannelConfig = (SalesforceChannelConfig) config;
         salesforceChannelConfig.setAccountLimit(newSalesforceChannelConfig.getAccoutLimit());
         salesforceChannelConfig
-                .setSupressAccountsWithoutLookupId(newSalesforceChannelConfig.isSupressAccountWithoutAccountId());
+                .setSupressAccountsWithoutLookupId(newSalesforceChannelConfig.isSupressAccountsWithoutLookupId());
         return this;
 
     }

@@ -117,14 +117,12 @@ public class FrontEndQueryCreator {
         final Map<BusinessEntity, List<String>> accLookupFields = tempAccLookupFields;
         List<Lookup> accountLookups = new ArrayList<>();
         accountLookupFields //
-                .keySet().stream() //
-                .forEach( //
+                .keySet().forEach( //
                         businessEntity -> prepareLookups(businessEntity, accountLookups, accLookupFields));
 
         List<Lookup> contactLookups = new ArrayList<>();
         contactLookupFields //
-                .keySet().stream() //
-                .forEach( //
+                .keySet().forEach( //
                         businessEntity -> prepareLookups(businessEntity, contactLookups, contactLookupFields));
         // if useSpark, need to union with user configured fields
         if (useSpark) {
@@ -177,9 +175,7 @@ public class FrontEndQueryCreator {
             }
             // add remaining lookups to AccountLookups
             if (MapUtils.isNotEmpty(fieldMaps)) {
-                fieldMaps.entrySet().iterator().forEachRemaining(entry -> {
-                    accountLookups.addAll(entry.getValue());
-                });
+                fieldMaps.entrySet().iterator().forEachRemaining(entry -> accountLookups.addAll(entry.getValue()));
             }
             log.info("accountLookups=" + Arrays.toString(accountLookups.toArray()));
             log.info("contactLookups=" + Arrays.toString(contactLookups.toArray()));
@@ -205,14 +201,12 @@ public class FrontEndQueryCreator {
         final Map<BusinessEntity, List<String>> accLookupFields = tempAccLookupFields;
         List<Lookup> accountLookups = new ArrayList<>();
         accountLookupFields //
-                .keySet().stream() //
-                .forEach( //
+                .keySet().forEach( //
                         businessEntity -> prepareLookups(businessEntity, accountLookups, accLookupFields));
 
         List<Lookup> contactLookups = new ArrayList<>();
         contactLookupFields //
-                .keySet().stream() //
-                .forEach( //
+                .keySet().forEach( //
                         businessEntity -> prepareLookups(businessEntity, contactLookups, contactLookupFields));
 
         accountFrontEndQuery.setLookups(accountLookups);
@@ -222,9 +216,7 @@ public class FrontEndQueryCreator {
     private void prepareLookups(BusinessEntity businessEntity, List<Lookup> lookups,
             Map<BusinessEntity, List<String>> entityLookupFields) {
         entityLookupFields.get(businessEntity) //
-                .stream() //
-                .forEach( //
-                        field -> lookups.add(new AttributeLookup(businessEntity, field)));
+                .forEach(field -> lookups.add(new AttributeLookup(businessEntity, field)));
     }
 
     private void setSortField(BusinessEntity entityType, List<String> sortBy, boolean descending,
@@ -285,8 +277,6 @@ public class FrontEndQueryCreator {
         if (ratingId != null && CollectionUtils.isNotEmpty(ratingModels)) {
             accountFrontEndQuery.setRatingModels(ratingModels);
 
-            // TODO add filtering based on list of selected buckets and update
-            // selected vs skipped count accordingly
             List<Lookup> lookups = accountFrontEndQuery.getLookups();
             Lookup lookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
             lookups.add(lookup);
@@ -305,10 +295,8 @@ public class FrontEndQueryCreator {
             String ratingId) {
         Lookup lhs = new AttributeLookup(BusinessEntity.Rating, ratingId);
 
-        Restriction ratingRestriction;
-        if (CollectionUtils.isEmpty(playLaunchContext.getPlayLaunch().getBucketsToLaunch())) {
-            ratingRestriction = null;
-        } else {
+        Restriction ratingRestriction = null;
+        if (CollectionUtils.isNotEmpty(playLaunchContext.getPlayLaunch().getBucketsToLaunch())) {
             Collection<Object> allowedRatingsCollection = playLaunchContext.getPlayLaunch().getBucketsToLaunch()
                     .stream().map(RatingBucketName::getName).collect(Collectors.toList());
             Lookup rhs = new CollectionLookup(allowedRatingsCollection);
