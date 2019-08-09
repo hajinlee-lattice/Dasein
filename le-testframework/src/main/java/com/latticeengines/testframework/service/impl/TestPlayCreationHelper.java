@@ -168,6 +168,7 @@ public class TestPlayCreationHelper {
             Map<String, Boolean> featureFlags = plConfig != null ? plConfig.getFeatureFlags() : null;
             tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG, featureFlags);
             tenantIdentifier = tenant.getId();
+            customerSpace = CustomerSpace.parse(tenantIdentifier).getTenantId();
             cdlTestDataService.populateData(tenantIdentifier, 3);
             postInitializeTenantCreation(tenantIdentifier, plConfig);
         }
@@ -183,11 +184,12 @@ public class TestPlayCreationHelper {
         tenant = tenantEntityMgr.findByTenantId(fullTenantId);
         log.info("Tenant = " + tenant.getId());
         tenantIdentifier = tenant.getId();
+        customerSpace = CustomerSpace.parse(tenantIdentifier).getTenantId();
         MultiTenantContext.setTenant(tenant);
         deploymentTestBed.switchToSuperAdmin(tenant);
     }
 
-    public void setupTenantAndCreatePlay(TestPlaySetupConfig testPlaySetupConfig) throws Exception {
+    public void setupTenantAndCreatePlay(TestPlaySetupConfig testPlaySetupConfig) {
         if (StringUtils.isNotBlank(testPlaySetupConfig.getExistingTenantName())) {
             useExistingTenant(testPlaySetupConfig.getExistingTenantName());
         } else {
@@ -883,6 +885,10 @@ public class TestPlayCreationHelper {
 
     public Tenant getTenant() {
         return tenant;
+    }
+
+    public String getCustomerSpace() {
+        return customerSpace;
     }
 
     public Play getPlay() {
