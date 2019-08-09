@@ -398,7 +398,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 .collect(Collectors.toList());
     }
 
-    private List<String> getActionImpactedEngineIds(List<Action> actions) {
+    protected List<String> getActionImpactedEngineIds(List<Action> actions) {
         List<String> engineIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(actions)) {
             for (Action action: actions) {
