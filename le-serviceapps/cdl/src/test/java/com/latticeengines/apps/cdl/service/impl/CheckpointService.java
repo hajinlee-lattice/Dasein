@@ -158,8 +158,8 @@ public class CheckpointService {
     @Value("${common.test.matchapi.url}")
     private String matchapiHostPort;
 
-    @Value("${aws.s3.bucket}")
-    protected String s3Bucket;
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3CustomerBucket;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -396,13 +396,13 @@ public class CheckpointService {
         log.info("Start uploading checkpoint " + checkpoint + " to S3.");
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        String s3Prefix = pathBuilder.getS3AtlasDataPrefix(s3Bucket, cs.getTenantId());
-        if (s3Service.isNonEmptyDirectory(s3Bucket, s3Prefix)) {
+        String s3Prefix = pathBuilder.getS3AtlasDataPrefix(s3CustomerBucket, cs.getTenantId());
+        if (s3Service.isNonEmptyDirectory(s3CustomerBucket, s3Prefix)) {
             log.info("S3 prefix {} already exists, delete first.", s3Prefix);
-            s3Service.cleanupPrefix(s3Bucket, s3Prefix);
+            s3Service.cleanupPrefix(s3CustomerBucket, s3Prefix);
         }
         String localDir = checkpointDir + "/" + checkpoint + "/hdfs/Data";
-        s3Service.uploadLocalDirectory(s3Bucket, s3Prefix, localDir, true);
+        s3Service.uploadLocalDirectory(s3CustomerBucket, s3Prefix, localDir, true);
     }
 
     private DataCollection.Version getCheckpointVersion(String checkpoint) throws IOException {
