@@ -8,6 +8,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -16,6 +19,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
+@Component("exportDeltaArtifactsToS3Step")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExportDeltaArtifactsToS3Step extends BaseImportExportS3<ExportDeltaArtifactsToS3StepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(ExportDeltaArtifactsToS3Step.class);
 
