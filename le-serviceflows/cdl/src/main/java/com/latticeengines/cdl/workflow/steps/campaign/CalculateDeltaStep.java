@@ -182,7 +182,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 getTargetTablePath(config.getPlayId(), config.getChannelId(), config.getExecutionId(), tableName));
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         dataUnitTable = metadataProxy.getTable(customerSpace.getTenantId(), dataUnitTable.getName());
-        putObjectInContext(contextKey, dataUnitTable);
+        putObjectInContext(contextKey, tableName);
         log.info(logHDFSDataUnit(tableNamePrefix, dataUnit));
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
