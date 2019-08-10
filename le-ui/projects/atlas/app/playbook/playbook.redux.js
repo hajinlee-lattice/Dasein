@@ -292,7 +292,7 @@ export const actions = {
                 useraccesstoken = playstore.userDocument.accessToken,
                 urls = (externalSystemName) => {
                     let urls = {
-                        default: `tray/${externalSystemName.toLowerCase()}/audiences`,
+                        default: `/tray/${externalSystemName.toLowerCase()}/audiences`,
                         Marketo: '/tray/marketo/programs'
                     };
                     if(urls[externalSystemName]) {
