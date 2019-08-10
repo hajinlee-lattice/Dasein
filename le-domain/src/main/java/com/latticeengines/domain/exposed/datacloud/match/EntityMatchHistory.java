@@ -22,11 +22,17 @@ public class EntityMatchHistory {
     @JsonProperty("FullMatchKeyTuple")
     private MatchKeyTuple fullMatchKeyTuple;
 
-    @JsonProperty("MatchedMatchKeyTuple")
-    private MatchKeyTuple matchedMatchKeyTuple;
+    @JsonProperty("EntityMatchType")
+    private String entityMatchType;
 
-    @JsonProperty("MatchType")
-    private String matchType;
+    @JsonProperty("MatchedEntityMatchKeyTuple")
+    private MatchKeyTuple matchedEntityMatchKeyTuple;
+
+    @JsonProperty("LdcMatchType")
+    private String ldcMatchType;
+
+    @JsonProperty("MatchedLdcMatchKeyTuple")
+    private MatchKeyTuple matchedLdcMatchKeyTuple;
 
     @JsonProperty("ExistingLookupKeyList")
     private List<Pair<String, MatchKeyTuple>> existingLookupKeyList;
@@ -46,11 +52,17 @@ public class EntityMatchHistory {
     @JsonProperty("L2AFullMatchKeyTuple")
     private MatchKeyTuple l2aFullMatchKeyTuple;
 
-    @JsonProperty("L2AMatchedMatchKeyTuple")
-    private MatchKeyTuple l2aMatchedMatchKeyTuple;
+    @JsonProperty("L2AEntityMatchType")
+    private String l2aEntityMatchType;
 
-    @JsonProperty("L2AMatchType")
-    private String l2aMatchType;
+    @JsonProperty("L2AMatchedEntityMatchKeyTuple")
+    private MatchKeyTuple l2aMatchedEntityMatchKeyTuple;
+
+    @JsonProperty("L2ALdcMatchType")
+    private String l2aLdcMatchType;
+
+    @JsonProperty("L2AMatchedLdcMatchKeyTuple")
+    private MatchKeyTuple l2aMatchedLdcMatchKeyTuple;
 
     @JsonProperty("L2AExistingLookupKeyList")
     private List<Pair<String, MatchKeyTuple>> l2aExistingLookupKeyList;
@@ -95,20 +107,36 @@ public class EntityMatchHistory {
         return fullMatchKeyTuple;
     }
 
-    public void setMatchedMatchKeyTuple(MatchKeyTuple matchedMatchKeyTuple) {
-        this.matchedMatchKeyTuple = matchedMatchKeyTuple;
+    public void setEntityMatchType(EntityMatchType entityMatchType) {
+        this.entityMatchType = entityMatchType.name();
     }
 
-    public MatchKeyTuple getMatchedMatchKeyTuple() {
-        return matchedMatchKeyTuple;
+    public String getEntityMatchType() {
+        return entityMatchType;
     }
 
-    public void setMatchType(EntityMatchType entityMatchType) {
-        this.matchType = entityMatchType.name();
+    public void setMatchedEntityMatchKeyTuple(MatchKeyTuple matchedEntityMatchKeyTuple) {
+        this.matchedEntityMatchKeyTuple = matchedEntityMatchKeyTuple;
     }
 
-    public String getMatchType() {
-        return matchType;
+    public MatchKeyTuple getMatchedEntityMatchKeyTuple() {
+        return matchedEntityMatchKeyTuple;
+    }
+
+    public void setLdcMatchType(LdcMatchType ldcMatchType) {
+        this.ldcMatchType = ldcMatchType.name();
+    }
+
+    public String getLdcMatchType() {
+        return ldcMatchType;
+    }
+
+    public void setMatchedLdcMatchKeyTuple(MatchKeyTuple matchedLdcMatchKeyTuple) {
+        this.matchedLdcMatchKeyTuple = matchedLdcMatchKeyTuple;
+    }
+
+    public MatchKeyTuple getMatchedLdcMatchKeyTuple() {
+        return matchedLdcMatchKeyTuple;
     }
 
     public void setExistingLookupKeyList(List<Pair<String, MatchKeyTuple>> existingLookupKeyList) {
@@ -151,20 +179,36 @@ public class EntityMatchHistory {
         return l2aFullMatchKeyTuple;
     }
 
-    public void setL2aMatchedMatchKeyTuple(MatchKeyTuple l2aMatchedMatchKeyTuple) {
-        this.l2aMatchedMatchKeyTuple = l2aMatchedMatchKeyTuple;
+    public void setL2aEntityMatchType(EntityMatchType l2aEntityMatchType) {
+        this.l2aEntityMatchType = l2aEntityMatchType.name();
     }
 
-    public MatchKeyTuple getL2aMatchedMatchKeyTuple() {
-        return l2aMatchedMatchKeyTuple;
+    public String getL2aEntityMatchType() {
+        return l2aEntityMatchType;
     }
 
-    public void setL2aMatchType(EntityMatchType l2aEntityMatchType) {
-        this.l2aMatchType = l2aEntityMatchType.name();
+    public void setL2aMatchedEntityMatchKeyTuple(MatchKeyTuple l2aMatchedEntityMatchKeyTuple) {
+        this.l2aMatchedEntityMatchKeyTuple = l2aMatchedEntityMatchKeyTuple;
     }
 
-    public String getL2aMatchType() {
-        return l2aMatchType;
+    public MatchKeyTuple getL2aMatchedEntityMatchKeyTuple() {
+        return l2aMatchedEntityMatchKeyTuple;
+    }
+
+    public void setL2aLdcMatchType(LdcMatchType l2aLdcMatchType) {
+        this.l2aLdcMatchType = l2aLdcMatchType.name();
+    }
+
+    public String getL2aLdcMatchType() {
+        return l2aLdcMatchType;
+    }
+
+    public void setL2aMatchedLdcMatchKeyTuple(MatchKeyTuple l2aMatchedLdcMatchKeyTuple) {
+        this.l2aMatchedLdcMatchKeyTuple = l2aMatchedLdcMatchKeyTuple;
+    }
+
+    public MatchKeyTuple getL2aMatchedLdcMatchKeyTuple() {
+        return l2aMatchedLdcMatchKeyTuple;
     }
 
     public void setL2aExistingLookupKeyList(List<Pair<String, MatchKeyTuple>> l2aExistingLookupKeyList) {

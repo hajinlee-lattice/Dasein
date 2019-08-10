@@ -19,7 +19,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DnBMatchUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.DnBMatchPostProcessor;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
-import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
+import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -64,8 +64,7 @@ public class DunsValidateMicroEngineActor extends DataSourceMicroEngineTemplate<
 
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
-        traveler.addEntityLdcMatchTypeToTupleList(
-                Pair.of(EntityMatchType.LDC_DUNS_VALIDATE, traveler.getMatchKeyTuple()));
+        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.DUNS_VALIDATE, traveler.getMatchKeyTuple()));
     }
 
     @Override
