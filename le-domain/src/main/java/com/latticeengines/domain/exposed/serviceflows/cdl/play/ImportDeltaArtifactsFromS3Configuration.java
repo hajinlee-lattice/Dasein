@@ -1,17 +1,11 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
-public class QueuePlayLaunchesStepConfiguration extends BaseStepConfiguration {
-    private CustomerSpace customerSpace;
+public class ImportDeltaArtifactsFromS3Configuration extends ImportExportS3StepConfiguration {
     private String channelId;
     private String playId;
     private String executionId;
-
-    public CustomerSpace getCustomerSpace() { return customerSpace; }
-
-    public void setCustomerSpace(CustomerSpace customerSpace) { this.customerSpace = customerSpace; }
 
     public String getChannelId() { return channelId; }
 
@@ -24,5 +18,4 @@ public class QueuePlayLaunchesStepConfiguration extends BaseStepConfiguration {
     public String getExecutionId() { return executionId; }
 
     public void setExecutionId(String executionId) { this.executionId = executionId; }
-
 }

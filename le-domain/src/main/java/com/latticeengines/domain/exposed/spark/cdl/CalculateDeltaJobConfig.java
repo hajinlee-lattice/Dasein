@@ -20,7 +20,7 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
 
     @Override
     public int getNumTargets() {
-        return 4;
+        return 6;
     }
 
     @JsonProperty("CurrentAccountUniverse")

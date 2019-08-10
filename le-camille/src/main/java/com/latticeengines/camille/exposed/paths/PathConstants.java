@@ -21,6 +21,7 @@ public final class PathConstants {
     public static final String FABRIC_ENTITIES = "FabricEntities";
     public static final String DANTE = "Dante";
     public static final String S3FILES = "S3Files";
+    public static final String CAMPAIGNS = "Campaigns";
 
     public static final String DEFAULTCONFIG_NODE = "Default";
     public static final String CONFIGSCHEMA_NODE = "Metadata";

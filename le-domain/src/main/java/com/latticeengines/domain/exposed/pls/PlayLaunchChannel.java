@@ -62,9 +62,6 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     private static final String PLAY_LAUNCH_CHANNEL_NAME_PREFIX = "channel";
     private static final String PLAY_LAUNCH_CHANNEL_NAME_FORMAT = "%s__%s";
 
-    public static final String PREVIOUS_ACCOUNT_UNIVERSE = "PREVIOUS_ACCOUNT_UNIVERSE";
-    public static final String PREVIOUS_CONTACT_UNIVERSE = "PREVIOUS_CONTACT_UNIVERSE";
-
     @Id
     @JsonProperty("pid")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -157,11 +154,17 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
 
-    @JsonProperty("currentLaunchUniverseTable")
+    @JsonProperty("currentLaunchedAccountUniverseTable")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_CURRENT_LAUNCH_UNIVERSE_TABLE")
+    @JoinColumn(name = "FK_CURRENT_LAUNCHED_ACCOUNT_UNIVERSE_TABLE")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Table currentLaunchUniverseTable;
+    private Table currentLaunchedAccountUniverseTable;
+
+    @JsonProperty("currentLaunchedContactUniverseTable")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_CURRENT_LAUNCHED_CONTACT_UNIVERSE_TABLE")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Table currentLaunchedContactUniverseTable;
 
     public PlayLaunchChannel() {
     }
@@ -376,12 +379,19 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         }
     }
 
-    public Table getCurrentLaunchUniverseTable() {
-        return currentLaunchUniverseTable;
+    public Table getCurrentLaunchedAccountUniverseTable() {
+        return currentLaunchedAccountUniverseTable;
     }
 
-    public void setCurrentLaunchUniverseTable(Table currentLaunchUniverseTable) {
-        this.currentLaunchUniverseTable = currentLaunchUniverseTable;
+    public void setCurrentLaunchedAccountUniverseTable(Table currentLaunchedAccountUniverseTable) {
+        this.currentLaunchedAccountUniverseTable = currentLaunchedAccountUniverseTable;
     }
 
+    public Table getCurrentLaunchedContactUniverseTable() {
+        return currentLaunchedContactUniverseTable;
+    }
+
+    public void setCurrentLaunchedContactUniverseTable(Table currentLaunchedContactUniverseTable) {
+        this.currentLaunchedContactUniverseTable = currentLaunchedContactUniverseTable;
+    }
 }

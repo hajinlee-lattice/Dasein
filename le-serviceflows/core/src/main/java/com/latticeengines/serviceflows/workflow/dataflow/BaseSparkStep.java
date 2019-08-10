@@ -96,7 +96,13 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     }
 
     protected Table toTable(String tableName, String primaryKey, HdfsDataUnit jobTarget) {
-        return SparkUtils.hdfsUnitToTable(tableName, primaryKey, jobTarget, yarnConfiguration, podId, customerSpace);
+        return SparkUtils.hdfsUnitToTable(tableName, primaryKey, jobTarget, yarnConfiguration, podId, customerSpace,
+                null);
+    }
+
+    protected Table toTable(String tableName, String primaryKey, HdfsDataUnit jobTarget, String tgtPath) {
+        return SparkUtils.hdfsUnitToTable(tableName, primaryKey, jobTarget, yarnConfiguration, podId, customerSpace,
+                tgtPath);
     }
 
     protected Table toTable(String tableName, HdfsDataUnit jobTarget) {
