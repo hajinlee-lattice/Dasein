@@ -40,7 +40,7 @@ import './launch.component.scss';
 /**
  * need time utility
  * need momentjs
- */ 
+ */
 
 function debounceEventHandler(...args) {
     const debounced = _.debounce(...args)
@@ -199,10 +199,10 @@ class LaunchComponent extends Component {
         vm.setState(this.state);
 
         let deepState = deepCopy(vm.state);
-        
+
         // creates this.state.launchAccountsCoverage, needed to load launch
         if(playstore.play.ratingEngine) {
-            playstore.playbookWizardStore.launchAccountsCoverage(play.name, { 
+            playstore.playbookWizardStore.launchAccountsCoverage(play.name, {
                 sendEngineId: opts.sendEngineId,
                 getExcludeItems: opts.getExcludeItems,
                 getDestinationAccountId: opts.getDestinationAccountId
@@ -348,10 +348,10 @@ class LaunchComponent extends Component {
             return(
                 <Aux>
                     <h2>Model Ratings</h2>
-                    <LeHPanel 
-                        hstretch={!littleBuckets} 
-                        halignment={LEFT} 
-                        valignment={CENTER} 
+                    <LeHPanel
+                        hstretch={!littleBuckets}
+                        halignment={LEFT}
+                        valignment={CENTER}
                         className={`rating-buckets ${littleBuckets ? 'little-buckets' : ''}`}
                     >
                         {this.makeBuckets(coverage, play, noBuckets, opts)}
@@ -394,7 +394,7 @@ class LaunchComponent extends Component {
                 <Aux>
                     {this.makeBucketsContainer(coverage, play, noBuckets, opts)}
                     <div className={'unscored-accounts-container'}>
-                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} disabled={this.state.fetching} /> 
+                        <input id="unscored" type="checkbox" onChange={this.clickUnscored} checked={this.state.unscored} disabled={this.state.fetching} />
                         <label for="unscored">
                             Include the {(coverage && coverage.unscoredAccountCount ? coverage.unscoredAccountCount.toLocaleString() : 0)} ({unscoredAccountCountPercent}%) Unscored Accounts
                         </label>
@@ -410,7 +410,7 @@ class LaunchComponent extends Component {
             return (
                 <Aux>
                     <li>
-                        <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" /> 
+                        <input id="requireAccountId" checked={this.state.excludeItemsWithoutSalesforceId} onChange={this.clickRequireAccountId} type="checkbox" />
                         <label for="requireAccountId">Must have account ID</label>
                     </li>
                 </Aux>
@@ -419,7 +419,7 @@ class LaunchComponent extends Component {
             return (
                 <Aux>
                     <li>
-                        <input id="requireContactIfo" checked={true} disabled={true} type="checkbox" /> 
+                        <input id="requireContactIfo" checked={true} disabled={true} type="checkbox" />
                         <label for="requireContactIfo">Must have contact info</label>
                     </li>
                 </Aux>
@@ -428,7 +428,7 @@ class LaunchComponent extends Component {
             return (
                 <Aux>
                     <li>
-                        <input id="requireAccountName" checked={true} disabled={true} type="checkbox" /> 
+                        <input id="requireAccountName" checked={true} disabled={true} type="checkbox" />
                         <label for="requireAccountName">Must have website or account name</label>
                     </li>
                 </Aux>
@@ -475,7 +475,7 @@ class LaunchComponent extends Component {
                     <LeVPanel halignment={LEFT} valignment={CENTER} className={'program-settings'}>
                         <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'programName-container'}>
                             <label for={'programName'}>{this.state.externalSystemName} Program Name</label>
-                            <select id={'programName'} onChange={(event) => { 
+                            <select id={'programName'} onChange={(event) => {
                                 this.state.errors.audiencename = null;
                                 this.getStaticList(event.target.value);
                             }}>
@@ -506,7 +506,7 @@ class LaunchComponent extends Component {
                 return(
                     <div className={'launch-section drop-folder'}>
                         <h2>
-                            S3 Drop Folder 
+                            S3 Drop Folder
                             <i className={'more-info show-tooltip left bottom'}> i
                                 <div className={'tooltip_'}>
                                     <div className={'cover'}>
@@ -522,8 +522,8 @@ class LaunchComponent extends Component {
                             <strong>{system.exportFolder}</strong>
                         </p>
                         <p className={'subtext'}>
-                            After launching the campaign, audience data is generated and will be available in the S3 drop location. 
-                            You will need the access token to S3 to access this data. 
+                            After launching the campaign, audience data is generated and will be available in the S3 drop location.
+                            You will need the access token to S3 to access this data.
                             You can obtain token from the connection page.
                         </p>
                     </div>
@@ -673,7 +673,7 @@ class LaunchComponent extends Component {
 
         var channelConfigDefault = {};
         channelConfigDefault[channelConfigKey] = {
-            supressAccountWithoutAccountId: this.state.excludeItemsWithoutSalesforceId,
+            supressAccountsWithoutLookupId: this.state.excludeItemsWithoutSalesforceId,
             audienceId: '',
             audienceName: '',
             folderName: ''
@@ -731,7 +731,7 @@ class LaunchComponent extends Component {
         console.log(e.target.checked);
         // not currenlty supported
         // <li>
-        //     <input id="contactInfo" onChange={this.clickContactInfo} type="checkbox" /> 
+        //     <input id="contactInfo" onChange={this.clickContactInfo} type="checkbox" />
         //     <label for="contactInfo">Must have contact info</label>
         // </li>
     }
@@ -813,7 +813,7 @@ class LaunchComponent extends Component {
         if(accountsCoverage && accountsCoverage.accountsCount) {
             return 'accountsCount';
         }
-        
+
     }
 
     getCoverage(accountsCoverage) {
@@ -829,7 +829,7 @@ class LaunchComponent extends Component {
             coverage = (engineId && accountsCoverage[coverageType][engineId] ? accountsCoverage[coverageType][engineId] : {});
         } else if(coverageType === 'accountsCount') {
             engineId: null;
-            coverage = { 
+            coverage = {
                 unscoredAccountCount: accountsCoverage.accountsCount,
                 bucketCoverageCounts: []
             };
@@ -845,7 +845,7 @@ class LaunchComponent extends Component {
         var loaded = (this.state.launchAccountsCoverage);
         if(isAudience(this.state.externalSystemName)) {
             /**
-             * I set this.state.programs to an empty array, from null, if the API doesn't send anything back 
+             * I set this.state.programs to an empty array, from null, if the API doesn't send anything back
              * so the modal will wait for the response in this case, but it will still load even if it's empty
              */
             loaded = loaded && (this.state.programs && this.state.staticList);
@@ -889,7 +889,7 @@ class LaunchComponent extends Component {
                         //selectedBuckets.push(bucket.bucket);
                     }
 
-                    bucket.percentage = bucket.count / numAccounts;               
+                    bucket.percentage = bucket.count / numAccounts;
                 });
                 //PlaybookWizardStore.setBucketsToLaunch(vm.selectedBuckets);
             }
@@ -902,10 +902,10 @@ class LaunchComponent extends Component {
                             <h2>{toBeLaunchedType(externalSystemName)} to be Launched: <strong>{recommendationCounts.launched}</strong> of {recommendationCounts.total.toLocaleString()}</h2>
                             <ul>
                                 <li>
-                                    <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" /> 
-                                    <label for="limitRecommendations"> 
-                                        Limit to only 
-                                        <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} /> 
+                                    <input id="limitRecommendations" checked={this.state.limitRecommendations} onChange={this.clickLimitRecommendations} type="checkbox" />
+                                    <label for="limitRecommendations">
+                                        Limit to only
+                                        <input id="limitRecommendationsAmount" type="number" min="1" max={recommendationCounts.total} class={`${!this.state.limitRecommendationsAmount ? 'empty' : ''} ${this.state.limitRecommendations ? 'required' : ''}`} required={this.state.limitRecommendations} onChange={debounceEventHandler(this.enterLimitRecommendationsAmount, 200)} />
                                         {toBeLaunchedType(externalSystemName).toLowerCase()}
                                     </label>
                                 </li>
@@ -956,11 +956,11 @@ class LaunchComponent extends Component {
                                             label: "Launch Now",
                                             classNames: "blue-button"
                                         }}
-                                        callback={() => { 
+                                        callback={() => {
                                             this.launch(play, connection, {
-                                                engineId: engineId, 
+                                                engineId: engineId,
                                                 lastIncompleteLaunch: play.launchHistory.lastIncompleteLaunch
-                                            }); 
+                                            });
                                         }} />
                                 </li>
                             </ul>

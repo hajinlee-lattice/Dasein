@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -60,6 +61,9 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     private static final String PLAY_LAUNCH_CHANNEL_NAME_PREFIX = "channel";
     private static final String PLAY_LAUNCH_CHANNEL_NAME_FORMAT = "%s__%s";
+
+    public static final String PREVIOUS_ACCOUNT_UNIVERSE = "PREVIOUS_ACCOUNT_UNIVERSE";
+    public static final String PREVIOUS_CONTACT_UNIVERSE = "PREVIOUS_CONTACT_UNIVERSE";
 
     @Id
     @JsonProperty("pid")
@@ -152,6 +156,12 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
+
+    @JsonProperty("currentLaunchUniverseTable")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_CURRENT_LAUNCH_UNIVERSE_TABLE")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Table currentLaunchUniverseTable;
 
     public PlayLaunchChannel() {
     }
@@ -364,6 +374,14 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
                     new String[] { String.format("Invalid Cron Schedule %s in Channel for channel id: %s",
                             channel.getCronScheduleExpression(), channel.getId()) });
         }
+    }
+
+    public Table getCurrentLaunchUniverseTable() {
+        return currentLaunchUniverseTable;
+    }
+
+    public void setCurrentLaunchUniverseTable(Table currentLaunchUniverseTable) {
+        this.currentLaunchUniverseTable = currentLaunchUniverseTable;
     }
 
 }

@@ -80,7 +80,7 @@ public class ContactResource extends BaseFrontEndEntityResource {
     List<Lookup> getDataLookups() {
         return Arrays.asList(//
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
-                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.CompanyName.name()), //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()));
     }
 
@@ -88,7 +88,7 @@ public class ContactResource extends BaseFrontEndEntityResource {
     List<AttributeLookup> getFreeTextSearchAttrs() {
         return Arrays.asList( //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
-                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.CompanyName.name()), //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
         );
     }
