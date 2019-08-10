@@ -8,6 +8,7 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
     private CustomerSpace customerSpace;
     private String channelId;
     private String playId;
+    private String executionId;
     private DataCollection.Version version;
 
     public CustomerSpace getCustomerSpace() {
@@ -22,9 +23,7 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
         return channelId;
     }
 
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
-    }
+    public void setChannelId(String channelId) { this.channelId = channelId; }
 
     public String getPlayId() {
         return playId;
@@ -41,5 +40,9 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
     public void setVersion(DataCollection.Version version) {
         this.version = version;
     }
+
+    public String getExecutionId() { return executionId; }
+
+    public void setExecutionId(String executionId) { this.executionId = executionId; }
 
 }

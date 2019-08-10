@@ -161,6 +161,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
     protected static final String ATLAS_EXPORT_DATA_UNIT = "ATLAS_EXPORT_DATA_UNIT";
     protected static final String PRIMARY_IMPORT_SYSTEM = "PRIMARY_IMPORT_SYSTEM";
+    protected static final String ADDED_ACCOUNTS_DELTA_TABLE = "ADDED_ACCOUNTS_DELTA_TABLE";
+    protected static final String REMOVED_ACCOUNTS_DELTA_TABLE = "REMOVED_ACCOUNTS_DELTA_TABLE";
+    protected static final String ADDED_CONTACTS_DELTA_TABLE = "ADDED_CONTACTS_DELTA_TABLE";
+    protected static final String REMOVED_CONTACTS_DELTA_TABLE = "REMOVED_CONTACTS_DELTA_TABLE";
+    protected static final String FULL_ACCOUNTS_UNIVERSE = "FULL_ACCOUNTS_UNIVERSE";
+    protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";
@@ -304,6 +310,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 // Do nothing for InterruptedException
+                log.info(e.getMessage());
             }
             i++;
 
@@ -312,14 +319,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
         if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(WorkflowUtils.getWorkFlowErrorCode(status.getDiagnostics()), new String[]{appId,
-                    status.getErrorReport()});
+            throw new LedpException(WorkflowUtils.getWorkFlowErrorCode(status.getDiagnostics()),
+                    new String[] { appId, status.getErrorReport() });
         }
     }
 
     protected String getHdfsDir(String path) {
         String[] tokens = StringUtils.split(path, "/");
-        String[] newTokens = null;
+        String[] newTokens;
 
         if (path.endsWith("avro")) {
             newTokens = new String[tokens.length - 1];
@@ -376,12 +383,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         putObjectInContext(WorkflowContextConstants.REPORTS, map);
 
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(
-                3, 5000L, 2.0, null);
+        RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(3, 5000L, 2.0, null);
         template.execute(context -> {
             if (context.getRetryCount() >= 1) {
-                log.warn("Last registering report for tenant {} failed. Retrying for {} times.",
-                        customerSpace, context.getRetryCount());
+                log.warn("Last registering report for tenant {} failed. Retrying for {} times.", customerSpace,
+                        context.getRetryCount());
             }
             proxy.registerReport(report, customerSpace.toString());
             return null;
@@ -466,19 +472,17 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             }
         }
         Map<String, String> registry = WorkflowUtils.getFlattenedConfig(workflowConfig);
-        Map<String, BaseStepConfiguration> result = registry.entrySet().stream()
-                .collect(Collectors.toMap(e -> newParentNamespace + e.getKey(), e -> {
-                    String namespace = newParentNamespace + e.getKey();
-                    BaseStepConfiguration step = getObjectFromContext(namespace, BaseStepConfiguration.class);
-                    if (step == null) {
-                        step = getConfigurationFromJobParameters(namespace);
-                        if (step == null) {
-                            step = JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
-                        }
-                    }
-                    return step;
-                }));
-        return result;
+        return registry.entrySet().stream().collect(Collectors.toMap(e -> newParentNamespace + e.getKey(), e -> {
+            String namespace = newParentNamespace + e.getKey();
+            BaseStepConfiguration step = getObjectFromContext(namespace, BaseStepConfiguration.class);
+            if (step == null) {
+                step = getConfigurationFromJobParameters(namespace);
+                if (step == null) {
+                    step = JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
+                }
+            }
+            return step;
+        }));
     }
 
     /**
@@ -489,10 +493,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
      * @param tableNameStrCtxKeys
      *            list of context keys that contain a single table as string
      * @param tableNameListCtxKeys
-     *            list of context keys that contain a list of tables as serialized
-     *            list of string
-     * @return list of tables, null will be inserted if the corresponding table does
-     *         not exist
+     *            list of context keys that contain a list of tables as serialized list of string
+     * @return list of tables, null will be inserted if the corresponding table does not exist
      */
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
             List<String> tableNameListCtxKeys) {
