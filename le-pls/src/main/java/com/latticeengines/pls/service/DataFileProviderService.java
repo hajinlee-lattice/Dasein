@@ -38,4 +38,6 @@ public interface DataFileProviderService {
 
     String getFileContents(String modelId, String mimeType, String filter) throws Exception;
 
+    void downloadCurrentBundleFile(HttpServletRequest request, HttpServletResponse response, String mimeType);
+
 }

@@ -126,7 +126,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         }
     }
 
-    private void deleteFile(String filename) {
+    protected void deleteFile(String filename) {
         if (StringUtils.isNotBlank(filename)) {
             File file = new File(filename);
             try {
@@ -210,7 +210,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         return dateAttributes;
     }
 
-    private String tempFolderName() {
+    protected String tempFolderName() {
         String tmpdir = System.getProperty("java.io.tmpdir");
         if (tmpdir.endsWith("/")) {
             tmpdir = tmpdir.substring(0, tmpdir.length() - 1);

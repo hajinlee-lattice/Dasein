@@ -9,13 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
@@ -40,14 +36,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -59,8 +50,6 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
@@ -100,25 +89,11 @@ public class CDLServiceImpl implements CDLService {
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Resource(name = "distCpConfiguration")
-    protected Configuration distCpConfiguration;
-
-    @Value("${aws.customer.s3.bucket}")
-    protected String s3Bucket;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
-
-    @Value("${camille.zk.pod.id:Default}")
-    protected String podId;
-
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
 
     private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Lattice Field Name", "Data Type");
 
-    private final List<String> bundleHeaders = Arrays.asList("Product Id", "Product Name", "Product Bundle",
-            "Description");
     private static final String CUSTOM = "Custom";
     private static final String STANDARD = "Standard";
     private static final String UNMAPPED = "unmapped";
@@ -684,84 +659,4 @@ public class CDLServiceImpl implements CDLService {
         return action;
     }
 
-    @Override
-    public String getCurrentBundleFileContent(String customerSpace) throws Exception {
-        Table table = getCurrentConsolidateProductTable(customerSpace);
-        if (table == null) {
-            log.info("no metadata table in batch store! ");
-            return StringUtils.EMPTY;
-        }
-
-        List<Extract> extracts = table.getExtracts();
-        List<Product> bundleProducts = new ArrayList<>();
-        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        if (CollectionUtils.isNotEmpty(extracts)) {
-            for (Extract extract : extracts) {
-                if (StringUtils.isNotBlank(extract.getPath())) {
-                    String hdfsPath = pathBuilder.getFullPath(extract.getPath());
-                    String s3Path = pathBuilder.convertAtlasTableDir(hdfsPath, podId, customerSpace, s3Bucket);
-                    List<String> files;
-                    try {
-                        files = HdfsUtils.getFilesByGlobWithScheme(distCpConfiguration, s3Path + "/*.avro",
-                                true);
-                    } catch(Exception e) {
-                        files = new ArrayList<>();
-                    }
-
-                    if (CollectionUtils.isEmpty(files)) {
-                        continue;
-                    }
-                    List<GenericRecord> records = AvroUtils.getData(distCpConfiguration, files);
-                    List<Product> list = ProductUtils.loadProducts(records.iterator(),
-                            Collections.singleton(ProductType.Bundle.name()),
-                            null);
-                    bundleProducts.addAll(list);
-
-                }
-            }
-        }
-        if (CollectionUtils.isEmpty(bundleProducts)) {
-            log.info("current bundle content null");
-            return StringUtils.EMPTY;
-        }
-
-        StringBuffer fileContent = new StringBuffer();
-        // append header
-        for (String header : bundleHeaders) {
-            appendTemplateMapptingValue(fileContent, header);
-        }
-        fileContent.deleteCharAt(fileContent.length() - 1);
-        fileContent.append("\n");
-        // append content
-        for (Product product : bundleProducts) {
-            appendTemplateMapptingValue(fileContent, product.getProductId());
-            appendTemplateMapptingValue(fileContent, StringUtils.isBlank(product.getProductName()) ? "":
-                    product.getProductName());
-            appendTemplateMapptingValue(fileContent, product.getProductBundle());
-            fileContent.append(StringUtils.isBlank(product.getProductDescription()) ? "": product.getProductDescription());
-            fileContent.append("\n");
-        }
-        fileContent.deleteCharAt(fileContent.length() - 1);
-        return fileContent.toString();
-    }
-
-    private Table getCurrentConsolidateProductTable(String customerSpace) {
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
-        DataCollection.Version inactiveVersion = activeVersion.complement();
-        Table currentTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct, activeVersion);
-        if (currentTable != null) {
-            log.info("Found consolidated product table with version " + activeVersion);
-            return currentTable;
-        }
-
-        currentTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
-                inactiveVersion);
-        if (currentTable != null) {
-            log.info("Found consolidated product table with version " + inactiveVersion);
-            return currentTable;
-        }
-
-        log.info("There is no ConsolidatedProduct table with version " + activeVersion + " and " + inactiveVersion);
-        return null;
-    }
 }

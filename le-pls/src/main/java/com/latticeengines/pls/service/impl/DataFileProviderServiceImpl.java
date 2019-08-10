@@ -31,8 +31,10 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.pls.download.BundleFileHttpDownloader;
 import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -67,6 +69,15 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3Bucket;
+
+    @Value("${camille.zk.pod.id:Default}")
+    protected String podId;
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
@@ -245,6 +256,18 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
                 .setImportFromS3Service(importFromS3Service).setBatonService(batonService);
         CustomerSpaceS3FileDownloader customerSpaceS3FileDownloader = new CustomerSpaceS3FileDownloader(builder);
         customerSpaceS3FileDownloader.downloadFile(request, response);
+
+    }
+
+    @Override
+    public void downloadCurrentBundleFile(HttpServletRequest request, HttpServletResponse response, String mimeType) {
+        String fileName = "currentBundle.csv";
+        BundleFileHttpDownloader.BundleFileHttpDownloaderBuilder builder =
+                new BundleFileHttpDownloader.BundleFileHttpDownloaderBuilder();
+        builder.setMimeType(mimeType).setFileName(fileName).setBucketName(s3Bucket).setDataCollectionProxy(dataCollectionProxy)
+                .setImportFromS3Service(importFromS3Service).setPodId(podId).setConfiguration(yarnConfiguration);
+        BundleFileHttpDownloader downloader = new BundleFileHttpDownloader(builder);
+        downloader.downloadFile(request, response);
 
     }
 }
