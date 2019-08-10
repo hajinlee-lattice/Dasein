@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -68,7 +69,8 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         }
 
         log.info("Uploading all HDFS files to S3. {}", exportFiles);
-        if (getConfiguration().getPlayLaunchDestination() == CDLExternalSystemType.MAP) {
+        if (Arrays.asList(CDLExternalSystemType.MAP, CDLExternalSystemType.ADS)
+                .contains(getConfiguration().getPlayLaunchDestination())) {
             exportFiles.forEach(hdfsFilePath -> {
                 ImportExportRequest request = new ImportExportRequest();
                 request.srcPath = hdfsFilePath;

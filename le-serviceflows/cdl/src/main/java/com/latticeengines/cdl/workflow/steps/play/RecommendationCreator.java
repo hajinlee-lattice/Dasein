@@ -203,6 +203,9 @@ class RecommendationCreator {
         } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.FILE_SYSTEM) {
             synchronizationDestination = SynchronizationDestinationEnum.FILE_SYSTEM.name();
             destinationSysType = CDLExternalSystemType.FILE_SYSTEM.name();
+        } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.ADS) {
+            synchronizationDestination = SynchronizationDestinationEnum.ADS.name();
+            destinationSysType = CDLExternalSystemType.ADS.name();
         } else {
             throw new RuntimeException(String.format("Destination type %s is not supported yet",
                     playLaunch.getDestinationSysType().name()));

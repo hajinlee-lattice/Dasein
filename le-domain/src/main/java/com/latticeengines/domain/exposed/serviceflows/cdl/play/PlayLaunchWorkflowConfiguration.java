@@ -38,6 +38,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             initStepConf.setPlayName(playLaunch.getPlay().getName());
             initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
             configuration.setUserId(playLaunch.getPlay().getCreatedBy());
+            exportFileGeneratorConf.setChannelConfig(playLaunch.getChannelConfig());
             exportFilesToS3Conf.setPlayName(playLaunch.getPlay().getName());
             exportFilesToS3Conf.setPlayDisplayName(playLaunch.getPlay().getDisplayName());
             exportPublishToSNSConf.setExternalFolderName(playLaunch.getFolderName());
@@ -48,7 +49,7 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
         }
 
         public Builder exportPublishPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
-            if (!Arrays.asList(CDLExternalSystemType.MAP, CDLExternalSystemType.FILE_SYSTEM)
+            if (!Arrays.asList(CDLExternalSystemType.MAP, CDLExternalSystemType.ADS, CDLExternalSystemType.FILE_SYSTEM)
                     .contains(playLaunch.getDestinationSysType())) {
                 exportFileGeneratorConf.setSkipStep(true);
                 exportFilesToS3Conf.setSkipStep(true);

@@ -77,6 +77,12 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
     private TestPlaySetupConfig s3TestPlaySetupConfig;
     private TestPlayChannelConfig s3TestPlayChannelSetupConfig;
 
+    private TestPlaySetupConfig linkedInTestPlaySetupConfig;
+    private TestPlayChannelConfig linkedInTestPlayChannelSetupConfig;
+
+    private TestPlaySetupConfig facebookTestPlaySetupConfig;
+    private TestPlayChannelConfig facebookTestPlayChannelSetupConfig;
+
     private DropBoxSummary dropboxSummary = null;
 
     private Tenant currentTestTenant() {
@@ -110,6 +116,16 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
 
         s3TestPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant).mockRatingTable(false)
                 .testPlayCrud(false).addChannel(s3TestPlayChannelSetupConfig).featureFlags(featureFlags).build();
+
+        linkedInTestPlayChannelSetupConfig = new TestPlayChannelConfig.Builder()
+                .destinationSystemType(CDLExternalSystemType.ADS).destinationSystemName(CDLExternalSystemName.LinkedIn)
+                .destinationSystemId("LinkedIn_" + System.currentTimeMillis())
+                .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B))).topNCount(160L)
+                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString()).build();
+
+        linkedInTestPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant)
+                .mockRatingTable(false).testPlayCrud(false).addChannel(linkedInTestPlayChannelSetupConfig)
+                .featureFlags(featureFlags).build();
 
         testPlayCreationHelper.setupTenantAndCreatePlay(marketoTestPlaySetupConfig);
         super.testBed = testPlayCreationHelper.getDeploymentTestBed();
@@ -244,6 +260,65 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         try {
             s3Service.cleanupPrefix(customerS3Bucket, s3FolderPath);
             s3Service.cleanupPrefix(customerS3Bucket, dropboxFolderName);
+        } catch (Exception ex) {
+            log.error("Error while cleaning up dropbox files ", ex);
+        }
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupS3UploadedS3File", enabled = false)
+    public void testLinkedInPlayLaunchWorkflow() {
+        log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
+        defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(linkedInTestPlaySetupConfig);
+        assertNotNull(defaultPlayLaunch);
+        assertNotNull(defaultPlayLaunch.getApplicationId());
+        log.info(String.format("PlayLaunch Workflow application id is %s", defaultPlayLaunch.getApplicationId()));
+
+        JobStatus completedStatus = waitForWorkflowStatus(defaultPlayLaunch.getApplicationId(), false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testLinkedInPlayLaunchWorkflow", enabled = false)
+    public void testVerifyAndCleanupLinkedInUploadedS3File() {
+        String dropboxFolderName = dropboxSummary.getDropBox();
+
+        // Create PlayLaunchExportFilesGeneratorConfiguration Config
+        PlayLaunchExportFilesGeneratorConfiguration config = new PlayLaunchExportFilesGeneratorConfiguration();
+        config.setPlayName(defaultPlay.getName());
+        config.setPlayLaunchId(defaultPlayLaunch.getId());
+        config.setDestinationOrgId(linkedInTestPlayChannelSetupConfig.getDestinationSystemId());
+        config.setDestinationSysType(linkedInTestPlayChannelSetupConfig.getDestinationSystemType());
+        config.setDestinationSysName(linkedInTestPlayChannelSetupConfig.getDestinationSystemName());
+
+        PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
+        sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));
+        String s3FolderPath = sb.substring(sb.indexOf(exportS3Bucket) + exportS3Bucket.length());
+
+        log.info("Verifying S3 Folder Path " + s3FolderPath);
+        // Get S3 Files for this PlayLaunch Config
+        List<S3ObjectSummary> s3Objects = s3Service.listObjects(exportS3Bucket, s3FolderPath);
+        assertNotNull(s3Objects);
+        assertEquals(s3Objects.size(), 2);
+        assertTrue(s3Objects.get(0).getKey().contains("Recommendations"));
+        // 426 rows
+
+        boolean csvFileExists = false, jsonFileExists = false;
+        for (S3ObjectSummary s3Obj : s3Objects) {
+            if (s3Obj.getKey().contains(".csv")) {
+                csvFileExists = true;
+            }
+            if (s3Obj.getKey().contains(".json")) {
+                jsonFileExists = true;
+            }
+        }
+        assertTrue(csvFileExists, "CSV file doesnot exists");
+        assertTrue(jsonFileExists, "JSON file doesnot exists");
+
+        log.info("Cleaning up S3 path " + s3FolderPath);
+        try {
+            s3Service.cleanupPrefix(exportS3Bucket, s3FolderPath);
+            s3Service.cleanupPrefix(exportS3Bucket, dropboxFolderName);
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }
