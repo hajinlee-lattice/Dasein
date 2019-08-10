@@ -51,7 +51,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME), //
         @JsonSubTypes.Type(value = ParseMatchResultJobConfig.class, name = ParseMatchResultJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountAvroGlobsConfig.class, name = CountAvroGlobsConfig.NAME), //
-        @JsonSubTypes.Type(value = CalculateDeltaJobConfig.class, name = CountAvroGlobsConfig.NAME), //
+        @JsonSubTypes.Type(value = CalculateDeltaJobConfig.class, name = CalculateDeltaJobConfig.NAME), //
 })
 public abstract class SparkJobConfig implements Serializable {
 
