@@ -297,7 +297,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         needDeletedEntity.addAll(getCurrentDeletedEntities(importedEntities, totalNeedDeletedEntities,
                 importActionIds.size()));
         List<Long> completedActionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());
-        completedActionIds.addAll(nonWorkflowDeleteActions.stream().map(Action::getPid).collect(Collectors.toList()));
+        Set<Long> currentDeletedEntityActionIds = getCurrentDeletedEntityActionIds(needDeletedEntity,
+                nonWorkflowDeleteActions);
+        if (CollectionUtils.isNotEmpty(currentDeletedEntityActionIds)) {
+            completedActionIds.addAll(currentDeletedEntityActionIds);
+        }
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
         return completedActionIds;
@@ -660,20 +664,22 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private Set<BusinessEntity> getImportEntities(String customerSpace, List<Action> actions) {
         Set<BusinessEntity> importedEntity = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(actions)) {
-            for (Action action : actions) {
-                if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
-                    if (importedEntity.size() >= 4) {
-                        break;
-                    }
-                    //if entity list isn't completed, do this logic to check import entity
-                    if (action.getActionConfiguration() instanceof ImportActionConfiguration) {
-                        ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
-                        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace,
-                                importActionConfiguration.getDataFeedTaskId());
-                        importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
-                    }
-                }
+        if (CollectionUtils.isEmpty(actions)) {
+            return importedEntity;
+        }
+        for (Action action : actions) {
+            if (!ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+                continue;
+            }
+            if (importedEntity.size() >= 4) {
+                break;
+            }
+            //if entity list isn't completed, do this logic to check import entity
+            if (action.getActionConfiguration() instanceof ImportActionConfiguration) {
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+                DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace,
+                        importActionConfiguration.getDataFeedTaskId());
+                importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
             }
         }
         return importedEntity;
@@ -681,19 +687,42 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private Set<BusinessEntity> getDeletedEntities(List<Action> actions) {
         Set<BusinessEntity> needDeletedEntity = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(actions)) {
-            for (Action action : actions) {
-                if (needDeletedEntity.size() >= 4) {
-                    break;
-                }
-                if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
-                    if (action.getActionConfiguration() instanceof CleanupActionConfiguration && needDeletedEntity.size() < 4) {
-                        CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
-                        needDeletedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
-                    }
-                }
+        if (CollectionUtils.isEmpty(actions)) {
+            return needDeletedEntity;
+        }
+        for (Action action : actions) {
+            if (needDeletedEntity.size() >= 4) {
+                break;
+            }
+            if (!ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
+                continue;
+            }
+            if (action.getActionConfiguration() instanceof CleanupActionConfiguration && needDeletedEntity.size() < 4) {
+                CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+                needDeletedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
             }
         }
         return needDeletedEntity;
+    }
+
+    private Set<Long> getCurrentDeletedEntityActionIds(Set<BusinessEntity> currentDeteledEntity,
+                                                       List<Action> nonWorkFlowDeletedActions) {
+        Set<Long> currentDeletedEntityActionIds = new HashSet<>();
+        if (CollectionUtils.isEmpty(currentDeteledEntity)) {
+            return currentDeletedEntityActionIds;
+        }
+        for (Action action : nonWorkFlowDeletedActions) {
+            if (!ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
+                continue;
+            }
+            if (!(action.getActionConfiguration() instanceof CleanupActionConfiguration)) {
+                continue;
+            }
+            CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+            if(currentDeteledEntity.containsAll(cleanupActionConfiguration.getImpactEntities())) {
+                currentDeletedEntityActionIds.add(action.getPid());
+            }
+        }
+        return currentDeletedEntityActionIds;
     }
 }
