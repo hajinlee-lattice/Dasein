@@ -144,14 +144,19 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             log.debug("MatchHistory - MatchedDUNS: " + matchHistory.getMatchedDUNS());
             log.debug("MatchHistory - LatticeAccountId: " + matchHistory.getLatticeAccountId());
             log.debug("MatchHistory - IsPublicDomain: " + matchHistory.getIsPublicDomain());
-            String rawSystemIds = matchHistory.getRawSystemIds().entrySet().stream()
-                    .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
+            String rawSystemIds = "<empty>";
+            if (MapUtils.isNotEmpty(matchHistory.getRawSystemIds())) {
+                rawSystemIds = matchHistory.getRawSystemIds().entrySet().stream()
+                        .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
+            }
             log.debug("MatchHistory - rawSystemIds: " + rawSystemIds);
-            String standardisedSystemIds = matchHistory.getStandardisedSystemIds().entrySet().stream()
-                    .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
+            String standardisedSystemIds = "<empty>";
+            if (MapUtils.isNotEmpty(matchHistory.getStandardisedSystemIds())) {
+                standardisedSystemIds = matchHistory.getStandardisedSystemIds().entrySet().stream()
+                        .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
+            }
             log.debug("MatchHistory - StandardisedSystemIds: " + standardisedSystemIds);
             log.debug("MatchHistory - Matched: " + matchHistory.getMatched());
-
 
             // Add EntityMatchHistory to MatchHistory.
             matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());
