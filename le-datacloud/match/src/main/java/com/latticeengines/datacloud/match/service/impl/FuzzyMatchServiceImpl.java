@@ -458,13 +458,15 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             return null;
         }
 
-        // Now set the LdcMatchType and the MatchedLdcMatchKeyTuple if LDC Match succeeded.
-        Pair<LdcMatchType, MatchKeyTuple> typeTuplePair = extractLdcMatchTypeAndTuple(traveler);
-        if (typeTuplePair == null) {
-            return null;
+        if (BusinessEntity.Account.name().equals(history.getBusinessEntity())) {
+            // Now set the LdcMatchType and the MatchedLdcMatchKeyTuple if LDC Match succeeded.
+            Pair<LdcMatchType, MatchKeyTuple> typeTuplePair = extractLdcMatchTypeAndTuple(traveler);
+            if (typeTuplePair == null) {
+                return null;
+            }
+            history.setLdcMatchType(typeTuplePair.getLeft());
+            history.setMatchedLdcMatchKeyTuple(typeTuplePair.getRight());
         }
-        history.setLdcMatchType(typeTuplePair.getLeft());
-        history.setMatchedLdcMatchKeyTuple(typeTuplePair.getRight());
 
         // Generate list of all Existing Entity Lookup Keys.
         history.setExistingLookupKeyList(extractExistingLookupKeyList(traveler, history.getBusinessEntity()));
@@ -766,8 +768,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Log the EntityMatchType and matched Entity MatchKeyTuple.
         log.debug("EntityMatchType is: " + entityMatchType);
         log.debug("MatchedEntityMatchKeyTuple: " + tuple);
-        log.debug("    inputDuns: " + inputDuns + "  tupleDuns: " + (tuple == null ? "null" : tuple.getDuns()));
-        if (EntityMatchType.LDC_MATCH.equals(entityMatchType) && !BusinessEntity.Account.name().equals(entity)) {
+        if (BusinessEntity.Account.name().equals(entity)) {
+            log.debug("    inputDuns: " + inputDuns + "  tupleDuns: " + (tuple == null ? "null" : tuple.getDuns()));
+        } else if (EntityMatchType.LDC_MATCH.equals(entityMatchType)) {
             log.error("Found LDC Match type for entity " + entity + " which should not be possible");
             return null;
         }
