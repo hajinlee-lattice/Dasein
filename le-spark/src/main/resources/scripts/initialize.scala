@@ -41,7 +41,6 @@ def loadHdfsUnit(unit: JsonNode): DataFrame = {
       }
     }
   }
-  println(s"load Path: $path")
   spark.read.format(fmt).load("hdfs://" + path)
 }
 
@@ -71,6 +70,10 @@ println("----- END SCRIPT OUTPUT -----")
 
 val lattice: LatticeContext = new LatticeContext(scriptInput, scriptParams, scriptTargets)
 
-def setPartitionTargets(index: Int, partitionKeys: Seq[String],lattice: LatticeContext): Unit = {
-  lattice.targets(index).set("PartitionKeys", mapper.valueToTree(partitionKeys))
+def setPartitionTargets(index: Int, partitionKeys: Seq[String], lattice: LatticeContext): Unit = {
+  if(index <= lattice.targets.size) {
+    lattice.targets(index).set("PartitionKeys", mapper.valueToTree(partitionKeys))
+  }else{
+    throw new RuntimeException(s"There's no Target $index")
+  }
 }

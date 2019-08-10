@@ -7,6 +7,7 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,13 +18,14 @@ import com.latticeengines.domain.exposed.spark.SparkInterpreter;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.spark.testframework.TestPartitionTestNGBase;
 
-public class PartitionPyScriptTestNG extends TestPartitionTestNGBase {
+public class PartitionScriptTestNG extends TestPartitionTestNGBase {
 
     private ScriptJobConfig jobConfig;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupLivyEnvironment();
+        dataCnt = uploadInputAvro();
         jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(1);
         jobConfig.setWorkspace(getWorkspace());
@@ -41,39 +43,45 @@ public class PartitionPyScriptTestNG extends TestPartitionTestNGBase {
         JsonNode params = om.valueToTree(map);
         jobConfig.setParams(params);
     }
-//
-    @Test(groups = "functional",priority = 1)
-    public void testPythonScript() {
-        dataCnt = uploadInputAvro();
+
+    @Test(groups = "functional", dataProvider = "dataProvider")
+    public void testPythonScript(SparkInterpreter interpreter) {
+        String ext = SparkInterpreter.Scala.equals(interpreter) ? "scala" : "py";
         setParamsWithPartition(true);
         InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("scripts/partition.py");
+                .getResourceAsStream("scripts/partition."+ext);
         InputStreamSparkScript script = new InputStreamSparkScript();
         script.setStream(is);
-        script.setInterpreter(SparkInterpreter.Python);
+        script.setInterpreter(interpreter);
         SparkJobResult result  = runSparkScript(script, jobConfig);
         verifier = this::verifyOutput1;
         inputSources =result.getTargets();
         verifyResult(result);
     }
 
-    @Test(groups = "functional",priority = 2)
-    public void testPartitionPythonScript() {
+    @Test(groups = "functional", dataProvider = "dataProvider", dependsOnMethods = "testPythonScript")
+    public void testPartitionPythonScript(SparkInterpreter interpreter) {
+        String ext = SparkInterpreter.Scala.equals(interpreter) ? "scala" : "py";
         setParamsWithPartition(false);
         uploadOutputAsInput(inputSources);
         InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("scripts/partition.py");
+                .getResourceAsStream("scripts/partition."+ext);
         InputStreamSparkScript script = new InputStreamSparkScript();
         script.setStream(is);
-        script.setInterpreter(SparkInterpreter.Python);
+        script.setInterpreter(interpreter);
         SparkJobResult result  = runSparkScript(script, jobConfig);
         verifier = this::verifyOutput2;
         verifyResult(result);
     }
 
+    @DataProvider(name = "dataProvider")
+    private Object[] provideData() {
+        return new Object[] { SparkInterpreter.Scala, SparkInterpreter.Python };
+    }
+
     @Override
     protected void verifyOutput(String output) {
-        Assert.assertEquals(output, "This is Python script output!");
+        Assert.assertEquals(output, "This is script output!");
     }
 
 }

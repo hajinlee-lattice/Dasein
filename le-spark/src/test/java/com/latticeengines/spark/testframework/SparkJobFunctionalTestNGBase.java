@@ -54,7 +54,7 @@ import com.latticeengines.spark.exposed.service.SparkJobService;
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })
 public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    protected static final Logger log = LoggerFactory.getLogger(SparkJobFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(SparkJobFunctionalTestNGBase.class);
 
     @Inject
     private LivySessionService sessionService;

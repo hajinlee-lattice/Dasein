@@ -22,4 +22,4 @@ val result = lattice.input.head
 
 // finish
 lattice.output = result :: Nil
-lattice.outputStr = "This is Scala script output!"
+lattice.outputStr = "This is script output!"

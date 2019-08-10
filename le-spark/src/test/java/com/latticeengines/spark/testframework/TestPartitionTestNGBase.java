@@ -7,12 +7,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 
 public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(TestPartitionTestNGBase.class);
 
     protected List<String> inputs;
 
@@ -95,6 +99,8 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
     }
 
     protected Boolean verifyOutput2(HdfsDataUnit target) {
+        List<String> keys = target.getPartitionKeys();
+        Assert.assertTrue(CollectionUtils.isEmpty(keys));
         AtomicInteger count = new AtomicInteger();
         verifyAndReadTarget(target).forEachRemaining(record -> {
             count.incrementAndGet();

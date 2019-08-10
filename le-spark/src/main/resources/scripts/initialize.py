@@ -56,6 +56,8 @@ print("Params: %s" % json.dumps(script_params))
 lattice = LatticeContext(input=script_input, params=script_params, targets=script_targets)
 
 def set_partition_targets(index, lst, lattice):
-    lattice.targets[index]['PartitionKeys'] = lst
-
+    if index <= len(lattice.targets):
+        lattice.targets[index]['PartitionKeys'] = lst
+    else:
+        raise Exception("Index not exist %d" % index)
 

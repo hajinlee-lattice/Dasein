@@ -26,7 +26,8 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   val df = t._2
   val path = tgt.get("Path").asText()
   val fmt = if (tgt.get("DataFormat") != null) tgt.get("DataFormat").asText().toLowerCase() else "avro"
-  val partitionKeys = if (tgt.get("PartitionKeys") == null) List() else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
+  val partitionKeys = if (tgt.get("PartitionKeys") == null) List()  //
+                else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
   if (partitionKeys.isEmpty) {
     df.write.format(fmt).save(path)
   }
@@ -38,7 +39,7 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   json.put("StorageType", "Hdfs")
   json.put("Path", path)
   json.put("Count", df2.count())
-  json.set("PartitionKeys",mapper.valueToTree(partitionKeys))
+  json.set("PartitionKeys", mapper.valueToTree(partitionKeys))
   if (!"avro".equals(fmt)) {
     json.put("DataFormat", tgt.get("DataFormat"))
   }
@@ -47,5 +48,4 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
 
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(mapper.writeValueAsString(finalTargets))
-//println("----- END SCRIPT OUTPUT -----")
 

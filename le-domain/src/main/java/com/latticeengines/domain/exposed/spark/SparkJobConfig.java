@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -120,14 +118,8 @@ public abstract class SparkJobConfig implements Serializable {
             } else {
                 root = workspace;
             }
-
             return Flux.range(0, getNumTargets()).map(idx -> {
-                HdfsDataUnit dataUnit;
-                if(CollectionUtils.isNotEmpty(input.get(idx).getPartitionKeys())) {
-                    dataUnit = HdfsDataUnit.fromPath(root + "/PartitionOutput" + idx);
-                }else{
-                    dataUnit = HdfsDataUnit.fromPath(root + "/Output" + idx);
-                }
+                HdfsDataUnit dataUnit = HdfsDataUnit.fromPath(root + "/Output" + (idx + 1));
                 if (specialFmts != null && specialFmts.containsKey(idx)) {
                     dataUnit.setDataFormat(specialFmts.get(idx));
                 }
