@@ -47,7 +47,9 @@ public class PlayLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 playLaunch.getDestinationSysType());
 
         boolean enableExport = batonService.isEnabled(getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION);
+                LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION)
+                || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION)
+                || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION);
         boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch, lookupIdMap);
 
         PlayLaunchWorkflowConfiguration configuration = new PlayLaunchWorkflowConfiguration.Builder()

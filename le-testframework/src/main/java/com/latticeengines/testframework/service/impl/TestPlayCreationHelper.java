@@ -67,6 +67,8 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
@@ -453,6 +455,12 @@ public class TestPlayCreationHelper {
                 break;
             case Eloqua:
                 channel.setChannelConfig(new EloquaChannelConfig());
+                break;
+            case Facebook:
+                channel.setChannelConfig(new FacebookChannelConfig());
+                break;
+            case LinkedIn:
+                channel.setChannelConfig(new LinkedInChannelConfig());
                 break;
             default:
                 channel.setChannelConfig(new SalesforceChannelConfig());

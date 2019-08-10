@@ -161,6 +161,9 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.MAP) {
                 result.put(CDLExternalSystemType.MAP.name(), new ArrayList<>());
             }
+            if (externalSystemType == null || externalSystemType == CDLExternalSystemType.ADS) {
+                result.put(CDLExternalSystemType.ADS.name(), new ArrayList<>());
+            }
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.ERP) {
                 result.put(CDLExternalSystemType.ERP.name(), new ArrayList<>());
             }
@@ -192,11 +195,17 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                         lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
                                 pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
                         break;
+                    case ADS:
+                        lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
+                                pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
+                        break;
                     case FILE_SYSTEM:
                         lookupIdMap.setExportFolder(
                                 new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket, dropbox.getDropBox())
                                         .replace(getProtocolPrefix(), ""));
                         break;
+                default:
+                    break;
                 }
         }
         return lookupIdMap;
