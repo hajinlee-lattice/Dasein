@@ -116,6 +116,9 @@
                 position: absolute;
                 bottom: -1.5em;
             }
+            #staticList.hasSelected + #newAudienceName {
+                display: none; // fallback for when there are timing issues with removing new audience field
+            }
         }
         &.schedule {
             label {
