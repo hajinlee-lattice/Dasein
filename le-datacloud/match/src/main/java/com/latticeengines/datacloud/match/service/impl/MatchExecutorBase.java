@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -120,9 +121,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 continue;
             }
             matchHistory.setRawDomain(record.getOrigDomain()).setRawDUNS(record.getOrigDuns())
-                    .setRawEmail(record.getOrigEmail()).withRawNameLocation(record.getOrigNameLocation());
+                    .setRawEmail(record.getOrigEmail()).setRawSystemIds(record.getOrigSystemIds())
+                    .withRawNameLocation(record.getOrigNameLocation());
             matchHistory.setStandardisedDomain(record.getParsedDomain()).setStandardisedDUNS(record.getParsedDuns())
-                    .setStandardisedEmail(record.getParsedEmail())
+                    .setStandardisedEmail(record.getParsedEmail()).setStandardisedSystemIds(record.getParsedSystemIds())
                     .withStandardisedNameLocation(record.getParsedNameLocation());
             matchHistory.setIsPublicDomain(record.isPublicDomain()).setLatticeAccountId(record.getLatticeAccountId());
 
@@ -133,7 +135,23 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setMatchedPrimaryIndustry(record.getMatchedPrimaryIndustry())
                     .setMatchedSecondaryIndustry(record.getMatchedSecondIndustry())
                     .setDomainSource(record.getDomainSource())
-                    .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()));
+                    .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()))
+                    .setDataCloudVersion(record.getDataCloudVersion());
+
+            // $JAW$ DEBUG
+            log.debug("MatchHistory - Timestamp: " + matchHistory.getRequestTimestamp());
+            log.debug("MatchHistory - DataCloudVersion: " + matchHistory.getDataCloudVersion());
+            log.debug("MatchHistory - MatchedDUNS: " + matchHistory.getMatchedDUNS());
+            log.debug("MatchHistory - LatticeAccountId: " + matchHistory.getLatticeAccountId());
+            log.debug("MatchHistory - IsPublicDomain: " + matchHistory.getIsPublicDomain());
+            String rawSystemIds = matchHistory.getRawSystemIds().entrySet().stream()
+                    .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
+            log.debug("MatchHistory - rawSystemIds: " + rawSystemIds);
+            String standardisedSystemIds = matchHistory.getStandardisedSystemIds().entrySet().stream()
+                    .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
+            log.debug("MatchHistory - StandardisedSystemIds: " + standardisedSystemIds);
+            log.debug("MatchHistory - Matched: " + matchHistory.getMatched());
+
 
             // Add EntityMatchHistory to MatchHistory.
             matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());

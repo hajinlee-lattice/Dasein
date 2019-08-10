@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.actors.visitor.AMLookupMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
+import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("dunsBasedMicroEngineActor")
@@ -32,7 +32,7 @@ public class DunsBasedMicroEngineActor extends AMLookupMicroEngineTemplate {
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
         traveler.addEntityLdcMatchTypeToTupleList(
-                Pair.of(EntityMatchType.LDC_DUNS, prepareInputData(traveler.getMatchKeyTuple())));
+                Pair.of(LdcMatchType.DUNS, prepareInputData(traveler.getMatchKeyTuple())));
     }
 
     @Override
