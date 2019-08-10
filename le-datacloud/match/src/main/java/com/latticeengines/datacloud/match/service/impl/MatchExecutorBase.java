@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -137,26 +136,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setDomainSource(record.getDomainSource())
                     .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()))
                     .setDataCloudVersion(record.getDataCloudVersion());
-
-            // $JAW$ DEBUG
-            log.debug("MatchHistory - Timestamp: " + matchHistory.getRequestTimestamp());
-            log.debug("MatchHistory - DataCloudVersion: " + matchHistory.getDataCloudVersion());
-            log.debug("MatchHistory - MatchedDUNS: " + matchHistory.getMatchedDUNS());
-            log.debug("MatchHistory - LatticeAccountId: " + matchHistory.getLatticeAccountId());
-            log.debug("MatchHistory - IsPublicDomain: " + matchHistory.getIsPublicDomain());
-            String rawSystemIds = "<empty>";
-            if (MapUtils.isNotEmpty(matchHistory.getRawSystemIds())) {
-                rawSystemIds = matchHistory.getRawSystemIds().entrySet().stream()
-                        .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
-            }
-            log.debug("MatchHistory - rawSystemIds: " + rawSystemIds);
-            String standardisedSystemIds = "<empty>";
-            if (MapUtils.isNotEmpty(matchHistory.getStandardisedSystemIds())) {
-                standardisedSystemIds = matchHistory.getStandardisedSystemIds().entrySet().stream()
-                        .map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining(", "));
-            }
-            log.debug("MatchHistory - StandardisedSystemIds: " + standardisedSystemIds);
-            log.debug("MatchHistory - Matched: " + matchHistory.getMatched());
 
             // Add EntityMatchHistory to MatchHistory.
             matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());
