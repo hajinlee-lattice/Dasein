@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
+import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -78,11 +79,11 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // contain multiple IDs for lookup, giving multiple results.
     private Map<String, List<Pair<MatchKeyTuple, List<String>>>> entityMatchLookupResults = new HashMap<>();
 
-    // A list of pairs of EntityMatchType enums and corresponding MatchKeyTuples, used to track the progress through
+    // A list of pairs of LdcMatchType enums and corresponding MatchKeyTuples, used to track the progress through
     // the Lattice Data Cloud decision graph.
-    private List<Pair<EntityMatchType, MatchKeyTuple>> entityLdcMatchTypeToTupleList = new ArrayList<>();
+    private List<Pair<LdcMatchType, MatchKeyTuple>> entityLdcMatchTypeToTupleList = new ArrayList<>();
 
-    // Entity -> (Lookup Type -> List of MatchKeyTuples)
+    // Entity -> (Entity Match Lookup Type -> List of MatchKeyTuples)
     private Map<String, Map<EntityMatchType, List<MatchKeyTuple>>> entityExistingLookupEntryMap = new HashMap<>();
 
     private Set<String> fieldsToClear = new HashSet<>();
@@ -379,11 +380,11 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         entityMatchLookupResults.put(entity, new ArrayList<>(lookupResultList));
     }
 
-    public List<Pair<EntityMatchType, MatchKeyTuple>> getEntityLdcMatchTypeToTupleList() {
+    public List<Pair<LdcMatchType, MatchKeyTuple>> getEntityLdcMatchTypeToTupleList() {
         return entityLdcMatchTypeToTupleList;
     }
 
-    public void addEntityLdcMatchTypeToTupleList(Pair<EntityMatchType, MatchKeyTuple> pair) {
+    public void addEntityLdcMatchTypeToTupleList(Pair<LdcMatchType, MatchKeyTuple> pair) {
         entityLdcMatchTypeToTupleList.add(pair);
     }
 

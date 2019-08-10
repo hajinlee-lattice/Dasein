@@ -120,9 +120,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 continue;
             }
             matchHistory.setRawDomain(record.getOrigDomain()).setRawDUNS(record.getOrigDuns())
-                    .setRawEmail(record.getOrigEmail()).withRawNameLocation(record.getOrigNameLocation());
+                    .setRawEmail(record.getOrigEmail()).setRawSystemIds(record.getOrigSystemIds())
+                    .withRawNameLocation(record.getOrigNameLocation());
             matchHistory.setStandardisedDomain(record.getParsedDomain()).setStandardisedDUNS(record.getParsedDuns())
-                    .setStandardisedEmail(record.getParsedEmail())
+                    .setStandardisedEmail(record.getParsedEmail()).setStandardisedSystemIds(record.getParsedSystemIds())
                     .withStandardisedNameLocation(record.getParsedNameLocation());
             matchHistory.setIsPublicDomain(record.isPublicDomain()).setLatticeAccountId(record.getLatticeAccountId());
 
@@ -133,7 +134,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setMatchedPrimaryIndustry(record.getMatchedPrimaryIndustry())
                     .setMatchedSecondaryIndustry(record.getMatchedSecondIndustry())
                     .setDomainSource(record.getDomainSource())
-                    .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()));
+                    .setRequestTimestamp(DateTimeUtils.format(record.getRequestTimeStamp()))
+                    .setDataCloudVersion(record.getDataCloudVersion());
 
             // Add EntityMatchHistory to MatchHistory.
             matchHistory.setEntityMatchHistory(record.getEntityMatchHistory());
