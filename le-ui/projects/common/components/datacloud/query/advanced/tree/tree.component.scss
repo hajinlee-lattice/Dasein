@@ -502,7 +502,7 @@ div.advanced-query-builder {
                     font-size: 13px;
                     cursor: pointer;
                 }
-            } 
+            }
  
             &.category-contact_attributes {
                 &,
@@ -510,7 +510,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #457eba;
+                    border-left-color: $datacloud-color-contact;
                 }
             }
 
@@ -520,7 +520,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #cd80bc;
+                    border-left-color: $datacloud-color-product;
                 }
             }
 
@@ -530,7 +530,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #33bdb7;
+                    border-left-color: $datacloud-color-firmographics;
                 }
             }
 
@@ -540,7 +540,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #f15a5a;
+                    border-left-color: $datacloud-color-intent;
                 }
             }
 
@@ -550,7 +550,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #70bf4a;
+                    border-left-color: $datacloud-color-technology-profile;
                 }
             }
 
@@ -560,7 +560,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #26649b;
+                    border-left-color: $datacloud-color-website-profile;
                 }
             }
 
@@ -570,7 +570,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #65b7e6;
+                    border-left-color: $datacloud-color-growth-trends;
                 }
             }
 
@@ -580,7 +580,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #aac43b;
+                    border-left-color: $datacloud-color-engagement;
                 }
             }
 
@@ -590,7 +590,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #8e71b2;
+                    border-left-color: $datacloud-color-online-presence;
                 }
             }
 
@@ -600,7 +600,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #fdbc49;
+                    border-left-color: $datacloud-color-website-keywords;
                 }
             }
 
@@ -610,7 +610,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #cd80bc;
+                    border-left-color: $datacloud-color-product;
                 }
             }
 
@@ -620,7 +620,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #457eba;
+                    border-left-color: $datacloud-color-my-attributes;
                 }
             }
 
@@ -630,7 +630,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #457eba;
+                    border-left-color: $datacloud-color-curated-accounts;
                 }
             }
 
@@ -640,7 +640,7 @@ div.advanced-query-builder {
                 &.editing .query-section-item-label,
                 &.editing .query-section-item-content,
                 &.editing .query-section-item-records {
-                    border-left-color: #26649b;
+                    border-left-color: $datacloud-color-lattice-ratings;
                 }
             }
 
