@@ -224,12 +224,14 @@ public class DataLakeServiceImpl implements DataLakeService {
                         .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
                 try {
                     FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, true);
+                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, true,
+                            batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
                     dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
                 } catch (Exception ex) {
                     log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
                     FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, false);
+                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, false,
+                            batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
                     dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
                 }
             }
@@ -337,12 +339,12 @@ public class DataLakeServiceImpl implements DataLakeService {
         DataPage entityData;
         try {
             FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
-                    lookupIdColumn, null, true);
+                    lookupIdColumn, null, true, batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
         } catch (Exception e) {
             FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
-                    lookupIdColumn, null, false);
+                    lookupIdColumn, null, false, batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
         }

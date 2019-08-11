@@ -44,15 +44,16 @@ public class AccountExtensionUtil {
     private static List<String> LOOKUP_FIELDS = Collections.singletonList(InterfaceName.AccountId.name());
 
     public static FrontEndQuery constructFrontEndQuery(String customerSpace, List<String> accountIds,
-            String lookupIdColumn, Long start, boolean shouldAddLookupIdClause) {
+            String lookupIdColumn, Long start, boolean shouldAddLookupIdClause, boolean newEntityMatchEnabled) {
 
         ArrayList<String> attributes = new ArrayList<String>(Arrays.asList(InterfaceName.AccountId.name()));
         return constructFrontEndQuery(customerSpace, accountIds, lookupIdColumn, attributes, start,
-                shouldAddLookupIdClause);
+                shouldAddLookupIdClause, newEntityMatchEnabled);
     }
 
     public static FrontEndQuery constructFrontEndQuery(String customerSpace, List<String> accountIds,
-            String lookupIdColumn, List<String> attributes, Long start, boolean shouldAddLookupIdClause) {
+            String lookupIdColumn, List<String> attributes, Long start, boolean shouldAddLookupIdClause,
+            boolean newEntityMatchEnabled) {
 
         List<Restriction> restrictions = new ArrayList<>();
         List<Restriction> idRestrictions = new ArrayList<>();
@@ -69,7 +70,15 @@ public class AccountExtensionUtil {
             RestrictionBuilder[] accountIdRestrictions = accountIds.stream()
                     .map(id -> Restriction.builder().let(BusinessEntity.Account, InterfaceName.AccountId.name()).eq(id))
                     .toArray(RestrictionBuilder[]::new);
+
             accoundIdRestrictionBuilder.or(accountIdRestrictions);
+            if (newEntityMatchEnabled) {
+                RestrictionBuilder[] custAccountIdRestrictions = accountIds.stream()
+                        .map(id -> Restriction.builder()
+                                .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()).eq(id))
+                        .toArray(RestrictionBuilder[]::new);
+                accoundIdRestrictionBuilder.or(custAccountIdRestrictions);
+            }
             idRestrictions.add(accoundIdRestrictionBuilder.build());
 
             if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
