@@ -808,9 +808,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             }
 
             if (ldcMatchLookupResultList.size() != traveler.getEntityLdcMatchTypeToTupleList().size()) {
-                log.error("EntityMatchLookupResult for " + BusinessEntity.LatticeAccount.name()
-                        + " and EntityLdcMatchTypeToTupleList are not equal length: " + ldcMatchLookupResultList.size()
-                        + " vs " + traveler.getEntityLdcMatchTypeToTupleList().size());
+                log.error("EntityMatchLookupResult for {} and EntityLdcMatchTypeToTupleList are not equal length: " +
+                                "{} vs {}", BusinessEntity.LatticeAccount.name(), ldcMatchLookupResultList.size(),
+                        traveler.getEntityLdcMatchTypeToTupleList().size());
                 return null;
             }
 
@@ -862,18 +862,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     MatchKeyTuple copyLdcTupleNoDuns(MatchKeyTuple tuple) {
-        MatchKeyTuple copy = new MatchKeyTuple();
-        copy.setDomain(tuple.getDomain());
-        copy.setName(tuple.getName());
-        copy.setCity(tuple.getCity());
-        copy.setState(tuple.getState());
-        copy.setCountry(tuple.getCountry());
-        copy.setCountryCode(tuple.getCountryCode());
-        copy.setZipcode(tuple.getZipcode());
-        copy.setPhoneNumber(tuple.getPhoneNumber());
-        copy.setEmail(tuple.getEmail());
         // Don't set System ID since it is not used in LDC match even if it is set.
-        return copy;
+        return new MatchKeyTuple.Builder().withDomain(tuple.getDomain()).withName(tuple.getName())
+                .withCity(tuple.getCity()).withState(tuple.getState()).withCountry(tuple.getCountry())
+                .withCountryCode(tuple.getCountryCode()).withZipcode(tuple.getZipcode())
+                .withPhoneNumber(tuple.getPhoneNumber()).withEmail(tuple.getEmail()).build();
     }
 
     private List<Pair<String, MatchKeyTuple>> extractExistingLookupKeyList(MatchTraveler traveler, String entity) {
@@ -930,9 +923,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             log.debug("    MatchKeyTuple Lookup Results for " + entry.getKey());
             for (Pair<MatchKeyTuple, List<String>> pair : entry.getValue()) {
                 if (pair.getKey() == null) {
-                    log.debug("        EntityMatchKeyTuple: null");
+                    log.debug("        MatchKeyTuple: null");
                 } else {
-                    log.debug("        EntityMatchKeyTuple: " + pair.getKey().toString());
+                    log.debug("        MatchKeyTuple: " + pair.getKey().toString());
                 }
 
                 String resultList = "";
