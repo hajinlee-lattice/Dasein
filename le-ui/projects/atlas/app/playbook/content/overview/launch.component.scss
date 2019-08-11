@@ -41,6 +41,21 @@
         &:last-child {
             margin-bottom: 0;
         }
+        &.audience-type {
+            .audienceType-container {
+                & > div {
+                    margin-right: 20px;
+                }
+            }
+            input[type="radio"] {
+                position: relative;
+                top: 2px;
+                margin-left: 0;
+            }
+            & > p {
+                color: #b9b6b6;
+            }
+        }
         &.drop-folder {
             h2 {
                 font-size: 12px;
@@ -101,10 +116,29 @@
                 position: absolute;
                 bottom: -1.5em;
             }
+            #staticList.hasSelected + #newAudienceName {
+                display: none; // fallback for when there are timing issues with removing new audience field
+            }
         }
         &.schedule {
             label {
                 margin-right: 5px;
+            }
+            i.more-info {
+                margin-left: 5px;
+            }
+            .schedule-dropdown-container {
+                &.le-nowrap {
+                    overflow: initial;
+                }
+                .schedule-dropdown {
+                    position: relative;
+                    .keep-in-sync {
+                        position: absolute;
+                        top: 1.5em;
+                        width: 300px;
+                    }
+                }
             }
         }
     }

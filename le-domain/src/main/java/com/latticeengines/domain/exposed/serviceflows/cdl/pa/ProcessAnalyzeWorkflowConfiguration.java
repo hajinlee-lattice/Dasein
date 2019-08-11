@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfigu
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.CleanupAllStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
@@ -58,6 +59,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
         private ApsGenerationStepConfiguration apsGenerationStepConfiguration = new ApsGenerationStepConfiguration();
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
+        private CleanupAllStepConfiguration cleanupAllStepConfiguration = new CleanupAllStepConfiguration();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
@@ -81,6 +83,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             apsGenerationStepConfiguration.setCustomer(customerSpace.getTenantId());
             importExportS3.setCustomerSpace(customerSpace);
+            cleanupAllStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -93,6 +96,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             curatedAttributesWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             importExportS3.setMicroServiceHostPort(microServiceHostPort);
+            cleanupAllStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -111,6 +115,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importExportS3.setInternalResourceHostPort(internalResourceHostPort);
+            cleanupAllStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -272,6 +277,14 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder deletedEntities(Set<BusinessEntity> needDeletedEntitties) {
+            cleanupAllStepConfiguration.setEntitySet(needDeletedEntitties);
+            if (CollectionUtils.isEmpty(needDeletedEntitties)) {
+                cleanupAllStepConfiguration.setSkipStep(true);
+            }
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
@@ -290,6 +303,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(awsPythonDataConfiguration);
             configuration.add(apsGenerationStepConfiguration);
             configuration.add(importExportS3);
+            configuration.add(cleanupAllStepConfiguration);
             return configuration;
         }
     }

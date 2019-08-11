@@ -7,7 +7,6 @@ import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -78,8 +77,7 @@ public class DiagnoseTable {
         }
         // 2. with standard schema:
         if (businessEntity != null) {
-            boolean entityMatch = batonService.isEnabled(CustomerSpace.parse(customerSpaceStr),
-                    LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean entityMatch = batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpaceStr));
             Table standardTable = SchemaRepository.instance().getSchema(businessEntity, true, false, entityMatch);
             Map<String, Attribute> standardAttrMap =
                     standardTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, attr -> attr));

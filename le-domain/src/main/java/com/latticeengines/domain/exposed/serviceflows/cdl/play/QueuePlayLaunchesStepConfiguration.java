@@ -7,6 +7,11 @@ public class QueuePlayLaunchesStepConfiguration extends BaseStepConfiguration {
     private CustomerSpace customerSpace;
     private String channelId;
     private String playId;
+    private String executionId;
+
+    public CustomerSpace getCustomerSpace() { return customerSpace; }
+
+    public void setCustomerSpace(CustomerSpace customerSpace) { this.customerSpace = customerSpace; }
 
     public String getChannelId() { return channelId; }
 
@@ -16,7 +21,8 @@ public class QueuePlayLaunchesStepConfiguration extends BaseStepConfiguration {
 
     public void setPlayId(String playId) { this.playId = playId; }
 
-    public CustomerSpace getCustomerSpace() { return customerSpace; }
+    public String getExecutionId() { return executionId; }
 
-    public void setCustomerSpace(CustomerSpace customerSpace) { this.customerSpace = customerSpace; }
+    public void setExecutionId(String executionId) { this.executionId = executionId; }
+
 }

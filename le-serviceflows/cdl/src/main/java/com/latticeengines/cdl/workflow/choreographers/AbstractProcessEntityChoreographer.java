@@ -43,7 +43,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean hasActiveServingStore = false;
     boolean hasImports = false;
     boolean hasManyUpdate = false;
-    boolean jobImpacted = false;
+    boolean rebuildDueToActions = false;
     private boolean initialized = false;
     private boolean hasBatchStore = false;
     private float diffRate = 0;
@@ -123,7 +123,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         decisions.add(hasImports ? "hasImports=true" : "");
         decisions.add(hasManyUpdate ? "hasManyUpdate=true" : "");
         decisions.add(hasManyUpdate ? String.format("diffRate=%f", diffRate) : "");
-        decisions.add(jobImpacted ? "jobImpacted=true" : "");
+        decisions.add(rebuildDueToActions ? "rebuildDueToActions=true" : "");
         decisions.addAll(getExtraDecisions());
         decisions.remove("");
         StringBuilder builder = new StringBuilder();
@@ -179,17 +179,17 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         checkImports(step);
         checkActiveServingStore(step);
         checkHasBatchStore(step);
-        checkJobImpactedEntity(step);
+        checkRebuildDueToActions(step);
     }
 
-    void checkJobImpactedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
+    void checkRebuildDueToActions(AbstractStep<? extends BaseStepConfiguration> step) {
         ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
-        if (CollectionUtils.isNotEmpty(grapherContext.getJobImpactedEntities())
-                && grapherContext.getJobImpactedEntities().contains(mainEntity())) {
-            jobImpacted = true;
+        if (CollectionUtils.isNotEmpty(grapherContext.getEntitiesRebuildDueToActions())
+                && grapherContext.getEntitiesRebuildDueToActions().contains(mainEntity())) {
+            rebuildDueToActions = true;
         }
-        log.info("Job impacted=" + jobImpacted + " for " + mainEntity());
+        log.info("Job impacted=" + rebuildDueToActions + " for " + mainEntity());
     }
 
     private void checkEnforcedRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -307,7 +307,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         } else if (hasManyUpdate) {
             log.info("Has more than 30% update, going to rebuild " + mainEntity());
             return true;
-        } else if (jobImpacted) {
+        } else if (rebuildDueToActions) {
             return true;
         }
         log.info("Common check: no reason to rebuild " + mainEntity());

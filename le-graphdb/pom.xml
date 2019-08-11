@@ -15,7 +15,6 @@
 
     <properties>
         <component-name>graphdb</component-name>
-        <le-project-version>4.18.0-SNAPSHOT</le-project-version>
     </properties>
 
     <dependencies>
@@ -29,11 +28,10 @@
             <artifactId>le-domain</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.tinkerpop</groupId>
-            <artifactId>gremlin-driver</artifactId>
-            <version>${tinkerpop.version}</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-graph</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,9 @@ public class PeriodDataDistributor
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Value("${datacloud.etl.period.distributer.legacy}")
+    private boolean useLegacy;
 
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
@@ -88,7 +92,7 @@ public class PeriodDataDistributor
         // Only retry for non-LedpException; If don't cleanup first, cannot
         // retry
         int maxAttempt = config.isCleanupFirst() ? 3 : 1;
-        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, null,
+        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, Collections.singletonList(Exception.class),
                 Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -99,24 +103,30 @@ public class PeriodDataDistributor
                 TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periods);
             }
 
-            @SuppressWarnings("serial")
-            TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
-                    .yarnConfig(yarnConfiguration) //
-                    .inputDir(inputDir) //
-                    .targetDirs(new HashMap<String, String>() {
-                        {
-                            put(TimeSeriesDistributer.DUMMY_PERIOD, targetDir);
-                        }
-                    }) //
-                    .periods(new HashMap<String, Set<Integer>>() {
-                        {
-                            put(TimeSeriesDistributer.DUMMY_PERIOD, periods);
-                        }
-                    }) //
-                    .periodField(config.getPeriodField()) //
-                    .periodNameField(null) //
-                    .build();
-            distributer.distributePeriodData();
+            if (useLegacy) {
+                TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDir, periods,
+                        config.getPeriodField());
+            } else {
+                @SuppressWarnings("serial")
+                TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
+                        .yarnConfig(yarnConfiguration) //
+                        .inputDir(inputDir) //
+                        .targetDirs(new HashMap<String, String>() {
+                            {
+                                put(TimeSeriesDistributer.DUMMY_PERIOD, targetDir);
+                            }
+                        }) //
+                        .periods(new HashMap<String, Set<Integer>>() {
+                            {
+                                put(TimeSeriesDistributer.DUMMY_PERIOD, periods);
+                            }
+                        }) //
+                        .periodField(config.getPeriodField()) //
+                        .periodNameField(null) //
+                        .build();
+                distributer.distributePeriodData();
+            }
+
             return true;
         });
     }
@@ -153,7 +163,7 @@ public class PeriodDataDistributor
         // Only retry for non-LedpException; If don't cleanup first, cannot
         // retry
         int maxAttempt = config.isCleanupFirst() ? 3 : 1;
-        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, null,
+        RetryTemplate retry = RetryUtils.getRetryTemplate(maxAttempt, Collections.singletonList(Exception.class),
                 Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -168,15 +178,21 @@ public class PeriodDataDistributor
                 }
             }
 
-            TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
-                    .yarnConfig(yarnConfiguration) //
-                    .inputDir(inputDir) //
-                    .targetDirs(targetDirs) //
-                    .periods(periods) //
-                    .periodField(config.getPeriodField()) //
-                    .periodNameField(config.getPeriodNameField()) //
-                    .build();
-            distributer.distributePeriodData();
+            if (useLegacy) {
+                TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDirs, periods,
+                        config.getPeriodField(), config.getPeriodNameField());
+            } else {
+                TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
+                        .yarnConfig(yarnConfiguration) //
+                        .inputDir(inputDir) //
+                        .targetDirs(targetDirs) //
+                        .periods(periods) //
+                        .periodField(config.getPeriodField()) //
+                        .periodNameField(config.getPeriodNameField()) //
+                        .build();
+                distributer.distributePeriodData();
+            }
+
             return true;
         });
     }

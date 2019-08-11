@@ -272,6 +272,22 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     }
 
     protected void exportToS3AndAddToContext(String tableName, String contextKey) {
+        exportTableToS3(tableName, contextKey);
+        putStringValueInContext(contextKey, tableName);
+    }
+
+    protected void exportToS3AndAddToContext(List<String> tableNames, String contextKey) {
+        if (CollectionUtils.isEmpty(tableNames)) {
+            log.warn("Tries to export empty tableName list for contextKey = {}", contextKey);
+            return;
+        }
+
+        tableNames.forEach(tableName -> exportTableToS3(tableName, contextKey));
+        log.info("Published tables = {}, contextKey = {}", tableNames, contextKey);
+        putObjectInContext(contextKey, tableNames);
+    }
+
+    protected void exportTableToS3(String tableName, String contextKey) {
         boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
         if (!shouldSkip) {
             HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
@@ -292,6 +308,5 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         } else {
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }
-        putStringValueInContext(contextKey, tableName);
     }
 }

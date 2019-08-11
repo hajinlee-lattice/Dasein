@@ -164,6 +164,14 @@ public class PlayLaunchChannelEntityMgrImpl
                 existingPlayLaunchChannel.setChannelConfig(playLaunchChannel.getChannelConfig());
             }
         }
+        if (playLaunchChannel.getCurrentLaunchedAccountUniverseTable() != null) {
+            existingPlayLaunchChannel
+                    .setCurrentLaunchedAccountUniverseTable(playLaunchChannel.getCurrentLaunchedAccountUniverseTable());
+        }
+        if (playLaunchChannel.getCurrentLaunchedContactUniverseTable() != null) {
+            existingPlayLaunchChannel
+                    .setCurrentLaunchedContactUniverseTable(playLaunchChannel.getCurrentLaunchedContactUniverseTable());
+        }
         existingPlayLaunchChannel.setUpdatedBy(playLaunchChannel.getUpdatedBy());
 
         playLaunchChannelDao.update(existingPlayLaunchChannel);

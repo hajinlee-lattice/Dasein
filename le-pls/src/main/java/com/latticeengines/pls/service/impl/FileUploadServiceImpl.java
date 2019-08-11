@@ -217,9 +217,9 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public SourceFile uploadCleanupFileTemplate(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-            CleanupOperationType cleanupOperationType) {
+            CleanupOperationType cleanupOperationType, boolean enableEntityMatch) {
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(sourceFile.getName(), schemaInterpretation, null, false, false, false);
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), schemaInterpretation, null, false, false, enableEntityMatch);
 
         List<FieldMapping> fieldMappings = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
@@ -228,64 +228,67 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
         }
         fieldMappingDocument.setFieldMappings(fieldMappings);
-        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, false, false);
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, false, enableEntityMatch);
 
         sourceFile = getSourceFilewithRetry(sourceFile.getName(), true);
         Table template = getMetadata(sourceFile.getName());
         if (template == null) {
             throw new RuntimeException("Cannot resolve metadata from uploaded file!");
         }
+        InterfaceName accountInterface = enableEntityMatch ? InterfaceName.CustomerAccountId : InterfaceName.AccountId;
+        InterfaceName contactInterface = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;
+
         switch (schemaInterpretation) {
-        case DeleteAccountTemplate:
-            if (template.getAttribute(InterfaceName.AccountId) == null) {
-                throw new LedpException(LedpCode.LEDP_40007,
-                        new String[] { "Account", InterfaceName.AccountId.name() });
-            }
-            break;
-        case DeleteContactTemplate:
-            if (template.getAttribute(InterfaceName.ContactId) == null) {
-                throw new LedpException(LedpCode.LEDP_40007,
-                        new String[] { "Contact", InterfaceName.ContactId.name() });
-            }
-            break;
-        case DeleteTransactionTemplate:
-            switch (cleanupOperationType) {
-            case BYUPLOAD_ACPD:
-                if (template.getAttribute(InterfaceName.AccountId) == null) {
+            case DeleteAccountTemplate:
+                if (template.getAttribute(accountInterface) == null) {
                     throw new LedpException(LedpCode.LEDP_40007,
-                            new String[] { "Delete by ACPD", InterfaceName.AccountId.name() });
-                }
-                if (template.getAttribute(InterfaceName.ContactId) == null) {
-                    throw new LedpException(LedpCode.LEDP_40007,
-                            new String[] { "Delete by ACPD", InterfaceName.ContactId.name() });
-                }
-                if (template.getAttribute(InterfaceName.ProductId) == null) {
-                    throw new LedpException(LedpCode.LEDP_40007,
-                            new String[] { "Delete by ACPD", InterfaceName.ProductId.name() });
-                }
-                if (template.getAttribute(InterfaceName.TransactionTime) == null) {
-                    throw new LedpException(LedpCode.LEDP_40007,
-                            new String[] { "Delete by ACPD", InterfaceName.TransactionTime.name() });
+                            new String[] { "Account", accountInterface.name() });
                 }
                 break;
-            case BYUPLOAD_MINDATE:
-                if (template.getAttribute(InterfaceName.TransactionTime) == null) {
+            case DeleteContactTemplate:
+                if (template.getAttribute(contactInterface) == null) {
                     throw new LedpException(LedpCode.LEDP_40007,
-                            new String[] { "Delete by MIN date", InterfaceName.TransactionTime.name() });
+                            new String[] { "Contact", contactInterface.name() });
                 }
                 break;
-            case BYUPLOAD_MINDATEANDACCOUNT:
-                if (template.getAttribute(InterfaceName.AccountId) == null) {
-                    throw new LedpException(LedpCode.LEDP_40007,
-                            new String[] { "Delete by MIN date & Account", InterfaceName.AccountId.name() });
-                }
-                if (template.getAttribute(InterfaceName.TransactionTime) == null) {
-                    throw new LedpException(LedpCode.LEDP_40007,
-                            new String[] { "Delete by MIN date & Account", InterfaceName.TransactionTime.name() });
-                }
+            case DeleteTransactionTemplate:
+                switch (cleanupOperationType) {
+                    case BYUPLOAD_ACPD:
+                        if (template.getAttribute(accountInterface) == null) {
+                            throw new LedpException(LedpCode.LEDP_40007,
+                                    new String[] { "Delete by ACPD", accountInterface.name() });
+                        }
+                        if (template.getAttribute(contactInterface) == null) {
+                            throw new LedpException(LedpCode.LEDP_40007,
+                                    new String[] { "Delete by ACPD", contactInterface.name() });
+                        }
+                        if (template.getAttribute(InterfaceName.ProductId) == null) {
+                            throw new LedpException(LedpCode.LEDP_40007,
+                                    new String[] { "Delete by ACPD", InterfaceName.ProductId.name() });
+                        }
+                        if (template.getAttribute(InterfaceName.TransactionTime) == null) {
+                            throw new LedpException(LedpCode.LEDP_40007,
+                                    new String[] { "Delete by ACPD", InterfaceName.TransactionTime.name() });
+                        }
+                        break;
+                    case BYUPLOAD_MINDATE:
+                        if (template.getAttribute(InterfaceName.TransactionTime) == null) {
+                            throw new LedpException(LedpCode.LEDP_40007,
+                                    new String[] { "Delete by MIN date", InterfaceName.TransactionTime.name() });
+                        }
+                        break;
+                    case BYUPLOAD_MINDATEANDACCOUNT:
+                        if (template.getAttribute(accountInterface) == null) {
+                            throw new LedpException(LedpCode.LEDP_40007,
+                                    new String[] { "Delete by MIN date & Account", accountInterface.name() });
+                        }
+                        if (template.getAttribute(InterfaceName.TransactionTime) == null) {
+                            throw new LedpException(LedpCode.LEDP_40007,
+                                    new String[] { "Delete by MIN date & Account", InterfaceName.TransactionTime.name() });
+                        }
+                        break;
+                    }
                 break;
-            }
-            break;
         }
         return sourceFile;
 

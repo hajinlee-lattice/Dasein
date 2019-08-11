@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.Inpu
         @Type(value = BaseDataFlowReportStepConfiguration.class, name = "BaseDataFlowReportStepConfiguration"),
         @Type(value = DeleteFileUploadStepConfiguration.class, name = "DeleteFileUploadStepConfiguration"),
         @Type(value = OperationExecuteConfiguration.class, name = "OperationExecuteConfiguration"),
+        @Type(value = CleanupAllStepConfiguration.class, name = "CleanupAllStepConfiguration"),
         @Type(value = InputFileValidatorConfiguration.class, name = "InputFileValidatorConfiguration"),
         @Type(value = PrepareImportConfiguration.class, name = "PrepareImportConfiguration"), })
 public class BaseReportStepConfiguration extends MicroserviceStepConfiguration {

@@ -192,7 +192,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             playLaunch.setFolderName(channelConfig.getFolderName());
         } else if (playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig) {
             SalesforceChannelConfig channelConfig = (SalesforceChannelConfig) playLaunchChannel.getChannelConfig();
-            playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountWithoutAccountId());
+            playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountsWithoutLookupId());
         } else if (playLaunchChannel.getChannelConfig() instanceof LinkedInChannelConfig) {
             LinkedInChannelConfig channelConfig = (LinkedInChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setAudienceId(channelConfig.getAudienceId());
@@ -290,7 +290,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         }
 
         if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM
-                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId()
+                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountsWithoutLookupId()
                 && StringUtils.isBlank(channel.getLookupIdMap().getAccountId())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
                     "Cannot restrict accounts with null Ids if account id has not been set up for selected Connection" });
@@ -300,7 +300,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
         if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM)
             coverageRequest.setRestrictNullLookupId(
-                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountWithoutAccountId());
+                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountsWithoutLookupId());
         coverageRequest.setLookupId(channel.getLookupIdMap().getAccountId());
         RatingEnginesCoverageResponse coverageResponse = ratingCoverageService.getRatingCoveragesForSegment(
                 CustomerSpace.parse(tenantId).toString(), play.getTargetSegment().getName(), coverageRequest);

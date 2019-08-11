@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.steps.play;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -33,6 +36,7 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -42,6 +46,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.ExportFieldMetadataProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -103,6 +108,9 @@ public class CampaignLaunchProcessor {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private ExportFieldMetadataProxy exportFieldMetadataProxy;
 
     public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
         // prepare basic account and contact front end queries
@@ -215,7 +223,16 @@ public class CampaignLaunchProcessor {
 
         Play play = playProxy.getPlay(customerSpace.toString(), playName);
         PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
-        playLaunch.setPlay(play);
+        List<ColumnMetadata> fieldMappingMetadata = null;
+        PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
+                playName, playLaunchId);
+        if (playLaunchChannel != null) {
+            fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
+                    playLaunchChannel.getId());
+            log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
+                    + ", the list of columnmetadata is:");
+            log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+        }
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 
         RatingEngine ratingEngine = play.getRatingEngine();
@@ -273,6 +290,7 @@ public class CampaignLaunchProcessor {
                 .accountFrontEndQuery(new FrontEndQuery()) //
                 .contactFrontEndQuery(new FrontEndQuery()) //
                 .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
+                .fieldMappingMetadata(fieldMappingMetadata) //
                 .counter(new Counter()) //
                 .recommendationTable(recommendationTable) //
                 .schema(schema);

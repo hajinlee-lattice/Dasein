@@ -130,7 +130,7 @@
         <kryo.version>4.0.2</kryo.version>
         <kryo.serializers.version>0.42</kryo.serializers.version> <!-- needed for kryo 4.0.1 -->
         <zookeeper.version>3.4.13</zookeeper.version>
-        <tinkerpop.version>3.3.4</tinkerpop.version>
+        <tinkerpop.version>3.4.2</tinkerpop.version>
         <springfox.swagger.version>2.9.2</springfox.swagger.version>
         <io.swagger.version>1.5.22</io.swagger.version>
         <io.micrometer.version>1.1.5</io.micrometer.version>

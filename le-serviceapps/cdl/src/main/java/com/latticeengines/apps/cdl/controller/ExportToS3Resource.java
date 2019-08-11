@@ -120,8 +120,8 @@ public class ExportToS3Resource {
                         inProcess.add(customer);
                         log.info("Exporting to S3 for " + customer + ", " + inProcess.size() + " in progress.");
                         List<ExportRequest> requests = new ArrayList<>();
-                        exportToS3Service.buildRequests(CustomerSpace.parse(customer), requests);
-                        exportToS3Service.executeRequests(requests, onlyAtlas);
+                        exportToS3Service.buildRequests(CustomerSpace.parse(customer), requests, onlyAtlas);
+                        exportToS3Service.executeRequests(requests);
                         exportToS3Service.buildDataUnits(CustomerSpace.parse(customer));
                         log.info("Finished Export To S3 for " + customer);
                     } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.reflect.AvroName;
 import org.apache.avro.reflect.Nullable;
@@ -29,6 +30,9 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("RequestTimestamp")
     String requestTimestamp;
+    @Nullable
+    @AvroName("DataCloudVersion")
+    String dataCloudVersion;
     @Nullable
     @AvroName("LatticeAccountId")
     String latticeAccountId;
@@ -66,6 +70,9 @@ public class MatchHistory implements HasId<String> {
     @AvroName("RawDUNS")
     String rawDUNS;
     @Nullable
+    @AvroName("RawSystemIds")
+    Map<String, String> rawSystemIds;
+    @Nullable
     @AvroName("StandardisedDomain")
     String standardisedDomain;
     @Nullable
@@ -98,6 +105,9 @@ public class MatchHistory implements HasId<String> {
     @Nullable
     @AvroName("StandardisedPhone")
     String standardisedPhone;
+    @Nullable
+    @AvroName("StandardisedSystemIds")
+    Map<String, String> standardisedSystemIds;
     @Nullable
     @AvroName("DnbMatchedDUNS")
     String dnbMatchedDUNS;
@@ -240,6 +250,7 @@ public class MatchHistory implements HasId<String> {
     @AvroName("MatchMode")
     private String matchMode; // Batch or Realtime
 
+    // The set of fields below are for Entity Match Reports.
     @Nullable
     @AvroName("BusinessEntity")
     private String businessEntity;
@@ -261,12 +272,20 @@ public class MatchHistory implements HasId<String> {
     private MatchKeyTuple fullMatchKeyTuple;
 
     @Nullable
-    @AvroName("MatchedMatchKeyTuple")
-    private MatchKeyTuple matchedMatchKeyTuple;
+    @AvroName("EntityMatchType")
+    private String entityMatchType;
 
     @Nullable
-    @AvroName("MatchType")
-    private String matchType;
+    @AvroName("MatchedEntityMatchKeyTuple")
+    private MatchKeyTuple matchedEntityMatchKeyTuple;
+
+    @Nullable
+    @AvroName("LdcMatchType")
+    private String ldcMatchType;
+
+    @Nullable
+    @AvroName("MatchedLdcMatchKeyTuple")
+    private MatchKeyTuple matchedLdcMatchKeyTuple;
 
     @Nullable
     @AvroName("ExistingLookupKeyList")
@@ -290,12 +309,20 @@ public class MatchHistory implements HasId<String> {
     private MatchKeyTuple l2aFullMatchKeyTuple;
 
     @Nullable
-    @AvroName("L2AMatchedMatchKeyTuple")
-    private MatchKeyTuple l2aMatchedMatchKeyTuple;
+    @AvroName("L2AEntityMatchType")
+    private String l2aEntityMatchType;
 
     @Nullable
-    @AvroName("L2AMatchType")
-    private String l2aMatchType;
+    @AvroName("L2AMatchedEntityMatchKeyTuple")
+    private MatchKeyTuple l2aMatchedEntityMatchKeyTuple;
+
+    @Nullable
+    @AvroName("L2ALdcMatchType")
+    private String l2aLdcMatchType;
+
+    @Nullable
+    @AvroName("L2AMatchedLdcMatchKeyTuple")
+    private MatchKeyTuple l2aMatchedLdcMatchKeyTuple;
 
     @Nullable
     @AvroName("L2AExistingLookupKeyList")
@@ -413,6 +440,17 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    @Union({})
+    public MatchHistory setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+        return this;
+    }
+
+    @Union({})
     public String getRawDomain() {
         return rawDomain;
     }
@@ -512,6 +550,17 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
+    public Map<String, String> getRawSystemIds() {
+        return rawSystemIds;
+    }
+
+    @Union({})
+    public MatchHistory setRawSystemIds(Map<String, String> rawSystemIds) {
+        this.rawSystemIds = rawSystemIds;
+        return this;
+    }
+
+    @Union({})
     public String getStandardisedDomain() {
         return standardisedDomain;
     }
@@ -596,6 +645,17 @@ public class MatchHistory implements HasId<String> {
     @Union({})
     public MatchHistory setStandardisedPhone(String standardisedPhone) {
         this.standardisedPhone = standardisedPhone;
+        return this;
+    }
+
+    @Union({})
+    public Map<String, String> getStandardisedSystemIds() {
+        return standardisedSystemIds;
+    }
+
+    @Union({})
+    public MatchHistory setStandardisedSystemIds(Map<String, String> standardisedSystemIds) {
+        this.standardisedSystemIds = standardisedSystemIds;
         return this;
     }
 
@@ -1178,23 +1238,43 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public void setMatchedMatchKeyTuple(MatchKeyTuple matchedMatchKeyTuple) {
-        this.matchedMatchKeyTuple = matchedMatchKeyTuple;
+    public void setEntityMatchType(EntityMatchType entityMatchType) {
+        this.entityMatchType = entityMatchType.name();
     }
 
     @Union({})
-    public MatchKeyTuple getMatchedMatchKeyTuple() {
-        return matchedMatchKeyTuple;
+    public String getEntityMatchType() {
+        return entityMatchType;
     }
 
     @Union({})
-    public void setMatchType(EntityMatchType entityMatchType) {
-        this.matchType = entityMatchType.name();
+    public void setMatchedEntityMatchKeyTuple(MatchKeyTuple matchedEntityMatchKeyTuple) {
+        this.matchedEntityMatchKeyTuple = matchedEntityMatchKeyTuple;
     }
 
     @Union({})
-    public String getMatchType() {
-        return matchType;
+    public MatchKeyTuple getMatchedEntityMatchKeyTuple() {
+        return matchedEntityMatchKeyTuple;
+    }
+
+    @Union({})
+    public void setLdcMatchType(LdcMatchType ldcMatchType) {
+        this.ldcMatchType = ldcMatchType.name();
+    }
+
+    @Union({})
+    public void setMatchedLdcMatchKeyTuple(MatchKeyTuple matchedLdcMatchKeyTuple) {
+        this.matchedLdcMatchKeyTuple = matchedLdcMatchKeyTuple;
+    }
+
+    @Union({})
+    public MatchKeyTuple getMatchedLdcMatchKeyTuple() {
+        return matchedLdcMatchKeyTuple;
+    }
+
+    @Union({})
+    public String getLdcMatchType() {
+        return ldcMatchType;
     }
 
     @Union({})
@@ -1248,23 +1328,43 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
-    public void setL2aMatchedMatchKeyTuple(MatchKeyTuple l2aMatchedMatchKeyTuple) {
-        this.l2aMatchedMatchKeyTuple = l2aMatchedMatchKeyTuple;
+    public void setL2aEntityMatchType(EntityMatchType l2aEntityMatchType) {
+        this.l2aEntityMatchType = l2aEntityMatchType.name();
     }
 
     @Union({})
-    public MatchKeyTuple getL2aMatchedMatchKeyTuple() {
-        return l2aMatchedMatchKeyTuple;
+    public String getL2aEntityMatchType() {
+        return l2aEntityMatchType;
     }
 
     @Union({})
-    public void setL2aMatchType(EntityMatchType l2aEntityMatchType) {
-        this.l2aMatchType = l2aEntityMatchType.name();
+    public void setL2aMatchedEntityMatchKeyTuple(MatchKeyTuple l2aMatchedEntityMatchKeyTuple) {
+        this.l2aMatchedEntityMatchKeyTuple = l2aMatchedEntityMatchKeyTuple;
     }
 
     @Union({})
-    public String getL2aMatchType() {
-        return l2aMatchType;
+    public MatchKeyTuple getL2aMatchedEntityMatchKeyTuple() {
+        return l2aMatchedEntityMatchKeyTuple;
+    }
+
+    @Union({})
+    public void setL2aLdcMatchType(LdcMatchType l2aLdcMatchType) {
+        this.l2aLdcMatchType = l2aLdcMatchType.name();
+    }
+
+    @Union({})
+    public String getL2aLdcMatchType() {
+        return l2aLdcMatchType;
+    }
+
+    @Union({})
+    public void setL2aMatchedLdcMatchKeyTuple(MatchKeyTuple l2aMatchedLdcMatchKeyTuple) {
+        this.l2aMatchedLdcMatchKeyTuple = l2aMatchedLdcMatchKeyTuple;
+    }
+
+    @Union({})
+    public MatchKeyTuple getL2aMatchedLdcMatchKeyTuple() {
+        return l2aMatchedLdcMatchKeyTuple;
     }
 
     @Union({})
@@ -1285,15 +1385,19 @@ public class MatchHistory implements HasId<String> {
             entityId = entityMatchHistory.getEntityId();
             customerEntityId = entityMatchHistory.getCustomerEntityId();
             fullMatchKeyTuple = entityMatchHistory.getFullMatchKeyTuple();
-            matchedMatchKeyTuple = entityMatchHistory.getMatchedMatchKeyTuple();
-            matchType = entityMatchHistory.getMatchType();
+            entityMatchType = entityMatchHistory.getEntityMatchType();
+            matchedEntityMatchKeyTuple = entityMatchHistory.getMatchedEntityMatchKeyTuple();
+            ldcMatchType = entityMatchHistory.getLdcMatchType();
+            matchedLdcMatchKeyTuple = entityMatchHistory.getMatchedLdcMatchKeyTuple();
             existingLookupKeyList = entityMatchHistory.getExistingLookupKeyList();
             l2aEntityMatched = entityMatchHistory.getL2aEntityMatched();
             l2aEntityId = entityMatchHistory.getL2aEntityId();
             l2aCustomerEntityId = entityMatchHistory.getL2aCustomerEntityId();
             l2aFullMatchKeyTuple = entityMatchHistory.getL2aFullMatchKeyTuple();
-            l2aMatchedMatchKeyTuple = entityMatchHistory.getL2aMatchedMatchKeyTuple();
-            l2aMatchType = entityMatchHistory.getL2aMatchType();
+            l2aEntityMatchType = entityMatchHistory.getL2aEntityMatchType();
+            l2aMatchedEntityMatchKeyTuple = entityMatchHistory.getL2aMatchedEntityMatchKeyTuple();
+            l2aLdcMatchType = entityMatchHistory.getL2aLdcMatchType();
+            l2aMatchedLdcMatchKeyTuple = entityMatchHistory.getL2aMatchedLdcMatchKeyTuple();
             l2aExistingLookupKeyList = entityMatchHistory.getL2aExistingLookupKeyList();
         }
         return this;

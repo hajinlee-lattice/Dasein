@@ -1,0 +1,18 @@
+package com.latticeengines.domain.exposed.datacloud.match;
+
+public enum LdcMatchType {
+    UNKNOWN,
+    CACHED_DUNS_GUIDE_VALIDATE,
+    CACHED_DUNS_VALIDATE,
+    DOMAIN,
+    DOMAIN_COUNTRY,
+    DOMAIN_COUNTRY_STATE,
+    DOMAIN_COUNTRY_ZIPCODE,
+    DUNS,
+    DUNS_DOMAIN,
+    DUNS_GUIDE_VALIDATE,
+    DUNS_VALIDATE,
+    LOCATION_CACHED_DUNS,
+    LOCATION_DUNS,
+    NO_MATCH
+}

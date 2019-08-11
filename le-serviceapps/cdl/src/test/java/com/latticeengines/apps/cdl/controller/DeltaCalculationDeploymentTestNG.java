@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.domain.TestPlayChannelConfig;
 import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -58,19 +57,16 @@ public class DeltaCalculationDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private TestPlayCreationHelper playCreationHelper3;
 
-    @Inject
-    private TenantService tenantService;
-
     private List<TestPlaySetupConfig> testPlaySetupConfigs = new ArrayList<>();
 
-    @BeforeClass(groups = "deployment-app")
+    @BeforeClass(groups = "deployment-app", enabled = false)
     public void setup() throws Exception {
         Map<String, Boolean> featureFlags = new HashMap<>();
         featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ALPHA_FEATURE.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName(), true);
 
-        TestPlaySetupConfig testPlaySetupConfig1 = new TestPlaySetupConfig.Builder()
+        TestPlaySetupConfig testPlaySetupConfig1 = new TestPlaySetupConfig.Builder().existingTenant("JLM_1564644778424")
                 .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
                         .destinationSystemName(Salesforce).destinationSystemId("Channel_" + System.currentTimeMillis())
                         .isAlwaysOn(true).cronSchedule("0 0/10 * 1/1 * ? *").launchType(LaunchType.FULL).build())
@@ -87,7 +83,7 @@ public class DeltaCalculationDeploymentTestNG extends CDLDeploymentTestNGBase {
                 "Tenant 1: " + playCreationHelper1.getTenant().getId() + " Play: " + playCreationHelper1.getPlayName());
         playProxy.deletePlay(playCreationHelper1.getTenant().getId(), playCreationHelper1.getPlayName(), false);
 
-        TestPlaySetupConfig testPlaySetupConfig2 = new TestPlaySetupConfig.Builder()
+        TestPlaySetupConfig testPlaySetupConfig2 = new TestPlaySetupConfig.Builder().existingTenant("JLM_1564644930638")
                 .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
                         .destinationSystemName(Salesforce).destinationSystemId("Channel_" + System.currentTimeMillis())
                         .isAlwaysOn(true).cronSchedule("0 0/10 * 1/1 * ? *").launchType(LaunchType.FULL).build())
@@ -107,7 +103,7 @@ public class DeltaCalculationDeploymentTestNG extends CDLDeploymentTestNGBase {
         log.info(
                 "Tenant 2: " + playCreationHelper2.getTenant().getId() + " Play: " + playCreationHelper2.getPlayName());
 
-        TestPlaySetupConfig testPlaySetupConfig3 = new TestPlaySetupConfig.Builder()
+        TestPlaySetupConfig testPlaySetupConfig3 = new TestPlaySetupConfig.Builder().existingTenant("JLM_1564645091401")
                 .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
                         .destinationSystemName(Salesforce).destinationSystemId("Channel_" + System.currentTimeMillis())
                         .isAlwaysOn(true).cronSchedule("0 0/10 * 1/1 * ? *").launchType(LaunchType.FULL).build())
@@ -124,9 +120,21 @@ public class DeltaCalculationDeploymentTestNG extends CDLDeploymentTestNGBase {
                 "Tenant 3: " + playCreationHelper3.getTenant().getId() + " Play: " + playCreationHelper3.getPlayName());
     }
 
-    @Test(groups = "deployment-app")
+    @Test(groups = "deployment-app", enabled = false)
     public void testGettingScheduledChannels() {
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllValidScheduledChannels();
         Assert.assertEquals(channels.size(), 9);
     }
+
+    // @Test(groups = "deployment-app", enabled = false)
+    // public void testDeltaCalculation() {
+    // PlayLaunchChannel testChannel = playLaunchChannelEntityMgr.findByPlayName(playCreationHelper1.getPlayName())
+    // .get(0);
+    // String appId = playProxy.kickoffDeltaCalculation(playCreationHelper1.getCustomerSpace(),
+    // playCreationHelper1.getPlayName(), testChannel.getId());
+    // log.info("AppID: " + appId);
+    // log.info("Queued a delta calculation job for campaignId " + playCreationHelper1.getPlayName() + ", ChannelID: "
+    // + testChannel.getId() + " : " + appId);
+    //
+    // }
 }

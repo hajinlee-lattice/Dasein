@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -64,7 +65,6 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -83,9 +83,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private MetadataProxy metadataProxy;
-
-    @Inject
-    private MatchProxy matchProxy;
 
     @Inject
     private PeriodProxy periodProxy;
@@ -122,9 +119,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Override
     public void execute() {
-        Set<String> renewableKeys = new HashSet<>(TABLE_NAMES_FOR_PA_RETRY);
-        renewableKeys.addAll(EXTRA_KEYS_FOR_PA_RETRY);
-        clearExecutionContext(renewableKeys);
+        clearExecutionContext(getRenewableCtxKeys());
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
         determineVersions();
@@ -235,11 +230,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 });
     }
 
-    protected void setGrapherContext() {
-        grapherContext.setDataCloudChanged(checkDataCloudChange());
-        Set<BusinessEntity> impactedEntities = getImpactedEntities();
-        grapherContext.setJobImpactedEntities(impactedEntities);
+    void setGrapherContext() {
         List<Action> actions = getActions();
+        grapherContext.setDataCloudChanged(checkDataCloudChange());
+        grapherContext.setEntitiesRebuildDueToActions(getEntitiesShouldRebuildByActions());
 
         List<Action> attrMgmtActions = getAttrManagementActions(actions);
         List<Action> accountAttrActions = getAttrManagementActionsForAccount(attrMgmtActions);
@@ -251,17 +245,19 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> businessCalenderChangedActions = getBusinessCalendarChangedActions(actions);
         grapherContext.setBusinessCalenderChanged(CollectionUtils.isNotEmpty(businessCalenderChangedActions));
 
-        List<Action> ratingActions = getRatingRelatedActions(actions);
-        List<String> segments = getActionImpactedSegmentNames(ratingActions);
+        List<String> engineIds = getActionImpactedEngineIds(actions);
+        List<String> segments = getActionImpactedSegmentNames(actions);
         grapherContext.setHasRatingEngineChange(
-                CollectionUtils.isNotEmpty(ratingActions) || CollectionUtils.isNotEmpty(segments));
+                CollectionUtils.isNotEmpty(engineIds) || CollectionUtils.isNotEmpty(segments));
+        putObjectInContext(ACTION_IMPACTED_ENGINES, engineIds);
+        putObjectInContext(ACTION_IMPACTED_SEGMENTS, segments);
 
         grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
 
-    protected Set<BusinessEntity> getImpactedEntities() {
+    Set<BusinessEntity> getEntitiesShouldRebuildByActions() {
         return RebuildEntitiesProvider.getRebuildEntities(this);
     }
 
@@ -392,11 +388,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }).collect(Collectors.toList());
     }
 
-    protected List<Action> getRatingRelatedActions(List<Action> actions) {
-        return actions.stream().filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
-                .collect(Collectors.toList());
-    }
-
     private List<Action> getPurchaseMetricsActions(List<Action> actions) {
         return actions.stream().filter(action -> action.getType() == ActionType.ACTIVITY_METRICS_CHANGE)
                 .collect(Collectors.toList());
@@ -405,6 +396,20 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private List<Action> getBusinessCalendarChangedActions(List<Action> actions) {
         return actions.stream().filter(action -> action.getType() == ActionType.BUSINESS_CALENDAR_CHANGE)
                 .collect(Collectors.toList());
+    }
+
+    protected List<String> getActionImpactedEngineIds(List<Action> actions) {
+        List<String> engineIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            for (Action action: actions) {
+                if (ActionType.getRatingRelatedTypes().contains(action.getType())) {
+                    RatingEngineActionConfiguration configuration = //
+                            (RatingEngineActionConfiguration) action.getActionConfiguration();
+                    engineIds.add(configuration.getRatingEngineId());
+                }
+            }
+        }
+        return engineIds;
     }
 
     protected List<String> getActionImpactedSegmentNames(List<Action> actions) {
@@ -527,10 +532,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setupInactiveVersion() {
-        Set<String> tableNamesForRetry = TABLE_NAMES_FOR_PA_RETRY.stream() //
-                .map(this::getStringValueFromContext) //
-                .filter(StringUtils::isNotBlank) //
-                .collect(Collectors.toSet());
+        Set<String> tableNamesForRetry = getTableNamesForPaRetry();
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
             List<String> tableNames = dataCollectionProxy.getTableNames(customerSpace.toString(), role,
                     inactiveVersion);
@@ -581,7 +583,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setMigrationMode() {
-        migrationMode = MigrationTrack.Status.STARTED.equals(metadataProxy.getMigrationStatus(customerSpace.toString()));
+        MigrationTrack.Status status = metadataProxy.getMigrationStatus(customerSpace.toString());
+        log.info("Tenant's migration status is {}.", status);
+        migrationMode = MigrationTrack.Status.STARTED.equals(status);
+        log.info("Migration mode is {}", migrationMode ? "on" : "off");
     }
 
     private void verifyActiveDataCollectionVersion() {

@@ -186,7 +186,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 "FK_TENANT_ID", tenant.getPid(),
                 "VERSION", version.toString()
         );
-        dataCollectionTableReaderRepository.deleteInBatch(dataCollectionTables);
+        if (CollectionUtils.isNotEmpty(dataCollectionTables)) {
+            dataCollectionTables.forEach(dataCollectionTableDao::delete);
+        }
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)

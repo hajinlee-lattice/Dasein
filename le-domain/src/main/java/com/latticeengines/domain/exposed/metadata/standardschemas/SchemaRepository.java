@@ -213,13 +213,13 @@ public class SchemaRepository {
                     includeCdlTimestamps, enableEntityMatch);
             break;
         case DeleteAccountTemplate:
-            table = getDeleteAccountTemplateSchema();
+            table = getDeleteAccountTemplateSchema(enableEntityMatch);
             break;
         case DeleteContactTemplate:
-            table = getDeleteContactTemplateSchema();
+            table = getDeleteContactTemplateSchema(enableEntityMatch);
             break;
         case DeleteTransactionTemplate:
-            table = getDeleteTransactionTemplateSchema();
+            table = getDeleteTransactionTemplateSchema(enableEntityMatch);
             break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
@@ -1064,6 +1064,17 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerContactId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                    .type(Schema.Type.STRING) //
+                    .defaultValueStr("").interfaceName(InterfaceName.CustomerContactId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID")) //
                 .type(Schema.Type.STRING) //
@@ -1207,6 +1218,16 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Id) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        if (enableEntityMatch) {
+            table.addAttribute(attr(InterfaceName.CustomerContactId.name()) //
+                    .allowedDisplayNames(
+                            Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
+                    .type(Schema.Type.STRING) //
+                    .interfaceName(InterfaceName.CustomerContactId) //
+                    .logicalType(LogicalDataType.Id) //
+                    .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                    .build());
+        }
         table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "PRODUCT_ID", "PRODUCT ID")) //
                 .type(Schema.Type.STRING) //
@@ -1298,15 +1319,15 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getDeleteAccountTemplateSchema() {
+    private Table getDeleteAccountTemplateSchema(boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.DeleteAccountTemplate);
-
-        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+        InterfaceName accountId = enableEntityMatch ? InterfaceName.CustomerAccountId : InterfaceName.AccountId;
+        table.addAttribute(attr(accountId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT_ID", "ACCOUNTID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
                 .required() //
-                .interfaceName(InterfaceName.AccountId) //
+                .interfaceName(accountId) //
                 .logicalType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1315,15 +1336,15 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getDeleteContactTemplateSchema() {
+    private Table getDeleteContactTemplateSchema(boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.DeleteContactTemplate);
-
-        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+        InterfaceName contactId = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;
+        table.addAttribute(attr(contactId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "CONTACT_ID", "CONTACTID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
                 .required() //
-                .interfaceName(InterfaceName.ContactId) //
+                .interfaceName(contactId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1332,24 +1353,26 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getDeleteTransactionTemplateSchema() {
+    private Table getDeleteTransactionTemplateSchema(boolean enableEntityMatch) {
         Table table = createTable(SchemaInterpretation.DeleteTransactionTemplate);
+        InterfaceName accountId = enableEntityMatch ? InterfaceName.CustomerAccountId : InterfaceName.AccountId;
+        InterfaceName contactId = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;
 
-        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+        table.addAttribute(attr(accountId.name()) //
                 .allowedDisplayNames(
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
-                .interfaceName(InterfaceName.AccountId) //
+                .interfaceName(accountId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+        table.addAttribute(attr(contactId.name()) //
                 .allowedDisplayNames(
                         Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                 .type(Schema.Type.STRING) //
-                .defaultValueStr("").interfaceName(InterfaceName.ContactId) //
+                .defaultValueStr("").interfaceName(contactId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //

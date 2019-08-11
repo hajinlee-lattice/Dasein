@@ -1,12 +1,16 @@
 package com.latticeengines.workflow.exposed.build;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -117,6 +121,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
+    public static final String ACTION_IMPACTED_SEGMENTS = "ACTION_IMPACTED_SEGMENTS";
+    public static final String ACTION_IMPACTED_ENGINES = "ACTION_IMPACTED_ENGINES";
+    public static final String RESCORE_ALL_RATINGS = "RESCORE_ALL_RATINGS";
     public static final String CURRENT_RATING_ITERATION = "CURRENT_RATING_ITERATION";
     public static final String INACTIVE_ENGINE_ATTRIBUTES = "INACTIVE_ENGINE_ATTRIBUTES";
     public static final String INACTIVE_ENGINES = "INACTIVE_ENGINES";
@@ -154,6 +161,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
     protected static final String ATLAS_EXPORT_DATA_UNIT = "ATLAS_EXPORT_DATA_UNIT";
     protected static final String PRIMARY_IMPORT_SYSTEM = "PRIMARY_IMPORT_SYSTEM";
+    protected static final String ADDED_ACCOUNTS_DELTA_TABLE = "ADDED_ACCOUNTS_DELTA_TABLE";
+    protected static final String REMOVED_ACCOUNTS_DELTA_TABLE = "REMOVED_ACCOUNTS_DELTA_TABLE";
+    protected static final String ADDED_CONTACTS_DELTA_TABLE = "ADDED_CONTACTS_DELTA_TABLE";
+    protected static final String REMOVED_CONTACTS_DELTA_TABLE = "REMOVED_CONTACTS_DELTA_TABLE";
+    protected static final String FULL_ACCOUNTS_UNIVERSE = "FULL_ACCOUNTS_UNIVERSE";
+    protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";
@@ -174,7 +187,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CONTACT_SERVING_TABLE_NAME = "CONTACT_SERVING_TABLE_NAME";
     protected static final String CONTACT_PROFILE_TABLE_NAME = "CONTACT_PROFILE_TABLE_NAME";
     protected static final String CONTACT_STATS_TABLE_NAME = "CONTACT_STATS_TABLE_NAME";
+    protected static final String DAILY_TRXN_TABLE_NAME = "DAILY_TRXN_TABLE_NAME";
     protected static final String AGG_DAILY_TRXN_TABLE_NAME = "AGG_DAILY_TRXN_TABLE_NAME";
+    protected static final String PERIOD_TRXN_TABLE_NAME = "PERIOD_TRXN_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
@@ -234,6 +249,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             CONTACT_SERVING_TABLE_NAME, //
             CONTACT_PROFILE_TABLE_NAME, //
             CONTACT_STATS_TABLE_NAME, //
+            DAILY_TRXN_TABLE_NAME, //
             AGG_DAILY_TRXN_TABLE_NAME, //
             AGG_PERIOD_TRXN_TABLE_NAME, //
             PH_SERVING_TABLE_NAME, //
@@ -242,6 +258,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PH_STATS_TABLE_NAME, //
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME);
+    protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Collections.singleton(PERIOD_TRXN_TABLE_NAME);
 
     // extra context keys to be carried over in restarted PA, beyond table names above
     protected static final Set<String> EXTRA_KEYS_FOR_PA_RETRY = Sets.newHashSet( //
@@ -293,6 +310,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 // Do nothing for InterruptedException
+                log.info(e.getMessage());
             }
             i++;
 
@@ -301,14 +319,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
         if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(WorkflowUtils.getWorkFlowErrorCode(status.getDiagnostics()), new String[]{appId,
-                    status.getErrorReport()});
+            throw new LedpException(WorkflowUtils.getWorkFlowErrorCode(status.getDiagnostics()),
+                    new String[] { appId, status.getErrorReport() });
         }
     }
 
     protected String getHdfsDir(String path) {
         String[] tokens = StringUtils.split(path, "/");
-        String[] newTokens = null;
+        String[] newTokens;
 
         if (path.endsWith("avro")) {
             newTokens = new String[tokens.length - 1];
@@ -365,12 +383,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         putObjectInContext(WorkflowContextConstants.REPORTS, map);
 
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(
-                3, 5000L, 2.0, null);
+        RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(3, 5000L, 2.0, null);
         template.execute(context -> {
             if (context.getRetryCount() >= 1) {
-                log.warn("Last registering report for tenant {} failed. Retrying for {} times.",
-                        customerSpace, context.getRetryCount());
+                log.warn("Last registering report for tenant {} failed. Retrying for {} times.", customerSpace,
+                        context.getRetryCount());
             }
             proxy.registerReport(report, customerSpace.toString());
             return null;
@@ -455,21 +472,42 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             }
         }
         Map<String, String> registry = WorkflowUtils.getFlattenedConfig(workflowConfig);
-        Map<String, BaseStepConfiguration> result = registry.entrySet().stream()
-                .collect(Collectors.toMap(e -> newParentNamespace + e.getKey(), e -> {
-                    String namespace = newParentNamespace + e.getKey();
-                    BaseStepConfiguration step = getObjectFromContext(namespace, BaseStepConfiguration.class);
-                    if (step == null) {
-                        step = getConfigurationFromJobParameters(namespace);
-                        if (step == null) {
-                            step = JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
-                        }
-                    }
-                    return step;
-                }));
-        return result;
+        return registry.entrySet().stream().collect(Collectors.toMap(e -> newParentNamespace + e.getKey(), e -> {
+            String namespace = newParentNamespace + e.getKey();
+            BaseStepConfiguration step = getObjectFromContext(namespace, BaseStepConfiguration.class);
+            if (step == null) {
+                step = getConfigurationFromJobParameters(namespace);
+                if (step == null) {
+                    step = JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
+                }
+            }
+            return step;
+        }));
     }
 
+    /**
+     * Retrieve table summary for all tables in target context keys.
+     *
+     * @param customer
+     *            customerSpace
+     * @param tableNameStrCtxKeys
+     *            list of context keys that contain a single table as string
+     * @param tableNameListCtxKeys
+     *            list of context keys that contain a list of tables as serialized list of string
+     * @return list of tables, null will be inserted if the corresponding table does not exist
+     */
+    protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
+            List<String> tableNameListCtxKeys) {
+        List<Table> tables = new ArrayList<>(getTableSummariesFromCtxKeys(customer, tableNameStrCtxKeys));
+        if (CollectionUtils.isNotEmpty(tableNameListCtxKeys)) {
+            tables.addAll(tableNameListCtxKeys.stream() //
+                    .map(key -> getTableSummariesFromListKey(customer, key)) //
+                    .filter(Objects::nonNull) //
+                    .flatMap(List::stream) //
+                    .collect(Collectors.toList()));
+        }
+        return tables;
+    }
 
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameCtxKeys) {
         if (CollectionUtils.isEmpty(tableNameCtxKeys)) {
@@ -480,14 +518,49 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
     }
 
+    protected List<Table> getTableSummariesFromListKey(String customer, String tableNameListCtxKey) {
+        List<String> tableNames = getListObjectFromContext(tableNameListCtxKey, String.class);
+        if (CollectionUtils.isNotEmpty(tableNames)) {
+            return tableNames.stream().map(name -> getTableSummary(customer, name)).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
 
     protected Table getTableSummaryFromKey(String customer, String tableNameCtxKey) {
         String tableName = getStringValueFromContext(tableNameCtxKey);
+        return getTableSummary(customer, tableName);
+    }
+
+    private Table getTableSummary(String customer, String tableName) {
         if (StringUtils.isNotBlank(tableName)) {
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             return retry.execute(ctx -> metadataProxy.getTableSummary(customer, tableName));
         }
         return null;
+    }
+
+    protected Set<String> getTableNamesForPaRetry() {
+        return Stream.concat( //
+                TABLE_NAMES_FOR_PA_RETRY.stream() //
+                        .map(this::getStringValueFromContext), //
+                TABLE_NAME_LISTS_FOR_PA_RETRY.stream() //
+                        .flatMap(key -> {
+                            List<String> tableNames = getListObjectFromContext(key, String.class);
+                            if (CollectionUtils.isEmpty(tableNames)) {
+                                return Stream.empty();
+                            } else {
+                                return tableNames.stream();
+                            }
+                        }) //
+        ).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+    }
+
+    protected Set<String> getRenewableCtxKeys() {
+        Set<String> renewableKeys = new HashSet<>(TABLE_NAMES_FOR_PA_RETRY);
+        renewableKeys.addAll(TABLE_NAME_LISTS_FOR_PA_RETRY);
+        renewableKeys.addAll(EXTRA_KEYS_FOR_PA_RETRY);
+        return renewableKeys;
     }
 
 }

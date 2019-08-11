@@ -10,7 +10,9 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -26,19 +28,25 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBase {
@@ -56,6 +64,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long PROBLEMATIC_ACTION_NO_TRACKING_ID_PID = 6L;
     private static final Long CANCEL_ACTION_1_PID = 7L;
     private static final Long CANCEL_ACTION_2_PID = 8L;
+    private static final Long NEW_DELETE_ACTION_PID = 9L;
     private static final Long RUNNING_ACTION_1_TRACKING_PID = 101L;
     private static final Long RUNNING_ACTION_2_TRACKING_PID = 102L;
     private static final Long RUNNING_ACTION_1_TRACKING_ID = 1101L;
@@ -71,7 +80,10 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private ActionService actionService;
 
     @Mock
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedService dataFeedService;
+
+    @Mock
+    private DataFeedTaskService dataFeedTaskService;
 
     @Mock
     private WorkflowProxy workflowProxy;
@@ -93,7 +105,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGetEmptyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateEmptyActions());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         Assert.assertTrue(CollectionUtils.isEmpty(list));
     }
@@ -102,7 +114,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     public void testGetNoCancelActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
 
@@ -126,7 +138,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGetMetadataOnlyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateMetadataChangeActions());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
@@ -137,8 +149,9 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
     public void testGetFullActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateFullActions());
+        when(dataFeedTaskService.getDataFeedTask(anyString(), nullable(String.class))).thenReturn(generateImportDataFeedTask());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
 
@@ -156,7 +169,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
                 COMPLETE_ACTION_1_TRACKING_PID, COMPLETE_ACTION_2_TRACKING_PID).map(Object::toString)
                 .collect(Collectors.toList());
         when(workflowProxy.getWorkflowExecutionsByJobPids(workflowIdStr)).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
@@ -166,10 +179,33 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
     }
 
+    @Test(groups = "functional")
+    public void testNonWorkFlowDeleteActions() {
+        when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateNewFullActions());
+        when(dataFeedTaskService.getDataFeedTask(anyString(), nullable(String.class))).thenReturn(generateImportDataFeedTask());
+        when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
+        Set<BusinessEntity> needDeletedEntities = new HashSet<>();
+        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, needDeletedEntities);
+        Assert.assertNotNull(list);
+        Assert.assertNotNull(needDeletedEntities);
+        log.info(String.format("actionIds=%s", list));
+        log.info(String.format("needDeletedEntities=%s", JsonUtils.serialize(needDeletedEntities)));
+
+        Assert.assertTrue(CollectionUtils.isNotEmpty(list));
+        Assert.assertEquals(list.size(), 4);
+        Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
+        Assert.assertEquals(list.get(1), COMPLETE_ACTION_1_PID);
+        Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
+        Assert.assertEquals(list.get(3), NEW_DELETE_ACTION_PID);
+        Assert.assertEquals(needDeletedEntities.size(), 1);
+        Assert.assertTrue(needDeletedEntities.contains(BusinessEntity.Account));
+    }
+
     @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")
     public void testGetInheritableActionsFromLastFailedPA(DataFeedExecution dataFeedExecution, Job workflowExection,
                                                           List<Action> actions, List<Long> inheritableActionIds) {
-        when(dataFeedProxy.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
+        when(dataFeedService.getDefaultDataFeed(anyString())).thenReturn(new DataFeed());
+        when(dataFeedService.getLatestExecution(anyString(), any(), any())).thenReturn(dataFeedExecution);
         when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
 
@@ -339,6 +375,43 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         return actions;
     }
 
+    private List<Action> generateNewFullActions() {
+        List<Action> actions = new ArrayList<>(generateMetadataChangeActions());
+        Action runningAction1 = new Action();
+        runningAction1.setPid(RUNNING_ACTION_1_PID);
+        runningAction1.setTrackingPid(RUNNING_ACTION_1_TRACKING_PID);
+        runningAction1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        runningAction1.setActionConfiguration(new ImportActionConfiguration());
+        Action runningAction2 = new Action();
+        runningAction2.setPid(RUNNING_ACTION_2_PID);
+        runningAction2.setTrackingPid(RUNNING_ACTION_2_TRACKING_PID);
+        runningAction2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        runningAction2.setActionConfiguration(new ImportActionConfiguration());
+
+        Action completeAction1 = new Action();
+        completeAction1.setPid(COMPLETE_ACTION_1_PID);
+        completeAction1.setTrackingPid(COMPLETE_ACTION_1_TRACKING_PID);
+        completeAction1.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        completeAction1.setActionConfiguration(new ImportActionConfiguration());
+        Action completeAction2 = new Action();
+        completeAction2.setPid(COMPLETE_ACTION_2_PID);
+        completeAction2.setTrackingPid(COMPLETE_ACTION_2_TRACKING_PID);
+        completeAction2.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        completeAction2.setActionConfiguration(new ImportActionConfiguration());
+        Action completeAction3 = new Action();
+        completeAction3.setPid(NEW_DELETE_ACTION_PID);
+        completeAction3.setType(ActionType.CDL_OPERATION_WORKFLOW);
+        CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
+        cleanupActionConfiguration.addImpactEntity(BusinessEntity.Account);
+        completeAction3.setActionConfiguration(cleanupActionConfiguration);
+        actions.add(runningAction1);
+        actions.add(runningAction2);
+        actions.add(completeAction1);
+        actions.add(completeAction2);
+        actions.add(completeAction3);
+        return actions;
+    }
+
     private Tenant generateLockedTenant() {
         Tenant tenant = new Tenant();
         tenant.setId(lockedCustomerSpace);
@@ -349,6 +422,12 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Tenant tenant = new Tenant();
         tenant.setId(unlockedCustomerSpace);
         return tenant;
+    }
+
+    private DataFeedTask generateImportDataFeedTask() {
+        DataFeedTask dataFeedTask = new DataFeedTask();
+        dataFeedTask.setEntity(BusinessEntity.Account.name());
+        return dataFeedTask;
     }
 
 }

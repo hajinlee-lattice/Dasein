@@ -75,16 +75,16 @@ public class ProcessAccountChoreographerUnitTestNG {
         };
         step.setExecutionContext(new ExecutionContext());
         ChoreographerContext grapherContext = new ChoreographerContext();
-        grapherContext.setJobImpactedEntities(new HashSet<>(Collections.singletonList(BusinessEntity.Contact)));
+        grapherContext.setEntitiesRebuildDueToActions(new HashSet<>(Collections.singletonList(BusinessEntity.Contact)));
         step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
-        choreographer.checkJobImpactedEntity(step);
-        Assert.assertFalse(choreographer.jobImpacted);
+        choreographer.checkRebuildDueToActions(step);
+        Assert.assertFalse(choreographer.rebuildDueToActions);
 
-        grapherContext.setJobImpactedEntities(
+        grapherContext.setEntitiesRebuildDueToActions(
                 new HashSet<>(Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)));
         step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
-        choreographer.checkJobImpactedEntity(step);
-        Assert.assertTrue(choreographer.jobImpacted);
+        choreographer.checkRebuildDueToActions(step);
+        Assert.assertTrue(choreographer.rebuildDueToActions);
     }
 
 }
