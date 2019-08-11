@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.app.exposed.download.BundleFileHttpDownloader;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.download.HdfsFileHttpDownloader;
@@ -31,7 +32,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-import com.latticeengines.pls.download.BundleFileHttpDownloader;
 import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -76,7 +76,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
 
-    @Value("${camille.zk.pod.id:Default}")
+    @Value("${camille.zk.pod.id}")
     protected String podId;
 
     @Override

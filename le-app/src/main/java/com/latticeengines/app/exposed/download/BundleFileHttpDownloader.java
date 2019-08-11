@@ -1,4 +1,4 @@
-package com.latticeengines.pls.download;
+package com.latticeengines.app.exposed.download;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -22,7 +22,6 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.app.exposed.download.AbstractHttpFileDownLoader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -102,9 +101,7 @@ public class BundleFileHttpDownloader extends AbstractHttpFileDownLoader {
                     if (StringUtils.isNotBlank(extract.getPath())) {
                         String hdfsPath = pathBuilder.getFullPath(extract.getPath());
                         String s3Path = pathBuilder.convertAtlasTableDir(hdfsPath, podId, customerSpace, bucketName);
-                        List<String> filePaths =  HdfsUtils.getFilesByGlobWithScheme(configuration, s3Path + "/*" +
-                                        ".avro",
-                                true);
+                        List<String> filePaths =  HdfsUtils.getFilesByGlobWithScheme(configuration, s3Path + "/*.avro", true);
                         if (CollectionUtils.isEmpty(filePaths)) {
                             continue;
                         }

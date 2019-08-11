@@ -2,20 +2,34 @@ package com.latticeengines.apps.cdl.end2end;
 
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
@@ -59,14 +73,48 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     @Override
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
-
         setupEnd2EndTestEnvironment();
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
 
     }
 
     @Test(groups = "end2end")
+    public void testCurrentBundle() throws Exception {
+        // get current bundle before PA
+        byte[] bytes = getCurrentBundleResponse();
+        Assert.assertTrue(bytes == null);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+
+        // get current bundle after PA
+        byte[] bytes2 = getCurrentBundleResponse();
+        Assert.assertTrue(bytes2.length > 0);
+        CSVFormat format = LECSVFormat.format;
+        try (CSVParser parser = new CSVParser(new InputStreamReader(new ByteArrayInputStream(bytes2)), format)){
+            Set<String> csvHeaders = parser.getHeaderMap().keySet();
+            assertTrue(csvHeaders.contains("Product Id"));
+            assertTrue(csvHeaders.contains("Product Name"));
+            assertTrue(csvHeaders.contains("Product Bundle"));
+            assertTrue(csvHeaders.contains("Description"));
+        } catch (Exception e) {
+            // unexpected exception happened
+        }
+
+    }
+
+    private byte[] getCurrentBundleResponse() {
+        RestTemplate template = testBed.getRestTemplate();
+        String url = String.format("%s/pls/datafiles/bundlecsv", deployedHostPort);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = template.exchange(url, HttpMethod.GET, entity, byte[].class);
+        String fileName = response.getHeaders().getFirst("Content-Disposition");
+        Assert.assertTrue(fileName.contains(".csv"));
+        return response.getBody();
+    }
+
+    @Test(groups = "end2end", dependsOnMethods = "testCurrentBundle")
     public void testProductBundle() throws Exception {
         // create bundle related segment
         createTestSegmentProductBundle();
