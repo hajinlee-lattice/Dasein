@@ -105,11 +105,13 @@ public class CampaignLaunchProcessor {
     @Inject
     private ExportFieldMetadataProxy exportFieldMetadataProxy;
 
-    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
+    public ProcessedFieldMappingMetadata prepareFrontEndQueries(PlayLaunchContext playLaunchContext,
+            DataCollection.Version version) {
         // prepare basic account and contact front end queries
-        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
+        ProcessedFieldMappingMetadata result = frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
         applyEmailFilterToQueries(playLaunchContext);
         handleLookupIdBasedSuppression(playLaunchContext);
+        return result;
     }
 
     public void runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
@@ -369,6 +371,50 @@ public class CampaignLaunchProcessor {
     @VisibleForTesting
     void setDataDbType(String dataDbType) {
         this.dataDbType = dataDbType;
+    }
+
+    public static class ProcessedFieldMappingMetadata {
+
+        private List<String> accountColsRecIncluded;
+
+        private List<String> accountColsRecNotIncludedStd;
+
+        private List<String> accountColsRecNotIncludedNonStd;
+
+        private List<String> contactCols;
+
+        public List<String> getAccountColsRecIncluded() {
+            return this.accountColsRecIncluded;
+        }
+
+        public void setAccountColsRecIncluded(List<String> accountColsRecIncluded) {
+            this.accountColsRecIncluded = accountColsRecIncluded;
+        }
+
+        public List<String> getAccountColsRecNotIncludedStd() {
+            return this.accountColsRecNotIncludedStd;
+        }
+
+        public void setAccountColsRecNotIncludedStd(List<String> accountColsRecNotIncludedStd) {
+            this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+        }
+
+        public List<String> getAccountCoslRecNotIncludedNonStd() {
+            return this.accountColsRecNotIncludedNonStd;
+        }
+
+        public void setAccountCoslRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
+            this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+        }
+
+        public List<String> getContactCols() {
+            return this.contactCols;
+        }
+
+        public void setContactCols(List<String> contactCols) {
+            this.contactCols = contactCols;
+        }
+
     }
 
 }

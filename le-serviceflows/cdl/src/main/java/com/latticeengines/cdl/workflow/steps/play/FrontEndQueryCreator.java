@@ -23,10 +23,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.playmakercore.RecommendationColumName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -65,7 +67,7 @@ public class FrontEndQueryCreator {
         initLookupFieldsConfiguration();
     }
 
-    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, boolean useSpark) {
+    public ProcessedFieldMappingMetadata prepareFrontEndQueries(PlayLaunchContext playLaunchContext, boolean useSpark) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
@@ -73,7 +75,7 @@ public class FrontEndQueryCreator {
         accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
 
-        prepareLookupsForFrontEndQueries(playLaunchContext, useSpark);
+        ProcessedFieldMappingMetadata result = prepareLookupsForFrontEndQueries(playLaunchContext, useSpark);
 
         prepareQueryWithRestrictions(playLaunchContext, useSpark);
 
@@ -84,6 +86,7 @@ public class FrontEndQueryCreator {
         addSort(playLaunchContext, accountFrontEndQuery, contactFrontEndQuery);
         log.info("AccountFrontEndQuery=" + JsonUtils.serialize(accountFrontEndQuery));
         log.info("ContactFrontEndQuery=" + JsonUtils.serialize(contactFrontEndQuery));
+        return result;
     }
 
     public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) {
@@ -102,7 +105,10 @@ public class FrontEndQueryCreator {
                 contactFrontEndQuery);
     }
 
-    private void prepareLookupsForFrontEndQueries(PlayLaunchContext playLaunchContext, boolean useSpark) {
+    @VisibleForTesting
+    ProcessedFieldMappingMetadata prepareLookupsForFrontEndQueries(PlayLaunchContext playLaunchContext,
+            boolean useSpark) {
+        ProcessedFieldMappingMetadata result = new ProcessedFieldMappingMetadata();
         String destinationAccountId = playLaunchContext.getPlayLaunch().getDestinationAccountId();
         Map<BusinessEntity, List<String>> tempAccLookupFields;
         if (StringUtils.isBlank(destinationAccountId)) {
@@ -129,16 +135,19 @@ public class FrontEndQueryCreator {
                         businessEntity -> prepareLookups(businessEntity, contactLookups, contactLookupFields));
         // if useSpark, need to union with user configured fields
         if (useSpark) {
-            unionAccountAndContactLookups(accountLookups, contactLookups, playLaunchContext.getFieldMappingMetadata());
+            unionAccountAndContactLookups(accountLookups, contactLookups, playLaunchContext.getFieldMappingMetadata(),
+                    result);
         }
         playLaunchContext.getAccountFrontEndQuery().setLookups(accountLookups);
         playLaunchContext.getContactFrontEndQuery().setLookups(contactLookups);
+        return result;
     }
 
-    @VisibleForTesting
-    void unionAccountAndContactLookups(List<Lookup> accountLookups, List<Lookup> contactLookups,
-            List<ColumnMetadata> fieldMappingMetadata) {
+    private void unionAccountAndContactLookups(List<Lookup> accountLookups, List<Lookup> contactLookups,
+            List<ColumnMetadata> fieldMappingMetadata, ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
         if (CollectionUtils.isNotEmpty(fieldMappingMetadata)) {
+            processFieldMappingMetadataWithExistingRecommendationColumns(fieldMappingMetadata,
+                    processedFieldMappingMetadata);
             Map<BusinessEntity, Set<Lookup>> fieldMaps = new HashMap<>();
             fieldMappingMetadata.stream().filter(md -> !md.isCampaignDerivedField()).forEach(md -> {
                 BusinessEntity entity = md.getEntity();
@@ -181,6 +190,30 @@ public class FrontEndQueryCreator {
                 fieldMaps.entrySet().iterator().forEachRemaining(entry -> accountLookups.addAll(entry.getValue()));
             }
         }
+    }
+
+    private void processFieldMappingMetadataWithExistingRecommendationColumns(List<ColumnMetadata> fieldMappingMetadata,
+            ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
+        List<String> accountColsRecIncluded = new ArrayList<>();
+        List<String> accountColsRecNotIncludedStd = new ArrayList<>();
+        List<String> accountColsRecNotIncludedNonStd = new ArrayList<>();
+        List<String> contactCols = new ArrayList<>();
+        processedFieldMappingMetadata.setAccountColsRecIncluded(accountColsRecIncluded);
+        processedFieldMappingMetadata.setAccountColsRecNotIncludedStd(accountColsRecNotIncludedStd);
+        processedFieldMappingMetadata.setAccountCoslRecNotIncludedNonStd(accountColsRecNotIncludedNonStd);
+        processedFieldMappingMetadata.setContactCols(contactCols);
+        fieldMappingMetadata.forEach(metadata -> {
+            String attrName = metadata.getAttrName();
+            if (BusinessEntity.Contact.equals(metadata.getEntity())) {
+                contactCols.add(metadata.getAttrName());
+            } else if (RecommendationColumName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.containsKey(attrName)) {
+                accountColsRecIncluded.add(attrName);
+            } else if (metadata.isCampaignDerivedField()) {
+                accountColsRecNotIncludedNonStd.add(attrName);
+            } else {
+                accountColsRecNotIncludedStd.add(attrName);
+            }
+        });
     }
 
     @SuppressWarnings("unused")

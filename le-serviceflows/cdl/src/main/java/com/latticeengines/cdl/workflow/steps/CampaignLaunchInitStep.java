@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
@@ -99,12 +101,14 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info(String.format("Total available accounts available for Launch: %d, contacts: %d",
                     totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch));
 
-            // 1. Generate FrontEndQueries for Account and Contact in the PlayLaunchContext
-            campaignLaunchProcessor.prepareFrontEndQueries(playLaunchContext, version);
+            // 1. Generate FrontEndQueries for Account and Contact in the
+            // PlayLaunchContext
+            ProcessedFieldMappingMetadata processedFieldMappingMetadata = campaignLaunchProcessor
+                    .prepareFrontEndQueries(playLaunchContext, version);
             log.info("Query for Accounts to Launch: " + playLaunchContext.getAccountFrontEndQuery());
             log.info("Query for Contact to Launch: " + playLaunchContext.getContactFrontEndQuery());
 
-            SparkJobResult createRecJobResult = executeSparkJob(playLaunchContext);
+            SparkJobResult createRecJobResult = executeSparkJob(playLaunchContext, processedFieldMappingMetadata);
 
             long launchedAccountNum = createRecJobResult.getTargets().get(0).getCount();
             log.info("Total Account launched: " + launchedAccountNum);
@@ -157,7 +161,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
         log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
     }
 
-    private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext) {
+    private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext,
+            ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -179,9 +184,19 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
                 }
 
-                // 3. generate avro out of DataFrame with predefined format for Recommendations
+                // 3. generate avro out of DataFrame with predefined format for
+                // Recommendations
+                PlayLaunchSparkContext playLaunchSparkContext = playLaunchContext.toPlayLaunchSparkContext();
+                playLaunchSparkContext
+                        .setAccountColsRecIncluded(processedFieldMappingMetadata.getAccountColsRecIncluded());
+                playLaunchSparkContext.setAccountColsRecNotIncludedStd(
+                        processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
+                playLaunchSparkContext.setAccountCoslRecNotIncludedNonStd(
+                        processedFieldMappingMetadata.getAccountCoslRecNotIncludedNonStd());
+                ;
+                playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
                 return executeSparkJob(CreateRecommendationsJob.class,
-                        generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchContext));
+                        generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));
             } finally {
                 stopSparkSQLSession();
             }
@@ -189,7 +204,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     }
 
     private CreateRecommendationConfig generateCreateRecommendationConfig(HdfsDataUnit accountDataUnit,
-            HdfsDataUnit contactDataUnit, PlayLaunchContext playLaunchContext) {
+            HdfsDataUnit contactDataUnit, PlayLaunchSparkContext playLaunchSparkContext) {
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
         createRecConfig.setWorkspace(getRandomWorkspace());
         if (contactDataUnit != null) {
@@ -197,7 +212,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
         } else {
             createRecConfig.setInput(Collections.singletonList(accountDataUnit));
         }
-        createRecConfig.setPlayLaunchSparkContext(playLaunchContext.toPlayLaunchSparkContext());
+        createRecConfig.setPlayLaunchSparkContext(playLaunchSparkContext);
         return createRecConfig;
     }
 

@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
@@ -92,16 +91,16 @@ public class PlayLaunchSparkContext implements Serializable {
     private String sfdcAccountID;
 
     @JsonProperty("AccountColsRecIncluded")
-    private List<ColumnMetadata> accountColsRecIncluded;
+    private List<String> accountColsRecIncluded;
 
     @JsonProperty("AccountColsRecNotIncludedStd")
-    private List<ColumnMetadata> accountColsRecNotIncludedStd;
+    private List<String> accountColsRecNotIncludedStd;
 
     @JsonProperty("AccountCoslRecNotIncludedNonStd")
-    private List<ColumnMetadata> accountColsRecNotIncludedNonStd;
+    private List<String> accountColsRecNotIncludedNonStd;
 
     @JsonProperty("ContactCols")
-    private List<ColumnMetadata> contactCols;
+    private List<String> contactCols;
 
     public PlayLaunchSparkContext() {
     }
@@ -250,35 +249,35 @@ public class PlayLaunchSparkContext implements Serializable {
         this.sfdcAccountID = sfdcAccountID;
     }
 
-    public List<ColumnMetadata> getAccountColsRecIncluded() {
+    public List<String> getAccountColsRecIncluded() {
         return this.accountColsRecIncluded;
     }
 
-    public void setAccountColsRecIncluded(List<ColumnMetadata> accountColsRecIncluded) {
+    public void setAccountColsRecIncluded(List<String> accountColsRecIncluded) {
         this.accountColsRecIncluded = accountColsRecIncluded;
     }
 
-    public List<ColumnMetadata> getAccountColsRecNotIncludedStd() {
+    public List<String> getAccountColsRecNotIncludedStd() {
         return this.accountColsRecNotIncludedStd;
     }
 
-    public void setAccountColsRecNotIncludedStd(List<ColumnMetadata> accountColsRecNotIncludedStd) {
+    public void setAccountColsRecNotIncludedStd(List<String> accountColsRecNotIncludedStd) {
         this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
     }
 
-    public List<ColumnMetadata> getAccountCoslRecNotIncludedNonStd() {
+    public List<String> getAccountCoslRecNotIncludedNonStd() {
         return this.accountColsRecNotIncludedNonStd;
     }
 
-    public void setAccountCoslRecNotIncludedNonStd(List<ColumnMetadata> accountColsRecNotIncludedNonStd) {
+    public void setAccountCoslRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
         this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
     }
 
-    public List<ColumnMetadata> getContactCols() {
+    public List<String> getContactCols() {
         return this.contactCols;
     }
 
-    public void setContactCols(List<ColumnMetadata> contactCols) {
+    public void setContactCols(List<String> contactCols) {
         this.contactCols = contactCols;
     }
 

@@ -33,7 +33,7 @@ public enum RecommendationColumName {
 
     // this maps from Recommendation table column names to the internal name
     // provided by the export config service
-    public static final Map<String, String> recColumnToInternalNameMap = //
+    public static final Map<String, String> RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP = //
             ImmutableMap.<String, String> builder().put(PID.name(), PID.name()) //
                     .put(EXTERNAL_ID.name(), EXTERNAL_ID.name())//
                     .put(ACCOUNT_ID.name(), InterfaceName.AccountId.name()) //
@@ -61,7 +61,7 @@ public enum RecommendationColumName {
                     .build();
 
     // this maps from internal name to Recommendation table column
-    public static final Map<String, String> internalNameToRecColumnMap = //
+    public static final Map<String, String> INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP = //
             ImmutableMap.<String, String> builder().put(PID.name(), PID.name()) //
                     .put(EXTERNAL_ID.name(), EXTERNAL_ID.name())//
                     .put(InterfaceName.AccountId.name(), ACCOUNT_ID.name()) //
