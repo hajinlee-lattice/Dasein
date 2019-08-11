@@ -146,32 +146,32 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
     @Test(groups = "deployment")
     public void testTriggerQueuedLaunches() throws InterruptedException {
         List<PlayLaunch> queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), 2);
+        int initialQueuedSize = queuedPlayLaunches.size();
         List<PlayLaunch> launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), 0);
+        int initiaLaunchingSize = launchingPlayLaunches.size();
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(1000);
         queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), 0);
+        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 2);
         launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), 2);
+        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
 
         // test that a play launch that's in queued state does not launch if
         // there already is a play launch launching to the same channel
         PlayLaunch playLaunch2a = playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel2, play);
         Assert.assertNotNull(playLaunch2a);
         queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), 1);
+        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 1);
         launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), 2);
+        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(1000);
         queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), 1);
+        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 1);
         launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), 2);
+        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
 
     }
 
