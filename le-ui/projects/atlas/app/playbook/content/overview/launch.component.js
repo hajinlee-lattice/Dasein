@@ -183,11 +183,11 @@ class LaunchComponent extends Component {
             this.setState(this.state);
         }
 
-        if(!channelConfig.audienceName) {
+        if(!channelConfig || !channelConfig.audienceName) {
             this.state.showNewAudienceName = true;
             this.setState(this.state);
         }
-        if(channelConfig.audienceName) {
+        if(channelConfig && channelConfig.audienceName) {
             this.state.audienceParams.audienceName = channelConfig.audienceName;
             this.setState(this.state);
         }
@@ -209,7 +209,10 @@ class LaunchComponent extends Component {
 
     getChannelConfig = (externalSystemName) => {
         var externalSystemName = externalSystemName || this.state.externalSystemName;
-        return this.state.connection.channelConfig[externalSystemName.toLowerCase()];
+        if(this.state.externalSystemName && this.state.connection && this.state.connection.channelConfig && this.state.connection.channelConfig[externalSystemName.toLowerCase()]) {
+            return this.state.connection.channelConfig[externalSystemName.toLowerCase()];
+        }
+        return null;
     }
 
     getLaunchAccountsCoverage(play, opts) {
@@ -694,7 +697,7 @@ class LaunchComponent extends Component {
     }
 
     launch = (play, connection, opts) => {
-        var debug = true;
+        var debug = false;
         // FIXME crappy hack to select all buckets because of setState recursion
         var coverageObj = this.getCoverage(this.state.launchAccountsCoverage);
         this.state.selectedBuckets = this.state.selectedBuckets.splice(0,4);
