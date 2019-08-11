@@ -28,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -71,6 +72,9 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Mock
     private MatchProxy mockedMatchProxyWithMatchedResult;
@@ -121,6 +125,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         lpiPMAccountExtensionImpl.setEntityQueryGenerator(entityQueryGenerator);
         lpiPMAccountExtensionImpl.setLookupIdMappingProxy(lookupIdMappingProxy);
         lpiPMAccountExtensionImpl.setColumnMetadataProxy(columnMetadataProxy);
+        lpiPMAccountExtensionImpl.setBatonService(batonService);
 
         MockitoAnnotations.initMocks(this);
 
