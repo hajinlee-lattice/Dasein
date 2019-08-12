@@ -402,7 +402,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<String> engineIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(actions)) {
             for (Action action: actions) {
-                if (ActionType.getRatingRelatedTypes().contains(action.getType())) {
+                if (ActionType.getRatingRelatedTypes().contains(action.getType()) && //
+                        action.getActionConfiguration() instanceof RatingEngineActionConfiguration) {
                     RatingEngineActionConfiguration configuration = //
                             (RatingEngineActionConfiguration) action.getActionConfiguration();
                     engineIds.add(configuration.getRatingEngineId());
