@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,14 +62,22 @@ public class AtlasExportResourceDeploymentTestNG extends CDLDeploymentTestNGBase
         Assert.assertNotNull(s3DropFolderPath);
         Assert.assertNotNull(s3SystemPath);
 
-        atlasExportProxy.addFileToDropFolder(mainCustomerSpace, atlasExport.getUuid(), "Dropfolder-Account.csv.gz");
+        List<String> files = new ArrayList<>();
+        files.add("Dropfolder-Account.csv.gz");
+        atlasExportProxy.addFileToDropFolder(mainCustomerSpace, atlasExport.getUuid(), "Dropfolder-Account.csv.gz", files);
 
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord.getUuid());
         Assert.assertEquals(atlasExport.getFilesUnderDropFolder().size(), 1);
+        Assert.assertEquals(atlasExport.getFilesToDelete().size(), 1);
+        Assert.assertEquals(atlasExport.getFilesToDelete().get(0), "Dropfolder-Account.csv.gz");
+        files = new ArrayList<>();
+        files.add("Account-" + atlasExport.getUuid() + ".csv.gz");
         atlasExportProxy.addFileToSystemPath(mainCustomerSpace, atlasExport.getUuid(),
-                "Account-" + atlasExport.getUuid() + ".csv.gz");
+                "Account-" + atlasExport.getUuid() + ".csv.gz", files);
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord.getUuid());
         Assert.assertEquals(atlasExport.getFilesUnderSystemPath().size(), 1);
+        Assert.assertEquals(atlasExport.getFilesToDelete().size(), 1);
+        Assert.assertEquals(atlasExport.getFilesToDelete().get(0), "Account-" + atlasExport.getUuid() + ".csv.gz");
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord2.getUuid());
         verifyAtlasExport(atlasExport, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.RUNNING);
         atlasExportProxy.updateAtlasExportStatus(mainCustomerSpace, exportRecord2.getUuid(), MetadataSegmentExport.Status.COMPLETED);
@@ -76,7 +85,6 @@ public class AtlasExportResourceDeploymentTestNG extends CDLDeploymentTestNGBase
         verifyAtlasExport(atlasExport, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.COMPLETED);
         List<AtlasExport> atlasExports = atlasExportProxy.findAll(mainCustomerSpace);
         Assert.assertEquals(atlasExports.size(), 2);
-
     }
 
     private AtlasExport createAtlasExport(AtlasExportType atlasExportType) {

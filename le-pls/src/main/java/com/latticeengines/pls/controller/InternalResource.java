@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -598,30 +599,47 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after segment export")
     public void sendSegmentExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
-            @RequestBody MetadataSegmentExport export, HttpServletRequest request) {
+                                       @RequestBody MetadataSegmentExport export) {
         List<User> users = userService.getUsers(tenantId);
         String exportID = export.getExportId();
         AtlasExportType exportType = export.getType();
+        sendEmail(exportType, exportID, users, result, tenantId, export.getCreatedBy());
+    }
+
+    private void sendEmail(AtlasExportType exportType, String exportID, List<User> users, String result,
+                           String tenantId, String createBy) {
         String exportTypeStr = exportType.getDisplayName();
         if (exportID != null && !exportID.isEmpty()) {
             for (User user : users) {
-                if (user.getEmail().equals(export.getCreatedBy())) {
+                if (user.getEmail().equals(createBy)) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
-                    case "COMPLETED":
-                        emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr);
-                        break;
-                    case "FAILED":
-                        emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
-                        break;
-                    case "STARTED":
-                        emailService.sendPlsExportSegmentRunningEmail(user, exportID);
-                        break;
+                        case "COMPLETED":
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr);
+                            break;
+                        case "FAILED":
+                            emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);
+                            break;
+                        case "STARTED":
+                            emailService.sendPlsExportSegmentRunningEmail(user, exportID);
+                            break;
                     }
                 }
             }
         }
+    }
+
+    @RequestMapping(value = "/emails/atlasexport/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after segment export")
+    public void sendAtlasExportEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
+                                     @RequestBody AtlasExport export) {
+        List<User> users = userService.getUsers(tenantId);
+        String exportID = export.getUuid();
+        AtlasExportType exportType = export.getExportType();
+        sendEmail(exportType, exportID, users, result, tenantId, export.getCreatedBy());
     }
 
     @RequestMapping(value = "/emails/s3import/result/{result}/"
