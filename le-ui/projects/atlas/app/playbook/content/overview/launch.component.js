@@ -212,7 +212,7 @@ class LaunchComponent extends Component {
         if(this.state.externalSystemName && this.state.connection && this.state.connection.channelConfig && this.state.connection.channelConfig[externalSystemName.toLowerCase()]) {
             return this.state.connection.channelConfig[externalSystemName.toLowerCase()];
         }
-        return null;
+        return {};
     }
 
     getLaunchAccountsCoverage(play, opts) {
@@ -253,7 +253,10 @@ class LaunchComponent extends Component {
                 vm.setState(vm.state);
             });
         } else {
-            // actions.fetchEntitiesCounts({ 'preexisting_segment_name': playstore.play.targetSegment.name }, function(data) {
+            // actions.fetchEntitiesCounts({
+            //     account_restriction: playstore.play.targetSegment.account_restriction, 
+            //     contact_restriction: playstore.play.targetSegment.contact_restriction
+            // }, function(data) {
             //     console.log(data);
             //     // vm.state.excludeItemsWithoutSalesforceId = deepState.excludeItemsWithoutSalesforceId; // this gets reset here. I don't know exactly why.
             //     // vm.state.launchAccountsCoverage = {
