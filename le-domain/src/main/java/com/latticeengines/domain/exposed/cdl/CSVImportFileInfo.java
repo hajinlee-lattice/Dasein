@@ -20,6 +20,12 @@ public class CSVImportFileInfo {
     @JsonProperty("partial_file")
     private boolean partialFile = false;
 
+    @JsonProperty("s3_bucket")
+    private String s3Bucket;
+
+    @JsonProperty("s3_path")
+    private String s3Path;
+
     public String getFileUploadInitiator() {
         return this.fileUploadInitiator;
     }
@@ -63,5 +69,21 @@ public class CSVImportFileInfo {
 
     public void setPartialFile(boolean partialFile) {
         this.partialFile = partialFile;
+    }
+
+    public String getS3Bucket() {
+        return s3Bucket;
+    }
+
+    public void setS3Bucket(String s3Bucket) {
+        this.s3Bucket = s3Bucket;
+    }
+
+    public String getS3Path() {
+        return s3Path;
+    }
+
+    public void setS3Path(String s3Path) {
+        this.s3Path = s3Path;
     }
 }

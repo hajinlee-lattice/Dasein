@@ -116,6 +116,14 @@ public class SourceFile
     @Column(name = "PARTIAL_FILE")
     private boolean partialFile;
 
+    @JsonProperty("s3_path")
+    @Column(name = "S3_PATH")
+    private String s3Path;
+
+    @JsonProperty("s3_bucket")
+    @Column(name = "S3_BUCKET")
+    private String s3Bucket;
+
     @Override
     public String getName() {
         return name;
@@ -259,5 +267,21 @@ public class SourceFile
 
     public void setPartialFile(boolean partialFile) {
         this.partialFile = partialFile;
+    }
+
+    public String getS3Path() {
+        return s3Path;
+    }
+
+    public void setS3Path(String s3Path) {
+        this.s3Path = s3Path;
+    }
+
+    public String getS3Bucket() {
+        return s3Bucket;
+    }
+
+    public void setS3Bucket(String s3Bucket) {
+        this.s3Bucket = s3Bucket;
     }
 }
