@@ -435,6 +435,81 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         }
     }
 
+    private InputStream transformHeaderForCsv(InputStream inputStream, Map<String, String> headerTransformation,
+                              StringBuilder filenameBuilder) {
+
+        //initial preparation
+        String tenant = MultiTenantContext.getShortTenantId();
+        log.info(String.format("headerTransformation=%s. Tenant=%s", JsonUtils.serialize(headerTransformation), tenant));
+        filenameBuilder.append(tempFolderName());
+        String filename = filenameBuilder.toString();
+        log.info(String.format("Use temporary file=%s. Tenant=%s", filename, tenant));
+
+        //prepare output
+        BufferedWriter bw;
+        try {
+
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
+
+        } catch (FileNotFoundException exc) {
+
+            log.error(String.format("Error while opening the temporary file %s. Tenant=%s", filename, tenant), exc);
+            return inputStream;
+
+        }
+
+        //transform
+        try (InputStreamReader reader = new InputStreamReader(
+                new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                StandardCharsets.UTF_8)) {
+            try (CSVParser parser = new CSVParser(reader, LECSVFormat.format)) {
+
+                //prepare header
+                Map<String, Integer> headerMap = parser.getHeaderMap();
+                String[] newHeader = transformHeader(headerMap, headerTransformation);
+
+                //output
+                String[] outBuf = new String[newHeader.length];
+                try (CSVPrinter printer = new CSVPrinter(bw,
+                        CSVFormat.DEFAULT.withHeader(newHeader))) {
+
+                    //loop the records
+                    for (CSVRecord record : parser) {
+
+                        //rec => string array
+                        toArray(record, outBuf);
+
+                        //output rec
+                        printer.printRecord(outBuf);
+
+                    }
+
+                }
+
+            }
+
+        } catch (IOException exc) {
+
+            log.error(String.format("Error reading the input stream. Tenant=%s", tenant), exc);
+            return inputStream;
+
+        }
+
+        //return newly created stream
+        try {
+
+            return new FileInputStream(filename);
+
+        } catch (FileNotFoundException exc) {
+
+            log.error(String.format("Error while reading temporary file %s. Tenant=%s", filename, tenant), exc);
+            return inputStream;
+
+        }
+
+    }
+
     private String[] toArray(CSVRecord rec) {
         String[] arr = new String[rec.size()];
         int i = 0;
@@ -444,9 +519,118 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         return arr;
     }
 
+    private void toArray(CSVRecord rec, String[] outBuf) {
+
+        for (int i = 0; i < rec.size(); ++i) {
+            outBuf[i] = rec.get(i);
+        }
+
+    }
+
+    private String[] transformHeader(Map<String, Integer> headerMap, Map<String, String> transformation) {
+
+        String[] newHeader = new String[headerMap.size()];
+        for (Map.Entry<String, Integer> entry: headerMap.entrySet()) {
+
+            String columnName = transformation.containsKey(entry.getKey()) ? transformation.get(entry.getKey()) : entry.getKey();
+            newHeader[entry.getValue()] = columnName;
+
+        }
+
+        return newHeader;
+    }
+
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response) {
         downloadFile(request, response, DownloadMode.DEFAULT);
     }
 
+    @Override
+    public void downloadCsvWithTransform(HttpServletRequest request, HttpServletResponse response, Map<String, String> headerTransform) {
+
+        List<String> tmpFiles = new ArrayList<>(2);
+        List<InputStream> tmpStreams = new ArrayList<>(2);
+
+        //only support octet_stream
+        try {
+
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", getFileName()));
+
+            try (InputStream is = getFileInputStream()) {
+                try (OutputStream os = response.getOutputStream()) {
+
+                    InputStream curIs = is;
+
+                    //reformat date?
+                    if (shouldReformatDate) {
+
+                        log.info("re-format dates...");
+                        InputStream prevIs = curIs;
+                        StringBuilder sb = new StringBuilder();
+                        curIs = processDates(prevIs, sb);
+
+                        if (curIs != prevIs) {
+
+                            tmpFiles.add(sb.toString());
+                            tmpStreams.add(curIs);
+
+                        }
+
+                    }
+
+                    //transform header
+                    if (headerTransform != null) {
+
+                        log.info("transform header...");
+                        InputStream prevIs = curIs;
+                        StringBuilder sb = new StringBuilder();
+                        curIs = transformHeaderForCsv(prevIs, headerTransform, sb);
+
+                        if (curIs != prevIs) {
+
+                            tmpFiles.add(sb.toString());
+                            tmpStreams.add(curIs);
+
+                        }
+
+                    }
+
+                    //send to response
+                    log.info("send content...");
+                    GzipUtils.copyAndCompressStream(curIs, os);
+
+                    log.info("downloading training csv file is done");
+                }
+            }
+
+        } catch (Exception exc) {
+
+            log.error("Failed to download file.", exc);
+            throw new LedpException(LedpCode.LEDP_18022, exc);
+
+        } finally {
+
+            for (InputStream stream : tmpStreams) {
+
+                try {
+
+                    stream.close();
+
+                } catch (IOException e) {
+
+                }
+
+            }
+
+            //delete temp files
+            for (String tmpFile : tmpFiles) {
+
+                deleteFile(tmpFile);
+
+            }
+
+        }
+
+    }
 }
