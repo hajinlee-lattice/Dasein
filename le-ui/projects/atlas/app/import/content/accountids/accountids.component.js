@@ -56,11 +56,18 @@ angular
 			this.unsubscribe = store.subscribe(() => {
 				const data = store.getState()["multitemplates.accountids"];
 				// console.log("DATA ", data.systems);
+				// vm.systems = data.systems;
 				vm.systems = data.systems;
+				// 	.filter(system => {
+				// 	return (
+				// 		system.system_type != data.systemSelected.system_type
+				// 	);
+				// });
 				// vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
 			});
 			//[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
-			actions.fetchSystems({});
+			let tmp = store.getState()["multitemplates.accountids"];
+			actions.fetchSystems({}, tmp.systemSelected);
 
 			let validationStatus = ImportWizardStore.getValidationStatus();
 			let banners = Banner.get();

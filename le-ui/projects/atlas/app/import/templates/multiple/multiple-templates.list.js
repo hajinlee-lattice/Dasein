@@ -381,7 +381,8 @@ export default class MultipleTemplatesList extends Component {
 
 	setDataTypes = response => {
 		let state = Object.assign({}, this.state);
-
+		// console.log("THE SYSTEM ", response.data);
+		actions.setSystemSelected(response.data.ImportSystem);
 		switch (response.type) {
 			case "Accounts": {
 				state.entity = "accounts";

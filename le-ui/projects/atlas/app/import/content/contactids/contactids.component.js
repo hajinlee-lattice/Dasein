@@ -58,11 +58,16 @@ angular
 				const data = store.getState()["multitemplates.contactids"];
 				// console.log("DATA ", data.systems);
 				vm.systems = data.systems;
-				// vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
+				//         .filter(system => {
+				// 		return (
+				// 			system.system_type != data.systemSelected.system_type
+				// 		);
+				// 	});
+				// 	// vm.systems = [{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}]; //data;
 			});
 			//[{ displayName: '-- Select System --', name: 'select'},{name: 't1', displayName: 'Test 1'}, {name: 't2', displayName: 'Test 2'}],
-
-			actions.fetchSystems({});
+			const tmp = store.getState()["multitemplates.contactids"];
+			actions.fetchSystems({}, tmp.systemSelected);
 
 			let validationStatus = ImportWizardStore.getValidationStatus();
 			let banners = Banner.get();
