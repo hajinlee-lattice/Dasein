@@ -63,7 +63,7 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
     public void testPartitionPythonScript(SparkInterpreter interpreter) {
         String ext = SparkInterpreter.Scala.equals(interpreter) ? "scala" : "py";
         setParamsWithPartition(false);
-        uploadOutputAsInput(inputSources);
+        copyOutputAsInput(inputSources);
         InputStream is = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("scripts/partition."+ext);
         InputStreamSparkScript script = new InputStreamSparkScript();

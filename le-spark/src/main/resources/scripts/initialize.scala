@@ -29,8 +29,8 @@ val rawInput = mapper.readValue[List[JsonNode]]("""{{INPUT}}""")
 def loadHdfsUnit(unit: JsonNode): DataFrame = {
   var path = unit.get("Path").asText()
   val fmt = if (unit.get("DataFormat") != null) unit.get("DataFormat").asText.toLowerCase else "avro"
-  val partitionKeys = if (unit.get("PartitionKeys") == null) List() else unit.get("PartitionKeys").elements.asScala.map(_.asText()).toList
-
+  val partitionKeys = if (unit.get("PartitionKeys") == null) List() //
+              else unit.get("PartitionKeys").elements.asScala.map(_.asText()).toList
   if (partitionKeys.isEmpty) {
     val suffix = "." + fmt
     if (!path.endsWith(suffix)) {

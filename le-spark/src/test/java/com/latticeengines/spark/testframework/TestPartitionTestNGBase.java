@@ -72,7 +72,7 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
         return result;
     }
 
-    protected void uploadOutputAsInput(List<HdfsDataUnit> inputs){
+    protected void copyOutputAsInput(List<HdfsDataUnit> inputs){
         try {
             if(CollectionUtils.isNotEmpty(inputs)) {
                 this.inputs = hdfsOutputsAsInputs(inputs);
@@ -93,6 +93,11 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
             count.incrementAndGet();
             log.info("Record: {}",record);
             Assert.assertTrue(record.get("Id") instanceof Long);
+            Assert.assertNull(record.get("Field1"));
+            Assert.assertNull(record.get("Field2"));
+            Assert.assertNull(record.get("Field3"));
+            Assert.assertNull(record.get("Field4"));
+            Assert.assertNull(record.get("Field5"));
         });
         Assert.assertEquals(count.get(), dataCnt.intValue());
         return true;

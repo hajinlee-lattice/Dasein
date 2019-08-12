@@ -22,7 +22,7 @@ public class TestPartitionJobTestNG extends TestPartitionTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "runTest")
     public void runTest2() {
-        uploadOutputAsInput(inputSources);
+        copyOutputAsInput(inputSources);
         TestPartitionJobConfig config = new TestPartitionJobConfig();
         config.setPartition(false);
         SparkJobResult result = runSparkJob(TestPartitionJob.class, config);
