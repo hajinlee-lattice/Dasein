@@ -81,8 +81,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskManagerServiceImpl.class);
 
-    public static final int MAX_HEADER_LENGTH = 63;
-
     private final DataFeedProxy dataFeedProxy;
 
     private final TenantService tenantService;
@@ -415,8 +413,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
         emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                 dataFeedTask.getFeedType()));
-        emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
-                dataFeedTask.getSubType()));
+        emailInfo.setEntityType(EntityType.fromDataFeedTask(dataFeedTask));
         String templateName = dataFeedTask.getTemplateDisplayName() == null ? dataFeedTask.getFeedType() :
                 dataFeedTask.getTemplateDisplayName();
         emailInfo.setTemplateName(templateName);
@@ -443,8 +440,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
                 emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         dataFeedTask.getFeedType()));
-                emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
-                        dataFeedTask.getSubType()));
+                emailInfo.setEntityType(EntityType.fromDataFeedTask(dataFeedTask));
                 String templateName = dataFeedTask.getTemplateDisplayName() == null ? dataFeedTask.getFeedType() :
                         dataFeedTask.getTemplateDisplayName();
                 emailInfo.setTemplateName(templateName);

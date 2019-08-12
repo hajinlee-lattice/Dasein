@@ -5,17 +5,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
 
 public enum EntityType {
-    Accounts(BusinessEntity.Account, null, "Accounts"), //
-    Contacts(BusinessEntity.Contact, null, "Contacts"), //
-    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases"), //
-    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles"), //
-    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy");
+    Accounts(BusinessEntity.Account, null, "Accounts", "AccountData"), //
+    Contacts(BusinessEntity.Contact, null, "Contacts", "ContactData"), //
+    Leads(BusinessEntity.Contact, SubType.Lead, "Leads", "LeadsData"),
+    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases", "TransactionData"), //
+    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles", "ProductBundle"), //
+    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy", "ProductHierarchy");
+
     private BusinessEntity entity;
     private SubType subType;
     private String displayName;
+    private String feedType;
 
     private static List<String> names;
     static {
@@ -25,17 +29,29 @@ public enum EntityType {
         }
     }
 
-    EntityType(BusinessEntity entity, SubType subType, String displayName) {
+    EntityType(BusinessEntity entity, SubType subType, String displayName, String feedType) {
         this.entity = entity;
         this.subType = subType;
         this.displayName = displayName;
+        this.feedType = feedType;
     }
 
     public static List<String> getNames() {
         return names;
     }
 
-    public static EntityType fromEntityAndSubType(BusinessEntity entity, SubType subType) {
+    public static EntityType fromDataFeedTask(DataFeedTask task) {
+        if (task == null) {
+            throw new IllegalArgumentException("Cannot get EntityType from NULL dataFeedTask!");
+        }
+        EntityType entityType = fromFeedTypeName(task.getFeedType());
+        if (entityType != null) {
+            return entityType;
+        }
+        return fromEntityAndSubType(BusinessEntity.getByName(task.getEntity()), task.getSubType());
+    }
+
+    private static EntityType fromEntityAndSubType(BusinessEntity entity, SubType subType) {
         for (EntityType entry : values()) {
             if (entry.getEntity().equals(entity) && entry.getSubType() == subType) {
                 return entry;
@@ -81,7 +97,8 @@ public enum EntityType {
     }
 
     public String getDefaultFeedTypeName() {
-        return this.subType == null ? entity.name() + "Data" : entity.name() + subType.name();
+        return feedType;
+//        return this.subType == null ? entity.name() + "Data" : entity.name() + subType.name();
     }
 
     public static List<String> getDefaultFolders() {

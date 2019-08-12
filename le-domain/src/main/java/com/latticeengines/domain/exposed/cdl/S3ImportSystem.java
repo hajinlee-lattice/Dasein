@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -27,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -204,6 +209,30 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     }
 
     public enum SystemType {
-        Salesforce, Marketo, Eloqua, Other
+        Salesforce {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Arrays.asList(EntityType.Accounts, EntityType.Contacts,
+                        EntityType.Leads);
+            }
+        },
+        Marketo {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Collections.singletonList(EntityType.Leads);
+            }
+        },
+        Eloqua {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Collections.singletonList(EntityType.Leads);
+            }
+        },
+        Other;
+
+        public Collection<EntityType> getEntityTypes() {
+            return Arrays.asList(EntityType.Accounts, EntityType.Contacts, EntityType.ProductPurchases,
+                    EntityType.ProductBundles, EntityType.ProductHierarchy);
+        }
     }
 }
