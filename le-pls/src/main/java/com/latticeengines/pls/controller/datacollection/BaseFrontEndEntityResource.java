@@ -86,7 +86,7 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setContactRestriction(null);
         } else {
             try {
-                validateBucketsInQuery(frontEndQuery);
+                cleanupAndValidateBucketsInQuery(frontEndQuery);
             } catch (LedpException e) {
                 if (LedpCode.LEDP_40057.equals(e.getCode())) {
                     throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
@@ -125,7 +125,7 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setContactRestriction(null);
         } else {
             try {
-                validateBucketsInQuery(frontEndQuery);
+                cleanupAndValidateBucketsInQuery(frontEndQuery);
             } catch (LedpException e) {
                 if (LedpCode.LEDP_40057.equals(e.getCode())) {
                     throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
@@ -160,11 +160,13 @@ public abstract class BaseFrontEndEntityResource {
         return data;
     }
 
-    private void validateBucketsInQuery(FrontEndQuery frontEndQuery) throws LedpException {
+    private void cleanupAndValidateBucketsInQuery(FrontEndQuery frontEndQuery) throws LedpException {
         Restriction accountRestriction = (frontEndQuery.getAccountRestriction() != null) ? //
                 frontEndQuery.getAccountRestriction().getRestriction() : null;
         Restriction contactRestriction = (frontEndQuery.getContactRestriction() != null) ? //
                 frontEndQuery.getContactRestriction().getRestriction() : null;
+        RestrictionUtils.cleanupBucketsInRestriction(accountRestriction);
+        RestrictionUtils.cleanupBucketsInRestriction(contactRestriction);
         List<BucketRestriction> invalidBkts = new ArrayList<>();
         try {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(accountRestriction));
