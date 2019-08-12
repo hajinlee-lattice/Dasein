@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -55,6 +55,7 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -84,6 +85,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
 
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
