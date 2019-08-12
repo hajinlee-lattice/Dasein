@@ -308,6 +308,10 @@ public class CDLServiceImpl implements CDLService {
         importFileInfo.setReportFileDisplayName(dataSourceFile.getDisplayName());
         importFileInfo.setReportFileName(dataSourceFile.getName());
         importFileInfo.setPartialFile(dataSourceFile.isPartialFile());
+        if (dataSourceFile.isPartialFile()) {
+            importFileInfo.setS3Bucket(dataSourceFile.getS3Bucket());
+            importFileInfo.setS3Path(dataSourceFile.getS3Path());
+        }
         CSVImportConfig csvImportConfig = new CSVImportConfig();
         csvImportConfig.setCsvToHdfsConfiguration(importConfig);
         csvImportConfig.setCSVImportFileInfo(importFileInfo);
@@ -487,10 +491,7 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public boolean autoImport(String templateFileName) {
         SourceFile sourceFile = getSourceFile(templateFileName);
-        if (sourceFile != null && !sourceFile.isPartialFile()) {
-            return true;
-        }
-        return false;
+        return sourceFile != null && !sourceFile.isPartialFile();
     }
 
     private void appendTemplateMapptingValue(StringBuffer fileContent, String value) {
