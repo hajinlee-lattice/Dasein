@@ -278,6 +278,7 @@ angular
 				) {
 					fieldsMapped[i].mappedField = null;
 					fieldsMapped[i].mappedToLatticeField = false;
+					fieldsMapped[i].isMatchField = false;
 				}
 				if (savedObj.userField === fieldsMapped[i].userField) {
 					fieldsMapped[i].mappedField = savedObj.mappedField;
@@ -293,6 +294,7 @@ angular
 						fieldsMapped[i].idType = savedObj.IdType;
 						fieldsMapped[i].systemName = savedObj.SystemName;
 					}
+					fieldsMapped[i].isMatchField = savedObj.isMatchField;
 					updateFieldDate(fieldsMapped[i], savedObj, entity);
 					return;
 				}
@@ -432,7 +434,21 @@ angular
 			return retList;
 		}
 
-		// function updateOtherIds(entity, fieldMappings, savedObj) {}
+		function removeMatchIds(fieldsMapped) {
+			let matched = [];
+			if (fieldsMapped) {
+				fieldsMapped.forEach((fieldMapped, index) => {
+					if (
+						fieldMapped.isMatchField &&
+						fieldMapped.isMatchField == true
+					) {
+						matched.push(Object.assign({}, fieldMapped));
+						fieldsMapped.splice(index, 1);
+					}
+				});
+			}
+			return matched;
+		}
 
 		this.updateDocumentMapping = function(entity, savedObj, fieldsMapping) {
 			if (savedObj && fieldsMapping) {
@@ -443,6 +459,7 @@ angular
 					entity,
 					fieldsMapping
 				);
+				let matched = removeMatchIds(fieldsMapping);
 				removeOtherIds(fieldsMapping);
 				let toUpdate = excludeOtherIds(savedObj);
 				keysSaved.forEach(function(keySaved) {
@@ -463,9 +480,11 @@ angular
 					otherIdsEmpty[index].mappedToLatticeField = false;
 				});
 				let ret = fieldsMapping.concat(copyUniqueIds);
+				ret = ret.concat(matched);
 				ret = ret.concat(otherIdsEmpty);
 				let filtered = cleanDuplicates(ret);
-
+				// console.log(filtered);
+				// console.log("=============================");
 				return filtered;
 			} else {
 				return fieldsMapping;
