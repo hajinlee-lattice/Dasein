@@ -399,11 +399,11 @@ public class CampaignLaunchProcessor {
             this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
         }
 
-        public List<String> getAccountCoslRecNotIncludedNonStd() {
+        public List<String> getAccountColsRecNotIncludedNonStd() {
             return this.accountColsRecNotIncludedNonStd;
         }
 
-        public void setAccountCoslRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
+        public void setAccountColsRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
             this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
         }
 

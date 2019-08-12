@@ -191,8 +191,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                         .setAccountColsRecIncluded(processedFieldMappingMetadata.getAccountColsRecIncluded());
                 playLaunchSparkContext.setAccountColsRecNotIncludedStd(
                         processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
-                playLaunchSparkContext.setAccountCoslRecNotIncludedNonStd(
-                        processedFieldMappingMetadata.getAccountCoslRecNotIncludedNonStd());
+                playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(
+                        processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
                 ;
                 playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
                 return executeSparkJob(CreateRecommendationsJob.class,

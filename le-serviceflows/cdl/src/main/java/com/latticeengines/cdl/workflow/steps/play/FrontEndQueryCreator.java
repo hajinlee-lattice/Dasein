@@ -28,7 +28,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.playmakercore.RecommendationColumName;
+import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -200,13 +200,13 @@ public class FrontEndQueryCreator {
         List<String> contactCols = new ArrayList<>();
         processedFieldMappingMetadata.setAccountColsRecIncluded(accountColsRecIncluded);
         processedFieldMappingMetadata.setAccountColsRecNotIncludedStd(accountColsRecNotIncludedStd);
-        processedFieldMappingMetadata.setAccountCoslRecNotIncludedNonStd(accountColsRecNotIncludedNonStd);
+        processedFieldMappingMetadata.setAccountColsRecNotIncludedNonStd(accountColsRecNotIncludedNonStd);
         processedFieldMappingMetadata.setContactCols(contactCols);
         fieldMappingMetadata.forEach(metadata -> {
             String attrName = metadata.getAttrName();
             if (BusinessEntity.Contact.equals(metadata.getEntity())) {
                 contactCols.add(metadata.getAttrName());
-            } else if (RecommendationColumName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.containsKey(attrName)) {
+            } else if (RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.containsKey(attrName)) {
                 accountColsRecIncluded.add(attrName);
             } else if (metadata.isCampaignDerivedField()) {
                 accountColsRecNotIncludedNonStd.add(attrName);

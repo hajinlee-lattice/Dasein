@@ -5,7 +5,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
-public enum RecommendationColumName {
+public enum RecommendationColumnName {
     PID, //
     EXTERNAL_ID, //
     ACCOUNT_ID, //

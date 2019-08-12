@@ -96,7 +96,7 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("AccountColsRecNotIncludedStd")
     private List<String> accountColsRecNotIncludedStd;
 
-    @JsonProperty("AccountCoslRecNotIncludedNonStd")
+    @JsonProperty("AccountColsRecNotIncludedNonStd")
     private List<String> accountColsRecNotIncludedNonStd;
 
     @JsonProperty("ContactCols")
@@ -107,7 +107,9 @@ public class PlayLaunchSparkContext implements Serializable {
 
     public PlayLaunchSparkContext(Tenant tenant, String playName, String playLaunchId, PlayLaunch playLaunch, Play play,
             RatingEngine ratingEngine, MetadataSegment segment, long launchTimestampMillis, String ratingId,
-            RatingModel publishedIteration) {
+            RatingModel publishedIteration, List<String> accountColsRecIncluded,
+            List<String> accountColsRecNotIncludedStd, List<String> accountColsRecNotIncludedNonStd,
+            List<String> contactCols) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
         this.tenantPid = tenant.getPid();
@@ -126,6 +128,10 @@ public class PlayLaunchSparkContext implements Serializable {
         this.modelSummaryId = publishedIteration != null && RatingEngineType.RULE_BASED != ratingEngineType
                 ? ((AIModel) publishedIteration).getModelSummaryId()
                 : "";
+        this.accountColsRecIncluded = accountColsRecIncluded;
+        this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+        this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+        this.contactCols = contactCols;
         setSyncDestination(playLaunch);
     }
 
@@ -233,6 +239,10 @@ public class PlayLaunchSparkContext implements Serializable {
         this.destinationOrgId = destinationOrgId;
     }
 
+    public String getDestinationOrgName() {
+        return this.destinationOrgName;
+    }
+
     public String getLaunchSystemName() {
         return this.launchSystemName;
     }
@@ -265,11 +275,11 @@ public class PlayLaunchSparkContext implements Serializable {
         this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
     }
 
-    public List<String> getAccountCoslRecNotIncludedNonStd() {
+    public List<String> getAccountColsRecNotIncludedNonStd() {
         return this.accountColsRecNotIncludedNonStd;
     }
 
-    public void setAccountCoslRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
+    public void setAccountColsRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
         this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
     }
 
@@ -336,6 +346,10 @@ public class PlayLaunchSparkContext implements Serializable {
         private long launchTimestampMillis;
         private String ratingId;
         private RatingModel publishedIteration;
+        private List<String> accountColsRecIncluded;
+        private List<String> accountColsRecNotIncludedStd;
+        private List<String> accountColsRecNotIncludedNonStd;
+        private List<String> contactCols;
 
         public PlayLaunchSparkContextBuilder tenant(Tenant tenant) {
             this.tenant = tenant;
@@ -387,10 +401,32 @@ public class PlayLaunchSparkContext implements Serializable {
             return this;
         }
 
+        public PlayLaunchSparkContextBuilder accountColsRecIncluded(List<String> accountColsRecIncluded) {
+            this.accountColsRecIncluded = accountColsRecIncluded;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder accountColsRecNotIncludedStd(List<String> accountColsRecNotIncludedStd) {
+            this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder accountColsRecNotIncludedNonStd(
+                List<String> accountColsRecNotIncludedNonStd) {
+            this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder contactCols(List<String> contactCols) {
+            this.contactCols = contactCols;
+            return this;
+        }
+
         public PlayLaunchSparkContext build() {
             return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
-                    this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId,
-                    this.publishedIteration);
+                    this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId, this.publishedIteration,
+                    this.accountColsRecIncluded, this.accountColsRecNotIncludedStd,
+                    this.accountColsRecNotIncludedNonStd, this.contactCols);
         }
     }
 
