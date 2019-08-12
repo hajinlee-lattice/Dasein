@@ -84,13 +84,4 @@ public class ContactResource extends BaseFrontEndEntityResource {
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()));
     }
 
-    @Override
-    List<AttributeLookup> getFreeTextSearchAttrs() {
-        return Arrays.asList( //
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.CompanyName.name()), //
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
-        );
-    }
-
 }
