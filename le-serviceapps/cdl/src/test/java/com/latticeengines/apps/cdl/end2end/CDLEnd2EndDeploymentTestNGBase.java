@@ -446,7 +446,15 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     @BeforeClass(groups = { "end2end", "manual", "precheckin", "deployment", "end2end_with_import" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
+    }
+
+    /*
+     * things that should be setup by all tests (should not override this)
+     */
+    @BeforeClass(groups = { "end2end", "manual", "precheckin", "deployment", "end2end_with_import" })
+    public final void setupShared() {
         if (!isLocalEnvironment()) {
+            log.info("Enable copying checkpoint to S3");
             checkpointService.enableCopyToS3();
         }
     }

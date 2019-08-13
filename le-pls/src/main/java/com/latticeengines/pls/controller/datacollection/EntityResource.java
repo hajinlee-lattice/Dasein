@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -104,11 +103,6 @@ public class EntityResource extends BaseFrontEndEntityResource {
     @Override
     List<Lookup> getDataLookups() {
         throw new UnsupportedOperationException("Do not support data query.");
-    }
-
-    @Override
-    List<AttributeLookup> getFreeTextSearchAttrs() {
-        throw new UnsupportedOperationException("Do not support free text search.");
     }
 
 }

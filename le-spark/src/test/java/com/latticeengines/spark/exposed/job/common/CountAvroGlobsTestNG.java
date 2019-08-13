@@ -46,13 +46,13 @@ public class CountAvroGlobsTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertNotNull(config.avroGlobs);
         SparkJobResult result = runSparkJob(CountAvroGlobs.class, config);
         Assert.assertEquals(result.getOutput(), "384");
-        // TODO - remove temp dir SparkCountAvroRecords
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/SparkCountAvroRecords");
     }
 
-    @Test(groups = "functional", expectedExceptions = {RuntimeException.class})
+    @Test(groups = "functional", expectedExceptions = { RuntimeException.class })
     public void testParquet() throws RuntimeException {
         /* should fail when file is not Avro */
-        String[] globs = {"some/meaningless/directory/file.with.invalid.extension"};
+        String[] globs = { "some/meaningless/directory/file.with.invalid.extension" };
         CountAvroGlobsConfig config = new CountAvroGlobsConfig();
         config.avroGlobs = globs;
         Assert.assertNotNull(config.avroGlobs);

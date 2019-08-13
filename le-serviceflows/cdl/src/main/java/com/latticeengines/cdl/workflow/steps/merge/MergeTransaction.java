@@ -84,6 +84,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private boolean entityMatchEnabled;
 
+    private boolean emptyRawStore;
+
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
@@ -94,7 +96,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         }
 
         mergedBatchStoreName = TableRoleInCollection.ConsolidatedRawTransaction.name() + "_Merged";
-        initOrClonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
+        initOrCloneRawStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
         rawTable = dataCollectionProxy.getTable(customerSpace.toString(), //
                 TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         if (rawTable == null) {
@@ -346,11 +348,17 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
+        // If raw store doesn't exist before: if some periods fail during
+        // distribution, they could be deleted and retry
+        // If raw store exists: period data is appended to existing period file,
+        // if some periods fail during distribution, cannot retry due to
+        // existing period data could be lost
+        config.setRetryable(emptyRawStore);
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
 
-    private void initOrClonePeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
+    private void initOrCloneRawStore(TableRoleInCollection role, SchemaInterpretation schema) {
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
         if (StringUtils.isNotBlank(activeTableName)) {
             log.info("Cloning " + role + " from " + active + " to " + inactive);
@@ -358,6 +366,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         } else {
             log.info("Building a brand new " + role);
             buildPeriodStore(role, schema);
+            emptyRawStore = true;
         }
     }
 

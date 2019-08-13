@@ -20,8 +20,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -74,6 +76,9 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
@@ -138,8 +143,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                 DataPage currentDataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountsIdsSublist,
                         attributes);
                 if (currentDataPage != null) {
-                    dataPage.getData()
-                            .addAll(currentDataPage.getData());
+                    dataPage.getData().addAll(currentDataPage.getData());
                 }
             }
             log.info(String.format("Accounts returned from matchapi: %s", JsonUtils.serialize(dataPage)));
@@ -169,8 +173,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                 int pageOffset = page * MAX_ROWS;
                 List<String> accountIdsSublist = accountIds.subList(pageOffset,
                         Math.min(pageOffset + MAX_ROWS, accountIds.size()));
-                DataPage currentDataPage = getAccountByIdViaMatchApi(customerSpace, accountIdsSublist,
-                        attributes);
+                DataPage currentDataPage = getAccountByIdViaMatchApi(customerSpace, accountIdsSublist, attributes);
                 if (currentDataPage != null) {
                     dataPage.getData().addAll(currentDataPage.getData());
                 }
@@ -182,22 +185,6 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
         return postProcessForLaunchBased(dataPage.getData(), accountInfos, offset, lookupIdColumn);
     }
-
-    // private List<Map<String, Object>>
-    // alignExtensionsByAccountIdSeq(List<Map<String, Object>> data,
-    // List<String> accountIds) {
-    // Map<String,Map<String, Object>> lookupMap = new HashMap<>();
-    // List<Map<String,Object>> sortedList = new ArrayList<>();
-    // data.stream().forEach(acc->{
-    // lookupMap.put((String) acc.get(PlaymakerConstants.AccountID), acc);
-    // });
-    // accountIds.stream().forEach(id->{
-    // if (lookupMap.containsKey(id)) {
-    // sortedList.add(lookupMap.get(id));
-    // }
-    // });
-    // return sortedList;
-    // }
 
     @Override
     public List<Map<String, Object>> getAccountIdsByRecommendationsInfo(boolean latest, Long recStart, long offset,
@@ -283,15 +270,17 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             String lookupIdColumn, Long start, Long offset, Long maximum) {
 
         DataPage entityData;
+
         try {
             FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
-                    lookupIdColumn, start, true);
+                    lookupIdColumn, start, true, batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
             setPageFilter(frontEndQuery, offset, maximum);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
         } catch (Exception e) {
             FrontEndQuery frontEndQuery = AccountExtensionUtil.constructFrontEndQuery(customerSpace, accountIds,
-                    lookupIdColumn, start, false);
+                    lookupIdColumn, start, false,
+                    batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
             setPageFilter(frontEndQuery, offset, maximum);
             log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
             entityData = entityProxy.getDataFromObjectApi(customerSpace, frontEndQuery);
@@ -304,8 +293,15 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             Set<String> attributes) {
 
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, attributes,
-                dataCloudVersion);
+        MatchInput matchInput;
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
+            matchInput = AccountExtensionUtil.constructEntityMatchInput(customerSpace, internalAccountIds, attributes,
+                    dataCloudVersion);
+        } else {
+            matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, attributes,
+                    dataCloudVersion);
+        }
+
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
@@ -432,5 +428,10 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     @VisibleForTesting
     void setMatchProxy(MatchProxy matchProxy) {
         this.matchProxy = matchProxy;
+    }
+
+    @VisibleForTesting
+    void setBatonService(BatonService batonService) {
+        this.batonService = batonService;
     }
 }

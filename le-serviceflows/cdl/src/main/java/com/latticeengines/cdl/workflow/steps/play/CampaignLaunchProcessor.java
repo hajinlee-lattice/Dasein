@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -96,13 +98,6 @@ public class CampaignLaunchProcessor {
     @Value("${datadb.datasource.type}")
     private String dataDbType;
 
-    // NOTE - do not increase this pagesize beyond 2.5K as it causes failure in
-    // count query for corresponding counts. Also do not increase it beyond 250
-    // otherwise contact fetch time increases significantly. After lot of trial
-    // and error we found 150 to be a good number
-    @Value("${playmaker.workflow.segment.pagesize:150}")
-    private long pageSize;
-
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
 
@@ -110,13 +105,18 @@ public class CampaignLaunchProcessor {
     private PlayProxy playProxy;
 
     @Inject
+    private BatonService batonService;
+
+    @Inject
     private ExportFieldMetadataProxy exportFieldMetadataProxy;
 
-    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext, DataCollection.Version version) {
+    public ProcessedFieldMappingMetadata prepareFrontEndQueries(PlayLaunchContext playLaunchContext,
+            DataCollection.Version version) {
         // prepare basic account and contact front end queries
-        frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
+        ProcessedFieldMappingMetadata result = frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
         applyEmailFilterToQueries(playLaunchContext);
         handleLookupIdBasedSuppression(playLaunchContext);
+        return result;
     }
 
     public void runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
@@ -224,14 +224,19 @@ public class CampaignLaunchProcessor {
         Play play = playProxy.getPlay(customerSpace.toString(), playName);
         PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
         List<ColumnMetadata> fieldMappingMetadata = null;
-        PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
-                playName, playLaunchId);
-        if (playLaunchChannel != null) {
-            fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
-                    playLaunchChannel.getId());
-            log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
-                    + ", the list of columnmetadata is:");
-            log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+        boolean enableExportFieldMetadata = batonService.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA);
+        if (Boolean.TRUE.equals(enableExportFieldMetadata)) {
+            PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
+                    playName, playLaunchId);
+            if (playLaunchChannel != null) {
+                fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
+                        playLaunchChannel.getId());
+                playLaunch.setDestinationOrgName(playLaunchChannel.getLookupIdMap().getOrgName());
+                log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
+                        + ", the list of columnmetadata is:");
+                log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+            }
         }
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 
@@ -313,11 +318,6 @@ public class CampaignLaunchProcessor {
     }
 
     @VisibleForTesting
-    void setPageSize(long pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    @VisibleForTesting
     void setFrontEndQueryCreator(FrontEndQueryCreator frontEndQueryCreator) {
         this.frontEndQueryCreator = frontEndQueryCreator;
     }
@@ -380,6 +380,50 @@ public class CampaignLaunchProcessor {
     @VisibleForTesting
     void setDataDbType(String dataDbType) {
         this.dataDbType = dataDbType;
+    }
+
+    public static class ProcessedFieldMappingMetadata {
+
+        private List<String> accountColsRecIncluded;
+
+        private List<String> accountColsRecNotIncludedStd;
+
+        private List<String> accountColsRecNotIncludedNonStd;
+
+        private List<String> contactCols;
+
+        public List<String> getAccountColsRecIncluded() {
+            return this.accountColsRecIncluded;
+        }
+
+        public void setAccountColsRecIncluded(List<String> accountColsRecIncluded) {
+            this.accountColsRecIncluded = accountColsRecIncluded;
+        }
+
+        public List<String> getAccountColsRecNotIncludedStd() {
+            return this.accountColsRecNotIncludedStd;
+        }
+
+        public void setAccountColsRecNotIncludedStd(List<String> accountColsRecNotIncludedStd) {
+            this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+        }
+
+        public List<String> getAccountColsRecNotIncludedNonStd() {
+            return this.accountColsRecNotIncludedNonStd;
+        }
+
+        public void setAccountColsRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
+            this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+        }
+
+        public List<String> getContactCols() {
+            return this.contactCols;
+        }
+
+        public void setContactCols(List<String> contactCols) {
+            this.contactCols = contactCols;
+        }
+
     }
 
 }

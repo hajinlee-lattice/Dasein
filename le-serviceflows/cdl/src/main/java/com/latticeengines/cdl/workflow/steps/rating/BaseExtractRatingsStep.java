@@ -147,7 +147,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
             do {
                 round = containers.stream() //
                         .filter(container -> container.getExtractedTarget() == null) //
-                        .limit(20) //
+                        .limit(32) //
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(round)) {
                     try {
@@ -245,7 +245,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
 
     protected int scaleBySize(double totalSizeInGb) {
         int ratingWeights = getTotalRatingWeights();
-        int scalingByWeights = (int) Math.floor(ratingWeights / 40.) + 1;
+        int scalingByWeights = (int) Math.floor(ratingWeights / 32.) + 1;
         int maxMultiplier = ScalingUtils.getMultiplier(1000);
         int scalingFactor = Math.min(maxMultiplier, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
         if (scalingFactor > 1) {
@@ -261,10 +261,8 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
             round.forEach(container -> {
                 switch (container.getEngineSummary().getType()) {
                     case CROSS_SELL:
-                        weights.addAndGet(4);
-                        break;
                     case RULE_BASED:
-                        weights.addAndGet(2);
+                        weights.addAndGet(4);
                         break;
                     default:
                         weights.addAndGet(1);

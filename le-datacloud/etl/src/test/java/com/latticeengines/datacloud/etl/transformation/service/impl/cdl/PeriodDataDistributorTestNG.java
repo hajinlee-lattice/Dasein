@@ -138,7 +138,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
 
     private String getSinglePeriodConfig() {
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
-        config.setCleanupFirst(true);
+        config.setRetryable(true);
         return JsonUtils.serialize(config);
     }
 
@@ -149,7 +149,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
                 PeriodStrategy.Template.Week.name(), 2, //
                 PeriodStrategy.Template.Month.name(), 3);
         config.setTransactionIdxes(periodNameIdxes);
-        config.setCleanupFirst(true);
+        config.setRetryable(true);
         return JsonUtils.serialize(config);
     }
 

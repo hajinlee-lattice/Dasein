@@ -240,7 +240,8 @@ class ConfWindowService {
 			orgId: lookupIdMapConfiguration.orgId,
 			orgName: lookupIdMapConfiguration.orgName,
 			accountId: lookupIdMapConfiguration.accountId || null,
-			externalSystemType: "MAP",
+			externalSystemType:
+				lookupIdMapConfiguration.externalSystemType || "MAP",
 			externalSystemName: this.solutionInstanceConfig.orgType,
 			externalAuthentication: {
 				solutionInstanceId: this.solutionInstanceConfig.id,
@@ -388,8 +389,9 @@ class ConfWindowService {
 					orgId:
 						customFields && customFields.identification
 							? customFields.identification.marketo_org_id
-							: this.guidGenerator(),
-					orgName: trayAuthenticationName
+							: guidGenerator(),
+					orgName: trayAuthenticationName,
+					externalSystemType: "MAP"
 				};
 			case LINKEDIN:
 			case FACEBOOK:
@@ -401,15 +403,17 @@ class ConfWindowService {
 				var adAccount =
 					externalAdAccount.length > 0
 						? externalAdAccount[0].value.replace(/['"]+/g, "")
-						: this.guidGenerator();
+						: guidGenerator();
 				return {
 					orgId: adAccount,
-					orgName: trayAuthenticationName
+					orgName: trayAuthenticationName,
+					externalSystemType: "ADS"
 				};
 			default:
 				return {
-					orgId: this.guidGenerator(),
-					orgName: trayAuthenticationName
+					orgId: guidGenerator(),
+					orgName: trayAuthenticationName,
+					externalSystemType: "MAP"
 				};
 		}
 	}

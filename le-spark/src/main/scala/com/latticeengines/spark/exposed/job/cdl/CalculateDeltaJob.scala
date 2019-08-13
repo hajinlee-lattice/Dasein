@@ -13,28 +13,39 @@ class CalculateDeltaJob extends AbstractSparkJob[CalculateDeltaJobConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[CalculateDeltaJobConfig]): Unit = {
     val config: CalculateDeltaJobConfig = lattice.config
     val newAccountUniverse = loadHdfsUnit(spark, config.getCurrentAccountUniverse.asInstanceOf[HdfsDataUnit])
-    val newContactUniverse = if (config.getCurrentContactUniverse != null) loadHdfsUnit(spark, config.getCurrentAccountUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyContactsDF(spark)
+    val newContactUniverse = if (config.getCurrentContactUniverse != null) loadHdfsUnit(spark, config.getCurrentContactUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyContactsDF(spark)
     val previousAccountUniverse = if (config.getPreviousAccountUniverse != null) loadHdfsUnit(spark, config.getPreviousAccountUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyAccountsDF(spark)
     val previousContactUniverse = if (config.getPreviousContactUniverse != null) loadHdfsUnit(spark, config.getPreviousContactUniverse.asInstanceOf[HdfsDataUnit]) else createEmptyContactsDF(spark)
     val selectedDFAlias = "selectionDataFrame"
+    val otherDFAlias = "otherDFAlias"
 
-    val addedAccounts = newAccountUniverse.alias(selectedDFAlias).join(previousAccountUniverse, Seq(InterfaceName.AccountId.name()), "left")
+    println("----- AddAccounts-----")
+    val addedAccounts = newAccountUniverse.alias(selectedDFAlias)
+      .join(previousAccountUniverse, Seq(InterfaceName.AccountId.name()), "left")
       .where(previousAccountUniverse.col(InterfaceName.AccountId.name()).isNull)
       .select(selectedDFAlias + ".*")
 
-    val removedAccounts = newAccountUniverse.join(previousAccountUniverse.alias(selectedDFAlias), Seq(InterfaceName.AccountId.name()), "right")
+    println("----- RemoveAccounts-----")
+    val removedAccounts = newAccountUniverse
+      .join(previousAccountUniverse.alias(selectedDFAlias), Seq(InterfaceName.AccountId.name()), "right")
       .where(newAccountUniverse.col(InterfaceName.AccountId.name()).isNull)
       .select(selectedDFAlias + ".*")
 
-    val addedContacts = newContactUniverse.alias(selectedDFAlias) //
-      .join(newAccountUniverse, Seq(InterfaceName.AccountId.name())) //
-      .join(previousContactUniverse, Seq(InterfaceName.ContactId.name()), "left") //
+    println("----- AddContacts-----")
+    val addedContacts = newContactUniverse.alias(selectedDFAlias)
+      .join(newAccountUniverse, newContactUniverse(InterfaceName.AccountId.name()) === newAccountUniverse(InterfaceName.AccountId.name())) //
+      .join(previousContactUniverse.as(otherDFAlias) //
+      , newContactUniverse(InterfaceName.ContactId.name()) === previousContactUniverse(InterfaceName.ContactId.name()) //
+      , joinType = "left") //
       .where(previousContactUniverse.col(InterfaceName.ContactId.name()).isNull) //
       .select(selectedDFAlias + ".*")
 
-    val removedContacts = newContactUniverse
-      .join(newAccountUniverse, Seq(InterfaceName.AccountId.name())) //
-      .join(previousContactUniverse.alias(selectedDFAlias), Seq(InterfaceName.ContactId.name()), "right") //
+    println("----- RemoveContacts-----")
+    val removedContacts = newContactUniverse.as(otherDFAlias)
+      .join(newAccountUniverse, newContactUniverse(InterfaceName.AccountId.name()) === newAccountUniverse(InterfaceName.AccountId.name())) //
+      .join(previousContactUniverse.alias(selectedDFAlias)
+      , newContactUniverse(InterfaceName.ContactId.name()) === previousContactUniverse(InterfaceName.ContactId.name()) //
+      , joinType = "right") //
       .where(newContactUniverse.col(InterfaceName.ContactId.name()).isNull) //
       .select(selectedDFAlias + ".*")
 

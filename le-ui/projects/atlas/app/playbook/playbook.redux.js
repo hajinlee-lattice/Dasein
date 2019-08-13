@@ -219,7 +219,7 @@ export const actions = {
             }
         );
         // var query = { 'preexisting_segment_name': data.targetSegment.name }; ??
-        httpService.post(`/pls/entities/count`, query, observer, {});
+        httpService.post(`/pls/entities/counts`, query, observer, {});
     },
     fetchTypes: (cb, deferred) => {
         deferred = deferred || { resolve: (data) => data }

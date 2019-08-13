@@ -87,27 +87,4 @@ public class AccountResource extends BaseFrontEndEntityResource {
                 new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
     }
 
-    @Override
-    List<AttributeLookup> getFreeTextSearchAttrs() {
-        if (isEntityMatchEnabled()) {
-            return Arrays.asList( //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()) //
-            );
-        } else {
-            return Arrays.asList( //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
-                    new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
-            );
-        }
-    }
-
 }

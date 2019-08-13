@@ -45,11 +45,13 @@ angular.module('lp.jobs.import.row', [
                 });
             }else if("closedForced" == action.action){
                 $scope.disableButton = false;
+                $scope.scheduleButtonDisabled = false;
                 setTimeout(() => {
                     $scope.$apply(()=>{});
                 },0);
             }else {
                 $scope.disableButton = false;
+                $scope.scheduleButtonDisabled = false;
                 if(modal){
                     Modal.modalRemoveFromDOM(modal, {name: 'processJob_Warning'});
                 }
@@ -91,7 +93,8 @@ angular.module('lp.jobs.import.row', [
             }
         }
         function getPayloadValue(subjob, field) {
-            if (subjob.reports && subjob.reports.length > 0) {
+            if (subjob.reports && subjob.reports!= null && subjob.reports.length > 0) {
+                
                 var json =
                     subjob.reports[0].json
                         .Payload;
@@ -214,7 +217,8 @@ angular.module('lp.jobs.import.row', [
             let oneFailed = false;
             let subjobs = (job.subJobs && job.subJobs != null) ? job.subJobs : [];
             for (let i = 0; i < subjobs.length; i++) { 
-                if (subjobs[i].jobStatus == 'Failed' || $scope.isOneJobFailed(subjobs)) {
+                let one = $scope.isOneJobFailed(subjobs);
+                if (subjobs[i].jobStatus == 'Failed' || one) {
                     oneFailed = true;
                     break;
                 }
@@ -225,44 +229,15 @@ angular.module('lp.jobs.import.row', [
             let oneFailed = false;
             for (let i = 0; i < subjobs.length; i++){
                 if (
-					(!isNaN(
-						getPayloadValue(
-							subjobs[i],
-							"total_failed_rows"
-						)
-					) &&
-						!isNaN(
-							getPayloadValue(
-								subjobs[i],
-								"total_rows"
-							)
-						) &&
-						getPayloadValue(
-							subjobs[i],
-							"total_failed_rows"
-						) ===
-							getPayloadValue(
-								subjobs[i],
-								"total_rows"
-							)) ||
-					getPayloadValue(
-						subjobs[i],
-						"total_failed_rows"
-					) ==
-						getPayloadValue(
-							subjobs[i],
-							"total_rows"
-						)
-				) {
+					!isNaN(getPayloadValue(subjobs[i],"total_failed_rows")) &&
+					!isNaN(getPayloadValue(subjobs[i],"total_rows")) &&
+						getPayloadValue(subjobs[i],"total_failed_rows") ===	getPayloadValue(subjobs[i],"total_rows")
+				    ) {
                     oneFailed = true;
                     break;
 				}
             }
             return oneFailed;
-
-            // if (!isNaN(getPayloadValue(subjob, 'total_failed_rows')) && !isNaN(getPayloadValue(subjob, 'total_rows')) && getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows') || (getPayloadValue(subjob, 'total_failed_rows') == getPayloadValue(subjob, 'total_rows'))) {
-            //         return 'Failed';
-            //     }
         }
         
 

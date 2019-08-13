@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -55,6 +55,7 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -84,6 +85,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
 
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
@@ -269,26 +273,6 @@ public class CDLServiceImpl implements CDLService {
         return cdlProxy.cleanupAllData(customerSpace, entity, email);
     }
 
-    @Override
-    public void cleanupAllByAction(String customerSpace, SchemaInterpretation schemaInterpretation) {
-        BusinessEntity entity;
-        switch (schemaInterpretation) {
-            case Account:
-                entity = BusinessEntity.Account;
-                break;
-            case Contact:
-                entity = BusinessEntity.Contact;
-                break;
-            case Transaction:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
-                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
-        }
-        String email = MultiTenantContext.getEmailAddress();
-        cdlProxy.cleanupAllByAction(customerSpace, entity, email);
-    }
-
     @VisibleForTesting
     CSVImportConfig generateImportConfig(String customerSpace, String templateFileName, String dataFileName,
                                          String email) {
@@ -308,6 +292,10 @@ public class CDLServiceImpl implements CDLService {
         importFileInfo.setReportFileDisplayName(dataSourceFile.getDisplayName());
         importFileInfo.setReportFileName(dataSourceFile.getName());
         importFileInfo.setPartialFile(dataSourceFile.isPartialFile());
+        if (dataSourceFile.isPartialFile()) {
+            importFileInfo.setS3Bucket(dataSourceFile.getS3Bucket());
+            importFileInfo.setS3Path(dataSourceFile.getS3Path());
+        }
         CSVImportConfig csvImportConfig = new CSVImportConfig();
         csvImportConfig.setCsvToHdfsConfiguration(importConfig);
         csvImportConfig.setCSVImportFileInfo(importFileInfo);
@@ -487,10 +475,7 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public boolean autoImport(String templateFileName) {
         SourceFile sourceFile = getSourceFile(templateFileName);
-        if (sourceFile != null && !sourceFile.isPartialFile()) {
-            return true;
-        }
-        return false;
+        return sourceFile != null && !sourceFile.isPartialFile();
     }
 
     private void appendTemplateMapptingValue(StringBuffer fileContent, String value) {
