@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -75,17 +76,15 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                     launchingPlayLaunches.size()));
             return true;
         }
-        Set<String> currentlyLaunchingPlayAndChannels = launchingPlayLaunches.stream()
-                .map(launch -> launch.getPlay().getName() + launch.getPlayLaunchChannel().getId())
-                .collect(Collectors.toSet());
+        Set<PlayLaunchChannel> currentlyLaunchingChannels = launchingPlayLaunches.stream()
+                .map(launch -> launch.getPlayLaunchChannel()).collect(Collectors.toSet());
 
         Iterator<PlayLaunch> iterator = queuedPlayLaunches.iterator();
         int i = launchingPlayLaunches.size();
 
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
-            if (currentlyLaunchingPlayAndChannels
-                    .contains(launch.getPlay().getName() + launch.getPlayLaunchChannel().getId())) {
+            if (currentlyLaunchingChannels.contains(launch.getPlayLaunchChannel())) {
                 log.info(String.format(
                         "Launch: %s skipped since a play launch is already being launched to this channel",
                         launch.getId()));
