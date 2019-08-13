@@ -39,7 +39,11 @@ export const actions = {
 				payload: { data: response.data, loaded: true }
 			});
 		});
-		httpService.get("/pls/cdl/s3import/template", observer, {});
+		httpService.get(
+			"/pls/cdl/s3import/template?sortBy=SystemDisplay",
+			observer,
+			{}
+		);
 	},
 	fetchPriorities: () => {
 		let observer = new Observer(response => {
