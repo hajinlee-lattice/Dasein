@@ -96,6 +96,7 @@ export default class ConnectionsComponent extends Component {
 		}
 		if (e.data.type === "tray.configPopup.finish") {
 			// Handle popup finish message
+			console.log("FINISHED");
 			if (
 				ConfWindowService.getSolutionInstanceConfig()
 					.registerLookupIdMap == true
