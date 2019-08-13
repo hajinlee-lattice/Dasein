@@ -91,6 +91,8 @@ public interface EmailService {
 
     void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days);
 
+    void sendTenantRightStatusNoticeEmail(User user, Tenant tenant, int days);
+
     void sendS3CredentialEmail(User user, Tenant tenant, GrantDropBoxAccessResponse response, String initiator);
 
     void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, S3ImportEmailInfo emailInfo);
