@@ -191,7 +191,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private void initializeIteration(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (shouldRebuildAll) {
+        if (shouldRebuildAll || shouldRebuildSome) {
             if (!iterationFinished) {
                 iteration = step.getObjectFromContext(CURRENT_RATING_ITERATION, Integer.class);
                 List<RatingModelContainer> containers = step.getListObjectFromContext(ITERATION_RATING_MODELS,
