@@ -21,6 +21,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -49,6 +50,10 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
             add(Pair.of(InterfaceName.PeriodId.name(), Integer.class));
         }
     };
+    private static final ImmutableSet<Pair<String, Integer>> INJECTED_FAILED_PERIODS = ImmutableSet.of( //
+            Pair.of(PeriodStrategy.Template.Day.name(), 1), //
+            Pair.of(PeriodStrategy.Template.Week.name(), 1), //
+            Pair.of(PeriodStrategy.Template.Month.name(), 1));
 
     @AfterClass(groups = "functional")
     public void destroy() {
@@ -56,8 +61,9 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
         cleanupHdfsPath(baseDir);
     }
 
-    @Test(groups = "functional")
-    public void testSinglePeriodStrategy() {
+    @Test(groups = "functional", priority = 1)
+    public void testSinglePeriodStore() {
+        TimeSeriesUtils.injectFailedPeriods(INJECTED_FAILED_PERIODS);
         String baseDir = "/tmp/" + this.getClass().getSimpleName() + "/SinglePeriodStrategy";
         cleanupHdfsPath(baseDir);
         String inputDir = baseDir + "/Input";
@@ -65,26 +71,16 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
         uploadInputData(data, inputDir);
         String targetDir = baseDir + "/Output";
 
-        @SuppressWarnings("serial")
-        TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
-                .yarnConfig(yarnConfiguration) //
-                .inputDir(inputDir) //
-                .targetDirs(new HashMap<String, String>() {
-                    {
-                        put(TimeSeriesDistributer.DUMMY_PERIOD, targetDir);
-                    }
-                }) //
-                .periods(new HashMap<String, Set<Integer>>() {
-                    {
-                        put(TimeSeriesDistributer.DUMMY_PERIOD, PERIODS);
-                    }
-                }) //
-                .periodField(InterfaceName.PeriodId.name()) //
-                .periodNameField(null) //
-                .build();
-        distributer.distributePeriodData();
-
+        // test legacy distributer
+        distributeSinglePeriodStore(true, inputDir, targetDir);
         verifyOutputData(data, targetDir, null);
+        cleanupHdfsPath(targetDir);
+
+        // test new distributer
+        distributeSinglePeriodStore(false, inputDir, targetDir);
+        verifyOutputData(data, targetDir, null);
+        cleanupHdfsPath(targetDir);
+
         cleanupHdfsPath(baseDir);
     }
 
@@ -100,8 +96,35 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
         return arr;
     }
 
-    @Test(groups = "functional")
-    public void testMultiPeriodStrategy() {
+    private void distributeSinglePeriodStore(boolean legacy, String inputDir, String targetDir) {
+        if (legacy) {
+            TimeSeriesUtils.distributePeriodDataWithRetry(yarnConfiguration, inputDir, targetDir, PERIODS,
+                    InterfaceName.PeriodId.name());
+        } else {
+            @SuppressWarnings("serial")
+            TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
+                    .yarnConfig(yarnConfiguration) //
+                    .inputDir(inputDir) //
+                    .targetDirs(new HashMap<String, String>() {
+                        {
+                            put(TimeSeriesDistributer.DUMMY_PERIOD, targetDir);
+                        }
+                    }) //
+                    .periods(new HashMap<String, Set<Integer>>() {
+                        {
+                            put(TimeSeriesDistributer.DUMMY_PERIOD, PERIODS);
+                        }
+                    }) //
+                    .periodField(InterfaceName.PeriodId.name()) //
+                    .periodNameField(null) //
+                    .build();
+            distributer.distributePeriodData();
+        }
+    }
+
+    @Test(groups = "functional", priority = 2)
+    public void testMultiPeriodStore() {
+        TimeSeriesUtils.injectFailedPeriods(INJECTED_FAILED_PERIODS);
         String baseDir = "/tmp/" + this.getClass().getSimpleName() + "/MultiPeriodStrategy";
         cleanupHdfsPath(baseDir);
         String inputDir = baseDir + "/Input";
@@ -117,21 +140,42 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
             periods.put(periodName, PERIODS);
         }
 
-        TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
-                .yarnConfig(yarnConfiguration) //
-                .inputDir(inputDir) //
-                .targetDirs(targetDirs) //
-                .periods(periods) //
-                .periodField(InterfaceName.PeriodId.name()) //
-                .periodNameField(InterfaceName.PeriodName.name()) //
-                .build();
-        distributer.distributePeriodData();
-
+        // test legacy distributer
+        distributeMultiPeriodStore(true, inputDir, targetDirs, periods);
         for (String periodName : PERIOD_NAMES) {
             Object[][] periodData = filterInputByPeriod(data, periodName);
             verifyOutputData(periodData, targetDirs.get(periodName), periodName);
         }
+        cleanupHdfsPath(targetDir);
+
+        // test new distributer
+        distributeMultiPeriodStore(false, inputDir, targetDirs, periods);
+        for (String periodName : PERIOD_NAMES) {
+            Object[][] periodData = filterInputByPeriod(data, periodName);
+            verifyOutputData(periodData, targetDirs.get(periodName), periodName);
+        }
+        cleanupHdfsPath(targetDir);
+
         cleanupHdfsPath(baseDir);
+    }
+
+    private void distributeMultiPeriodStore(boolean legacy, String inputDir, Map<String, String> targetDirs,
+            Map<String, Set<Integer>> periods) {
+        if (legacy) {
+            TimeSeriesUtils.distributePeriodDataWithRetry(yarnConfiguration, inputDir, targetDirs, periods,
+                    InterfaceName.PeriodId.name(), InterfaceName.PeriodName.name());
+        } else {
+            TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //
+                    .yarnConfig(yarnConfiguration) //
+                    .inputDir(inputDir) //
+                    .targetDirs(targetDirs) //
+                    .periods(periods) //
+                    .periodField(InterfaceName.PeriodId.name()) //
+                    .periodNameField(InterfaceName.PeriodName.name()) //
+                    .build();
+            distributer.distributePeriodData();
+        }
+
     }
 
     // Result verification is based on assumption that total size is large

@@ -430,6 +430,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
+        config.setRetryable(true);
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
@@ -528,6 +529,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
+        config.setRetryable(true);
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }

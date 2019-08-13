@@ -16,19 +16,25 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
@@ -37,6 +43,22 @@ public class TimeSeriesUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeSeriesUtils.class);
     private static final String TIMESERIES_FILENAME_PREFIX = "Period-";
     private static final String TIMESERIES_FILENAME_SUFFIX = "-data.avro";
+
+    // ONLY for testing purpose -- for testing retry time-series distribution
+    // with failed period
+    // set((periodName, periodId))
+    private static ImmutableSet<Pair<String, Integer>> injectedFailedPeriods;
+
+    /**
+     * ONLY for testing purpose -- for testing retry time-series distribution
+     * with failed period
+     *
+     * @param failedPeriods:
+     *            set((periodName, periodId))
+     */
+    public static void injectFailedPeriods(ImmutableSet<Pair<String, Integer>> failedPeriods) {
+        injectedFailedPeriods = failedPeriods;
+    }
 
     public static Set<Integer> collectPeriods(Configuration yarnConfiguration, String avroDir,
             String periodField) {
@@ -94,8 +116,14 @@ public class TimeSeriesUtils {
         log.info("Clean periods from " + avroDir);
         Long rowCounts = 0L;
         try {
+            if (!HdfsUtils.isDirectory(yarnConfiguration, avroDir)) {
+                return rowCounts;
+            }
             List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir,
                     ".*.avro$");
+            if (CollectionUtils.isEmpty(avroFiles)) {
+                return rowCounts;
+            }
             for (String fileName : avroFiles) {
                 try {
                     if (periods == null) {
@@ -234,7 +262,58 @@ public class TimeSeriesUtils {
         }
     }
 
-    public static boolean distributePeriodData(Configuration yarnConfiguration, String inputDir,
+    /**
+     * distribute period data for single period store (daily store) with retry
+     * IMPORTANT: will cleanup impacted period partition in target dir before
+     * start/re-start distributing
+     *
+     * @param yarnConfiguration
+     * @param inputDir
+     * @param targetDir
+     * @param periods
+     * @param periodField
+     */
+    public static void distributePeriodDataWithRetry(Configuration yarnConfiguration, String inputDir, String targetDir,
+            Set<Integer> periods, String periodField) {
+        Set<Integer> periodsRemained = new HashSet<>(periods);
+        // Only retry for non-LedpException
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singletonList(Exception.class),
+                Collections.singletonList(LedpException.class));
+        retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("Attempt #{} to distribute daily store", ctx.getRetryCount() + 1);
+                // only for testing retry purpose: in retry phase, cleanup
+                // injected failed period to let failed period pass
+                injectedFailedPeriods = null;
+            }
+            // cleanup impacted periods in target dir
+            TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periodsRemained);
+            // distribute to target dir
+            Set<Integer> failedPeriods = TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDir,
+                    periodsRemained, periodField);
+            periodsRemained.clear();
+            if (CollectionUtils.isNotEmpty(failedPeriods)) {
+                periodsRemained.addAll(failedPeriods);
+            }
+            if (CollectionUtils.isNotEmpty(periodsRemained)) {
+                throw new RuntimeException("Has periods failed to distribute");
+            }
+            return true;
+        });
+    }
+
+    /**
+     * distribute period data for single period store (daily store) without
+     * retry
+     *
+     * @param yarnConfiguration
+     * @param inputDir
+     * @param targetDir
+     * @param periods
+     * @param periodField
+     * @return failed periodIds -- return null if there is no failed period
+     */
+    public static Set<Integer> distributePeriodData(Configuration yarnConfiguration, String inputDir,
             String targetDir, Set<Integer> periods, String periodField) {
         verifySchemaCompatibility(yarnConfiguration, inputDir, targetDir);
         inputDir = getPath(inputDir) + "/*.avro";
@@ -243,14 +322,17 @@ public class TimeSeriesUtils {
         Map<Integer, String> periodFileMap = new HashMap<>();
         for (Integer period : periods) {
             periodFileMap.put(period, targetDir + "/" + getFileNameFromPeriod(period));
-            log.info("Add period " + period + " File " + targetDir + "/"
-                    + getFileNameFromPeriod(period));
         }
+        log.info("Distribute period IDs for daily period store: {}",
+                String.join(",", periods.stream().map(String::valueOf).collect(Collectors.toList())));
+
+        // Day -> set<periodIds>
+        Map<String, Set<Integer>> failedPeriods = new HashMap<>();
         try {
             AvroFilesIterator iter = AvroUtils.iterateAvroFiles(yarnConfiguration, inputDir);
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, inputDir);
             Map<Integer, List<GenericRecord>> dateRecordMap = new HashMap<>();
-            List<Future<Boolean>> pendingWrites = new ArrayList<>();
+            List<Future<Pair<Boolean, Pair<String, Integer>>>> pendingWrites = new ArrayList<>();
             ExecutorService executor = ThreadPoolUtils
                     .getFixedSizeThreadPool("periodDataDistributor", 16);
 
@@ -259,34 +341,95 @@ public class TimeSeriesUtils {
             while (iter.hasNext()) {
                 GenericRecord record = iter.next();
                 Integer period = (Integer) record.get(periodField);
-                if (!dateRecordMap.containsKey(period)) {
-                    dateRecordMap.put(period, new ArrayList<>());
-                }
+                dateRecordMap.putIfAbsent(period, new ArrayList<>());
                 dateRecordMap.get(period).add(record);
                 totalRecords++;
                 pendingRecords++;
                 if (pendingRecords > 4 * 128 * 1024) {
                     log.info("Schedule " + pendingRecords + "records to write");
-                    dateRecordMap = writeRecords(yarnConfiguration, executor, pendingWrites, schema,
-                            periodFileMap, dateRecordMap);
+                    writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap,
+                            failedPeriods);
+                    dateRecordMap.clear();
                     pendingRecords = 0;
                 }
             }
             log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords
                     + " records to write");
-            writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap,
-                    dateRecordMap);
-            syncWrites(pendingWrites);
-            return true;
+            writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap,
+                    failedPeriods);
+            syncWrites(pendingWrites, failedPeriods);
+            Set<Integer> failedPeriodIds = failedPeriods.get(PeriodStrategy.Template.Day.name());
+            if (CollectionUtils.isNotEmpty(failedPeriodIds)) {
+                log.error("Period IDs failed to distribute: {}",
+                        String.join(",", failedPeriodIds.stream().map(String::valueOf).collect(Collectors.toList())));
+            }
+            return failedPeriodIds;
         } catch (Exception e) {
             throw new RuntimeException("Failed to distribute to period store", e);
         }
     }
 
-    // MultiPeriod mode
-    // targetDirs: PeriodName -> TargetDir
-    // periods: PeriodName -> Periods
-    public static boolean distributePeriodData(Configuration yarnConfiguration, String inputDir,
+    /**
+     * distribute period data for multi-period store with retry
+     *
+     * IMPORTANT: will cleanup impacted period partition in target dir before
+     * start/re-start distributing
+     *
+     * @param yarnConfiguration
+     * @param inputDir
+     * @param targetDirs:
+     *            (periodName -> target dir)
+     * @param periods:
+     *            (periodName -> set(periodIds))
+     * @param periodField
+     * @param periodNameField
+     */
+    public static void distributePeriodDataWithRetry(Configuration yarnConfiguration, String inputDir,
+            Map<String, String> targetDirs, Map<String, Set<Integer>> periods, String periodField,
+            String periodNameField) {
+        Map<String, Set<Integer>> periodsRemained = new HashMap<>(periods);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singletonList(Exception.class),
+                Collections.singletonList(LedpException.class));
+        retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("Attempt #{} to distribute period store", ctx.getRetryCount() + 1);
+                // only for testing retry purpose: in retry phase, cleanup
+                // injected failed period to let failed period pass
+                injectedFailedPeriods = null;
+            }
+            // cleanup impacted periods in target dir
+            for (String periodName : periodsRemained.keySet()) {
+                TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDirs.get(periodName),
+                        periodsRemained.get(periodName));
+            }
+            // distribute to target dirs
+            Map<String, Set<Integer>> failedPeriods = TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir,
+                    targetDirs, periodsRemained, periodField, periodNameField);
+            periodsRemained.clear();
+            if (MapUtils.isNotEmpty(failedPeriods)) {
+                periodsRemained.putAll(failedPeriods);
+            }
+            if (MapUtils.isNotEmpty(periodsRemained)) {
+                throw new RuntimeException("Has periods failed to distribute");
+            }
+            return true;
+        });
+    }
+
+    /**
+     * distribute period data for multi-period store without retry
+     *
+     * @param yarnConfiguration
+     * @param inputDir
+     * @param targetDirs:
+     *            (periodName -> target dir)
+     * @param periods:
+     *            (periodName -> set(periodIds))
+     * @param periodField
+     * @param periodNameField
+     * @return failed periodIds: periodName -> set(periodIds)
+     */
+    public static Map<String, Set<Integer>> distributePeriodData(Configuration yarnConfiguration, String inputDir,
             Map<String, String> targetDirs, Map<String, Set<Integer>> periods, String periodField,
             String periodNameField) {
         for (String targetDir : targetDirs.values()) {
@@ -300,7 +443,7 @@ public class TimeSeriesUtils {
             targetDirs.put(periodName, targetDir);
         }
 
-        // PeriodName -> (PeriodId -> PeriodFile)
+        // periodName -> (periodId -> periodFile)
         Map<String, Map<Integer, String>> periodFileMap = new HashMap<>();
         for (Map.Entry<String, Set<Integer>> ent : periods.entrySet()) {
             String periodName = ent.getKey();
@@ -308,16 +451,17 @@ public class TimeSeriesUtils {
             for (Integer period : ent.getValue()) {
                 periodFileMap.get(periodName).put(period,
                         targetDirs.get(periodName) + "/" + getFileNameFromPeriod(period));
-                log.info("Add period " + period + " File" + targetDirs.get(periodName) + "/"
-                        + getFileNameFromPeriod(period));
             }
+            log.info("Distribute period IDs for {} period store: {}", periodName,
+                    String.join(",", ent.getValue().stream().map(String::valueOf).collect(Collectors.toList())));
         }
 
+        Map<String, Set<Integer>> failedPeriods = new HashMap<>();
         try {
             AvroFilesIterator iter = AvroUtils.iterateAvroFiles(yarnConfiguration, inputDir);
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, inputDir);
             Map<String, Map<Integer, List<GenericRecord>>> dateRecordMap = new HashMap<>();
-            List<Future<Boolean>> pendingWrites = new ArrayList<>();
+            List<Future<Pair<Boolean, Pair<String, Integer>>>> pendingWrites = new ArrayList<>();
             ExecutorService executor = ThreadPoolUtils
                     .getFixedSizeThreadPool("periodDataDistributor", 16);
 
@@ -327,85 +471,143 @@ public class TimeSeriesUtils {
                 GenericRecord record = iter.next();
                 Integer period = (Integer) record.get(periodField);
                 String periodName = record.get(periodNameField).toString();
-                if (!dateRecordMap.containsKey(periodName)) {
-                    dateRecordMap.put(periodName, new HashMap<>());
-                }
-                if (!dateRecordMap.get(periodName).containsKey(period)) {
-                    dateRecordMap.get(periodName).put(period, new ArrayList<>());
-                }
+                dateRecordMap.putIfAbsent(periodName, new HashMap<>());
+                dateRecordMap.get(periodName).putIfAbsent(period, new ArrayList<>());
                 dateRecordMap.get(periodName).get(period).add(record);
                 totalRecords++;
                 pendingRecords++;
                 if (pendingRecords > 2 * 128 * 1024) {
                     log.info("Schedule " + pendingRecords + "records to write");
-                    dateRecordMap = writeRecordsMultiPeriod(yarnConfiguration, executor,
-                            pendingWrites, schema, periodFileMap, dateRecordMap);
+                    writeRecordsMultiPeriod(yarnConfiguration, executor,
+                            pendingWrites, schema, periodFileMap, dateRecordMap, failedPeriods);
                     pendingRecords = 0;
+                    dateRecordMap.clear();
                 }
             }
             log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords
                     + " records to write");
             writeRecordsMultiPeriod(yarnConfiguration, executor, pendingWrites, schema,
-                    periodFileMap, dateRecordMap);
-            syncWrites(pendingWrites);
-            return true;
+                    periodFileMap, dateRecordMap, failedPeriods);
+            syncWrites(pendingWrites, failedPeriods);
+            if (MapUtils.isNotEmpty(failedPeriods)) {
+                for (Map.Entry<String, Set<Integer>> period : failedPeriods.entrySet()) {
+                    if (CollectionUtils.isNotEmpty(period.getValue())) {
+                        log.error("Period IDs failed to distribute to {} period store: {}", period.getKey(),
+                                String.join(",",
+                                        period.getValue().stream().map(String::valueOf).collect(Collectors.toList())));
+                    }
+                }
+            }
+            return failedPeriods;
         } catch (Exception e) {
             throw new RuntimeException("Failed to distribute to period store", e);
         }
     }
 
-    private static Map<Integer, List<GenericRecord>> writeRecords(Configuration yarnConfiguration,
-            ExecutorService executor, List<Future<Boolean>> pendingWrites, Schema schema,
-            Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap) {
-        syncWrites(pendingWrites);
+    /**
+     * for single period store
+     *
+     * @param yarnConfiguration
+     * @param executor
+     * @param pendingWrites:
+     *            future(success, (periodName, periodId))
+     * @param schema
+     * @param periodFileMap:
+     *            (periodId -> periodFile)
+     * @param dateRecordMap:
+     *            periodId -> [records]
+     * @param failedPeriods:
+     *            (periodName -> set(periodId))
+     */
+    private static void writeRecords(Configuration yarnConfiguration,
+            ExecutorService executor, List<Future<Pair<Boolean, Pair<String, Integer>>>> pendingWrites, Schema schema,
+            Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap,
+            Map<String, Set<Integer>> failedPeriods) {
+        syncWrites(pendingWrites, failedPeriods);
         for (Integer period : dateRecordMap.keySet()) {
             List<GenericRecord> records = dateRecordMap.get(period);
             String fileName = periodFileMap.get(period);
+            // Only distribute required periods. If cannot find target file, the
+            // period is not in the required list
             if (fileName == null) {
-                log.info("Failed to find file for " + period);
                 continue;
             }
             if ((records == null) || (records.size() == 0)) {
                 continue;
             }
-            PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records);
+            // This period is already failed in previous write job, all the data
+            // belonging to this period need to
+            // re-distribute anyway
+            if (failedPeriods.getOrDefault(PeriodStrategy.Template.Day.name(), new HashSet<>()).contains(period)) {
+                continue;
+            }
+            PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records,
+                    Pair.of(PeriodStrategy.Template.Day.name(), period));
             pendingWrites.add(executor.submit(callable));
         }
-
-        return new HashMap<>();
     }
 
-    // periodFileMap: periodName -> (periodId -> periodFile)
-    // dateRecordMap: periodName -> (periodId -> records)
-    private static Map<String, Map<Integer, List<GenericRecord>>> writeRecordsMultiPeriod(
-            Configuration yarnConfiguration, ExecutorService executor, List<Future<Boolean>> pendingWrites,
-            Schema schema, Map<String, Map<Integer, String>> periodFileMap,
-            Map<String, Map<Integer, List<GenericRecord>>> dateRecordMap) {
-        syncWrites(pendingWrites);
+    /**
+     * for multi-period store
+     *
+     * @param yarnConfiguration
+     * @param executor
+     * @param pendingWrites:
+     *            future(success, (periodName, periodId))
+     * @param schema
+     * @param periodFileMap:
+     *            periodName -> (periodId -> periodFile)
+     * @param dateRecordMap:
+     *            periodName -> (periodId -> records)
+     * @param failedPeriods:
+     *            periodName -> set(periodId)
+     */
+    private static void writeRecordsMultiPeriod(Configuration yarnConfiguration,
+            ExecutorService executor, List<Future<Pair<Boolean, Pair<String, Integer>>>> pendingWrites, Schema schema,
+            Map<String, Map<Integer, String>> periodFileMap,
+            Map<String, Map<Integer, List<GenericRecord>>> dateRecordMap, Map<String, Set<Integer>> failedPeriods) {
+        syncWrites(pendingWrites, failedPeriods);
         for (Map.Entry<String, Map<Integer, List<GenericRecord>>> ent : dateRecordMap.entrySet()) {
             String periodName = ent.getKey();
             for (Integer period : ent.getValue().keySet()) {
                 List<GenericRecord> records = ent.getValue().get(period);
                 String fileName = periodFileMap.get(periodName).get(period);
+                // Only distribute required periods. If cannot find target file,
+                // the period is not in the required list
                 if (fileName == null) {
-                    log.info("Failed to find file for " + period);
                     continue;
                 }
                 if ((records == null) || (records.size() == 0)) {
                     continue;
                 }
-                PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records);
+                // This period is already failed in previous write job, all the
+                // data belonging to this period need to re-distribute anyway
+                if (failedPeriods.getOrDefault(periodName, new HashSet<>()).contains(period)) {
+                    continue;
+                }
+                PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records,
+                        Pair.of(periodName, period));
                 pendingWrites.add(executor.submit(callable));
             }
         }
-
-        return new HashMap<>();
     }
 
-    private static void syncWrites(List<Future<Boolean>> pendingWrites) {
-        for (Future<Boolean> pendingWrite : pendingWrites) {
+    /**
+     * @param pendingWrites:
+     *            future(success, (periodName, periodId))
+     * @param failedPeriods:
+     *            periodName -> set(periodId)
+     */
+    private static void syncWrites(
+            List<Future<Pair<Boolean, Pair<String, Integer>>>> pendingWrites, Map<String, Set<Integer>> failedPeriods) {
+        for (Future<Pair<Boolean, Pair<String, Integer>>> pendingWrite : pendingWrites) {
             try {
-                pendingWrite.get();
+                // (success, (periodName, periodId))
+                Pair<Boolean, Pair<String, Integer>> res = pendingWrite.get();
+                if (!Boolean.TRUE.equals(res.getLeft())) {
+                    failedPeriods.putIfAbsent(res.getRight().getLeft(), new HashSet<>());
+                    failedPeriods.get(res.getRight().getLeft()).add(res.getRight().getRight());
+                }
             } catch (Exception e) {
                 throw new RuntimeException("Error waiting for pending writes", e);
             }
@@ -483,33 +685,41 @@ public class TimeSeriesUtils {
         return Arrays.equals(cols1.toArray(new String[size]), cols2.toArray(new String[size]));
     }
 
-    static class PeriodDataCallable implements Callable<Boolean> {
+    static class PeriodDataCallable implements Callable<Pair<Boolean, Pair<String, Integer>>> {
         private Configuration yarnConfiguration;
         private Schema schema;
         private String fileName;
         private List<GenericRecord> records;
+        // (periodName, periodId)
+        private Pair<String, Integer> period;
 
         PeriodDataCallable(Configuration yarnConfiguration, Schema schema, String fileName,
-                List<GenericRecord> records) {
-
+                List<GenericRecord> records, Pair<String, Integer> period) {
             this.yarnConfiguration = yarnConfiguration;
             this.schema = schema;
             this.fileName = fileName;
             this.records = records;
+            this.period = period;
         }
 
         @Override
-        public Boolean call() throws Exception {
+        public Pair<Boolean, Pair<String, Integer>> call() throws Exception {
             try {
+                // fail the write job only for testing purpose
+                if (injectedFailedPeriods != null && injectedFailedPeriods.contains(period)) {
+                    return Pair.of(Boolean.FALSE, period);
+                }
                 if (!HdfsUtils.fileExists(yarnConfiguration, fileName)) {
                     AvroUtils.writeToHdfsFile(yarnConfiguration, schema, fileName, records);
                 } else {
                     AvroUtils.appendToHdfsFile(yarnConfiguration, fileName, records);
                 }
             } catch (Exception e) {
-                throw new RuntimeException("Failed to distribute period data to " + fileName, e);
+                log.error(String.format("Failed to distribute period data %s-%d to %s", period.getLeft(),
+                        period.getRight(), fileName), e);
+                return Pair.of(Boolean.FALSE, period);
             }
-            return Boolean.TRUE;
+            return Pair.of(Boolean.TRUE, period);
         }
     }
 }
