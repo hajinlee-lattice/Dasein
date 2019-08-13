@@ -294,5 +294,15 @@ angular
 			}
 		};
 
+		vm.isMatchDisabled = fieldMapping => {
+			if (fieldMapping && fieldMapping.contact == "") {
+				vm.match = false;
+				vm.changeLatticeField(vm.fieldMapping, vm.form);
+				return true;
+			} else {
+				return false;
+			}
+		};
+
 		vm.init();
 	});

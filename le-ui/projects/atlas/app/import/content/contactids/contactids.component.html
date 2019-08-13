@@ -114,6 +114,7 @@
         <input
           type="checkbox"
           ng-model="vm.match"
+          ng-disabled="vm.isMatchDisabled(vm.fieldMapping)"
           ng-change="vm.changeLatticeField(vm.fieldMapping, vm.form)"
         />
         Match this ID to Contact ID field in Lattice
