@@ -182,14 +182,16 @@ public class ContactFileValidationService
         if (checkEmpty && StringUtils.isEmpty(contactId)) {
             contactId = getFieldValue(record, InterfaceName.ContactId.name());
             if (StringUtils.isEmpty(contactId)) {
-                message = "ContactId should not be empty!";
+                message = String.format("[Required Column %s is missing value.]",
+                        getFieldDisplayName(record, InterfaceName.ContactId.name(), InterfaceName.ContactId.name()));
                 return message;
             }
         }
         if (checkEmpty && StringUtils.isEmpty(accountId)) {
             accountId = getFieldValue(record, InterfaceName.AccountId.name());
             if (StringUtils.isEmpty(accountId)) {
-                message = "AccountId should not be empty!";
+                message = String.format("[Required Column %s is missing value.]",
+                        getFieldDisplayName(record, InterfaceName.AccountId.name(), InterfaceName.AccountId.name()));
                 return message;
             }
         }
