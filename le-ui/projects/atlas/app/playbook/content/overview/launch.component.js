@@ -253,22 +253,13 @@ class LaunchComponent extends Component {
                 vm.setState(vm.state);
             });
         } else {
-            // actions.fetchEntitiesCounts({
-            //     account_restriction: playstore.play.targetSegment.account_restriction, 
-            //     contact_restriction: playstore.play.targetSegment.contact_restriction
-            // }, function(data) {
-            //     console.log(data);
-            //     // vm.state.excludeItemsWithoutSalesforceId = deepState.excludeItemsWithoutSalesforceId; // this gets reset here. I don't know exactly why.
-            //     // vm.state.launchAccountsCoverage = {
-            //     //     accountsCount: data
-            //     // };
-            //     // vm.state.fetching = false;
-            //     // vm.setState(vm.state);
-            // });
-            actions.fetchAccountsCount({ 'preexisting_segment_name': playstore.play.targetSegment.name }, function(data) {
+            actions.fetchEntitiesCounts({
+                account_restriction: playstore.play.targetSegment.account_restriction, 
+                contact_restriction: playstore.play.targetSegment.contact_restriction
+            }, function(data) {
                 vm.state.excludeItemsWithoutSalesforceId = deepState.excludeItemsWithoutSalesforceId; // this gets reset here. I don't know exactly why.
                 vm.state.launchAccountsCoverage = {
-                    accountsCount: data
+                    accountsCount: data.Account
                 };
                 vm.state.fetching = false;
                 vm.setState(vm.state);
