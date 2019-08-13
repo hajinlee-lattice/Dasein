@@ -142,7 +142,11 @@ public class CDLResource {
         try {
             ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName,
                     dataFileName, source, entity, feedType);
-            return ResponseDocument.successResponse(applicationId.toString());
+            if (applicationId != null) {
+                return ResponseDocument.successResponse(applicationId.toString());
+            } else {
+                return ResponseDocument.successResponse("");
+            }
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit import job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"ImportFile", e.getMessage()});
