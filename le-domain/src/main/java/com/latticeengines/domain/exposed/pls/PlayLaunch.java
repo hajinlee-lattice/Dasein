@@ -197,6 +197,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DESTINATION_ORG_ID")
     private String destinationOrgId;
 
+    @JsonProperty("destinationOrgName")
+    private String destinationOrgName;
+
     @JsonProperty("destinationSysType")
     @Column(name = "DESTINATION_SYS_TYPE")
     @Enumerated(EnumType.STRING)
@@ -522,6 +525,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setDestinationOrgId(String destinationOrgId) {
         this.destinationOrgId = destinationOrgId;
+    }
+
+    public String getDestinationOrgName() {
+        return destinationOrgName;
+    }
+
+    public void setDestinationOrgName(String destinationOrgName) {
+        this.destinationOrgName = destinationOrgName;
     }
 
     public CDLExternalSystemType getDestinationSysType() {

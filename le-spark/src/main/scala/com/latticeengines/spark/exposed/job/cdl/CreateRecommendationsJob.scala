@@ -6,6 +6,7 @@ import java.util.UUID
 import com.latticeengines.common.exposed.util.{JsonUtils, KryoUtils}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
+import com.latticeengines.domain.exposed.playmakercore.{NonStandardRecColumnName, RecommendationColumnName}
 import com.latticeengines.domain.exposed.pls.{PlayLaunchSparkContext, RatingBucketName}
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -13,7 +14,8 @@ import org.apache.commons.lang3.{EnumUtils, StringUtils}
 import org.apache.spark.sql.functions.{col, count, lit, sum, when}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-
+import collection.mutable._
+import collection.JavaConverters._
 
 object CreateRecommendationsJob {
 
@@ -179,6 +181,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val playLaunchContext: PlayLaunchSparkContext = config.getPlayLaunchSparkContext
     val topNCount = playLaunchContext.getTopNCount
     val joinKey: String = playLaunchContext.getJoinKey
+    val accountColsRecIncluded: Seq[String] = playLaunchContext.getAccountColsRecIncluded.asScala
+    val accountColsRecNotIncludedStd: Seq[String] = playLaunchContext.getAccountColsRecNotIncludedStd.asScala
+    val accountColsRecNotIncludedNonStd: Seq[String] = playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala
+    val contactCols: Seq[String] = playLaunchContext.getContactCols.asScala
+
     println("----- BEGIN SCRIPT OUTPUT -----")
 	  println(s"joinKey is: $joinKey")
 	  println("----- END SCRIPT OUTPUT -----")
@@ -259,8 +266,80 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         "DESCRIPTION", "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID",
         "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "CONTACTS",
         "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
-    lattice.output = orderedRec :: Nil
+        
     lattice.outputStr = finalOutput
+    // generate dataframe for csv file exporter
+    
+    // No user configured field mapping is provided. Only generate Recommendation DF
+    if (accountColsRecIncluded.isEmpty //
+        && accountColsRecNotIncludedStd.isEmpty //
+        && accountColsRecNotIncludedNonStd.isEmpty //
+        && contactCols.isEmpty) {
+      lattice.output = orderedRec :: Nil
+    } else {
+      val userConfiguredDataFrame = generateUserConfiguredDataFrame(playLaunchContext, joinKey)
+      lattice.output = list(orderedRec, userConfiguredDataFrame)
+    }
+  }
+  
+  private def generateUserConfiguredDataFrame(playLaunchContext: PlayLaunchSparkContext, joinKey: String): DataFrame = {
+    val accountColsRecIncluded: Seq[String] = playLaunchContext.getAccountColsRecIncluded.asScala
+    val accountColsRecNotIncludedStd: Seq[String] = playLaunchContext.getAccountColsRecNotIncludedStd.asScala
+    val accountColsRecNotIncludedNonStd: Seq[String] = playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala
+    val contactCols: Seq[String] = playLaunchContext.getContactCols.asScala
+    
+    // 1. combine Recommendation-contained columns (including Contacts column if required)
+    // with Recommendation-not-contained standard columns
+    var userConfiguredDataFrame: DataFrame = null
+    var recContainedCombinedWithStd: DataFrame = null
+    val needContactsColumn = !contactCols.isEmpty
+    
+    val containsJoinKey = accountColsRecIncluded.contains(joinKey)
+    val joinKeyCol: Option[String] = if (!containsJoinKey) Some(joinKey) else None
+    val contactsCol: Option[String] = if (needContactsColumn) Some(RecommendationColumnName.CONTACTS.name) else None
+       
+    if (!accountColsRecNotIncludedStd.isEmpty) {
+      val internalAppendedCols: Seq[String] = (accountColsRecIncluded ++ joinKeyCol ++ contactsCol).toSeq
+      val mappedToRecAppendedCols = internalAppendedCols map {col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.get(col) getOrElse col}
+      val recColsToInternalNameMap = mappedToRecAppendedCols map {col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.get(col).getOrElse(col)}} toMap
+      val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
+      // need to translate Recommendation name to internal name
+      val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
+      // need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
+      val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
+      
+      if (containsJoinKey) {
+        recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left")
+      } else {
+        recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left").drop(joinKey)
+      }
+    } else if (!accountColsRecIncluded.isEmpty && accountColsRecNotIncludedStd.isEmpty) {
+      val internalAppendedCols = (accountColsRecIncluded ++ contactsCol).toSeq
+      val mappedToRecAppendedCols = internalAppendedCols map {col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.get(col) getOrElse col}
+      val recColsToInternalNameMap = mappedToRecAppendedCols map {col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.get(col).getOrElse(col)}} toMap
+      val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
+      recContainedCombinedWithStd = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
+    } else {
+      println("Currently this scenario is not possible")
+      recContainedCombinedWithStd = orderedRec
+    }
+    
+    userConfiguredDataFrame = recContainedCombinedWithStd
+    // 2. Combine result of 1 with Recommendation-not-contained non-standard columns
+    if (!accountColsRecNotIncludedNonStd.isEmpty) {
+      for (name <- accountColsRecNotIncludedNonStd) {
+        if (name == NonStandardRecColumnName.DESTINATION_SYS_NAME.name) {
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getDestinationOrgName))
+        } else if (name == NonStandardRecColumnName.PLAY_NAME.name) {
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getPlayDisplayName))
+        } else if (name == NonStandardRecColumnName.RATING_MODEL_NAME.name) {
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getRatingEngineDisplayName))
+        } else if (name == NonStandardRecColumnName.SEGMENT_NAME.name) {
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getSegmentDisplayName))
+        }
+      }
+    }
+    return userConfiguredDataFrame
   }
   
   private def aggregateContacts(contactTable: DataFrame, joinKey: String): DataFrame = {
