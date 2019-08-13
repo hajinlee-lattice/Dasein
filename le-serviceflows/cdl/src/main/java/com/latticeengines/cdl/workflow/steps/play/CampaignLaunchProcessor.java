@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -101,6 +103,9 @@ public class CampaignLaunchProcessor {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private ExportFieldMetadataProxy exportFieldMetadataProxy;
@@ -219,15 +224,19 @@ public class CampaignLaunchProcessor {
         Play play = playProxy.getPlay(customerSpace.toString(), playName);
         PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
         List<ColumnMetadata> fieldMappingMetadata = null;
-        PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
-                playName, playLaunchId);
-        if (playLaunchChannel != null) {
-            fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
-                    playLaunchChannel.getId());
-            playLaunch.setDestinationOrgName(playLaunchChannel.getLookupIdMap().getOrgName());
-            log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
-                    + ", the list of columnmetadata is:");
-            log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+        boolean enableExportFieldMetadata = batonService.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA);
+        if (Boolean.TRUE.equals(enableExportFieldMetadata)) {
+            PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
+                    playName, playLaunchId);
+            if (playLaunchChannel != null) {
+                fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
+                        playLaunchChannel.getId());
+                playLaunch.setDestinationOrgName(playLaunchChannel.getLookupIdMap().getOrgName());
+                log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
+                        + ", the list of columnmetadata is:");
+                log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+            }
         }
         long launchTimestampMillis = playLaunch.getCreated().getTime();
 

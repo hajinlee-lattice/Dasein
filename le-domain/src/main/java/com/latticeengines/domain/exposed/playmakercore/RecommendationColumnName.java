@@ -25,6 +25,7 @@ public enum RecommendationColumnName {
     LIFT, //
     RATING_MODEL_ID, //
     MODEL_SUMMARY_ID, //
+    CONTACTS, //
     SYNC_DESTINATION, //
     DESTINATION_ORG_ID, //
     DESTINATION_SYS_TYPE, //

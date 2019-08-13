@@ -294,25 +294,31 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     var recContainedCombinedWithStd: DataFrame = null
     val needContactsColumn = !contactCols.isEmpty
     
+    val containsJoinKey = accountColsRecIncluded.contains(joinKey)
+    val joinKeyCol: Option[String] = if (!containsJoinKey) Some(joinKey) else None
+    val contactsCol: Option[String] = if (needContactsColumn) Some(RecommendationColumnName.CONTACTS.name) else None
+       
     if (!accountColsRecNotIncludedStd.isEmpty) {
-      val containsJoinKey = accountColsRecIncluded.contains("ACCOUNT_ID")
-      val joinKeyCol: Option[String] = if (!containsJoinKey) Some("ACCOUNT_ID") else None
-      val contactsCol: Option[String] = if (needContactsColumn) Some("CONTACTS") else None
-      val appendedCols: Seq[String] = (joinKeyCol ++ contactsCol).toSeq
+      val internalAppendedCols: Seq[String] = (accountColsRecIncluded ++ joinKeyCol ++ contactsCol).toSeq
+      val mappedToRecAppendedCols = internalAppendedCols map {col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.get(col) getOrElse col}
+      val recColsToInternalNameMap = mappedToRecAppendedCols map {col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.get(col).getOrElse(col)}} toMap
+      val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
+      // need to translate Recommendation name to internal name
+      val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
+      // need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
+      val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
+      
       if (containsJoinKey) {
-        val selectedRecTable = orderedRec.select((accountColsRecIncluded ++ appendedCols).map(name => col(name)) : _*)
-        // need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
-        val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
-        recContainedCombinedWithStd = selectedRecTable.join(selectedAccTable, joinKey :: Nil, "left")
+        recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left")
       } else {
-        val selectedRecTable = orderedRec.select((accountColsRecIncluded ++ appendedCols).map(name => col(name)) : _*)
-        // need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
-        val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
-        recContainedCombinedWithStd = selectedRecTable.join(selectedAccTable, joinKey :: Nil, "left").drop("ACCOUNT_ID")
+        recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left").drop(joinKey)
       }
     } else if (!accountColsRecIncluded.isEmpty && accountColsRecNotIncludedStd.isEmpty) {
-      val contactsCol: Option[String] = if (needContactsColumn) Some("CONTACTS") else None
-      recContainedCombinedWithStd = orderedRec.select((accountColsRecIncluded ++ (contactsCol.toSeq)).map(name => col(name)) : _*)
+      val internalAppendedCols = (accountColsRecIncluded ++ contactsCol).toSeq
+      val mappedToRecAppendedCols = internalAppendedCols map {col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.get(col) getOrElse col}
+      val recColsToInternalNameMap = mappedToRecAppendedCols map {col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.get(col).getOrElse(col)}} toMap
+      val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
+      recContainedCombinedWithStd = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
     } else {
       println("Currently this scenario is not possible")
       recContainedCombinedWithStd = orderedRec
