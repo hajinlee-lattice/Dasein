@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileWriter;
@@ -20,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -38,9 +41,12 @@ class RecommendationCreator {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
 
+    @Inject
+    private BatonService batonService;
+
     void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
-                                 Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
-                                 DataFileWriter<GenericRecord> dataFileWriter) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
+            DataFileWriter<GenericRecord> dataFileWriter) {
 
         List<Recommendation> recommendations = accountList//
                 .stream().parallel() //
@@ -56,8 +62,8 @@ class RecommendationCreator {
                                 playLaunchContext.getCounter().getContactErrored()
                                         .addAndGet(accountId != null
                                                 && mapForAccountAndContactList.containsKey(accountId.toString())
-                                                ? mapForAccountAndContactList.get(accountId.toString()).size()
-                                                : 0);
+                                                        ? mapForAccountAndContactList.get(accountId.toString()).size()
+                                                        : 0);
                                 return null;
                             }
                         }) //
@@ -71,13 +77,13 @@ class RecommendationCreator {
                             .collect(Collectors.toList());
 
             records.forEach(datum -> {
-                        try {
-                            dataFileWriter.append(datum);
-                        } catch (IOException e) {
-                            log.error(String.format("Error while writing recommendation record (%s) to avro file",
-                                    JsonUtils.serialize(datum)), e);
-                        }
-                    });
+                try {
+                    dataFileWriter.append(datum);
+                } catch (IOException e) {
+                    log.error(String.format("Error while writing recommendation record (%s) to avro file",
+                            JsonUtils.serialize(datum)), e);
+                }
+            });
         }
     }
 
@@ -134,6 +140,9 @@ class RecommendationCreator {
         }
         recommendation.setLaunchDate(launchTime);
 
+        if (batonService.isEntityMatchEnabled(playLaunchContext.getCustomerSpace())) {
+            recommendation.setAccountId(checkAndGet(account, InterfaceName.CustomerAccountId.name()));
+        }
         recommendation.setAccountId(accountId.toString());
         recommendation.setLeAccountExternalID(accountId.toString());
 
@@ -231,20 +240,20 @@ class RecommendationCreator {
             return 0;
 
         switch (bucket) {
-            case A:
-                return 95.0D;
-            case B:
-                return 70.0D;
-            case C:
-                return 40.0D;
-            case D:
-                return 20.0D;
-            case E:
-                return 10.0D;
-            case F:
-                return 5.0D;
-            default:
-                throw new UnsupportedOperationException("Unknown bucket " + bucket);
+        case A:
+            return 95.0D;
+        case B:
+            return 70.0D;
+        case C:
+            return 40.0D;
+        case D:
+            return 20.0D;
+        case E:
+            return 10.0D;
+        case F:
+            return 5.0D;
+        default:
+            throw new UnsupportedOperationException("Unknown bucket " + bucket);
         }
     }
 
