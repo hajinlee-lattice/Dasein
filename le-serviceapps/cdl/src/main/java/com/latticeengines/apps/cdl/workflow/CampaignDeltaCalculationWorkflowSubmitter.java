@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
@@ -39,7 +39,7 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
                 .inputProperties(inputProperties) //
                 .playId(playId) //
                 .channelId(channelId) //
-                .executionId(NamingUtils.uuid(playId+"_"+channelId))
+                .executionId(UUID.randomUUID().toString()) //
                 .build();
         return workflowJobService.submit(configuration);
     }
