@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,7 @@ public abstract class BaseFrontEndEntityResource {
                 }
             }
         }
-        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery);
+        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery, mainEntity);
         frontEndQuery.setMainEntity(mainEntity);
         if (BusinessEntity.Contact.equals(mainEntity)) {
             Restriction accountRestriction;
@@ -133,7 +134,7 @@ public abstract class BaseFrontEndEntityResource {
                 }
             }
         }
-        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery);
+        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery, getMainEntity());
         if (BusinessEntity.Contact.equals(getMainEntity())) {
             Restriction accountRestriction;
             if (frontEndQuery.getAccountRestriction() != null
@@ -183,7 +184,7 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    private void appendSegmentRestrictionAndFreeTextSearch(FrontEndQuery frontEndQuery) {
+    private void appendSegmentRestrictionAndFreeTextSearch(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
         // restrictions in the query
         Restriction frontEndAccountRestriction = frontEndQuery.getAccountRestriction() != null
                 ? frontEndQuery.getAccountRestriction().getRestriction() : null;
@@ -203,9 +204,9 @@ public abstract class BaseFrontEndEntityResource {
 
         // free text search
         Restriction freeTextAccountRestriction = //
-                translateFreeTextSearchForAccount(frontEndQuery.getFreeFormTextSearch());
+                translateFreeTextSearchForAccount(frontEndQuery.getFreeFormTextSearch(), mainEntity);
         Restriction freeTextContactRestriction = //
-                translateFreeTextSearchForContact(frontEndQuery.getFreeFormTextSearch());
+                translateFreeTextSearchForContact(frontEndQuery.getFreeFormTextSearch(), mainEntity);
         frontEndQuery.setFreeFormTextSearch(null);
 
         // merge together
@@ -339,23 +340,22 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    abstract List<AttributeLookup> getFreeTextSearchAttrs();
-
-    private Restriction translateFreeTextSearchForAccount(String freeTextSearch) {
-        return translateFreeTextSearch(BusinessEntity.Account, freeTextSearch);
+    private Restriction translateFreeTextSearchForAccount(String freeTextSearch, BusinessEntity queryEntity) {
+        return translateFreeTextSearch(BusinessEntity.Account, freeTextSearch, queryEntity);
     }
 
-    private Restriction translateFreeTextSearchForContact(String freeTextSearch) {
-        return translateFreeTextSearch(BusinessEntity.Contact, freeTextSearch);
+    private Restriction translateFreeTextSearchForContact(String freeTextSearch, BusinessEntity queryEntity) {
+        return translateFreeTextSearch(BusinessEntity.Contact, freeTextSearch, queryEntity);
     }
 
-    private Restriction translateFreeTextSearch(BusinessEntity entity, String freeTextSearch) {
+    private Restriction translateFreeTextSearch(BusinessEntity searchEntity, String freeTextSearch, //
+                                                BusinessEntity queryEntity) {
         if (StringUtils.isBlank(freeTextSearch)) {
             return null;
         }
 
-        List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs().stream() //
-                .filter(attributeLookup -> entity.equals(attributeLookup.getEntity())) //
+        List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs(queryEntity).stream() //
+                .filter(attributeLookup -> searchEntity.equals(attributeLookup.getEntity())) //
                 .collect(Collectors.toList());
 
         List<Restriction> searchRestrictions = searchAttrs.stream().map(attributeLookup -> {
@@ -376,6 +376,38 @@ public abstract class BaseFrontEndEntityResource {
 
     boolean isEntityMatchEnabled() {
         return tenantConfigService.isEntityMatchEnabled();
+    }
+
+    private List<AttributeLookup> getFreeTextSearchAttrs(BusinessEntity queryEntity) {
+        if (BusinessEntity.Account.equals(queryEntity)) {
+            if (isEntityMatchEnabled()) {
+                return Arrays.asList( //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()) //
+                );
+            } else {
+                return Arrays.asList( //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+                );
+            }
+        } else if (BusinessEntity.Contact.equals(queryEntity)) {
+            return Arrays.asList( //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.CompanyName.name()), //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
+            );
+        } else {
+            return Collections.emptyList();
+        }
     }
 
 }
