@@ -2210,6 +2210,27 @@ attr-categories,
                 background-color: $datacloud-color-contact !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-contact;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-contact;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
     .category-product, 
     .category-product-spend, 
@@ -2301,6 +2322,27 @@ attr-categories,
                 background-color: $datacloud-color-engagement !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-engagement;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-engagement;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
     .category-curated-account,
     .category-curated-account-attributes {
@@ -2336,20 +2378,42 @@ attr-categories,
                 background-color: $datacloud-color-curated-accounts !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-curated-accounts;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-curated-accounts;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
+
     .category-contact-attributes {
         &.color {
-            color: #21a585;
+            color: $datacloud-color-contact;
         }
         .category-icon {
-            @include svg-icon("contact-attributes", #21a585);
+            @include svg-icon("contact-attributes", $datacloud-color-contact);
         }
         .category-icon-container,
         &.border {
-            border-color: #21a585;
+            border-color: $datacloud-color-contact;
         }
         &.border-top {
-            border-top-color: #21a585;
+            border-top-color: $datacloud-color-contact;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2357,17 +2421,38 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #21a585 !important;
+            border-color: $datacloud-color-contact !important;
         }
         .background-color {
-            background-color: #21a585;
+            background-color: $datacloud-color-contact;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #21a585;
+                color: $datacloud-color-contact;
             }
             li.attribute:hover {
-                background-color: #21a585 !important;
+                background-color: $datacloud-color-contact !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-contact;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-contact;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
@@ -2402,6 +2487,27 @@ attr-categories,
             }
             li.attribute:hover {
                 background-color: $datacloud-color-my-attributes !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-my-attributes;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-my-attributes;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }

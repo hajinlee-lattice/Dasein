@@ -114,7 +114,7 @@ angular
             var presentCategories = DataCloudStore.getPresentCategories();
             if (presentCategories.length > 0) {
                 DataCloudStore.setMetadata('category', presentCategories[0]);
-            }            
+            }
         }
 
         vm.checkIterationFilter = function (type) {
