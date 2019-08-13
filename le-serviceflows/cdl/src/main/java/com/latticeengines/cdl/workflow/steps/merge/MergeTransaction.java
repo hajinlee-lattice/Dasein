@@ -362,11 +362,11 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
         if (StringUtils.isNotBlank(activeTableName)) {
             log.info("Cloning " + role + " from " + active + " to " + inactive);
-            emptyRawStore = true;
             clonePeriodStore(role);
         } else {
             log.info("Building a brand new " + role);
             buildPeriodStore(role, schema);
+            emptyRawStore = true;
         }
     }
 
