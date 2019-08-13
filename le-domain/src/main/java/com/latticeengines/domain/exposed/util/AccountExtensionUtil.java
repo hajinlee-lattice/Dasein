@@ -171,7 +171,6 @@ public class AccountExtensionUtil {
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columnSelections);
         matchInput.setCustomSelection(columnSelection);
-        matchInput.setDataCloudVersion(dataCloudVersion);
 
         return matchInput;
     }
