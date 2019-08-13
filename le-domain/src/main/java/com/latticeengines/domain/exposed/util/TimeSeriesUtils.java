@@ -536,8 +536,7 @@ public class TimeSeriesUtils {
                 continue;
             }
             // This period is already failed in previous write job, all the data
-            // belonging to this period need to
-            // re-distribute anyway
+            // belonging to this period need to re-distribute anyway
             if (failedPeriods.getOrDefault(PeriodStrategy.Template.Day.name(), new HashSet<>()).contains(period)) {
                 continue;
             }
