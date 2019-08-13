@@ -101,7 +101,9 @@ public class AccountFileValidationService
                                         log.info("Empty id is found from avro file");
                                         if (checkNull) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                            csvFilePrinter.printRecord(lineId, "", "AccountId cannot be empty!");
+                                            String message = String.format("[Required Column %s is missing value.]",
+                                                    getFieldDisplayName(record, interfaceName.name(), InterfaceName.AccountId.name()));
+                                            csvFilePrinter.printRecord(lineId, "", message);
                                             fileError = true;
                                             errorInPath++;
                                             errorLine++;

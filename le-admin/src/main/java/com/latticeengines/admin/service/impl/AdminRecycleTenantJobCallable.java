@@ -111,24 +111,30 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 long expiredTime = tenantRight.getExpirationDate();
                 if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
                     int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
-                    Tenant tenant = tenantService.findByTenantId(tenantRight.getGlobalAuthTenant().getId());
-                    GlobalAuthUser userData = tenantRight.getGlobalAuthUser();
-                    if (StringUtils.isBlank(userData.getFirstName())) {
-                        continue;
-                    }
-                    User user = new User();
-                    user.setFirstName(userData.getFirstName());
-                    user.setEmail(userData.getEmail());
-                    emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
+                    sendEmail(tenantRight, days);
+
                 } else if (currentTime >= expiredTime) {
                     String tenantId = tenantRight.getGlobalAuthTenant().getId();
                     String userName = tenantRight.getGlobalAuthUser().getEmail();
-                    log.info(String.format(String.format("Quartz job deleted %s from tenant %s", tenantId, userName)));
+                    log.info(String.format(String.format("Quartz job deleted %s from user %s", tenantId, userName)));
                     userService.deleteUser(tenantId, userName);
+                    sendEmail(tenantRight, 0);
                 }
             }
         }
         return true;
+    }
+
+    private void sendEmail(GlobalAuthUserTenantRight tenantRight, int days) {
+        Tenant tenant = tenantService.findByTenantId(tenantRight.getGlobalAuthTenant().getId());
+        GlobalAuthUser userData = tenantRight.getGlobalAuthUser();
+        if (StringUtils.isBlank(userData.getFirstName()) || StringUtils.isBlank(userData.getEmail())) {
+            return ;
+        }
+        User user = new User();
+        user.setFirstName(userData.getFirstName());
+        user.setEmail(userData.getEmail());
+        emailService.sendTenantRightStatusNoticeEmail(user, tenant, days);
     }
 
     public static class Builder {
