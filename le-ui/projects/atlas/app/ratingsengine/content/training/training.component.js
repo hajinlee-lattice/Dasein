@@ -61,6 +61,11 @@ angular
 			};
 
 			vm.$onInit = function() {
+
+				if (vm.engineType != "cross_sell" && vm.viewingIteration) {
+					vm.disableRemodelButton = false;
+				}
+
 				vm.ratingModel = vm.iteration
 					? vm.iteration.AI
 					: vm.ratingEngine.latest_iteration.AI;
