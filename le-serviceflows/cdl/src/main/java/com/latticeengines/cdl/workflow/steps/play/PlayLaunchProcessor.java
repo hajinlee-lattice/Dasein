@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
@@ -133,6 +134,9 @@ public class PlayLaunchProcessor {
     @Inject
     private PlayProxy playProxy;
 
+    @Inject
+    private BatonService batonService;
+
     public String launchPlay(Tenant tenant, PlayLaunchInitStepConfiguration config) throws IOException {
         // initialize play launch context
         PlayLaunchContext playLaunchContext = initPlayLaunchContext(tenant, config);
@@ -156,6 +160,9 @@ public class PlayLaunchProcessor {
 
             File localFile = new File(String.format("%s_%s_%s", tenant.getName(), currentTimeMillis, avroFileName));
 
+            boolean entityMatchEnabled = Boolean.TRUE == batonService
+                    .isEntityMatchEnabled(playLaunchContext.getCustomerSpace());
+
             if (totalAccountsCount > 0) {
                 // process accounts that exists in segment
                 long processedSegmentAccountsCount = 0;
@@ -171,7 +178,7 @@ public class PlayLaunchProcessor {
                     for (int pageNo = 0; pageNo < pages; pageNo++) {
                         // fetch and process a single page
                         processedSegmentAccountsCount = fetchAndProcessPage(playLaunchContext, totalAccountsCount,
-                                processedSegmentAccountsCount, pageNo, dataFileWriter, version);
+                                processedSegmentAccountsCount, pageNo, dataFileWriter, version, entityMatchEnabled);
                     }
                 }
 
@@ -360,7 +367,7 @@ public class PlayLaunchProcessor {
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,
             long processedSegmentAccountsCount, int pageNo, DataFileWriter<GenericRecord> dataFileWriter,
-            DataCollection.Version version) {
+            DataCollection.Version version, boolean entityMatchEnabled) {
         log.info(String.format("Loop #%d", pageNo));
 
         // fetch accounts in current page
@@ -369,7 +376,8 @@ public class PlayLaunchProcessor {
                         playLaunchContext, segmentAccountsCount, processedSegmentAccountsCount, version);
 
         // process accounts in current page
-        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage, dataFileWriter, version);
+        processedSegmentAccountsCount += processAccountsPage(playLaunchContext, accountsPage, dataFileWriter, version,
+                entityMatchEnabled);
 
         // update launch progress
         updateLaunchProgress(playLaunchContext, processedSegmentAccountsCount, segmentAccountsCount);
@@ -464,7 +472,7 @@ public class PlayLaunchProcessor {
     }
 
     private long processAccountsPage(PlayLaunchContext playLaunchContext, DataPage accountsPage,
-            DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version) {
+            DataFileWriter<GenericRecord> dataFileWriter, DataCollection.Version version, boolean entityMatchEnabled) {
         List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
                 .getModifiableAccountIdCollectionForContacts();
 
@@ -487,7 +495,7 @@ public class PlayLaunchProcessor {
             // generate recommendations using list of accounts in page and
             // corresponding account/contacts map
             recommendationCreator.generateRecommendations(playLaunchContext, //
-                    accountList, mapForAccountAndContactList, dataFileWriter);
+                    accountList, mapForAccountAndContactList, dataFileWriter, entityMatchEnabled);
         }
         return accountList.size();
     }

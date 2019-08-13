@@ -8,8 +8,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileWriter;
@@ -22,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -41,12 +38,9 @@ class RecommendationCreator {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
 
-    @Inject
-    private BatonService batonService;
-
     void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
-            DataFileWriter<GenericRecord> dataFileWriter) {
+            DataFileWriter<GenericRecord> dataFileWriter, boolean entityMatchEnabled) {
 
         List<Recommendation> recommendations = accountList//
                 .stream().parallel() //
@@ -54,7 +48,7 @@ class RecommendationCreator {
                         account -> {
                             try {
                                 return processSingleAccount(playLaunchContext, //
-                                        mapForAccountAndContactList, account);
+                                        mapForAccountAndContactList, account, entityMatchEnabled);
                             } catch (Throwable th) {
                                 log.error(th.getMessage(), th);
                                 playLaunchContext.getCounter().getAccountErrored().addAndGet(1);
@@ -100,12 +94,13 @@ class RecommendationCreator {
     }
 
     private Recommendation processSingleAccount(PlayLaunchContext playLaunchContext,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account,
+            boolean entityMatchEnabled) {
         Recommendation recommendation;
 
         // prepare recommendation
         recommendation = //
-                prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList);
+                prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList, entityMatchEnabled);
 
         // update corresponding counters
         playLaunchContext.getCounter().getContactLaunched().addAndGet(
@@ -116,7 +111,7 @@ class RecommendationCreator {
     }
 
     private Recommendation prepareRecommendation(PlayLaunchContext playLaunchContext, Map<String, Object> account,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, boolean entityMatchEnabled) {
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         long launchTimestampMillis = playLaunchContext.getLaunchTimestampMillis();
         String playName = playLaunchContext.getPlayName();
@@ -140,10 +135,11 @@ class RecommendationCreator {
         }
         recommendation.setLaunchDate(launchTime);
 
-        if (batonService.isEntityMatchEnabled(playLaunchContext.getCustomerSpace())) {
+        if (entityMatchEnabled) {
             recommendation.setAccountId(checkAndGet(account, InterfaceName.CustomerAccountId.name()));
+        } else {
+            recommendation.setAccountId(accountId.toString());
         }
-        recommendation.setAccountId(accountId.toString());
         recommendation.setLeAccountExternalID(accountId.toString());
 
         if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
