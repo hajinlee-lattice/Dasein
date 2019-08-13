@@ -149,6 +149,7 @@ public class PeriodDataDistributorTestNG extends PipelineTransformationTestNGBas
                 PeriodStrategy.Template.Week.name(), 2, //
                 PeriodStrategy.Template.Month.name(), 3);
         config.setTransactionIdxes(periodNameIdxes);
+        config.setRetryable(true);
         return JsonUtils.serialize(config);
     }
 
