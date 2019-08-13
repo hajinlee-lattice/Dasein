@@ -308,7 +308,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private boolean shouldProcessModelOfOneType(boolean hasModels, String modelType) {
-        boolean shouldProcess = shouldRebuildAll;
+        boolean shouldProcess = shouldRebuildAll || shouldRebuildSome;
         if (shouldProcess && !hasModels) {
             log.info("Has no " + modelType + " models, skip generating " + modelType + " ratings");
             shouldProcess = false;
