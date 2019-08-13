@@ -84,8 +84,11 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
-            if (launch.getPlayLaunchChannel() == null
-                    || currentlyLaunchingChannels.contains(launch.getPlayLaunchChannel().getId())) {
+            if (launch.getPlayLaunchChannel() == null) {
+                log.info(String.format("No play channel for this play launch %s", launch.getId()));
+                continue;
+            }
+            if (currentlyLaunchingChannels.contains(launch.getPlayLaunchChannel().getId())) {
                 log.info(String.format(
                         "Launch: %s skipped since a play launch is already being launched to this channel",
                         launch.getId()));
