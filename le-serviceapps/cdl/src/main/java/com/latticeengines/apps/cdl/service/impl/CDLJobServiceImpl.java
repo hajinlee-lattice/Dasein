@@ -1,11 +1,14 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,10 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.RedisZSetCommands;
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
@@ -83,6 +90,13 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static final String TEST_SCHEDULER = "qa_testing";
 
+    @Value("${common.le.environment}")
+    private String leEnv;
+
+    private static String MAIN_TRACKING_SET;
+
+    private static String NEW_TRACKING_SET;
+
     @Inject
     private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
 
@@ -117,6 +131,9 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private RedisTemplate<String, Object> InQTimeTracker;
 
     @VisibleForTesting
     @Value("${cdl.processAnalyze.concurrent.job.count}")
@@ -168,6 +185,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         };
         EXPORT_APPID_MAP = new LinkedHashMap<>();
+
+        initTrackingSets();
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
@@ -184,6 +203,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.info(String.format("CDLJobService running with cdlHostPort=%s, workflowHostPort=%s",
                     cdlProxy.getHostport(), workflowProxy.getHostport()));
         }
+
+        initTrackingSets();
     }
 
     @Override
@@ -346,7 +367,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
         if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && autoScheduledPAJobsCount < maximumScheduledJobCount)
                 || runningPAJobsCount >= concurrentProcessAnalyzeJobs
-                        && autoScheduledPAJobsCount < minimumScheduledJobCount) {
+                && autoScheduledPAJobsCount < minimumScheduledJobCount) {
             log.info("Need to schedule a PA job.");
             list.sort(Comparator.comparing(Map.Entry::getKey));
             for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
@@ -378,6 +399,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String tenantId : canRunRetryJobSet) {
                 try {
+                    InQTimeTracker.opsForZSet().remove(MAIN_TRACKING_SET, tenantId);
                     if (!dryRun) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
                         logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
@@ -391,16 +413,25 @@ public class CDLJobServiceImpl implements CDLJobService {
         Set<String> canRunJobSet = result.getNewPATenants();
         if (CollectionUtils.isNotEmpty(canRunJobSet)) {
             for (String tenantId : canRunJobSet) {
+                InQTimeTracker.opsForZSet().remove(MAIN_TRACKING_SET, tenantId);
                 if (!dryRun) {
                     ApplicationId appId = submitProcessAnalyzeJob(tenantId);
                     logScheduledPA(schedulerName, tenantId, appId, false, result);
                 }
             }
         }
+        try {
+            Set<?> starvedTenants = detectStarvation(result);
+            if (CollectionUtils.isNotEmpty(starvedTenants)) {
+                log.warn("Starvation detected for the following tenant(s) in scheduler: {}", starvedTenants);
+            }
+        } catch (Exception e) {
+            log.error("Encounter error while detecting starvation:", e);
+        }
     }
 
     private void logScheduledPA(@NotNull String schedulerName, String tenantId, ApplicationId appId, boolean isRetry,
-            SchedulingResult result) {
+                                SchedulingResult result) {
         if (StringUtils.isEmpty(tenantId) || appId == null || appId.toString() == null || result == null) {
             return;
         }
@@ -605,10 +636,10 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private boolean reachRetryLimit(CDLJobType cdlJobType, int retryCount) {
         switch (cdlJobType) {
-        case PROCESSANALYZE:
-            return retryCount >= processAnalyzeJobRetryCount;
-        default:
-            return false;
+            case PROCESSANALYZE:
+                return retryCount >= processAnalyzeJobRetryCount;
+            default:
+                return false;
         }
     }
 
@@ -744,4 +775,28 @@ public class CDLJobServiceImpl implements CDLJobService {
         MultiTenantContext.setTenant(tenant);
     }
 
+    @VisibleForTesting
+    Set<?> detectStarvation(SchedulingResult result) {
+        Set<String> allTenantsInQ = result.getAllTenantsInQ();
+        Set<ZSetOperations.TypedTuple<Object>> newTrackingEntries = new HashSet<>();
+        Instant curTime = Instant.now();
+        allTenantsInQ.forEach(tenantId -> {
+            newTrackingEntries.add(new DefaultTypedTuple<>(tenantId, (double) curTime.toEpochMilli()));
+        });
+        if (CollectionUtils.isNotEmpty(newTrackingEntries)) {
+            InQTimeTracker.opsForZSet().add(NEW_TRACKING_SET, newTrackingEntries);
+            InQTimeTracker.opsForZSet().unionAndStore(MAIN_TRACKING_SET, Collections.singletonList(NEW_TRACKING_SET), MAIN_TRACKING_SET, RedisZSetCommands.Aggregate.MIN);
+            InQTimeTracker.delete(NEW_TRACKING_SET);
+        }
+        Set<?> starvedTenants = InQTimeTracker.opsForZSet().rangeByScore(MAIN_TRACKING_SET, 0, (double) curTime.minus(2, ChronoUnit.DAYS).toEpochMilli());
+        if (CollectionUtils.isNotEmpty(starvedTenants)) {
+            return starvedTenants;
+        }
+        return Collections.emptySet();
+    }
+
+    private void initTrackingSets() {
+        MAIN_TRACKING_SET = leEnv + "_PA_SCHEDULER_MAIN_TRACKING_SET";
+        NEW_TRACKING_SET = leEnv + "_PA_SCHEDULER_NEW_TRACKING_SET";
+    }
 }
