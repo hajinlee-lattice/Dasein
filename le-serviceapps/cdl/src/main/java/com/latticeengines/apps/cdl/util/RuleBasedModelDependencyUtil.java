@@ -18,15 +18,13 @@ import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 
 @Component
 public class RuleBasedModelDependencyUtil {
 
     @Inject
     private RuleBasedModelEntityMgr ruleBasedModelEntityMgr;
-
-    @Inject
-    private SegmentDependencyUtil segmentDependencyUtil;
 
     @NoCustomerSpace
     public void findRatingModelAttributeLookups(RuleBasedModel ratingModel) {
@@ -49,7 +47,7 @@ public class RuleBasedModelDependencyUtil {
         if (ratingModel != null && !ignoreSegment) {
             MetadataSegment segment = ruleBasedModelEntityMgr.inflateParentSegment(ratingModel);
             if (segment != null) {
-                attributes.addAll(segmentDependencyUtil.findDependingAttributes(Collections.singletonList(segment)));
+                attributes.addAll(SegmentDependencyUtil.findDependingAttributes(Collections.singletonList(segment)));
             }
         }
         ratingModel.setRatingModelAttributes(attributes);
