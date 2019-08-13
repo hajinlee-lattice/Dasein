@@ -356,8 +356,14 @@ public class DataLakeServiceImpl implements DataLakeService {
             ColumnSelection.Predefined predefined) {
 
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, predefined,
-                dataCloudVersion);
+        MatchInput matchInput;
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
+            matchInput = AccountExtensionUtil.constructEntityMatchInput(customerSpace, internalAccountIds, predefined,
+                    dataCloudVersion);
+        } else {
+            matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, predefined,
+                    dataCloudVersion);
+        }
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
         List<ColumnMetadata> servingMetadata = getCachedServingMetadataForEntity(customerSpace, BusinessEntity.Account);

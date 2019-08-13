@@ -293,8 +293,15 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             Set<String> attributes) {
 
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        MatchInput matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, attributes,
-                dataCloudVersion);
+        MatchInput matchInput;
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
+            matchInput = AccountExtensionUtil.constructEntityMatchInput(customerSpace, internalAccountIds, attributes,
+                    dataCloudVersion);
+        } else {
+            matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, attributes,
+                    dataCloudVersion);
+        }
+
         log.info(String.format("Calling matchapi with request payload: %s", JsonUtils.serialize(matchInput)));
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
@@ -424,5 +431,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     }
 
     @VisibleForTesting
-    void setBatonService(BatonService batonService){ this.batonService = batonService;}
+    void setBatonService(BatonService batonService) {
+        this.batonService = batonService;
+    }
 }

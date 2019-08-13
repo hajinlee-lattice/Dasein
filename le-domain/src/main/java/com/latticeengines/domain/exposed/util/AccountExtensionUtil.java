@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -67,26 +68,22 @@ public class AccountExtensionUtil {
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
             RestrictionBuilder accoundIdRestrictionBuilder = Restriction.builder();
-            RestrictionBuilder[] accountIdRestrictions = accountIds.stream()
-                    .map(id -> Restriction.builder().let(BusinessEntity.Account, InterfaceName.AccountId.name()).eq(id))
-                    .toArray(RestrictionBuilder[]::new);
-
-            accoundIdRestrictionBuilder.or(accountIdRestrictions);
+            Restriction accountIdRestriction = Restriction.builder()
+                    .let(BusinessEntity.Account, InterfaceName.AccountId.name())
+                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
+            accoundIdRestrictionBuilder.or(accountIdRestriction);
             if (newEntityMatchEnabled) {
-                RestrictionBuilder[] custAccountIdRestrictions = accountIds.stream()
-                        .map(id -> Restriction.builder()
-                                .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()).eq(id))
-                        .toArray(RestrictionBuilder[]::new);
+                RestrictionBuilder custAccountIdRestrictions = Restriction.builder()
+                        .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())
+                        .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
                 accoundIdRestrictionBuilder.or(custAccountIdRestrictions);
             }
             idRestrictions.add(accoundIdRestrictionBuilder.build());
 
             if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
-                RestrictionBuilder sfdcRestrictionBuilder = Restriction.builder();
-                RestrictionBuilder[] sfdcRestrictions = accountIds.stream()
-                        .map(id -> Restriction.builder().let(BusinessEntity.Account, lookupIdColumn).eq(id))
-                        .toArray(RestrictionBuilder[]::new);
-                sfdcRestrictionBuilder.or(sfdcRestrictions);
+                RestrictionBuilder sfdcRestrictionBuilder = Restriction.builder()
+                        .let(BusinessEntity.Account, lookupIdColumn)
+                        .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
                 idRestrictions.add(sfdcRestrictionBuilder.build());
             }
         }
@@ -133,19 +130,48 @@ public class AccountExtensionUtil {
         List<List<Object>> data = new ArrayList<>();
         internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
 
-        Tenant tenant = new Tenant(customerSpace);
-        matchInput.setTenant(tenant);
+        matchInput.setTenant(new Tenant(customerSpace));
         matchInput.setFields(LOOKUP_FIELDS);
         matchInput.setData(data);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.LookupId, LOOKUP_FIELDS);
         matchInput.setKeyMap(keyMap);
         matchInput.setDataCloudVersion(dataCloudVersion);
+
         matchInput.setUseRemoteDnB(false);
+
         List<Column> columnSelections = attributes.stream().map(Column::new).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columnSelections);
         matchInput.setCustomSelection(columnSelection);
+
+        return matchInput;
+    }
+
+    public static MatchInput constructEntityMatchInput(String customerSpace, List<String> internalAccountIds,
+            Set<String> attributes, String dataCloudVersion) {
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(customerSpace));
+        List<List<Object>> data = new ArrayList<>();
+        internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
+        matchInput.setData(data);
+
+        matchInput.setFields(LOOKUP_FIELDS);
+        matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH_ATTR_LOOKUP);
+        matchInput.setTargetEntity(BusinessEntity.Account.name());
+        matchInput.setAllocateId(false);
+        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+        map.addMatchKey(MatchKey.EntityId, LOOKUP_FIELDS.get(0));
+        Map<String, MatchInput.EntityKeyMap> keyMap = new HashMap<>();
+        keyMap.put(BusinessEntity.Account.name(), map);
+        matchInput.setEntityKeyMaps(keyMap);
+
+        matchInput.setDataCloudVersion(dataCloudVersion);
+        List<Column> columnSelections = attributes.stream().map(Column::new).collect(Collectors.toList());
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columnSelections);
+        matchInput.setCustomSelection(columnSelection);
+        matchInput.setDataCloudVersion(dataCloudVersion);
 
         return matchInput;
     }
@@ -166,6 +192,31 @@ public class AccountExtensionUtil {
         matchInput.setKeyMap(keyMap);
         matchInput.setPredefinedSelection(predefined);
         matchInput.setUseRemoteDnB(false);
+        matchInput.setDataCloudVersion(dataCloudVersion);
+
+        return matchInput;
+    }
+
+    public static MatchInput constructEntityMatchInput(String customerSpace, List<String> internalAccountIds,
+            ColumnSelection.Predefined predefined, String dataCloudVersion) {
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(customerSpace));
+        List<List<Object>> data = new ArrayList<>();
+        internalAccountIds.forEach(accountId -> data.add(Collections.singletonList(accountId)));
+        matchInput.setData(data);
+
+        matchInput.setFields(LOOKUP_FIELDS);
+        matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH_ATTR_LOOKUP);
+        matchInput.setTargetEntity(BusinessEntity.Account.name());
+        matchInput.setAllocateId(false);
+        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+        map.addMatchKey(MatchKey.EntityId, LOOKUP_FIELDS.get(0));
+        Map<String, MatchInput.EntityKeyMap> keyMap = new HashMap<>();
+        keyMap.put(BusinessEntity.Account.name(), map);
+        matchInput.setEntityKeyMaps(keyMap);
+
+        matchInput.setDataCloudVersion(dataCloudVersion);
+        matchInput.setPredefinedSelection(predefined);
         matchInput.setDataCloudVersion(dataCloudVersion);
 
         return matchInput;

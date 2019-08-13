@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -13,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @Component(AccountDanteFormatter.Qualifier)
+@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>> {
 
     public static final String Qualifier = "accountDanteFormatter";
@@ -30,7 +33,7 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
         public static String BaseExternalID = "BaseExternalID";
         public static String LEAccount_External_ID = "LEAccount_External_ID";
         public static String Dante_Accounts = "Dante_Accounts";
-        public static String SalesforceAccountID = "SalesforceAccountID";
+        public static String SalesforceAccountID = InterfaceName.SalesforceAccountID.name();
         public static String NotionName = "NotionName";
     }
 
@@ -55,15 +58,16 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
         }
 
         boolean isSegment = isSpendAnalyticsSegmentEntity(entity);
+
         String spendAnalyticsSegmentName = entity.containsKey(InterfaceName.SpendAnalyticsSegment.name())
                 && entity.get(InterfaceName.SpendAnalyticsSegment.name()) != null
                         ? entity.get(InterfaceName.SpendAnalyticsSegment.name()).toString()
                         : null;
 
-        String accountIdValue = (String) (isEntityMatchEnabled ? entity.get(custAccountIdColumnName.toLowerCase())
-                : entity.get(custAccountIdColumnName));
-        // accountId = (String) (isSegment ? entity.get(accountIdColumnName.toLowerCase())
-        // : entity.get(accountIdColumnName));
+        String accountIdValue = (String) (isSegment ? entity.get(accountIdColumnName.toLowerCase())
+                : entity.get(accountIdColumnName));
+        accountIdValue = (String) (!isSegment && isEntityMatchEnabled ? entity.get(custAccountIdColumnName)
+                : accountIdValue);
         entity.put(RequiredDanteAccountProperty.BaseExternalID, accountIdValue);
         entity.put(RequiredDanteAccountProperty.LEAccount_External_ID, accountIdValue);
         entity.put(RequiredDanteAccountProperty.Dante_Accounts, accountIdValue);
@@ -95,11 +99,10 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
     }
 
     private boolean isSpendAnalyticsSegmentEntity(Map<String, Object> entity) {
-        return (entity.containsKey(isSegmentColumnName) //
-                && entity.get(isSegmentColumnName) != null //
+        return (entity.containsKey(isSegmentColumnName) && entity.get(isSegmentColumnName) != null
                 && (boolean) entity.get(isSegmentColumnName)) //
-                || (entity.containsKey(isSegmentColumnName.toLowerCase()) //
-                        && entity.get(isSegmentColumnName.toLowerCase()) != null //
+                || (entity.containsKey(isSegmentColumnName.toLowerCase())
+                        && entity.get(isSegmentColumnName.toLowerCase()) != null
                         && (boolean) entity.get(isSegmentColumnName.toLowerCase()));
     }
 

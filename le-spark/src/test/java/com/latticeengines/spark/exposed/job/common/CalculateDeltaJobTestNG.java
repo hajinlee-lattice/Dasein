@@ -1,7 +1,6 @@
 package com.latticeengines.spark.exposed.job.common;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -41,12 +40,12 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         InputStream is3 = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(
                         "com/latticeengines/common/exposed/util/SparkCountRecordsTest/newContactData.avro");
-        Assert.assertNotNull(is);
+        Assert.assertNotNull(is3);
 
         InputStream is4 = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(
                         "com/latticeengines/common/exposed/util/SparkCountRecordsTest/previousContactData.avro");
-        Assert.assertNotNull(is2);
+        Assert.assertNotNull(is4);
 
         String tempDir = "/tmp/testCalculateDelta";
         String avroPath = tempDir + "/newAccountData.avro";
@@ -61,9 +60,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath2));
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath3));
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath4));
-        // setup wildcard to count records in Avro files
-        ArrayList<String> globs = new ArrayList<>();
-        globs.add("hdfs://" + tempDir + "/*.avro");
+
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setCurrentAccountUniverse(HdfsDataUnit.fromPath(avroPath));
         config.setPreviousAccountUniverse(HdfsDataUnit.fromPath(avroPath2));
