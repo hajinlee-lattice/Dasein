@@ -183,7 +183,7 @@ public class ContactFileValidationService
             contactId = getFieldValue(record, InterfaceName.ContactId.name());
             if (StringUtils.isEmpty(contactId)) {
                 message = String.format("[Required Column %s is missing value.]",
-                        getFieldDisplayName(record, InterfaceName.ContactId.name(), InterfaceName.ContactId.name()));
+                        getFieldDisplayName(record, contactIdName, InterfaceName.ContactId.name()));
                 return message;
             }
         }
@@ -191,7 +191,7 @@ public class ContactFileValidationService
             accountId = getFieldValue(record, InterfaceName.AccountId.name());
             if (StringUtils.isEmpty(accountId)) {
                 message = String.format("[Required Column %s is missing value.]",
-                        getFieldDisplayName(record, InterfaceName.AccountId.name(), InterfaceName.AccountId.name()));
+                        getFieldDisplayName(record, accountIdName, InterfaceName.AccountId.name()));
                 return message;
             }
         }

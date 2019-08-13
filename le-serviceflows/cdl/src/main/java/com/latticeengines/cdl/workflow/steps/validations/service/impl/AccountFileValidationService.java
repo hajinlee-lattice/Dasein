@@ -102,7 +102,7 @@ public class AccountFileValidationService
                                         if (checkNull) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                             String message = String.format("[Required Column %s is missing value.]",
-                                                    getFieldDisplayName(record, InterfaceName.AccountId.name(), InterfaceName.AccountId.name()));
+                                                    getFieldDisplayName(record, interfaceName.name(), InterfaceName.AccountId.name()));
                                             csvFilePrinter.printRecord(lineId, "", message);
                                             fileError = true;
                                             errorInPath++;
