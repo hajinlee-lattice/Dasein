@@ -136,15 +136,15 @@ public class CampaignFrontEndQueryBuilder {
 
     private void setupLookups() {
         if (mainEntity == BusinessEntity.Contact) {
-            campaignFrontEndQuery.setLookups(contactLookups.stream()
-                    .map(cl -> new AttributeLookup(BusinessEntity.Contact, cl)).collect(Collectors.toList()));
+            campaignFrontEndQuery.setLookups(contactLookups.stream().map(cl -> new AttributeLookup(mainEntity, cl))
+                    .collect(Collectors.toList()));
         }
         if (mainEntity == BusinessEntity.Account) {
             if (StringUtils.isNotBlank(lookupId)) {
                 accountLookups.add(lookupId);
             }
-            campaignFrontEndQuery.setLookups(accountLookups.stream()
-                    .map(cl -> new AttributeLookup(BusinessEntity.Contact, cl)).collect(Collectors.toList()));
+            campaignFrontEndQuery.setLookups(accountLookups.stream().map(cl -> new AttributeLookup(mainEntity, cl))
+                    .collect(Collectors.toList()));
         }
     }
 

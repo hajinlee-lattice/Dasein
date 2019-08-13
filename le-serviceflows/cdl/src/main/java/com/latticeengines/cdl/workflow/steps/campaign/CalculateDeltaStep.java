@@ -177,13 +177,13 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     private void processHDFSDataUnit(HdfsDataUnit dataUnit, String primaryKey, String tableNamePrefix,
             String contextKey, CalculateDeltaStepConfiguration config) {
+        log.info(logHDFSDataUnit(tableNamePrefix, dataUnit));
         String tableName = NamingUtils.timestamp(tableNamePrefix);
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit,
                 getTargetTablePath(config.getPlayId(), config.getChannelId(), config.getExecutionId(), tableName));
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         dataUnitTable = metadataProxy.getTable(customerSpace.getTenantId(), dataUnitTable.getName());
         putObjectInContext(contextKey, tableName);
-        log.info(logHDFSDataUnit(tableNamePrefix, dataUnit));
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
@@ -247,7 +247,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         String tokenSparator = ", ";
         return tag + tokenSparator //
                 + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSparator //
-                + "Path: " + valueSeparator + dataUnit.getPath();
+                + "Path: " + valueSeparator + dataUnit.getPath() + tokenSparator //
+                + "Count: " + valueSeparator + dataUnit.getCount();
     }
 
     private CalculateDeltaJobConfig buildCalculateDeltaJobConfig(HdfsDataUnit accountDataUnit,
