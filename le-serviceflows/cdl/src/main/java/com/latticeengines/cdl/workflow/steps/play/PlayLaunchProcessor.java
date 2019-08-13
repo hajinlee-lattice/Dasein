@@ -160,8 +160,7 @@ public class PlayLaunchProcessor {
 
             File localFile = new File(String.format("%s_%s_%s", tenant.getName(), currentTimeMillis, avroFileName));
 
-            boolean entityMatchEnabled = Boolean.TRUE == batonService
-                    .isEntityMatchEnabled(playLaunchContext.getCustomerSpace());
+            boolean entityMatchEnabled = batonService.isEntityMatchEnabled(playLaunchContext.getCustomerSpace());
 
             if (totalAccountsCount > 0) {
                 // process accounts that exists in segment
