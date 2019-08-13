@@ -83,6 +83,7 @@
       <label class="match-contact">
         <input
           type="checkbox"
+          ng-disabled="vm.isMatchDisabled(vm.fieldMapping)"
           ng-model="vm.match"
           ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
         />
