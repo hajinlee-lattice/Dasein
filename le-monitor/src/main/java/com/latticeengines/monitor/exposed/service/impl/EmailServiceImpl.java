@@ -876,6 +876,34 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void sendTenantRightStatusNoticeEmail(User user, Tenant tenant, int days) {
+        try {
+            log.info("Sending tenant access change notice email to " + user.getEmail() + " on " + tenant.getName()
+                    + " started.");
+            EmailTemplateBuilder builder;
+            if (days > 0) {
+                builder = new EmailTemplateBuilder(Template.TENANT_RIGHT_NOTIFY_DAYS);
+            } else {
+                builder = new EmailTemplateBuilder(Template.TENANT_RIGHT_DELETE);
+            }
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{tenantname}}", tenant.getName());
+            builder.replaceToken("{{email}}", user.getEmail());
+            builder.replaceToken("{{days}}", String.valueOf(days));
+
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(EmailSettings.TENANT_RIGHT_NOTICE_SUBJECT, mp,
+                    Collections.singleton(user.getEmail()));
+            log.info(
+                    "Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on " + tenant.getName()
+                    + " " + e.getMessage());
+        }
+    }
+
+    @Override
     public void sendS3CredentialEmail(User user, Tenant tenant, GrantDropBoxAccessResponse response, String initiator) {
         try {
             log.info("Sending s3 credentials to " + user.getEmail() + " on " + tenant.getName() + " started.");
