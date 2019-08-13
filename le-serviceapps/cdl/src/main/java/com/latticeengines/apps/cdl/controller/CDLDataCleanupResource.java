@@ -44,17 +44,4 @@ public class CDLDataCleanupResource {
         }
     }
 
-    @RequestMapping(value = "/createCleanupAction", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "create clean up data action")
-    public void createCleanupAction(@PathVariable String customerSpace,
-                                            @RequestBody CleanupOperationConfiguration cleanupOperationConfiguration) {
-        try {
-            cdlDataCleanupService.createCleanupAction(customerSpace, cleanupOperationConfiguration);
-        } catch (Exception e) {
-            log.error("error:", e);
-            throw e;
-        }
-    }
-
 }
