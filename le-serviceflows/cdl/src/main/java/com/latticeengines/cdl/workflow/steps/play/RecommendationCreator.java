@@ -188,7 +188,7 @@ class RecommendationCreator {
         }
         if (mapForAccountAndContactList.containsKey(accountId)) {
             List<Map<String, String>> contactsForRecommendation = PlaymakerUtils
-                    .generateContactForRecommendation(mapForAccountAndContactList.get(accountId));
+                    .generateContactForRecommendation(mapForAccountAndContactList.get(accountId), entityMatchEnabled);
             recommendation.setExpandedContacts(contactsForRecommendation);
         }
 
