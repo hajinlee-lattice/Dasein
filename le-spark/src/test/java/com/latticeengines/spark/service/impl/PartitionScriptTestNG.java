@@ -44,12 +44,12 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
         jobConfig.setParams(params);
     }
 
-    @Test(groups = "functional", dataProvider = "dataProvider")
-    public void testPythonScript(SparkInterpreter interpreter) {
+    @Test(groups = "functional", dataProvider = "interpreter")
+    public void testScript(SparkInterpreter interpreter) {
         String ext = SparkInterpreter.Scala.equals(interpreter) ? "scala" : "py";
         setParamsWithPartition(true);
         InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("scripts/partition."+ext);
+                .getResourceAsStream("scripts/partition." + ext);
         InputStreamSparkScript script = new InputStreamSparkScript();
         script.setStream(is);
         script.setInterpreter(interpreter);
@@ -59,13 +59,13 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
         verifyResult(result);
     }
 
-    @Test(groups = "functional", dataProvider = "dataProvider", dependsOnMethods = "testPythonScript")
-    public void testPartitionPythonScript(SparkInterpreter interpreter) {
+    @Test(groups = "functional", dataProvider = "interpreter", dependsOnMethods = "testScript")
+    public void testPartitionScript(SparkInterpreter interpreter) {
         String ext = SparkInterpreter.Scala.equals(interpreter) ? "scala" : "py";
         setParamsWithPartition(false);
         copyOutputAsInput(inputSources);
         InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream("scripts/partition."+ext);
+                .getResourceAsStream("scripts/partition." + ext);
         InputStreamSparkScript script = new InputStreamSparkScript();
         script.setStream(is);
         script.setInterpreter(interpreter);
@@ -74,7 +74,7 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
         verifyResult(result);
     }
 
-    @DataProvider(name = "dataProvider")
+    @DataProvider(name = "interpreter")
     private Object[] provideData() {
         return new Object[] { SparkInterpreter.Scala, SparkInterpreter.Python };
     }

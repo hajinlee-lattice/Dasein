@@ -11,7 +11,7 @@ public class TestPartitionJobTestNG extends TestPartitionTestNGBase {
 
     @Test(groups = "functional")
     public void runTest() {
-        dataCnt =uploadInputAvro();
+        dataCnt = uploadInputAvro();
         TestPartitionJobConfig config = new TestPartitionJobConfig();
         config.setPartition(true);
         SparkJobResult result = runSparkJob(TestPartitionJob.class, config);

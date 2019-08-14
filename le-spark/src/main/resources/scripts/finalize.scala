@@ -30,8 +30,7 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
                 else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
   if (partitionKeys.isEmpty) {
     df.write.format(fmt).save(path)
-  }
-  else {
+  } else {
     df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
   }
   val df2 = spark.read.format(fmt).load(path)

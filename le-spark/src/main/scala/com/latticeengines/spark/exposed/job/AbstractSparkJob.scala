@@ -94,8 +94,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val partitionKeys = if (tgt.getPartitionKeys == null) List() else tgt.getPartitionKeys.asScala.toList
       if (partitionKeys.isEmpty) {
         df.write.format(fmt).save(path)
-      }
-      else {
+      } else {
         df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
       }
       val df2 = spark.read.format(fmt).load(path)
@@ -105,7 +104,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   }
 
   def setPartitionTargets(index: Int, list: Seq[String],lattice: LatticeContext[C]): Unit = {
-    if(index <= lattice.targets.size) {
+    if (index >= 0 && index < lattice.targets.size) {
       lattice.targets(index).setPartitionKeys(list.asJava);
     }else{
       throw new RuntimeException(s"There's no Target $index")

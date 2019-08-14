@@ -46,11 +46,11 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
                 Pair.of("Field5", Integer.class) //
         );
         Object[][] data = new Object[][] { //
-                { 0L, "a", 1L ,	0.0f , 0.2d , 0 }, //
-                { 1L, "b", 2L ,	0.1f , 0.2d , 0 }, //
-                { 2L, "b", 3L ,	0.2f , 0.4d , 1 }, //
-                { 3L, "c", 3L ,	0.1f , 0.3d , 4 }, //
-                { 4L, "a", 2L ,	0.1f , 0.3d , 2 }, //
+                { 0L,"a",1L,0.0f,0.2d,0 }, //
+                { 1L,"b",2L,0.1f,0.2d,0 }, //
+                { 2L,"b",3L,0.2f,0.4d,1 }, //
+                { 3L,"c",3L,0.1f,0.3d,4 }, //
+                { 4L,"a",2L,0.1f,0.3d,2 }, //
         };
 
         Object[][] preData = getData(data);
@@ -64,10 +64,10 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
 
     private Object[][] getData(Object[][] data){
         Object[][] result = new Object[1000][];
-        for(Integer i=0;i<1000;i++){
+        for(Integer i = 0 ; i < 1000 ; i++){
             Object[] row = data[i%5];
             row[0] = Long.valueOf(i);
-            result[i]=row.clone();
+            result[i] = row.clone();
         }
         return result;
     }

@@ -19,7 +19,7 @@ def load_hdfs_unit(unit):
     path = unit['Path']
     fmt = unit['DataFormat'] if 'DataFormat' in unit else "avro"
     partition_keys = unit['PartitionKeys'] if 'PartitionKeys' in unit else []
-    if not partition_keys:
+    if (partition_keys is None) or (len(partition_keys) == 0) :
         suffix = "." + fmt
         if path[-len(suffix):] != suffix:
             if path[-1] == "/":
@@ -56,7 +56,7 @@ print("Params: %s" % json.dumps(script_params))
 lattice = LatticeContext(input=script_input, params=script_params, targets=script_targets)
 
 def set_partition_targets(index, lst, lattice):
-    if index <= len(lattice.targets):
+    if (index >= 0) and (index < len(lattice.targets)):
         lattice.targets[index]['PartitionKeys'] = lst
     else:
         raise Exception("Index not exist %d" % index)

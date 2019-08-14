@@ -7,7 +7,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 class TestPartitionJob extends AbstractSparkJob[TestPartitionJobConfig]{
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[TestPartitionJobConfig]): Unit = {
-    if(lattice.config.getPartition==true){
+    if(lattice.config.getPartition){
       setPartitionTargets(0, Seq("Field1","Field2","Field3","Field4","Field5"), lattice)
     }
     val result = lattice.input.head

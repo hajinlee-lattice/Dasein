@@ -14,7 +14,7 @@
 // ============
 // BEGIN SCRIPT
 // ============
-if(lattice.params.get("Partition")==BooleanNode.TRUE){
+if(lattice.params.hasNonNull("Partition") && lattice.params.get("Partition").asBoolean()){
   setPartitionTargets(0, Seq("Field1","Field2","Field3","Field4","Field5"), lattice)
 }
 

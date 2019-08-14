@@ -71,7 +71,7 @@ println("----- END SCRIPT OUTPUT -----")
 val lattice: LatticeContext = new LatticeContext(scriptInput, scriptParams, scriptTargets)
 
 def setPartitionTargets(index: Int, partitionKeys: Seq[String], lattice: LatticeContext): Unit = {
-  if(index <= lattice.targets.size) {
+  if (index >= 0 && index < lattice.targets.size) {
     lattice.targets(index).set("PartitionKeys", mapper.valueToTree(partitionKeys))
   }else{
     throw new RuntimeException(s"There's no Target $index")
