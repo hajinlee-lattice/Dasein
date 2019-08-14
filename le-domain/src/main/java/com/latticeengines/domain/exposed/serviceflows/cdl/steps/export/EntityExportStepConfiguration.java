@@ -1,10 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps.export;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
@@ -19,12 +16,6 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("data_collection_version")
     private DataCollection.Version dataCollectionVersion;
 
-    @JsonProperty("export_entities")
-    private List<ExportEntity> exportEntities;
-
-    @JsonProperty("add_export_timestamp")
-    private boolean addExportTimestamp;
-
     @JsonProperty("compress_result")
     private boolean compressResult;
 
@@ -34,6 +25,9 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
 
     @JsonProperty("atlas_export_id")
     private String atlasExportId;
+
+    @JsonProperty("add_export_timestamp")
+    private boolean addExportTimestamp;
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -59,22 +53,6 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
         this.saveToDropfolder = saveToDropfolder;
     }
 
-    public List<ExportEntity> getExportEntities() {
-        return exportEntities;
-    }
-
-    public void setExportEntities(List<ExportEntity> exportEntities) {
-        this.exportEntities = exportEntities;
-    }
-
-    public boolean isAddExportTimestamp() {
-        return addExportTimestamp;
-    }
-
-    public void setAddExportTimestamp(boolean addExportTimestamp) {
-        this.addExportTimestamp = addExportTimestamp;
-    }
-
     public boolean isCompressResult() {
         return compressResult;
     }
@@ -97,5 +75,13 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
 
     public void setAtlasExportId(String atlasExportId) {
         this.atlasExportId = atlasExportId;
+    }
+
+    public boolean isAddExportTimestamp() {
+        return addExportTimestamp;
+    }
+
+    public void setAddExportTimestamp(boolean addExportTimestamp) {
+        this.addExportTimestamp = addExportTimestamp;
     }
 }

@@ -7,14 +7,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
@@ -80,16 +77,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public void createSourceFile(SourceFile sourceFile, String tenantId) {
-        try {
-            String url = constructUrl("pls/internal/sourcefiles", sourceFile.getName(), tenantId);
-            log.info(String.format("Posting to %s", url));
-            restTemplate.postForObject(url, sourceFile, Void.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createSourceFile: Remote call failure", e);
-        }
-    }
-
     public void sendPlsCreateModelEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl("pls/internal/emails/createmodel/result", result, tenantId);
@@ -132,16 +119,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public void sendMetadataSegmentExportEmail(String result, String tenantId, MetadataSegmentExport export) {
-        try {
-            String url = constructUrl("pls/internal/emails/segmentexport/result", result, tenantId);
-            log.info(String.format("Putting to %s", url));
-            restTemplate.put(url, export);
-        } catch (Exception e) {
-            throw new RuntimeException("sendMetadataSegmentExportEmail: Remote call failure", e);
-        }
-    }
-
     public void sendOrphanRecordsExportEmail(String result, String tenantId, OrphanRecordsExportRequest export) {
         try {
             String url = constructUrl("pls/internal/emails/orphanexport/result", result, tenantId);
@@ -162,26 +139,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public boolean createTenant(Tenant tenant) {
-        try {
-            String url = constructUrl("pls/admin/tenants");
-            log.debug(String.format("Posting to %s", url));
-            return restTemplate.postForObject(url, tenant, Boolean.class);
-        } catch (Exception e) {
-            throw new RuntimeException("createTenant: Remote call failure", e);
-        }
-    }
-
-    public void deleteTenant(CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl("pls/admin/tenants/", customerSpace.toString());
-            log.debug(String.format("Deleting to %s", url));
-            restTemplate.delete(url);
-        } catch (Exception e) {
-            throw new RuntimeException("deleteTenant: Remote call failure", e);
-        }
-    }
-
     public void createNote(String modelId, NoteParams noteParams) {
         try {
             String url = constructUrl("pls/internal/modelnotes/", modelId);
@@ -192,7 +149,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public void copyNotes(String fromModelSummaryId , String toModelSummaryId) {
+    public void copyNotes(String fromModelSummaryId, String toModelSummaryId) {
         try {
             String url = constructUrl("pls/internal/modelnotes/", fromModelSummaryId, toModelSummaryId);
             HttpHeaders headers = new HttpHeaders();

@@ -38,8 +38,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -68,14 +68,15 @@ public class DataFeedTaskImportListener extends LEJobListener {
     @Inject
     private Configuration yarnConfiguration;
 
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
 
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
-        String hostPort = jobExecution.getJobParameters().getString("Internal_Resource_Host_Port");
-        log.info("DataFeedTask import hostPort: " + hostPort);
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String applicationId = job.getOutputContextValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
         String importJobIdentifier = job
@@ -111,7 +112,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
             String result = "Failed";
             if (sendS3ImportEmail && notificationLevel.compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
                 String message = "Failed to import s3 file, please contact Lattice admin.";
-                sendS3ImportEmail(hostPort, customerSpace, result,
+                sendS3ImportEmail(customerSpace, result,
                         importJobIdentifier, emailInfo, message);
             }
             List<String> pathList = eaiImportJobDetail.getPathDetail();
@@ -184,7 +185,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 String result = "Success";
                 if (sendS3ImportEmail && notificationLevel.compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
-                    sendS3ImportEmail(hostPort, customerSpace, result,
+                    sendS3ImportEmail(customerSpace, result,
                             importJobIdentifier, emailInfo, null);
                 }
             } catch (Exception e) {
@@ -197,7 +198,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                 }
                 String result = "Failed";
                 if (sendS3ImportEmail && notificationLevel.compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
-                    sendS3ImportEmail(hostPort, customerSpace, result,
+                    sendS3ImportEmail(customerSpace, result,
                             importJobIdentifier, emailInfo, e.getMessage());
                 }
             }
@@ -216,17 +217,16 @@ public class DataFeedTaskImportListener extends LEJobListener {
         }
     }
 
-    private void sendS3ImportEmail(String hostPort, String customerSpace, String result,
+    private void sendS3ImportEmail(String customerSpace, String result,
                                    String taskId, S3ImportEmailInfo emailInfo, String message) {
         try {
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
             if (dataFeedTask != null && emailInfo != null) {
                 if (StringUtils.isNotEmpty(message)) {
                     emailInfo.setErrorMsg(message);
                 }
                 String tenantId = CustomerSpace.parse(customerSpace).toString();
-                proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+                plsInternalProxy.sendS3ImportEmail(result, tenantId, emailInfo);
             }
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
