@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -44,7 +45,7 @@ import io.swagger.annotations.ApiModelProperty;
         indexes = { @Index(name = "IX_UUID", columnList = "UUID") },
         uniqueConstraints = {@UniqueConstraint(name = "UX_UUID", columnNames = { "TENANT_ID", "UUID" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class AtlasExport implements HasPid, HasTenant, HasTenantId {
+public class AtlasExport implements HasPid, HasTenant, HasTenantId , HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -135,6 +136,14 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @JsonProperty("cleanup_by")
     @Column(name = "CLEANUP_BY", nullable = false)
     private Date cleanupBy;
+
+    @JsonProperty("created")
+    @Column(name = "CREATED", nullable = false)
+    private Date created;
+
+    @JsonProperty("updated")
+    @Column(name = "UPDATED", nullable = false)
+    private Date updated;
 
     @Override
     public Long getPid() {
@@ -285,5 +294,25 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
 
     public void setFilesToDelete(List<String> filesToDelete) {
         this.filesToDelete = filesToDelete;
+    }
+
+    @Override
+    public Date getCreated() {
+        return created;
+    }
+
+    @Override
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return updated;
+    }
+
+    @Override
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 }

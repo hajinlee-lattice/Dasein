@@ -82,6 +82,8 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
                 metadataSegmentExportService.getSegmentExportByExportId(atlasExport.getUuid());
         Assert.assertNotNull(metadataSegmentExport.getExportId());
         Assert.assertEquals(metadataSegmentExportService.getSegmentExports().size(), 2);
+        Assert.assertNotNull(metadataSegmentExport.getCreated());
+        Assert.assertNotNull(metadataSegmentExport.getUpdated());
         metadataSegmentExportService.deleteSegmentExportByExportId(exportId);
     }
 

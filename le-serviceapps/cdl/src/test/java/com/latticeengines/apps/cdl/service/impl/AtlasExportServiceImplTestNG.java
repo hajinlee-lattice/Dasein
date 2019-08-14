@@ -90,6 +90,8 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
         Tenant tenant = atlasExport.getTenant();
         Assert.assertEquals(tenant.getId(), mainCustomerSpace);
         Assert.assertNull(atlasExport.getFilesToDelete());
+        Assert.assertNotNull(atlasExport.getUpdated());
+        Assert.assertNotNull(atlasExport.getCreated());
     }
 
     private AtlasExport createAtlasExport(AtlasExportType atlasExportType) {

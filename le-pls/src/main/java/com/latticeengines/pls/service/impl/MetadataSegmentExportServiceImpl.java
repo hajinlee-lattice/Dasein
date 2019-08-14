@@ -24,6 +24,7 @@ import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
@@ -52,9 +53,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Inject
     private Configuration yarnConfiguration;
-
-    @Value("${pls.cdl.export.usespark}")
-    private boolean useSparkSQL;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -117,13 +115,13 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         checkExportSize(metadataSegmentExportJob);
         setCreatedBy(metadataSegmentExportJob);
         boolean useSpark;
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (useSparkFromRestApi != null) {
             useSpark = useSparkFromRestApi;
         } else {
-            useSpark = useSparkSQL;
+            useSpark = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         }
         if (useSpark) {
-            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             if (customerSpace == null) {
                 throw new LedpException(LedpCode.LEDP_18217);
             }
