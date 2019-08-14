@@ -7,6 +7,4 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 public interface CDLDataCleanupService {
 
     ApplicationId cleanupData(String customerSpace, CleanupOperationConfiguration configuration);
-
-    void createCleanupAction(String customerSpace, CleanupOperationConfiguration configuration);
 }

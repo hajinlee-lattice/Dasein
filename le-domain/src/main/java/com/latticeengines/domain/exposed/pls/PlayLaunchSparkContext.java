@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -80,18 +81,35 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("DestinationOrgId")
     private String destinationOrgId;
 
+    @JsonProperty("DestinationOrgName")
+    private String destinationOrgName;
+
     @JsonProperty("LaunchSystemName")
     private String launchSystemName;
 
     @JsonProperty("SfdcAccountID")
     private String sfdcAccountID;
 
+    @JsonProperty("AccountColsRecIncluded")
+    private List<String> accountColsRecIncluded;
+
+    @JsonProperty("AccountColsRecNotIncludedStd")
+    private List<String> accountColsRecNotIncludedStd;
+
+    @JsonProperty("AccountColsRecNotIncludedNonStd")
+    private List<String> accountColsRecNotIncludedNonStd;
+
+    @JsonProperty("ContactCols")
+    private List<String> contactCols;
+
     public PlayLaunchSparkContext() {
     }
 
     public PlayLaunchSparkContext(Tenant tenant, String playName, String playLaunchId, PlayLaunch playLaunch, Play play,
             RatingEngine ratingEngine, MetadataSegment segment, long launchTimestampMillis, String ratingId,
-            RatingModel publishedIteration) {
+            RatingModel publishedIteration, List<String> accountColsRecIncluded,
+            List<String> accountColsRecNotIncludedStd, List<String> accountColsRecNotIncludedNonStd,
+            List<String> contactCols) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
         this.tenantPid = tenant.getPid();
@@ -110,6 +128,10 @@ public class PlayLaunchSparkContext implements Serializable {
         this.modelSummaryId = publishedIteration != null && RatingEngineType.RULE_BASED != ratingEngineType
                 ? ((AIModel) publishedIteration).getModelSummaryId()
                 : "";
+        this.accountColsRecIncluded = accountColsRecIncluded;
+        this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+        this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+        this.contactCols = contactCols;
         setSyncDestination(playLaunch);
     }
 
@@ -217,6 +239,10 @@ public class PlayLaunchSparkContext implements Serializable {
         this.destinationOrgId = destinationOrgId;
     }
 
+    public String getDestinationOrgName() {
+        return this.destinationOrgName;
+    }
+
     public String getLaunchSystemName() {
         return this.launchSystemName;
     }
@@ -231,6 +257,38 @@ public class PlayLaunchSparkContext implements Serializable {
 
     public void setSfdcAccountID(String sfdcAccountID) {
         this.sfdcAccountID = sfdcAccountID;
+    }
+
+    public List<String> getAccountColsRecIncluded() {
+        return this.accountColsRecIncluded;
+    }
+
+    public void setAccountColsRecIncluded(List<String> accountColsRecIncluded) {
+        this.accountColsRecIncluded = accountColsRecIncluded;
+    }
+
+    public List<String> getAccountColsRecNotIncludedStd() {
+        return this.accountColsRecNotIncludedStd;
+    }
+
+    public void setAccountColsRecNotIncludedStd(List<String> accountColsRecNotIncludedStd) {
+        this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+    }
+
+    public List<String> getAccountColsRecNotIncludedNonStd() {
+        return this.accountColsRecNotIncludedNonStd;
+    }
+
+    public void setAccountColsRecNotIncludedNonStd(List<String> accountColsRecNotIncludedNonStd) {
+        this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+    }
+
+    public List<String> getContactCols() {
+        return this.contactCols;
+    }
+
+    public void setContactCols(List<String> contactCols) {
+        this.contactCols = contactCols;
     }
 
     public String getModelId() {
@@ -254,6 +312,9 @@ public class PlayLaunchSparkContext implements Serializable {
         } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.FILE_SYSTEM) {
             synchronizationDestination = SynchronizationDestinationEnum.FILE_SYSTEM.name();
             destinationSysType = CDLExternalSystemType.FILE_SYSTEM.name();
+        } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.ADS) {
+            synchronizationDestination = SynchronizationDestinationEnum.ADS.name();
+            destinationSysType = CDLExternalSystemType.ADS.name();
         } else {
             throw new RuntimeException(String.format("Destination type %s is not supported yet",
                     playLaunch.getDestinationSysType().name()));
@@ -262,6 +323,7 @@ public class PlayLaunchSparkContext implements Serializable {
         this.synchronizationDestination = synchronizationDestination;
         if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
             this.destinationOrgId = playLaunch.getDestinationOrgId();
+            this.destinationOrgName = playLaunch.getDestinationOrgName();
             this.destinationSysType = destinationSysType;
         }
         if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
@@ -284,6 +346,10 @@ public class PlayLaunchSparkContext implements Serializable {
         private long launchTimestampMillis;
         private String ratingId;
         private RatingModel publishedIteration;
+        private List<String> accountColsRecIncluded;
+        private List<String> accountColsRecNotIncludedStd;
+        private List<String> accountColsRecNotIncludedNonStd;
+        private List<String> contactCols;
 
         public PlayLaunchSparkContextBuilder tenant(Tenant tenant) {
             this.tenant = tenant;
@@ -335,10 +401,32 @@ public class PlayLaunchSparkContext implements Serializable {
             return this;
         }
 
+        public PlayLaunchSparkContextBuilder accountColsRecIncluded(List<String> accountColsRecIncluded) {
+            this.accountColsRecIncluded = accountColsRecIncluded;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder accountColsRecNotIncludedStd(List<String> accountColsRecNotIncludedStd) {
+            this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder accountColsRecNotIncludedNonStd(
+                List<String> accountColsRecNotIncludedNonStd) {
+            this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder contactCols(List<String> contactCols) {
+            this.contactCols = contactCols;
+            return this;
+        }
+
         public PlayLaunchSparkContext build() {
             return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
-                    this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId,
-                    this.publishedIteration);
+                    this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId, this.publishedIteration,
+                    this.accountColsRecIncluded, this.accountColsRecNotIncludedStd,
+                    this.accountColsRecNotIncludedNonStd, this.contactCols);
         }
     }
 

@@ -142,7 +142,11 @@ public class CDLResource {
         try {
             ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName,
                     dataFileName, source, entity, feedType);
-            return ResponseDocument.successResponse(applicationId.toString());
+            if (applicationId != null) {
+                return ResponseDocument.successResponse(applicationId.toString());
+            } else {
+                return ResponseDocument.successResponse("");
+            }
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit import job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"ImportFile", e.getMessage()});
@@ -293,9 +297,8 @@ public class CDLResource {
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-//            ApplicationId applicationId = cdlService.cleanupAllData(customerSpace.toString(), schemaInterpretation);
-            cdlService.cleanupAllByAction(customerSpace.toString(), schemaInterpretation);
-            return ResponseDocument.successResponse("");
+            ApplicationId applicationId = cdlService.cleanupAllData(customerSpace.toString(), schemaInterpretation);
+            return ResponseDocument.successResponse(applicationId.toString());
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit cleanup all job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"Cleanup", e.getMessage()});

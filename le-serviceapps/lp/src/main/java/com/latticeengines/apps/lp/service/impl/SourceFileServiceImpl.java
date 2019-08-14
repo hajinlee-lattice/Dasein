@@ -174,6 +174,8 @@ public class SourceFileServiceImpl implements SourceFileService {
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(fileProperty.getFileName());
             file.setPartialFile(true);
+            file.setS3Path(key);
+            file.setS3Bucket(s3Bucket);
 
             long spendTime = System.currentTimeMillis();
             long fileRows = HdfsUtils.copyCSVStreamToHdfs(yarnConfiguration, inputStream,

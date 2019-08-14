@@ -208,6 +208,18 @@ public class PlayResource {
         return playLaunchChannelService.createPlayLaunchChannel(playName, playLaunchChannel, launchNow);
     }
 
+    @GetMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get the play launch channel by the given play id and channel id")
+    public PlayLaunchChannel getPlayLaunchChannelById(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("channelId") String channelId) {
+        if (StringUtils.isEmpty(channelId)) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank channel Id" });
+        }
+        return playLaunchChannelService.findById(channelId);
+    }
+
     @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
@@ -655,8 +667,11 @@ public class PlayResource {
                         .contains(RatingBucketName.valueOf(ratingBucket.getBucket())))
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
-        accountsToLaunch = accountsToLaunch + (playLaunch.isLaunchUnscored() ? coverageResponse
-                .getRatingModelsCoverageMap().get(play.getRatingEngine().getId()).getUnscoredAccountCount() : 0L);
+        accountsToLaunch = accountsToLaunch
+                + (playLaunch.isLaunchUnscored()
+                        ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
+                                .getUnscoredAccountCount()
+                        : 0L);
 
         if (accountsToLaunch <= 0L) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });

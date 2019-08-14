@@ -18,6 +18,7 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.commons.collections4.comparators.NullComparator;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -26,10 +27,13 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.hadoop.fs.HdfsResourceLoader;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.dataflow.exception.RetryableFlowException;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -58,6 +62,7 @@ import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
+import cascading.flow.FlowException;
 import cascading.flow.FlowStep;
 import cascading.flow.StepCounters;
 import cascading.operation.NoOp;
@@ -999,12 +1004,33 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             log.info("Set application jar path to " + appJarPath);
             AppProps.setApplicationJarPath(properties, appJarPath);
         }
-        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
-        Flow<?> flow = flowConnector.connect(flowDef);
-        flow.writeDOT("dot/wcr.dot");
-        flow.addListener(dataFlowListener);
-        flow.addStepListener(dataFlowStepListener);
-        flow.complete();
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, //
+                Collections.singleton(RetryableFlowException.class), Collections.emptyList());
+        final ExecutionEngine finalEngine = engine;
+        Flow<?> flow = retry.execute(retryContext -> {
+            if (retryContext.getRetryCount() > 0) {
+                log.info("(Attempt=" + retryContext.getRetryCount() + ") retry cascading flow.");
+            }
+            try {
+                FlowConnector flowConnector = finalEngine.createFlowConnector(dataFlowCtx, properties);
+                Flow<?> flow0 = flowConnector.connect(flowDef);
+                flow0.writeDOT("dot/wcr.dot");
+                flow0.addListener(dataFlowListener);
+                flow0.addStepListener(dataFlowStepListener);
+                flow0.complete();
+                return flow0;
+            } catch (FlowException e) {
+                String stackTrace = ExceptionUtils.getStackTrace(e);
+                // Shuffle failed with too many fetch failures and insufficient progress!
+                if (stackTrace.contains("too many fetch failures")) {
+                    log.warn("Too many fetch failures error", e);
+                    throw new RetryableFlowException(e);
+                } else {
+                    throw e;
+                }
+            }
+        });
 
         // CascadeConnector connector = new CascadeConnector();
         // Cascade cascade = connector.connect(flow);

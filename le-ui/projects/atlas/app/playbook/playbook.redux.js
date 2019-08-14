@@ -219,7 +219,7 @@ export const actions = {
             }
         );
         // var query = { 'preexisting_segment_name': data.targetSegment.name }; ??
-        httpService.post(`/pls/entities/count`, query, observer, {});
+        httpService.post(`/pls/entities/counts`, query, observer, {});
     },
     fetchTypes: (cb, deferred) => {
         deferred = deferred || { resolve: (data) => data }
@@ -289,9 +289,19 @@ export const actions = {
         if(playstore && (playstore.lookupIdMapping && playstore.lookupIdMapping.MAP) && (playstore.userDocument && playstore.userDocument.accessToken)) {
             let map = playstore.lookupIdMapping.MAP.find(function(system) { return system.externalSystemName === opts.externalSystemName }),
                 trayAuthenticationId = (map  && map.externalAuthentication ? map.externalAuthentication.trayAuthenticationId : null),
-                useraccesstoken = playstore.userDocument.accessToken;
+                useraccesstoken = playstore.userDocument.accessToken,
+                urls = (externalSystemName) => {
+                    let urls = {
+                        default: `/tray/${externalSystemName.toLowerCase()}/audiences`,
+                        Marketo: '/tray/marketo/programs'
+                    };
+                    if(urls[externalSystemName]) {
+                        return urls[externalSystemName];
+                    }
+                    return urls['default'];
+                };
 
-            http.get(`/tray/marketo/programs`, {
+            http.get(urls(opts.externalSystemName), {
                 params: {
                     trayAuthenticationId: trayAuthenticationId
                 }, 

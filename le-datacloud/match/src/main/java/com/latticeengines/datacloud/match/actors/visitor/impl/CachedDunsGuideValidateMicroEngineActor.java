@@ -14,7 +14,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DnBMatchUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
-import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
+import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
@@ -37,7 +37,7 @@ public class CachedDunsGuideValidateMicroEngineActor extends BaseDunsGuideValida
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
         traveler.addEntityLdcMatchTypeToTupleList(
-                Pair.of(EntityMatchType.LDC_CACHED_DUNS_GUIDE_VALIDATE, traveler.getMatchKeyTuple()));
+                Pair.of(LdcMatchType.CACHED_DUNS_GUIDE_VALIDATE, traveler.getMatchKeyTuple()));
     }
 
     @Override

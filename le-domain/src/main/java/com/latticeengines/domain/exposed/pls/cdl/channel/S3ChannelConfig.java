@@ -26,8 +26,8 @@ public class S3ChannelConfig implements ChannelConfig {
     @JsonProperty("isIncludeExportAttributes")
     private Boolean isIncludeExportAttributes = false;
 
-    @JsonProperty("supressAccountWithoutAccountId")
-    private Boolean supressAccountWithoutAccountId = false;
+    @JsonProperty("supressAccountsWithoutLookupId")
+    private Boolean supressAccountsWithoutLookupId = false;
 
     @JsonProperty("supressAccountWithoutContacts")
     private Boolean supressAccountWithoutContacts = false;
@@ -64,12 +64,12 @@ public class S3ChannelConfig implements ChannelConfig {
         this.isIncludeExportAttributes = isIncludeExportAttributes;
     }
 
-    public Boolean isSupressAccountWithoutAccountId() {
-        return supressAccountWithoutAccountId;
+    public Boolean isSupressAccountsWithoutLookupId() {
+        return supressAccountsWithoutLookupId;
     }
 
-    public void setSupressAccountWithoutAccountId(boolean supressAccountWithoutAccountId) {
-        this.supressAccountWithoutAccountId = supressAccountWithoutAccountId;
+    public void setSupressAccountsWithoutLookupId(boolean supressAccountsWithoutLookupId) {
+        this.supressAccountsWithoutLookupId = supressAccountsWithoutLookupId;
     }
 
     public Boolean isSupressAccountWithoutContacts() {
@@ -93,7 +93,7 @@ public class S3ChannelConfig implements ChannelConfig {
         s3ChannelConfig.setAccountLimit(newS3ChannelConfig.getAccoutLimit());
         s3ChannelConfig.setS3CampaignExportDir(newS3ChannelConfig.getS3CampaignExportDir());
         s3ChannelConfig.setIsIncludeExportAttributes(newS3ChannelConfig.isIncludeExportAttributes());
-        s3ChannelConfig.setSupressAccountWithoutAccountId(newS3ChannelConfig.isSupressAccountWithoutAccountId());
+        s3ChannelConfig.setSupressAccountsWithoutLookupId(newS3ChannelConfig.isSupressAccountsWithoutLookupId());
         s3ChannelConfig.setSupressAccountWithoutContacts(newS3ChannelConfig.isSupressAccountWithoutContacts());
         return this;
     }

@@ -1,0 +1,18 @@
+.launch-modal-systems {
+	margin-top: -32px;
+	.le-title-container {
+		img {
+			width: 12%;
+		}
+	}
+	.le-modal-body {
+		height: 80vh;
+		iframe {
+			position: absolute;
+			top: 60px;
+			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+	}
+}

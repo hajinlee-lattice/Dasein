@@ -39,8 +39,8 @@ class RecommendationCreator {
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
 
     void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
-                                 Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
-                                 DataFileWriter<GenericRecord> dataFileWriter) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
+            DataFileWriter<GenericRecord> dataFileWriter, boolean entityMatchEnabled) {
 
         List<Recommendation> recommendations = accountList//
                 .stream().parallel() //
@@ -48,7 +48,7 @@ class RecommendationCreator {
                         account -> {
                             try {
                                 return processSingleAccount(playLaunchContext, //
-                                        mapForAccountAndContactList, account);
+                                        mapForAccountAndContactList, account, entityMatchEnabled);
                             } catch (Throwable th) {
                                 log.error(th.getMessage(), th);
                                 playLaunchContext.getCounter().getAccountErrored().addAndGet(1);
@@ -56,8 +56,8 @@ class RecommendationCreator {
                                 playLaunchContext.getCounter().getContactErrored()
                                         .addAndGet(accountId != null
                                                 && mapForAccountAndContactList.containsKey(accountId.toString())
-                                                ? mapForAccountAndContactList.get(accountId.toString()).size()
-                                                : 0);
+                                                        ? mapForAccountAndContactList.get(accountId.toString()).size()
+                                                        : 0);
                                 return null;
                             }
                         }) //
@@ -71,13 +71,13 @@ class RecommendationCreator {
                             .collect(Collectors.toList());
 
             records.forEach(datum -> {
-                        try {
-                            dataFileWriter.append(datum);
-                        } catch (IOException e) {
-                            log.error(String.format("Error while writing recommendation record (%s) to avro file",
-                                    JsonUtils.serialize(datum)), e);
-                        }
-                    });
+                try {
+                    dataFileWriter.append(datum);
+                } catch (IOException e) {
+                    log.error(String.format("Error while writing recommendation record (%s) to avro file",
+                            JsonUtils.serialize(datum)), e);
+                }
+            });
         }
     }
 
@@ -94,12 +94,13 @@ class RecommendationCreator {
     }
 
     private Recommendation processSingleAccount(PlayLaunchContext playLaunchContext,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account,
+            boolean entityMatchEnabled) {
         Recommendation recommendation;
 
         // prepare recommendation
         recommendation = //
-                prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList);
+                prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList, entityMatchEnabled);
 
         // update corresponding counters
         playLaunchContext.getCounter().getContactLaunched().addAndGet(
@@ -110,7 +111,7 @@ class RecommendationCreator {
     }
 
     private Recommendation prepareRecommendation(PlayLaunchContext playLaunchContext, Map<String, Object> account,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList) {
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, boolean entityMatchEnabled) {
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         long launchTimestampMillis = playLaunchContext.getLaunchTimestampMillis();
         String playName = playLaunchContext.getPlayName();
@@ -134,7 +135,11 @@ class RecommendationCreator {
         }
         recommendation.setLaunchDate(launchTime);
 
-        recommendation.setAccountId(accountId.toString());
+        if (entityMatchEnabled) {
+            recommendation.setAccountId(checkAndGet(account, InterfaceName.CustomerAccountId.name()));
+        } else {
+            recommendation.setAccountId(accountId.toString());
+        }
         recommendation.setLeAccountExternalID(accountId.toString());
 
         if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
@@ -203,6 +208,9 @@ class RecommendationCreator {
         } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.FILE_SYSTEM) {
             synchronizationDestination = SynchronizationDestinationEnum.FILE_SYSTEM.name();
             destinationSysType = CDLExternalSystemType.FILE_SYSTEM.name();
+        } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.ADS) {
+            synchronizationDestination = SynchronizationDestinationEnum.ADS.name();
+            destinationSysType = CDLExternalSystemType.ADS.name();
         } else {
             throw new RuntimeException(String.format("Destination type %s is not supported yet",
                     playLaunch.getDestinationSysType().name()));
@@ -228,20 +236,20 @@ class RecommendationCreator {
             return 0;
 
         switch (bucket) {
-            case A:
-                return 95.0D;
-            case B:
-                return 70.0D;
-            case C:
-                return 40.0D;
-            case D:
-                return 20.0D;
-            case E:
-                return 10.0D;
-            case F:
-                return 5.0D;
-            default:
-                throw new UnsupportedOperationException("Unknown bucket " + bucket);
+        case A:
+            return 95.0D;
+        case B:
+            return 70.0D;
+        case C:
+            return 40.0D;
+        case D:
+            return 20.0D;
+        case E:
+            return 10.0D;
+        case F:
+            return 5.0D;
+        default:
+            throw new UnsupportedOperationException("Unknown bucket " + bucket);
         }
     }
 

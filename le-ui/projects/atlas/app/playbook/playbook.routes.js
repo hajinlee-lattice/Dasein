@@ -243,7 +243,8 @@ angular
                 },
                 onEnter: function (BackStore, Play) {
                     BackStore.setBackLabel(Play.displayName);
-                    BackStore.setBackState('home.playbook.listchannels');
+                    //BackStore.setBackState('home.playbook.listchannels');
+                    BackStore.setBackState('home.playbook');
                     BackStore.setHidden(false);
                 },
                 onExit: function ($state) {

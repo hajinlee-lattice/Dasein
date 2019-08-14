@@ -281,19 +281,6 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
-    public void cleanupAllByAction(String customerSpace, BusinessEntity entity, String initiator) {
-        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/createCleanupAction";
-        String url = constructUrl(urlPattern, customerSpace);
-        CleanupAllConfiguration cleanupAllConfiguration = new CleanupAllConfiguration();
-        cleanupAllConfiguration.setOperationType(MaintenanceOperationType.DELETE);
-        cleanupAllConfiguration.setCleanupOperationType(CleanupOperationType.ALLDATA);
-        cleanupAllConfiguration.setEntity(entity);
-        cleanupAllConfiguration.setCustomerSpace(customerSpace);
-        cleanupAllConfiguration.setOperationInitiator(initiator);
-        put("create cleanup all data action", url, cleanupAllConfiguration);
-    }
-
-    @SuppressWarnings("unchecked")
     public ApplicationId cleanupAllAttrConfig(String customerSpace, BusinessEntity entity, String initiator) {
         String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
         String url = constructUrl(urlPattern, customerSpace);

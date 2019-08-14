@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
+import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.CDLEntityMatchMigrationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("cdlEntityMatchMigrationWorkflowSubmitter")
@@ -55,10 +57,19 @@ public class CDLEntityMatchMigrationWorkflowSubmitter extends WorkflowSubmitter 
     @Inject
     private ImportMigrateTrackingService importMigrateTrackingService;
 
+    @Inject
+    private MetadataProxy metadataProxy;
+
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, String userId, WorkflowPidWrapper pidWrapper) {
         log.info(String.format("Start submit EntityMatchMigrate job for tenant %s, by user %s",
                 customerSpace.getTenantId(), userId));
+        if (!MigrationTrack.Status.STARTED.equals(metadataProxy.getMigrationStatus(customerSpace.toString()))) {
+            log.error("Tenant {} is not tracked for migration or its migration status is not STARTED. Unable to submit migrate workflow.", customerSpace);
+            throw new IllegalStateException(String.format("Tenant %s does not have a valid migration state.", customerSpace));
+        } else {
+            log.info("Tenant {} is eligible for migration.", customerSpace);
+        }
         ImportMigrateTracking importMigrateTracking = importMigrateTrackingService.create(customerSpace.toString());
         Map<BusinessEntity, List<String>> dataFeedTaskMap = new HashMap<>();
         DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace.toString());

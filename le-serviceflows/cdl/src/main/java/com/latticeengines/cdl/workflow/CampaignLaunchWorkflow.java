@@ -24,7 +24,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class CampaignLaunchWorkflow extends AbstractWorkflow<CampaignLaunchWorkflowConfiguration> {
 
     @Inject
-    private ImportExtractEntityFromS3 importFromS3;
+    private ImportExtractEntityFromS3 importExtractEntityFromS3;
 
     @Inject
     private CampaignLaunchInitStep campaignLaunchInitStep;
@@ -44,7 +44,7 @@ public class CampaignLaunchWorkflow extends AbstractWorkflow<CampaignLaunchWorkf
     @Override
     public Workflow defineWorkflow(CampaignLaunchWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
-                .next(importFromS3) //
+                .next(importExtractEntityFromS3) //
                 .next(campaignLaunchInitStep) //
                 .next(playLaunchExportFileGeneratorStep) //
                 .next(playLaunchExportFilesToS3Step) //

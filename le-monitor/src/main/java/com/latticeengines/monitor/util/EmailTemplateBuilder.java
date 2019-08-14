@@ -122,6 +122,8 @@ public class EmailTemplateBuilder {
         PLS_CANCEL_ACTION_SUCCESS("pls_cancel_action_success.html"),
         CDL_JOB_SUCCESS("cdl_job_success.html"), CDL_JOB_ERROR("cdl_job_error.html"), //
         TENANT_STATE_NOTICE("poc_state_notice.html"), //
+        TENANT_RIGHT_NOTIFY_DAYS("tenant_right_notify_days.html"), //
+        TENANT_RIGHT_DELETE("tenant_right_delete.html"), //
         S3_CREDENTIALS("s3_credentials.html"), S3_EMPTY_CREDENTIALS("s3_empty_credentials.html"), //
         CDL_INGESTION_ERROR("cdl_ingestion_error.html"), CDL_INGESTION_SUCCESS(
                 "cdl_ingestion_success.html"), CDL_INGESTION_IN_PROCESS("cdl_ingestion_in_progress.html"),

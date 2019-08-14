@@ -19,7 +19,6 @@
     background-color: $color;
     -webkit-mask-image: url($svgIcon);
             mask-image: url($svgIcon);
-
 }
 
 
@@ -1794,18 +1793,18 @@ attr-categories,
     }
     .category-firmographics {
         &.color {
-            color: #33bdb7;
+            color: $datacloud-color-firmographics;
         }
         .category-icon {
-            @include svg-icon("firmographics", #33bdb7);
+            @include svg-icon("firmographics", $datacloud-color-firmographics);
         }
 
         .category-icon-container,
         &.border {
-            border-color: #33bdb7;
+            border-color: $datacloud-color-firmographics;
         }
         &.border-top {
-            border-top-color: #33bdb7;
+            border-top-color: $datacloud-color-firmographics;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -1813,17 +1812,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #33bdb7 !important;
+            border-color: $datacloud-color-firmographics !important;
         }
         .background-color {
-            background-color: #33bdb7;
+            background-color: $datacloud-color-firmographics;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #33bdb7;
+                color: $datacloud-color-firmographics;
             }
             li.attribute:hover {
-                background-color: #33bdb7 !important;
+                background-color: $datacloud-color-firmographics !important;
             }
         }
         &.button {
@@ -1834,14 +1833,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #33bdb7;
+                color: $datacloud-color-firmographics;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #33bdb7;
+                background-color: $datacloud-color-firmographics;
                 .free-text {
                     color: #ffffff;
                 }
@@ -1850,17 +1849,17 @@ attr-categories,
     }
     .category-growth-trends {
         &.color {
-            color: #65b7e6;
+            color: $datacloud-color-growth-trends;
         }
         .category-icon {
-            @include svg-icon("growth-trends", #33bdb7);
+            @include svg-icon("growth-trends", $datacloud-color-growth-trends);
         }
         .category-icon-container,
         &.border {
-            border-color: #65b7e6;
+            border-color: $datacloud-color-growth-trends;
         }
         &.border-top {
-            border-top-color: #65b7e6;
+            border-top-color: $datacloud-color-growth-trends;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -1868,17 +1867,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #65b7e6 !important;
+            border-color: $datacloud-color-growth-trends !important;
         }
         .background-color {
-            background-color: #65b7e6;
+            background-color: $datacloud-color-growth-trends;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #65b7e6;
+                color: $datacloud-color-growth-trends;
             }
             li.attribute:hover {
-                background-color: #65b7e6 !important;
+                background-color: $datacloud-color-growth-trends !important;
             }
         }
         &.button {
@@ -1889,14 +1888,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #65b7e6;
+                color: $datacloud-color-growth-trends;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #65b7e6;
+                background-color: $datacloud-color-growth-trends;
                 .free-text {
                     color: #ffffff;
                 }
@@ -1905,17 +1904,17 @@ attr-categories,
     }
     .category-intent {
         &.color {
-            color: #f15a5a;
+            color: $datacloud-color-intent;
         }
         .category-icon {
-            @include svg-icon("intent", #f15a5a);
+            @include svg-icon("intent", $datacloud-color-intent);
         }
         .category-icon-container,
         &.border {
-            border-color: #f15a5a;
+            border-color: $datacloud-color-intent;
         }
         &.border-top {
-            border-top-color: #f15a5a;
+            border-top-color: $datacloud-color-intent;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -1923,17 +1922,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #f15a5a !important;
+            border-color: $datacloud-color-intent !important;
         }
         .background-color {
-            background-color: #f15a5a;
+            background-color: $datacloud-color-intent;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #f15a5a;
+                color: $datacloud-color-intent;
             }
             li.attribute:hover {
-                background-color: #f15a5a !important;
+                background-color: $datacloud-color-intent !important;
             }
         }
         &.button {
@@ -1944,14 +1943,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #f15a5a;
+                color: $datacloud-color-intent;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #f15a5a;
+                background-color: $datacloud-color-intent;
                 .free-text {
                     color: #ffffff;
                 }
@@ -1960,17 +1959,17 @@ attr-categories,
     }
     .category-online-presence {
         &.color {
-            color: #8e71b2;
+            color: $datacloud-color-online-presence;
         }
         .category-icon {
-            @include svg-icon("online-presence", #8e71b2);
+            @include svg-icon("online-presence", $datacloud-color-online-presence);
         }
         .category-icon-container,
         &.border {
-            border-color: #8e71b2;
+            border-color: $datacloud-color-online-presence;
         }
         &.border-top {
-            border-top-color: #8e71b2;
+            border-top-color: $datacloud-color-online-presence;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -1978,17 +1977,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #8e71b2 !important;
+            border-color: $datacloud-color-online-presence !important;
         }
         .background-color {
-            background-color: #8e71b2 !important;
+            background-color: $datacloud-color-online-presence !important;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #8e71b2;
+                color: $datacloud-color-online-presence;
             }
             li.attribute:hover {
-                background-color: #8e71b2 !important;
+                background-color: $datacloud-color-online-presence !important;
             }
         }
         &.button {
@@ -1999,14 +1998,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #8e71b2;
+                color: $datacloud-color-online-presence;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #8e71b2;
+                background-color: $datacloud-color-online-presence;
                 .free-text {
                     color: #ffffff;
                 }
@@ -2015,17 +2014,17 @@ attr-categories,
     }
     .category-technology-profile {
         &.color {
-            color: #70bf4a;
+            color: $datacloud-color-technology-profile;
         }
         .category-icon {
-            @include svg-icon("technology-profile", #70bf4a);
+            @include svg-icon("technology-profile", $datacloud-color-technology-profile);
         }
         .category-icon-container,
         &.border {
-            border-color: #70bf4a;
+            border-color: $datacloud-color-technology-profile;
         }
         &.border-top {
-            border-top-color: #70bf4a;
+            border-top-color: $datacloud-color-technology-profile;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2033,17 +2032,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #70bf4a !important;
+            border-color: $datacloud-color-technology-profile !important;
         }
         .background-color {
-            background-color: #70bf4a;
+            background-color: $datacloud-color-technology-profile;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #70bf4a;
+                color: $datacloud-color-technology-profile;
             }
             li.attribute:hover {
-                background-color: #70bf4a !important;
+                background-color: $datacloud-color-technology-profile !important;
             }
         }
         &.button {
@@ -2054,14 +2053,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #70bf4a;
+                color: $datacloud-color-technology-profile;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #70bf4a;
+                background-color: $datacloud-color-technology-profile;
                 .free-text {
                     color: #ffffff;
                 }
@@ -2070,17 +2069,17 @@ attr-categories,
     }
     .category-website-keywords {
         &.color {
-            color: #fdbc49;
+            color: $datacloud-color-website-keywords;
         }
         .category-icon {
-            @include svg-icon("website-keywords", #fdbc49);
+            @include svg-icon("website-keywords", $datacloud-color-website-keywords);
         }
         .category-icon-container,
         &.border {
-            border-color: #fdbc49;
+            border-color: $datacloud-color-website-keywords;
         }
         &.border-top {
-            border-top-color: #fdbc49;
+            border-top-color: $datacloud-color-website-keywords;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2088,17 +2087,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #fdbc49 !important;
+            border-color: $datacloud-color-website-keywords !important;
         }
         .background-color {
-            background-color: #fdbc49;
+            background-color: $datacloud-color-website-keywords;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #fdbc49;
+                color: $datacloud-color-website-keywords;
             }
             li.attribute:hover {
-                background-color: #fdbc49 !important;
+                background-color: $datacloud-color-website-keywords !important;
             }
         }
         &.button {
@@ -2109,14 +2108,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #fdbc49;
+                color: $datacloud-color-website-keywords;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #fdbc49;
+                background-color: $datacloud-color-website-keywords;
                 .free-text {
                     color: #ffffff;
                 }
@@ -2125,17 +2124,17 @@ attr-categories,
     }
     .category-website-profile {
         &.color {
-            color: #26649b;
+            color: $datacloud-color-website-profile;
         }
         .category-icon {
-            @include svg-icon("website-profile", #26649b);
+            @include svg-icon("website-profile", $datacloud-color-website-profile);
         }
         .category-icon-container,
         &.border {
-            border-color: #26649b;
+            border-color: $datacloud-color-website-profile;
         }
         &.border-top {
-            border-top-color: #26649b;
+            border-top-color: $datacloud-color-website-profile;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2143,17 +2142,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #26649b !important;
+            border-color: $datacloud-color-website-profile !important;
         }
         .background-color {
-            background-color: #26649b;
+            background-color: $datacloud-color-website-profile;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #26649b;
+                color: $datacloud-color-website-profile;
             }
             li.attribute:hover {
-                background-color: #26649b !important;
+                background-color: $datacloud-color-website-profile !important;
             }
         }
         &.button {
@@ -2164,14 +2163,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #26649b;
+                color: $datacloud-color-website-profile;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #26649b;
+                background-color: $datacloud-color-website-profile;
                 .free-text {
                     color: #ffffff;
                 }
@@ -2180,17 +2179,17 @@ attr-categories,
     }
     .category-contact {
         &.color {
-            color: #ff9e64;
+            color: $datacloud-color-contact;
         }
         .category-icon {
-            @include svg-icon("contact", #ff9e64);
+            @include svg-icon("contact", $datacloud-color-contact);
         }
         .category-icon-container,
         &.border {
-            border-color: #ff9e64;
+            border-color: $datacloud-color-contact;
         }
         &.border-top {
-            border-top-color: #ff9e64;
+            border-top-color: $datacloud-color-contact;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2198,53 +2197,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #ff9e64 !important;
+            border-color: $datacloud-color-contact !important;
         }
         .background-color {
-            background-color: #ff9e64;
+            background-color: $datacloud-color-contact;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #ff9e64;
+                color: $datacloud-color-contact;
             }
             li.attribute:hover {
-                background-color: #ff9e64 !important;
-            }
-        }
-    }
-    .category-product, 
-    .category-product-spend, 
-    .category-product-spend-profile {
-        &.color {
-            color: #cd80bc;
-        }
-        .category-icon {
-            @include svg-icon("product", #cd80bc);
-        }
-        .category-icon-container,
-        &.border {
-            border-color: #cd80bc;
-        }
-        &.border-top {
-            border-top-color: #cd80bc;
-        }
-        &.background:not(.active):hover,
-        &.active.active-glow {
-            @include box-shadow(205,128,188);
-        }
-        &.background:not(.active):hover > span,
-        &.active.active-glow > span {
-            border-color: #cd80bc !important;
-        }
-        .background-color {
-            background-color: #cd80bc;
-        }
-        &.box-inner {
-            li.attribute .column.checkspace i {
-                color: #cd80bc;
-            }
-            li.attribute:hover {
-                background-color: #cd80bc !important;
+                background-color: $datacloud-color-contact !important;
             }
         }
         &.button {
@@ -2255,14 +2218,71 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #cd80bc;
+                color: $datacloud-color-contact;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #cd80bc;
+                background-color: $datacloud-color-contact;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
+    }
+    .category-product, 
+    .category-product-spend, 
+    .category-product-spend-profile {
+        &.color {
+            color: $datacloud-color-product;
+        }
+        .category-icon {
+            @include svg-icon("product", $datacloud-color-product);
+        }
+        .category-icon-container,
+        &.border {
+            border-color: $datacloud-color-product;
+        }
+        &.border-top {
+            border-top-color: $datacloud-color-product;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(205,128,188);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
+            border-color: $datacloud-color-product !important;
+        }
+        .background-color {
+            background-color: $datacloud-color-product;
+        }
+        &.box-inner {
+            li.attribute .column.checkspace i {
+                color: $datacloud-color-product;
+            }
+            li.attribute:hover {
+                background-color: $datacloud-color-product !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-product;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-product;
                 .free-text {
                     color: #ffffff;
                 }
@@ -2271,17 +2291,17 @@ attr-categories,
     }
     .category-engagement {
         &.color {
-            color: #aac43b;
+            color: $datacloud-color-engagement;
         }
         .category-icon {
-            @include svg-icon("engagement", #aac43b);
+            @include svg-icon("engagement", $datacloud-color-engagement);
         }
         .category-icon-container,
         &.border {
-            border-color: #aac43b;
+            border-color: $datacloud-color-engagement;
         }
         &.border-top {
-            border-top-color: #aac43b;
+            border-top-color: $datacloud-color-engagement;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2289,34 +2309,55 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #aac43b !important;
+            border-color: $datacloud-color-engagement !important;
         }
         .background-color {
-            background-color: #aac43b;
+            background-color: $datacloud-color-engagement;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #aac43b;
+                color: $datacloud-color-engagement;
             }
             li.attribute:hover {
-                background-color: #aac43b !important;
+                background-color: $datacloud-color-engagement !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-engagement;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-engagement;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
     .category-curated-account,
     .category-curated-account-attributes {
         &.color {
-            color: #a5bd46;
+            color: $datacloud-color-curated-accounts;
         }
         .category-icon {
-            @include svg-icon("curated-accounts", #a5bd46);
+            @include svg-icon("curated-accounts", $datacloud-color-curated-accounts);
         }
         .category-icon-container,
         &.border {
-            border-color: #a5bd46;
+            border-color: $datacloud-color-curated-accounts;
         }
         &.border-top {
-            border-top-color: #a5bd46;
+            border-top-color: $datacloud-color-curated-accounts;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2324,33 +2365,55 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #a5bd46 !important;
+            border-color: $datacloud-color-curated-accounts !important;
         }
         .background-color {
-            background-color: #a5bd46;
+            background-color: $datacloud-color-curated-accounts;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #a5bd46;
+                color: $datacloud-color-curated-accounts;
             }
             li.attribute:hover {
-                background-color: #a5bd46 !important;
+                background-color: $datacloud-color-curated-accounts !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-curated-accounts;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-curated-accounts;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
+
     .category-contact-attributes {
         &.color {
-            color: #21a585;
+            color: $datacloud-color-contact;
         }
         .category-icon {
-            @include svg-icon("contact-attributes", #21a585);
+            @include svg-icon("contact-attributes", $datacloud-color-contact);
         }
         .category-icon-container,
         &.border {
-            border-color: #21a585;
+            border-color: $datacloud-color-contact;
         }
         &.border-top {
-            border-top-color: #21a585;
+            border-top-color: $datacloud-color-contact;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2358,33 +2421,54 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #21a585 !important;
+            border-color: $datacloud-color-contact !important;
         }
         .background-color {
-            background-color: #21a585;
+            background-color: $datacloud-color-contact;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #21a585;
+                color: $datacloud-color-contact;
             }
             li.attribute:hover {
-                background-color: #21a585 !important;
+                background-color: $datacloud-color-contact !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-contact;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-contact;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
     .category-my-attributes {
         &.color {
-            color: #5f529e;
+            color: $datacloud-color-my-attributes;
         }
         .category-icon {
-            @include svg-icon("my-attributes", #5f529e);
+            @include svg-icon("my-attributes", $datacloud-color-my-attributes);
         }
         .category-icon-container,
         &.border {
-            border-color: #5f529e;
+            border-color: $datacloud-color-my-attributes;
         }
         &.border-top {
-            border-top-color: #5f529e;
+            border-top-color: $datacloud-color-my-attributes;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2392,17 +2476,38 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #5f529e !important;
+            border-color: $datacloud-color-my-attributes !important;
         }
         .background-color {
-            background-color: #5f529e;
+            background-color: $datacloud-color-my-attributes;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #5f529e;
+                color: $datacloud-color-my-attributes;
             }
             li.attribute:hover {
-                background-color: #5f529e !important;
+                background-color: $datacloud-color-my-attributes !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: $datacloud-color-my-attributes;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: $datacloud-color-my-attributes;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
@@ -2465,17 +2570,17 @@ attr-categories,
 
     .category-lattice-ratings {
         &.color {
-            color: #f2702f;
+            color: $datacloud-color-lattice-ratings;
         }
         .category-icon {
-            @include svg-icon("lattice-ratings", #f2702f);
+            @include svg-icon("lattice-ratings", $datacloud-color-lattice-ratings);
         }
         .category-icon-container,
         &.border {
-            border-color: #f2702f;
+            border-color: $datacloud-color-lattice-ratings;
         }
         &.border-top {
-            border-top-color: #f2702f;
+            border-top-color: $datacloud-color-lattice-ratings;
         }
         &.background:not(.active):hover,
         &.active.active-glow {
@@ -2483,17 +2588,17 @@ attr-categories,
         }
         &.background:not(.active):hover > span,
         &.active.active-glow > span {
-            border-color: #f2702f !important;
+            border-color: $datacloud-color-lattice-ratings !important;
         }
         .background-color {
-            background-color: #f2702f;
+            background-color: $datacloud-color-lattice-ratings;
         }
         &.box-inner {
             li.attribute .column.checkspace i {
-                color: #f2702f;
+                color: $datacloud-color-lattice-ratings;
             }
             li.attribute:hover {
-                background-color: #f2702f !important;
+                background-color: $datacloud-color-lattice-ratings !important;
             }
         }
         &.button {
@@ -2504,14 +2609,14 @@ attr-categories,
             font-weight: 500;
             border-style: solid;
             .free-text {
-                color: #f2702f;
+                color: $datacloud-color-lattice-ratings;
                 margin-right: 5px;
                 transition: all 0ms ease;
                 font-weight: bold;
             } 
             &:hover {
                 color: #ffffff;
-                background-color: #f2702f;
+                background-color: $datacloud-color-lattice-ratings;
                 .free-text {
                     color: #ffffff;
                 }
@@ -2562,7 +2667,7 @@ attr-categories,
         z-index: 10000;
         & > div {
             height: 5px;
-            background-color: #70bf4a;
+            background-color: $datacloud-color-technology-profile;
         }
 
     }

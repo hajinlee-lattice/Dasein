@@ -1,11 +1,14 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -84,7 +87,7 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setContactRestriction(null);
         } else {
             try {
-                validateBucketsInQuery(frontEndQuery);
+                cleanupAndValidateBucketsInQuery(frontEndQuery);
             } catch (LedpException e) {
                 if (LedpCode.LEDP_40057.equals(e.getCode())) {
                     throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
@@ -92,7 +95,7 @@ public abstract class BaseFrontEndEntityResource {
                 }
             }
         }
-        appendSegmentRestriction(frontEndQuery);
+        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery, mainEntity);
         frontEndQuery.setMainEntity(mainEntity);
         if (BusinessEntity.Contact.equals(mainEntity)) {
             Restriction accountRestriction;
@@ -123,7 +126,7 @@ public abstract class BaseFrontEndEntityResource {
             frontEndQuery.setContactRestriction(null);
         } else {
             try {
-                validateBucketsInQuery(frontEndQuery);
+                cleanupAndValidateBucketsInQuery(frontEndQuery);
             } catch (LedpException e) {
                 if (LedpCode.LEDP_40057.equals(e.getCode())) {
                     throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
@@ -131,7 +134,17 @@ public abstract class BaseFrontEndEntityResource {
                 }
             }
         }
-        appendSegmentRestriction(frontEndQuery);
+        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery, getMainEntity());
+        if (BusinessEntity.Contact.equals(getMainEntity())) {
+            Restriction accountRestriction;
+            if (frontEndQuery.getAccountRestriction() != null
+                    && frontEndQuery.getAccountRestriction().getRestriction() != null) {
+                accountRestriction = appendAccountNotNull(frontEndQuery.getAccountRestriction().getRestriction());
+            } else {
+                accountRestriction = accountNotNullBucket();
+            }
+            frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
+        }
         frontEndQuery.setMainEntity(getMainEntity());
         if (CollectionUtils.isEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.setLookups(getDataLookups());
@@ -148,11 +161,13 @@ public abstract class BaseFrontEndEntityResource {
         return data;
     }
 
-    private void validateBucketsInQuery(FrontEndQuery frontEndQuery) throws LedpException {
+    private void cleanupAndValidateBucketsInQuery(FrontEndQuery frontEndQuery) throws LedpException {
         Restriction accountRestriction = (frontEndQuery.getAccountRestriction() != null) ? //
                 frontEndQuery.getAccountRestriction().getRestriction() : null;
         Restriction contactRestriction = (frontEndQuery.getContactRestriction() != null) ? //
                 frontEndQuery.getContactRestriction().getRestriction() : null;
+        RestrictionUtils.cleanupBucketsInRestriction(accountRestriction);
+        RestrictionUtils.cleanupBucketsInRestriction(contactRestriction);
         List<BucketRestriction> invalidBkts = new ArrayList<>();
         try {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(accountRestriction));
@@ -169,64 +184,50 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
+    private void appendSegmentRestrictionAndFreeTextSearch(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
+        // restrictions in the query
+        Restriction frontEndAccountRestriction = frontEndQuery.getAccountRestriction() != null
+                ? frontEndQuery.getAccountRestriction().getRestriction() : null;
+        Restriction frontEndContactRestriction = frontEndQuery.getContactRestriction() != null
+                ? frontEndQuery.getContactRestriction().getRestriction() : null;
+
+        // restrictions in the segment
+        Restriction segmentAccountRestriction = null;
+        Restriction segmentContactRestriction = null;
         if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())
                 && !NEW_SEGMENT_PLACEHOLDER.equals(frontEndQuery.getPreexistingSegmentName())) {
-            // Segment Restrictions
             Pair<Restriction, Restriction> segmentRestrictions = getSegmentRestrictions(
                     frontEndQuery.getPreexistingSegmentName());
-            Restriction segmentAccountRestriction = segmentRestrictions.getLeft();
-            Restriction segmentContactRestriction = segmentRestrictions.getRight();
+            segmentAccountRestriction = segmentRestrictions.getLeft();
+            segmentContactRestriction = segmentRestrictions.getRight();
+        }
 
-            Restriction freeTextAccountRestriction = //
-                    translateFreeTextSearchForAccount(frontEndQuery.getFreeFormTextSearch());
-            Restriction freeTextContactRestriction = //
-                    translateFreeTextSearchForContact(frontEndQuery.getFreeFormTextSearch());
-            frontEndQuery.setFreeFormTextSearch(null);
+        // free text search
+        Restriction freeTextAccountRestriction = //
+                translateFreeTextSearchForAccount(frontEndQuery.getFreeFormTextSearch(), mainEntity);
+        Restriction freeTextContactRestriction = //
+                translateFreeTextSearchForContact(frontEndQuery.getFreeFormTextSearch(), mainEntity);
+        frontEndQuery.setFreeFormTextSearch(null);
 
-            // Account
-            if (segmentAccountRestriction != null) {
-                Restriction frontEndAccountRestriction = frontEndQuery.getAccountRestriction() != null
-                        ? frontEndQuery.getAccountRestriction().getRestriction() : null;
-                if (frontEndAccountRestriction != null) {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(frontEndAccountRestriction, segmentAccountRestriction, freeTextAccountRestriction) //
-                            .build();
-                    frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
-                } else {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(segmentAccountRestriction, freeTextAccountRestriction) //
-                            .build();
-                    FrontEndRestriction feRestriction = frontEndQuery.getAccountRestriction();
-                    if (feRestriction == null) {
-                        feRestriction = new FrontEndRestriction();
-                    }
-                    feRestriction.setRestriction(totalRestriction);
-                    frontEndQuery.setAccountRestriction(feRestriction);
-                }
-            }
+        // merge together
+        Restriction finalAccountRestriction = tripleMergeRestrictions( //
+                segmentAccountRestriction, frontEndAccountRestriction, freeTextAccountRestriction //
+        );
+        Restriction finalContactRestriction = tripleMergeRestrictions( //
+                segmentContactRestriction, frontEndContactRestriction, freeTextContactRestriction //
+        );
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(finalAccountRestriction));
+        frontEndQuery.setContactRestriction(new FrontEndRestriction(finalContactRestriction));
+    }
 
-            // Contact
-            if (segmentContactRestriction != null) {
-                Restriction frontEndContactRestriction = frontEndQuery.getContactRestriction() != null
-                        ? frontEndQuery.getContactRestriction().getRestriction() : null;
-                if (frontEndContactRestriction != null) {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(frontEndContactRestriction, segmentContactRestriction, freeTextContactRestriction) //
-                            .build();
-                    frontEndQuery.getContactRestriction().setRestriction(totalRestriction);
-                } else {
-                    Restriction totalRestriction = Restriction.builder() //
-                            .and(segmentAccountRestriction, segmentContactRestriction) //
-                            .build();
-                    FrontEndRestriction feRestriction = frontEndQuery.getContactRestriction();
-                    if (feRestriction == null) {
-                        feRestriction = new FrontEndRestriction();
-                    }
-                    feRestriction.setRestriction(totalRestriction);
-                    frontEndQuery.setContactRestriction(feRestriction);
-                }
-            }
+    private Restriction tripleMergeRestrictions(Restriction r1, Restriction r2, Restriction r3) {
+        List<Restriction> nonEmptyRs = Stream.of(r1, r2, r3).filter(Objects::nonNull).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(nonEmptyRs)) {
+            return Restriction.builder().and(Collections.emptyList()).build();
+        } else if (CollectionUtils.size(nonEmptyRs) == 1) {
+            return nonEmptyRs.get(0);
+        } else {
+            return Restriction.builder().and(nonEmptyRs).build();
         }
     }
 
@@ -339,23 +340,22 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    abstract List<AttributeLookup> getFreeTextSearchAttrs();
-
-    private Restriction translateFreeTextSearchForAccount(String freeTextSearch) {
-        return translateFreeTextSearch(BusinessEntity.Account, freeTextSearch);
+    private Restriction translateFreeTextSearchForAccount(String freeTextSearch, BusinessEntity queryEntity) {
+        return translateFreeTextSearch(BusinessEntity.Account, freeTextSearch, queryEntity);
     }
 
-    private Restriction translateFreeTextSearchForContact(String freeTextSearch) {
-        return translateFreeTextSearch(BusinessEntity.Contact, freeTextSearch);
+    private Restriction translateFreeTextSearchForContact(String freeTextSearch, BusinessEntity queryEntity) {
+        return translateFreeTextSearch(BusinessEntity.Contact, freeTextSearch, queryEntity);
     }
 
-    private Restriction translateFreeTextSearch(BusinessEntity entity, String freeTextSearch) {
+    private Restriction translateFreeTextSearch(BusinessEntity searchEntity, String freeTextSearch, //
+                                                BusinessEntity queryEntity) {
         if (StringUtils.isBlank(freeTextSearch)) {
             return null;
         }
 
-        List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs().stream() //
-                .filter(attributeLookup -> entity.equals(attributeLookup.getEntity())) //
+        List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs(queryEntity).stream() //
+                .filter(attributeLookup -> searchEntity.equals(attributeLookup.getEntity())) //
                 .collect(Collectors.toList());
 
         List<Restriction> searchRestrictions = searchAttrs.stream().map(attributeLookup -> {
@@ -376,6 +376,38 @@ public abstract class BaseFrontEndEntityResource {
 
     boolean isEntityMatchEnabled() {
         return tenantConfigService.isEntityMatchEnabled();
+    }
+
+    private List<AttributeLookup> getFreeTextSearchAttrs(BusinessEntity queryEntity) {
+        if (BusinessEntity.Account.equals(queryEntity)) {
+            if (isEntityMatchEnabled()) {
+                return Arrays.asList( //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()) //
+                );
+            } else {
+                return Arrays.asList( //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                        new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+                );
+            }
+        } else if (BusinessEntity.Contact.equals(queryEntity)) {
+            return Arrays.asList( //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.CompanyName.name()), //
+                    new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
+            );
+        } else {
+            return Collections.emptyList();
+        }
     }
 
 }

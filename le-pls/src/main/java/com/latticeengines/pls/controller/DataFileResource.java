@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.download.HttpFileDownLoader;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.DataFileProviderService;
 
 import io.swagger.annotations.Api;
@@ -224,6 +227,24 @@ public class DataFileResource {
         try {
             dataFileProviderService.downloadFileByPath(request, response, "application/csv", filePath);
         } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @RequestMapping(value = "/bundlecsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get bundle file from s3")
+    public void getBundleCsvFile(
+            HttpServletRequest request, //
+            HttpServletResponse response) throws Exception {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        if (tenantId == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            dataFileProviderService.downloadCurrentBundleFile(request, response, "application/csv");
+        } catch (Exception e) {
+            log.error("Download csv Failed: " + e.getMessage());
             throw e;
         }
     }

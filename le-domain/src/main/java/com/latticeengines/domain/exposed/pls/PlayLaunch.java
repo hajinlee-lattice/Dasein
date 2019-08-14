@@ -20,6 +20,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -196,6 +197,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DESTINATION_ORG_ID")
     private String destinationOrgId;
 
+    @Transient
+    @JsonProperty("destinationOrgName")
+    private String destinationOrgName;
+
     @JsonProperty("destinationSysType")
     @Column(name = "DESTINATION_SYS_TYPE")
     @Enumerated(EnumType.STRING)
@@ -229,6 +234,30 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "CHANNEL_CONFIG")
     @Lob
     private String channelConfig;
+
+    @JsonProperty("addAccountsTable")
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_ADD_ACCOUNTS_TABLE")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private com.latticeengines.domain.exposed.metadata.Table addAccountsTable;
+
+    @JsonProperty("addContactsTable")
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_ADD_CONTACTS_TABLE")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private com.latticeengines.domain.exposed.metadata.Table addContactsTable;
+
+    @JsonProperty("removeAccountsTable")
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_REMOVE_ACCOUNTS_TABLE")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private com.latticeengines.domain.exposed.metadata.Table removeAccountsTable;
+
+    @JsonProperty("removeContactsTable")
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_REMOVE_CONTACTS_TABLE")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private com.latticeengines.domain.exposed.metadata.Table removeContactsTable;
 
     public PlayLaunch() {
     }
@@ -499,6 +528,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.destinationOrgId = destinationOrgId;
     }
 
+    public String getDestinationOrgName() {
+        return destinationOrgName;
+    }
+
+    public void setDestinationOrgName(String destinationOrgName) {
+        this.destinationOrgName = destinationOrgName;
+    }
+
     public CDLExternalSystemType getDestinationSysType() {
         return destinationSysType;
     }
@@ -572,6 +609,38 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setChannelConfig(ChannelConfig channelConfig) {
         this.channelConfig = JsonUtils.serialize(channelConfig);
+    }
+
+    public com.latticeengines.domain.exposed.metadata.Table getAddAccountsTable() {
+        return addAccountsTable;
+    }
+
+    public void setAddAccountsTable(com.latticeengines.domain.exposed.metadata.Table addAccountsTable) {
+        this.addAccountsTable = addAccountsTable;
+    }
+
+    public com.latticeengines.domain.exposed.metadata.Table getAddContactsTable() {
+        return addContactsTable;
+    }
+
+    public void setAddContactsTable(com.latticeengines.domain.exposed.metadata.Table addContactsTable) {
+        this.addContactsTable = addContactsTable;
+    }
+
+    public com.latticeengines.domain.exposed.metadata.Table getRemoveAccountsTable() {
+        return removeAccountsTable;
+    }
+
+    public void setRemoveAccountsTable(com.latticeengines.domain.exposed.metadata.Table removeAccountsTable) {
+        this.removeAccountsTable = removeAccountsTable;
+    }
+
+    public com.latticeengines.domain.exposed.metadata.Table getRemoveContactsTable() {
+        return removeContactsTable;
+    }
+
+    public void setRemoveContactsTable(com.latticeengines.domain.exposed.metadata.Table removeContactsTable) {
+        this.removeContactsTable = removeContactsTable;
     }
 
 }
