@@ -1,14 +1,11 @@
 package com.latticeengines.apps.cdl.workflow;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -20,14 +17,12 @@ import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
+import com.latticeengines.domain.exposed.cdl.ExportEntity;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.SegmentExportWorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @Component
 public class EntityExportWorkflowSubmitter extends WorkflowSubmitter {
-
-    private static final Logger log = LoggerFactory.getLogger(EntityExportWorkflowSubmitter.class);
 
     @Inject
     private AtlasExportService atlasExportService;
@@ -37,38 +32,27 @@ public class EntityExportWorkflowSubmitter extends WorkflowSubmitter {
                                 @NotNull WorkflowPidWrapper pidWrapper) {
         AtlasExport atlasExport;
         if (StringUtils.isEmpty(request.getAtlasExportId())) {
-            throw new NullPointerException("export id should not be null");
+            atlasExport = atlasExportService.createAtlasExport(customerSpace,
+                    AtlasExportType.ACCOUNT_AND_CONTACT);
         } else {
             atlasExport = atlasExportService.getAtlasExport(customerSpace, request.getAtlasExportId());
         }
-        EntityExportWorkflowConfiguration configuration = configure(customerSpace, request, atlasExport, request.isSaveToDropfolder());
-
-        Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "entityExportWorkflow");
-        inputProperties.put(SegmentExportWorkflowConfiguration.SEGMENT_EXPORT_ID, //
-                atlasExport.getUuid());
-        inputProperties.put(SegmentExportWorkflowConfiguration.EXPORT_OBJECT_TYPE, //
-                atlasExport.getExportType().getDisplayName());
-        inputProperties.put(SegmentExportWorkflowConfiguration.EXPIRE_BY_UTC_TIMESTAMP, //
-                Long.toString(atlasExport.getCleanupBy().getTime()));
-        inputProperties.put(SegmentExportWorkflowConfiguration.SEGMENT_DISPLAY_NAME, //
-                atlasExport.getSegmentName());
-        configuration.setInputProperties(inputProperties);
+        EntityExportWorkflowConfiguration configuration = configure(customerSpace, request, atlasExport);
         ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
         atlasExport.setApplicationId(applicationId.toString());
-        log.info(String.format("The current status for atlas export is %s", atlasExport.getStatus()));
         atlasExportService.updateAtlasExport(customerSpace, atlasExport);
         return applicationId;
     }
 
     @VisibleForTesting
     private EntityExportWorkflowConfiguration configure(String customerSpace, EntityExportRequest request,
-                                                        AtlasExport atlasExport, Boolean saveToDropfolder) {
+                                                        AtlasExport atlasExport) {
         return new EntityExportWorkflowConfiguration.Builder() //
                 .customer(CustomerSpace.parse(customerSpace)) //
+                .exportEntities(Arrays.asList(ExportEntity.Account, ExportEntity.Contact)) //
                 .dataCollectionVersion(request.getDataCollectionVersion()) //
                 .compressResult(true) //
-                .saveToDropfolder(saveToDropfolder) //
+                .saveToDropfolder(true) //
                 .atlasExportId(atlasExport.getUuid())
                 .build();
     }

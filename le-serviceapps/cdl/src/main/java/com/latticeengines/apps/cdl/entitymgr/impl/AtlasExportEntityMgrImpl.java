@@ -86,7 +86,7 @@ public class AtlasExportEntityMgrImpl
         export.setUuid(NamingUtils.uuid(UUID_PREFIX));
         export.setScheduled(true);
         export.setDatePrefix(exportDateFormat.format(new Date()));
-        export.setCleanupBy(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(30)));
+        export.setCleanupBy(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
         atlasExportDao.create(export);
         return export;
     }
@@ -103,15 +103,6 @@ public class AtlasExportEntityMgrImpl
         atlasExport.setCleanupBy(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
         atlasExportDao.create(atlasExport);
         return atlasExport;
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void deleteByExportId(String exportId) {
-        AtlasExport atlasExport = findByUuid(exportId);
-        if (atlasExport != null) {
-            atlasExportDao.delete(atlasExport);
-        }
     }
 
 }
