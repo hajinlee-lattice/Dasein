@@ -1,4 +1,4 @@
-/**
+    /**
 - add description behavior is wrong
 
 All Channels
@@ -50,20 +50,49 @@ function debounceEventHandler(...args) {
     }
 }
 
-function chron(frequency) {
-    var date = new Date(),
+function cronMaker(opts) {
+    /**
+      *  Name          Required  Values              Allowed special charcters 
+      *  Seconds       Y         0-59                , - * /
+      *  Minutes       Y         0-59                , - * /
+      *  Hours         Y         0-23                , - * / 
+      *  Day of month  Y         1-31                , - * ? / L W C
+      *  Month         Y         0-11 or JAN-DEC     , - * /
+      *  Day of week   Y         1-7 or SUN-SAT      , - * ? / L C #
+      *  Year          N         empty or 1970-2099  , - * /
+      *
+      *  <s> <m> <h> <dom> <m> <dow> <y>
+     */
+
+    var opts = opts || {},
+        date = new Date(),
         daysofweek = 'SUN,MON,TUE,WED,THU,FRI,SAT'.split(','),
-        dayofweek = daysofweek[date.getDay()],
-        day = date.getDate(),
-        months = 1;
+        dayofweek = opts.dayofweek || daysofweek[date.getDay()],
+        dayofmonth = opts.dayofmonth || date.getDate(),
+        months = 1,
+        timeofday = {
+            hour: 12,
+            minutes: 0
+        };
+
+    if(opts.timeofday) {
+        let _timeofday = opts.timeofday.split(':'),
+            hour = parseInt(_timeofday[0]),
+            minutes = parseInt(_timeofday[1]),
+            seconds = parseInt(_timeofday[2]);
+
+        timeofday = {
+            hour: hour,
+            minutes: minutes
+        }
+    }
 
     var schedule = {
         Once: null,
-        Weekly: `0 0 12 ? * ${dayofweek} *`,
-        Monthly: `0 0 12 ${day} 1/${months} ? *`
+        Weekly:  `0 ${timeofday.minutes} ${timeofday.hour} ? * ${dayofweek} *`,
+        Monthly: `0 ${timeofday.minutes} ${timeofday.hour} ${dayofmonth} 1/${months} ? *`
     }
-
-    return schedule[frequency];
+    return schedule[opts.frequency];
 }
 
 function isAudience(externalSystemName, showlist) {
@@ -107,7 +136,13 @@ class LaunchComponent extends Component {
             launchSchedule: null,
             launchingState: 'unlaunching',
             launchType: null,
-            keepInSync: true,
+            cronSettings: {
+                frequency: 'Once',
+                timeofday: '12:00',
+                dayofweek: 'MON',
+                dayofmonth: 1
+            },
+            keepInSync: false, // turned off as per PLS-14504 otherwise true
             programs: null,
             staticList: null,
             showNewAudienceName: false,
@@ -183,7 +218,15 @@ class LaunchComponent extends Component {
             this.setState(this.state);
         }
 
-        if(!channelConfig || !channelConfig.audienceName) {
+        if(!channelConfig) {
+            this.state.showNewAudienceName = true;
+            this.setState(this.state);
+        }
+        if(channelConfig && !channelConfig.audienceName) {
+            this.state.showNewAudienceName = true;
+            this.setState(this.state);
+        }
+        if(['LinkedIn','Facebook'].indexOf(this.state.externalSystemName) !== -1) { // hack because stub data is stub data
             this.state.showNewAudienceName = true;
             this.setState(this.state);
         }
@@ -526,7 +569,7 @@ class LaunchComponent extends Component {
             return (
                 <div className={'launch-section programs'}>
                     <LeVPanel halignment={LEFT} valignment={CENTER} className={'program-settings'}>
-                        <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'staticList-container'}>
+                        <LeHPanel hstretch={false} halignment={LEFT} valignment={CENTER} className={'staticList-container'}>
                             <label for={'staticList'}>{this.state.externalSystemName} Audience</label>
                             {vm.makeStaticList(this.state.staticList)}
                             {newAudienceNameInput}
@@ -586,7 +629,6 @@ class LaunchComponent extends Component {
         vm.state.audienceParams.folderName = programName;
 
         vm.setState(vm.state);
-
         actions.fetchStaticLists(programName, {externalSystemName: vm.state.externalSystemName}, function(data) {
             if(data && data.result) {
                 let staticList = (data && data.result ? data.result : []);
@@ -634,8 +676,10 @@ class LaunchComponent extends Component {
     }
 
     makeAudienceType(externalSystemName) {
-        var vm = this;
-        let inputs = [];
+        var vm = this,
+            inputs = [],
+            items = [];
+
         inputs.push({
             name: 'accounts',
             displayName: 'Accounts',
@@ -650,7 +694,6 @@ class LaunchComponent extends Component {
             selected: (externalSystemName === 'Facebook' ? true : null),
             disabled: false
         });
-        var items = [];
         inputs.forEach(function(item) {
             items.push(
                 <div>
@@ -659,22 +702,71 @@ class LaunchComponent extends Component {
                 </div>
             )
         });
-        if(['LinkedIn','Facebook'].indexOf(externalSystemName) !== -1) {
-            return(
-                <div className={'launch-section audience-type'}>
+
+        var audienceTypes = (items) => {
+            if(['LinkedIn'].indexOf(externalSystemName) !== -1) {
+                return (
                     <LeHPanel hstretch={true} halignment={LEFT} valignment={CENTER} className={'audienceType-container'}>
                         {items}
                     </LeHPanel>
-                    <p>
-                        After this audience is sent to {externalSystemName}, it will take 24 - 48 hours to be available for use.
-                    </p>
-                </div>
+                );
+            }
+        }
+        if(['LinkedIn','Facebook'].indexOf(externalSystemName) !== -1) {
+            return(
+                <Aux>
+                    <div className={'launch-section audience-type'}>
+                        <div className={'audience-aware-message'}>
+                            <i className={'fa fa-clock-o'}></i> 
+                            Please be aware, after an audience is sent to {externalSystemName}, it can sometimes take them more then a day to make it avaliable for use
+                        </div>
+                        {audienceTypes(items)}
+                    </div>
+                </Aux>
             );
         }
     }
 
-    makeKeepInSync() {
+    makeCronSettings() {
         if(this.state.launchSchedule) {
+            let daysofmonth = () => {
+                    if(this.state.cronSettings.frequency === 'Monthly') {
+                        return (
+                            <input id={'cronDayOf'} type={'number'} min={1} max={31} value={this.state.cronSettings.dayofmonth} onChange={this.clickCronDayOfMonth} />
+                        )
+                    }
+                },
+                daysofweek = () => {
+                    if(this.state.cronSettings.frequency === 'Weekly') {
+                        return (
+                            <select id={'cronDayOf'} onChange={this.clickCronDayOfWeek}>
+                                <option value={'MON'} selected>Monday</option>
+                                <option value={'TUE'}>Tuesday</option>
+                                <option value={'WED'}>Wednesday</option>
+                                <option value={'THU'}>Thursday</option>
+                                <option value={'FRI'}>Friday</option>
+                                <option value={'SAT'}>Saturday</option>
+                                <option value={'SUN'}>Sunday</option>
+                            </select>
+                        )
+                    }
+                };
+            return (
+                <Aux>
+                    <div className={'cron-settings'}>
+                        <label for={'cronDayOf'}>on</label> 
+                        {daysofweek()}
+                        {daysofmonth()}
+                        <label for={'cronTime'}>at</label> 
+                        <input id={'cronTime'} type={'time'} value={this.state.cronSettings.timeofday} onChange={this.clickCronTime} />
+                    </div>
+                </Aux>
+            )
+        }
+    }
+
+    makeKeepInSync() {
+        if(false && this.state.launchSchedule) { // disabled as per PLS-14504
             return (
                 <div className={'keep-in-sync'}>
                     <input id={'keepInSync'} type={'checkbox'} onChange={this.clickKeepInSync} checked={this.state.keepInSync} /> <label for={'keepInSync'}>Keep target system in sync</label>
@@ -823,8 +915,9 @@ class LaunchComponent extends Component {
     clickLaunchSchedule= (e) => {
         var schedule = (e.target.value === 'Once' ? null : e.target.value),
             launchType;
-
-        this.state.launchSchedule = chron(schedule);
+        
+        this.state.cronSettings.frequency = schedule;
+        this.state.launchSchedule = cronMaker(this.state.cronSettings);
 
         if(e.target.value === 'Once') {
             launchType = 'FULL';
@@ -840,6 +933,24 @@ class LaunchComponent extends Component {
         if(!schedule) {
             this.state.launchType = 'FULL';
         }
+        this.setState(this.state);
+    }
+
+    clickCronDayOfWeek = (e) => {
+        this.state.cronSettings.dayofweek = e.target.value;
+        this.state.launchSchedule = cronMaker(this.state.cronSettings);
+        this.setState(this.state);
+    }
+
+    clickCronDayOfMonth = (e) => {
+        this.state.cronSettings.dayofmonth = e.target.value;
+        this.state.launchSchedule = cronMaker(this.state.cronSettings);
+        this.setState(this.state);
+    }
+
+    clickCronTime = (e) => {
+        this.state.cronSettings.timeofday = e.target.value;
+        this.state.launchSchedule = cronMaker(this.state.cronSettings);
         this.setState(this.state);
     }
 
@@ -988,6 +1099,7 @@ class LaunchComponent extends Component {
                                     </select>
                                     {this.makeKeepInSync()}
                                 </div>
+                                {this.makeCronSettings()}
                             </LeHPanel>
                         </div>
                         <div className={'launch-section launch-buttons'}>
