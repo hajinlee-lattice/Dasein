@@ -42,7 +42,7 @@ public class AtlasExportResource {
     @PutMapping(value = "")
     @ApiOperation(value = "Update Export")
     public void updateAtlasExportStatus(@PathVariable String customerSpace, @RequestParam String uuid,
-                                        @RequestParam MetadataSegmentExport.Status status) {
+                                  @RequestParam MetadataSegmentExport.Status status) {
         AtlasExport atlasExport = atlasExportService.getAtlasExport(customerSpace, uuid);
         atlasExport.setStatus(status);
         atlasExportService.updateAtlasExport(customerSpace, atlasExport);
@@ -63,15 +63,15 @@ public class AtlasExportResource {
     @PostMapping(value = "/systemfiles")
     @ApiOperation(value = "Add export file to systempath")
     public void addFileToSystemPath(@PathVariable String customerSpace, @RequestParam String uuid,
-                                    @RequestParam String fileName, @RequestBody List<String> filesToDelete) {
-        atlasExportService.addFileToSystemPath(customerSpace, uuid, fileName, filesToDelete);
+                                    @RequestParam String fileName) {
+        atlasExportService.addFileToSystemPath(customerSpace, uuid, fileName);
     }
 
     @PostMapping(value = "/dropfolderfiles")
     @ApiOperation(value = "Add export file to dropfolder")
     public void addFileToDropFolder(@PathVariable String customerSpace, @RequestParam String uuid,
-                                    @RequestParam String fileName, @RequestBody List<String> filesToDelete) {
-        atlasExportService.addFileToDropFolder(customerSpace, uuid, fileName, filesToDelete);
+                                    @RequestParam String fileName) {
+        atlasExportService.addFileToDropFolder(customerSpace, uuid, fileName);
     }
 
     @GetMapping(value = "/dropfolder/path")

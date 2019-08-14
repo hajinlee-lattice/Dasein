@@ -35,17 +35,17 @@ public class AtlasExportProxyImpl extends MicroserviceRestApiProxy implements At
     }
 
     @Override
-    public void addFileToSystemPath(String customerSpace, String uuid, String fileName, List<String> pathToDelete) {
+    public void addFileToSystemPath(String customerSpace, String uuid, String fileName) {
         String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/systemfiles?uuid={uuid}&fileName={fileName}", //
                 shortenCustomerSpace(customerSpace), uuid, fileName);
-        post("Add export fileName with system path", url, pathToDelete, Void.class);
+        post("Add export fileName with system path", url, Void.class);
     }
 
     @Override
-    public void addFileToDropFolder(String customerSpace, String uuid, String fileName, List<String> pathToDelete) {
+    public void addFileToDropFolder(String customerSpace, String uuid, String fileName) {
         String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/dropfolderfiles?uuid={uuid}&fileName={fileName}", //
                 shortenCustomerSpace(customerSpace), uuid, fileName);
-        post("Add export fileName with dropfolder", url, pathToDelete, Void.class);
+        post("Add export fileName with dropfolder", url, Void.class);
     }
 
     @Override

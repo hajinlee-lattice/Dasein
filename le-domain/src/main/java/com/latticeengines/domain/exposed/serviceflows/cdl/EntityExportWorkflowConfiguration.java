@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
@@ -28,6 +32,11 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
 
         public Builder saveToDropfolder(boolean save2Dropfolder) {
             step.setSaveToDropfolder(save2Dropfolder);
+            return this;
+        }
+
+        public Builder exportEntities(Collection<ExportEntity> entities) {
+            step.setExportEntities(new ArrayList<>(entities));
             return this;
         }
 

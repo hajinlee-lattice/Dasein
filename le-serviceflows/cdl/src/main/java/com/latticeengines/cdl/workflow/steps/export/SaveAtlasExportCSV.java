@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -44,7 +43,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
@@ -94,8 +92,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     @Resource(name = "redshiftSegmentJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
-    private List<String> filesToDelete;
-
     @Override
     protected CustomerSpace parseCustomerSpace(EntityExportStepConfiguration stepConfiguration) {
         return stepConfiguration.getCustomerSpace();
@@ -109,7 +105,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     @Override
     protected ConvertToCSVConfig configureJob(EntityExportStepConfiguration stepConfiguration) {
         inputUnits = getMapObjectFromContext(ATLAS_EXPORT_DATA_UNIT, ExportEntity.class, HdfsDataUnit.class);
-
         if (MapUtils.isEmpty(inputUnits)) {
             throw new IllegalStateException("No extracted entities to be converted to csv.");
         }
@@ -176,37 +171,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         return dateFmtMap;
     }
 
-    private void setAccountSchema(Map<BusinessEntity, List> schemaMap, List<ColumnMetadata> schema) {
-        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
-            if (!BusinessEntity.Contact.equals(entity)) {
-                List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
-                        .getOrDefault(entity, Collections.emptyList());
-                if (CollectionUtils.isNotEmpty(cms)) {
-                    if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                        CustomerSpace customerSpace = parseCustomerSpace(configuration);
-                        DataCollection.Version version = configuration.getDataCollectionVersion();
-                        String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                                TableRoleInCollection.SortedProduct, version);
-                        if (StringUtils.isBlank(tblName)) {
-                            throw new RuntimeException("Cannot find sorted product table, " + //
-                                    "while is exporting purchase history attributes.");
-                        }
-                        for (ColumnMetadata cm : cms) {
-                            String attrName = cm.getAttrName();
-                            String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
-                            String productName = getProductNameFromRedshift(tblName, productId);
-                            String displayName = cm.getDisplayName();
-                            if (!displayName.startsWith(productName)) {
-                                cm.setDisplayName(productName + ": " + displayName);
-                            }
-                        }
-                    }
-                    schema.addAll(cms);
-                }
-            }
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private List<ColumnMetadata> getExportSchema(ExportEntity exportEntity) {
         Map<BusinessEntity, List> schemaMap =
@@ -216,13 +180,35 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
         List<ColumnMetadata> schema = new ArrayList<>();
         if (ExportEntity.Account.equals(exportEntity)) {
-            setAccountSchema(schemaMap, schema);
+            for (BusinessEntity entity: BusinessEntity.EXPORT_ENTITIES) {
+                if (!BusinessEntity.Contact.equals(entity)) {
+                    List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
+                            .getOrDefault(entity, Collections.emptyList());
+                    if (CollectionUtils.isNotEmpty(cms)) {
+                        if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                            CustomerSpace customerSpace = parseCustomerSpace(configuration);
+                            DataCollection.Version version = configuration.getDataCollectionVersion();
+                            String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                                    TableRoleInCollection.SortedProduct, version);
+                            if (StringUtils.isBlank(tblName)) {
+                                throw new RuntimeException("Cannot find sorted product table, " + //
+                                        "while is exporting purchase history attributes.");
+                            }
+                            for (ColumnMetadata cm : cms) {
+                                String attrName = cm.getAttrName();
+                                String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
+                                String productName = getProductNameFromRedshift(tblName, productId);
+                                String displayName = cm.getDisplayName();
+                                if (!displayName.startsWith(productName)) {
+                                    cm.setDisplayName(productName + ": " + displayName);
+                                }
+                            }
+                        }
+                        schema.addAll(cms);
+                    }
+                }
+            }
         } else if (ExportEntity.Contact.equals(exportEntity)) {
-            List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
-                    .getOrDefault(BusinessEntity.Contact, Collections.emptyList());
-            schema.addAll(cms);
-        } else if (ExportEntity.AccountContact.equals(exportEntity)) {
-            setAccountSchema(schemaMap, schema);
             List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
                     .getOrDefault(BusinessEntity.Contact, Collections.emptyList());
             schema.addAll(cms);
@@ -260,6 +246,9 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             }
             processResultCSV(exportEntity, csvGzPath, exportRecord);
         }));
+        if (configuration.isSaveToDropfolder()) {
+            saveSupportingFilesToDropfolder();
+        }
     }
 
     private void processResultCSV(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {
@@ -273,24 +262,36 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
     }
 
-    private List<String> getDeletePath() {
-        List<String> files = getListObjectFromContext(ATLAS_EXPORT_DELETE_PATH, String.class);
-        files.addAll(outputUnits.values().stream().map(hdfsDataUnit -> hdfsDataUnit.getPath().substring(0,
-                hdfsDataUnit.getPath().lastIndexOf("/"))).collect(Collectors.toList()));
-        return files;
-    }
-
     private void saveToDataFiles(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {
         String customerSpaceStr = configuration.getCustomerSpace().toString();
         String targetPath = atlasExportProxy.getSystemExportPath(customerSpaceStr, false);
         String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
         String fileName = exportEntity + "_" + exportRecord.getUuid() + suffix;
-        copyToS3(targetPath, fileName, csvGzFilePath);
-        atlasExportProxy.addFileToSystemPath(customerSpaceStr, exportRecord.getUuid(), fileName, getDeletePath());
+        targetPath = targetPath + fileName;
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            String finalTargetPath = targetPath;
+            retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("(Retry=" + ctx.getRetryCount() + ") copy from " + csvGzFilePath + " to " + finalTargetPath);
+                }
+                copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, systemFolderTag, systemFolderTagValue);
+                return true;
+            });
+        } catch (Exception e) {
+            log.error(String.format("Cannot save export file %s to %s", csvGzFilePath, targetPath));
+        }
+        atlasExportProxy.addFileToSystemPath(customerSpaceStr, exportRecord.getUuid(), fileName);
     }
 
-    private void copyToS3(String targetPath, String fileName, String csvGzFilePath) {
+    private void saveToDropfolder(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {
+        String customerSpaceStr = configuration.getCustomerSpace().toString();
+        String targetPath = atlasExportProxy.getDropFolderExportPath(customerSpaceStr, exportRecord.getExportType(),
+                exportRecord.getDatePrefix(), false);
+        String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
+        String fileName = exportEntity + suffix;
         targetPath = targetPath + fileName;
+
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         try {
             String finalTargetPath = targetPath;
@@ -302,24 +303,9 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 return true;
             });
         } catch (Exception e) {
-            AtlasExport atlasExport = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
-            if (atlasExport == null) {
-                throw new RuntimeException("Cannot find atlasExport in context");
-            }
-            atlasExportProxy.updateAtlasExportStatus(configuration.getCustomerSpace().toString(), atlasExport.getUuid(),
-                    MetadataSegmentExport.Status.FAILED);
             log.error(String.format("Cannot save export file %s to %s", csvGzFilePath, targetPath));
         }
-    }
-
-    private void saveToDropfolder(ExportEntity exportEntity, String csvGzFilePath, AtlasExport exportRecord) {
-        String customerSpaceStr = configuration.getCustomerSpace().toString();
-        String targetPath = atlasExportProxy.getDropFolderExportPath(customerSpaceStr, exportRecord.getExportType(),
-                exportRecord.getDatePrefix(), false);
-        String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
-        String fileName = exportEntity + suffix;
-        copyToS3(targetPath, fileName, csvGzFilePath);
-        atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName, getDeletePath());
+        atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName);
     }
 
     private void copyToS3(Configuration configuration, String hdfsPath, String s3Path, String tag, String tagValue)
@@ -343,6 +329,10 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         } catch (IOException e) {
             throw new RuntimeException("Failed to download hdfs file " + csvGzFilePath, e);
         }
+    }
+
+    private void saveSupportingFilesToDropfolder() {
+
     }
 
 }

@@ -3,7 +3,6 @@ package com.latticeengines.pls.service.impl;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,7 @@ public class MetadataSegmentExportCleanupServiceImpl implements MetadataSegmentE
                         if (CollectionUtils.isNotEmpty(exportJobs)) {
                             exportJobs.stream() //
                                     .forEach(exportJob -> {
-                                        if (exportJob.getCleanupBy().getTime() < System.currentTimeMillis()) {
+                                        if (exportJob.getCleanupBy() != null && exportJob.getCleanupBy().getTime() < System.currentTimeMillis()) {
                                             cleanupExportJob(tenant, exportJob);
                                         }
                                     });
@@ -65,17 +64,18 @@ public class MetadataSegmentExportCleanupServiceImpl implements MetadataSegmentE
         try {
             log.info(String.format("Trying to cleanup old export job for tenant: %s, job: %s", tenant.getId(),
                     JsonUtils.serialize(exportJob)));
+
             String tableName = exportJob.getTableName();
-            // clean up old segment export
-            if (StringUtils.isNotEmpty(tableName)) {
-                metadataProxy.deleteTable(tenant.getId(), tableName);
-                String exportedFilePath = metadataSegmentExportService.getExportedFilePath(exportJob);
-                if (HdfsUtils.fileExists(yarnConfiguration, exportedFilePath)) {
-                    HdfsUtils.rmdir(yarnConfiguration, exportedFilePath);
-                    HdfsUtils.rmdir(yarnConfiguration, exportJob.getPath());
-                }
-                metadataSegmentExportService.deleteSegmentExportByExportId(exportJob.getExportId());
+            metadataProxy.deleteTable(tenant.getId(), tableName);
+
+            String exportedFilePath = metadataSegmentExportService.getExportedFilePath(exportJob);
+
+            if (HdfsUtils.fileExists(yarnConfiguration, exportedFilePath)) {
+                HdfsUtils.rmdir(yarnConfiguration, exportedFilePath);
+                HdfsUtils.rmdir(yarnConfiguration, exportJob.getPath());
             }
+
+            metadataSegmentExportService.deleteSegmentExportByExportId(exportJob.getExportId());
         } catch (Exception ex) {
             log.error(String.format("Could not cleanup old export job for tenant: %s, job: %s", tenant.getId(),
                     JsonUtils.serialize(exportJob)), ex);

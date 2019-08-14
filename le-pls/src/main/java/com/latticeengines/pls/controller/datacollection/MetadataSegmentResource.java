@@ -125,13 +125,11 @@ public class MetadataSegmentResource {
         return metadataSegmentService.getAllDeletedSegments();
     }
 
-    // useSpark parameter is just used for unit test
     @PostMapping("/export")
     @ResponseBody
     @ApiOperation(value = "Create a segment export job")
-    public MetadataSegmentExport createSegmentExportJob(@RequestBody MetadataSegmentExport metadataSegmentExportJob,
-                                                        @RequestParam(required = false) Boolean useSpark) {
-        return metadataSegmentExportService.createSegmentExportJob(metadataSegmentExportJob, useSpark);
+    public MetadataSegmentExport createSegmentExportJob(@RequestBody MetadataSegmentExport metadataSegmentExportJob) {
+        return metadataSegmentExportService.createSegmentExportJob(metadataSegmentExportJob);
     }
 
     @GetMapping("/export")
