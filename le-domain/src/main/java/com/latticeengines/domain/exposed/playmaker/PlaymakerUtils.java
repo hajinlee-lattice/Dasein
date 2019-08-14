@@ -115,17 +115,19 @@ public class PlaymakerUtils {
         return length;
     }
 
-    public static List<Map<String, String>> generateContactForRecommendation(List<Map<String, String>> rawContacts) {
+    public static List<Map<String, String>> generateContactForRecommendation(List<Map<String, String>> rawContacts,
+            boolean entityMatchEnabled) {
         List<Map<String, String>> contactsForRecommendation = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(rawContacts)) {
-            rawContacts.stream().forEach(rawContact -> processRawContact(rawContact, contactsForRecommendation));
+            rawContacts.stream().forEach(
+                    rawContact -> processRawContact(rawContact, contactsForRecommendation, entityMatchEnabled));
         }
         return contactsForRecommendation;
     }
 
     private static void processRawContact(Map<String, String> rawContact,
-            List<Map<String, String>> contactsForRecommendation) {
+            List<Map<String, String>> contactsForRecommendation, boolean entityMatchEnabled) {
 
         Map<String, String> contact = new HashMap<>();
 
@@ -137,7 +139,11 @@ public class PlaymakerUtils {
         contact.put(PlaymakerConstants.Country, rawContact.get(InterfaceName.Country.name()));
         contact.put(PlaymakerConstants.SfdcContactID, "");
         contact.put(PlaymakerConstants.City, rawContact.get(InterfaceName.City.name()));
-        contact.put(PlaymakerConstants.ContactID, rawContact.get(InterfaceName.ContactId.name()));
+        if (entityMatchEnabled) {
+            contact.put(PlaymakerConstants.ContactID, rawContact.get(InterfaceName.CustomerContactId.name()));
+        } else {
+            contact.put(PlaymakerConstants.ContactID, rawContact.get(InterfaceName.ContactId.name()));
+        }
         contact.put(PlaymakerConstants.Name, rawContact.get(InterfaceName.ContactName.name()));
 
         contactsForRecommendation.add(contact);

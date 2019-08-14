@@ -145,6 +145,7 @@ public class FrontEndQueryCreator {
         }
         if (batonService.isEntityMatchEnabled(playLaunchContext.getCustomerSpace())) {
             accountLookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()));
+            contactLookups.add(new AttributeLookup(BusinessEntity.Contact, InterfaceName.CustomerContactId.name()));
         }
         playLaunchContext.getAccountFrontEndQuery().setLookups(accountLookups);
         playLaunchContext.getContactFrontEndQuery().setLookups(contactLookups);
