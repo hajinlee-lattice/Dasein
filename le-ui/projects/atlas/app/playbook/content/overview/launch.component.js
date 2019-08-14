@@ -1,12 +1,3 @@
-/**
-- add description behavior is wrong
-
-All Channels
-? Include unscored accounts should be enabled/included if the campaign has no models ? blocked, /pls/count failing
-? Retain last launch settings: When you eventually go back to the setting, the previous settings are no longer available. ? we don't get these settings back, exzcept the ones we do which we retain
-? When you disable always on, all the previous launch data is removed, but eventually comes back after a delay ? blocked because all launches always fail
-*/
-
 import React, { Component } from "common/react-vendor";
 //import ReactRouter from 'atlas/react/router';
 import Aux from 'common/widgets/hoc/_Aux';
@@ -1006,6 +997,21 @@ class LaunchComponent extends Component {
         }
     }
 
+    hasErrors(errors) {
+        var errors = errors || this.state.errors,
+            hasErrors = false;
+
+        for(var i in errors) {
+            let error = errors[i];
+
+            if(error) {
+                hasErrors = true;
+                break;
+            }
+        }
+        return hasErrors;
+    }
+
     render() {
         var loaded = (this.state.launchAccountsCoverage);
         if(isAudience(this.state.externalSystemName)) {
@@ -1031,7 +1037,7 @@ class LaunchComponent extends Component {
                 selectedBuckets = this.selectedBuckets,
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
-                canLaunch = recommendationCounts.launched,
+                canLaunch = recommendationCounts.launched && !this.hasErrors(),
                 lookupIdMapping = this.state.lookupIdMapping,
                 externalSystemName = this.state.externalSystemName,
                 lastLaunch = (connection.lastLaunch ? connection.lastLaunch : null),
