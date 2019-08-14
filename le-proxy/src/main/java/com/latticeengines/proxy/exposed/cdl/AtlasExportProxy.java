@@ -16,9 +16,9 @@ public interface AtlasExportProxy {
 
     void updateAtlasExportStatus(String customerSpace, String uuid, MetadataSegmentExport.Status status);
 
-    void addFileToSystemPath(String customerSpace, String uuid, String fileName);
+    void addFileToSystemPath(String customerSpace, String uuid, String fileName, List<String> pathToDelete);
 
-    void addFileToDropFolder(String customerSpace, String uuid, String fileName);
+    void addFileToDropFolder(String customerSpace, String uuid, String fileName, List<String> pathToDelete);
 
     String getDropFolderExportPath(String customerSpace, AtlasExportType exportType, String datePrefix,
                                    boolean withProtocol);

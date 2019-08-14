@@ -42,6 +42,13 @@ public class ThreadPoolUtils {
         return executorService;
     }
 
+    public static ExecutorService getSingleThreadPool(String name) {
+        ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
+        ExecutorService executorService = Executors.newSingleThreadExecutor(threadFac);
+        Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdownNow));
+        return executorService;
+    }
+
     public static ForkJoinPool getForkJoinThreadPool(String name) {
         ForkJoinPool pool = getForkJoinThreadPool(name, null);
         Runtime.getRuntime().addShutdownHook(new Thread(pool::shutdownNow));
