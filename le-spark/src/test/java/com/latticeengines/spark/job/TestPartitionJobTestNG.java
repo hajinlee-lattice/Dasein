@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.TestPartitionJobConfig;
 import com.latticeengines.spark.testframework.TestPartitionTestNGBase;
 
-
 public class TestPartitionJobTestNG extends TestPartitionTestNGBase {
 
     @Test(groups = "functional")

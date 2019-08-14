@@ -76,7 +76,7 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
 
     @DataProvider(name = "interpreter")
     private Object[] provideData() {
-        return new Object[]{SparkInterpreter.Scala, SparkInterpreter.Python};
+        return new Object[] { SparkInterpreter.Scala, SparkInterpreter.Python };
     }
 
     @Override

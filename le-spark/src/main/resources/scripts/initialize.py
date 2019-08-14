@@ -1,5 +1,6 @@
 import json
 
+
 class LatticeContext:
     def __init__(self, input, params, targets):
         self.input = input
@@ -8,12 +9,14 @@ class LatticeContext:
         self.output = []
         self.output_str = ""
 
+
 def load_data_unit(unit):
     storage = unit['StorageType'].lower()
     if storage == "hdfs":
         return load_hdfs_unit(unit)
     else:
         raise ValueError("Unsupported storage type %s" % storage)
+
 
 def load_hdfs_unit(unit):
     path = unit['Path']
@@ -28,6 +31,7 @@ def load_hdfs_unit(unit):
                 path += "/*" + suffix
     path = "hdfs://%s" % path
     return spark.read.format(fmt).load(path)
+
 
 checkpoint_dir = '''{{CHECKPOINT_DIR}}'''
 if checkpoint_dir != "":
@@ -55,9 +59,9 @@ print("Params: %s" % json.dumps(script_params))
 
 lattice = LatticeContext(input=script_input, params=script_params, targets=script_targets)
 
+
 def set_partition_targets(index, lst, lattice):
     if (index >= 0) and (index < len(lattice.targets)):
         lattice.targets[index]['PartitionKeys'] = lst
     else:
         raise Exception("Index not exist %d" % index)
-

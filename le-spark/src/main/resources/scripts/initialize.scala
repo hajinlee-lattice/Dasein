@@ -1,9 +1,10 @@
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import com.fasterxml.jackson.databind.node.{ObjectNode, ArrayNode, BooleanNode}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
-import scala.collection.JavaConverters._
 import org.apache.spark.sql.{DataFrame, SparkSession}
+
+import scala.collection.JavaConverters._
 
 class LatticeContext(val input: List[DataFrame], val params: JsonNode, val targets: List[ObjectNode]) {
   var output: List[DataFrame] = List[DataFrame]()

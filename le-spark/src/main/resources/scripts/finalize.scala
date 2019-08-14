@@ -26,8 +26,8 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   val df = t._2
   val path = tgt.get("Path").asText()
   val fmt = if (tgt.get("DataFormat") != null) tgt.get("DataFormat").asText().toLowerCase() else "avro"
-  val partitionKeys = if (tgt.get("PartitionKeys") == null) List()  //
-                else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
+  val partitionKeys = if (tgt.get("PartitionKeys") == null) List() //
+  else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
   if (partitionKeys.isEmpty) {
     df.write.format(fmt).save(path)
   } else {

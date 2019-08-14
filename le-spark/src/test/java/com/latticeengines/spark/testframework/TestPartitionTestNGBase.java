@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 
@@ -40,17 +40,17 @@ public class TestPartitionTestNGBase extends SparkJobFunctionalTestNGBase {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("Id", Long.class), //
                 Pair.of("Field1", String.class), //
-                Pair.of("Field2", Long.class),//
-                Pair.of("Field3", Float.class),//
+                Pair.of("Field2", Long.class), //
+                Pair.of("Field3", Float.class), //
                 Pair.of("Field4", Double.class), //
                 Pair.of("Field5", Integer.class) //
         );
-        Object[][] data = new Object[][]{ //
-                {0L, "a", 1L, 0.0f, 0.2d, 0}, //
-                {1L, "b", 2L, 0.1f, 0.2d, 0}, //
-                {2L, "b", 3L, 0.2f, 0.4d, 1}, //
-                {3L, "c", 3L, 0.1f, 0.3d, 4}, //
-                {4L, "a", 2L, 0.1f, 0.3d, 2}, //
+        Object[][] data = new Object[][] { //
+                { 0L, "a", 1L, 0.0f, 0.2d, 0 }, //
+                { 1L, "b", 2L, 0.1f, 0.2d, 0 }, //
+                { 2L, "b", 3L, 0.2f, 0.4d, 1 }, //
+                { 3L, "c", 3L, 0.1f, 0.3d, 4 }, //
+                { 4L, "a", 2L, 0.1f, 0.3d, 2 }, //
         };
 
         Object[][] preData = getData(data);
