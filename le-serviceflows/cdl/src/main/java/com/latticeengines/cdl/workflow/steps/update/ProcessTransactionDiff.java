@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 
 @Component(ProcessTransactionDiff.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -195,7 +196,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         PeriodDataFilterConfig config = new PeriodDataFilterConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         config.setEarliestTransactionDate(earliestTransaction);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -215,7 +216,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
 
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -227,7 +228,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setPeriodStrategies(periodStrategies);
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -261,7 +262,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
         config.setGroupByFields(groupByFields);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.EXTRA_HEAVY)));
         return step;
     }
 
@@ -278,7 +279,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodIdx(1);
         config.setTransactinIdx(2);
         config.setRetryable(true);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -310,7 +311,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.PeriodName.name()));
         config.setGroupByFields(groupByFields);
         step.setConfiguration(JsonUtils.serialize(config));
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.EXTRA_HEAVY)));
         return step;
     }
 
@@ -321,7 +322,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.EXTRA_HEAVY)));
         return step;
     }
 
@@ -337,7 +338,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setEarliestTransactionDate(earliestTransaction);
         config.setPeriodStrategies(periodStrategies);
         config.setMultiPeriod(true);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -363,7 +364,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
         config.setRetryable(true);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 

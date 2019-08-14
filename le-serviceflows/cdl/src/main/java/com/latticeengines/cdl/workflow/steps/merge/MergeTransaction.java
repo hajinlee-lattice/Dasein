@@ -266,7 +266,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         config.setTrxTimeField(InterfaceName.TransactionTime.name());
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setTrxDayPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -276,7 +276,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         step.setInputSteps(Collections.singletonList(dailyStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
         step.setConfiguration(appendEngineConf(getConsolidateDataTxmfrConfig(false, false, true),
-                getEngineConfig(ETLEngineLoad.HEAVY)));
+                getEngineConfig(ETLEngineLoad.LIGHT)));
 
         return step;
     }
@@ -290,7 +290,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         config.setLongFields(longFields);
         config.setIntFields(intFields);
         config.setCustomField(InterfaceName.CustomTrxField.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -306,7 +306,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         targetTable.setNamePrefix(diffTablePrefix);
         step.setTargetTable(targetTable);
 
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.EXTRA_HEAVY)));
         return step;
     }
 
@@ -325,7 +325,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         step.setBaseTables(baseTables);
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
@@ -354,7 +354,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         // if some periods fail during distribution, cannot retry due to
         // existing period data could be lost
         config.setRetryable(emptyRawStore);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, getEngineConfig(ETLEngineLoad.LIGHT)));
         return step;
     }
 
