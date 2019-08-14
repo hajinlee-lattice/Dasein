@@ -120,7 +120,11 @@ export default class OverviewSummaryContainer extends Component {
             if(type.displayName === play.playType.displayName) {
                 selected = true;
             }
-            options.push(<li className={`${selected ? 'selected' : ''}`} onClick={() => {save(type)} }>{type.displayName}</li>);
+            options.push(
+                <li className={`${selected ? 'selected' : ''}`} onClick={() => {save(type)} }>
+                    {type.displayName}
+                </li>
+            );
         });
 
         let toggle = () => {
