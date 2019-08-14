@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -20,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
-import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -112,17 +110,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     }
 
     @Override
-    public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob,
-                                                        Boolean useSparkFromRestApi) {
+    public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob) {
         checkExportSize(metadataSegmentExportJob);
         setCreatedBy(metadataSegmentExportJob);
-        boolean useSpark;
-        if (useSparkFromRestApi != null) {
-            useSpark = useSparkFromRestApi;
-        } else {
-            useSpark = useSparkSQL;
-        }
-        if (useSpark) {
+        if (useSparkSQL) {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
             if (customerSpace == null) {
                 throw new LedpException(LedpCode.LEDP_18217);
@@ -131,8 +122,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace.toString()));
             AtlasExport atlasExport = atlasExportProxy.createAtlasExport(customerSpace.toString(),
                     MetadataSegmentExportConverter.convertToAtlasExport(metadataSegmentExportJob));
-            request.setAtlasExportId(atlasExport.getUuid());
-            request.setSaveToDropfolder(false);
             cdlProxy.entityExport(customerSpace.toString(), request);
             return MetadataSegmentExportConverter.convertToMetadataSegmentExport(atlasExportProxy.findAtlasExportById(customerSpace.toString(), atlasExport.getUuid()));
         } else {
@@ -194,92 +183,36 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         metadataSegmentExportEntityMgr.deleteByExportId(exportId);
     }
 
-    private void throwDownloadExportException(MetadataSegmentExport.Status status, String exportId) {
-        if (!MetadataSegmentExport.Status.COMPLETED.equals(status)) {
-            switch (status) {
-                case RUNNING:
-                    throw new LedpException(LedpCode.LEDP_18163, new Object[]{exportId});
-                case FAILED:
-                    throw new LedpException(LedpCode.LEDP_18164, new Object[]{exportId});
-                default:
-                    throw new LedpException(LedpCode.LEDP_18160, new Object[]{exportId});
-            }
-        }
-    }
-
     @Override
     public void downloadSegmentExportResult(String exportId, HttpServletRequest request, HttpServletResponse response) {
         MetadataSegmentExport metadataSegmentExport = metadataSegmentExportEntityMgr.findByExportId(exportId);
-        if (metadataSegmentExport == null) {
-            // handle new download
-            downloadAtlasExport(exportId, request, response);
-        } else {
-            // handle old download
-            downloadSegmentExport(metadataSegmentExport, exportId, request, response);
+        if (metadataSegmentExport == null
+                || metadataSegmentExport.getCleanupBy().getTime() < System.currentTimeMillis()) {
+            throw new LedpException(LedpCode.LEDP_18160, new Object[] { exportId });
         }
-    }
 
-    private void downloadS3ExportFile(String filePath, String fileName, HttpServletRequest request, HttpServletResponse response) {
-        String fileNameIndownloader = fileName;
-        if (fileNameIndownloader.endsWith(".gz")){
-            fileNameIndownloader = fileNameIndownloader.substring(0, fileNameIndownloader.length() - 3);
-        }
-        response.setHeader("Content-Encoding", "gzip");
-        CustomerSpaceS3FileDownloader.S3FileDownloadBuilder builder = new CustomerSpaceS3FileDownloader.S3FileDownloadBuilder();
-        builder.setMimeType("application/csv").setFilePath(filePath + fileName).setFileName(fileNameIndownloader).setImportFromS3Service(importFromS3Service).setBatonService(batonService);
-        CustomerSpaceS3FileDownloader customerSpaceS3FileDownloader = new CustomerSpaceS3FileDownloader(builder);
-        customerSpaceS3FileDownloader.downloadFile(request, response);
-    }
-
-    private void downloadAtlasExport(String exportId, HttpServletRequest request, HttpServletResponse response) {
-        String customerSpace = getCustomerSpace().toString();
-        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpace, exportId);
-        if (atlasExport == null || atlasExport.getCleanupBy().getTime() < System.currentTimeMillis()) {
-            throw new LedpException(LedpCode.LEDP_18160, new Object[]{exportId});
-        }
-        if (!MetadataSegmentExport.Status.COMPLETED.equals(atlasExport.getStatus())) {
-            throwDownloadExportException(atlasExport.getStatus(), exportId);
-        }
-        try {
-            String filePath;
-            String fileName;
-            if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderDropFolder())) {
-                filePath = atlasExportProxy.getDropFolderExportPath(customerSpace, atlasExport.getExportType(), atlasExport.getDatePrefix(), false);
-                fileName = atlasExport.getFilesUnderDropFolder().get(0);
-                downloadS3ExportFile(filePath, fileName, request, response);
-            } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
-                filePath = atlasExportProxy.getSystemExportPath(customerSpace, false);
-                fileName = atlasExport.getFilesUnderSystemPath().get(0);
-                downloadS3ExportFile(filePath, fileName, request, response);
-            } else {
-                throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
+        switch (metadataSegmentExport.getStatus()) {
+        case RUNNING:
+            throw new LedpException(LedpCode.LEDP_18163, new Object[] { exportId });
+        case FAILED:
+            throw new LedpException(LedpCode.LEDP_18164, new Object[] { exportId });
+        case COMPLETED:
+            try {
+                String filePath = getExportedFilePath(metadataSegmentExport);
+                response.setHeader("Content-Encoding", "gzip");
+                response.setHeader("Content-Disposition",
+                        String.format("attachment; filename=\"%s\"", "segment_export" + ".csv"));
+                CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(
+                        MediaType.APPLICATION_OCTET_STREAM, filePath, metadataSegmentExport.getFileName());
+                downloader.setShouldReformatDate(true);
+                downloader.downloadFile(request, response);
+            } catch (Exception ex) {
+                log.error("Could not download result of export job: " + exportId, ex);
+                throw new LedpException(LedpCode.LEDP_18161, new Object[] { exportId });
             }
-        } catch (Exception ex) {
-            log.error("Could not download result of export job: " + exportId, ex);
-            throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
-        }
-    }
-
-    private void downloadSegmentExport(MetadataSegmentExport metadataSegmentExport, String exportId,
-                                       HttpServletRequest request, HttpServletResponse response) {
-        if (metadataSegmentExport.getCleanupBy().getTime() < System.currentTimeMillis()) {
-            throw new LedpException(LedpCode.LEDP_18160, new Object[]{exportId});
-        }
-        if (!MetadataSegmentExport.Status.COMPLETED.equals(metadataSegmentExport.getStatus())) {
-            throwDownloadExportException(metadataSegmentExport.getStatus(), exportId);
-        }
-        try {
-            String filePath = getExportedFilePath(metadataSegmentExport);
-            response.setHeader("Content-Encoding", "gzip");
-            response.setHeader("Content-Disposition",
-                    String.format("attachment; filename=\"%s\"", "segment_export" + ".csv"));
-            CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(
-                    MediaType.APPLICATION_OCTET_STREAM, filePath, metadataSegmentExport.getFileName());
-            downloader.setShouldReformatDate(true);
-            downloader.downloadFile(request, response);
-        } catch (Exception ex) {
-            log.error("Could not download result of export job: " + exportId, ex);
-            throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
+            break;
+        default:
+            throw new LedpException(LedpCode.LEDP_18160, new Object[] { exportId });
         }
     }
 

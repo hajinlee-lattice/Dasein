@@ -134,12 +134,12 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         atlasExport = atlasExportService.createAtlasExport(mainTestCustomerSpace.toString(),
                 AtlasExportType.ACCOUNT_AND_CONTACT);
         Method method = ReflectionUtils.findMethod(EntityExportWorkflowSubmitter.class,
-                "configure", String.class, EntityExportRequest.class, AtlasExport.class, Boolean.class);
+                "configure", String.class, EntityExportRequest.class, AtlasExport.class);
         Assert.assertNotNull(method);
         ReflectionUtils.makeAccessible(method);
         EntityExportWorkflowConfiguration configuration = (EntityExportWorkflowConfiguration) //
                 ReflectionUtils.invokeMethod(method, entityExportWorkflowSubmitter, //
-                        mainTestCustomerSpace.toString(), request, atlasExport, true);
+                        mainTestCustomerSpace.toString(), request, atlasExport);
         Assert.assertNotNull(configuration);
 
         EntityExportStepConfiguration stepConfiguration = JsonUtils.deserialize( //
@@ -160,7 +160,6 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         Assert.assertNotNull(atlasExport);
         Assert.assertNotNull(atlasExport.getFilesUnderDropFolder());
         Assert.assertTrue(atlasExport.getFilesUnderDropFolder().size() > 0);
-        Assert.assertEquals(atlasExport.getFilesUnderDropFolder().size(), 2);
         String targetPath = s3ExportFolderService.getDropFolderExportPath(mainTestCustomerSpace.toString(),
                 atlasExport.getExportType(), atlasExport.getDatePrefix(), "");
         boolean hasAccountCsv = false;

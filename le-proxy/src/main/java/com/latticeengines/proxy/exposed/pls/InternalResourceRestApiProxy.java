@@ -17,7 +17,10 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.DeprecatedBaseRestApiProxy;
 
@@ -271,6 +274,46 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
 
         return url;
+    }
+
+    //fix it: only for OrphanRecordExportDeploymentTestNG, after segmentExport migration, remove it.
+    public MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport, CustomerSpace customerSpace){
+        String url = constructUrl("pls/internal/segment/orphan/customerspace/" + customerSpace.toString());
+        return restTemplate.postForObject(url, metadataSegmentExport, MetadataSegmentExport.class);
+    }
+
+    public MetadataSegmentExport getMetadataSegmentExport(CustomerSpace customerSpace, //
+                                                          String exportId) {
+        try {
+            String url = constructUrl("pls/internal/segment/export/" + exportId + "/" + customerSpace.toString());
+            log.debug("Find MetadataSegmentExport by exportId (" + exportId + ")" + url);
+            return restTemplate.getForObject(url, MetadataSegmentExport.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getMetadataSegmentExport: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
+                                                             String exportId, Status state) {
+        if (exportId == null) {
+            log.info("Skipping updating Metadata Segment Export as exportId is null");
+            return null;
+        }
+        try {
+            String url = constructUrl("pls/internal/segment/export/" + exportId + "/" + customerSpace.toString());
+            url += "?" + "state=" + state;
+
+            log.debug("Update MetadataSegmentExport by exportId (" + exportId + ")" + url);
+            restTemplate.put(url, null);
+            return getMetadataSegmentExport(customerSpace, exportId);
+        } catch (Exception e) {
+            throw new RuntimeException("updateMetadataSegmentExport: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public Restriction getSegmentRestrictionQuery(CustomerSpace customerSpace, String segmentName) {
+        String url = constructUrl("pls/internal/segment/" + segmentName + "/restriction", customerSpace.toString());
+        return restTemplate.getForObject(url, Restriction.class);
     }
 
     public Report findReportByName(CustomerSpace customerSpace, String reportName) {

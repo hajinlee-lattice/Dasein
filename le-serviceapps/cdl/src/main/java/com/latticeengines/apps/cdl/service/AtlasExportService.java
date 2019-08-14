@@ -9,11 +9,9 @@ public interface AtlasExportService {
 
     AtlasExport createAtlasExport(String customerSpace, AtlasExportType exportType);
 
-    void deleteAtlasExport(String customerSpace, String uuid);
+    void addFileToSystemPath(String customerSpace, String uuid, String fileName);
 
-    void addFileToSystemPath(String customerSpace, String uuid, String fileName, List<String> filesToDelete);
-
-    void addFileToDropFolder(String customerSpace, String uuid, String fileName, List<String> filesToDelete);
+    void addFileToDropFolder(String customerSpace, String uuid, String fileName);
 
     AtlasExport getAtlasExport(String customerSpace, String uuid);
 
