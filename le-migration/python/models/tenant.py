@@ -3,13 +3,14 @@ from sqlalchemy.dialects.mysql import VARCHAR, BIGINT, TINYINT
 from sqlalchemy.orm import relationship
 
 from models.base_model import BaseModel, Base
+from models.import_migrate_tracking import ImportMigrateTracking
 from models.metadata_data_collection import MetadataDataCollection
 from models.metadata_data_collection_status import MetadataDataCollectionStatus
 from models.metadata_data_collection_table import MetadataDataCollectionTable
 from models.metadata_statistics import MetadataStatistics
 from models.metadata_table import MetadataTable
 from models.migration_track import MigrationTrack
-from models.import_migrate_tracking import ImportMigrationTracking
+from models.action import Action
 
 
 class Tenant(BaseModel, Base):
@@ -31,7 +32,8 @@ class Tenant(BaseModel, Base):
     metadataTable = relationship(MetadataTable, backref='tenant', cascade='delete')
     metadataStatistics = relationship(MetadataStatistics, backref='tenant', cascade='delete')
     migrationTrack = relationship(MigrationTrack, cascade='delete', uselist=False, backref='tenant')
-    importMigrateTracking = relationship(ImportMigrationTracking, cascade='delete', backref='tenant')
+    importMigrateTracking = relationship(ImportMigrateTracking, cascade='delete', backref='tenant')
+    actions = relationship(Action, cascade='delete', backref='tenant')
 
     @property
     def activeMetadataStatistics(self):
