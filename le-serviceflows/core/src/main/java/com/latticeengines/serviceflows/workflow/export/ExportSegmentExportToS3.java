@@ -2,6 +2,8 @@ package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportSegmentExportToS3")
@@ -20,13 +22,14 @@ public class ExportSegmentExportToS3 extends BaseImportExportS3<ImportExportS3St
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ExportSegmentExportToS3.class);
 
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
+
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         ImportExportRequest request = new ImportExportRequest();
         String exportId = getConfiguration().getAtlasExportId();
-        InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(
-                getConfiguration().getInternalResourceHostPort());
-        MetadataSegmentExport metadataSegmentExport = internalResourceRestApiProxy
+        MetadataSegmentExport metadataSegmentExport = plsInternalProxy
                 .getMetadataSegmentExport(getConfiguration().getCustomerSpace(), exportId);
 
         String filePath = metadataSegmentExport.getPath();

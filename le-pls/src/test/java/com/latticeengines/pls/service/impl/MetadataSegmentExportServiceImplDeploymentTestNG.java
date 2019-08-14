@@ -57,7 +57,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
         metadataSegmentExport.setCreatedBy(CREATED_BY);
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
 
-        metadataSegmentExport = metadataSegmentExportService.createSegmentExportJob(metadataSegmentExport);
+        metadataSegmentExport = metadataSegmentExportService.createSegmentExportJob(metadataSegmentExport, null);
 
         Assert.assertNotNull(metadataSegmentExport.getPid());
         Assert.assertNotNull(metadataSegmentExport.getExportId());

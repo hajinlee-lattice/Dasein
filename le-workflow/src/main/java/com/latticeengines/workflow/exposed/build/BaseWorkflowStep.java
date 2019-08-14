@@ -160,6 +160,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
     protected static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
     protected static final String ATLAS_EXPORT_DATA_UNIT = "ATLAS_EXPORT_DATA_UNIT";
+    protected static final String ATLAS_EXPORT_DELETE_PATH = "ATLAS_EXPORT_DELETE_PATH";
     protected static final String PRIMARY_IMPORT_SYSTEM = "PRIMARY_IMPORT_SYSTEM";
     protected static final String ADDED_ACCOUNTS_DELTA_TABLE = "ADDED_ACCOUNTS_DELTA_TABLE";
     protected static final String REMOVED_ACCOUNTS_DELTA_TABLE = "REMOVED_ACCOUNTS_DELTA_TABLE";
