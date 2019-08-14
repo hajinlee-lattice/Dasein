@@ -1,6 +1,5 @@
-
-if lattice.params["Partition"] :
-    set_partition_targets(0, ["Field1","Field2","Field3","Field4","Field5"], lattice)
+if lattice.params["Partition"]:
+    set_partition_targets(0, ["Field1", "Field2", "Field3", "Field4", "Field5"], lattice)
 
 result = lattice.input[0]
 

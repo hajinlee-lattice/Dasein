@@ -36,7 +36,7 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
         tearDownLivyEnvironment();
     }
 
-    private void setParamsWithPartition(boolean isPartition){
+    private void setParamsWithPartition(boolean isPartition) {
         Map<String, Object> map = new HashMap<>();
         map.put("Partition", isPartition);
         ObjectMapper om = new ObjectMapper();
@@ -53,9 +53,9 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
         InputStreamSparkScript script = new InputStreamSparkScript();
         script.setStream(is);
         script.setInterpreter(interpreter);
-        SparkJobResult result  = runSparkScript(script, jobConfig);
+        SparkJobResult result = runSparkScript(script, jobConfig);
         verifier = this::verifyOutput1;
-        inputSources =result.getTargets();
+        inputSources = result.getTargets();
         verifyResult(result);
     }
 
@@ -69,14 +69,14 @@ public class PartitionScriptTestNG extends TestPartitionTestNGBase {
         InputStreamSparkScript script = new InputStreamSparkScript();
         script.setStream(is);
         script.setInterpreter(interpreter);
-        SparkJobResult result  = runSparkScript(script, jobConfig);
+        SparkJobResult result = runSparkScript(script, jobConfig);
         verifier = this::verifyOutput2;
         verifyResult(result);
     }
 
     @DataProvider(name = "interpreter")
     private Object[] provideData() {
-        return new Object[] { SparkInterpreter.Scala, SparkInterpreter.Python };
+        return new Object[]{SparkInterpreter.Scala, SparkInterpreter.Python};
     }
 
     @Override

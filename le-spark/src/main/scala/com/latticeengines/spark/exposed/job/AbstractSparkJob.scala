@@ -103,10 +103,10 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     }
   }
 
-  def setPartitionTargets(index: Int, list: Seq[String],lattice: LatticeContext[C]): Unit = {
+  def setPartitionTargets(index: Int, list: Seq[String], lattice: LatticeContext[C]): Unit = {
     if (index >= 0 && index < lattice.targets.size) {
       lattice.targets(index).setPartitionKeys(list.asJava);
-    }else{
+    } else {
       throw new RuntimeException(s"There's no Target $index")
     }
   }

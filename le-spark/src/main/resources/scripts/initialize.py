@@ -19,7 +19,7 @@ def load_hdfs_unit(unit):
     path = unit['Path']
     fmt = unit['DataFormat'] if 'DataFormat' in unit else "avro"
     partition_keys = unit['PartitionKeys'] if 'PartitionKeys' in unit else []
-    if (partition_keys is None) or (len(partition_keys) == 0) :
+    if (partition_keys is None) or (len(partition_keys) == 0):
         suffix = "." + fmt
         if path[-len(suffix):] != suffix:
             if path[-1] == "/":

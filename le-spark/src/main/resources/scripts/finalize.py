@@ -6,7 +6,7 @@ for tgt, df in zip(lattice.targets, lattice.output):
     df = df
     fmt = tgt['DataFormat'].lower() if 'DataFormat' in tgt else "avro"
     partition_keys = tgt['PartitionKeys'] if 'PartitionKeys' in tgt else []
-    if (partition_keys is None) or (len(partition_keys) == 0) :
+    if (partition_keys is None) or (len(partition_keys) == 0):
         df.write.format(fmt).save(tgt['Path'])
     else:
         df.write.partitionBy(*partition_keys).format(fmt).save(tgt['Path'])
