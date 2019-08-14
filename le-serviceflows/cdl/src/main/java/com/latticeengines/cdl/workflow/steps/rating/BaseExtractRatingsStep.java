@@ -147,7 +147,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
             do {
                 round = containers.stream() //
                         .filter(container -> container.getExtractedTarget() == null) //
-                        .limit(32) //
+                        .limit(16) //
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(round)) {
                     try {
