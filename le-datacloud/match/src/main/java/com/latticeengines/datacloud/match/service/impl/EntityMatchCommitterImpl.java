@@ -88,8 +88,10 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
      */
     private EntityPublishStatistics commitAsync(@NotNull String entity, @NotNull Tenant tenant, boolean useTTL,
             int nReader, int nWriter) {
-        ExecutorService service = ThreadPoolUtils.getCachedThreadPool(String.format("em-commit-%s", entity));
-        AtomicBoolean finished = new AtomicBoolean(false);
+        ExecutorService readService = ThreadPoolUtils.getCachedThreadPool(String.format("em-commit-r-%s", entity));
+        ExecutorService writeService = ThreadPoolUtils.getCachedThreadPool(String.format("em-commit-w-%s", entity));
+        AtomicBoolean readFinished = new AtomicBoolean(false);
+        AtomicBoolean writeFinished = new AtomicBoolean(false);
         // shared queues
         ArrayBlockingQueue<EntityRawSeed> readQueue = new ArrayBlockingQueue<>(queueSize);
         ArrayBlockingQueue<WriteSeedLookupRequest> writeQueue = new ArrayBlockingQueue<>(queueSize);
@@ -106,10 +108,11 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
 
         // add r/w workers
         for (int i = 0; i < nReader; i++) {
-            service.submit(new SeedLookupWriter(tenant, finished, nWrittenSeeds, nWrittenLookups, writeQueue, useTTL));
+            writeService.submit(
+                    new SeedLookupWriter(tenant, writeFinished, nWrittenSeeds, nWrittenLookups, writeQueue, useTTL));
         }
         for (int i = 0; i < nWriter; i++) {
-            service.submit(new LookupEntryReader(tenant, finished, nLookupNotInStaging, writeQueue, readQueue));
+            readService.submit(new LookupEntryReader(tenant, readFinished, nLookupNotInStaging, writeQueue, readQueue));
         }
 
         // scanning seeds
@@ -145,12 +148,23 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
 
         // finish and wait for all writes to finish
         try {
-            finished.set(true);
-            service.shutdown();
-            service.awaitTermination(maxWriterLagInHours, TimeUnit.HOURS);
+            // need to terminate reader first to prevent race condition that all writers
+            // finish first and then reader put some entries into queue
+            readFinished.set(true);
+            readService.shutdown();
+            readService.awaitTermination(maxWriterLagInHours, TimeUnit.HOURS);
+            writeFinished.set(true);
+            writeService.shutdown();
+            writeService.awaitTermination(maxWriterLagInHours, TimeUnit.HOURS);
         } catch (InterruptedException e) {
             log.error("Commit entity {} for tenant {} is interrupted, error = {}", entity, tenant.getId(), e);
             throw new RuntimeException(e);
+        }
+
+        if (!readQueue.isEmpty() || !writeQueue.isEmpty()) {
+            // some records not handled
+            log.warn("Spotted unprocessed records in queue. readQueue size = {}, writeQueue size = {}",
+                    readQueue.size(), writeQueue.size());
         }
 
         Instant workerExited = Instant.now();
@@ -231,6 +245,7 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                     log.error("Failed to read lookup entries from seed", e);
                 }
             }
+            log.debug("Reader exited");
         }
     }
 
@@ -291,6 +306,7 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                     log.error("Failed to write seeds and lookup entries", e);
                 }
             }
+            log.debug("Writer exited");
         }
     }
 
