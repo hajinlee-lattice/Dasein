@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.testframework.exposed.utils.TestRetryUtils;
 
 public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -143,7 +145,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", retryAnalyzer = SimpleRetryPolicy.class)
     public void testTriggerQueuedLaunches() throws InterruptedException {
         List<PlayLaunch> queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
         int initialQueuedSize = queuedPlayLaunches.size();
@@ -152,10 +154,12 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(1000);
-        queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 2);
-        launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
+        TestRetryUtils.retryForAssertionError(() -> {
+            List<PlayLaunch> queues = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
+            Assert.assertEquals(queues.size(), initialQueuedSize - 2);
+            queues = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
+            Assert.assertEquals(queues.size(), initiaLaunchingSize + 2);
+        });
 
         // test that a play launch that's in queued state does not launch if
         // there already is a play launch launching to the same channel
@@ -168,11 +172,12 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(1000);
-        queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 1);
-        launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
-
+        TestRetryUtils.retryForAssertionError(() -> {
+            List<PlayLaunch> queues = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
+            Assert.assertEquals(queues.size(), initialQueuedSize - 1);
+            queues = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
+            Assert.assertEquals(queues.size(), initiaLaunchingSize + 2);
+        });
     }
 
     @AfterClass(groups = "deployment")
