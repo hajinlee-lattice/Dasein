@@ -94,11 +94,6 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
     @Type(type = "json")
     private List<String> filesUnderDropFolder;
 
-    @JsonProperty("files_to_delete")
-    @Column(name = "FILES_TO_DELETE", columnDefinition = "'JSON'")
-    @Type(type = "json")
-    private List<String> filesToDelete;
-
     @JsonIgnore
     @Column(name = "ACCOUNT_RESTRICTION")
     @Type(type = "text")
@@ -277,13 +272,5 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId {
 
     public void setSegmentName(String segmentName) {
         this.segmentName = segmentName;
-    }
-
-    public List<String> getFilesToDelete() {
-        return filesToDelete;
-    }
-
-    public void setFilesToDelete(List<String> filesToDelete) {
-        this.filesToDelete = filesToDelete;
     }
 }

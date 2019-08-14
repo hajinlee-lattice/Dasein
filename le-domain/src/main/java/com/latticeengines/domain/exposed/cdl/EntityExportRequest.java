@@ -26,22 +26,11 @@ public class EntityExportRequest {
     @JsonProperty("AtlasExportId")
     private String atlasExportId;
 
-    @JsonProperty("SaveToDropfolder")
-    private boolean saveToDropfolder;
-
     public String getAtlasExportId() {
         return atlasExportId;
     }
 
     public void setAtlasExportId(String atlasExportId) {
         this.atlasExportId = atlasExportId;
-    }
-
-    public boolean isSaveToDropfolder() {
-        return saveToDropfolder;
-    }
-
-    public void setSaveToDropfolder(boolean saveToDropfolder) {
-        this.saveToDropfolder = saveToDropfolder;
     }
 }

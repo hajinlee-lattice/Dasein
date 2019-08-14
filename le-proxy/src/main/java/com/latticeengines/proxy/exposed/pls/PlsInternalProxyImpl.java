@@ -18,7 +18,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -287,7 +286,12 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         return url;
     }
 
-    @Override
+    //fix it: only for OrphanRecordExportDeploymentTestNG, after segmentExport migration, remove it.
+    public MetadataSegmentExport createOrphanRecordThruMgr(MetadataSegmentExport metadataSegmentExport, CustomerSpace customerSpace) {
+        String url = constructUrl(combine("/internal/segment/orphan/customerspace", customerSpace.toString()));
+        return post("MetadataSegmentExport", url, metadataSegmentExport, MetadataSegmentExport.class);
+    }
+
     public MetadataSegmentExport getMetadataSegmentExport(CustomerSpace customerSpace, //
                                                           String exportId) {
         try {
@@ -299,7 +303,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
-    @Override
     public MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
                                                              String exportId, Status state) {
         if (exportId == null) {
@@ -478,7 +481,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
-    @Override
     public void sendMetadataSegmentExportEmail(String result, String tenantId, MetadataSegmentExport export) {
         try {
             String url = constructUrl(combine("/internal/emails/segmentexport/result", result, tenantId));
@@ -486,17 +488,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
             put("sendMetadataSegmentExportEmail", url, export);
         } catch (Exception e) {
             throw new RuntimeException("sendMetadataSegmentExportEmail: Remote call failure", e);
-        }
-    }
-
-    @Override
-    public void sendAtlasExportEmail(String result, String tenantId, AtlasExport export) {
-        try {
-            String url = constructUrl(combine("/internal/emails/atlasexport/result", result, tenantId));
-            log.info(String.format("Putting to %s", url));
-            put("sendMetadataSegmentExportEmail", url, export);
-        } catch (Exception e) {
-            throw new RuntimeException("sendAtlasExportEmail: Remote call failure", e);
         }
     }
 

@@ -11,6 +11,4 @@ public interface AtlasExportEntityMgr extends BaseEntityMgrRepository<AtlasExpor
     AtlasExport createAtlasExport(AtlasExportType exportType);
 
     AtlasExport createAtlasExport(AtlasExport atlasExport);
-
-    void deleteByExportId(String exportId);
 }
