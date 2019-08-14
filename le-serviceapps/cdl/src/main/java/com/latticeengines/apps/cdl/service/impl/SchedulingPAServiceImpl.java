@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,6 +75,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
+    private static final String REDIS_KEY = "PASubmitFailed";
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -105,6 +107,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${cdl.processAnalyze.maximum.priority.large.account.count}")
     private long largeAccountCountLimit;
@@ -189,6 +194,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     runningLargeJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
+                if (!checkRedisValidation(tenantId)) {
+                    continue;
+                }
                 TenantActivity tenantActivity = new TenantActivity();
                 tenantActivity.setTenantId(tenantId);
                 tenantActivity.setTenantType(tenant.getTenantType());
@@ -551,5 +559,24 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.error("Failed to check whether scheduler [{}] is enabled", schedulerName);
             return false;
         }
+    }
+
+    private boolean checkRedisValidation(String tenantId) {
+        if (!redisTemplate.opsForHash().hasKey(REDIS_KEY, tenantId)) {
+            return true;
+        }
+        log.info("RedisMap: " + JsonUtils.serialize(redisTemplate.opsForHash().entries(REDIS_KEY)));
+        Long failedTime = 0L;
+        try {
+            failedTime = (Long) redisTemplate.opsForHash().get(REDIS_KEY, tenantId);
+        } catch (NullPointerException e) {
+            log.error("Redis get tenant " + tenantId + " fail time failed.", e);
+        }
+        //judge if this tenant PA submit failed over than 1 hour, we can kick off PA
+        if (schedulingPATimeClock.getCurrentTime() - failedTime < 60 * 60 * 1000) {
+            return false;
+        }
+        redisTemplate.opsForHash().delete(REDIS_KEY, tenantId);
+        return true;
     }
 }
