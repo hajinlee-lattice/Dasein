@@ -45,6 +45,10 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
     public CampaignLaunchTriggerServiceImpl() {
         super(PropertyUtils.getProperty("common.internal.app.url"), "cdl");
+        String env = PropertyUtils.getProperty("common.le.environment");
+        if ("dev".equals(env) || "devcluster".equals(env)) {
+            setHostport(PropertyUtils.getProperty("common.microservice.url"));
+        }
     }
 
     @Override
