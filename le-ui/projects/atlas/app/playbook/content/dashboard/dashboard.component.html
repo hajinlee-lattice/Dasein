@@ -127,7 +127,7 @@
                                 <!-- <span ng-if="vm.launchedState != 'Launched'">Avaliable for Launch</span> -->
                                 <span>Available Recommendations</span>
                             </div>
-                            <div class="column" ng-show="vm.play.launchHistory.mostRecentLaunch && ['Launching','Launched','Failed'].indexOf(vm.play.launchHistory.mostRecentLaunch.launchState) !== -1 || vm.play.launchHistory.lastCompletedLaunch.launchState">
+                            <div class="column" ng-show="vm.play.launchHistory.mostRecentLaunch && ['Launching','Launched','Failed','Synced', 'PartialSync', 'Syncing', 'SyncFailed'].indexOf(vm.play.launchHistory.mostRecentLaunch.launchState) !== -1 || vm.play.launchHistory.lastCompletedLaunch.launchState">
                                 <a ui-sref="home.playbook.dashboard.launchhistory({play_name: vm.play.name})"><span class="ico ico-cog ico-black"></span> Launch History</a>
                             </div>
                         </h2>

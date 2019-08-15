@@ -7,8 +7,11 @@ angular.module('lp.playbook.playlisttabs', [
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
         current: PlaybookWizardStore.current,
-        counts: {}
+        counts: {},
+        cumulativeCount: 0
     });
+
+    var ALL_LAUNCH_STATES = ['Launched', 'Launching', 'Completed' ,'Failed', 'Syncing', 'Synced', 'PartialSync', 'SyncFailed'];
 
     vm.count = function(type, current) {
         var filter = current
@@ -20,6 +23,15 @@ angular.module('lp.playbook.playlisttabs', [
             vm.counts[type] = launched.length;
         }
         return vm.counts[type] || 0;
+    }
+
+    vm.countAll = function() {
+        var count = 0;
+        ALL_LAUNCH_STATES.forEach(function(state) {
+            count += vm.count(state);
+        });
+        vm.cumulativeCount = count;
+        return count;
     }
 
     vm.historyTabIsDisabled = ((vm.count('Launching') + vm.count('Launched') + vm.count('Failed')) === 0);
