@@ -123,6 +123,8 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         message.setEventDetail(null);
         List<DataIntegrationStatusMonitorMessage> messages = new ArrayList<>();
         messages.add(message);
+        log.info(String.format("Creating status monitor for launchId %s with workflowRequestId %s", playLaunchId,
+                workflowRequestId));
         dataIntegrationMonitoringProxy.createOrUpdateStatus(messages);
         putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, workflowRequestId);
         putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, s3ExportFilePaths);
