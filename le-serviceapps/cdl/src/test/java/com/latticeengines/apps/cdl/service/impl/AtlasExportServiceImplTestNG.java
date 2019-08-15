@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,10 +43,15 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
         String dropfolderExportPath = s3ExportFolderService.getDropFolderExportPath(mainCustomerSpace,
                 AtlasExportType.ALL_ACCOUNTS, exportRecord.getDatePrefix(), "");
         Assert.assertNotNull(dropfolderExportPath);
-        atlasExportService.addFileToDropFolder(mainCustomerSpace, exportUuid, "TestFile.csv.gz");
+
+        List<String> files = new ArrayList<>();
+        files.add("TestFile.csv.gz");
+        atlasExportService.addFileToDropFolder(mainCustomerSpace, exportUuid, "TestFile.csv.gz", files);
         String systemExportPath = s3ExportFolderService.getSystemExportPath(mainCustomerSpace);
         Assert.assertNotNull(systemExportPath);
-        atlasExportService.addFileToSystemPath(mainCustomerSpace, exportUuid, "Account_" + exportUuid + ".csv.gz");
+        files = new ArrayList<>();
+        files.add("Account_" + exportUuid + ".csv.gz");
+        atlasExportService.addFileToSystemPath(mainCustomerSpace, exportUuid, "Account_" + exportUuid + ".csv.gz", files);
         exportRecord = atlasExportService.getAtlasExport(mainCustomerSpace, exportUuid);
         Assert.assertEquals(exportRecord.getFilesUnderDropFolder().size(), 1);
         Assert.assertEquals(exportRecord.getFilesUnderSystemPath().size(), 1);
@@ -53,6 +59,7 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(exportRecord.getFilesUnderSystemPath().get(0), "Account_" + exportUuid + ".csv.gz");
 
         AtlasExport atlasExport1 = createAtlasExport(AtlasExportType.ACCOUNT);
+        atlasExport1 = atlasExportService.getAtlasExport(mainCustomerSpace, atlasExport1.getUuid());
         verifyAtlasExport(atlasExport1, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.RUNNING);
         AtlasExport atlasExport2 = createAtlasExport(AtlasExportType.CONTACT);
         verifyAtlasExport(atlasExport2, AtlasExportType.CONTACT, MetadataSegmentExport.Status.RUNNING);
@@ -64,6 +71,9 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         List<AtlasExport> atlasExports = atlasExportService.findAll(mainCustomerSpace);
         Assert.assertEquals(atlasExports.size(), 3);
+        atlasExportService.deleteAtlasExport(mainCustomerSpace, atlasExport1.getUuid());
+        atlasExports = atlasExportService.findAll(mainCustomerSpace);
+        Assert.assertEquals(atlasExports.size(), 2);
     }
 
     private void verifyAtlasExport(AtlasExport atlasExport, AtlasExportType atlasExportType,
@@ -79,6 +89,9 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(atlasExport.getStatus(), status);
         Tenant tenant = atlasExport.getTenant();
         Assert.assertEquals(tenant.getId(), mainCustomerSpace);
+        Assert.assertNull(atlasExport.getFilesToDelete());
+        Assert.assertNotNull(atlasExport.getUpdated());
+        Assert.assertNotNull(atlasExport.getCreated());
     }
 
     private AtlasExport createAtlasExport(AtlasExportType atlasExportType) {
