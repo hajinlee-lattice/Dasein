@@ -6,7 +6,7 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-ui</artifactId>
     <packaging>pom</packaging>
-    <version>4.21.0-SNAPSHOT</version>
+    <version>4.19.0-SNAPSHOT</version>
     <description>LE UI</description>
 
     <properties>
