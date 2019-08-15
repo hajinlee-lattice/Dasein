@@ -904,6 +904,15 @@ attr-categories,
                     right: 1em;
                     font-weight: bold;
                     font-size: 16px;
+                    .tooltip_ {
+                        color: white;
+                        font-size: 12px;
+                        width: auto;
+                        .cover {
+                            white-space: nowrap;
+                            padding-right: 20px;
+                        }
+                    }
                 }
             }
         }
