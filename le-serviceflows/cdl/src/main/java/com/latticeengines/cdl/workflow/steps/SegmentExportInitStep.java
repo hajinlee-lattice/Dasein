@@ -1,12 +1,9 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -23,7 +20,7 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("segmentExportInitStep")
@@ -38,15 +35,8 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
     @Autowired
     private SegmentExportProcessorFactory segmentExportProcessorFactory;
 
-    @Value("${yarn.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
 
     @Override
     public void execute() {
@@ -67,7 +57,7 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
             log.info(String.format("For exportId: %s", exportId));
             MetadataSegmentExport metadataSegmentExport = configuration.getMetadataSegmentExport();
             if (metadataSegmentExport == null) {
-                metadataSegmentExport = internalResourceRestApiProxy.getMetadataSegmentExport(customerSpace, exportId);
+                metadataSegmentExport = plsInternalProxy.getMetadataSegmentExport(customerSpace, exportId);
                 config.setMetadataSegmentExport(metadataSegmentExport);
             }
 
@@ -82,9 +72,9 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
             segmentExportProcessorFactory.getProcessor(metadataSegmentExport.getType()) //
                     .executeExportActivity(tenant, config, yarnConfiguration);
 
-            internalResourceRestApiProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.COMPLETED);
+            plsInternalProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.COMPLETED);
         } catch (Exception ex) {
-            internalResourceRestApiProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.FAILED);
+            plsInternalProxy.updateMetadataSegmentExport(customerSpace, exportId, Status.FAILED);
             throw new LedpException(LedpCode.LEDP_18167, ex);
         }
     }
@@ -95,12 +85,12 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
     }
 
     @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    void setSegmentExportProcessorFactory(SegmentExportProcessorFactory segmentExportProcessorFactory) {
+        this.segmentExportProcessorFactory = segmentExportProcessorFactory;
     }
 
     @VisibleForTesting
-    void setSegmentExportProcessorFactory(SegmentExportProcessorFactory segmentExportProcessorFactory) {
-        this.segmentExportProcessorFactory = segmentExportProcessorFactory;
+    void setPlsInternalProxy(PlsInternalProxy plsInternalProxy){
+        this.plsInternalProxy = plsInternalProxy;
     }
 }

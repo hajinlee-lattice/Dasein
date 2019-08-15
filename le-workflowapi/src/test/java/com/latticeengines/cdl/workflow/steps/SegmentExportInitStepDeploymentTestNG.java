@@ -16,7 +16,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -40,17 +39,17 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+@Listeners({GlobalAuthCleanupTestListener.class})
+@TestExecutionListeners({DirtiesContextTestExecutionListener.class})
 @ContextConfiguration(locations = { //
         "classpath:playmakercore-context.xml", "classpath:test-playlaunch-properties-context.xml",
         "classpath:yarn-context.xml", "classpath:proxy-context.xml", "classpath:test-workflowapi-context.xml",
-        "classpath:test-testframework-cleanup-context.xml" })
+        "classpath:test-testframework-cleanup-context.xml"})
 public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportInitStepDeploymentTestNG.class);
@@ -60,8 +59,8 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
     @Inject
     private TestMetadataSegmentProxy testMetadataSegmentProxy;
 
-    @Value("${common.test.pls.url}")
-    private String internalResourceHostPort;
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -79,8 +78,6 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
 
     private CustomerSpace customerSpace;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndData();
@@ -88,34 +85,30 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
         testPlayCreationHelper.setupTestRulesBasedModel();
         tenant = testPlayCreationHelper.getTenant();
 
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         customerSpace = CustomerSpace.parse(tenant.getId());
         testPlayCreationHelper.getDeploymentTestBed().attachProtectedProxy(testMetadataSegmentProxy);
     }
 
     @Test(groups = "deployment")
     public void testAccountExport() throws IOException {
-        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.ACCOUNT,
-                internalResourceRestApiProxy);
+        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.ACCOUNT);
         segmentExportInitStep.execute(yarnConfiguration);
         confirmJobSuccessful(segmentExport,
                 BusinessEntity.Account.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.AccountId.name());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testAccountExport" })
+    @Test(groups = "deployment", dependsOnMethods = {"testAccountExport"})
     public void testContactExport() throws IOException {
-        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.CONTACT,
-                internalResourceRestApiProxy);
+        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.CONTACT);
         segmentExportInitStep.execute(yarnConfiguration);
         confirmJobSuccessful(segmentExport,
                 BusinessEntity.Contact.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.AccountId.name(),
                 BusinessEntity.Contact.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.ContactId.name());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testContactExport" })
+    @Test(groups = "deployment", dependsOnMethods = {"testContactExport"})
     public void testAccountAndContactExport() throws IOException {
-        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.ACCOUNT_AND_CONTACT,
-                internalResourceRestApiProxy);
+        MetadataSegmentExport segmentExport = createExportJob(customerSpace, AtlasExportType.ACCOUNT_AND_CONTACT);
         segmentExportInitStep.execute(yarnConfiguration);
         confirmJobSuccessful(segmentExport,
                 BusinessEntity.Contact.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.AccountId.name(),
@@ -123,8 +116,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
                 BusinessEntity.Account.name() + SegmentExportProcessor.SEPARATOR + InterfaceName.AccountId.name());
     }
 
-    private MetadataSegmentExport createExportJob(CustomerSpace customerSpace, AtlasExportType type,
-            InternalResourceRestApiProxy internalResourceRestApiProxy) {
+    private MetadataSegmentExport createExportJob(CustomerSpace customerSpace, AtlasExportType type) {
         String segmentName = UUID.randomUUID().toString();
         MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
         metadataSegmentExport.setType(type);
@@ -137,7 +129,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
         metadataSegmentExport.setCreatedBy("CREATED_BY");
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
 
-        metadataSegmentExport = testMetadataSegmentProxy.createSegmentExport(metadataSegmentExport);
+        metadataSegmentExport = testMetadataSegmentProxy.createSegmentExport(metadataSegmentExport, false);
 
         Assert.assertNotNull(metadataSegmentExport.getExportId());
         Assert.assertNotNull(metadataSegmentExport);
@@ -154,8 +146,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
         segmentExportInitStep.setTenantEntityMgr(tenantEntityMgr);
         segmentExportInitStep.setConfiguration(conf);
         segmentExportInitStep.setSegmentExportProcessorFactory(segmentExportProcessorFactory);
-        segmentExportInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
-
+        segmentExportInitStep.setPlsInternalProxy(plsInternalProxy);
         return metadataSegmentExport;
     }
 
@@ -216,7 +207,7 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
         }
     }
 
-    @AfterClass(groups = { "deployment" })
+    @AfterClass(groups = {"deployment"})
     public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
     }
