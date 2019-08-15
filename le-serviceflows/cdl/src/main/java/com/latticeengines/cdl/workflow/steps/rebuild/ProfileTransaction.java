@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -140,7 +139,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
             double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
             int multiplier = ScalingUtils.getMultiplier(sizeInGb);
-            log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
+            log.info("Set scalingMultiplier=" + multiplier + " base on raw txn store size=" + sizeInGb + " gb.");
             scalingMultiplier = multiplier;
 
             periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
@@ -353,7 +352,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
 
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -365,7 +364,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setPeriodStrategies(periodStrategies);
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -397,7 +396,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
         config.setGroupByFields(groupByFields);
-        step.setConfiguration(appendEngineConf(config, extraHeavyEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -407,7 +406,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setInputSteps(Collections.singletonList(dailyAgrStep));
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -431,7 +430,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         config.setRetryable(true);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -441,8 +440,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setTransformer(TRANSFORMER_COPY_TXMFR);
 
         CopyConfig conf = new CopyConfig();
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
+        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -478,7 +476,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
                 InterfaceName.PeriodId.name(), //
                 InterfaceName.PeriodName.name()));
         config.setGroupByFields(groupByFields);
-        step.setConfiguration(appendEngineConf(config, extraHeavyEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -496,7 +494,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -530,7 +528,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
         config.setRetryable(true);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 }

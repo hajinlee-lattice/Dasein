@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(ProcessTransactionDiff.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -87,6 +88,15 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES, BusinessEntity.class,
                 String.class);
         diffTableName = diffTableNames.get(BusinessEntity.Transaction);
+
+        Table diffTable = metadataProxy.getTable(customerSpace.toString(), diffTableName);
+        if (diffTable == null) {
+            throw new RuntimeException("Cannot find diff txn table " + diffTableName);
+        }
+        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, diffTable);
+        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
+        log.info("Set scalingMultiplier=" + multiplier + " base on diff txn table size=" + sizeInGb + " gb.");
+        scalingMultiplier = multiplier;
 
         DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
         earliestTransaction = DateTimeUtils.dayPeriodToDate(feed.getEarliestTransaction());
@@ -227,7 +237,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setPeriodStrategies(periodStrategies);
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -261,7 +271,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
         config.setGroupByFields(groupByFields);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -310,7 +320,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.PeriodName.name()));
         config.setGroupByFields(groupByFields);
         step.setConfiguration(JsonUtils.serialize(config));
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -321,7 +331,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -363,7 +373,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
         config.setRetryable(true);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
