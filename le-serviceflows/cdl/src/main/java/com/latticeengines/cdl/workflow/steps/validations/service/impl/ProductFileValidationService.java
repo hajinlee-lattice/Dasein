@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -285,7 +285,7 @@ public class ProductFileValidationService
                             attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
                         } else {
                             attrToSegName.put(attrLookup.getAttribute(),
-                                    Collections.singleton(metadataSegment.getDisplayName()));
+                                    new HashSet<>(Arrays.asList(metadataSegment.getDisplayName())));
                         }
                     }
                 }
@@ -303,9 +303,8 @@ public class ProductFileValidationService
                             if (attrToModelName.containsKey(attrLookup.getAttribute())) {
                                 attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
                             } else {
-                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
                                 attrToModelName.put(attrLookup.getAttribute(),
-                                        Collections.singleton(model.getRatingEngine().getDisplayName()));
+                                        new HashSet<>(Arrays.asList(model.getRatingEngine().getDisplayName())));
                             }
                         }
                     }
@@ -360,7 +359,7 @@ public class ProductFileValidationService
                                 productsInUse.forEach(product -> {
                                     if (bundleIdToModelName.get(product) == null) {
                                         bundleIdToModelName.put(product,
-                                                Collections.singleton(summary.getDisplayName()));
+                                                new HashSet<>(Arrays.asList(summary.getDisplayName())));
                                     } else {
                                         bundleIdToModelName.get(product).add(summary.getDisplayName());
                                     }
