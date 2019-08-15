@@ -11,6 +11,7 @@ import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataflow.exception.RetryableFlowException;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -23,8 +24,8 @@ import cascading.tuple.Fields;
 
 public class FailingBufferTestNG extends DataFlowOperationFunctionalTestNGBase {
 
-    @Test(groups = "functional")
-    public void testDenormalize() throws Exception {
+    @Test(groups = "functional", expectedExceptions = { RetryableFlowException.class })
+    public void testFailingFlow() {
         Object[][] data = new Object[][] { //
                 { "dom1.com", "x", 1, 123L }, //
                 { "dom2.com", "y", 2, 123L }, //
