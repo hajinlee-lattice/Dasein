@@ -120,7 +120,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private final CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy,
+    public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy,//
                                            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
                                            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
@@ -191,6 +191,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
                         customerSpace, datafeedStatus.getName());
             }
+
             throw new RuntimeException(errorMessage);
         }
 
