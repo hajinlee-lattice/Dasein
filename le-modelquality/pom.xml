@@ -8,20 +8,20 @@
 
     <properties>
         <component-name>modelquality</component-name>
-        <le.common.version>4.21.0-SNAPSHOT</le.common.version>
-        <le.db.version>4.21.0-SNAPSHOT</le.db.version>
-        <le.domain.version>4.21.0-SNAPSHOT</le.domain.version>
-        <le.proxy.version>4.21.0-SNAPSHOT</le.proxy.version>
-        <le.security.version>4.21.0-SNAPSHOT</le.security.version>
-        <le.dataplatform.version>4.21.0-SNAPSHOT</le.dataplatform.version>
-        <le.monitor.version>4.21.0-SNAPSHOT</le.monitor.version>
-        <le.testfwk.version>4.21.0-SNAPSHOT</le.testfwk.version>
+        <le.common.version>4.19.0-SNAPSHOT</le.common.version>
+        <le.db.version>4.19.0-SNAPSHOT</le.db.version>
+        <le.domain.version>4.19.0-SNAPSHOT</le.domain.version>
+        <le.proxy.version>4.19.0-SNAPSHOT</le.proxy.version>
+        <le.security.version>4.19.0-SNAPSHOT</le.security.version>
+        <le.dataplatform.version>4.19.0-SNAPSHOT</le.dataplatform.version>
+        <le.monitor.version>4.19.0-SNAPSHOT</le.monitor.version>
+        <le.testfwk.version>4.19.0-SNAPSHOT</le.testfwk.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>4.21.0-SNAPSHOT</version>
+        <version>4.19.0-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 
