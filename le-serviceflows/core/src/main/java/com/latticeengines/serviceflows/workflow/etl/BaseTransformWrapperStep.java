@@ -252,14 +252,16 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
         engineConf.setEngine("TEZ");
         Map<String, String> jobProperties = new HashMap<>();
-        int memoryMultiplier = scalingMultiplier == 1 ? 1 : (scalingMultiplier > 3 ? (scalingMultiplier - 1) : 2);
-        log.info("Set memoryMultiplier={} based on scalingMultiplier={}", memoryMultiplier, scalingMultiplier);
-        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * memoryMultiplier));
-        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * memoryMultiplier));
-        jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * memoryMultiplier));
-        jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
-        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
-        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
+        // scalingMultiplier is in range [1, 5]
+        int scaleUp = scalingMultiplier > 2 ? 4 : Math.max(1, scalingMultiplier);
+        int scaleOut = scalingMultiplier > 2 ? scalingMultiplier - 1 : 1;
+        log.info("Set scaleUp={} and scaleOut={} based on scalingMultiplier={}", scaleUp, scaleOut, scalingMultiplier);
+        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * scaleUp));
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * scaleUp));
+        jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * scaleUp));
+        jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scaleOut));
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scaleOut));
+        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scaleOut));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         return engineConf;
