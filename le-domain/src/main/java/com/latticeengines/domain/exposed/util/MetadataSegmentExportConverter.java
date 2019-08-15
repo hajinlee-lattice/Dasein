@@ -26,6 +26,8 @@ public class MetadataSegmentExportConverter {
         atlasExport.setTenantId(metadataSegmentExport.getTenantId());
         atlasExport.setCleanupBy(metadataSegmentExport.getCleanupBy());
         atlasExport.setSegmentName(metadataSegmentExport.getExportPrefix());
+        atlasExport.setCreated(metadataSegmentExport.getCreated());
+        atlasExport.setUpdated(metadataSegmentExport.getUpdated());
         return atlasExport;
     }
 
@@ -51,6 +53,8 @@ public class MetadataSegmentExportConverter {
         }
         metadataSegmentExport.setCleanupBy(atlasExport.getCleanupBy());
         metadataSegmentExport.setExportPrefix(atlasExport.getSegmentName());
+        metadataSegmentExport.setCreated(atlasExport.getCreated());
+        metadataSegmentExport.setUpdated(atlasExport.getUpdated());
         return metadataSegmentExport;
     }
 

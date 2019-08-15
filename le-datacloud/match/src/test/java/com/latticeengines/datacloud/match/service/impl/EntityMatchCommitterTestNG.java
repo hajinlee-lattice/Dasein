@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
@@ -38,11 +39,9 @@ public class EntityMatchCommitterTestNG extends DataCloudMatchFunctionalTestNGBa
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
 
-    @Test(groups = "functional")
-    private void testCommit() {
+    @Test(groups = "functional", dataProvider = "commit")
+    private void testCommit(Integer nSeeds) {
         Tenant tenant = newTestTenant();
-
-        int nSeeds = 500;
         String entity = BusinessEntity.Account.name();
 
         log.info("Preparing test data of {} seeds, entity={}, tenant={}", nSeeds, entity, tenant.getId());
@@ -55,6 +54,14 @@ public class EntityMatchCommitterTestNG extends DataCloudMatchFunctionalTestNGBa
         Assert.assertEquals(res.getSeedCount(), (int) pair.getKey(), "Number of seeds should match");
         Assert.assertEquals(res.getLookupCount(), (int) pair.getValue(), "Number of lookup entries should match");
         Assert.assertEquals(res.getNotInStagingLookupCount(), 0);
+    }
+
+    @DataProvider(name = "commit")
+    private Object[][] commitTestData() {
+        return new Object[][] { //
+                { 1 }, // small number of records to make sure no race condition
+                { 500 }, //
+        }; //
     }
 
     private Tenant newTestTenant() {

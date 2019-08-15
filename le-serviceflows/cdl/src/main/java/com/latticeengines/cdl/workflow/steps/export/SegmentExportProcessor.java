@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -65,7 +64,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -97,32 +96,25 @@ public abstract class SegmentExportProcessor {
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
+
     @Value("${playmaker.workflow.segment.pagesize:200}")
     protected long pageSize;
 
-    @Value("${yarn.pls.url}")
-    private String internalResourceHostPort;
-
     private String avroFilePath;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     private List<Predefined> filterByPredefinedSelection = Collections.singletonList(Predefined.Enrichment);
 
     protected DataCollection.Version version;
 
-    @PostConstruct
-    public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
-
     public abstract boolean accepts(AtlasExportType type);
 
     protected abstract void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext,
-            File localFile) throws IOException;
+                                                File localFile) throws IOException;
 
     public void executeExportActivity(Tenant tenant, SegmentExportStepConfiguration config,
-            Configuration yarnConfiguration) {
+                                      Configuration yarnConfiguration) {
         CustomerSpace customerSpace = config.getCustomerSpace();
         version = dataCollectionProxy.getActiveVersion(customerSpace.toString());
         log.info(String.format("Using DataCollection.Version %s", version.name()));
@@ -130,7 +122,7 @@ public abstract class SegmentExportProcessor {
         MetadataSegmentExport metadataSegmentExport = config.getMetadataSegmentExport();
         if (metadataSegmentExport == null) {
             String exportId = config.getMetadataSegmentExportId();
-            metadataSegmentExport = internalResourceRestApiProxy.getMetadataSegmentExport(customerSpace, exportId);
+            metadataSegmentExport = plsInternalProxy.getMetadataSegmentExport(customerSpace, exportId);
         }
 
         AtlasExportType exportType = metadataSegmentExport.getType();
@@ -186,7 +178,7 @@ public abstract class SegmentExportProcessor {
             exportType.getDefaultAttributeTuples().stream() //
                     .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact
                             && (InterfaceName.ContactId.name().equals(tuple.getMiddle())
-                                    || InterfaceName.AccountId.name().equals(tuple.getMiddle()))) //
+                            || InterfaceName.AccountId.name().equals(tuple.getMiddle()))) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Contact.name() + SEPARATOR + tuple.getMiddle());
@@ -219,7 +211,7 @@ public abstract class SegmentExportProcessor {
     }
 
     private void fetchExtratPageByPage(Tenant tenant, MetadataSegmentExport metadataSegmentExport,
-            SegmentExportContext segmentExportContext, Configuration yarnConfiguration) {
+                                       SegmentExportContext segmentExportContext, Configuration yarnConfiguration) {
         try {
             long currentTimeMillis = System.currentTimeMillis();
 
@@ -259,8 +251,8 @@ public abstract class SegmentExportProcessor {
     }
 
     private void registerTableForExport( //
-            CustomerSpace customerSpace, MetadataSegmentExport metadataSegmentExportJob, //
-            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
+                                         CustomerSpace customerSpace, MetadataSegmentExport metadataSegmentExportJob, //
+                                         Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
 
         Tenant tenant = new Tenant(customerSpace.toString());
         Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(tenant, metadataSegmentExportJob,
@@ -270,9 +262,9 @@ public abstract class SegmentExportProcessor {
     }
 
     private SegmentExportContext initSegmentExportContext(Tenant tenant, //
-            SegmentExportStepConfiguration config, //
-            MetadataSegmentExport metadataSegmentExport, //
-            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
+                                                          SegmentExportStepConfiguration config, //
+                                                          MetadataSegmentExport metadataSegmentExport, //
+                                                          Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
         SegmentExportContextBuilder segmentExportContextBuilder = new SegmentExportContextBuilder();
 
         CustomerSpace customerSpace = config.getCustomerSpace();
@@ -334,7 +326,7 @@ public abstract class SegmentExportProcessor {
     }
 
     private FrontEndRestriction prepareContactRestriction(Restriction extractedContactRestriction,
-            Collection<Object> modifiableAccountIdCollection) {
+                                                          Collection<Object> modifiableAccountIdCollection) {
         Restriction accountIdRestriction = Restriction.builder()
                 .let(BusinessEntity.Contact, InterfaceName.AccountId.name()).inCollection(modifiableAccountIdCollection)
                 .build();
@@ -368,10 +360,24 @@ public abstract class SegmentExportProcessor {
         return nameToDisplayNameMap;
     }
 
+    private void setSortField(BusinessEntity entityType, List<String> sortBy, boolean descending,
+                                    FrontEndQuery entityFrontEndQuery) {
+        if (CollectionUtils.isEmpty(sortBy)) {
+            sortBy = Collections.singletonList(InterfaceName.AccountId.name());
+        }
+
+        List<AttributeLookup> lookups = sortBy.stream() //
+                .map(sort -> new AttributeLookup(entityType, sort)) //
+                .collect(Collectors.toList());
+
+        FrontEndSort sort = new FrontEndSort(lookups, descending);
+        entityFrontEndQuery.setSort(sort);
+    }
+
     private void prepareLookupsForFrontEndQueries( //
-            FrontEndQuery accountFrontEndQuery, //
-            FrontEndQuery contactFrontEndQuery, //
-            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
+                                                   FrontEndQuery accountFrontEndQuery, //
+                                                   FrontEndQuery contactFrontEndQuery, //
+                                                   Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
         List<Lookup> accountLookups = new ArrayList<>();
         List<Attribute> configuredAccountAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Account);
         List<Attribute> configuredContactAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Contact);
@@ -417,23 +423,9 @@ public abstract class SegmentExportProcessor {
     }
 
     protected void setValueInAvroRecord(Map<String, Object> account, GenericRecordBuilder builder, Field field,
-            String fieldNameInAccountLookupResult) {
+                                        String fieldNameInAccountLookupResult) {
         Object val = account.get(fieldNameInAccountLookupResult);
         builder.set(field.name(), val == null ? null : val.toString());
-    }
-
-    private void setSortField(BusinessEntity entityType, List<String> sortBy, boolean descending,
-            FrontEndQuery entityFrontEndQuery) {
-        if (CollectionUtils.isEmpty(sortBy)) {
-            sortBy = Collections.singletonList(InterfaceName.AccountId.name());
-        }
-
-        List<AttributeLookup> lookups = sortBy.stream() //
-                .map(sort -> new AttributeLookup(entityType, sort)) //
-                .collect(Collectors.toList());
-
-        FrontEndSort sort = new FrontEndSort(lookups, descending);
-        entityFrontEndQuery.setSort(sort);
     }
 
     private List<Attribute> getSchema(String customerSpace, BusinessEntity entity) {
@@ -456,21 +448,6 @@ public abstract class SegmentExportProcessor {
     @VisibleForTesting
     void setPageSize(long pageSize) {
         this.pageSize = pageSize;
-    }
-
-    @VisibleForTesting
-    void setAccountFetcher(ExportAccountFetcher accountFetcher) {
-        this.accountFetcher = accountFetcher;
-    }
-
-    @VisibleForTesting
-    void setContactFetcher(ExportContactFetcher contactFetcher) {
-        this.contactFetcher = contactFetcher;
-    }
-
-    @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
     }
 
     @VisibleForTesting

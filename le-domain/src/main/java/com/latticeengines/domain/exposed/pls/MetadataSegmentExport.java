@@ -293,6 +293,7 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     public enum Status {
         RUNNING, //
         FAILED, //
-        COMPLETED;
+        COMPLETED
     }
+
 }

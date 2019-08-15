@@ -223,6 +223,8 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
             return lightEngineConfig();
         case HEAVY:
             return heavyEngineConfig();
+        case HEAVY_MEMORY:
+            return heavyMemoryEngineConfig();
         case EXTRA_HEAVY:
             return extraHeavyEngineConfig();
         default:
@@ -237,6 +239,24 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores));
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024));
         jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024));
+        jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
+        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
+        engineConf.setJobProperties(jobProperties);
+        engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
+        return engineConf;
+    }
+
+    // TODO: Will merge into extraHeavyEngineConfig() in M31
+    protected TransformationFlowParameters.EngineConfiguration heavyMemoryEngineConfig() {
+        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+        engineConf.setEngine("TEZ");
+        Map<String, String> jobProperties = new HashMap<>();
+        int memoryMultiplier = scalingMultiplier == 1 ? 1 : (scalingMultiplier > 3 ? (scalingMultiplier - 1) : 2);
+        log.info("Set memoryMultiplier={} based on scalingMultiplier={}", memoryMultiplier, scalingMultiplier);
+        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * memoryMultiplier));
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * memoryMultiplier));
+        jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * memoryMultiplier));
         jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
         jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
