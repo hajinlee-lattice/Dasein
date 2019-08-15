@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.workflow;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +19,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -78,8 +76,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
-    private static final String REDIS_KEY = "PASubmitFailed";
-
     @Inject
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
@@ -123,11 +119,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final CDLAttrConfigProxy cdlAttrConfigProxy;
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy,
-                                           RedisTemplate<String, Object> redisTemplate,
                                            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
                                            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
@@ -138,7 +131,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.batonService = batonService;
         this.zkConfigService = zkConfigService;
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
-        this.redisTemplate = redisTemplate;
     }
 
     @WithWorkflowJobPid
@@ -147,20 +139,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
-        addRedisTemplateValue(REDIS_KEY, customerSpace);
         boolean tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace));
         if (!request.skipMigrationCheck && tenantInMigration) {
             log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
-            addRedisTemplateValue(REDIS_KEY, customerSpace);
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
         } else if (request.skipMigrationCheck && !tenantInMigration) {
             log.error("Tenant {} is not in migration and should not kickoff migration PA", customerSpace);
-            addRedisTemplateValue(REDIS_KEY, customerSpace);
             throw new IllegalStateException(String.format("Tenant %s is not in migration.", customerSpace));
         }
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
         if (dataCollection == null) {
-            addRedisTemplateValue(REDIS_KEY, customerSpace);
             throw new LedpException(LedpCode.LEDP_37014);
         }
 
@@ -172,7 +160,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         AttrConfigRequest configRequest = cdlAttrConfigProxy.validateAttrConfig(customerSpace, new AttrConfigRequest(),
                 AttrConfigUpdateMode.Limit);
         if (configRequest.hasError()) {
-            addRedisTemplateValue(REDIS_KEY, customerSpace);
             throw new RuntimeException("User activate or enable more allowed attribute.");
         }
 
@@ -189,7 +176,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                         + ExceptionUtils.getStackTrace(e));
                 dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
-                addRedisTemplateValue(REDIS_KEY, customerSpace);
                 throw new RuntimeException(String.format("Failed to submit %s's P&A migration workflow", customerSpace), e);
             }
         }
@@ -205,7 +191,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
                         customerSpace, datafeedStatus.getName());
             }
-            addRedisTemplateValue(REDIS_KEY, customerSpace);
             throw new RuntimeException(errorMessage);
         }
 
@@ -252,7 +237,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                     + ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
-            addRedisTemplateValue(REDIS_KEY, customerSpace);
             throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace), e);
         }
     }
@@ -629,14 +613,5 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private List<Long> getImportActionIds(String customerSpace) {
         Long importMigrateTrackingPid = migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking().getPid();
         return importMigrateTrackingService.getAllRegisteredActionIds(customerSpace, importMigrateTrackingPid);
-    }
-
-    private void addRedisTemplateValue(String key, String customerSpace) {
-        if (redisTemplate.opsForHash().entries(key) == null) {
-            Map<String, Long> newMap = new HashMap<>();
-            redisTemplate.opsForHash().putAll(key, newMap);
-        }
-        redisTemplate.opsForHash().put(key, customerSpace, new Date().getTime());
-        log.info("RedisMap is: " + JsonUtils.serialize(redisTemplate.opsForHash().entries(key)));
     }
 }

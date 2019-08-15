@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
-    private static final String REDIS_KEY = "PASubmitFailed";
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -129,6 +129,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${cdl.processAnalyze.retry.expired.time}")
     private long retryExpiredTime;
 
+    @Value("${common.le.environment}")
+    private String leEnv;
+
     private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
     @Override
@@ -154,6 +157,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> skippedMigrationTenants = new HashSet<>();
         log.info("Number of tenant with new actions after last PA = {}", actionStats.size());
         log.debug("Action stats = {}", actionStats);
+
+        Map<String, Long> paFailedMap = getPASubmitFailedRedisMap();
 
         for (DataFeed simpleDataFeed : allDataFeeds) {
             if (simpleDataFeed.getTenant() == null) {
@@ -194,7 +199,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     runningLargeJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
-                if (!checkRedisValidation(tenantId)) {
+                if (paFailedMap.containsKey(tenantId)) {
                     continue;
                 }
                 TenantActivity tenantActivity = new TenantActivity();
@@ -561,22 +566,23 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         }
     }
 
-    private boolean checkRedisValidation(String tenantId) {
-        if (!redisTemplate.opsForHash().hasKey(REDIS_KEY, tenantId)) {
-            return true;
+    private Map<String, Long> getPASubmitFailedRedisMap() {
+        String redisKey = "pa_scheduler_" + leEnv + "_pa_submit_failed";
+        Map<Object, Object> redisMap = redisTemplate.opsForHash().entries(redisKey);
+        Map<String, Long> paSubmitFailedMap = new HashMap<>();
+        if (redisMap.size() > 0) {
+            Iterator<Map.Entry<Object, Object>> iter = redisMap.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<Object, Object> entry = iter.next();
+                Long failedTime = (Long) entry.getValue();
+                if (schedulingPATimeClock.getCurrentTime() - failedTime < 60 * 60 * 1000) {
+                    paSubmitFailedMap.put((String) entry.getKey(), failedTime);
+                } else {
+                    redisTemplate.opsForHash().delete(redisKey, entry.getKey());
+                }
+            }
+
         }
-        log.info("RedisMap: " + JsonUtils.serialize(redisTemplate.opsForHash().entries(REDIS_KEY)));
-        Long failedTime = 0L;
-        try {
-            failedTime = (Long) redisTemplate.opsForHash().get(REDIS_KEY, tenantId);
-        } catch (NullPointerException e) {
-            log.error("Redis get tenant " + tenantId + " fail time failed.", e);
-        }
-        //judge if this tenant PA submit failed over than 1 hour, we can kick off PA
-        if (schedulingPATimeClock.getCurrentTime() - failedTime < 60 * 60 * 1000) {
-            return false;
-        }
-        redisTemplate.opsForHash().delete(REDIS_KEY, tenantId);
-        return true;
+        return paSubmitFailedMap;
     }
 }
