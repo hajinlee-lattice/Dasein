@@ -409,10 +409,14 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String tenantId : canRunRetryJobSet) {
                 try {
-                    InQTimeTracker.opsForZSet().remove(MAIN_TRACKING_SET, tenantId);
                     if (!dryRun) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
                         logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
+                        if (retryAppId != null) {
+                            InQTimeTracker.opsForZSet().remove(MAIN_TRACKING_SET, tenantId);
+                        }
+                    } else {
+                        InQTimeTracker.opsForZSet().remove(MAIN_TRACKING_SET, tenantId);
                     }
                 } catch (Exception e) {
                     log.error("Failed to retry PA for tenant {}, error = {}", tenantId, e);
@@ -427,6 +431,11 @@ public class CDLJobServiceImpl implements CDLJobService {
                 if (!dryRun) {
                     ApplicationId appId = submitProcessAnalyzeJob(tenantId);
                     logScheduledPA(schedulerName, tenantId, appId, false, result);
+                    if (appId != null) {
+                        InQTimeTracker.opsForZSet().remove(MAIN_TRACKING_SET, tenantId);
+                    }
+                } else {
+                    InQTimeTracker.opsForZSet().remove(MAIN_TRACKING_SET, tenantId);
                 }
             }
         }
