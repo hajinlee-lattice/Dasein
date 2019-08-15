@@ -9,19 +9,19 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.19.0-SNAPSHOT</version>
+        <version>4.20.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
     <properties>
         <component-name>playmakercore</component-name>
-        <le.common.version>4.19.0-SNAPSHOT</le.common.version>
-        <le.datadb.version>4.19.0-SNAPSHOT</le.datadb.version>
-        <le.db.version>4.19.0-SNAPSHOT</le.db.version>
-        <le.proxy.version>4.19.0-SNAPSHOT</le.proxy.version>
-        <le.remote.version>4.19.0-SNAPSHOT</le.remote.version>
-        <le.security.version>4.19.0-SNAPSHOT</le.security.version>
-        <le.testfwk.version>4.19.0-SNAPSHOT</le.testfwk.version>
+        <le.common.version>4.20.0-SNAPSHOT</le.common.version>
+        <le.datadb.version>4.20.0-SNAPSHOT</le.datadb.version>
+        <le.db.version>4.20.0-SNAPSHOT</le.db.version>
+        <le.proxy.version>4.20.0-SNAPSHOT</le.proxy.version>
+        <le.remote.version>4.20.0-SNAPSHOT</le.remote.version>
+        <le.security.version>4.20.0-SNAPSHOT</le.security.version>
+        <le.testfwk.version>4.20.0-SNAPSHOT</le.testfwk.version>
     </properties>
 
     <dependencies>

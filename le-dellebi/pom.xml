@@ -9,17 +9,17 @@
 
 	<properties>
 		<component-name>dellebi</component-name>
-		<le.common.version>4.19.0-SNAPSHOT</le.common.version>
-		<le.scheduler.version>4.19.0-SNAPSHOT</le.scheduler.version>
-		<le.domain.version>4.19.0-SNAPSHOT</le.domain.version>
-		<le.quartzclient.version>4.19.0-SNAPSHOT</le.quartzclient.version>
+		<le.common.version>4.20.0-SNAPSHOT</le.common.version>
+		<le.scheduler.version>4.20.0-SNAPSHOT</le.scheduler.version>
+		<le.domain.version>4.20.0-SNAPSHOT</le.domain.version>
+		<le.quartzclient.version>4.20.0-SNAPSHOT</le.quartzclient.version>
 		<jcifs.version>1.3.17</jcifs.version>
 	</properties>
 
 	<parent>
 		<groupId>com.latticeengines</groupId>
 		<artifactId>le-microservice-parent</artifactId>
-		<version>4.19.0-SNAPSHOT</version>
+		<version>4.20.0-SNAPSHOT</version>
 		<relativePath>../le-microservice</relativePath>
 	</parent>
 
