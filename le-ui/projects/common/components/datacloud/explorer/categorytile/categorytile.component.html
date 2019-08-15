@@ -22,7 +22,7 @@
         <span class="count">
             <strong class="show-tooltip top right">
                 {{ count|number }}
-                <div class="tooltip_">
+                <div class="tooltip_" ng-if="!vm.category">
                     <div class="cover">
                         There are {{ count|number }} attributes in this category
                     </div>

@@ -54,12 +54,13 @@ function cronMaker(opts) {
       *
       *  <s> <m> <h> <dom> <m> <dow> <y>
      */
-
+    
     var opts = opts || {},
         date = new Date(),
         daysofweek = 'SUN,MON,TUE,WED,THU,FRI,SAT'.split(','),
         dayofweek = opts.dayofweek || daysofweek[date.getDay()],
-        dayofmonth = opts.dayofmonth || date.getDate(),
+        daysofmonth = opts.daysofmonth || date.getDate(),
+        dayofmonth = opts.dayofmonth || null,
         months = 1,
         timeofday = {
             hour: 12,
@@ -81,7 +82,11 @@ function cronMaker(opts) {
     var schedule = {
         Once: null,
         Weekly:  `0 ${timeofday.minutes} ${timeofday.hour} ? * ${dayofweek} *`,
-        Monthly: `0 ${timeofday.minutes} ${timeofday.hour} ${dayofmonth} 1/${months} ? *`
+        Monthly: (dayofmonth ? `0 ${timeofday.minutes} ${timeofday.hour} ? 1/${months} ${dayofmonth} *` : `0 ${timeofday.minutes} ${timeofday.hour} ${daysofmonth} 1/${months} ? *`)
+    }
+
+    if(opts.debug) {
+        console.log(schedule[opts.frequency]);
     }
     return schedule[opts.frequency];
 }
@@ -131,7 +136,9 @@ class LaunchComponent extends Component {
                 frequency: 'Once',
                 timeofday: '12:00',
                 dayofweek: 'MON',
-                dayofmonth: 1
+                whichdayofmonth: null,
+                dayofmonth: null,
+                daysofmonth: 1
             },
             keepInSync: false, // turned off as per PLS-14504 otherwise true
             programs: null,
@@ -720,18 +727,12 @@ class LaunchComponent extends Component {
 
     makeCronSettings() {
         if(this.state.launchSchedule) {
-            let daysofmonth = () => {
-                    if(this.state.cronSettings.frequency === 'Monthly') {
-                        return (
-                            <input id={'cronDayOf'} type={'number'} min={1} max={31} value={this.state.cronSettings.dayofmonth} onChange={this.clickCronDayOfMonth} />
-                        )
-                    }
-                },
-                daysofweek = () => {
+            let daysofweek = () => {
                     if(this.state.cronSettings.frequency === 'Weekly') {
                         return (
                             <select id={'cronDayOf'} onChange={this.clickCronDayOfWeek}>
-                                <option value={'MON'} selected>Monday</option>
+                                <option disabled hidden selected>Day</option>
+                                <option value={'MON'}>Monday</option>
                                 <option value={'TUE'}>Tuesday</option>
                                 <option value={'WED'}>Wednesday</option>
                                 <option value={'THU'}>Thursday</option>
@@ -741,12 +742,51 @@ class LaunchComponent extends Component {
                             </select>
                         )
                     }
+                },
+                whichdayofmonth = () => {
+                    if(this.state.cronSettings.frequency === 'Monthly') {
+                        return (
+                            <select id={'cronWhichDayOf'} onChange={this.clickCronWhichDayOfMonth}>
+                                <option value={'--'} selected>Day of Month</option>
+                                <option value={'#1'}>First</option>
+                                <option value={'#2'}>Second</option>
+                                <option value={'#3'}>Third</option>
+                                <option value={'#4'}>Fourth</option>
+                            </select>
+                        )
+                    }
+                },
+                dayofmonth = () => {
+                    if(this.state.cronSettings.frequency === 'Monthly' && this.state.cronSettings.whichdayofmonth) {
+                        let whichdayofmonth = this.state.cronSettings.whichdayofmonth;
+                        return (
+                            <select id={'cronDayOf'} onChange={this.clickCronDayOfMonth}>
+                                <option disabled hidden selected>Day</option>
+                                <option value={'MON' + whichdayofmonth}>Monday</option>
+                                <option value={'TUE' + whichdayofmonth}>Tuesday</option>
+                                <option value={'WED' + whichdayofmonth}>Wednesday</option>
+                                <option value={'THU' + whichdayofmonth}>Thursday</option>
+                                <option value={'FRI' + whichdayofmonth}>Friday</option>
+                                <option value={'SAT' + whichdayofmonth}>Saturday</option>
+                                <option value={'SUN' + whichdayofmonth}>Sunday</option>
+                            </select>
+                        )
+                    }
+                },
+                daysofmonth = () => {
+                    if(this.state.cronSettings.frequency === 'Monthly' && !this.state.cronSettings.whichdayofmonth) {
+                        return (
+                            <input id={'cronDayOf'} type={'number'} min={1} max={31} value={this.state.cronSettings.daysofmonth} onChange={this.clickCronDaysOfMonth} />
+                        )
+                    }
                 };
             return (
                 <Aux>
                     <div className={'cron-settings'}>
                         <label for={'cronDayOf'}>on</label> 
                         {daysofweek()}
+                        {whichdayofmonth()}
+                        {dayofmonth()}
                         {daysofmonth()}
                         <label for={'cronTime'}>at</label> 
                         <input id={'cronTime'} type={'time'} value={this.state.cronSettings.timeofday} onChange={this.clickCronTime} />
@@ -933,8 +973,33 @@ class LaunchComponent extends Component {
         this.setState(this.state);
     }
 
+    clickCronWhichDayOfMonth = (e) => {
+        this.state.cronSettings.whichdayofmonth = e.target.value;
+        if(e.target.value === '--') {
+            this.state.cronSettings.whichdayofmonth = null;
+            this.state.cronSettings.dayofmonth = null;
+        } else {
+            if(this.state.cronSettings.dayofmonth) {
+                let day = this.state.cronSettings.dayofmonth.split('#')[0],
+                    value = e.target.value;
+
+                this.state.cronSettings.whichdayofmonth = value;
+                this.state.cronSettings.dayofmonth = day + value;
+                this.state.launchSchedule = cronMaker(this.state.cronSettings);
+            }
+
+        }
+        this.setState(this.state);
+    }
+
     clickCronDayOfMonth = (e) => {
         this.state.cronSettings.dayofmonth = e.target.value;
+        this.state.launchSchedule = cronMaker(this.state.cronSettings);
+        this.setState(this.state);
+    }
+
+    clickCronDaysOfMonth = (e) => {
+        this.state.cronSettings.daysofmonth = e.target.value;
         this.state.launchSchedule = cronMaker(this.state.cronSettings);
         this.setState(this.state);
     }
