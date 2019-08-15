@@ -9,18 +9,18 @@
 
     <properties>
         <component-name>testframework</component-name>
-        <le.common.version>4.20.0-SNAPSHOT</le.common.version>
-        <le.domain.version>4.20.0-SNAPSHOT</le.domain.version>
-        <le.security.version>4.20.0-SNAPSHOT</le.security.version>
-        <le.remote.version>4.20.0-SNAPSHOT</le.remote.version>
-        <le.camille.version>4.20.0-SNAPSHOT</le.camille.version>
-        <le.hadoop.version>4.20.0-SNAPSHOT</le.hadoop.version>
+        <le.common.version>4.21.0-SNAPSHOT</le.common.version>
+        <le.domain.version>4.21.0-SNAPSHOT</le.domain.version>
+        <le.security.version>4.21.0-SNAPSHOT</le.security.version>
+        <le.remote.version>4.21.0-SNAPSHOT</le.remote.version>
+        <le.camille.version>4.21.0-SNAPSHOT</le.camille.version>
+        <le.hadoop.version>4.21.0-SNAPSHOT</le.hadoop.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.20.0-SNAPSHOT</version>
+        <version>4.21.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

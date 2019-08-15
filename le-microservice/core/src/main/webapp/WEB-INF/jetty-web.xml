@@ -7,7 +7,7 @@
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/doc</Set>
-    <Set name="war"><Property name="jetty.webapps" default="."/>/le-microservice-4.20.0-SNAPSHOT.war</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-microservice-4.21.0-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
