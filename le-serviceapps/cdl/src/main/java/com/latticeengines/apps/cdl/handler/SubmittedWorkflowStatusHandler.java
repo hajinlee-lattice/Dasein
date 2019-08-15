@@ -1,7 +1,12 @@
 package com.latticeengines.apps.cdl.handler;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
@@ -15,6 +20,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component
 public class SubmittedWorkflowStatusHandler implements WorkflowStatusHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(SubmittedWorkflowStatusHandler.class);
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -35,6 +42,14 @@ public class SubmittedWorkflowStatusHandler implements WorkflowStatusHandler {
         if (statusMonitor != null) {
             throw new LedpException(LedpCode.LEDP_40047,
                     new String[] { statusMonitor.getStatus(), status.getEventType() });
+        }
+        
+        List<DataIntegrationStatusMonitor> statusMonitors = dataIntegrationStatusMonitoringEntityMgr
+                .getAllStatusesByEntityNameAndIds(tenant.getPid(), "PlayLaunch", Arrays.asList(status.getEntityId()));
+
+        if (statusMonitors.size() > 0) {
+            log.error(String.format("%s integration status monitors already exists with launch id %s",
+                    statusMonitors.size(), status.getEntityId()));
         }
 
         statusMonitor = new DataIntegrationStatusMonitor(status, tenant);
