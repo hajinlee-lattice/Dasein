@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -284,8 +283,8 @@ public class ProductFileValidationService
                         if (attrToSegName.containsKey(attrLookup.getAttribute())) {
                             attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
                         } else {
-                            attrToSegName.put(attrLookup.getAttribute(),
-                                    new HashSet<>(Arrays.asList(metadataSegment.getDisplayName())));
+                            attrToSegName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
+                            attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
                         }
                     }
                 }
@@ -303,8 +302,8 @@ public class ProductFileValidationService
                             if (attrToModelName.containsKey(attrLookup.getAttribute())) {
                                 attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
                             } else {
-                                attrToModelName.put(attrLookup.getAttribute(),
-                                        new HashSet<>(Arrays.asList(model.getRatingEngine().getDisplayName())));
+                                attrToModelName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
+                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
                             }
                         }
                     }
@@ -358,8 +357,8 @@ public class ProductFileValidationService
                                 // this generate bundle id to model name mapping
                                 productsInUse.forEach(product -> {
                                     if (bundleIdToModelName.get(product) == null) {
-                                        bundleIdToModelName.put(product,
-                                                new HashSet<>(Arrays.asList(summary.getDisplayName())));
+                                        bundleIdToModelName.putIfAbsent(product, new HashSet<>());
+                                        bundleIdToModelName.get(product).add(summary.getDisplayName());
                                     } else {
                                         bundleIdToModelName.get(product).add(summary.getDisplayName());
                                     }
