@@ -257,8 +257,8 @@ export default class OverviewSummaryContainer extends Component {
                             <div className="le-flex-h-panel boxes-container">
                                 {this.makeSummaryBoxes({
                                     Segment: play.targetSegment.display_name,
-                                    Accounts: play.targetSegment.accounts.toLocaleString(),
-                                    Contacts: play.targetSegment.contacts.toLocaleString(),
+                                    Accounts: (play.targetSegment && play.targetSegment.accounts ? play.targetSegment.accounts.toLocaleString() : ''),
+                                    Contacts: (play.targetSegment && play.targetSegment.contacts ? play.targetSegment.contacts.toLocaleString() : ''),
                                     "Scoring Model": (play.ratingEngine ? play.ratingEngine.displayName : null)
                                 })}
                             </div>
