@@ -16,7 +16,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -132,55 +131,52 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             CalculateDeltaStepConfiguration config) {
         HdfsDataUnit addedAccounts = deltaCalculationResult.getTargets().get(0);
         if (addedAccounts != null && addedAccounts.getCount() > 0) {
-            processHDFSDataUnit(addedAccounts, InterfaceName.AccountId.name(), "AddedAccounts_",
-                    ADDED_ACCOUNTS_DELTA_TABLE, config);
+            processHDFSDataUnit("AddedAccounts_" + config.getExecutionId(), addedAccounts,
+                    InterfaceName.AccountId.name(), ADDED_ACCOUNTS_DELTA_TABLE);
         } else {
             log.info("No new Added accounts");
         }
 
         HdfsDataUnit removedAccounts = deltaCalculationResult.getTargets().get(1);
         if (removedAccounts != null && removedAccounts.getCount() > 0) {
-            processHDFSDataUnit(removedAccounts, InterfaceName.AccountId.name(), "RemovedAccounts_",
-                    REMOVED_ACCOUNTS_DELTA_TABLE, config);
+            processHDFSDataUnit("RemovedAccounts_" + config.getExecutionId(), removedAccounts,
+                    InterfaceName.AccountId.name(), REMOVED_ACCOUNTS_DELTA_TABLE);
         } else {
             log.info("No removed accounts");
         }
 
         HdfsDataUnit addedContacts = deltaCalculationResult.getTargets().get(2);
         if (addedContacts != null && addedContacts.getCount() > 0) {
-            processHDFSDataUnit(addedContacts, InterfaceName.ContactId.name(), "AddedContacts_",
-                    ADDED_CONTACTS_DELTA_TABLE, config);
+            processHDFSDataUnit("AddedContacts_" + config.getExecutionId(), addedContacts,
+                    InterfaceName.ContactId.name(), ADDED_CONTACTS_DELTA_TABLE);
         } else {
             log.info("No new contacts to be added");
         }
 
         HdfsDataUnit removedContacts = deltaCalculationResult.getTargets().get(3);
         if (removedContacts != null && removedContacts.getCount() > 0) {
-            processHDFSDataUnit(removedContacts, InterfaceName.ContactId.name(), "RemovedContacts_",
-                    REMOVED_CONTACTS_DELTA_TABLE, config);
+            processHDFSDataUnit("RemovedContacts_" + config.getExecutionId(), removedContacts,
+                    InterfaceName.ContactId.name(), REMOVED_CONTACTS_DELTA_TABLE);
         } else {
             log.info("No removed contacts");
         }
 
         HdfsDataUnit fullAccountUniverse = deltaCalculationResult.getTargets().get(4);
-        processHDFSDataUnit(fullAccountUniverse, InterfaceName.AccountId.name(), "FullAccountUniverse_",
-                FULL_ACCOUNTS_UNIVERSE, config);
+        processHDFSDataUnit("FullAccountUniverse_" + config.getExecutionId(), fullAccountUniverse,
+                InterfaceName.AccountId.name(), FULL_ACCOUNTS_UNIVERSE);
 
         HdfsDataUnit fullContactUniverse = deltaCalculationResult.getTargets().get(5);
         if (fullContactUniverse != null && fullContactUniverse.getCount() > 0) {
-            processHDFSDataUnit(fullContactUniverse, InterfaceName.ContactId.name(), "FullContactUniverse_",
-                    FULL_CONTACTS_UNIVERSE, config);
+            processHDFSDataUnit("FullContactUniverse_", fullContactUniverse, InterfaceName.ContactId.name(),
+                    FULL_CONTACTS_UNIVERSE);
         } else {
             log.info("Contact universe is empty");
         }
     }
 
-    private void processHDFSDataUnit(HdfsDataUnit dataUnit, String primaryKey, String tableNamePrefix,
-            String contextKey, CalculateDeltaStepConfiguration config) {
-        log.info(logHDFSDataUnit(tableNamePrefix, dataUnit));
-        String tableName = NamingUtils.timestamp(tableNamePrefix);
-        Table dataUnitTable = toTable(tableName, primaryKey, dataUnit,
-                getTargetTablePath(config.getPlayId(), config.getChannelId(), config.getExecutionId(), tableName));
+    private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
+        log.info(logHDFSDataUnit(tableName, dataUnit));
+        Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         dataUnitTable = metadataProxy.getTable(customerSpace.getTenantId(), dataUnitTable.getName());
         putObjectInContext(contextKey, tableName);
