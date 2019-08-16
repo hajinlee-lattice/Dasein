@@ -3,7 +3,6 @@ package com.latticeengines.serviceflows.workflow.util;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -26,10 +25,9 @@ public final class SparkUtils {
 
     public static Table hdfsUnitToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //
             Configuration yarnConfiguration, //
-            String podId, CustomerSpace customerSpace, String tgtPath) {
+            String podId, CustomerSpace customerSpace) {
         String srcPath = hdfsDataUnit.getPath();
-        tgtPath = StringUtils.isNotBlank(tgtPath) ? tgtPath
-                : PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
+        String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
         try {
             HdfsUtils.moveFile(yarnConfiguration, srcPath, tgtPath);
         } catch (IOException e) {

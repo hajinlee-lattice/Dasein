@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
@@ -750,6 +751,11 @@ public class MetadataResolver {
             }
         }
         if (conformingDateCount < dateThreshold) {
+            return null;
+        }
+
+        // caution NPE
+        if (MapUtils.isEmpty(hitMap)) {
             return null;
         }
 
