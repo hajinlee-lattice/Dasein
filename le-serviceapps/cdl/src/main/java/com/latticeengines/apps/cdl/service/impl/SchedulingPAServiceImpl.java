@@ -582,7 +582,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
             }
         } catch (Exception e) {
-            log.error("connect redis fail.");
+            log.error("get redis cache fail.", e);
         }
         return paSubmitFailedMap;
     }

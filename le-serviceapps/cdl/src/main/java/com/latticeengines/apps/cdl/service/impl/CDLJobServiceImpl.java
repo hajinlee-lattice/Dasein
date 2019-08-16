@@ -814,7 +814,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             redisTemplate.opsForHash().put(key, customerSpace, currentTime);
             log.info("pa submit failed, tenant: " + customerSpace + ", fail time: " + currentTime);
         } catch (Exception e) {
-            log.error("connect redis fail.");
+            log.error("get redis cache fail.", e);
         }
     }
 }
