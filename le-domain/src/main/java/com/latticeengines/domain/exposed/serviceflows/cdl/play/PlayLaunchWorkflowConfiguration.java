@@ -1,10 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
-import java.util.Arrays;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
@@ -49,13 +51,6 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
         }
 
         public Builder exportPublishPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
-            if (!Arrays.asList(CDLExternalSystemType.MAP, CDLExternalSystemType.ADS, CDLExternalSystemType.FILE_SYSTEM)
-                    .contains(playLaunch.getDestinationSysType())) {
-                exportFileGeneratorConf.setSkipStep(true);
-                exportFilesToS3Conf.setSkipStep(true);
-                exportPublishToSNSConf.setSkipStep(true);
-                return this;
-            }
 
             exportFileGeneratorConf.setPlayName(playLaunch.getPlay().getName());
             exportFileGeneratorConf.setPlayLaunchId(playLaunch.getLaunchId());
@@ -72,6 +67,17 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
             if (lookupIdMap == null) {
                 return this;
             }
+
+            ExternalSystemAuthentication externalAuth = lookupIdMap.getExternalAuthentication();
+            if (lookupIdMap.getExternalSystemType() != CDLExternalSystemType.FILE_SYSTEM
+                    && (externalAuth == null || StringUtils.isBlank(externalAuth.getTrayAuthenticationId())
+                            || !externalAuth.getTrayWorkflowEnabled())) {
+                exportFileGeneratorConf.setSkipStep(true);
+                exportFilesToS3Conf.setSkipStep(true);
+                exportPublishToSNSConf.setSkipStep(true);
+                return this;
+            }
+
             exportFileGeneratorConf.setDestinationSysType(lookupIdMap.getExternalSystemType());
             exportFileGeneratorConf.setDestinationOrgId(lookupIdMap.getOrgId());
             exportFileGeneratorConf.setDestinationSysName(lookupIdMap.getExternalSystemName());
