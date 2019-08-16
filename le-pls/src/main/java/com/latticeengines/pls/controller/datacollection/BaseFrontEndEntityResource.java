@@ -91,7 +91,7 @@ public abstract class BaseFrontEndEntityResource {
             } catch (LedpException e) {
                 if (LedpCode.LEDP_40057.equals(e.getCode())) {
                     throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
-                            "Failed to get " + getMainEntity() + " count");
+                            "Failed to get " + mainEntity + " count");
                 }
             }
         }
@@ -111,17 +111,21 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery) {
+        return getData(frontEndQuery, getMainEntity());
+    }
+
+    public DataPage getData(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
-        String servingTableName = dataCollectionProxy.getTableName(tenantId, getMainEntity().getServingStore());
+        String servingTableName = dataCollectionProxy.getTableName(tenantId, mainEntity.getServingStore());
         if (StringUtils.isBlank(servingTableName)) {
             log.warn(String.format("%s's serving store %s does not exist, returning empty data page.",
-                    getMainEntity().name(), getMainEntity().getServingStore().name()));
+                    mainEntity.name(), mainEntity.getServingStore().name()));
             return new DataPage();
         }
         if (frontEndQuery == null) {
             frontEndQuery = new FrontEndQuery();
         }
-        if (BusinessEntity.Product.equals(getMainEntity())) {
+        if (BusinessEntity.Product.equals(mainEntity)) {
             frontEndQuery.setAccountRestriction(null);
             frontEndQuery.setContactRestriction(null);
         } else {
@@ -130,12 +134,12 @@ public abstract class BaseFrontEndEntityResource {
             } catch (LedpException e) {
                 if (LedpCode.LEDP_40057.equals(e.getCode())) {
                     throw graphDependencyToUIActionUtil.handleInvalidBucketsError(e, //
-                            "Failed to get " + getMainEntity() + " data");
+                            "Failed to get " + mainEntity + " data");
                 }
             }
         }
-        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery, getMainEntity());
-        if (BusinessEntity.Contact.equals(getMainEntity())) {
+        appendSegmentRestrictionAndFreeTextSearch(frontEndQuery, mainEntity);
+        if (BusinessEntity.Contact.equals(mainEntity)) {
             Restriction accountRestriction;
             if (frontEndQuery.getAccountRestriction() != null
                     && frontEndQuery.getAccountRestriction().getRestriction() != null) {
@@ -145,7 +149,7 @@ public abstract class BaseFrontEndEntityResource {
             }
             frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
         }
-        frontEndQuery.setMainEntity(getMainEntity());
+        frontEndQuery.setMainEntity(mainEntity);
         if (CollectionUtils.isEmpty(frontEndQuery.getLookups())) {
             frontEndQuery.setLookups(getDataLookups());
         }
@@ -374,7 +378,7 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    boolean isEntityMatchEnabled() {
+    private boolean isEntityMatchEnabled() {
         return tenantConfigService.isEntityMatchEnabled();
     }
 
