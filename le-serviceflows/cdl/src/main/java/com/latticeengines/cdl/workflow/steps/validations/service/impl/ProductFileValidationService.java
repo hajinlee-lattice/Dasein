@@ -280,12 +280,8 @@ public class ProductFileValidationService
                     SegmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
                     Set<AttributeLookup> attrLookups = metadataSegment.getSegmentAttributes();
                     for (AttributeLookup attrLookup : attrLookups) {
-                        if (attrToSegName.containsKey(attrLookup.getAttribute())) {
-                            attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
-                        } else {
-                            attrToSegName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
-                            attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
-                        }
+                        attrToSegName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
+                        attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
                     }
                 }
             }
@@ -299,12 +295,8 @@ public class ProductFileValidationService
                     for (AttributeLookup attrLookup : attrLookups) {
                         // model name means rating engine name in page here
                         if (model.getRatingEngine() != null) {
-                            if (attrToModelName.containsKey(attrLookup.getAttribute())) {
-                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
-                            } else {
-                                attrToModelName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
-                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
-                            }
+                            attrToModelName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
+                            attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
                         }
                     }
                 }
@@ -356,12 +348,8 @@ public class ProductFileValidationService
                                 }
                                 // this generate bundle id to model name mapping
                                 productsInUse.forEach(product -> {
-                                    if (bundleIdToModelName.get(product) == null) {
-                                        bundleIdToModelName.putIfAbsent(product, new HashSet<>());
-                                        bundleIdToModelName.get(product).add(summary.getDisplayName());
-                                    } else {
-                                        bundleIdToModelName.get(product).add(summary.getDisplayName());
-                                    }
+                                    bundleIdToModelName.putIfAbsent(product, new HashSet<>());
+                                    bundleIdToModelName.get(product).add(summary.getDisplayName());
                                 });
                             }
                         }
