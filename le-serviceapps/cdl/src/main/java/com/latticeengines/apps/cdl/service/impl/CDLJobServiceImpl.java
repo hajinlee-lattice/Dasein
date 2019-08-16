@@ -103,6 +103,8 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static String NEW_TRACKING_SET;
 
+    private static String REDIS_TEMPLATE_KEY;
+
     @Inject
     private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
 
@@ -177,6 +179,9 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private RedisTemplate<String, Object> redisTemplate;
 
     private CDLProxy cdlProxy;
 
@@ -421,6 +426,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 } catch (Exception e) {
                     log.error("Failed to retry PA for tenant {}, error = {}", tenantId, e);
                     updateRetryCount(tenantId);
+                    setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
                 }
             }
         }
@@ -611,6 +617,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.info("Submit PA job with appId = {} for tenant = {} successfully", applicationId, tenantId);
         } catch (Exception e) {
             log.error("Failed to submit job for tenant = {}, error = {}", tenantId, e);
+            setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
         }
         return applicationId;
     }
@@ -828,6 +835,17 @@ public class CDLJobServiceImpl implements CDLJobService {
     private void initTrackingSets() {
         MAIN_TRACKING_SET = leEnv + "_PA_SCHEDULER_MAIN_TRACKING_SET";
         NEW_TRACKING_SET = leEnv + "_PA_SCHEDULER_NEW_TRACKING_SET";
+        REDIS_TEMPLATE_KEY = "pa_scheduler_" + leEnv + "_pa_submit_failed";
+    }
+
+    private void setPASubmissionFailTime(String key, String customerSpace) {
+        try {
+            long currentTime = new Date().getTime();
+            redisTemplate.opsForHash().put(key, customerSpace, currentTime);
+            log.info("pa submit failed, tenant: " + customerSpace + ", fail time: " + currentTime);
+        } catch (Exception e) {
+            log.error("get redis cache fail.", e);
+        }
     }
 }
 
