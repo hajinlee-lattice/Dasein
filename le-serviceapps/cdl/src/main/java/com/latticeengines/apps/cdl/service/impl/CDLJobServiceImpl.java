@@ -832,7 +832,11 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private void removeFromSet(ApplicationId appId, String key, String tenantId) {
         log.info("Submitted PA for tenant {}. Application is {}. Removing from tracking set {}", tenantId, appId, key);
-        redisTemplate.opsForZSet().remove(key, tenantId);
+        try {
+            redisTemplate.opsForZSet().remove(key, tenantId);
+        } catch (Exception e) {
+            log.warn("Failed to remove tenant {} from tracking set {}. {}", tenantId, key, e);
+        }
     }
 
     private void initTrackingSets() {
