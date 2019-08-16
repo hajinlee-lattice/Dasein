@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps.process;
 
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +27,12 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
     @JsonProperty("rebuild")
     private Boolean rebuild;
 
+    @JsonProperty("system_ids")
+    private Map<String, List<String>> systemIdMap; // entity -> List<ID> used for matching
+
+    @JsonProperty("default_system_ids")
+    private Map<String, String> defaultSystemIdMap; // entity -> ID that mapped to lattice ID
+
     public abstract BusinessEntity getMainEntity();
 
     public Boolean getRebuild() {
@@ -32,5 +41,21 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
 
     public void setRebuild(Boolean rebuild) {
         this.rebuild = rebuild;
+    }
+
+    public Map<String, List<String>> getSystemIdMap() {
+        return systemIdMap;
+    }
+
+    public void setSystemIdMap(Map<String, List<String>> systemIdMap) {
+        this.systemIdMap = systemIdMap;
+    }
+
+    public Map<String, String> getDefaultSystemIdMap() {
+        return defaultSystemIdMap;
+    }
+
+    public void setDefaultSystemIdMap(Map<String, String> defaultSystemIdMap) {
+        this.defaultSystemIdMap = defaultSystemIdMap;
     }
 }
