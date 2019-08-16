@@ -1,6 +1,8 @@
 package com.latticeengines.aws.dynamo.impl;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -18,6 +20,8 @@ import com.latticeengines.common.exposed.aws.DynamoOperation;
 
 
 public class DynamoServiceImplTestNG extends DynamoFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DynamoServiceImplTestNG.class);
 
     @Value("${datacloud.match.entity.staging.table}")
     private String entityMatchTable;
@@ -52,6 +56,7 @@ public class DynamoServiceImplTestNG extends DynamoFunctionalTestNGBase {
         description = dynamoService.describeTable(entityMatchTable);
         Assert.assertNotNull(description);
         Assert.assertFalse(description.getKeySchema().isEmpty());
+        Assert.assertTrue(dynamoService.isCapacityOnDemand(entityMatchTable));
     }
 
     @Test(groups = "functional", dataProvider = "dynamoOperationProvider")

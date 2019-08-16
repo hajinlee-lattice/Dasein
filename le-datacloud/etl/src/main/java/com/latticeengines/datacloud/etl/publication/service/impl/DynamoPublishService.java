@@ -171,7 +171,8 @@ public class DynamoPublishService extends AbstractPublishService
 
     /**
      * Update read & write capacity of Dynamo table. Retry 3 times, waiting
-     * intervals are 30s, 60s, 120s.
+     * intervals are 30s, 60s, 120s. If the table capacity is on demand, skip
+     * updating
      *
      * Reason: If Dynamo table is configured as auto-scaling and it's already
      * under scaling status, request of updating capacity will fail
@@ -183,6 +184,10 @@ public class DynamoPublishService extends AbstractPublishService
      */
     private void updateThroughput(DynamoService dynamoService, String tableName, long readCapacity,
             long writeCapacity) {
+        if (dynamoService.isCapacityOnDemand(tableName)) {
+            log.warn("Capacity for table {} is on demand. Skip updating throughput.", tableName);
+            return;
+        }
         RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(3, 30, 2, null);
         try {
             retry.execute(context -> {
