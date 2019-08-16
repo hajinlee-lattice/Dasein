@@ -469,7 +469,7 @@ public class RestrictionUtils {
 
     private static void validateEmptyValue(ComparisonType comparisonType, List<Object> values) {
         if (CollectionUtils.isNotEmpty(values)) {
-            throw new IllegalArgumentException(comparisonType + " should not have any value.");
+            log.warn(comparisonType + " should not have any value.");
         }
     }
 
