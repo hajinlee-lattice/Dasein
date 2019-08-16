@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -63,6 +64,7 @@ import com.latticeengines.ldc_collectiondb.entity.CollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
 import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 
@@ -72,6 +74,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private static final Logger log = LoggerFactory.getLogger(CollectionDBServiceImpl.class);
     private static final int LATENCY_GAP_MS = 3000;
     private static final int BUCKET_CACHE_LIMIT = 1024;
+    private static final long DAY_MILLIS = TimeUnit.DAYS.toMillis(1);
+    private static final long HOUR_MILLIS = TimeUnit.HOURS.toMillis(1);
 
     @Inject
     private RawCollectionRequestService rawCollectionRequestService;
@@ -145,17 +149,17 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.collection.orbintelligencev2.timestamp}")
     private String orbIntelligenceV2TimestampColumn;
 
-    /*
-    @Value("${datacloud.collection.consolidation.exec.period}")
-    private int consolidationExecPeriod;
+    @Value("${datacloud.ingestion.log.millis.start}")
+    private long ingestionLogMillisStart;
 
-    @Value("${datacloud.collection.consolidation.exec.weekday}")
-    private int consolidationExecWeekDay;*/
+    @Value("${datacloud.ingestion.log.millis.stop}")
+    private long ingestionLogMillisStop;
 
     private long prevCollectMillis = 0;
     private long prevCleanupMillis = 0;
     private int prevCollectTasks;
     private long prevIngestionMillis = 0;
+    private long prevLogIngestionMillis = 0;
 
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
 
@@ -618,7 +622,25 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         int activeTasks = 0;
         try {
 
-            if (prevCleanupMillis == 0 || currentMillis - prevCleanupMillis > 86400 * 1000) {
+            //log consumed/ingested workers during last 24 hour
+            //do logging during UTC [1:30, 2:00), log one item per 24 hours.
+            long dayMillis = currentMillis % DAY_MILLIS;
+            long logThreshold = DAY_MILLIS - HOUR_MILLIS / 2;//23.5 hours
+            if (dayMillis >= ingestionLogMillisStart &&
+                    dayMillis < ingestionLogMillisStop &&
+                    currentMillis - prevLogIngestionMillis >= logThreshold) {
+
+                prevLogIngestionMillis = currentMillis;
+
+                Timestamp ts = new Timestamp(currentMillis - DAY_MILLIS);
+                CollectionWorkerMgr entityMgr = collectionWorkerService.getEntityMgr();
+                int consumed = entityMgr.getWorkerTerminatedByStatus(ts, CollectionWorker.STATUS_CONSUMED).size();
+                int ingested = entityMgr.getWorkerTerminatedByStatus(ts, CollectionWorker.STATUS_INGESTED).size();
+                log.info("INGESTION_RATE during last 24h: consumed_worker=" + consumed + ",ingested_worker=" + ingested);
+
+            }
+
+            if (currentMillis - prevCleanupMillis >= DAY_MILLIS) {
 
                 prevCleanupMillis = currentMillis;
 
@@ -629,9 +651,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             }
 
             activeTasks = getActiveTaskCount();
-            if (prevCollectMillis == 0 ||
-                    prevCollectTasks != activeTasks ||
-                    currentMillis - prevCollectMillis >= 3600 * 1000) {
+            if (prevCollectTasks != activeTasks ||
+                    currentMillis - prevCollectMillis >= HOUR_MILLIS) {
 
                 prevCollectMillis = currentMillis;
                 log.info("There're " + activeTasks + " tasks");
@@ -764,295 +785,6 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }
     }
 
-    /*
-    private List<File> createBucketFiles(long minTs, int periodInMS, int bucketCount) throws Exception {
-
-        List<File> bucketFiles = new ArrayList<>();
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String path = Files.createTempDirectory("bucket").toString();
-        Date date = new Date();
-
-        for (int i = 0; i < bucketCount; ++i) {
-
-            date.setTime(minTs + i * periodInMS);
-
-            File of = new File(path, dateFormat.format(date) + "_UTC.avro");
-            of.deleteOnExit();
-
-            bucketFiles.add(of);
-
-        }
-
-        return bucketFiles;
-
-    }
-
-    private List<File> doBucketing(List<File> inputFiles, String vendor) throws Exception {
-
-        //get timestamp, adjust min to whole period
-        Pair<Long, Long> tsPair = getTimestampRange(inputFiles, vendor);
-        long minTs = tsPair.getKey();
-        long maxTs = tsPair.getValue();
-
-        int periodInMS = ingestionPartionPeriod * 1000;
-        int dayInMS = 86400 * 1000;
-        int weekInMS = dayInMS * 7;
-        if (periodInMS == weekInMS) {
-
-            minTs -= minTs % dayInMS;//adjust to day boundary
-            long weekDay = (minTs % weekInMS / dayInMS + 4) % 7;//week day
-            minTs -= weekDay * dayInMS;
-
-        } else {
-
-            minTs -= minTs % periodInMS;
-
-        }
-
-        //create bucket file/buffers
-        int bucketCount = 1 + (int) ((maxTs - minTs) / periodInMS);
-
-        List<File> bucketFiles = createBucketFiles(minTs, periodInMS, bucketCount);
-
-        boolean[] bucketCreated = new boolean[bucketCount];
-
-        List<List<GenericRecord>> bucketBuffers = new ArrayList<>();
-        for (int i = 0; i < bucketCount; ++i) {
-
-            bucketBuffers.add(new ArrayList<>());
-
-        }
-
-        //processing files
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
-                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
-        Schema schema = getSchema(vendor);
-        List<Schema.Field> fields = schema.getFields();
-        String tsColName = getTimestampColumn(vendor);
-        String domainCheckField = vendorConfigService.getDomainCheckField(vendor);
-
-        for (File file : inputFiles) {
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
-                try (CSVParser parser = new CSVParser(reader, format)) {
-
-                    Map<String, Integer> csvColName2Idx = parser.getHeaderMap();
-                    int domainChkCsvCol = csvColName2Idx.getOrDefault(domainCheckField, -1);
-                    int columnCount = csvColName2Idx.size();
-
-                    //calculate col mapping
-                    int[] csvIdx2Avro = new int[columnCount];
-                    Schema.Field[] avroIdx2Fields = new Schema.Field[columnCount];
-                    if (fields.size() != columnCount + 2) {//avro has two extra id column
-
-                        throw new Exception("avro column count != csv column count");
-
-                    }
-
-                    for (Schema.Field field: fields) {
-
-                        int csvIdx = csvColName2Idx.getOrDefault(field.name(), -1);
-                        if (csvIdx == -1) {
-
-                            continue;
-
-                        }
-
-                        csvIdx2Avro[csvIdx] = field.pos();
-                        avroIdx2Fields[csvIdx] = field;
-
-                    }
-                    int tsAvroCol = csvIdx2Avro[csvColName2Idx.get(tsColName)];
-                    Schema.Field avroIdField = schema.getField(ingestionIdCol);
-                    Schema.Field avroPidField = schema.getField(ingestionPidCol);
-
-                    //iterate csv, generate avro
-                    for (CSVRecord csvRec : parser) {
-
-                        if (domainChkCsvCol != -1 && csvRec.get(domainChkCsvCol).equals("")) {
-
-                            //bypass dummy line
-                            continue;
-
-                        }
-
-                        //create avro record, add it to buffer
-                        GenericRecord rec = new GenericData.Record(schema);
-                        for (int i = 0; i < columnCount; ++i) {
-
-                            rec.put(csvIdx2Avro[i], AvroUtils.checkTypeAndConvertEx(avroIdx2Fields[i].name(), //
-                                    csvRec.get(i), avroIdx2Fields[i]));
-
-                        }
-                        rec.put(avroIdField.pos(), UUID.randomUUID().toString());
-                        rec.put(avroPidField.pos(), null);
-
-                        int bucketIdx = (int) (((Long) rec.get(tsAvroCol) - minTs) / periodInMS);
-                        List<GenericRecord> buf = bucketBuffers.get(bucketIdx);
-                        buf.add(rec);
-
-                        //flush bucket buffer when it's full
-                        if (buf.size() == BUCKET_CACHE_LIMIT) {
-
-                            if (!bucketCreated[bucketIdx]) {
-
-                                AvroUtils.writeToLocalFile(schema, buf, bucketFiles.get(bucketIdx).getPath(), true);
-                                bucketCreated[bucketIdx] = true;
-
-                            } else {
-
-                                AvroUtils.appendToLocalFile(buf, bucketFiles.get(bucketIdx).getPath(), true);
-
-                            }
-
-                            buf.clear();
-
-                        }
-
-                    }
-
-                    //flush non-empty buffers
-                    for (int bucketIdx = 0; bucketIdx < bucketCount; ++bucketIdx) {
-
-                        List<GenericRecord> buf = bucketBuffers.get(bucketIdx);
-                        if (buf.size() == 0) {
-
-                            continue;
-
-                        }
-
-                        if (!bucketCreated[bucketIdx]) {
-
-                            AvroUtils.writeToLocalFile(schema, buf, bucketFiles.get(bucketIdx).getPath(), true);
-                            bucketCreated[bucketIdx] = true;
-
-                        } else {
-
-                            AvroUtils.appendToLocalFile(buf, bucketFiles.get(bucketIdx).getPath(), true);
-
-                        }
-
-                        buf.clear();
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        return bucketFiles;
-
-    }
-
-    private void ingestConsumedWorker(CollectionWorker worker) throws Exception {
-
-        try {
-
-            String vendor = worker.getVendor();
-            log.info("ingesting " + vendor + ", worker_id = " + worker.getWorkerId());
-
-            List<File> tmpFiles = downloadWorkerOutput(worker);
-            if (CollectionUtils.isEmpty(tmpFiles)) {
-
-                log.error(worker.getVendor() + " worker " + worker.getWorkerId() //
-                        + "\'s output dir on s3 does not contain any files");
-                return;
-
-            }
-
-            //bucketing
-            List<File> bucketFiles = doBucketing(tmpFiles, vendor);
-            List<File> tmpBucketFiles = new ArrayList<>(bucketFiles.size());
-            if (CollectionUtils.isNotEmpty(bucketFiles)) {
-
-                Path ingestLocation = S3PathBuilder.constructIngestionDir(vendor + "_RAW");
-                String ingestDir = ingestLocation.toString();
-
-                for (File bucketFile : bucketFiles) {
-
-                    if (!bucketFile.exists()) {
-
-                        log.warn("no data gathered for bucket file: " + bucketFile.getPath());
-                        continue;
-
-                    }
-
-                    String remoteFilePath = ingestLocation.append(bucketFile.getName()).toString();
-
-                    if (s3Service.objectExist(s3Bucket, remoteFilePath)) {
-
-                        File tmpFile = File.createTempFile("temp", ".avro");
-                        tmpFile.deleteOnExit();
-                        tmpBucketFiles.add(tmpFile);
-
-                        s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
-
-                        if (bucketFile.length() >= tmpFile.length()) {
-
-                            log.info("appending to local file: " + bucketFile);
-                            AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
-
-                            log.info("uploading local file: " + bucketFile);
-                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
-
-                        } else {
-
-                            log.info("appending to local file: " + tmpFile);
-                            AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
-
-                            log.info("uploading local file: " + tmpFile);
-                            s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
-                        }
-
-                    } else {
-
-                        log.info("uploading local file: " + bucketFile);
-                        s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
-
-                    }
-
-                    log.info("uploaded s3 file in bucket " + s3Bucket + ": " + remoteFilePath);
-
-                }
-
-            }
-
-            //clean local file
-            for (File tmpFile : tmpFiles) {
-
-                FileUtils.deleteQuietly(tmpFile);
-
-            }
-
-            if (CollectionUtils.isNotEmpty(bucketFiles)) {
-
-                for (File bucketFile : bucketFiles) {
-
-                    FileUtils.deleteQuietly(bucketFile);
-
-                }
-
-                for (File tmpBucketFile: tmpBucketFiles) {
-
-                    FileUtils.deleteQuietly(tmpBucketFile);
-
-                }
-            }
-
-            //update worker status
-            worker.setStatus(CollectionWorker.STATUS_INGESTED);
-            collectionWorkerService.getEntityMgr().update(worker);
-
-        }
-        catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }*/
-
     private void createBucketFiles(long minTs, int periodInMS, int bucketCount, Map<Long, File> buckets) throws Exception {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
@@ -1088,7 +820,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         long maxTs = tsPair.getValue();
 
         int periodInMS = ingestionPartionPeriod * 1000;
-        int dayInMS = 86400 * 1000;
+        int dayInMS = (int)DAY_MILLIS;
         int weekInMS = dayInMS * 7;
         if (periodInMS == weekInMS) {
 
@@ -1394,9 +1126,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         try {
 
-            if (prevCollectMillis == 0 || curMillis - prevCollectMillis > 3600 * 1000) {
+            if (curMillis - prevIngestionMillis >= HOUR_MILLIS) {
 
-                prevCollectMillis = curMillis;
+                prevIngestionMillis = curMillis;
 
             }
 
@@ -1457,7 +1189,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     //0 -> Sun, 1 -> Mon, ...
     private static int getWeekDay(long millis) {
 
-        int dayInMS = 86400 * 1000;
+        int dayInMS = (int)DAY_MILLIS;
         int weekInMS = dayInMS * 7;
         millis -= millis % dayInMS;
         return ((int)(millis % weekInMS) / dayInMS + 4) % 7;

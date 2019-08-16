@@ -22,4 +22,5 @@ public interface CollectionWorkerMgr extends BaseEntityMgrRepository<CollectionW
 
     List<CollectionWorker> getWorkerBySpawnTimeBetween(Timestamp start, Timestamp end);
 
+    List<CollectionWorker> getWorkerTerminatedByStatus(Timestamp after, String status);
 }

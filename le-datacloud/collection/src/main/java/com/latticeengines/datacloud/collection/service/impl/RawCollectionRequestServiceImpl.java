@@ -1,22 +1,17 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
-import com.latticeengines.common.exposed.util.PartitionUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.collection.service.RawCollectionRequestService;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
@@ -36,6 +31,9 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
     @Value("${datacloud.collection.req.transfer.batch}")
     private int rawReqTransferBatch;
 
+    @Value("${datacloud.collection.cleanup.batch}")
+    private int cleanupBatch;
+
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
 
         final String vendorUpper = vendor.toUpperCase();
@@ -46,10 +44,10 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
         }
 
+        /*
         try (PerformanceTimer timer = new PerformanceTimer("Saved in total " //
                 + CollectionUtils.size(domains) + " raw requests to db.")) {
 
-            final Timestamp ts = new Timestamp(System.currentTimeMillis());
             int chunkSize = 1000;
             List<List<String>> domainPartitions = PartitionUtils.partitionCollectionBySize(domains, chunkSize);
             List<Runnable> uploaders = new ArrayList<>();
@@ -61,8 +59,9 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
                     try (PerformanceTimer timer2 = new PerformanceTimer(
                             "Saved a chunk of " + partition.size() + " raw requests to db.")) {
 
+                        Timestamp ts = new Timestamp(System.currentTimeMillis());
                         List<RawCollectionRequest> reqs = partition.stream() //
-                                .map(domain -> toRawRequest(vendorUpper, ts, reqId, domain)) //
+                                .map(domain -> RawCollectionRequest.generate(vendorUpper, domain, ts, reqId))//
                                 .collect(Collectors.toList());
 
                         rawCollectionRequestMgr.saveRequests(reqs);
@@ -86,7 +85,8 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
             }
 
-        }
+        }*/
+        rawCollectionRequestMgr.saveRequests(domains, vendor, reqId);
 
         return true;
 
@@ -176,7 +176,7 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
     @Override
     public void cleanup() {
 
-        rawCollectionRequestMgr.cleanupTransferred();
+        rawCollectionRequestMgr.cleanupTransferred(cleanupBatch);
 
     }
 }

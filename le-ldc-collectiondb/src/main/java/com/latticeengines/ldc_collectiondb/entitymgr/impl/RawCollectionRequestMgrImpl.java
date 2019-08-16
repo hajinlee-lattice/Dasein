@@ -1,12 +1,14 @@
 package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -40,39 +42,71 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
 
     }
 
-    @Override
-    public void saveRequests(Iterable<RawCollectionRequest> reqs) {
+    private void saveRequestsInternal(List<RawCollectionRequest> reqBuf, int bufCap, Iterable<String> domains, String vendor, String reqId) {
 
-        repository.saveAll(reqs);
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
 
-    }
+        for (String domain : domains) {
 
-    @Override
-    public void saveDomains(Iterable<String> domains, String reqId) {
+            //add to buf
+            reqBuf.add(RawCollectionRequest.generate(vendor, domain, ts, reqId));
 
-        for (String vendor: VendorConfig.EFFECTIVE_VENDOR_SET) {
+            //save
+            if (reqBuf.size() == bufCap) {
 
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
-
-            for (String domain : domains) {
-
-                repository.save(RawCollectionRequest.generate(vendor, domain, ts, reqId));
-
+                repository.saveAll(reqBuf);
+                reqBuf.clear();
+                ts = new Timestamp(System.currentTimeMillis());
             }
+
+        }
+
+        //save
+        if (reqBuf.size() > 0) {
+
+            repository.saveAll(reqBuf);
+            reqBuf.clear();
+
         }
 
     }
 
     @Override
-    public void cleanupRequestsBetween(Timestamp start, Timestamp end) {
-        repository.removeByRequestedTimeBetween(start, end);
+    @Transactional
+    public void saveRequests(Iterable<String> domains, String reqId) {
+
+        int batch = 512;
+        List<RawCollectionRequest> reqBuf = new ArrayList<>(batch);
+        for (String vendor: VendorConfig.EFFECTIVE_VENDOR_SET) {
+
+            saveRequestsInternal(reqBuf, batch, domains, vendor, reqId);
+
+        }
+
     }
 
+    @Override
+    @Transactional
+    public void saveRequests(Iterable<String> domains, String vendor, String reqId) {
+
+        int batch = 512;
+        List<RawCollectionRequest> reqBuf = new ArrayList<>(batch);
+        saveRequestsInternal(reqBuf, batch, domains, vendor, reqId);
+
+    }
 
     @Override
-    public void cleanupTransferred() {
+    public void cleanupRequestsBetween(Timestamp start, Timestamp end) {
 
-        repository.removeByTransferred(true);
+        repository.removeByRequestedTimeBetween(start, end);
+
+    }
+
+    @Override
+    public void cleanupTransferred(int batch) {
+
+        long minPid = readerRepository.getMinPid();
+        repository.removeByTransferredAndPidLessThan(true, minPid + batch);
 
     }
 }

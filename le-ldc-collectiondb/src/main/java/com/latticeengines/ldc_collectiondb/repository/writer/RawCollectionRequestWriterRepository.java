@@ -15,5 +15,5 @@ public interface RawCollectionRequestWriterRepository extends RawCollectionReque
 
     @Modifying
     @Transactional
-    void removeByTransferred(Boolean transferred);
+    void removeByTransferredAndPidLessThan(Boolean transferred, Long pid);
 }

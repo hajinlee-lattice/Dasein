@@ -127,9 +127,10 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     }
 
     @Override
-    public void cleanupRequests(Collection<String> statuses, String vendor, Timestamp before) {
+    public void cleanupRequests(Collection<String> statuses, String vendor, Timestamp before, int batch) {
 
-        repository.removeByStatusInAndVendorAndDeliveryTimeBefore(statuses, vendor, before);
+        long minPid = repository.getMinPid();
+        repository.removeByStatusInAndVendorAndDeliveryTimeBeforeAndPidLessThan(statuses, vendor, before, minPid + batch);
 
     }
 }

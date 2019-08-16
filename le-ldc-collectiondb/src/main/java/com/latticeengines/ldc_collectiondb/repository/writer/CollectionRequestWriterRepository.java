@@ -16,5 +16,5 @@ public interface CollectionRequestWriterRepository extends CollectionRequestRepo
 
     @Modifying
     @Transactional
-    void removeByStatusInAndVendorAndDeliveryTimeBefore(Collection<String> statuses, String vendor, Timestamp before);
+    void removeByStatusInAndVendorAndDeliveryTimeBeforeAndPidLessThan(Collection<String> statuses, String vendor, Timestamp before, Long pid);
 }

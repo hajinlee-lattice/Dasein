@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
@@ -34,6 +35,9 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     private CollectionRequestMgr collectionRequestMgr;
     @Inject
     private VendorConfigService vendorConfigService;
+
+    @Value("${datacloud.collection.cleanup.batch}")
+    private int cleanupBatch;
 
     class RawRequestCmp implements Comparator<RawCollectionRequest> {
 
@@ -463,7 +467,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     public void cleanupRequestHandled(String vendor, Timestamp before) {
         List<String> statuses = Arrays.asList(CollectionRequest.STATUS_DELIVERED, CollectionRequest.STATUS_FAILED);
 
-        collectionRequestMgr.cleanupRequests(statuses, vendor, before);
+        collectionRequestMgr.cleanupRequests(statuses, vendor, before, cleanupBatch);
 
     }
 }

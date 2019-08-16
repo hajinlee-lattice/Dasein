@@ -10,11 +10,13 @@ public interface RawCollectionRequestMgr extends BaseEntityMgrRepository<RawColl
 
     List<RawCollectionRequest> getNonTransferred(int limit);
 
-    void saveRequests(Iterable<RawCollectionRequest> reqs);
+    //void saveRequests(Iterable<RawCollectionRequest> reqs);
 
-    void saveDomains(Iterable<String> domains, String reqId);
+    void saveRequests(Iterable<String> domains, String vendor, String reqId);
+
+    void saveRequests(Iterable<String> domains, String reqId);
 
     void cleanupRequestsBetween(Timestamp start, Timestamp end);
 
-    void cleanupTransferred();
+    void cleanupTransferred(int batch);
 }
