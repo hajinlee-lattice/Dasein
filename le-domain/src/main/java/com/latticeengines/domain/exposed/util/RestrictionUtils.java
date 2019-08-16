@@ -207,6 +207,7 @@ public class RestrictionUtils {
         } else if (bkt.getDateFilter() != null) {
             restriction = convertDateBucket(bucketRestriction, translatePriorOnly);
         } else {
+            cleanupBucketRestriction(bucketRestriction);
             ComparisonType comparisonType = bkt.getComparisonType();
             List<Object> values = bkt.getValues();
             if (comparisonType == null) {
