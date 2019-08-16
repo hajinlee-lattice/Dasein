@@ -127,6 +127,9 @@
             }
         }
         &.schedule {
+            input, select {
+                height: 28px;
+            }
             label {
                 margin-right: 5px;
             }
