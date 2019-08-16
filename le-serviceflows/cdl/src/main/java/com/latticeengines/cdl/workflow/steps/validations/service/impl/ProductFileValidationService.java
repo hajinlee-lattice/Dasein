@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -281,12 +280,8 @@ public class ProductFileValidationService
                     SegmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
                     Set<AttributeLookup> attrLookups = metadataSegment.getSegmentAttributes();
                     for (AttributeLookup attrLookup : attrLookups) {
-                        if (attrToSegName.containsKey(attrLookup.getAttribute())) {
-                            attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
-                        } else {
-                            attrToSegName.put(attrLookup.getAttribute(),
-                                    Collections.singleton(metadataSegment.getDisplayName()));
-                        }
+                        attrToSegName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
+                        attrToSegName.get(attrLookup.getAttribute()).add(metadataSegment.getDisplayName());
                     }
                 }
             }
@@ -300,13 +295,8 @@ public class ProductFileValidationService
                     for (AttributeLookup attrLookup : attrLookups) {
                         // model name means rating engine name in page here
                         if (model.getRatingEngine() != null) {
-                            if (attrToModelName.containsKey(attrLookup.getAttribute())) {
-                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
-                            } else {
-                                attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
-                                attrToModelName.put(attrLookup.getAttribute(),
-                                        Collections.singleton(model.getRatingEngine().getDisplayName()));
-                            }
+                            attrToModelName.putIfAbsent(attrLookup.getAttribute(), new HashSet<>());
+                            attrToModelName.get(attrLookup.getAttribute()).add(model.getRatingEngine().getDisplayName());
                         }
                     }
                 }
@@ -358,12 +348,8 @@ public class ProductFileValidationService
                                 }
                                 // this generate bundle id to model name mapping
                                 productsInUse.forEach(product -> {
-                                    if (bundleIdToModelName.get(product) == null) {
-                                        bundleIdToModelName.put(product,
-                                                Collections.singleton(summary.getDisplayName()));
-                                    } else {
-                                        bundleIdToModelName.get(product).add(summary.getDisplayName());
-                                    }
+                                    bundleIdToModelName.putIfAbsent(product, new HashSet<>());
+                                    bundleIdToModelName.get(product).add(summary.getDisplayName());
                                 });
                             }
                         }

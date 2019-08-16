@@ -118,6 +118,11 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     public void testProductBundle() throws Exception {
         // create bundle related segment
         createTestSegmentProductBundle();
+
+        // segment2 and segment3 has common attribute AttributeLookup(BusinessEntity.Account, "State")
+        createTestSegment2();
+        createTestSegment3();
+
         // mock one active x-shell rating engine
         createModelingSegment();
         MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, SEGMENT_NAME_MODELING);
