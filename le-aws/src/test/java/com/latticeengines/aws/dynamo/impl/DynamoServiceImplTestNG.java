@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.aws.DynamoOperation;
 
 public class DynamoServiceImplTestNG extends DynamoFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DynamoServiceImplTestNG.class);
 
     @Value("${datacloud.match.entity.staging.table}")
