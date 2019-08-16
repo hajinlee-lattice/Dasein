@@ -164,14 +164,16 @@ class LaunchComponent extends Component {
             if(!playstore.ratings) {
                 actions.fetchRatings([playstore.play.ratingEngine.id], false);
             } else {
-                this.setState({ratings: playstore.ratings});
+                this.state.ratings = playstore.ratings;
+                this.setState(this.state);
             }
         }
 
         if(!playstore.lookupIdMapping) {
             actions.fetchLookupIdMapping();
         } else {
-            this.setState({lookupIdMapping: playstore.lookupIdMapping});
+            this.state.lookupIdMapping = playstore.lookupIdMapping;
+            this.setState(this.state);
         }
         if(this.state.externalSystemName && isAudience(this.state.externalSystemName)) {
             actions.fetchUserDocument({}, function() {
@@ -496,9 +498,9 @@ class LaunchComponent extends Component {
     }
 
     makeProgramsList(programs) {
-        // program name = folder name
-        // static list name dropdwon is audience name/id
-        // static list name input is audience name/no id (makes new audience)
+        if(!isAudience(this.state.externalSystemName)) {
+            return false;
+        }
         var vm = this,
             list = [],
             channelConfig = this.getChannelConfig();
@@ -729,46 +731,88 @@ class LaunchComponent extends Component {
         if(this.state.launchSchedule) {
             let daysofweek = () => {
                     if(this.state.cronSettings.frequency === 'Weekly') {
+                        let options = () => {
+                            let optionsObj = {
+                                MON: 'Monday',
+                                TUE: 'Tuesday',
+                                WED: 'Wednesday',
+                                THU: 'Thursday',
+                                FRI: 'Friday',
+                                SAT: 'Saturday',
+                                SUN: 'Sunday',
+                            },
+                            options = [];
+
+                            for(let i in optionsObj) {
+                                let selected = (this.state.cronSettings.dayofweek === i);
+                                options.push(
+                                    <option value={i} selected={selected}>{optionsObj[i]}</option>
+                                )
+                            }
+                            return options;
+                        };
                         return (
                             <select id={'cronDayOf'} onChange={this.clickCronDayOfWeek}>
-                                <option disabled hidden selected>Day</option>
-                                <option value={'MON'}>Monday</option>
-                                <option value={'TUE'}>Tuesday</option>
-                                <option value={'WED'}>Wednesday</option>
-                                <option value={'THU'}>Thursday</option>
-                                <option value={'FRI'}>Friday</option>
-                                <option value={'SAT'}>Saturday</option>
-                                <option value={'SUN'}>Sunday</option>
+                                <option disabled hidden selected>Select</option>
+                                {options()}
                             </select>
                         )
                     }
                 },
                 whichdayofmonth = () => {
                     if(this.state.cronSettings.frequency === 'Monthly') {
+                        let options = () => {
+                            let optionsObj = {
+                                '#1': 'First',
+                                '#2': 'Second',
+                                '#3': 'Third',
+                                '#4': 'Fouth'
+                            },
+                            options = [];
+
+                            for(let i in optionsObj) {
+                                let selected = (this.state.cronSettings.whichdayofmonth === i);
+                                options.push(
+                                    <option value={i} selected={selected}>{optionsObj[i]}</option>
+                                )
+                            }
+                            return options;
+                        };
                         return (
                             <select id={'cronWhichDayOf'} onChange={this.clickCronWhichDayOfMonth}>
-                                <option value={'--'} selected>Day of Month</option>
-                                <option value={'#1'}>First</option>
-                                <option value={'#2'}>Second</option>
-                                <option value={'#3'}>Third</option>
-                                <option value={'#4'}>Fourth</option>
+                                <option value={'--'} selected>Day</option>
+                                {options()}
                             </select>
                         )
                     }
                 },
                 dayofmonth = () => {
                     if(this.state.cronSettings.frequency === 'Monthly' && this.state.cronSettings.whichdayofmonth) {
-                        let whichdayofmonth = this.state.cronSettings.whichdayofmonth;
+                        let whichdayofmonth = this.state.cronSettings.whichdayofmonth,
+                            options = () => {
+                                let optionsObj = {},
+                                    options = [];
+
+                                optionsObj['MON' + whichdayofmonth] = 'Monday';
+                                optionsObj['TUE' + whichdayofmonth] = 'Tuesday';
+                                optionsObj['WED' + whichdayofmonth] = 'Wednesday';
+                                optionsObj['THU' + whichdayofmonth] = 'Thursday';
+                                optionsObj['FRI' + whichdayofmonth] = 'Friday';
+                                optionsObj['SAT' + whichdayofmonth] = 'Saturday';
+                                optionsObj['SUN' + whichdayofmonth] = 'Sunday';
+
+                                for(let i in optionsObj) {
+                                    let selected = (this.state.cronSettings.dayofmonth === i);
+                                    options.push(
+                                        <option value={i} selected={selected}>{optionsObj[i]}</option>
+                                    )
+                                }
+                                return options;
+                            };
                         return (
                             <select id={'cronDayOf'} onChange={this.clickCronDayOfMonth}>
-                                <option disabled hidden selected>Day</option>
-                                <option value={'MON' + whichdayofmonth}>Monday</option>
-                                <option value={'TUE' + whichdayofmonth}>Tuesday</option>
-                                <option value={'WED' + whichdayofmonth}>Wednesday</option>
-                                <option value={'THU' + whichdayofmonth}>Thursday</option>
-                                <option value={'FRI' + whichdayofmonth}>Friday</option>
-                                <option value={'SAT' + whichdayofmonth}>Saturday</option>
-                                <option value={'SUN' + whichdayofmonth}>Sunday</option>
+                                <option disabled hidden selected>Select</option>
+                                {options()}
                             </select>
                         )
                     }
@@ -789,7 +833,7 @@ class LaunchComponent extends Component {
                         {dayofmonth()}
                         {daysofmonth()}
                         <label for={'cronTime'}>at</label> 
-                        <input id={'cronTime'} type={'time'} value={this.state.cronSettings.timeofday} onChange={this.clickCronTime} />
+                        <input id={'cronTime'} className={`${this.state.errors.crontime ? 'errors' : ''}`} type={'time'} value={this.state.cronSettings.timeofday} onChange={this.clickCronTime} />
                     </div>
                 </Aux>
             )
@@ -952,7 +996,11 @@ class LaunchComponent extends Component {
 
         if(e.target.value === 'Once') {
             launchType = 'FULL';
+            this.state.errors.crontime = null;
         } else {
+            if(!this.state.cronSettings.timeofday) {
+                this.state.errors.crontime = 'No time set';
+            }
             if(this.state.keepInSync) {
                 launchType = 'DIFFERENTIAL';
             } else {
@@ -978,6 +1026,7 @@ class LaunchComponent extends Component {
         if(e.target.value === '--') {
             this.state.cronSettings.whichdayofmonth = null;
             this.state.cronSettings.dayofmonth = null;
+            this.state.launchSchedule = cronMaker(this.state.cronSettings);
         } else {
             if(this.state.cronSettings.dayofmonth) {
                 let day = this.state.cronSettings.dayofmonth.split('#')[0],
@@ -1005,6 +1054,10 @@ class LaunchComponent extends Component {
     }
 
     clickCronTime = (e) => {
+        this.state.errors.crontime = null;
+        if(!e.target.value) {
+            this.state.errors.crontime = 'No time set';
+        }
         this.state.cronSettings.timeofday = e.target.value;
         this.state.launchSchedule = cronMaker(this.state.cronSettings);
         this.setState(this.state);
