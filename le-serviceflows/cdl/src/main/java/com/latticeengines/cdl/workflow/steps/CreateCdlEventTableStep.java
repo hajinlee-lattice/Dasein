@@ -228,6 +228,9 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
             putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
 
         }
+        if (!getConfiguration().isExportKeyColumnsOnly()) {
+            putObjectInContext(FILTER_EVENT_TARGET_TABLE_NAME, eventTable);
+        }
     }
 
 }
