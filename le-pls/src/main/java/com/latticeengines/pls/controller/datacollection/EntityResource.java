@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -55,9 +57,9 @@ public class EntityResource extends BaseFrontEndEntityResource {
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Map<BusinessEntity, Long> getCounts(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         Map<BusinessEntity, Future<Long>> futures = new HashMap<>();
-        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
+        Tenant tenant = MultiTenantContext.getTenant();
         for (BusinessEntity entity: BusinessEntity.COUNT_ENTITIES) {
-            futures.put(entity, executorService.submit(new CountFetcher(tenantId, entity, frontEndQuery)));
+            futures.put(entity, executorService.submit(new CountFetcher(tenant, entity, frontEndQuery)));
         }
         Map<BusinessEntity, Long> counts = new HashMap<>();
         for (BusinessEntity entity: BusinessEntity.COUNT_ENTITIES) {
@@ -65,7 +67,7 @@ public class EntityResource extends BaseFrontEndEntityResource {
                 Long count = futures.get(entity).get();
                 counts.put(entity, count);
             } catch (Exception e) {
-                log.warn("Failed to get count of " + entity + ": " + e.getMessage());
+                log.warn("Failed to get count of " + entity, e);
             }
         }
         return counts;
@@ -78,18 +80,20 @@ public class EntityResource extends BaseFrontEndEntityResource {
 
     private class CountFetcher implements Callable<Long> {
 
-        private final String tenantId;
+        private final Tenant tenant;
         private final BusinessEntity entity;
         private final FrontEndQuery frontEndQuery;
 
-        CountFetcher(String tenantId, BusinessEntity entity, FrontEndQuery frontEndQuery) {
-            this.tenantId = tenantId;
+        CountFetcher(Tenant tenant, BusinessEntity entity, FrontEndQuery frontEndQuery) {
+            this.tenant = tenant;
             this.entity = entity;
             this.frontEndQuery = JsonUtils.deserialize(JsonUtils.serialize(frontEndQuery), FrontEndQuery.class);
         }
 
         @Override
         public Long call() {
+            MultiTenantContext.setTenant(tenant);
+            String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
             Long count = getCount(tenantId, frontEndQuery, entity);
             if (count != null) {
                 return count;
