@@ -24,6 +24,7 @@
             top: 2px;
             margin-left: 0
         }
+        &.errors,
         &.required.empty {
             border: 1px solid red;
         }
