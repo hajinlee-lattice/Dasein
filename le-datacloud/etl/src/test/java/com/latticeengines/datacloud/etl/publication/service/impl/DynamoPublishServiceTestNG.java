@@ -305,6 +305,11 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
             // TODO Auto-generated method stub
             return null;
         }
+
+        @Override
+        public boolean isCapacityOnDemand(String tableName) {
+            return false;
+        }
     }
 
     private static class TestEaiProxy extends EaiProxy {
