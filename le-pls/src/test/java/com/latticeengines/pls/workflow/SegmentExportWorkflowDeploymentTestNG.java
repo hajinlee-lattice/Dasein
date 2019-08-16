@@ -100,9 +100,8 @@ public class SegmentExportWorkflowDeploymentTestNG extends PlsDeploymentTestNGBa
                 break;
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
-        if (status.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
-            verifyTest(segmentExport.getExportId());
-        }
+        Assert.assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
+        verifyTest(segmentExport.getExportId());
     }
 
     private MetadataSegmentExport createExportJob(AtlasExportType type) {
