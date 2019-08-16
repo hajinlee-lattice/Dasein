@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -568,20 +567,22 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private Map<String, Long> getPASubmitFailedRedisMap() {
         String redisKey = "pa_scheduler_" + leEnv + "_pa_submit_failed";
-        Map<Object, Object> redisMap = redisTemplate.opsForHash().entries(redisKey);
         Map<String, Long> paSubmitFailedMap = new HashMap<>();
-        if (redisMap.size() > 0) {
-            Iterator<Map.Entry<Object, Object>> iter = redisMap.entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry<Object, Object> entry = iter.next();
-                Long failedTime = (Long) entry.getValue();
-                if (schedulingPATimeClock.getCurrentTime() - failedTime < 60 * 60 * 1000) {
-                    paSubmitFailedMap.put((String) entry.getKey(), failedTime);
-                } else {
-                    redisTemplate.opsForHash().delete(redisKey, entry.getKey());
+        try {
+            Map<Object, Object> redisMap = redisTemplate.opsForHash().entries(redisKey);
+            if (redisMap.size() > 0) {
+                for (Map.Entry<Object, Object> entry : redisMap.entrySet()) {
+                    Long failedTime = (Long) entry.getValue();
+                    if (schedulingPATimeClock.getCurrentTime() - failedTime < 60 * 60 * 1000) {
+                        paSubmitFailedMap.put((String) entry.getKey(), failedTime);
+                    } else {
+                        redisTemplate.opsForHash().delete(redisKey, entry.getKey());
+                    }
                 }
-            }
 
+            }
+        } catch (Exception e) {
+            log.error("connect redis fail.");
         }
         return paSubmitFailedMap;
     }

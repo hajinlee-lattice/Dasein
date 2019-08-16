@@ -412,6 +412,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 } catch (Exception e) {
                     log.error("Failed to retry PA for tenant {}, error = {}", tenantId, e);
                     updateRetryCount(tenantId);
+                    setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
                 }
             }
         }
@@ -597,7 +598,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.info("Submit PA job with appId = {} for tenant = {} successfully", applicationId, tenantId);
         } catch (Exception e) {
             log.error("Failed to submit job for tenant = {}, error = {}", tenantId, e);
-            addRedisTemplateValue(REDIS_TEMPLATE_KEY, tenantId);
+            setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
         }
         return applicationId;
     }
@@ -807,8 +808,13 @@ public class CDLJobServiceImpl implements CDLJobService {
         REDIS_TEMPLATE_KEY = "pa_scheduler_" + leEnv + "_pa_submit_failed";
     }
 
-    private void addRedisTemplateValue(String key, String customerSpace) {
-        redisTemplate.opsForHash().put(key, customerSpace, new Date().getTime());
-        log.info("RedisMap is: " + JsonUtils.serialize(redisTemplate.opsForHash().entries(key)));
+    private void setPASubmissionFailTime(String key, String customerSpace) {
+        try {
+            long currentTime = new Date().getTime();
+            redisTemplate.opsForHash().put(key, customerSpace, currentTime);
+            log.info("pa submit failed, tenant: " + customerSpace + ", fail time: " + currentTime);
+        } catch (Exception e) {
+            log.error("connect redis fail.");
+        }
     }
 }
