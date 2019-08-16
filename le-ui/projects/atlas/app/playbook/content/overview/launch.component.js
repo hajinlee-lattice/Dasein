@@ -1151,7 +1151,9 @@ class LaunchComponent extends Component {
                 coverageObj = this.getCoverage(this.state.launchAccountsCoverage),
                 engineId = coverageObj.engineId,
                 coverage = coverageObj.coverage || {},
-                unscoredAccountCountPercent = Math.floor((coverage.unscoredAccountCount / (coverage.unscoredAccountCount + coverage.accountCount)) * 100) || 0,
+                unscoredAccountCount = coverage.unscoredAccountCount || 0,
+                accountCount = coverage.accountCount || 0,
+                unscoredAccountCountPercent = Math.floor((unscoredAccountCount / (unscoredAccountCount + accountCount)) * 100) || 0,
                 selectedBuckets = this.selectedBuckets,
                 numAccounts = coverage.unscoredAccountCount + coverage.accountCount,
                 recommendationCounts = this.makeRecommendationCounts(coverage, play),
@@ -1168,6 +1170,7 @@ class LaunchComponent extends Component {
                         return types[externalSystemName];
                     }
                     return types['default'];
+
                 };
 
             if(coverage && coverage.bucketCoverageCounts){
