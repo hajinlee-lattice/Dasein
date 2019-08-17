@@ -61,6 +61,7 @@ public class PlayLaunchInitStepTestHelper {
         playLaunchProcessor.setDataDbDialect(dataDbDialect);
         playLaunchProcessor.setDataDbType(dataDbType);
         playLaunchProcessor.setYarnConfiguration(yarnConfiguration);
+        playLaunchProcessor.setBatonService(batonService);
     }
 
     public RecommendationCreator getRecommendationCreator() {
