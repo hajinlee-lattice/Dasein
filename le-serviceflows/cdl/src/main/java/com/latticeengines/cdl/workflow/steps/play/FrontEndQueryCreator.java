@@ -389,4 +389,9 @@ public class FrontEndQueryCreator {
                 InterfaceName.Address_Street_1.name()));
     }
 
+    @VisibleForTesting
+    void setBatonService(BatonService batonService) {
+        this.batonService = batonService;
+    }
+
 }

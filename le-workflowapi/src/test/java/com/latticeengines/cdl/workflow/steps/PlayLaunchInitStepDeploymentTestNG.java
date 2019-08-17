@@ -8,6 +8,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mock;
@@ -15,7 +17,6 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -27,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -73,31 +75,31 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
-    @Autowired
+    @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
 
-    @Autowired
+    @Inject
     RecommendationService recommendationService;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Value("${datadb.datasource.driver}")
@@ -118,10 +120,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @Value("${datadb.datasource.type}")
     private String dataDbType;
 
-    @Autowired
+    @Inject
     TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
+    BatonService batonService;
+
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
     String randId = UUID.randomUUID().toString();
@@ -175,7 +180,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         helper = new PlayLaunchInitStepTestHelper(playProxy, lookupIdMappingProxy, entityProxy, recommendationService,
                 pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService, dataCollectionProxy, dataDbDriver,
-                dataDbUrl, dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration);
+                dataDbUrl, dataDbUser, dataDbPassword, dataDbDialect, dataDbType, yarnConfiguration, batonService);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
