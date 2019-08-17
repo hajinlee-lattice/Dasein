@@ -180,7 +180,8 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void addChannelSpecificRestrictions() {
-        if (CDLExternalSystemName.Marketo.equals(destinationSystemName)) {
+        if (CDLExternalSystemName.Marketo.equals(destinationSystemName)
+                && campaignFrontEndQuery.getContactRestriction() != null) {
             Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
                     campaignFrontEndQuery.getContactRestriction().getRestriction());
             campaignFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForAccountQuery));
