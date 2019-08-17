@@ -1,12 +1,18 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -14,13 +20,19 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -43,60 +55,22 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     private String accountData;
     private String contactData;
 
-    @Test(groups = "functional")
-    public void runTest() {
+    @Override
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        super.setup();
         uploadInputAvro();
-        CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
-        PlayLaunchSparkContext playLaunchContext = generatePlayLaunchSparkContext();
-        createRecConfig.setPlayLaunchSparkContext(playLaunchContext);
-        SparkJobResult result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
-        verifyResult(result);
-
-        // mimic the case where there is no contact data
-        inputs = Collections.singletonList(accountData);
-        result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
-        verifyResult(result);
     }
 
-    private PlayLaunchSparkContext generatePlayLaunchSparkContext() {
-        Tenant tenant = new Tenant("TestRecommendationGenTenant");
-        tenant.setPid(1L);
-        PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setCreated(new Date());
-        playLaunch.setId(PlayLaunch.generateLaunchId());
-        playLaunch.setDestinationAccountId(destinationAccountId);
-        playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
-        MetadataSegment segment = new MetadataSegment();
-        Play play = new Play();
-        play.setTargetSegment(segment);
-        play.setDescription("play description");
-        play.setName(UUID.randomUUID().toString());
-        playLaunch.setPlay(play);
-        long launchTime = new Date().getTime();
-        RatingEngine ratingEngine = new RatingEngine();
-        play.setRatingEngine(ratingEngine);
-        ratingEngine.setId(ratingId);
-        ratingEngine.setType(RatingEngineType.CROSS_SELL);
-        AIModel aiModel = new AIModel();
-        aiModel.setId(AIModel.generateIdStr());
-        aiModel.setCreatedBy(ratingEngine.getCreatedBy());
-        aiModel.setUpdatedBy(ratingEngine.getUpdatedBy());
-        aiModel.setRatingEngine(ratingEngine);
-        ratingEngine.setLatestIteration(aiModel);
-
-        PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
-                .tenant(tenant)//
-                .playName(play.getName())//
-                .playLaunchId(playLaunch.getId())//
-                .playLaunch(playLaunch)//
-                .play(play)//
-                .ratingEngine(ratingEngine)//
-                .segment(segment)//
-                .launchTimestampMillis(launchTime)//
-                .ratingId(ratingId)//
-                .publishedIteration(aiModel)//
-                .build();
-        return sparkContext;
+    @Test(groups = "functional", dataProvider = "destinationProvider")
+    public void runTest(final CDLExternalSystemName destination, boolean accountDataOnly) {
+        overwriteInputs(accountDataOnly);
+        CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
+        PlayLaunchSparkContext playLaunchContext = generatePlayContext(destination);
+        createRecConfig.setPlayLaunchSparkContext(playLaunchContext);
+        SparkJobResult result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
+        List<List<Pair<List<String>, Boolean>>> expectedColumns = generateExpectedColumns(destination, accountDataOnly);
+        verifyResult(result, expectedColumns);
     }
 
     @Override
@@ -110,23 +84,58 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     }
 
     @Override
-    protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(this::verifyOutput);
+    protected List<BiFunction<HdfsDataUnit, List<Pair<List<String>, Boolean>>, Boolean>> getTargetVerifiers(
+            List<List<Pair<List<String>, Boolean>>> expectedColumns) {
+        List<BiFunction<HdfsDataUnit, List<Pair<List<String>, Boolean>>, Boolean>> list = new ArrayList<>();
+        for (int i = 0; i < expectedColumns.size(); i++) {
+            list.add(this::verifyOutput);
+        }
+        return list;
     }
 
-    private Boolean verifyOutput(HdfsDataUnit target) {
+    private Boolean verifyOutput(HdfsDataUnit target, List<Pair<List<String>, Boolean>> accountAndContextExpectedCols) {
+        Pair<List<String>, Boolean> accountExpectedCols = accountAndContextExpectedCols.get(0);
+        Pair<List<String>, Boolean> contactExpectedCols = accountAndContextExpectedCols.get(1);
         AtomicInteger count = new AtomicInteger();
+
         verifyAndReadTarget(target).forEachRemaining(record -> {
             count.incrementAndGet();
-            String accountId = record.get("ACCOUNT_ID").toString();
-            String contacts = record.get("CONTACTS").toString();
+            String accountId = record.get(RecommendationColumnName.ACCOUNT_ID.name()).toString();
+            String contacts = record.get(RecommendationColumnName.CONTACTS.name()).toString();
             if (count.get() == 1) {
+                List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
+                        .collect(Collectors.toList());
+                Assert.assertTrue(
+                        verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight()));
+                ObjectMapper jsonParser = new ObjectMapper();
+                try {
+                    JsonNode jsonObject = jsonParser.readTree(contacts);
+                    Assert.assertTrue(jsonObject.isArray());
+                    List<String> contactCols = new ArrayList<>();
+                    jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
+                    Assert.assertTrue(
+                            verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight()));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 log.info(String.format("For account %s, contacts are: %s", accountId, contacts));
-                assertOrder(record);
             }
         });
         Assert.assertEquals(count.get(), 10);
         return true;
+    }
+
+    private boolean verifyCols(List<String> cols, List<String> expectedCols, boolean checkOrder) {
+        if (cols.size() != expectedCols.size()) {
+            return false;
+        }
+        if (checkOrder) {
+            return IntStream.range(0, cols.size()).allMatch(i -> cols.get(i) == expectedCols.get(i));
+        } else {
+            Set<String> colsSet = new HashSet<>(cols);
+            return IntStream.range(0, cols.size()).allMatch(i -> colsSet.contains(expectedCols.get(i)));
+        }
     }
 
     private void assertOrder(GenericRecord record) {
@@ -218,7 +227,105 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
             }
         }
         contactData = uploadHdfsDataUnit(contacts, contactfields);
-        inputs = Arrays.asList(accountData, contactData);
+        // inputs = Arrays.asList(accountData, contactData);
+    }
+
+    private void overwriteInputs(boolean accountDataOnly) {
+        if (!accountDataOnly) {
+            inputs = Arrays.asList(accountData, contactData);
+        } else {
+            inputs = Arrays.asList(accountData);
+        }
+    }
+
+    private PlayLaunchSparkContext generatePlayContext(CDLExternalSystemName destination) {
+        switch (destination) {
+        case Salesforce:
+            return generateSfdcPlayLaunchSparkContext();
+        default:
+            return generateSfdcPlayLaunchSparkContext();
+        }
+    }
+
+    private List<List<Pair<List<String>, Boolean>>> generateExpectedColumns(CDLExternalSystemName destination,
+            boolean accountDataOnly) {
+        switch (destination) {
+        case Salesforce:
+            return generateSfdcExpectedColumns(accountDataOnly);
+        default:
+            return generateSfdcExpectedColumns(accountDataOnly);
+        }
+    }
+
+    private List<List<Pair<List<String>, Boolean>>> generateSfdcExpectedColumns(boolean accountDataOnly) {
+        if (accountDataOnly) {
+            List<Pair<List<String>, Boolean>> list = Arrays.asList(
+                    Pair.of(standardRecommendationAccountColumns(), true),
+                    Pair.of(standardRecommendationContactColumns(), false));
+            return Arrays.asList(list, list);
+        } else {
+            List<Pair<List<String>, Boolean>> list = Arrays.asList(
+                    Pair.of(standardRecommendationAccountColumns(), true), Pair.of(Collections.emptyList(), false));
+            return Arrays.asList(list, list);
+        }
+    }
+
+    private List<String> standardRecommendationAccountColumns() {
+        return Arrays.asList(RecommendationColumnName.values()).stream().map(col -> col.name())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> standardRecommendationContactColumns() {
+        return Arrays.asList(PlaymakerConstants.Email, PlaymakerConstants.Address, PlaymakerConstants.Phone,
+                PlaymakerConstants.State, PlaymakerConstants.ZipCode, PlaymakerConstants.Country,
+                PlaymakerConstants.SfdcContactID, PlaymakerConstants.City);
+    }
+
+    private PlayLaunchSparkContext generateSfdcPlayLaunchSparkContext() {
+        Tenant tenant = new Tenant("TestRecommendationGenTenant");
+        tenant.setPid(1L);
+        PlayLaunch playLaunch = new PlayLaunch();
+        playLaunch.setCreated(new Date());
+        playLaunch.setId(PlayLaunch.generateLaunchId());
+        playLaunch.setDestinationAccountId(destinationAccountId);
+        playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
+        MetadataSegment segment = new MetadataSegment();
+        Play play = new Play();
+        play.setTargetSegment(segment);
+        play.setDescription("play description");
+        play.setName(UUID.randomUUID().toString());
+        playLaunch.setPlay(play);
+        long launchTime = new Date().getTime();
+        RatingEngine ratingEngine = new RatingEngine();
+        play.setRatingEngine(ratingEngine);
+        ratingEngine.setId(ratingId);
+        ratingEngine.setType(RatingEngineType.CROSS_SELL);
+        AIModel aiModel = new AIModel();
+        aiModel.setId(AIModel.generateIdStr());
+        aiModel.setCreatedBy(ratingEngine.getCreatedBy());
+        aiModel.setUpdatedBy(ratingEngine.getUpdatedBy());
+        aiModel.setRatingEngine(ratingEngine);
+        ratingEngine.setLatestIteration(aiModel);
+
+        PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
+                .tenant(tenant)//
+                .playName(play.getName())//
+                .playLaunchId(playLaunch.getId())//
+                .playLaunch(playLaunch)//
+                .play(play)//
+                .ratingEngine(ratingEngine)//
+                .segment(segment)//
+                .launchTimestampMillis(launchTime)//
+                .ratingId(ratingId)//
+                .publishedIteration(aiModel)//
+                .build();
+        return sparkContext;
+    }
+
+    @DataProvider
+    public Object[][] destinationProvider() {
+        return new Object[][] { { CDLExternalSystemName.Salesforce, false }, //
+                { CDLExternalSystemName.Salesforce, true } };
     }
 
 }
