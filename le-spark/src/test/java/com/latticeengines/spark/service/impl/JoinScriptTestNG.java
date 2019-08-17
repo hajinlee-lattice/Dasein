@@ -44,9 +44,9 @@ public class JoinScriptTestNG extends TestJoinTestNGBase {
     private Object[][] provideData() {
         return new Object[][] { //
                 { SparkInterpreter.Scala, null }, //
-//                { SparkInterpreter.Python, null }, //
-//                { SparkInterpreter.Scala, DataUnit.DataFormat.PARQUET}, //
-//                { SparkInterpreter.Python, DataUnit.DataFormat.PARQUET}
+                { SparkInterpreter.Python, null }, //
+                { SparkInterpreter.Scala, DataUnit.DataFormat.PARQUET}, //
+                { SparkInterpreter.Python, DataUnit.DataFormat.PARQUET}
         };
     }
 

@@ -14,6 +14,7 @@ import scala.collection.JavaConverters._
 abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext => String) {
 
   var serializedConfig: String = "{}"
+  var applicationId: String = ""
 
   def configure(jobConfig: C): Unit = {
     serializedConfig = JsonUtils.serialize(jobConfig)
@@ -24,6 +25,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   }
 
   override def apply(ctx: ScalaJobContext): String = {
+    applicationId = ctx.sc.applicationId
     val (spark, latticeCtx) = initializeJob()
     runJob(spark, latticeCtx)
     val finalTargets = finalizeJob(spark, latticeCtx).asJava
@@ -103,6 +105,10 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     }
     latticeCtx.orphanViews map spark.catalog.dropTempView
     results
+  }
+
+  def logSpark(message: String): Unit = {
+    println(s"[$applicationId]: $message")
   }
 
   def setPartitionTargets(index: Int, list: Seq[String], lattice: LatticeContext[C]): Unit = {
