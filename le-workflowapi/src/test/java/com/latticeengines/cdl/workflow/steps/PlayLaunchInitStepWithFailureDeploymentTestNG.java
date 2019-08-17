@@ -3,10 +3,11 @@ package com.latticeengines.cdl.workflow.steps;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -14,6 +15,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -53,25 +55,25 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
-    @Autowired
+    @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
     @Value("${datadb.datasource.driver}")
@@ -92,19 +94,22 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     @Value("${datadb.datasource.type}")
     private String dataDbType;
 
-    @Autowired
+    @Inject
     RecommendationService recommendationService;
 
     RecommendationService badRecommendationService;
 
-    @Autowired
+    @Inject
     TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private BatonService batonService;
 
     String randId = UUID.randomUUID().toString();
 
@@ -142,7 +147,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
         helper = new PlayLaunchInitStepTestHelper(playProxy, lookupIdMappingProxy, entityProxy,
                 badRecommendationService, pageSize, metadataProxy, sqoopProxy, ratingEngineProxy, jobService,
                 dataCollectionProxy, dataDbDriver, dataDbUrl, dataDbUser, dataDbPassword, dataDbDialect, dataDbType,
-                yarnConfiguration);
+                yarnConfiguration, batonService);
 
         playLaunchInitStep = new PlayLaunchInitStep();
         playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
