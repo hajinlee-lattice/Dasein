@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.Counter;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportContext.SegmentExportContextBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -91,6 +92,9 @@ public abstract class SegmentExportProcessor {
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private PlsInternalProxy plsInternalProxy;
@@ -252,7 +256,7 @@ public abstract class SegmentExportProcessor {
 
         Tenant tenant = new Tenant(customerSpace.toString());
         Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(tenant, metadataSegmentExportJob,
-                configuredBusEntityAttrMap);
+                configuredBusEntityAttrMap, batonService.isEntityMatchEnabled(customerSpace));
 
         metadataProxy.createTable(tenant.getId(), segmentExportTable.getName(), segmentExportTable);
     }
