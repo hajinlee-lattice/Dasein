@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.spark.SparkInterpreter;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.SparkScript;
+import com.latticeengines.domain.exposed.spark.SparkScriptOutput;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
@@ -135,11 +136,10 @@ public class SparkJobServiceImpl implements SparkJobService {
             default:
                 throw new UnsupportedOperationException("Unknown script type " + script.getType());
         }
-        String outputStr = client.printOutputStr();
-        List<HdfsDataUnit> targets = client.runPostScript();
+        SparkScriptOutput scriptOutput = client.runPostScript();
         SparkJobResult result = new SparkJobResult();
-        result.setOutput(outputStr);
-        result.setTargets(targets);
+        result.setOutput(scriptOutput.getOutputStr());
+        result.setTargets(scriptOutput.getOutput());
         return result;
     }
 

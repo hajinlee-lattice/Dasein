@@ -13,12 +13,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -90,18 +88,19 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
         RuleBasedModel model = (RuleBasedModel) models.get(0);
         String defaultBkt = model.getRatingRule().getDefaultBucketName();
         List<Pair<String, String>> ruleSqls = getRuleQueries(frontEndQuery, model, version);
+        List<Pair<String, String>> nonEmptyRuleSqls = getRuleQueries(frontEndQuery, model, version);
         List<String> viewList = new ArrayList<>();
         for (Pair<String, String> pair: ruleSqls) {
             String alias = pair.getLeft();
             String sql = pair.getRight();
             if (StringUtils.isNotBlank(sql)) {
-                RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-                retry.execute(ctx -> //
-                        ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).createView(customerSpace, sql, alias));
+                nonEmptyRuleSqls.add(pair);
                 viewList.add(alias);
             }
         }
-        return ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).mergeRules(customerSpace, viewList, defaultBkt);
+        QueryEvaluatorServiceSparkSQL serviceSparkSQL = (QueryEvaluatorServiceSparkSQL) queryEvaluatorService;
+        List<String> tempViews = serviceSparkSQL.createViews(customerSpace, ruleSqls);
+        return serviceSparkSQL.mergeRules(customerSpace, viewList, tempViews, defaultBkt);
     }
 
     private List<Pair<String, String>> getRuleQueries(FrontEndQuery frontEndQuery, RuleBasedModel model, //

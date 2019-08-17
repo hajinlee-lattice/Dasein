@@ -19,7 +19,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.ScriptJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkInterpreter;
+import com.latticeengines.domain.exposed.spark.SparkScriptOutput;
 
 import reactor.core.publisher.Mono;
 
@@ -78,20 +78,14 @@ class SparkScriptClient {
         log.info("Script env initialized.");
     }
 
-    String printOutputStr() {
-        String statement = getPrintOutTemplate();
-        return runStatement(statement);
-    }
-
-    List<HdfsDataUnit> runPostScript() {
+    SparkScriptOutput runPostScript() {
         String statement = getFinalizeTemplate();
         String result = runStatement(statement);
         log.info("Script env finalized.");
         try {
-            return om.readValue(result, new TypeReference<List<HdfsDataUnit>>() {
-            });
+            return om.readValue(result, SparkScriptOutput.class);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to parse result to List<SparkJobTarget>.", e);
+            throw new RuntimeException("Failed to parse result to SparkScriptOutput.", e);
         }
     }
 
@@ -170,10 +164,6 @@ class SparkScriptClient {
                 "{{PARAMS}}", params, //
                 "{{CHECKPOINT_DIR}}", checkpointDir //
         ));
-    }
-
-    private String getPrintOutTemplate() {
-        return getTemplate("printout", Collections.emptyMap());
     }
 
     private String getFinalizeTemplate() {

@@ -86,7 +86,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       throw new IllegalArgumentException(s"${targets.length} targets are declared " //
         + s"but ${output.length} outputs are generated!")
     }
-    targets.zip(output).map { t =>
+    val results = targets.zip(output).map { t =>
       val tgt = t._1
       val df = t._2
       val path = tgt.getPath
@@ -101,6 +101,8 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       tgt.setCount(df2.count())
       tgt
     }
+    latticeCtx.orphanViews map spark.catalog.dropTempView
+    results
   }
 
   def setPartitionTargets(index: Int, list: Seq[String], lattice: LatticeContext[C]): Unit = {

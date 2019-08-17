@@ -8,6 +8,7 @@ class LatticeContext:
         self.targets = targets
         self.output = []
         self.output_str = ""
+        self.orphan_views = []
 
 
 def load_data_unit(unit):
