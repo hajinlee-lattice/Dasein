@@ -622,4 +622,9 @@ public class PlayLaunchProcessor {
         this.dataDbType = dataDbType;
     }
 
+    @VisibleForTesting
+    void setBatonService(BatonService batonService) {
+        this.batonService = batonService;
+    }
+
 }
