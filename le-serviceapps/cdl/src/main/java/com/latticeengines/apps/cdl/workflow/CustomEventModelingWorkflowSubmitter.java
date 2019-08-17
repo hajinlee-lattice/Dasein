@@ -47,7 +47,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
@@ -76,7 +76,9 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
     @Value("${cdl.modeling.workflow.mem.mb}")
     protected int workflowMemMb;
 
-    private InternalResourceRestApiProxy internalResourceProxy;
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
+
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -85,13 +87,12 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
 
     @PostConstruct
     public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         ratingEngineType = RatingEngineType.CUSTOM_EVENT;
     }
 
     public ApplicationId submit(String customerSpace, ModelingParameters parameters) {
 
-        SourceFile sourceFile = internalResourceProxy.findSourceFileByName(parameters.getFilename(), customerSpace);
+        SourceFile sourceFile = plsInternalProxy.findSourceFileByName(parameters.getFilename(), customerSpace);
 
         if (sourceFile == null) {
             throw new LedpException(LedpCode.LEDP_18084, new String[] { parameters.getFilename() });
@@ -99,7 +100,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
         CustomEventModelingWorkflowConfiguration configuration = generateConfiguration(parameters, sourceFile);
         ApplicationId applicationId = workflowJobService.submit(configuration);
         sourceFile.setApplicationId(applicationId.toString());
-        internalResourceProxy.updateSourceFile(sourceFile, customerSpace);
+        plsInternalProxy.updateSourceFile(sourceFile, customerSpace);
         return applicationId;
     }
 

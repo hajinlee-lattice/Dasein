@@ -14,7 +14,6 @@ public class PlsInternalProxyUnitTestNG {
     private String localhost = "http://localhost:8081";
     private String expectedPrefix = "http://localhost:8081/pls/internal/jobs/all/";
     private PlsInternalProxyImpl plsInternalProxy = new PlsInternalProxyImpl(localhost);
-    private InternalResourceRestApiProxy internalResourceRestApiProxy = new InternalResourceRestApiProxy(localhost);
 
     private String tenantId = "tenant";
 

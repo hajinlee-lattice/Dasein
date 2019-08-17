@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,17 +21,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 
 @Component
 public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
     private static final Logger log = LoggerFactory.getLogger(EnrichmentMetadataCacheImpl.class);
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     @Value("${scoringapi.enrichment.cache.size:100}")
     private int maxEnrichmentCacheSize;
@@ -50,17 +46,18 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
 
     private volatile List<LeadEnrichmentAttribute> allEnrichmentAttributes;
 
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
+
     @PostConstruct
     public void initialize() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-
         leadEnrichmentAttributeCache = //
                 CacheBuilder.newBuilder()//
                         .maximumSize(maxEnrichmentCacheSize)//
                         .expireAfterWrite(enrichmentCacheExpirationTime, TimeUnit.MINUTES)//
                         .build(new CacheLoader<CustomerSpace, List<LeadEnrichmentAttribute>>() {
                             public List<LeadEnrichmentAttribute> load(CustomerSpace customerSpace) throws Exception {
-                                return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, null,
+                                return plsInternalProxy.getLeadEnrichmentAttributes(customerSpace, null,
                                         null, true, true);
                             }
                         });
@@ -112,7 +109,7 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
 
     private List<LeadEnrichmentAttribute> loadAllEnrichmentAttributesMetadata() {
         log.info("Start loading all enrichment attribute metadata");
-        List<LeadEnrichmentAttribute> list = internalResourceRestApiProxy.getAllLeadEnrichmentAttributes();
+        List<LeadEnrichmentAttribute> list = plsInternalProxy.getAllLeadEnrichmentAttributes();
         log.info("Completed loading all enrichment attribute metadata");
         return list;
     }

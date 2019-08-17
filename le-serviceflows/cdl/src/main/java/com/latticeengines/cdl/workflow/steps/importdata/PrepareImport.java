@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("prepareImport")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -221,8 +220,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
     private void sendS3ImportEmail(String result, S3ImportEmailInfo emailInfo) {
         try {
             String tenantId = configuration.getCustomerSpace().toString();
-            InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-            proxy.sendS3ImportEmail(result, tenantId, emailInfo);
+            plsInternalProxy.sendS3ImportEmail(result, tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Failed to send s3 import email: " + e.getMessage());
         }

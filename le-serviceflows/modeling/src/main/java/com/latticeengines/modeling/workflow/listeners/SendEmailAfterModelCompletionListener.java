@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -27,6 +27,9 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
     @Autowired
     private RatingEngineProxy ratingEngineProxy;
 
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -35,8 +38,6 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
     public void afterJobExecution(JobExecution jobExecution) {
         String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
         log.info("tenantid: " + tenantId);
-        String hostPort = jobExecution.getJobParameters().getString("Internal_Resource_Host_Port");
-        log.info("hostPort: " + hostPort);
         String userId = jobExecution.getJobParameters().getString("User_Id");
         AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
         emailInfo.setUserId(userId);
@@ -55,9 +56,8 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
             }
             log.info(String.format("userId: %s; modelName: %s; status:%s ", emailInfo.getUserId(),
                     emailInfo.getModelId(), jobExecution.getStatus().name()));
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             try {
-                proxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+                plsInternalProxy.sendPlsCreateModelEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
             } catch (Exception e) {
                 log.error("Can not send create model email: " + e.getMessage());
             }

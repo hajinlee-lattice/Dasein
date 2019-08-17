@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.listeners;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -11,14 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
@@ -29,7 +26,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -44,15 +41,8 @@ public class MaintenanceOperationListener extends LEJobListener {
     @Autowired
     private DataFeedProxy dataFeedProxy;
 
-    @Value("${yarn.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
 
     @Inject
     private ActionProxy actionProxy;
@@ -87,8 +77,7 @@ public class MaintenanceOperationListener extends LEJobListener {
             // check data feed status? should be Initing or InitialLoaded?
             String reportName = job.getReportName(ReportPurpose.MAINTENANCE_OPERATION_SUMMARY.getKey());
             if (!StringUtils.isEmpty(reportName)) {
-                Report report = internalResourceRestApiProxy.findReportByName(CustomerSpace.parse(customerSpace),
-                        reportName);
+                Report report = plsInternalProxy.findReportByName(reportName, customerSpace);
                 updateMaintenanceActionConfiguration(job, report);
             }
             if (StringUtils.isEmpty(executionId))

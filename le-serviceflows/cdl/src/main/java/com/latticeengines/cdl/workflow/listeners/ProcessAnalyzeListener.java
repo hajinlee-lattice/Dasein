@@ -25,7 +25,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -49,6 +49,9 @@ public class ProcessAnalyzeListener extends LEJobListener {
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
+
     private String customerSpace;
 
     @Override
@@ -65,10 +68,8 @@ public class ProcessAnalyzeListener extends LEJobListener {
         customerSpace = job.getTenant().getId();
 
         String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
-        String hostPort = jobExecution.getJobParameters().getString("Internal_Resource_Host_Port");
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
         String userId = jobExecution.getJobParameters().getString("User_Id");
-        log.info(String.format("tenantId %s, hostPort %s, userId %s", tenantId, hostPort, userId));
+        log.info(String.format("tenantId %s, userId %s", tenantId, userId));
 
         if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.info(String.format("Workflow failed. Update datafeed status for customer %s with status of %s",
@@ -100,7 +101,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
         AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
         emailInfo.setUserId(userId);
         try {
-            proxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+            plsInternalProxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
         } catch (Exception e) {
             log.error("Can not send process analyze email: " + e.getMessage());
         }

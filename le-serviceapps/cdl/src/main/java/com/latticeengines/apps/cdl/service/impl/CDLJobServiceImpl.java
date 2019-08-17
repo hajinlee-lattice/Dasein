@@ -31,9 +31,7 @@ import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -51,7 +49,6 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -80,7 +77,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -182,8 +179,8 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private CDLProxy cdlProxy;
 
-    @Value("${cdl.app.public.url:https://localhost:9081}")
-    private String appPublicUrl;
+    @Inject
+    private PlsHealthCheckProxy plsHealthCheckProxy;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
@@ -261,8 +258,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @VisibleForTesting
     boolean systemCheck() {
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(appPublicUrl);
-        StatusDocument statusDocument = proxy.systemCheck();
+        StatusDocument statusDocument = plsHealthCheckProxy.systemCheck();
         log.info(String.format("System status is : %s.", statusDocument.getStatus()));
         return StatusDocument.UNDER_MAINTENANCE.equals(statusDocument.getStatus());
     }
@@ -478,23 +474,16 @@ public class CDLJobServiceImpl implements CDLJobService {
     @SuppressWarnings("unchecked")
     @VisibleForTesting
     String getCurrentClusterID() {
-        String url = appPublicUrl + STACK_INFO_URL;
         String clusterId = null;
         try {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                    Collections.singleton(HttpServerErrorException.class), null);
             AtomicReference<Map<String, String>> stackInfo = new AtomicReference<>();
-            retry.execute(retryContext -> {
-                stackInfo.set(restTemplate.getForObject(url, Map.class));
-                return true;
-            });
+            stackInfo.set(plsHealthCheckProxy.getActiveStack());
             if (MapUtils.isNotEmpty(stackInfo.get()) && stackInfo.get().containsKey("EMRClusterId")) {
                 clusterId = stackInfo.get().get("EMRClusterId");
             }
         } catch (Exception e) {
             log.error("Get current cluster id failed. ", e);
         }
-
         return clusterId;
     }
 

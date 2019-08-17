@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -25,6 +25,9 @@ public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListene
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -33,8 +36,6 @@ public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListene
     public void afterJobExecution(JobExecution jobExecution) {
         String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
         log.info("tenantid: " + tenantId);
-        String hostPort = jobExecution.getJobParameters().getString("Internal_Resource_Host_Port");
-        log.info("hostPort: " + hostPort);
         String userId = jobExecution.getJobParameters().getString("User_Id");
         AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
         emailInfo.setUserId(userId);
@@ -43,9 +44,8 @@ public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListene
             String modelId = job.getInputContextValue(WorkflowContextConstants.Inputs.MODEL_ID);
             emailInfo.setModelId(modelId);
             log.info(String.format("userId: %s; modelId: %s", emailInfo.getUserId(), emailInfo.getModelId()));
-            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
+
             try {
-                proxy.sendPlsScoreEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
 
                 Object involvedEnrichmentForInternalAttributes = jobExecution.getExecutionContext()
                         .get(WorkflowContextConstants.Outputs.ENRICHMENT_FOR_INTERNAL_ATTRIBUTES_ATTEMPTED);
@@ -59,8 +59,7 @@ public class SendEmailAfterRTSBulkScoringCompletionListener extends LEJobListene
                     List<String> internalEnrichmentAttributes = JsonUtils.convertList(internalEnrichmentAttributesObj,
                             String.class);
                     emailInfo.setExtraInfoList(internalEnrichmentAttributes);
-
-                    proxy.sendPlsEnrichInternalAttributeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+                    plsInternalProxy.sendPlsEnrichInternalAttributeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
                 }
             } catch (Exception e) {
                 log.error("Can not send RTS bulk scoring email: " + e.getMessage());

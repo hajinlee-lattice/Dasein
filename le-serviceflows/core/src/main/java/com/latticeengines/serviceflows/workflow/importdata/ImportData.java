@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfi
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("importData")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -83,8 +82,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         SourceFile sourceFile = retrieveSourceFile(getConfiguration().getCustomerSpace(), //
                 getConfiguration().getSourceFileName());
         sourceFile.setState(SourceFileState.Imported);
-        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        proxy.updateSourceFile(sourceFile, space.toString());
+        plsInternalProxy.updateSourceFile(sourceFile, space.toString());
 
         Table table = metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),
                 sourceFile.getTableName());
