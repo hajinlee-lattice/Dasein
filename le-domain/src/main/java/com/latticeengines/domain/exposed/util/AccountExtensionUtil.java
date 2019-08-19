@@ -73,12 +73,13 @@ public class AccountExtensionUtil {
                         .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())
                         .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
                 accoundIdRestrictionBuilder.or(custAccountIdRestrictions);
-            } else {
-                Restriction accountIdRestriction = Restriction.builder()
-                        .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                        .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
-                accoundIdRestrictionBuilder.or(accountIdRestriction);
             }
+
+            Restriction accountIdRestriction = Restriction.builder()
+                    .let(BusinessEntity.Account, InterfaceName.AccountId.name())
+                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
+            accoundIdRestrictionBuilder.or(accountIdRestriction);
+
             idRestrictions.add(accoundIdRestrictionBuilder.build());
 
             if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
