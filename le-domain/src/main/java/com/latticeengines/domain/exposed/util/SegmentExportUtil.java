@@ -40,6 +40,8 @@ public class SegmentExportUtil {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    public static String SEPARATOR = "___";
+
     // For entity match enabled tenant, following attributes need to be hidden
     // from export
     // Just short-term fix. Exporting segment will change to Spark job
@@ -56,13 +58,21 @@ public class SegmentExportUtil {
         String displayName = metadataSegmentExportJob.getFileName();
 
         List<Attribute> combinedAttributes = new ArrayList<>();
-        for (List<Attribute> configuredAttributes : configuredBusEntityAttrMap.values()) {
+        for (Map.Entry<BusinessEntity, List<Attribute>> ent : configuredBusEntityAttrMap.entrySet()) {
+            List<Attribute> configuredAttributes = ent.getValue();
+            if (entityMatchEnabled) {
+                log.info(
+                        "Tenant is enabled with entity match. Will hide AccountId/ContactId from exporting data for entity {}",
+                        ent.getKey());
+                configuredAttributes = configuredAttributes.stream()
+                        // some attribute names are renamed to entity___attr in
+                        // SegmentExportProcessor
+                        .filter(attr -> !EM_HIDE_ATTRS.contains(attr.getName())
+                                && (!attr.getName().startsWith(ent.getKey() + SEPARATOR) || !EM_HIDE_ATTRS
+                                        .contains(attr.getName().substring((ent.getKey() + SEPARATOR).length()))))
+                        .collect(Collectors.toList());
+            }
             combineAttributes(configuredAttributes, combinedAttributes);
-        }
-        if (entityMatchEnabled) {
-            log.info("Tenant is enabled with entity match. Will hide AccountId and ContactId from export.");
-            combinedAttributes = combinedAttributes.stream().filter(attr -> !EM_HIDE_ATTRS.contains(attr.getName()))
-                    .collect(Collectors.toList());
         }
 
         log.info(String.format("Combined list of fields for export: %s",
