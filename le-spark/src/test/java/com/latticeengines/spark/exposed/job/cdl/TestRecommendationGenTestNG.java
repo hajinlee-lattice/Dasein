@@ -14,8 +14,6 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,20 +103,16 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
             if (count.get() == 1) {
                 List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
                         .collect(Collectors.toList());
-                log.info("account Cols:" + accountCols.toArray());
-                log.info("expected account Cols:" + Arrays.toString(accountExpectedCols.getLeft().toArray()));
-                Assert.assertTrue(
-                        verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight()));
+                verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight());
                 ObjectMapper jsonParser = new ObjectMapper();
                 try {
                     JsonNode jsonObject = jsonParser.readTree(contacts);
                     Assert.assertTrue(jsonObject.isArray());
                     List<String> contactCols = new ArrayList<>();
-                    jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
-                    log.info("contactCols Cols:" + Arrays.toString(contactCols.toArray()));
-                    log.info("expected Cols:" + Arrays.toString(contactExpectedCols.getLeft().toArray()));
-                    Assert.assertTrue(
-                            verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight()));
+                    if (jsonObject.size() > 0) {
+                        jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
+                        verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight());
+                    }
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -130,47 +124,23 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         return true;
     }
 
-    private boolean verifyCols(List<String> cols, List<String> expectedCols, boolean checkOrder) {
+    private void verifyCols(List<String> cols, List<String> expectedCols, boolean checkOrder) {
+        log.info("actual Cols:" + Arrays.toString(cols.toArray()));
+        log.info("expected Cols:" + Arrays.toString(expectedCols.toArray()));
         if (cols.size() != expectedCols.size()) {
-            return false;
+            Assert.fail(cols.size() + " size does not match with " + expectedCols.size());
         }
         if (checkOrder) {
-            return IntStream.range(0, cols.size()).allMatch(i -> cols.get(i) == expectedCols.get(i));
+            IntStream.range(0, cols.size()).forEach(i -> {
+                Assert.assertTrue(cols.get(i).equals(expectedCols.get(i)),
+                        "At " + i + ": " + cols.get(i) + "not equal to " + expectedCols.get(i));
+            });
         } else {
             Set<String> colsSet = new HashSet<>(cols);
-            return IntStream.range(0, cols.size()).allMatch(i -> colsSet.contains(expectedCols.get(i)));
+            IntStream.range(0, cols.size()).forEach(i -> {
+                Assert.assertTrue(colsSet.contains(expectedCols.get(i)), expectedCols.get(i) + "not included.");
+            });
         }
-    }
-
-    private void assertOrder(GenericRecord record) {
-        List<Schema.Field> fields = record.getSchema().getFields();
-        Assert.assertEquals(fields.size(), 25);
-        // fields.stream().forEach(field -> log.info(field.toString()));
-        Assert.assertEquals(fields.get(0).name(), "PID");
-        Assert.assertEquals(fields.get(1).name(), "EXTERNAL_ID");
-        Assert.assertEquals(fields.get(2).name(), "ACCOUNT_ID");
-        Assert.assertEquals(fields.get(3).name(), "LE_ACCOUNT_EXTERNAL_ID");
-        Assert.assertEquals(fields.get(4).name(), "PLAY_ID");
-        Assert.assertEquals(fields.get(5).name(), "LAUNCH_ID");
-        Assert.assertEquals(fields.get(6).name(), "DESCRIPTION");
-        Assert.assertEquals(fields.get(7).name(), "LAUNCH_DATE");
-        Assert.assertEquals(fields.get(8).name(), "LAST_UPDATED_TIMESTAMP");
-        Assert.assertEquals(fields.get(9).name(), "MONETARY_VALUE");
-        Assert.assertEquals(fields.get(10).name(), "LIKELIHOOD");
-        Assert.assertEquals(fields.get(11).name(), "COMPANY_NAME");
-        Assert.assertEquals(fields.get(12).name(), "SFDC_ACCOUNT_ID");
-        Assert.assertEquals(fields.get(13).name(), "PRIORITY_ID");
-        Assert.assertEquals(fields.get(14).name(), "PRIORITY_DISPLAY_NAME");
-        Assert.assertEquals(fields.get(15).name(), "MONETARY_VALUE_ISO4217_ID");
-        Assert.assertEquals(fields.get(16).name(), "LIFT");
-        Assert.assertEquals(fields.get(17).name(), "RATING_MODEL_ID");
-        Assert.assertEquals(fields.get(18).name(), "MODEL_SUMMARY_ID");
-        Assert.assertEquals(fields.get(19).name(), "CONTACTS");
-        Assert.assertEquals(fields.get(20).name(), "SYNC_DESTINATION");
-        Assert.assertEquals(fields.get(21).name(), "DESTINATION_ORG_ID");
-        Assert.assertEquals(fields.get(22).name(), "DESTINATION_SYS_TYPE");
-        Assert.assertEquals(fields.get(23).name(), "TENANT_ID");
-        Assert.assertEquals(fields.get(24).name(), "DELETED");
     }
 
     @Override
@@ -262,7 +232,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     }
 
     private List<List<Pair<List<String>, Boolean>>> generateSfdcExpectedColumns(boolean accountDataOnly) {
-        if (accountDataOnly) {
+        if (!accountDataOnly) {
             List<Pair<List<String>, Boolean>> list = Arrays.asList(
                     Pair.of(standardRecommendationAccountColumns(), true),
                     Pair.of(standardRecommendationContactColumns(), false));
@@ -282,7 +252,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     private List<String> standardRecommendationContactColumns() {
         return Arrays.asList(PlaymakerConstants.Email, PlaymakerConstants.Address, PlaymakerConstants.Phone,
                 PlaymakerConstants.State, PlaymakerConstants.ZipCode, PlaymakerConstants.Country,
-                PlaymakerConstants.SfdcContactID, PlaymakerConstants.City);
+                PlaymakerConstants.SfdcContactID, PlaymakerConstants.City, PlaymakerConstants.ContactID,
+                PlaymakerConstants.Name);
     }
 
     private PlayLaunchSparkContext generateSfdcPlayLaunchSparkContext() {
