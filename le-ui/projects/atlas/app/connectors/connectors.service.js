@@ -4,6 +4,7 @@ export const ELOQUA = "Eloqua";
 export const AWS_S3 = "AWS_S3";
 export const LINKEDIN = "LinkedIn";
 export const FACEBOOK = "Facebook";
+export const OUTREACH = "Outreach";
 
 export const EDIT_MODE = "edit";
 export const CREATE_MODE = "create";
@@ -76,7 +77,16 @@ class ConnectorService {
 						text:
 							"Display social ads to reach your future consumers by marketing to 2 billion people on Facebook"
 					}
-				}
+				},
+                Outreach: {
+                    defaultConnector: false,
+                    name: "Outreach",
+                    config: {
+                        img: "/atlas/assets/images/outreach.png",
+                        text:
+                            "Display social ads to reach your future consumers by marketing to 2 billion people on Facebook"
+                    }
+                }
 			};
 			this._connectorsList = [];
 			this.partnerId = "lattice-engines";
@@ -205,6 +215,7 @@ class ConnectorService {
 			case MARKETO:
 			case LINKEDIN:
 			case FACEBOOK:
+            case OUTREACH:
 				return true;
 			case SALESFORCE:
 			case ELOQUA:

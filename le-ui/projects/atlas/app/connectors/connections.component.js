@@ -56,7 +56,8 @@ export default class ConnectionsComponent extends Component {
 		this.connectors = ConnectorService.getList({
 			Marketo: this.ConnectorsService.isExternalIntegrationEnabled(),
 			Facebook: this.ConnectorsService.isFacebookIntegrationEnabled(),
-			LinkedIn: this.ConnectorsService.isLinkedInIntegrationEnabled()
+			LinkedIn: this.ConnectorsService.isLinkedInIntegrationEnabled(),
+            Outreach: this.ConnectorsService.isOutreachIntegrationEnabled()
 		});
 	}
 

@@ -6,7 +6,8 @@ import {
 	SALESFORCE,
 	ELOQUA,
 	LINKEDIN,
-	FACEBOOK
+	FACEBOOK,
+	OUTREACH
 } from "./connectors.service";
 
 // export const solutionInstanceConfig = {
@@ -19,12 +20,10 @@ import {
 // };
 
 export const FIELD_MAPPING = "external_field_mapping";
-// const EMAIL = "email";
+const EMAIL = "email";
 
 class ConfWindowService {
 	constructor() {
-		this.EMAIL = "email";
-		// this.FIELD_MAPPING = "external_field_mapping";
 		this.solutionInstanceConfig = {
 			orgType: null,
 			id: null,
@@ -382,6 +381,7 @@ class ConfWindowService {
 				: this.solutionInstanceConfig.orgType +
 				  "_" +
 				  new Date().getTime();
+		console.log(authentication);
 		switch (this.solutionInstanceConfig.orgType) {
 			case MARKETO:
 				var customFields = JSON.parse(authentication.node.customFields);
@@ -389,7 +389,7 @@ class ConfWindowService {
 					orgId:
 						customFields && customFields.identification
 							? customFields.identification.marketo_org_id
-							: guidGenerator(),
+							: this.guidGenerator(),
 					orgName: trayAuthenticationName,
 					externalSystemType: "MAP"
 				};
@@ -403,15 +403,16 @@ class ConfWindowService {
 				var adAccount =
 					externalAdAccount.length > 0
 						? externalAdAccount[0].value.replace(/['"]+/g, "")
-						: guidGenerator();
+						: this.guidGenerator();
 				return {
 					orgId: adAccount,
 					orgName: trayAuthenticationName,
 					externalSystemType: "ADS"
 				};
+			case OUTREACH:
 			default:
 				return {
-					orgId: guidGenerator(),
+					orgId: this.guidGenerator(),
 					orgName: trayAuthenticationName,
 					externalSystemType: "MAP"
 				};
