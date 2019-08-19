@@ -328,7 +328,8 @@ public class ProductFileValidationService
                 Set<String> activeXsellModelNames =
                         activeXSellModel.stream().map(RatingEngineSummary::getDisplayName).collect(Collectors.toSet());
                 for (String bundle : bundleToBeRemoved) {
-                    String errMsg = String.format("Error: \"%s\" can't be removed as existing active CE model %s",
+                    String errMsg = String.format("Error: \"%s\" can't be removed as existing active cross sell model" +
+                                    " %s",
                             bundle, StringUtils.join(activeXsellModelNames));
                     csvFilePrinter.printRecord("", "", errMsg);
                     errorLine++;
@@ -377,7 +378,8 @@ public class ProductFileValidationService
                             currentList.stream().map(Product::getProductBundleId).collect(Collectors.toSet());
                     for (String bundleId : bundleIds) {
                         if (bundleIdToModelName.containsKey(bundleId)) {
-                            String errMsg = String.format("Error: \"%s\" will be removed while also referenced by model %s",
+                            String errMsg = String.format("Error: \"%s\" which is directly referenced by " +
+                                            "model %s can't be removed.",
                                     bundle, StringUtils.join(bundleIdToModelName.get(bundleId)));
                             csvFilePrinter.printRecord("", "", errMsg);
                             missingBundleInUse++;
