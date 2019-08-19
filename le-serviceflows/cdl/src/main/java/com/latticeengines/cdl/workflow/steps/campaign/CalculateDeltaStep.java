@@ -121,8 +121,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         processDeltaCalculationResult(deltaCalculationResult, config);
 
         // 4) Record the new launch universe for the next delta calculation
-        channel.setCurrentLaunchedAccountUniverseTable(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, Table.class));
-        channel.setCurrentLaunchedContactUniverseTable(getObjectFromContext(FULL_CONTACTS_UNIVERSE, Table.class));
+        channel.setCurrentLaunchedAccountUniverseTable(metadataProxy.getTable(customerSpace.getTenantId(),
+                getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class)));
+        channel.setCurrentLaunchedContactUniverseTable(metadataProxy.getTable(customerSpace.getTenantId(),
+                getObjectFromContext(FULL_CONTACTS_UNIVERSE, String.class)));
         playProxy.updatePlayLaunchChannel(customerSpace.getTenantId(), config.getPlayId(), config.getChannelId(),
                 channel, false);
     }
@@ -167,8 +169,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
         HdfsDataUnit fullContactUniverse = deltaCalculationResult.getTargets().get(5);
         if (fullContactUniverse != null && fullContactUniverse.getCount() > 0) {
-            processHDFSDataUnit("FullContactUniverse_", fullContactUniverse, InterfaceName.ContactId.name(),
-                    FULL_CONTACTS_UNIVERSE);
+            processHDFSDataUnit("FullContactUniverse_" + config.getExecutionId(), fullContactUniverse,
+                    InterfaceName.ContactId.name(), FULL_CONTACTS_UNIVERSE);
         } else {
             log.info("Contact universe is empty");
         }
