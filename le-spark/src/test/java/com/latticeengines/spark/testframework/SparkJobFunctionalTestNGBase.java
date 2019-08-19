@@ -396,4 +396,9 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return true;
     }
 
+    protected Boolean verifyMultipleTarget(HdfsDataUnit tgt,
+            List<Pair<List<String>, Boolean>> accountAndContactExpectedCols) {
+        return true;
+    }
+
 }

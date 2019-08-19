@@ -105,6 +105,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
             if (count.get() == 1) {
                 List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
                         .collect(Collectors.toList());
+                log.info("account Cols:" + accountCols.toArray());
+                log.info("expected account Cols:" + Arrays.toString(accountExpectedCols.getLeft().toArray()));
                 Assert.assertTrue(
                         verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight()));
                 ObjectMapper jsonParser = new ObjectMapper();
@@ -113,6 +115,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                     Assert.assertTrue(jsonObject.isArray());
                     List<String> contactCols = new ArrayList<>();
                     jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
+                    log.info("contactCols Cols:" + Arrays.toString(contactCols.toArray()));
+                    log.info("expected Cols:" + Arrays.toString(contactExpectedCols.getLeft().toArray()));
                     Assert.assertTrue(
                             verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight()));
                 } catch (IOException e) {
