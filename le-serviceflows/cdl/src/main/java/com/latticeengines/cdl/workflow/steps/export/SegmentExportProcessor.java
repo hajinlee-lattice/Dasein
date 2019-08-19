@@ -73,7 +73,7 @@ public abstract class SegmentExportProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportProcessor.class);
 
-    public static String SEPARATOR = "___";
+    public static String SEPARATOR = SegmentExportUtil.SEPARATOR;
 
     @Inject
     protected ExportAccountFetcher accountFetcher;
