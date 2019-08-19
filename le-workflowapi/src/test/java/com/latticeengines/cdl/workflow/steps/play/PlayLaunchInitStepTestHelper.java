@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.play;
 
 import org.apache.hadoop.conf.Configuration;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
@@ -20,14 +21,15 @@ public class PlayLaunchInitStepTestHelper {
     private ContactFetcher contactFetcher;
     private FrontEndQueryCreator frontEndQueryCreator;
 
-    public PlayLaunchInitStepTestHelper(PlayProxy playProxy, LookupIdMappingProxy lookupIdMappingProxy, EntityProxy entityProxy,
-            RecommendationService recommendationService, long pageSize, MetadataProxy metadataProxy,
-            SqoopProxy sqoopProxy, RatingEngineProxy ratingEngineProxy, JobService jobService,
-            DataCollectionProxy dataCollectionProxy, String dataDbDriver, String dataDbUrl,
+    public PlayLaunchInitStepTestHelper(PlayProxy playProxy, LookupIdMappingProxy lookupIdMappingProxy,
+            EntityProxy entityProxy, RecommendationService recommendationService, long pageSize,
+            MetadataProxy metadataProxy, SqoopProxy sqoopProxy, RatingEngineProxy ratingEngineProxy,
+            JobService jobService, DataCollectionProxy dataCollectionProxy, String dataDbDriver, String dataDbUrl,
             String dataDbUser, String dataDbPassword, String dataDbDialect, String dataDbType,
-            Configuration yarnConfiguration) {
+            Configuration yarnConfiguration, BatonService batonService) {
         frontEndQueryCreator = new FrontEndQueryCreator();
         frontEndQueryCreator.initLookupFieldsConfiguration();
+        frontEndQueryCreator.setBatonService(batonService);
 
         recommendationCreator = new RecommendationCreator();
 
@@ -59,6 +61,7 @@ public class PlayLaunchInitStepTestHelper {
         playLaunchProcessor.setDataDbDialect(dataDbDialect);
         playLaunchProcessor.setDataDbType(dataDbType);
         playLaunchProcessor.setYarnConfiguration(yarnConfiguration);
+        playLaunchProcessor.setBatonService(batonService);
     }
 
     public RecommendationCreator getRecommendationCreator() {

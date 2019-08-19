@@ -28,6 +28,7 @@ import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.ExtractRuleBasedRatings;
 import com.latticeengines.cdl.workflow.steps.rating.PostIterationInitialization;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
+import com.latticeengines.cdl.workflow.steps.rating.SplitRatingEngines;
 import com.latticeengines.cdl.workflow.steps.rating.StartIteration;
 import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -57,6 +58,9 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     @Inject
     private ImportGeneratingRatingFromS3 importGeneratingRatingFromS3;
+
+    @Inject
+    private SplitRatingEngines splitRatingEngines;
 
     @Inject
     private GenerateAIRatingWorkflow generateAIRatingWorkflow;
@@ -139,7 +143,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             } else if (isResetRatingStep(step) || iterationFinished) {
                 skip = true;
             } else if (isStartIterationStep(step) || isCloneServingStoresStep(step)
-                    || isImportGeneratingRatingFromS3(step)) {
+                    || isImportGeneratingRatingFromS3(step) || isSplitRatingStep(step)) {
                 // always run these steps in rebuild mode
                 skip = false;
             } else {
@@ -191,7 +195,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private void initializeIteration(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (shouldRebuildAll) {
+        if (shouldRebuildAll || shouldRebuildSome) {
             if (!iterationFinished) {
                 iteration = step.getObjectFromContext(CURRENT_RATING_ITERATION, Integer.class);
                 List<RatingModelContainer> containers = step.getListObjectFromContext(ITERATION_RATING_MODELS,
@@ -227,6 +231,10 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean isPrepareStep(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.name().equals(prepareForRating.name());
+    }
+
+    private boolean isSplitRatingStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().equals(splitRatingEngines.name());
     }
 
     private boolean isCloneServingStoresStep(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -308,7 +316,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private boolean shouldProcessModelOfOneType(boolean hasModels, String modelType) {
-        boolean shouldProcess = shouldRebuildAll;
+        boolean shouldProcess = shouldRebuildAll || shouldRebuildSome;
         if (shouldProcess && !hasModels) {
             log.info("Has no " + modelType + " models, skip generating " + modelType + " ratings");
             shouldProcess = false;

@@ -41,4 +41,6 @@ public interface DynamoService {
     DescribeScalingPoliciesResult describeAutoScalingPolicy(String tableName, DynamoOperation operation);
 
     DescribeScalableTargetsResult describeScalableTargetsResult(String tableName, DynamoOperation operation);
+
+    boolean isCapacityOnDemand(String tableName);
 }

@@ -5,15 +5,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.kitesdk.shaded.com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
@@ -36,9 +40,17 @@ public class SegmentExportUtil {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    // For entity match enabled tenant, following attributes need to be hidden
+    // from export
+    // Just short-term fix. Exporting segment will change to Spark job
+    // ExtractAtlasEntity which will only export attributes which are enabled
+    // for enrichment (handled by metadata decorator)
+    private static final Set<String> EM_HIDE_ATTRS = ImmutableSet.of( //
+            InterfaceName.AccountId.name(), InterfaceName.ContactId.name());
+
     public static Table constructSegmentExportTable(//
             Tenant tenant, MetadataSegmentExport metadataSegmentExportJob, //
-            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
+            Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap, boolean entityMatchEnabled) {
 
         String tableName = metadataSegmentExportJob.getTableName();
         String displayName = metadataSegmentExportJob.getFileName();
@@ -46,6 +58,11 @@ public class SegmentExportUtil {
         List<Attribute> combinedAttributes = new ArrayList<>();
         for (List<Attribute> configuredAttributes : configuredBusEntityAttrMap.values()) {
             combineAttributes(configuredAttributes, combinedAttributes);
+        }
+        if (entityMatchEnabled) {
+            log.info("Tenant is enabled with entity match. Will hide AccountId and ContactId from export.");
+            combinedAttributes = combinedAttributes.stream().filter(attr -> !EM_HIDE_ATTRS.contains(attr.getName()))
+                    .collect(Collectors.toList());
         }
 
         log.info(String.format("Combined list of fields for export: %s",

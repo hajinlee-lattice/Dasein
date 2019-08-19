@@ -5,6 +5,7 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EXPORT_SCHEMA_MAP;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -22,25 +23,30 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.pls.AccountContactExportContext;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.spark.exposed.job.cdl.AccountContactExportJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 
@@ -64,6 +70,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private AtlasExport atlasExport;
     private AttributeRepository attrRepo;
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
+    private AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
 
     @Override
     public void execute() {
@@ -74,36 +81,94 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         schemaMap = getExportSchema();
         atlasExport = buildAtlasExport();
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
-
+        List<String> filesToDelete = new ArrayList<>();
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         Map<ExportEntity, HdfsDataUnit> resultMap = retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
-                log.warn("Previous failure:",  ctx.getLastThrowable());
+                log.warn("Previous failure:", ctx.getLastThrowable());
             }
             Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                configuration.getExportEntities().forEach(exportEntity -> {
-                    BusinessEntity mainEntity = null;
-                    if (ExportEntity.Account.equals(exportEntity)) {
-                        mainEntity = BusinessEntity.Account;
-                    } else if (ExportEntity.Contact.equals(exportEntity)) {
-                        mainEntity = BusinessEntity.Contact;
+                List<ExportEntity> entities = new ArrayList<>();
+                if (AtlasExportType.ACCOUNT.equals(atlasExport.getExportType())) {
+                    entities.add(ExportEntity.Account);
+                    resultForCurrentAttempt = getResultAttempt(entities);
+                    addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
+                } else if (AtlasExportType.CONTACT.equals(atlasExport.getExportType())) {
+                    entities.add(ExportEntity.Contact);
+                    resultForCurrentAttempt = getResultAttempt(entities);
+                    addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
+                } else if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType())) {
+                    entities.add(ExportEntity.Account);
+                    entities.add(ExportEntity.Contact);
+                    resultForCurrentAttempt = getResultAttempt(entities);
+                    addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
+                    if (!atlasExport.getScheduled()) {
+                        SparkJobResult sparkJobResult = executeSparkJob(AccountContactExportJob.class,
+                                generateAccountAndContactExportConfig(resultForCurrentAttempt.get(ExportEntity.Account),
+                                        resultForCurrentAttempt.get(ExportEntity.Contact)));
+                        resultForCurrentAttempt = new HashMap<>();
+                        HdfsDataUnit hdfsDataUnit = sparkJobResult.getTargets().get(0);
+                        filesToDelete.add(hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/")));
+                        resultForCurrentAttempt.put(ExportEntity.AccountContact, hdfsDataUnit);
                     }
-                    if (isEntityValid(mainEntity)) {
-                        FrontEndQuery frontEndQuery = getFrontEndQueryCopy();
-                        HdfsDataUnit entityResult = exportOneEntity(exportEntity, frontEndQuery);
-                        resultForCurrentAttempt.put(exportEntity, entityResult);
-                    }
-                });
+                }
             } finally {
                 stopSparkSQLSession();
             }
             return resultForCurrentAttempt;
         });
-
         putObjectInContext(ATLAS_EXPORT_DATA_UNIT, resultMap);
+        putObjectInContext(ATLAS_EXPORT_DELETE_PATH, filesToDelete);
+    }
+
+    private void addPathToDeletePath(List<String> files, Map<ExportEntity, HdfsDataUnit> outputUnits) {
+        files.addAll(outputUnits.values().stream().map(hdfsDataUnit -> hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/"))).collect(Collectors.toList()));
+    }
+
+    private AtlasExport buildAtlasExport() {
+        String customerSpaceStr = configuration.getCustomerSpace().toString();
+        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpaceStr,
+                configuration.getAtlasExportId());
+        WorkflowStaticContext.putObject(ATLAS_EXPORT, atlasExport);
+        return atlasExport;
+    }
+
+    private AccountContactExportConfig generateAccountAndContactExportConfig(HdfsDataUnit accountDataUnit,
+                                                                             HdfsDataUnit contactDataUnit) {
+        AccountContactExportConfig accountContactExportConfig = new AccountContactExportConfig();
+        accountContactExportConfig.setWorkspace(getRandomWorkspace());
+        if (contactDataUnit != null) {
+            accountContactExportConfig.setInput(Arrays.asList(accountDataUnit, contactDataUnit));
+        } else {
+            accountContactExportConfig.setInput(Collections.singletonList(accountDataUnit));
+        }
+        accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
+        log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
+        return accountContactExportConfig;
+    }
+
+
+    private Map<ExportEntity, HdfsDataUnit> getResultAttempt(List<ExportEntity> exportEntities) {
+        Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
+        exportEntities.forEach(exportEntity -> {
+            BusinessEntity mainEntity = null;
+            if (ExportEntity.Account.equals(exportEntity)) {
+                mainEntity = BusinessEntity.Account;
+            } else if (ExportEntity.Contact.equals(exportEntity)) {
+                mainEntity = BusinessEntity.Contact;
+            }
+            if (isEntityValid(mainEntity)) {
+                FrontEndQuery frontEndQuery = new FrontEndQuery();
+                frontEndQuery.setAccountRestriction(atlasExport.getAccountFrontEndRestriction());
+                frontEndQuery.setContactRestriction(atlasExport.getContactFrontEndRestriction());
+                HdfsDataUnit entityResult = exportOneEntity(exportEntity, frontEndQuery);
+                resultForCurrentAttempt.put(exportEntity, entityResult);
+            }
+        });
+        return resultForCurrentAttempt;
     }
 
     @Override
@@ -139,47 +204,107 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return attrRepo;
     }
 
-    private AtlasExport buildAtlasExport() {
-        String customerSpaceStr = configuration.getCustomerSpace().toString();
-        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpaceStr,
-                configuration.getAtlasExportId());
-        WorkflowStaticContext.putObject(ATLAS_EXPORT, atlasExport);
-        return atlasExport;
+    private List<Lookup> getAccountLookup() {
+        List<Lookup> lookups = new ArrayList<>();
+        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
+            if (!BusinessEntity.Contact.equals(entity)) {
+                List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
+                cms.forEach(cm -> lookups.add(new AttributeLookup(entity, cm.getAttrName())));
+            }
+        }
+        // from GUI export
+        if (!atlasExport.getScheduled()) {
+            AttributeLookup accountIdLookup = new AttributeLookup(BusinessEntity.Account,
+                    InterfaceName.AccountId.name());
+            if (!lookups.contains(accountIdLookup)) {
+                lookups.add(accountIdLookup);
+            }
+        }
+        lookups.sort((lookup1, lookup2) -> {
+            AttributeLookup attributeLookup1 = (AttributeLookup) lookup1;
+            if (InterfaceName.AccountId.name().equals(attributeLookup1.getAttribute())) {
+                return -1;
+            }
+            AttributeLookup attributeLookup2 = (AttributeLookup) lookup2;
+            if (InterfaceName.AccountId.name().equals(attributeLookup2.getAttribute())) {
+                return 1;
+            }
+            return attributeLookup1.getAttribute().compareTo(attributeLookup2.getAttribute());
+        });
+        return lookups;
     }
 
-
-    private FrontEndQuery getFrontEndQueryCopy() {
-        FrontEndQuery inConfig = new FrontEndQuery();
-        inConfig.setAccountRestriction(atlasExport.getAccountFrontEndRestriction());
-        inConfig.setContactRestriction(atlasExport.getContactFrontEndRestriction());
-        FrontEndQuery frontEndQuery;
-        if (inConfig != null) {
-            frontEndQuery = JsonUtils.deserialize(JsonUtils.serialize(inConfig), FrontEndQuery.class);
-            frontEndQuery.setPageFilter(null);
-            inConfig.setPageFilter(null);
-        } else {
-            frontEndQuery = new FrontEndQuery();
+    private Map<String, Lookup> getAccountLookupMap() {
+        Map<String, Lookup> lookupMap = new HashMap<>();
+        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
+            if (!BusinessEntity.Contact.equals(entity)) {
+                List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
+                cms.forEach(cm -> lookupMap.put(cm.getAttrName(), new AttributeLookup(entity, cm.getAttrName())));
+            }
         }
-        return frontEndQuery;
+        // from GUI export
+        if (!atlasExport.getScheduled()) {
+            if (!lookupMap.containsKey(InterfaceName.AccountId.name())) {
+                lookupMap.put(InterfaceName.AccountId.name(), new AttributeLookup(BusinessEntity.Account,
+                        InterfaceName.AccountId.name()));
+            }
+        }
+        return lookupMap;
+    }
+
+    private List<Lookup> getContactLookup() {
+        List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
+        List<Lookup> lookups;
+        // from GUI export
+        if (!atlasExport.getScheduled()) {
+            // remove the attribute already exist in account if query account and contact together
+            if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
+                Map<String, Lookup> accountLookupMap = getAccountLookupMap();
+                lookups =
+                        cms.stream().filter(cm -> !accountLookupMap.containsKey(cm.getAttrName()) && !InterfaceName.AccountId.name().equals(cm.getAttrName()))
+                                .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
+                                .collect(Collectors.toList());
+            } else {
+                lookups = cms.stream().map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
+                        .collect(Collectors.toList());
+            }
+            AttributeLookup contactIdLookup = new AttributeLookup(BusinessEntity.Contact,
+                    InterfaceName.ContactId.name());
+            if (!lookups.contains(contactIdLookup)) {
+                lookups.add(contactIdLookup);
+            }
+            AttributeLookup accountIdLookup = new AttributeLookup(BusinessEntity.Contact,
+                    InterfaceName.AccountId.name());
+            if (!lookups.contains(accountIdLookup)) {
+                lookups.add(accountIdLookup);
+            }
+        } else {
+            lookups = cms.stream()
+                    .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
+                    .collect(Collectors.toList());
+        }
+        lookups.sort((lookup1, lookup2) -> {
+            AttributeLookup attributeLookup1 = (AttributeLookup) lookup1;
+            if (InterfaceName.ContactId.name().equals(attributeLookup1.getAttribute())) {
+                return -1;
+            }
+            AttributeLookup attributeLookup2 = (AttributeLookup) lookup2;
+            if (InterfaceName.ContactId.name().equals(attributeLookup2.getAttribute())) {
+                return 1;
+            }
+            return attributeLookup1.getAttribute().compareTo(attributeLookup2.getAttribute());
+        });
+        return lookups;
     }
 
     private HdfsDataUnit exportOneEntity(ExportEntity exportEntity, FrontEndQuery frontEndQuery) {
         List<Lookup> lookups;
         if (ExportEntity.Account.equals(exportEntity)) {
             frontEndQuery.setMainEntity(BusinessEntity.Account);
-            lookups = new ArrayList<>();
-            for (BusinessEntity entity: BusinessEntity.EXPORT_ENTITIES) {
-                if (!BusinessEntity.Contact.equals(entity)) {
-                    List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
-                    cms.forEach(cm -> lookups.add(new AttributeLookup(entity, cm.getAttrName())));
-                }
-            }
+            lookups = getAccountLookup();
         } else if (ExportEntity.Contact.equals(exportEntity)) {
             frontEndQuery.setMainEntity(BusinessEntity.Contact);
-            List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
-            lookups = cms.stream() //
-                    .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName())) //
-                    .collect(Collectors.toList());
+            lookups = getContactLookup();
         } else {
             throw new UnsupportedOperationException("Unknown export entity " + exportEntity);
         }
@@ -208,7 +333,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private Map<BusinessEntity, List<ColumnMetadata>> getExportSchema() {
         List<ColumnSelection.Predefined> groups = Collections.singletonList(ColumnSelection.Predefined.Enrichment);
         Map<BusinessEntity, List<ColumnMetadata>> schemaMap = new HashMap<>();
-        for (BusinessEntity entity: BusinessEntity.EXPORT_ENTITIES) {
+        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
             List<ColumnMetadata> cms = servingStoreProxy //
                     .getDecoratedMetadata(customerSpace.toString(), entity, groups, version).collectList().block();
             if (CollectionUtils.isNotEmpty(cms)) {

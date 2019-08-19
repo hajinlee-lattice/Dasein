@@ -197,6 +197,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DESTINATION_ORG_ID")
     private String destinationOrgId;
 
+    @Transient
     @JsonProperty("destinationOrgName")
     private String destinationOrgName;
 

@@ -234,5 +234,8 @@ public class MetadataResolverUnitTestNG {
         Assert.assertEquals(formatForDateAndTime.getLeft(), "DD.MMM.YYYY");
         Assert.assertEquals(formatForDateAndTime.getMiddle(), "00 00 12H");
         Assert.assertNull(formatForDateAndTime.getRight());
+
+        // Bug PLS-14490
+        Assert.assertNull(formatForDateAndTime = metadataResolver.distinguishDateAndTime(new ArrayList<>()));
     }
 }

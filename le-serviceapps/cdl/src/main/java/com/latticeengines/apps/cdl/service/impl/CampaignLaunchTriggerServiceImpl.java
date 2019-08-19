@@ -45,6 +45,10 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
     public CampaignLaunchTriggerServiceImpl() {
         super(PropertyUtils.getProperty("common.internal.app.url"), "cdl");
+        String env = PropertyUtils.getProperty("common.le.environment");
+        if ("dev".equals(env) || "devcluster".equals(env)) {
+            setHostport(PropertyUtils.getProperty("common.microservice.url"));
+        }
     }
 
     @Override
@@ -75,17 +79,20 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                     launchingPlayLaunches.size()));
             return true;
         }
-        Set<String> currentlyLaunchingPlayAndChannels = launchingPlayLaunches.stream()
-                .map(launch -> launch.getPlay().getName() + launch.getPlayLaunchChannel().getId())
-                .collect(Collectors.toSet());
+        Set<String> currentlyLaunchingChannels = launchingPlayLaunches.stream()
+                .filter(launch -> launch.getPlayLaunchChannel() != null)
+                .map(launch -> launch.getPlayLaunchChannel().getId()).collect(Collectors.toSet());
 
         Iterator<PlayLaunch> iterator = queuedPlayLaunches.iterator();
         int i = launchingPlayLaunches.size();
 
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
-            if (currentlyLaunchingPlayAndChannels
-                    .contains(launch.getPlay().getName() + launch.getPlayLaunchChannel().getId())) {
+            if (launch.getPlayLaunchChannel() == null) {
+                log.info(String.format("No play channel for this play launch %s", launch.getId()));
+                continue;
+            }
+            if (currentlyLaunchingChannels.contains(launch.getPlayLaunchChannel().getId())) {
                 log.info(String.format(
                         "Launch: %s skipped since a play launch is already being launched to this channel",
                         launch.getId()));

@@ -308,8 +308,9 @@ public class CampaignLaunchProcessor {
             PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
 
             playProxy.updatePlayLaunchProgress(playLaunchContext.getCustomerSpace().toString(), //
-                    playLaunch.getPlay().getName(), playLaunch.getLaunchId(), playLaunch.getLaunchCompletionPercent(),
-                    playLaunch.getAccountsLaunched(), playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
+                    playLaunchContext.getPlay().getName(), playLaunch.getLaunchId(),
+                    playLaunch.getLaunchCompletionPercent(), playLaunch.getAccountsLaunched(),
+                    playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
                     playLaunch.getAccountsSuppressed(), playLaunch.getContactsSuppressed(),
                     playLaunch.getContactsErrored());
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -52,10 +53,9 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         verifyResult(result);
 
         // mimic the case where there is no contact data
-        // inputs = Collections.singletonList(accountData);
-        // result = runSparkJob(CreateRecommendationsJob.class,
-        // createRecConfig);
-        // verifyResult(result);
+        inputs = Collections.singletonList(accountData);
+        result = runSparkJob(CreateRecommendationsJob.class, createRecConfig);
+        verifyResult(result);
     }
 
     private PlayLaunchSparkContext generatePlayLaunchSparkContext() {
@@ -83,10 +83,6 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         aiModel.setUpdatedBy(ratingEngine.getUpdatedBy());
         aiModel.setRatingEngine(ratingEngine);
         ratingEngine.setLatestIteration(aiModel);
-        List<String> accountColsRecIncluded = Arrays.asList("one", "two", "three");
-        List<String> accountColsRecNotIncludedStd = Arrays.asList("one", "two", "three");
-        List<String> accountColsRecNotIncludedNonStd = Arrays.asList("one", "two", "three");
-        List<String> contactCols = Arrays.asList("one", "two", "three");
 
         PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
                 .tenant(tenant)//
@@ -99,10 +95,6 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 .launchTimestampMillis(launchTime)//
                 .ratingId(ratingId)//
                 .publishedIteration(aiModel)//
-                .accountColsRecIncluded(accountColsRecIncluded)//
-                .accountColsRecNotIncludedStd(accountColsRecNotIncludedStd)//
-                .accountColsRecNotIncludedNonStd(accountColsRecNotIncludedNonStd)//
-                .contactCols(contactCols)//
                 .build();
         return sparkContext;
     }

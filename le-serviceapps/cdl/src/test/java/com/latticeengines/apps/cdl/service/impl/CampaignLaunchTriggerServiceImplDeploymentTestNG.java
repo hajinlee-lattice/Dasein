@@ -2,9 +2,11 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,6 +35,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.testframework.exposed.utils.TestRetryUtils;
 
 public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -143,36 +146,66 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", retryAnalyzer = SimpleRetryPolicy.class)
     public void testTriggerQueuedLaunches() throws InterruptedException {
-        List<PlayLaunch> queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        int initialQueuedSize = queuedPlayLaunches.size();
-        List<PlayLaunch> launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        int initiaLaunchingSize = launchingPlayLaunches.size();
+        TestRetryUtils.retryForAssertionError(() -> {
+            List<String> queuedPlayLaunchesIdList = //
+                    playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
+                    .stream().map(PlayLaunch::getId).collect(Collectors.toList());
+            Assert.assertTrue(queuedPlayLaunchesIdList.contains(playLaunch1.getId()));
+            Assert.assertTrue(queuedPlayLaunchesIdList.contains(playLaunch2.getId()));
+        });
+        TestRetryUtils.retryForAssertionError(() -> {
+            List<String> launchingPlayLaunchesIdList = playLaunchService
+                    .getByStateAcrossTenants(LaunchState.Launching, null).stream() //
+                    .map(PlayLaunch::getId)
+                    .collect(Collectors.toList());
+            Assert.assertFalse(launchingPlayLaunchesIdList.contains(playLaunch1.getId()));
+            Assert.assertFalse(launchingPlayLaunchesIdList.contains(playLaunch2.getId()));
+        });
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(1000);
-        queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 2);
-        launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
+        TestRetryUtils.retryForAssertionError(() -> {
+            List<String> queuedPlayLaunchesIdList = //
+                    playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
+                    .stream().map(PlayLaunch::getId).collect(Collectors.toList());
+            Assert.assertFalse(queuedPlayLaunchesIdList.contains(playLaunch1.getId()));
+            Assert.assertFalse(queuedPlayLaunchesIdList.contains(playLaunch2.getId()));
+            List<String> launchingPlayLaunchesIdList = playLaunchService
+                    .getByStateAcrossTenants(LaunchState.Launching, null).stream() //
+                    .map(PlayLaunch::getId).collect(Collectors.toList());
+            Assert.assertTrue(launchingPlayLaunchesIdList.contains(playLaunch1.getId()));
+            Assert.assertTrue(launchingPlayLaunchesIdList.contains(playLaunch2.getId()));
+        });
 
         // test that a play launch that's in queued state does not launch if
         // there already is a play launch launching to the same channel
         PlayLaunch playLaunch2a = playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel2, play);
         Assert.assertNotNull(playLaunch2a);
-        queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 1);
-        launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
+        Thread.sleep(1000);
+        TestRetryUtils.retryForAssertionError(() -> {
+            List<String> queuedPlayLaunchesIdList = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null)
+                    .stream().map(PlayLaunch::getId).collect(Collectors.toList());
+            Assert.assertTrue(queuedPlayLaunchesIdList.contains(playLaunch2a.getId()));
+            List<String> launchingPlayLaunchesIdList = playLaunchService
+                    .getByStateAcrossTenants(LaunchState.Launching, null).stream().map(PlayLaunch::getId)
+                    .collect(Collectors.toList());
+            Assert.assertFalse(launchingPlayLaunchesIdList.contains(playLaunch2a.getId()));
+        });
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(1000);
-        queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null);
-        Assert.assertEquals(queuedPlayLaunches.size(), initialQueuedSize - 1);
-        launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-        Assert.assertEquals(launchingPlayLaunches.size(), initiaLaunchingSize + 2);
-
+        TestRetryUtils.retryForAssertionError(() -> {
+            List<String> queuedPlayLaunchesIdList = //
+                    playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
+                    .stream().map(PlayLaunch::getId).collect(Collectors.toList());
+            Assert.assertTrue(queuedPlayLaunchesIdList.contains(playLaunch2a.getId()));
+            List<String> launchingPlayLaunchesIdList = playLaunchService
+                    .getByStateAcrossTenants(LaunchState.Launching, null).stream() //
+                    .map(PlayLaunch::getId).collect(Collectors.toList());
+            Assert.assertFalse(launchingPlayLaunchesIdList.contains(playLaunch2a.getId()));
+        });
     }
 
     @AfterClass(groups = "deployment")

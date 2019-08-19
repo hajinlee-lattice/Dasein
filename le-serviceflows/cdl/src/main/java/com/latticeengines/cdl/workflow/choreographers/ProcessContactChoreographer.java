@@ -18,7 +18,6 @@ import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.cdl.workflow.steps.update.CloneContact;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -108,7 +107,7 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
         } else {
             boolean commonRebuild = super.shouldRebuild(step);
             if (!commonRebuild && !reset) {
-                if (hasNonTrivialAccountChange(step)) {
+                if (accountChoreographer.hasNonTrivialChange()) {
                     log.info("Should rebuild, since account has non-trivial change");
                     return true;
                 } else if (hasAttrLifeCycleChange) {
@@ -145,15 +144,6 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         return false;
-    }
-
-    private boolean hasNonTrivialAccountChange(AbstractStep<? extends BaseStepConfiguration> step) {
-        boolean isEntityMatchEnabled = false;
-        if (step.getConfiguration() != null && step.getConfiguration() instanceof ProcessContactStepConfiguration) {
-            isEntityMatchEnabled = ((ProcessContactStepConfiguration) step.getConfiguration()).isEntityMatchEnabled();
-        }
-        hasNonTrivialAccountChange = !isEntityMatchEnabled && accountChoreographer.hasNonTrivialChange();
-        return hasNonTrivialAccountChange;
     }
 
 }

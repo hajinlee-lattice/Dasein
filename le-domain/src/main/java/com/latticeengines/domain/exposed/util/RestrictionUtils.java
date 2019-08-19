@@ -207,6 +207,7 @@ public class RestrictionUtils {
         } else if (bkt.getDateFilter() != null) {
             restriction = convertDateBucket(bucketRestriction, translatePriorOnly);
         } else {
+            cleanupBucketRestriction(bucketRestriction);
             ComparisonType comparisonType = bkt.getComparisonType();
             List<Object> values = bkt.getValues();
             if (comparisonType == null) {
@@ -468,7 +469,7 @@ public class RestrictionUtils {
 
     private static void validateEmptyValue(ComparisonType comparisonType, List<Object> values) {
         if (CollectionUtils.isNotEmpty(values)) {
-            throw new IllegalArgumentException(comparisonType + " should not have any value.");
+            log.warn(comparisonType + " should not have any value.");
         }
     }
 

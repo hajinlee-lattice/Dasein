@@ -46,6 +46,7 @@ public enum LatticeFeatureFlag {
     ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
     ENABLE_EXPORT_FIELD_METADATA("EnableExportFieldMetadata", "Enable export field metadata integration"), //
+    ENABLE_EXPORT_WITH_SPARK_SQL("EnableExportWithSparkSQL", "Enable segment export using spark SQL"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

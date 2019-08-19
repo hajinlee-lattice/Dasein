@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -60,6 +62,9 @@ public class FrontEndQueryCreator {
 
     @Value("${playmaker.workflow.contact.shouldapply.launch.flag.sfdcid.exclusion:true}")
     private Boolean applyExcludeItemsWithoutSalesforceIdOnContacts;
+
+    @Inject
+    private BatonService batonService;
 
     @PostConstruct
     public void init() {
@@ -137,6 +142,10 @@ public class FrontEndQueryCreator {
         if (useSpark) {
             unionAccountAndContactLookups(accountLookups, contactLookups, playLaunchContext.getFieldMappingMetadata(),
                     result);
+        }
+        if (batonService.isEntityMatchEnabled(playLaunchContext.getCustomerSpace())) {
+            accountLookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()));
+            contactLookups.add(new AttributeLookup(BusinessEntity.Contact, InterfaceName.CustomerContactId.name()));
         }
         playLaunchContext.getAccountFrontEndQuery().setLookups(accountLookups);
         playLaunchContext.getContactFrontEndQuery().setLookups(contactLookups);
@@ -378,6 +387,11 @@ public class FrontEndQueryCreator {
                 InterfaceName.PhoneNumber.name(), //
                 InterfaceName.Title.name(), //
                 InterfaceName.Address_Street_1.name()));
+    }
+
+    @VisibleForTesting
+    void setBatonService(BatonService batonService) {
+        this.batonService = batonService;
     }
 
 }

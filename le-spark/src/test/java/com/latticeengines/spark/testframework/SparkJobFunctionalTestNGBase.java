@@ -293,6 +293,9 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         String path = target.getPath();
         try {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, path));
+            if (CollectionUtils.isNotEmpty(target.getPartitionKeys())) {
+                path = path + StringUtils.repeat("/**", target.getPartitionKeys().size());
+            }
             if (DataUnit.DataFormat.PARQUET.equals(target.getDataFormat())) {
                 log.info("Read parquet files in " + path + " as avro records.");
                 return ParquetUtils.iteratorParquetFiles(yarnConfiguration, PathUtils.toParquetGlob(path));
@@ -315,4 +318,34 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return true;
     }
 
+    protected List<String> hdfsOutputsAsInputs(List<HdfsDataUnit> units) {
+        inputUnits = new HashMap<>();
+        List<String> names = new ArrayList<>();
+        units.forEach(unit -> {
+            int seq = inputSeq.getAndIncrement();
+            String recordName = "Input" + seq;
+            String dirPath = getWorkspace() + "/" + recordName;
+            try {
+                HdfsUtils.fileExists(yarnConfiguration, unit.getPath());
+            } catch (Exception e) {
+                throw new RuntimeException("Partitioned output path don't exist.", e);
+            }
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, dirPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, dirPath);
+                }
+                HdfsUtils.copyFiles(yarnConfiguration, unit.getPath(), dirPath);
+                HdfsUtils.rmdir(yarnConfiguration, dirPath + "/" + "_SUCCESS");
+            } catch (Exception e) {
+                throw new RuntimeException("Partition copy failed.", e);
+            }
+            HdfsDataUnit dataUnit = new HdfsDataUnit();
+            dataUnit.setName(recordName);
+            dataUnit.setPath(dirPath);
+            dataUnit.setPartitionKeys(unit.getPartitionKeys());
+            inputUnits.put(recordName, dataUnit);
+            names.add(recordName);
+        });
+        return names;
+    }
 }

@@ -39,6 +39,7 @@ public class DataFlowStepListener implements FlowStepListener {
 
     @Override
     public boolean onStepThrowable(FlowStep flowStep, Throwable throwable) {
+        log.warn(String.format("Exception during step %s.", flowStep.getStepDisplayName()), throwable);
         return false;
     }
 
