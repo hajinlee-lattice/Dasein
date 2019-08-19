@@ -2,6 +2,7 @@ package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -92,6 +93,66 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
         int batch = 512;
         List<RawCollectionRequest> reqBuf = new ArrayList<>(batch);
         saveRequestsInternal(reqBuf, batch, domains, vendor, reqId);
+
+    }
+
+    @Override
+    @Transactional
+    public void updateTransferred(Iterable<RawCollectionRequest> added, BitSet filter, boolean deleteFiltered) {
+
+        //temp buf
+        int batch = 512;
+        List<RawCollectionRequest> updBuf = new ArrayList<>(batch);
+        List<RawCollectionRequest> delBuf = new ArrayList<>(batch);
+
+        int i = 0;
+        for (RawCollectionRequest req : added) {
+
+            //add to temp del/update buf
+            boolean toDel = filter.get(i);
+            if (!toDel) {
+
+                updBuf.add(req);
+
+            } else if (deleteFiltered) {
+
+                delBuf.add(req);
+
+            }
+            ++i;
+
+            //update in batch
+            if (updBuf.size() == batch) {
+
+                repository.saveAll(updBuf);
+                updBuf.clear();
+
+            }
+
+            //delete in batch
+            if (delBuf.size() == batch) {
+
+                repository.deleteAll(delBuf);
+                delBuf.clear();
+
+            }
+        }
+
+        //update if buf not empty
+        if (updBuf.size() > 0) {
+
+            repository.saveAll(updBuf);
+            updBuf.clear();
+
+        }
+
+        //delete if buf not empty
+        if (delBuf.size() > 0) {
+
+            repository.deleteAll(delBuf);
+            delBuf.clear();
+
+        }
 
     }
 

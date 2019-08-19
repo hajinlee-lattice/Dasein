@@ -103,35 +103,17 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
         //update transferred status
         for (int i = 0; i < added.size(); ++i) {
 
-            if (filter.get(i)) {
-
-                continue;
-
-            }
-
-            added.get(i).setTransferred(true);
-
-            rawCollectionRequestMgr.update(added.get(i));
-
-        }
-
-        //delete filtered items?
-        if (!deleteFiltered) {
-
-            return;
-
-        }
-        for (int i = 0; i < added.size(); ++i) {
-
             if (!filter.get(i)) {
 
-                continue;
+                added.get(i).setTransferred(true);
 
             }
 
-            rawCollectionRequestMgr.delete(added.get(i));
-
         }
+
+        //call entity-mgr to update & del obj in db
+        rawCollectionRequestMgr.updateTransferred(added, filter, deleteFiltered);
+        log.info("updating raw req transferred status done");
 
     }
 
@@ -177,6 +159,8 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
     public void cleanup() {
 
         rawCollectionRequestMgr.cleanupTransferred(cleanupBatch);
+
+        log.info("cleaning transferred raw req done");
 
     }
 }

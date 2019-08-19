@@ -465,9 +465,12 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
     @Override
     public void cleanupRequestHandled(String vendor, Timestamp before) {
+
         List<String> statuses = Arrays.asList(CollectionRequest.STATUS_DELIVERED, CollectionRequest.STATUS_FAILED);
 
         collectionRequestMgr.cleanupRequests(statuses, vendor, before, cleanupBatch);
+
+        log.info("cleaning expired " + vendor + " collection req done");
 
     }
 }
