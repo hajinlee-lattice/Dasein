@@ -146,7 +146,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
 
     private void dumpDomains(String transferId, Collection<String> domains) {
         putDomainsInAccountTransferTable(transferId, domains);
-        rawCollectionRequestMgr.saveDomains(domains, transferId);
+        rawCollectionRequestMgr.saveRequests(domains, transferId);
     }
 
     private void putDomainsInAccountTransferTable(String transferId, Collection<String> domains) {

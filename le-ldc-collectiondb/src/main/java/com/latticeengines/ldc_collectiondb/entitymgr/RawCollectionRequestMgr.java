@@ -1,6 +1,7 @@
 package com.latticeengines.ldc_collectiondb.entitymgr;
 
 import java.sql.Timestamp;
+import java.util.BitSet;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
@@ -10,11 +11,13 @@ public interface RawCollectionRequestMgr extends BaseEntityMgrRepository<RawColl
 
     List<RawCollectionRequest> getNonTransferred(int limit);
 
-    void saveRequests(Iterable<RawCollectionRequest> reqs);
+    void updateTransferred(Iterable<RawCollectionRequest> added, BitSet filter, boolean deleteFiltered);
 
-    void saveDomains(Iterable<String> domains, String reqId);
+    void saveRequests(Iterable<String> domains, String vendor, String reqId);
+
+    void saveRequests(Iterable<String> domains, String reqId);
 
     void cleanupRequestsBetween(Timestamp start, Timestamp end);
 
-    void cleanupTransferred();
+    void cleanupTransferred(int batch);
 }
