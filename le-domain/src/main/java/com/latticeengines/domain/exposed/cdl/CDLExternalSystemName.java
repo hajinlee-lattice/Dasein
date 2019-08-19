@@ -11,6 +11,7 @@ public enum CDLExternalSystemName {
     LinkedIn("LinkedIn"), //
     GoogleAds("Google Ads"), //
     AWS_S3("AWS S3"), //
+    Outreach("Outreach"), //
     Others("Others");
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();

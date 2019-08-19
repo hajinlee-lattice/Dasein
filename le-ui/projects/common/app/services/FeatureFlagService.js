@@ -103,6 +103,7 @@ angular
             ENABLE_EXTERNAL_INTEGRATION: "EnableExternalIntegration",
             ENABLE_FACEBOOK_INTEGRATION: "EnableFacebookIntegration",
             ENABLE_LINKEDIN_INTEGRATION: "EnableLinkedInIntegration",
+            ENABLE_OUTREACH_INTEGRATION: "EnableOutreachIntegration",
 			MIGRATION_TENANT: "MigrationTenant",
 			ENABLE_MULTI_TEMPLATE_IMPORT: "EnableMultiTemplateImport",
 			ALPHA_FEATURE: "AlphaFeature",
