@@ -33,6 +33,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -47,7 +48,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
@@ -59,6 +59,28 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
     String hdfsPath = "/tmp/test_metadata_resolution";
 
     String hdfsPath2 = "/tmp/test_metadata_resolution2";
+
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws IOException {
+        String path = ClassLoader
+                .getSystemResource("com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath();
+
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath);
+
+        path = ClassLoader.getSystemResource("com/latticeengines/pls/metadata/csvfiles/sample_lead.csv").getPath();
+
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath2);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath2);
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanup() throws IOException {
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath2);
+    }
+
 
     @Test(groups = "manual")
     public void testAvro() {
@@ -79,19 +101,7 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     }
 
-    @BeforeClass(groups = "functional")
-    public void setup() throws IOException {
-        String path = ClassLoader
-                .getSystemResource("com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath();
 
-        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath);
-
-        path = ClassLoader.getSystemResource("com/latticeengines/pls/metadata/csvfiles/sample_lead.csv").getPath();
-
-        HdfsUtils.rmdir(yarnConfiguration, hdfsPath2);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath2);
-    }
 
     @Test(groups = "functional")
     public void getFieldMappingsTest() {
@@ -295,10 +305,5 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(table.getAttributes().get(0).getDisplayName(), "LEAD");
         assertEquals(table.getAttributes().get(1).getDisplayName(), "1to300");
         assertEquals(table.getAttributes().get(33).getDisplayName(), "SourceColumn");
-    }
-
-    @AfterClass(groups = "functional")
-    public void cleanup() throws IOException {
-        HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
     }
 }
