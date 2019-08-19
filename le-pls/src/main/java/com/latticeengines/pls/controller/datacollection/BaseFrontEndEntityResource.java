@@ -59,8 +59,7 @@ public abstract class BaseFrontEndEntityResource {
     private CommonTenantConfigService tenantConfigService;
 
     BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
-                               DataCollectionProxy dataCollectionProxy,
-                               GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
+            DataCollectionProxy dataCollectionProxy, GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
         this.entityProxy = entityProxy;
         this.segmentProxy = segmentProxy;
         this.dataCollectionProxy = dataCollectionProxy;
@@ -110,11 +109,11 @@ public abstract class BaseFrontEndEntityResource {
         return entityProxy.getCount(tenantId, frontEndQuery);
     }
 
-    public DataPage getData(FrontEndQuery frontEndQuery) {
-        return getData(frontEndQuery, getMainEntity());
+    public DataPage getData(FrontEndQuery frontEndQuery, boolean useInternalAccountId) {
+        return getData(frontEndQuery, getMainEntity(), useInternalAccountId);
     }
 
-    public DataPage getData(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
+    public DataPage getData(FrontEndQuery frontEndQuery, BusinessEntity mainEntity, boolean useInternalAccountId) {
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         String servingTableName = dataCollectionProxy.getTableName(tenantId, mainEntity.getServingStore());
         if (StringUtils.isBlank(servingTableName)) {
@@ -155,7 +154,7 @@ public abstract class BaseFrontEndEntityResource {
         }
         ArrayList<Lookup> lookups = new ArrayList<>(frontEndQuery.getLookups());
         boolean companyNameExpanded = expandCompanyNameLookup(lookups);
-        Map<String, String> replacedAttrs = replaceDataLookups(lookups);
+        Map<String, String> replacedAttrs = replaceDataLookups(lookups, useInternalAccountId);
         frontEndQuery.setLookups(lookups);
 
         DataPage data = entityProxy.getData(tenantId, frontEndQuery);
@@ -177,23 +176,25 @@ public abstract class BaseFrontEndEntityResource {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(accountRestriction));
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(contactRestriction));
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_40057, e, new String[]{ e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_40057, e, new String[] { e.getMessage() });
         }
         if (CollectionUtils.isNotEmpty(invalidBkts)) {
             String message = invalidBkts.stream() //
                     .map(BucketRestriction::getAttr) //
                     .map(AttributeLookup::toString) //
                     .collect(Collectors.joining(","));
-            throw new LedpException(LedpCode.LEDP_40057, new String[]{ message });
+            throw new LedpException(LedpCode.LEDP_40057, new String[] { message });
         }
     }
 
     private void appendSegmentRestrictionAndFreeTextSearch(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
         // restrictions in the query
         Restriction frontEndAccountRestriction = frontEndQuery.getAccountRestriction() != null
-                ? frontEndQuery.getAccountRestriction().getRestriction() : null;
+                ? frontEndQuery.getAccountRestriction().getRestriction()
+                : null;
         Restriction frontEndContactRestriction = frontEndQuery.getContactRestriction() != null
-                ? frontEndQuery.getContactRestriction().getRestriction() : null;
+                ? frontEndQuery.getContactRestriction().getRestriction()
+                : null;
 
         // restrictions in the segment
         Restriction segmentAccountRestriction = null;
@@ -262,16 +263,16 @@ public abstract class BaseFrontEndEntityResource {
 
     abstract List<Lookup> getDataLookups();
 
-    private Map<String, String> replaceDataLookups(List<Lookup> lookups) {
+    private Map<String, String> replaceDataLookups(List<Lookup> lookups, boolean useInternalAccount) {
         Map<String, String> replacedAttrs = new HashMap<>();
         if (isEntityMatchEnabled()) {
             List<Lookup> newLookups = new ArrayList<>();
-            for (Lookup lookup: lookups) {
+            for (Lookup lookup : lookups) {
                 if (lookup instanceof AttributeLookup) {
                     AttributeLookup attributeLookup = (AttributeLookup) lookup;
                     BusinessEntity entity = attributeLookup.getEntity();
                     String attr = attributeLookup.getAttribute();
-                    if (InterfaceName.AccountId.name().equalsIgnoreCase(attr)) {
+                    if (InterfaceName.AccountId.name().equalsIgnoreCase(attr) && !useInternalAccount) {
                         newLookups.add(new AttributeLookup(entity, InterfaceName.CustomerAccountId.name()));
                         replacedAttrs.put(InterfaceName.CustomerAccountId.name(), InterfaceName.AccountId.name());
                     } else if (InterfaceName.ContactId.name().equalsIgnoreCase(attr)) {
@@ -293,7 +294,7 @@ public abstract class BaseFrontEndEntityResource {
     private boolean expandCompanyNameLookup(ArrayList<Lookup> lookups) {
         boolean hasCompanyName = false;
         boolean hasLdcName = false;
-        for (Lookup lookup: lookups) {
+        for (Lookup lookup : lookups) {
             if (lookup instanceof AttributeLookup) {
                 AttributeLookup attrLookup = (AttributeLookup) lookup;
                 if (InterfaceName.CompanyName.name().equalsIgnoreCase(attrLookup.getAttribute())) {
@@ -313,7 +314,7 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     private void postProcessRecord(Map<String, Object> result, boolean companyNameExpanded, //
-                                   Map<String, String> replacedAttrs) {
+            Map<String, String> replacedAttrs) {
         if (companyNameExpanded) {
             mergeCompanyName(result);
         }
@@ -334,7 +335,7 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     private void resumeReplacedAttrs(Map<String, Object> result, Map<String, String> replacedAttrs) {
-        for (String replacedAttr: replacedAttrs.keySet()) {
+        for (String replacedAttr : replacedAttrs.keySet()) {
             if (result.containsKey(replacedAttr)) {
                 String originalAttr = replacedAttrs.get(replacedAttr);
                 Object value = result.get(replacedAttr);
@@ -353,7 +354,7 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     private Restriction translateFreeTextSearch(BusinessEntity searchEntity, String freeTextSearch, //
-                                                BusinessEntity queryEntity) {
+            BusinessEntity queryEntity) {
         if (StringUtils.isBlank(freeTextSearch)) {
             return null;
         }
