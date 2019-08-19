@@ -2,6 +2,7 @@ package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -89,5 +90,17 @@ public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<Collecti
     @Override
     public List<CollectionWorker> getWorkerBySpawnTimeBetween(Timestamp start, Timestamp end) {
         return collectionWorkerRepository.findBySpawnTimeBetween(start, end);
+    }
+
+    @Override
+    public List<CollectionWorker> getWorkerTerminatedByStatus(Timestamp after, String status) {
+
+        if (!WORKER_STATUS_SET.contains(status)) {
+
+            return Collections.emptyList();
+
+        }
+
+        return collectionWorkerRepository.findByTerminationTimeIsAfterAndStatus(after, status);
     }
 }
