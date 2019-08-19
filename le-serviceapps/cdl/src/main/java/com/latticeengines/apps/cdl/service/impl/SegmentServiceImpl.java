@@ -21,7 +21,6 @@ import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
 import com.latticeengines.apps.cdl.service.SegmentService;
-import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -43,6 +42,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("segmentService")
@@ -61,9 +61,6 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Inject
     private EntityProxy entityProxy;
-
-    @Inject
-    private SegmentDependencyUtil segmentDependencyUtil;
 
     @Inject
     private DependencyChecker dependencyChecker;
@@ -261,7 +258,7 @@ public class SegmentServiceImpl implements SegmentService {
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (metadataSegments != null) {
             for (MetadataSegment metadataSegment : metadataSegments) {
-                segmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
+                SegmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
                 Set<AttributeLookup> attributeLookups = metadataSegment.getSegmentAttributes();
                 if (attributeLookups != null) {
                     dependingAttributes.addAll(metadataSegment.getSegmentAttributes());
@@ -279,7 +276,7 @@ public class SegmentServiceImpl implements SegmentService {
             List<MetadataSegment> metadataSegments = getSegments();
             if (metadataSegments != null) {
                 for (MetadataSegment metadataSegment : metadataSegments) {
-                    segmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
+                    SegmentDependencyUtil.findSegmentDependingAttributes(metadataSegment);
                     Set<AttributeLookup> segmentAttributes = metadataSegment.getSegmentAttributes();
                     if (segmentAttributes != null) {
                         for (AttributeLookup attributeLookup : segmentAttributes) {
