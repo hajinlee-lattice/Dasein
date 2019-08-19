@@ -64,6 +64,7 @@ angular
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
         if (RatingsEngineStore.getCustomEventModelingType() == 'CDL') {
+            console.log(vm.standardFieldsList);
             vm.standardFieldsList[1] = 'AccountId';
             delete vm.requiredFieldsMissing['Id'];
             vm.requiredFieldsMissing['AccountId'] = true;
@@ -80,11 +81,15 @@ angular
 
         vm.standardFieldsList.forEach(function(field) {
             // create a copy of mapping object to preserve FieldDocument
-            // FieldDocument updated when NextClicked
+            // FieldDocument updated when NextClicked        
             if (fieldMappingsMap[field]) {
                 vm.standardFieldMappings[field] = angular.copy(fieldMappingsMap[field]);
                 vm.standardFieldMappings[field].mappedToLatticeField = true;
             } else {
+
+                console.log(field);
+                console.log(vm.standardFieldMappings);
+
                 vm.standardFieldMappings[field] = {
                     fieldType: vm.UnmappedFieldsMap[field] ? vm.UnmappedFieldsMap[field].fieldType : null,
                     mappedField: field,
