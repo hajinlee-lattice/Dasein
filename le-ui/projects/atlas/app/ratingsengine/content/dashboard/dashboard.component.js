@@ -452,8 +452,6 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.toggleMenu = function ($event) {
             vm.toggle = !vm.toggle;
 
-            console.log($event);
-
             if ($event && $event.target) {
                 var target = angular.element($event.target),
                     parent = target.parent();
@@ -480,33 +478,6 @@ angular.module('lp.ratingsengine.dashboard', [
                 } else {
                     iteration.hasProducts = false;
                 }
-            });
-        }
-
-        vm.setRemodelIteration = function (iteration) {
-            vm.selectedIteration = iteration;
-            RatingsEngineStore.setRemodelIteration(vm.selectedIteration);
-        }
-
-        vm.remodelIteration = function () {
-            var engineId = vm.ratingEngine.id,
-                iteration = RatingsEngineStore.getRemodelIteration(),
-                modelId = iteration.id;
-
-            vm.remodelingProgress = true;
-
-            RatingsEngineStore.getRatingModel(engineId, modelId).then(function (result) {
-                RatingsEngineStore.setRemodelIteration(result);
-                RatingsEngineStore.setRatingEngine(vm.ratingEngine);
-                RatingsEngineStore.saveIteration('attributes').then(function (result) {
-                    if (!result.result) {
-                        Banner.success({
-                            message:
-                                "A remodel job has started. You can track it's progress on the jobs page."
-                        });
-                    }
-                    vm.remodelingProgress = result.showProgress;
-                });
             });
         }
 

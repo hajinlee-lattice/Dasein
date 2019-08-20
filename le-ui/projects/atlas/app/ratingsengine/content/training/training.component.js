@@ -589,11 +589,10 @@ angular
 			// ============================================================================================
 
 			vm.formOnChange = function() {
-                vm.disableRemodelButton = true;
-                RatingsEngineStore.setValidation("training", false);
-
 				$timeout(function() {
 					if (vm.engineType === "cross_sell") {
+						vm.disableRemodelButton = true;
+                		RatingsEngineStore.setValidation("training", false);
 						vm.validateCrossSellForm();
 					} else {
 						vm.validateCustomEventForm();
