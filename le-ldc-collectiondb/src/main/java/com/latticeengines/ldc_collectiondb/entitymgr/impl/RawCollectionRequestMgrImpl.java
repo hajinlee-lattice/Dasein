@@ -98,25 +98,57 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
 
     @Override
     @Transactional
-    public void updateTransferred(Iterable<RawCollectionRequest> added, BitSet filter, boolean deleteFiltered) {
+    public void deleteFiltered(Iterable<RawCollectionRequest> added, BitSet filter) {
 
         //temp buf
         int batch = 512;
-        List<RawCollectionRequest> updBuf = new ArrayList<>(batch);
         List<RawCollectionRequest> delBuf = new ArrayList<>(batch);
 
         int i = 0;
         for (RawCollectionRequest req : added) {
 
-            //add to temp del/update buf
-            boolean toDel = filter.get(i);
-            if (!toDel) {
-
-                updBuf.add(req);
-
-            } else if (deleteFiltered) {
+            //add to temp buf
+            if (filter.get(i)) {
 
                 delBuf.add(req);
+
+            }
+            ++i;
+
+            //delete in batch
+            if (delBuf.size() == batch) {
+
+                repository.deleteAll(delBuf);
+                delBuf.clear();
+
+            }
+        }
+
+        //delete if buf not empty
+        if (delBuf.size() > 0) {
+
+            repository.deleteAll(delBuf);
+            delBuf.clear();
+
+        }
+
+    }
+
+    @Override
+    @Transactional
+    public void updateTransferred(Iterable<RawCollectionRequest> added, BitSet filter) {
+
+        //temp buf
+        int batch = 512;
+        List<RawCollectionRequest> updBuf = new ArrayList<>(batch);
+
+        int i = 0;
+        for (RawCollectionRequest req : added) {
+
+            //add to temp buf
+            if (!filter.get(i)) {
+
+                updBuf.add(req);
 
             }
             ++i;
@@ -129,13 +161,6 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
 
             }
 
-            //delete in batch
-            if (delBuf.size() == batch) {
-
-                repository.deleteAll(delBuf);
-                delBuf.clear();
-
-            }
         }
 
         //update if buf not empty
@@ -143,14 +168,6 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
 
             repository.saveAll(updBuf);
             updBuf.clear();
-
-        }
-
-        //delete if buf not empty
-        if (delBuf.size() > 0) {
-
-            repository.deleteAll(delBuf);
-            delBuf.clear();
 
         }
 

@@ -11,7 +11,9 @@ public interface RawCollectionRequestMgr extends BaseEntityMgrRepository<RawColl
 
     List<RawCollectionRequest> getNonTransferred(int limit);
 
-    void updateTransferred(Iterable<RawCollectionRequest> added, BitSet filter, boolean deleteFiltered);
+    void updateTransferred(Iterable<RawCollectionRequest> added, BitSet filter);
+
+    void deleteFiltered(Iterable<RawCollectionRequest> added, BitSet filter);
 
     void saveRequests(Iterable<String> domains, String vendor, String reqId);
 

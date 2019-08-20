@@ -278,6 +278,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         log.info("filtering raw reqs against collection reqs done");
 
         //insert collection req
+        List<CollectionRequest> requests = new ArrayList<>(toAdd.size());
         for (int i = 0; i < toAdd.size(); ++i) {
 
             if (rawReqFilter.get(i)) {
@@ -299,9 +300,13 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             colReq.setPickupWorker(null);
             colReq.setDeliveryTime(null);
 
-            collectionRequestMgr.create(colReq);
+            requests.add(colReq);
 
         }
+
+        collectionRequestMgr.saveRequests(requests);
+        requests.clear();
+
         log.info("inserting collection reqs done");
 
         return rawReqFilter;
@@ -318,9 +323,9 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             req.setPickupTime(pickupTime);
             req.setStatus(CollectionRequest.STATUS_COLLECTING);
 
-            collectionRequestMgr.update(req);
-
         }
+
+        collectionRequestMgr.saveRequests(readyReqs);
 
     }
 
@@ -370,9 +375,9 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
             }
 
-            collectionRequestMgr.update(req);
-
         }
+
+        collectionRequestMgr.saveRequests(resultList);
 
         if (failCount > 0) {
 
@@ -389,6 +394,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     public int consumeFinished(String workerId, Set<String> domains) {
 
         List<CollectionRequest> reqs = collectionRequestMgr.getDelivered(workerId);
+        List<CollectionRequest> delivered = new ArrayList<>(domains.size());
 
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         for (CollectionRequest req: reqs) {
@@ -398,14 +404,17 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
                 req.setStatus(CollectionRequest.STATUS_DELIVERED);
                 req.setDeliveryTime(ts);
 
-                collectionRequestMgr.update(req);
+                delivered.add(req);
 
             }
 
         }
 
+        collectionRequestMgr.saveRequests(delivered);
+
         int ret = reqs.size();
         reqs.clear();
+        delivered.clear();
 
         return ret;
 

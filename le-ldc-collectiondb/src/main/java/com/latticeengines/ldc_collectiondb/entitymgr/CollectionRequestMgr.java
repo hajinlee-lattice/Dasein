@@ -10,6 +10,8 @@ import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
 
 public interface CollectionRequestMgr extends BaseEntityMgrRepository<CollectionRequest, Long> {
 
+    void saveRequests(Collection<CollectionRequest> requests);
+
     List<CollectionRequest> getByVendorAndDomains(String vendor, Collection<String> domains);
 
     List<CollectionRequest> getReady(String vendor, int upperLimit);
