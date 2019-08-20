@@ -14,6 +14,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,14 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmakercore.NonStandardRecColumnName;
 import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -98,7 +101,6 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
         verifyAndReadTarget(target).forEachRemaining(record -> {
             count.incrementAndGet();
-            String accountId = record.get(RecommendationColumnName.ACCOUNT_ID.name()).toString();
             String contacts = record.get(RecommendationColumnName.CONTACTS.name()).toString();
             if (count.get() == 1) {
                 List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
@@ -117,7 +119,6 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                log.info(String.format("For account %s, contacts are: %s", accountId, contacts));
             }
         });
         Assert.assertEquals(count.get(), 10);
@@ -152,19 +153,24 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.LDC_Name.name(), String.class), //
                 Pair.of(ratingId + PlaymakerConstants.RatingScoreColumnSuffix, Integer.class), //
                 Pair.of(ratingId, String.class), //
-                Pair.of(ratingId + PlaymakerConstants.RatingEVColumnSuffix, String.class) //
+                Pair.of(ratingId + PlaymakerConstants.RatingEVColumnSuffix, String.class), //
+                Pair.of(InterfaceName.Website.name(), String.class), //
+                Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
         Object[][] accounts = new Object[][] { //
-                { "0L", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000" }, //
-                { "1L", "destinationAccountId", "DnB", "DnB", 97, "B", "2000" }, //
-                { "2L", "destinationAccountId", "Google", "Google", 98, "C", "3000" }, //
-                { "3L", "destinationAccountId", "Facebook", "FB", 93, "E", "1000000" }, //
-                { "4L", "destinationAccountId", "Apple", "Apple", null, null, null }, //
-                { "5L", "destinationAccountId", "SalesForce", "SalesForce", null, "A", null }, //
-                { "6L", "destinationAccountId", "Adobe", "Adobe", 98, null, "1000" }, //
-                { "7L", "destinationAccountId", "Eloqua", "Eloqua", 40, "F", "100" }, //
-                { "8L", "destinationAccountId", "Dell", "Dell", 8, "F", "10" }, //
-                { "9L", "destinationAccountId", "HP", "HP", 38, "E", "500" }, //
+                { "0L", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000",
+                        "www.lattice-engines.com", "01/01/2019" }, //
+                { "1L", "destinationAccountId", "DnB", "DnB", 97, "B", "2000", "www.dnb.com", "01/01/2019" }, //
+                { "2L", "destinationAccountId", "Google", "Google", 98, "C", "3000", "www.google.com", "01/01/2019" }, //
+                { "3L", "destinationAccountId", "Facebook", "FB", 93, "E", "1000000", "www.facebook.com",
+                        "01/01/2019" }, //
+                { "4L", "destinationAccountId", "Apple", "Apple", null, null, null, "www.apple.com", "01/01/2019" }, //
+                { "5L", "destinationAccountId", "SalesForce", "SalesForce", null, "A", null, "www.salesforce.com",
+                        "01/01/2019" }, //
+                { "6L", "destinationAccountId", "Adobe", "Adobe", 98, null, "1000", "www.adobe.com", "01/01/2019" }, //
+                { "7L", "destinationAccountId", "Eloqua", "Eloqua", 40, "F", "100", "www.eloqua.com", "01/01/2019" }, //
+                { "8L", "destinationAccountId", "Dell", "Dell", 8, "F", "10", "www.dell.com", "01/01/2019" }, //
+                { "9L", "destinationAccountId", "HP", "HP", 38, "E", "500", "www.hp.com", "01/01/2019" }, //
         };
         accountData = uploadHdfsDataUnit(accounts, accountFields);
 
@@ -181,7 +187,10 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.Country.name(), String.class), //
                 Pair.of(InterfaceName.PostalCode.name(), String.class), //
                 Pair.of(InterfaceName.PhoneNumber.name(), String.class), //
-                Pair.of(InterfaceName.Title.name(), String.class) //
+                Pair.of(InterfaceName.Title.name(), String.class), //
+                Pair.of(InterfaceName.FirstName.name(), String.class), //
+                Pair.of(InterfaceName.LastName.name(), String.class), //
+                Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
 
         Object[][] contacts = new Object[accounts.length * contactPerAccount][contactfields.size()];
@@ -191,13 +200,16 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 contacts[accounts.length * i + j][1] = String.valueOf(accounts.length * i + j);
                 contacts[accounts.length * i + j][2] = "Kind Inc.";
                 contacts[accounts.length * i + j][3] = "michael@kind.com";
-                contacts[accounts.length * i + j][4] = "Michael";
+                contacts[accounts.length * i + j][4] = "Michael Jackson";
                 contacts[accounts.length * i + j][5] = "SMO";
                 contacts[accounts.length * i + j][6] = "CA";
                 contacts[accounts.length * i + j][7] = "US";
                 contacts[accounts.length * i + j][8] = "94404";
                 contacts[accounts.length * i + j][9] = "650-898-3928";
                 contacts[accounts.length * i + j][10] = "CEO";
+                contacts[accounts.length * i + j][11] = "Michael";
+                contacts[accounts.length * i + j][12] = "Jackson";
+                contacts[accounts.length * i + j][13] = "08/08/2019";
             }
         }
         contactData = uploadHdfsDataUnit(contacts, contactfields);
@@ -216,6 +228,12 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         switch (destination) {
         case Salesforce:
             return generateSfdcPlayLaunchSparkContext();
+        case Marketo:
+            return generateMarketoPlayLaunchSparkContext();
+        case AWS_S3:
+            return generateS3PlayLaunchSparkContext();
+        case LinkedIn:
+            return generateLinkedInPlayLaunchSparkContext();
         default:
             return generateSfdcPlayLaunchSparkContext();
         }
@@ -226,22 +244,61 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         switch (destination) {
         case Salesforce:
             return generateSfdcExpectedColumns(accountDataOnly);
+        case Marketo:
+            return generateMarketoExpectedColumns(accountDataOnly);
+        case AWS_S3:
+            return generateS3ExpectedColumns(accountDataOnly);
+        case LinkedIn:
+            return generateLinkedInExpectedColumns(accountDataOnly);
         default:
             return generateSfdcExpectedColumns(accountDataOnly);
         }
     }
 
+    private List<List<Pair<List<String>, Boolean>>> generateLinkedInExpectedColumns(boolean accountDataOnly) {
+        List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
+                Pair.of(standardRecommendationAccountColumns(), true),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(linkedInRecommendationContactColumns(), false));
+        List<Pair<List<String>, Boolean>> customList = Arrays.asList(
+                Pair.of(linkedInRecommendationAccountColumns(), false),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(linkedInRecommendationContactColumns(), false));
+        return Arrays.asList(standardList, customList);
+    }
+
+    private List<List<Pair<List<String>, Boolean>>> generateS3ExpectedColumns(boolean accountDataOnly) {
+        List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
+                Pair.of(standardRecommendationAccountColumns(), true),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(s3RecommendationContactColumns(), false));
+        List<Pair<List<String>, Boolean>> customList = Arrays.asList(Pair.of(s3RecommendationAccountColumns(), false),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(s3RecommendationContactColumns(), false));
+        return Arrays.asList(standardList, customList);
+    }
+
+    private List<List<Pair<List<String>, Boolean>>> generateMarketoExpectedColumns(boolean accountDataOnly) {
+        List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
+                Pair.of(standardRecommendationAccountColumns(), true),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(marketoRecommendationContactColumns(), false));
+        List<Pair<List<String>, Boolean>> customList = Arrays.asList(
+                Pair.of(marketoRecommendationAccountColumns(), false),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(marketoRecommendationContactColumns(), false));
+        return Arrays.asList(standardList, customList);
+    }
+
     private List<List<Pair<List<String>, Boolean>>> generateSfdcExpectedColumns(boolean accountDataOnly) {
-        if (!accountDataOnly) {
-            List<Pair<List<String>, Boolean>> list = Arrays.asList(
-                    Pair.of(standardRecommendationAccountColumns(), true),
-                    Pair.of(standardRecommendationContactColumns(), false));
-            return Arrays.asList(list, list);
-        } else {
-            List<Pair<List<String>, Boolean>> list = Arrays.asList(
-                    Pair.of(standardRecommendationAccountColumns(), true), Pair.of(Collections.emptyList(), false));
-            return Arrays.asList(list, list);
-        }
+        List<Pair<List<String>, Boolean>> list = standardAccountAndContactExpectedColumns(accountDataOnly);
+        return Arrays.asList(list, list);
+    }
+
+    private List<Pair<List<String>, Boolean>> standardAccountAndContactExpectedColumns(boolean accountDataOnly) {
+        return Arrays.asList(Pair.of(standardRecommendationAccountColumns(), true),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(standardRecommendationContactColumns(), false));
     }
 
     private List<String> standardRecommendationAccountColumns() {
@@ -256,7 +313,169 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 PlaymakerConstants.Name);
     }
 
+    private PlayLaunchSparkContext generateMarketoPlayLaunchSparkContext() {
+        PlayLaunchSparkContext playLaunchSparkContext = generateBasicPlayLaunchSparkContext();
+        playLaunchSparkContext.setAccountColsRecIncluded(generateAccountColsRecIncludedForMarketo());
+        playLaunchSparkContext.setAccountColsRecNotIncludedStd(generateAccountColsRecNotIncludedStdForMarketo());
+        playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(generateAccountColsRecNotIncludedNonStdForMarketo());
+        playLaunchSparkContext.setContactCols(generateContactColsForMarketo());
+        return playLaunchSparkContext;
+    }
+
+    private PlayLaunchSparkContext generateS3PlayLaunchSparkContext() {
+        PlayLaunchSparkContext playLaunchSparkContext = generateBasicPlayLaunchSparkContext();
+        playLaunchSparkContext.setAccountColsRecIncluded(generateAccountColsRecIncludedForS3());
+        playLaunchSparkContext.setAccountColsRecNotIncludedStd(generateAccountColsRecNotIncludedStdForS3());
+        playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(generateAccountColsRecNotIncludedNonStdForS3());
+        playLaunchSparkContext.setContactCols(generateContactColsForS3());
+        return playLaunchSparkContext;
+    }
+
+    private PlayLaunchSparkContext generateLinkedInPlayLaunchSparkContext() {
+        PlayLaunchSparkContext playLaunchSparkContext = generateBasicPlayLaunchSparkContext();
+        playLaunchSparkContext.setAccountColsRecIncluded(generateAccountColsRecIncludedForLinkedIn());
+        playLaunchSparkContext.setAccountColsRecNotIncludedStd(generateAccountColsRecNotIncludedStdForLinkedIn());
+        playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(generateAccountColsRecNotIncludedNonStdForLinkedIn());
+        playLaunchSparkContext.setContactCols(generateContactColsForLinkedIn());
+        return playLaunchSparkContext;
+    }
+
+    // ---- start of LinkedIn Account and Contact columns---
+    private List<String> linkedInRecommendationAccountColumns() {
+        return ImmutableList.<String> builder().addAll(generateAccountColsRecIncludedForLinkedIn())
+                .addAll(generateAccountColsRecNotIncludedStdForLinkedIn())
+                .addAll(generateAccountColsRecNotIncludedNonStdForLinkedIn())
+                .addAll(CollectionUtils.isNotEmpty(generateContactColsForLinkedIn())
+                        ? Collections.singletonList(RecommendationColumnName.CONTACTS.name())
+                        : Collections.emptyList())
+                .build();
+    }
+
+    private List<String> linkedInRecommendationContactColumns() {
+        return generateContactColsForLinkedIn();
+    }
+
+    private List<String> generateAccountColsRecIncludedForLinkedIn() {
+        return Arrays.asList(RecommendationColumnName.COMPANY_NAME.name()).stream()
+                .map(col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.getOrDefault(col, col))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedStdForLinkedIn() {
+        return Arrays.asList(InterfaceName.Website.name());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedNonStdForLinkedIn() {
+        return Collections.emptyList();
+    }
+
+    private List<String> generateContactColsForLinkedIn() {
+        return Arrays.asList(InterfaceName.Email.name());
+    }
+
+    // ---- end of LinkedIn Account and Contact columns---
+
+    // ---- start of S3 Account and Contact columns---
+
+    private List<String> s3RecommendationAccountColumns() {
+        return ImmutableList.<String> builder().addAll(generateAccountColsRecIncludedForS3())
+                .addAll(generateAccountColsRecNotIncludedStdForS3())
+                .addAll(generateAccountColsRecNotIncludedNonStdForS3())
+                .addAll(CollectionUtils.isNotEmpty(generateContactColsForS3())
+                        ? Collections.singletonList(RecommendationColumnName.CONTACTS.name())
+                        : Collections.emptyList())
+                .build();
+    }
+
+    private List<String> s3RecommendationContactColumns() {
+        return generateContactColsForS3();
+    }
+
+    private List<String> generateAccountColsRecIncludedForS3() {
+        return Arrays.asList(RecommendationColumnName.COMPANY_NAME.name(), RecommendationColumnName.ACCOUNT_ID.name(),
+                RecommendationColumnName.DESCRIPTION.name(), RecommendationColumnName.PLAY_ID.name(),
+                RecommendationColumnName.LAUNCH_DATE.name(), RecommendationColumnName.LAUNCH_ID.name(),
+                RecommendationColumnName.DESTINATION_ORG_ID.name(),
+                RecommendationColumnName.DESTINATION_SYS_TYPE.name(),
+                RecommendationColumnName.LAST_UPDATED_TIMESTAMP.name(), RecommendationColumnName.MONETARY_VALUE.name(),
+                RecommendationColumnName.PRIORITY_ID.name(), RecommendationColumnName.PRIORITY_DISPLAY_NAME.name(),
+                RecommendationColumnName.LIKELIHOOD.name(), RecommendationColumnName.LIFT.name(),
+                RecommendationColumnName.RATING_MODEL_ID.name(), RecommendationColumnName.EXTERNAL_ID.name(),
+                RecommendationColumnName.SFDC_ACCOUNT_ID.name()).stream()
+                .map(col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.getOrDefault(col, col))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedStdForS3() {
+        return Arrays.asList(InterfaceName.Website.name(), InterfaceName.CreatedDate.name());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedNonStdForS3() {
+        return Arrays.asList(NonStandardRecColumnName.DESTINATION_SYS_NAME.name(),
+                NonStandardRecColumnName.PLAY_NAME.name(), NonStandardRecColumnName.RATING_MODEL_NAME.name(),
+                NonStandardRecColumnName.SEGMENT_NAME.name());
+    }
+
+    private List<String> generateContactColsForS3() {
+        return ImmutableList.<String> builder().addAll(standardRecommendationContactColumns())
+                .add(InterfaceName.FirstName.name()).add(InterfaceName.LastName.name())
+                .add(InterfaceName.CreatedDate.name()).build();
+    }
+
+    // ---- end of S3 Account and Contact columns---
+
+    // ---- start of Marketo Account and Contact columns---
+
+    private List<String> marketoRecommendationAccountColumns() {
+        return ImmutableList.<String> builder().addAll(generateAccountColsRecIncludedForMarketo())
+                .addAll(generateAccountColsRecNotIncludedStdForMarketo())
+                .addAll(generateAccountColsRecNotIncludedNonStdForMarketo())
+                .addAll(CollectionUtils.isNotEmpty(generateContactColsForMarketo())
+                        ? Collections.singletonList(RecommendationColumnName.CONTACTS.name())
+                        : Collections.emptyList())
+                .build();
+    }
+
+    private List<String> marketoRecommendationContactColumns() {
+        return generateContactColsForMarketo();
+    }
+
+    private List<String> generateAccountColsRecIncludedForMarketo() {
+        return Arrays
+                .asList(RecommendationColumnName.ACCOUNT_ID.name(), RecommendationColumnName.PLAY_ID.name(),
+                        RecommendationColumnName.MONETARY_VALUE.name(), RecommendationColumnName.LIKELIHOOD.name(),
+                        RecommendationColumnName.COMPANY_NAME.name(), RecommendationColumnName.PRIORITY_ID.name(),
+                        RecommendationColumnName.PRIORITY_DISPLAY_NAME.name(), RecommendationColumnName.LIFT.name(),
+                        RecommendationColumnName.RATING_MODEL_ID.name())
+                .stream()
+                .map(col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.getOrDefault(col, col))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedStdForMarketo() {
+        return Arrays.asList(InterfaceName.Website.name());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedNonStdForMarketo() {
+        return Arrays.asList(NonStandardRecColumnName.DESTINATION_SYS_NAME.name(),
+                NonStandardRecColumnName.PLAY_NAME.name(), NonStandardRecColumnName.RATING_MODEL_NAME.name(),
+                NonStandardRecColumnName.SEGMENT_NAME.name());
+    }
+
+    private List<String> generateContactColsForMarketo() {
+        return Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(), InterfaceName.Email.name(),
+                InterfaceName.Country.name(), InterfaceName.PhoneNumber.name(), InterfaceName.PostalCode.name(),
+                InterfaceName.Address_Street_1.name(), InterfaceName.City.name(), InterfaceName.ContactName.name(),
+                InterfaceName.State.name());
+    }
+
+    // ---- end of Marketo Account and Contact columns---
+
     private PlayLaunchSparkContext generateSfdcPlayLaunchSparkContext() {
+        return generateBasicPlayLaunchSparkContext();
+    }
+
+    private PlayLaunchSparkContext generateBasicPlayLaunchSparkContext() {
         Tenant tenant = new Tenant("TestRecommendationGenTenant");
         tenant.setPid(1L);
         PlayLaunch playLaunch = new PlayLaunch();
@@ -283,24 +502,32 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         ratingEngine.setLatestIteration(aiModel);
 
         PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
-                .tenant(tenant)//
-                .playName(play.getName())//
-                .playLaunchId(playLaunch.getId())//
-                .playLaunch(playLaunch)//
-                .play(play)//
-                .ratingEngine(ratingEngine)//
-                .segment(segment)//
-                .launchTimestampMillis(launchTime)//
-                .ratingId(ratingId)//
-                .publishedIteration(aiModel)//
+                .tenant(tenant) //
+                .playName(play.getName()) //
+                .playLaunchId(playLaunch.getId()) //
+                .playLaunch(playLaunch) //
+                .play(play) //
+                .ratingEngine(ratingEngine) //
+                .segment(segment) //
+                .launchTimestampMillis(launchTime) //
+                .ratingId(ratingId) //
+                .publishedIteration(aiModel) //
                 .build();
         return sparkContext;
     }
 
     @DataProvider
     public Object[][] destinationProvider() {
-        return new Object[][] { { CDLExternalSystemName.Salesforce, false }, //
-                { CDLExternalSystemName.Salesforce, true } };
+        // return new Object[][] { { CDLExternalSystemName.Salesforce, false },
+        // //
+        // { CDLExternalSystemName.Salesforce, true }, //
+        // { CDLExternalSystemName.Marketo, false }, //
+        // { CDLExternalSystemName.AWS_S3, false }, //
+        // { CDLExternalSystemName.LinkedIn, false }, //
+        // { CDLExternalSystemName.GoogleAds, false }, //
+        // { CDLExternalSystemName.Facebook, false } //
+        // };
+        return new Object[][] { { CDLExternalSystemName.LinkedIn, false } };
     }
 
 }

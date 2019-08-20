@@ -288,6 +288,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val accountColsRecNotIncludedNonStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedNonStd != null) playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
     val contactCols: Seq[String] = if (playLaunchContext.getContactCols != null) playLaunchContext.getContactCols.asScala else Seq.empty[String]
     
+    println(accountColsRecIncluded)
+    println(accountColsRecNotIncludedStd)
+    println(accountColsRecNotIncludedNonStd)     
+    println(contactCols)
+    
     // 1. combine Recommendation-contained columns (including Contacts column if required)
     // with Recommendation-not-contained standard columns
     var userConfiguredDataFrame: DataFrame = null
@@ -329,13 +334,13 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     if (accountColsRecNotIncludedNonStd.nonEmpty) {
       for (name <- accountColsRecNotIncludedNonStd) {
         if (name == NonStandardRecColumnName.DESTINATION_SYS_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getDestinationOrgName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getDestinationOrgName).cast(StringType))
         } else if (name == NonStandardRecColumnName.PLAY_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getPlayDisplayName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getPlayDisplayName).cast(StringType))
         } else if (name == NonStandardRecColumnName.RATING_MODEL_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getRatingEngineDisplayName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getRatingEngineDisplayName).cast(StringType))
         } else if (name == NonStandardRecColumnName.SEGMENT_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getSegmentDisplayName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getSegmentDisplayName).cast(StringType))
         }
       }
     }
