@@ -570,7 +570,8 @@ public class TimeSeriesUtils {
             String periodName = ent.getKey();
             for (Integer period : ent.getValue().keySet()) {
                 List<GenericRecord> records = ent.getValue().get(period);
-                String fileName = periodFileMap.get(periodName).get(period);
+                String fileName = periodFileMap.get(periodName) == null ? null
+                        : periodFileMap.get(periodName).get(period);
                 // Only distribute required periods. If cannot find target file,
                 // the period is not in the required list
                 if (fileName == null) {
