@@ -363,7 +363,7 @@ class ConfWindowService {
 					}
 					marketoFields.add(mapping.field_right);
 				});
-				if (!marketoFields.has(this.EMAIL)) {
+				if (!marketoFields.has(EMAIL)) {
 					errors[
 						externalId
 					] = `The email field in Marketo is required.`;
