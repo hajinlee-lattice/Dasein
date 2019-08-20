@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -21,10 +22,12 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -93,6 +96,16 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @Column(name = "MAP_TO_LATTICE_CONTACT")
     @JsonProperty("map_to_lattice_contact")
     private Boolean mapToLatticeContact = false;
+
+    @JsonProperty("secondary_account_ids")
+    @Column(name = "SECONDARY_ACCOUNT_IDS", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private SecondaryIdList secondaryAccountIds;
+
+    @JsonProperty("secondary_contact_ids")
+    @Column(name = "SECONDARY_CONTACT_IDS", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private SecondaryIdList secondaryContactIds;
 
     @Override
     public Long getPid() {
@@ -208,6 +221,66 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
         this.mapToLatticeContact = mapToLatticeContact;
     }
 
+    public SecondaryIdList getSecondaryAccountIds() {
+        return secondaryAccountIds;
+    }
+
+    public String getSecondaryAccountId(EntityType entityType) {
+        if (secondaryAccountIds != null) {
+            return secondaryAccountIds.getSecondaryId(entityType);
+        }
+        return StringUtils.EMPTY;
+    }
+
+    public void setSecondaryAccountIds(SecondaryIdList secondaryAccountIds) {
+        this.secondaryAccountIds = secondaryAccountIds;
+    }
+
+    public void addSecondaryAccountId(EntityType entityType, String secondaryAccountId) {
+        if (secondaryAccountIds == null) {
+            secondaryAccountIds = new SecondaryIdList();
+        }
+        secondaryAccountIds.addSecondaryId(entityType, secondaryAccountId);
+    }
+
+    @JsonIgnore
+    public List<String> getSecondaryAccountIdsSortByPriority() {
+        if (secondaryAccountIds != null) {
+            return secondaryAccountIds.getSecondaryIds(SecondaryIdList.SortBy.PRIORITY);
+        }
+        return Collections.emptyList();
+    }
+
+    public SecondaryIdList getSecondaryContactIds() {
+        return secondaryContactIds;
+    }
+
+    public String getSecondaryContactId(EntityType entityType) {
+        if (secondaryContactIds != null) {
+            return secondaryContactIds.getSecondaryId(entityType);
+        }
+        return StringUtils.EMPTY;
+    }
+
+    public void setSecondaryContactIds(SecondaryIdList secondaryContactIds) {
+        this.secondaryContactIds = secondaryContactIds;
+    }
+
+    public void addSecondaryContactId(EntityType entityType, String secondaryContactId) {
+        if (secondaryContactIds == null) {
+            secondaryContactIds = new SecondaryIdList();
+        }
+        secondaryContactIds.addSecondaryId(entityType, secondaryContactId);
+    }
+
+    @JsonIgnore
+    public List<String> getSecondaryContactIdsSortByPriority() {
+        if (secondaryContactIds != null) {
+            return secondaryContactIds.getSecondaryIds(SecondaryIdList.SortBy.PRIORITY);
+        }
+        return Collections.emptyList();
+    }
+
     public enum SystemType {
         Salesforce {
             @Override
@@ -221,11 +294,27 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             public Collection<EntityType> getEntityTypes() {
                 return Collections.singletonList(EntityType.Leads);
             }
+
+            @Override
+            public EntityType getPrimaryContact() {
+                return EntityType.Leads;
+            }
         },
         Eloqua {
             @Override
             public Collection<EntityType> getEntityTypes() {
                 return Collections.singletonList(EntityType.Leads);
+            }
+
+            @Override
+            public EntityType getPrimaryContact() {
+                return EntityType.Leads;
+            }
+        },
+        GoogleAnalytics {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Arrays.asList(EntityType.Accounts, EntityType.Contacts);
             }
         },
         Other;
@@ -233,6 +322,14 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
         public Collection<EntityType> getEntityTypes() {
             return Arrays.asList(EntityType.Accounts, EntityType.Contacts, EntityType.ProductPurchases,
                     EntityType.ProductBundles, EntityType.ProductHierarchy);
+        }
+
+        public EntityType getPrimaryAccount() {
+            return EntityType.Accounts;
+        }
+
+        public EntityType getPrimaryContact() {
+            return EntityType.Contacts;
         }
     }
 }

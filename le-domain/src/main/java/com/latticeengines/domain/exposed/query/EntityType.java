@@ -4,22 +4,31 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
 
 public enum EntityType {
-    Accounts(BusinessEntity.Account, null, "Accounts", "AccountData"), //
-    Contacts(BusinessEntity.Contact, null, "Contacts", "ContactData"), //
-    Leads(BusinessEntity.Contact, SubType.Lead, "Leads", "LeadsData"),
-    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases", "TransactionData"), //
-    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles", "ProductBundle"), //
-    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy", "ProductHierarchy");
+    Accounts(BusinessEntity.Account, null, "Accounts", "AccountData",
+            "([A-Za-z0-9_()\\[\\]]+)_(AccountData)"), //
+    Contacts(BusinessEntity.Contact, null, "Contacts", "ContactData",
+            "([A-Za-z0-9_()\\[\\]]+)_(ContactData)"), //
+    Leads(BusinessEntity.Contact, SubType.Lead, "Leads", "LeadsData",
+            "([A-Za-z0-9_()\\[\\]]+)_(LeadsData)"),
+    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases", "TransactionData",
+            "([A-Za-z0-9_()\\[\\]]+)_(TransactionData)"), //
+    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles", "ProductBundle",
+            "([A-Za-z0-9_()\\[\\]]+)_(ProductBundle)"), //
+    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy", "ProductHierarchy",
+            "([A-Za-z0-9_()\\[\\]]+)_(ProductHierarchy)");
 
     private BusinessEntity entity;
     private SubType subType;
     private String displayName;
     private String feedType;
+    private Pattern feedTypePattern; // for future System(group(1)) match & default feedType name (group(2))
 
     private static List<String> names;
     static {
@@ -29,11 +38,12 @@ public enum EntityType {
         }
     }
 
-    EntityType(BusinessEntity entity, SubType subType, String displayName, String feedType) {
+    EntityType(BusinessEntity entity, SubType subType, String displayName, String feedType, String feedTypeRegex) {
         this.entity = entity;
         this.subType = subType;
         this.displayName = displayName;
         this.feedType = feedType;
+        this.feedTypePattern = Pattern.compile(feedTypeRegex);
     }
 
     public static List<String> getNames() {
@@ -84,6 +94,19 @@ public enum EntityType {
         return null;
     }
 
+    public static EntityType matchFeedType(String feedType) {
+        for (EntityType entry : values()) {
+            if (entry.feedType.equalsIgnoreCase(feedType)) {
+                return entry;
+            }
+            Matcher matcher = entry.feedTypePattern.matcher(feedType);
+            if (matcher.find()) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -98,7 +121,6 @@ public enum EntityType {
 
     public String getDefaultFeedTypeName() {
         return feedType;
-//        return this.subType == null ? entity.name() + "Data" : entity.name() + subType.name();
     }
 
     public static List<String> getDefaultFolders() {
