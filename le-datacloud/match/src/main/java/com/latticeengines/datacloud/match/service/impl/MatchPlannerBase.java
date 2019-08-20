@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
@@ -173,8 +172,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 && !Boolean.TRUE.equals(input.getDataCloudOnly()) && zkConfigurationService.isCDLTenant(customerSpace);
     }
 
-    @VisibleForTesting
-    List<ColumnMetadata> parseCDLMetadata(MatchInput input) {
+    public List<ColumnMetadata> parseCDLMetadata(MatchInput input) {
         if (isAttrLookup(input)) {
             return cdlColumnSelectionService.parseMetadata(input);
         } else {

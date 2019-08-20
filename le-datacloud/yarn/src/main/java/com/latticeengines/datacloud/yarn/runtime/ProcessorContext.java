@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -46,6 +47,7 @@ import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -361,7 +363,16 @@ public class ProcessorContext {
                         && !OperationalMode.isEntityMatch(originalInput.getOperationalMode()));
 
         if (originalInput.getUnionSelection() != null || originalInput.getCustomSelection() != null) {
-            columnSelection = ((MatchPlannerBase) matchPlanner).parseColumnSelection(originalInput);
+            if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(originalInput.getOperationalMode())) {
+                metadatas = ((MatchPlannerBase) matchPlanner).parseCDLMetadata(originalInput);
+                columnSelection = new ColumnSelection();
+                List<Column> columns = metadatas.stream() //
+                        .map(cm -> new Column(cm.getAttrName())) //
+                        .collect(Collectors.toList());
+                columnSelection.setColumns(columns);
+            } else {
+                columnSelection = ((MatchPlannerBase) matchPlanner).parseColumnSelection(originalInput);
+            }
         } else {
             predefinedSelection = originalInput.getPredefinedSelection();
         }
@@ -549,12 +560,22 @@ public class ProcessorContext {
             // TODO: Feeling match planning for bulk match is not
             // well-organized. Some of them happen in BulkMatchPlanner, some of
             // them happen here
-            metadatas = ((MatchPlannerBase) matchPlanner).parseEntityMetadata(input);
+            if (metadatas == null) {
+                if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
+                    metadatas = ((MatchPlannerBase) matchPlanner).parseCDLMetadata(input);
+                } else if (OperationalMode.ENTITY_MATCH.equals(input.getOperationalMode())) {
+                    metadatas = ((MatchPlannerBase) matchPlanner).parseEntityMetadata(input);
+                } else {
+                    String msg = String.format("Entity match operational mode %s is not supported",
+                            input.getOperationalMode() == null ? null : input.getOperationalMode().name());
+                    throw new UnsupportedOperationException(msg);
+                }
+            }
             metadataFields = parseMetadataFields();
             outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
                     dataCloudVersion);
-            log.info("Output schema has " + outputSchema.getFields().size() + " fields for entity match.");
-
+            log.info("Output schema has {} fields for entity match. OperationalMode={}",
+                    outputSchema.getFields().size(), input.getOperationalMode());
         } else {
             throw new UnsupportedOperationException("Cannot support cdl bulk match yet.");
         }
