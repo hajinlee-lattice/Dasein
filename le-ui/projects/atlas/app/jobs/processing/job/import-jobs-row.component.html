@@ -185,10 +185,13 @@
 	class="le-row le-cell le-col-start-1 le-col-span-12"
 	ng-if="expanded && job.applicationId && job.applicationLogUrl != null && hasRight()"
 >
-	<span
-		>Application Id:
-		<a ng-href="{{ job.applicationLogUrl }}" target="_blank">{{
-			job.applicationId
-		}}</a></span
-	>
+	<div class="more-info-job">
+		<span>Job ran by: {{ job.user ? job.user : "--" }}</span>
+		<span
+			>Application Id:
+			<a ng-href="{{ job.applicationLogUrl }}" target="_blank">{{
+				job.applicationId
+			}}</a></span
+		>
+	</div>
 </div>
