@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -225,12 +226,18 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
     protected void verifyResult(SparkJobResult result) {
         List<Function<HdfsDataUnit, Boolean>> verifiers = getTargetVerifiers();
-        verifyResult(result, verifiers);
+        verify(result, verifiers);
+    }
+
+    protected void verifyResult(SparkJobResult result, List<List<Pair<List<String>, Boolean>>> expectedColumns) {
+        List<BiFunction<HdfsDataUnit, List<Pair<List<String>, Boolean>>, Boolean>> verifiers = getTargetVerifiers(
+                expectedColumns);
+        verify(result, expectedColumns, verifiers);
     }
 
     // If single test needs to run multiple jobs with different inputs (to cover
     // different test cases), pass in verifiers to verify each job's result
-    protected void verifyResult(SparkJobResult result, List<Function<HdfsDataUnit, Boolean>> verifiers) {
+    protected void verify(SparkJobResult result, List<Function<HdfsDataUnit, Boolean>> verifiers) {
         verifyOutput(result.getOutput());
 
         int numTargets = CollectionUtils.size(result.getTargets());
@@ -243,6 +250,32 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
             HdfsDataUnit tgt = result.getTargets().get(i);
             Function<HdfsDataUnit, Boolean> verifier = verifiers.get(i);
             runnables.add(() -> verifier.apply(tgt));
+        }
+
+        if (CollectionUtils.size(runnables) > 1) {
+            int poolSize = Math.min(4, numTargets);
+            ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("spark-job-verifier", poolSize);
+            ThreadPoolUtils.runRunnablesInParallel(executors, runnables, 30, 5);
+        } else if (CollectionUtils.size(runnables) == 1) {
+            runnables.get(0).run();
+        }
+    }
+
+    protected void verify(SparkJobResult result, List<List<Pair<List<String>, Boolean>>> expectedColumns,
+            List<BiFunction<HdfsDataUnit, List<Pair<List<String>, Boolean>>, Boolean>> verifiers) {
+        verifyOutput(result.getOutput());
+
+        int numTargets = CollectionUtils.size(result.getTargets());
+        int numVerifiers = CollectionUtils.size(verifiers);
+        Assert.assertEquals(numTargets, numVerifiers, //
+                String.format("There are %d targets but %d verifiers", numTargets, numVerifiers));
+
+        List<Runnable> runnables = new ArrayList<>();
+        for (int i = 0; i < numTargets; i++) {
+            HdfsDataUnit tgt = result.getTargets().get(i);
+            List<Pair<List<String>, Boolean>> cols = expectedColumns.get(i);
+            BiFunction<HdfsDataUnit, List<Pair<List<String>, Boolean>>, Boolean> verifier = verifiers.get(i);
+            runnables.add(() -> verifier.apply(tgt, cols));
         }
 
         if (CollectionUtils.size(runnables) > 1) {
@@ -314,6 +347,15 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return Collections.singletonList(this::verifySingleTarget);
     }
 
+    protected List<BiFunction<HdfsDataUnit, List<Pair<List<String>, Boolean>>, Boolean>> getTargetVerifiers(
+            List<List<Pair<List<String>, Boolean>>> expectedColumns) {
+        List<BiFunction<HdfsDataUnit, List<Pair<List<String>, Boolean>>, Boolean>> list = new ArrayList<>();
+        for (int i = 0; i < expectedColumns.size(); i++) {
+            list.add(this::verifyMultipleTarget);
+        }
+        return list;
+    }
+
     protected Boolean verifySingleTarget(HdfsDataUnit tgt) {
         return true;
     }
@@ -348,4 +390,10 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         });
         return names;
     }
+
+    protected Boolean verifyMultipleTarget(HdfsDataUnit tgt,
+            List<Pair<List<String>, Boolean>> accountAndContactExpectedCols) {
+        return true;
+    }
+
 }

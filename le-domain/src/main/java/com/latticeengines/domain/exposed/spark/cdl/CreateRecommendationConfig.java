@@ -22,6 +22,11 @@ public class CreateRecommendationConfig extends SparkJobConfig {
         return NAME;
     }
 
+    @Override
+    public int getNumTargets() {
+        return 2;
+    }
+
     public PlayLaunchSparkContext getPlayLaunchSparkContext() {
         return this.playLaunchSparkContext;
     }
