@@ -234,6 +234,10 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
             return generateS3PlayLaunchSparkContext();
         case LinkedIn:
             return generateLinkedInPlayLaunchSparkContext();
+        case GoogleAds:
+            return generateGooglePlayLaunchSparkContext();
+        case Facebook:
+            return generateFacebookPlayLaunchSparkContext();
         default:
             return generateSfdcPlayLaunchSparkContext();
         }
@@ -250,9 +254,37 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
             return generateS3ExpectedColumns(accountDataOnly);
         case LinkedIn:
             return generateLinkedInExpectedColumns(accountDataOnly);
+        case GoogleAds:
+            return generateGoogleExpectedColumns(accountDataOnly);
+        case Facebook:
+            return generateFacebookExpectedColumns(accountDataOnly);
         default:
             return generateSfdcExpectedColumns(accountDataOnly);
         }
+    }
+
+    private List<List<Pair<List<String>, Boolean>>> generateFacebookExpectedColumns(boolean accountDataOnly) {
+        List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
+                Pair.of(standardRecommendationAccountColumns(), true),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(facebookRecommendationContactColumns(), false));
+        List<Pair<List<String>, Boolean>> customList = Arrays.asList(
+                Pair.of(facebookRecommendationAccountColumns(), false),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(facebookRecommendationContactColumns(), false));
+        return Arrays.asList(standardList, customList);
+    }
+
+    private List<List<Pair<List<String>, Boolean>>> generateGoogleExpectedColumns(boolean accountDataOnly) {
+        List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
+                Pair.of(standardRecommendationAccountColumns(), true),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(googleRecommendationContactColumns(), false));
+        List<Pair<List<String>, Boolean>> customList = Arrays.asList(
+                Pair.of(googleRecommendationAccountColumns(), false),
+                accountDataOnly ? Pair.of(Collections.emptyList(), false)
+                        : Pair.of(googleRecommendationContactColumns(), false));
+        return Arrays.asList(standardList, customList);
     }
 
     private List<List<Pair<List<String>, Boolean>>> generateLinkedInExpectedColumns(boolean accountDataOnly) {
@@ -339,6 +371,93 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         playLaunchSparkContext.setContactCols(generateContactColsForLinkedIn());
         return playLaunchSparkContext;
     }
+
+    private PlayLaunchSparkContext generateGooglePlayLaunchSparkContext() {
+        PlayLaunchSparkContext playLaunchSparkContext = generateBasicPlayLaunchSparkContext();
+        playLaunchSparkContext.setAccountColsRecIncluded(generateAccountColsRecIncludedForGoogle());
+        playLaunchSparkContext.setAccountColsRecNotIncludedStd(generateAccountColsRecNotIncludedStdForGoogle());
+        playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(generateAccountColsRecNotIncludedNonStdForGoogle());
+        playLaunchSparkContext.setContactCols(generateContactColsForGoogle());
+        return playLaunchSparkContext;
+    }
+
+    private PlayLaunchSparkContext generateFacebookPlayLaunchSparkContext() {
+        PlayLaunchSparkContext playLaunchSparkContext = generateBasicPlayLaunchSparkContext();
+        playLaunchSparkContext.setAccountColsRecIncluded(generateAccountColsRecIncludedForFacebook());
+        playLaunchSparkContext.setAccountColsRecNotIncludedStd(generateAccountColsRecNotIncludedStdForFacebook());
+        playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(generateAccountColsRecNotIncludedNonStdForFacebook());
+        playLaunchSparkContext.setContactCols(generateContactColsForFacebook());
+        return playLaunchSparkContext;
+    }
+
+    // ---- start of Facebook Account and Contact columns---
+    private List<String> facebookRecommendationAccountColumns() {
+        return ImmutableList.<String> builder().addAll(generateAccountColsRecIncludedForFacebook())
+                .addAll(generateAccountColsRecNotIncludedStdForFacebook())
+                .addAll(generateAccountColsRecNotIncludedNonStdForFacebook())
+                .addAll(CollectionUtils.isNotEmpty(generateContactColsForFacebook())
+                        ? Collections.singletonList(RecommendationColumnName.CONTACTS.name())
+                        : Collections.emptyList())
+                .build();
+    }
+
+    private List<String> facebookRecommendationContactColumns() {
+        return generateContactColsForFacebook();
+    }
+
+    private List<String> generateAccountColsRecIncludedForFacebook() {
+        return Arrays.asList(InterfaceName.CompanyName.name());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedStdForFacebook() {
+        return Arrays.asList(InterfaceName.Website.name());
+    }
+
+    private List<String> generateAccountColsRecNotIncludedNonStdForFacebook() {
+        return Collections.emptyList();
+    }
+
+    private List<String> generateContactColsForFacebook() {
+        return Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(), InterfaceName.Email.name(),
+                InterfaceName.Country.name(), InterfaceName.PhoneNumber.name(), InterfaceName.PostalCode.name(),
+                InterfaceName.City.name(), InterfaceName.ContactId.name(), InterfaceName.State.name());
+    }
+
+    // ---- end of Facebook Account and Contact columns---
+
+    // ---- start of Google Account and Contact columns---
+    private List<String> googleRecommendationAccountColumns() {
+        return ImmutableList.<String> builder().addAll(generateAccountColsRecIncludedForGoogle())
+                .addAll(generateAccountColsRecNotIncludedStdForGoogle())
+                .addAll(generateAccountColsRecNotIncludedNonStdForGoogle())
+                .addAll(CollectionUtils.isNotEmpty(generateContactColsForGoogle())
+                        ? Collections.singletonList(RecommendationColumnName.CONTACTS.name())
+                        : Collections.emptyList())
+                .build();
+    }
+
+    private List<String> googleRecommendationContactColumns() {
+        return generateContactColsForGoogle();
+    }
+
+    private List<String> generateAccountColsRecIncludedForGoogle() {
+        return Collections.emptyList();
+    }
+
+    private List<String> generateAccountColsRecNotIncludedStdForGoogle() {
+        return Collections.emptyList();
+    }
+
+    private List<String> generateAccountColsRecNotIncludedNonStdForGoogle() {
+        return Collections.emptyList();
+    }
+
+    private List<String> generateContactColsForGoogle() {
+        return Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(), InterfaceName.Email.name(),
+                InterfaceName.Country.name(), InterfaceName.PhoneNumber.name(), InterfaceName.PostalCode.name());
+    }
+
+    // ---- end of Google Account and Contact columns---
 
     // ---- start of LinkedIn Account and Contact columns---
     private List<String> linkedInRecommendationAccountColumns() {
@@ -518,16 +637,15 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     @DataProvider
     public Object[][] destinationProvider() {
-        // return new Object[][] { { CDLExternalSystemName.Salesforce, false },
-        // //
-        // { CDLExternalSystemName.Salesforce, true }, //
-        // { CDLExternalSystemName.Marketo, false }, //
-        // { CDLExternalSystemName.AWS_S3, false }, //
-        // { CDLExternalSystemName.LinkedIn, false }, //
-        // { CDLExternalSystemName.GoogleAds, false }, //
-        // { CDLExternalSystemName.Facebook, false } //
-        // };
-        return new Object[][] { { CDLExternalSystemName.LinkedIn, false } };
+        return new Object[][] { //
+                { CDLExternalSystemName.Salesforce, false }, //
+                { CDLExternalSystemName.Salesforce, true }, //
+                { CDLExternalSystemName.Marketo, false }, //
+                { CDLExternalSystemName.AWS_S3, false }, //
+                { CDLExternalSystemName.LinkedIn, false }, //
+                { CDLExternalSystemName.GoogleAds, false }, //
+                { CDLExternalSystemName.Facebook, false } //
+        };
     }
 
 }

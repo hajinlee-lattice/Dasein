@@ -302,35 +302,39 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val containsJoinKey = accountColsRecIncluded.contains(joinKey)
     val joinKeyCol: Option[String] = if (!containsJoinKey) Some(joinKey) else None
     val contactsCol: Option[String] = if (needContactsColumn) Some(RecommendationColumnName.CONTACTS.name) else None
-       
+    var internalAppendedCols: Seq[String] = Seq.empty[String]
+    
     if (accountColsRecNotIncludedStd.nonEmpty) {
-      val internalAppendedCols: Seq[String] = (accountColsRecIncluded ++ joinKeyCol ++ contactsCol).toSeq
-      val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
-      val recColsToInternalNameMap = mappedToRecAppendedCols.map{col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}}.toMap
-      val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
-      // need to translate Recommendation name to internal name
-      val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
-      // need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
-      val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
+      internalAppendedCols = (accountColsRecIncluded ++ joinKeyCol ++ contactsCol).toSeq
+    } else if (accountColsRecIncluded.nonEmpty && accountColsRecNotIncludedStd.isEmpty) {
+      internalAppendedCols = (accountColsRecIncluded ++ contactsCol).toSeq
+    } else {
+      internalAppendedCols = Seq(RecommendationColumnName.CONTACTS.name)
+    }
+    
+    // map internal column names to Recommendation column names
+    val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
+    // get the map from Recommendation column names to internal column names for later rename purpose
+    val recColsToInternalNameMap = mappedToRecAppendedCols.map{col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}}.toMap
+    // select columns from Recommendation Dataframe
+    val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
+    // translate Recommendation column name to internal column name
+    val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
       
+    if (accountColsRecNotIncludedStd.nonEmpty) {
+      // 2. need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
+      val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
       if (containsJoinKey) {
         recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left")
       } else {
         recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left").drop(joinKey)
       }
-    } else if (accountColsRecIncluded.nonEmpty && accountColsRecNotIncludedStd.isEmpty) {
-      val internalAppendedCols = (accountColsRecIncluded ++ contactsCol).toSeq
-      val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
-      val recColsToInternalNameMap = mappedToRecAppendedCols.map{col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}}.toMap
-      val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
-      recContainedCombinedWithStd = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
     } else {
-      println("Currently this scenario is not possible")
-      recContainedCombinedWithStd = orderedRec
+      recContainedCombinedWithStd = selectedRecTableTranslated
     }
     
+    // 3. Combine result of 1 with Recommendation-not-contained non-standard columns
     userConfiguredDataFrame = recContainedCombinedWithStd
-    // 2. Combine result of 1 with Recommendation-not-contained non-standard columns
     if (accountColsRecNotIncludedNonStd.nonEmpty) {
       for (name <- accountColsRecNotIncludedNonStd) {
         if (name == NonStandardRecColumnName.DESTINATION_SYS_NAME.name) {
@@ -344,6 +348,12 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         }
       }
     }
+    
+    // 4. Drop Contacts column if not needed
+    if (!needContactsColumn) {
+      userConfiguredDataFrame = userConfiguredDataFrame.drop(RecommendationColumnName.CONTACTS.name)
+    }
+    
     return userConfiguredDataFrame
   }
   
