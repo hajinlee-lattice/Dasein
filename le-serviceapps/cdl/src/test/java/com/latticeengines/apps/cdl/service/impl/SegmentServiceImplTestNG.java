@@ -175,6 +175,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         ((LogicalRestriction) accountRestriction).getRestrictions().set(0, b1);
         ((LogicalRestriction) accountRestriction).getRestrictions().set(1, b2);
 
+        /* Disable this check for now because we need to relax validation until UI doesn't set "" as value in array
         Restriction b3c = cloneRestriction(b3);
         ((BucketRestriction) b3c).getBkt().setValues(Collections.singletonList(2));
         ((LogicalRestriction) contactRestriction).getRestrictions().set(0, b3c);
@@ -186,6 +187,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_40057);
             Assert.assertTrue(e.getMessage().contains("Contact.Attr1"), e.getMessage());
         }
+        */
 
         Restriction b4c = cloneRestriction(b4);
         ((BucketRestriction) b4c).getBkt().setValues(Collections.emptyList());
