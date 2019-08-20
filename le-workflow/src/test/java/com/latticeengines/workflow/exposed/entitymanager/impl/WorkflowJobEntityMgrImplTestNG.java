@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -50,6 +51,9 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Value("${common.le.stack}")
+    private String leStack;
 
     private String tenantId1;
     private String tenantId2;
@@ -302,6 +306,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob1.setTenant(tenant1);
         workflowJob1.setUserId(WorkflowUser.DEFAULT_USER.name());
         workflowJob1.setInputContextValue("filename", "abc");
+        workflowJob1.setStack(leStack);
         workflowJobEntityMgr.create(workflowJob1);
 
         WorkflowJob workflowJob2 = new WorkflowJob();
@@ -314,6 +319,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob3.setApplicationId("application_00003");
         workflowJob3.setTenant(tenant1);
         workflowJob3.setUserId("user3");
+        workflowJob3.setStack(leStack);
         workflowJobEntityMgr.create(workflowJob3);
 
         MultiTenantContext.setTenant(tenant1);
@@ -323,8 +329,10 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.get(0).getApplicationId(), "application_00001");
         assertEquals(workflowJobs.get(0).getUserId(), WorkflowUser.DEFAULT_USER.name());
         assertEquals(workflowJobs.get(0).getInputContext().get("filename"), "abc");
+        assertEquals(workflowJobs.get(0).getStack(), leStack);
         assertEquals(workflowJobs.get(1).getApplicationId(), "application_00003");
         assertEquals(workflowJobs.get(1).getUserId(), "user3");
+        assertEquals(workflowJobs.get(1).getStack(), leStack);
 
         WorkflowJob workflowJob4 = workflowJobEntityMgr.findByApplicationId("application_00003");
         assertEquals(workflowJobs.get(1).getTenantId(), workflowJob4.getTenantId());
@@ -335,6 +343,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.size(), 1);
         assertEquals(workflowJobs.get(0).getApplicationId(), "application_00002");
         assertEquals(workflowJobs.get(0).getUserId(), "user2");
+        assertNull(workflowJobs.get(0).getStack());
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
@@ -516,9 +525,9 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     @DataProvider(name = "provideQueryByClusterIDData")
     private Object[][] provideQueryClusterIdData() {
-        return new Object[][] { //
+        return new Object[][]{ //
                 { //
-                        new WorkflowJob[] { //
+                        new WorkflowJob[]{ //
                                 newJob("c1", "PA", "RUNNING"), //
                                 newJob("c1", "PA", "FAILED"), //
                                 newJob("c1", "PA", "PENDING"), //
@@ -542,7 +551,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
                                 newJob(null, "PA", "PENDING"), //
                                 newJob(null, "PA", "PENDING"), //
                         }, //
-                        new ClusterIdQuery[] { //
+                        new ClusterIdQuery[]{ //
                                 new ClusterIdQuery("c1", null, null), //
                                 new ClusterIdQuery("c1", Collections.singletonList("PA"), null), //
                                 new ClusterIdQuery("c1", Collections.singletonList("PA"),
