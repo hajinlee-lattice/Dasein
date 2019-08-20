@@ -239,7 +239,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
-      val aggregatedContacts = aggregateContacts(contactTable, joinKey)
+      val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey)
         
       // join
       val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey :: Nil, "left")
@@ -275,7 +275,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         && accountColsRecNotIncludedStd.isEmpty //
         && accountColsRecNotIncludedNonStd.isEmpty //
         && contactCols.isEmpty) {
-      lattice.output = orderedRec :: Nil
+      lattice.output = List(orderedRec, orderedRec)
     } else {
       val userConfiguredDataFrame = generateUserConfiguredDataFrame(orderedRec, accountTable, playLaunchContext, joinKey)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
@@ -287,6 +287,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val accountColsRecNotIncludedStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedStd != null) playLaunchContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
     val accountColsRecNotIncludedNonStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedNonStd != null) playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
     val contactCols: Seq[String] = if (playLaunchContext.getContactCols != null) playLaunchContext.getContactCols.asScala else Seq.empty[String]
+    
+    println(accountColsRecIncluded)
+    println(accountColsRecNotIncludedStd)
+    println(accountColsRecNotIncludedNonStd)     
+    println(contactCols)
     
     // 1. combine Recommendation-contained columns (including Contacts column if required)
     // with Recommendation-not-contained standard columns
@@ -300,8 +305,8 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
        
     if (accountColsRecNotIncludedStd.nonEmpty) {
       val internalAppendedCols: Seq[String] = (accountColsRecIncluded ++ joinKeyCol ++ contactsCol).toSeq
-      val mappedToRecAppendedCols = internalAppendedCols map {col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
-      val recColsToInternalNameMap = mappedToRecAppendedCols map {col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}} toMap
+      val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
+      val recColsToInternalNameMap = mappedToRecAppendedCols.map{col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}}.toMap
       val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
       // need to translate Recommendation name to internal name
       val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
@@ -315,8 +320,8 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       }
     } else if (accountColsRecIncluded.nonEmpty && accountColsRecNotIncludedStd.isEmpty) {
       val internalAppendedCols = (accountColsRecIncluded ++ contactsCol).toSeq
-      val mappedToRecAppendedCols = internalAppendedCols map {col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
-      val recColsToInternalNameMap = mappedToRecAppendedCols map {col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}} toMap
+      val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
+      val recColsToInternalNameMap = mappedToRecAppendedCols.map{col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}}.toMap
       val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
       recContainedCombinedWithStd = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
     } else {
@@ -329,22 +334,22 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     if (accountColsRecNotIncludedNonStd.nonEmpty) {
       for (name <- accountColsRecNotIncludedNonStd) {
         if (name == NonStandardRecColumnName.DESTINATION_SYS_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getDestinationOrgName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getDestinationOrgName).cast(StringType))
         } else if (name == NonStandardRecColumnName.PLAY_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getPlayDisplayName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getPlayDisplayName).cast(StringType))
         } else if (name == NonStandardRecColumnName.RATING_MODEL_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getRatingEngineDisplayName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getRatingEngineDisplayName).cast(StringType))
         } else if (name == NonStandardRecColumnName.SEGMENT_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getSegmentDisplayName))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getSegmentDisplayName).cast(StringType))
         }
       }
     }
     return userConfiguredDataFrame
   }
   
-  private def aggregateContacts(contactTable: DataFrame, joinKey: String): DataFrame = {
+  private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], joinKey: String): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols)
       val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //

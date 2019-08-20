@@ -58,13 +58,13 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     private void test1() {
         List<String> orderedInput = uploadDataTest1();
         log.info("Inputs for test1: {}", String.join(",", orderedInput));
-        
+
         MergeImportsConfig config = new MergeImportsConfig();
         config.setDedupSrc(false);
         config.setJoinKey(null);
         config.setAddTimestamps(false);
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace1());
-        verifyResult(result, Collections.singletonList(this::verifyTarget1));
+        verify(result, Collections.singletonList(this::verifyTarget1));
     }
 
     private List<String> uploadDataTest1() {
@@ -119,7 +119,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setJoinKey(InterfaceName.Id.name());
         config.setAddTimestamps(true);
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace2());
-        verifyResult(result, Collections.singletonList(this::verifyTarget2));
+        verify(result, Collections.singletonList(this::verifyTarget2));
     }
 
     private List<String> uploadDataTest2() {
@@ -175,22 +175,20 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setDedupSrc(false);
         config.setJoinKey(null);
         config.setAddTimestamps(false);
-        config.setCloneSrcFields(
-                new String[][] { //
-                        // Copy AID1 to AID1_COPY
-                        { "AID1", "AID1_COPY" },
-                        // Cannot copy NON_EXISTS1 to NON_EXISTS1_COPY
-                        { "NON_EXISTS1", "NON_EXISTS1_COPY" } });
-        config.setRenameSrcFields(
-                new String[][] { //
-                        // Rename AID1 to AID1_NEW
-                        { "AID1", "AID1_NEW" }, //
-                        // Cannot rename NON_EXISTS2 to NON_EXISTS2_NEW
-                        { "NON_EXISTS2", "NON_EXISTS2_NEW" },
-                        // Cannot rename due to AccountId already exists
-                        { "AID2", InterfaceName.Id.name() } });
+        config.setCloneSrcFields(new String[][] { //
+                // Copy AID1 to AID1_COPY
+                { "AID1", "AID1_COPY" },
+                // Cannot copy NON_EXISTS1 to NON_EXISTS1_COPY
+                { "NON_EXISTS1", "NON_EXISTS1_COPY" } });
+        config.setRenameSrcFields(new String[][] { //
+                // Rename AID1 to AID1_NEW
+                { "AID1", "AID1_NEW" }, //
+                // Cannot rename NON_EXISTS2 to NON_EXISTS2_NEW
+                { "NON_EXISTS2", "NON_EXISTS2_NEW" },
+                // Cannot rename due to AccountId already exists
+                { "AID2", InterfaceName.Id.name() } });
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace3());
-        verifyResult(result, Collections.singletonList(this::verifyTarget3));
+        verify(result, Collections.singletonList(this::verifyTarget3));
     }
 
     private List<String> uploadDataTest3() {
@@ -247,7 +245,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setDedupSrc(true);
         config.setJoinKey(InterfaceName.Id.name());
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace4());
-        verifyResult(result, Collections.singletonList(this::verifyTarget4));
+        verify(result, Collections.singletonList(this::verifyTarget4));
     }
 
     private List<String> uploadDataTest4() {
