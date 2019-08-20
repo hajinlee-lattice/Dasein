@@ -4,6 +4,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
+
 public class CSVImportMapperUnitTestNG {
 
     private CSVImportMapper mapper = new CSVImportMapper();
@@ -82,6 +84,54 @@ public class CSVImportMapperUnitTestNG {
                 {"blank", true},
                 {"Empty", true},
                 {"test", false}
+        };
+    }
+
+    @Test(groups = "unit", dataProvider = "testTimeZoneStr")
+    public void testTimeZoneCheck(String dateStr, boolean isISOValue) {
+        try {
+            mapper.checkTimeZoneValidity(dateStr, null);
+        } catch(Exception e) {
+            Assert.fail("should not have thrown Exception");
+        }
+        try {
+            mapper.checkTimeZoneValidity(dateStr, TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE);
+        } catch(Exception e) {
+            if (isISOValue) {
+                Assert.fail("Should not have thrown Exception");
+            } else {
+                Assert.assertTrue(e instanceof IllegalArgumentException);
+            }
+        }
+        try {
+            mapper.checkTimeZoneValidity(dateStr, "UTC");
+        } catch(Exception e) {
+            if (isISOValue) {
+                Assert.assertTrue(e instanceof  IllegalArgumentException);
+            } else {
+                Assert.fail("Should not have thrown exception");
+            }
+        }
+    }
+
+    @DataProvider(name = "testTimeZoneStr")
+    public Object[][] provideTestTimeZoneStrings() {
+        return new Object[][] {
+                // exceptional value
+                {"null", false},
+                {"", false},
+                {"   ", false},
+                // valid date time
+                {"2013/09/24", false},
+                {"2013/09/23 07:24", false},
+                {"2014-09-23   06:25", false},
+                // T&Z value
+                {"2014/09/24T07:23", true},
+                {"2014/09/24T07:23Z", true},
+                {"2014/09/24T07:23 PM", true},
+                {"2014/09/24T05:24 PMZ", true},
+                {"12.12.68T12:12:12-0900", true},
+                {"2014/09/24 07:23Z", false}
         };
     }
 }

@@ -340,14 +340,12 @@ public class MetadataResolver {
                             knownColumn
                                     .setTimeFormatString(result.getMiddle());
                             knownColumn.setTimezone(result.getRight());
-                            knownColumn.setMappedToDateBefore(false);
                         }
                     }
                 } else {
                     knownColumn.setDateFormatString(attribute.getDateFormatString());
                     knownColumn.setTimeFormatString(attribute.getTimeFormatString());
                     knownColumn.setTimezone(attribute.getTimezone());
-                    knownColumn.setMappedToDateBefore(true);
                 }
                 result.fieldMappings.add(knownColumn);
                 pickedHeaders.add(attribute.getDisplayName());
@@ -373,14 +371,12 @@ public class MetadataResolver {
                                     knownColumn.setDateFormatString(result.getLeft());
                                     knownColumn.setTimeFormatString(result.getMiddle());
                                     knownColumn.setTimezone(result.getRight());
-                                    knownColumn.setMappedToDateBefore(false);
                                 }
                             }
                         } else {
                             knownColumn.setDateFormatString(attribute.getDateFormatString());
                             knownColumn.setTimeFormatString(attribute.getTimeFormatString());
                             knownColumn.setTimezone(attribute.getTimezone());
-                            knownColumn.setMappedToDateBefore(true);
                         }
 
                         result.fieldMappings.add(knownColumn);
@@ -445,7 +441,6 @@ public class MetadataResolver {
                             knownColumn.setDateFormatString(result.getLeft());
                             knownColumn.setTimeFormatString(result.getMiddle());
                             knownColumn.setTimezone(result.getRight());
-                            knownColumn.setMappedToDateBefore(false);
                         }
                     }
                     knownColumn.setMappedToLatticeField(true);
@@ -667,7 +662,6 @@ public class MetadataResolver {
             fieldMapping.setDateFormatString(formatForDateAndTime.getLeft());
             fieldMapping.setTimeFormatString(formatForDateAndTime.getMiddle());
             fieldMapping.setTimezone(formatForDateAndTime.getRight());
-            fieldMapping.setMappedToDateBefore(false);
         } else {
             fundamentalType = UserDefinedType.TEXT;
         }

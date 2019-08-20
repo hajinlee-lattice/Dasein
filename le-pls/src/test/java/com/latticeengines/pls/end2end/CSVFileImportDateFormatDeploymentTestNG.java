@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -91,7 +92,6 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
             if (fieldMapping.getUserField().equals("Created Date")) {
                 Assert.assertTrue(fieldMapping.isMappedToLatticeField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), false);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
             }
         }
@@ -129,12 +129,10 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
             if (fieldMapping.getUserField().equals("Created Date")) {
                 Assert.assertTrue(fieldMapping.isMappedToLatticeField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), true);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
             } else if (fieldMapping.getUserField().equals("LastModifiedDate")) {
                 Assert.assertFalse(fieldMapping.isMappedToLatticeField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), false);
                 Assert.assertEquals(fieldMapping.getTimeFormatString(), "00:00:00 12H");
             }
         }
@@ -184,7 +182,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
 
 
     @Test(groups = "deployment")
-    public void testDateFormat() throws IOException {
+    public void testAccountDateFormat() throws IOException {
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String dateFormatString1 = "DD/MM/YYYY";
         String timezone1 = "America/New_York";
@@ -211,7 +209,6 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
             if (fieldMapping.getUserField().equals("TestDate1")) {
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), dateFormatString1);
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), false);
                 // change the auto detection result for date pattern
                 fieldMapping.setFieldType(UserDefinedType.DATE);
                 fieldMapping.setMappedToLatticeField(false);
@@ -219,7 +216,6 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                 fieldMapping.setTimezone(timezone1);
             } else if (fieldMapping.getUserField().equals("TestDate2")) {
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.DATE);
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), false);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), dateFormatString2);
                 Assert.assertEquals(fieldMapping.getTimeFormatString(), timeFormatString2);
                 // change the auto detection result for time pattern
@@ -242,11 +238,9 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                 .getFieldMappingDocumentBestEffort(accountDateSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("TestDate1")) {
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), true);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), storedDateFormatString1);
                 Assert.assertEquals(fieldMapping.getTimezone(), timezone1);
             } else if (fieldMapping.getUserField().equals("TestDate2")) {
-                Assert.assertEquals(fieldMapping.isMappedToDateBefore(), true);
                 Assert.assertEquals(fieldMapping.getDateFormatString(), dateFormatString2);
                 Assert.assertEquals(fieldMapping.getTimeFormatString(), storedTimeFormatString2);
                 Assert.assertEquals(fieldMapping.getTimezone(), timezone2);
@@ -254,7 +248,6 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         }
 
         Assert.assertEquals(dfId, dfIdExtra);
-
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType);
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, false);
         String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
@@ -332,7 +325,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         } else if (field2.equals("user_TestDate3")) {
             Assert.assertEquals(field0, CUSTOM);
             Assert.assertEquals(field1, "TestDate3");
-            Assert.assertEquals(field3, "YYYY-MMM-DD 00:00 12H Time Zone is Part of Value");
+            Assert.assertEquals(field3, "YYYY-MMM-DD 00:00 12H " + TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
         } else if (field2.equals("LastModifiedDate")) {
             Assert.assertEquals(field0, STANDARD);
             Assert.assertEquals(field1, UNMAPPED);
