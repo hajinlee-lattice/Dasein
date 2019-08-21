@@ -303,6 +303,16 @@ const Queries = {
               }
           };
       }
+    },
+    getFacebookAudiences(authenticationId, ad_account_id) {
+      let q = 
+        `mutation callFacebook {
+          callConnector(input: 
+          {connector: "facebook", version: "2.0", operation: "list_custom_audiences", authId: "${authenticationId}", input: "{\\\"ad_account_id\\\": \\\"${ad_account_id}\\\", \\\"limit\\\":25}"}) {
+            output
+          }
+        }`;
+      return { query: q };
     }
 
 

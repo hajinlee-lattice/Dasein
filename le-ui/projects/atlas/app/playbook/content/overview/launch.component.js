@@ -398,6 +398,12 @@ class LaunchComponent extends Component {
     }
 
     makeBucketsContainer(coverage, play, noBuckets, opts) {
+        console.log({
+            coverage: coverage, 
+            play: play, 
+            noBuckets: noBuckets, 
+            opts: opts
+        });
         var _buckets = [],
             total = 0,
             vm = this,
@@ -468,7 +474,7 @@ class LaunchComponent extends Component {
     makeAccountOptions() {
         let externalSystemName = this.state.externalSystemName;
         
-        if(externalSystemName === 'Salesforce' && (this.state.connection && this.state.connection.lookupIdMap && this.state.connection.lookupIdMap.accountId)) {
+        if(externalSystemName === 'Salesforce') {
             return (
                 <Aux>
                     <li>
