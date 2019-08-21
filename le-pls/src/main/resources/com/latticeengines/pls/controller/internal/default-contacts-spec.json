@@ -1,0 +1,275 @@
+{
+    "Unique ID": [
+        {
+            "fieldName": "CustomerContactId",
+            "fieldType": "TEXT",
+            "displayName": "Contact ID",
+            "matchingColumnNames": [
+                "ID",
+                "CONTACT",
+                "CONTACTID",
+                "CONTACT ID",
+                "CONTACT_ID",
+                "EXTERNALID",
+                "EXTERNAL ID",
+                "EXTERNAL_ID"
+            ],
+            "required": false
+        }
+    ],
+    "Match IDs": [],
+    "Other IDs": [],
+    "Contact Fields": [
+        {
+            "fieldName": "FirstName",
+            "fieldType": "TEXT",
+            "displayName": "First Name",
+            "matchingColumnNames": [
+                "FIRSTNAME",
+                "FIRST NAME",
+                "FIRST_NAME"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "LastName",
+            "fieldType": "TEXT",
+            "displayName": "Last Name",
+            "matchingColumnNames": [
+                "LASTNAME",
+                "LAST NAME",
+                "LAST_NAME"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "Title",
+            "fieldType": "TEXT",
+            "displayName": "Title",
+            "matchingColumnNames": [
+                "TITLE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "Email",
+            "fieldType": "TEXT",
+            "displayName": "Email",
+            "matchingColumnNames": [
+                "EMAIL",
+                "EMAIL ADDRESS",
+                "EMAIL_ADDRESS"
+            ],
+            "required": false
+        }
+    ],
+    "Analysis Fields": [
+        {
+            "fieldName": "LeadStatus",
+            "fieldType": "TEXT",
+            "displayName": "Lead Status",
+            "matchingColumnNames": [
+                "LEADSTATUS",
+                "LEAD STATUS",
+                "LEAD_STATUS"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "LeadSource",
+            "fieldType": "TEXT",
+            "displayName": "Lead Source",
+            "matchingColumnNames": [
+                "LEADSOURCE",
+                "LEAD SOURCE",
+                "LEAD_SOURCE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "LeadType",
+            "fieldType": "TEXT",
+            "displayName": "Lead Type",
+            "matchingColumnNames": [
+                "LEADTYPE",
+                "LEAD TYPE",
+                "LEAD_TYPE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "DoNotMail",
+            "fieldType": "BOOLEAN",
+            "displayName": "Has Opted Out of Email",
+            "matchingColumnNames": [
+                "DONOTMAIL",
+                "DO NOT MAIL",
+                "DO_NOT_MAIL",
+                "EMAIL OPT OUT",
+                "EMAIL_OPT_OUT"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "DoNotCall",
+            "fieldType": "BOOLEAN",
+            "displayName": "Has Opted Out of Phone Calls",
+            "matchingColumnNames": [
+                "DONOTCALL",
+                "DO NOT CALL",
+                "DO_NOT_CALL"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "CreatedDate",
+            "fieldType": "DATE",
+            "displayName": "Created Date",
+            "matchingColumnNames": [
+                "CREATEDDATE",
+                "CREATED DATE",
+                "CREATED_DATE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "LastModifiedDate",
+            "fieldType": "DATE",
+            "displayName": "Last Modified Date",
+            "matchingColumnNames": [
+                "LASTMODIFIEDDATE",
+                "LAST MODIFIED DATE",
+                "LAST_MODIFIED_DATE",
+                "LASTMODIFIED",
+                "LAST MODIFIED",
+                "LAST_MODIFIED"
+            ],
+            "required": false
+        }
+    ],
+    "Match to Accounts - ID": [
+        {
+            "fieldName": "CustomerAccountId",
+            "fieldType": "TEXT",
+            "displayName": "Unique Account Identifier",
+            "matchingColumnNames": [
+                "ACCOUNTID",
+                "ACCOUNT ID",
+                "ACCOUNT_ID",
+                "ACCOUNT EXTERNAL ID",
+                "ACCOUNT_EXTERNAL_ID",
+                "ACCOUNT"
+            ],
+            "required": false
+        }
+    ],
+    "Match to Accounts - Fields": [
+        {
+            "fieldName": "Website",
+            "fieldType": "TEXT",
+            "displayName": "Website",
+            "matchingColumnNames": [
+                "WEBSITE",
+                "DOMAIN"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "CompanyName",
+            "fieldType": "TEXT",
+            "displayName": "Company Name",
+            "matchingColumnNames": [
+                "COMPANY",
+                "COMPANY NAME",
+                "COMPANY_NAME",
+                "ACCOUNT NAME",
+                "ACCOUNT_NAME"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "DUNS",
+            "fieldType": "TEXT",
+            "displayName": "D-U-N-S",
+            "matchingColumnNames": [
+                "DUNS",
+                "DUNS NUMBER",
+                "DUNS_NUMBER"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "City",
+            "fieldType": "TEXT",
+            "displayName": "City",
+            "matchingColumnNames": [
+                "CITY",
+                "BILLING CITY",
+                "BILLING_CITY"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "State",
+            "fieldType": "TEXT",
+            "displayName": "State",
+            "matchingColumnNames": [
+                "STATE",
+                "STATE PROVINCE",
+                "STATE_PROVINCE",
+                "PROVINCE",
+                "BILLING STATE",
+                "BILLING_STATE",
+                "BILLING PROVINCE",
+                "BILLING_PROVINCE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "Country",
+            "fieldType": "TEXT",
+            "displayName": "Country",
+            "matchingColumnNames": [
+                "COUNTRY",
+                "BILLING COUNTRY",
+                "BILLING_COUNTRY"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "PostalCode",
+            "fieldType": "TEXT",
+            "displayName": "Postal Code",
+            "matchingColumnNames": [
+                "ZIP",
+                "POSTALCODE",
+                "POSTAL CODE",
+                "POSTAL_CODE",
+                "BILLINGZIP",
+                "BILLING ZIP",
+                "BILLING_ZIP",
+                "BILLINGZIPCODE",
+                "BILLING ZIP CODE",
+                "BILLING_ZIP_CODE",
+                "BILLINGPOSTALCODE",
+                "BILLING POSTALCODE",
+                "BILLING_POSTALCODE",
+                "BILLING POSTAL CODE",
+                "BILLING_POSTAL_CODE"
+            ],
+            "required": false
+        },
+        {
+            "fieldName": "PhoneNumber",
+            "fieldType": "TEXT",
+            "displayName": "Phone Number",
+            "matchingColumnNames": [
+                "PHONE",
+                "PHONE NUMBER",
+                "PHONE_NUMBER"
+            ],
+            "required": false
+        }
+    ],
+    "Custom Fields": []
+}

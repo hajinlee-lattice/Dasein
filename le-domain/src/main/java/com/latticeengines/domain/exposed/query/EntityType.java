@@ -59,7 +59,7 @@ public enum EntityType {
         throw new IllegalArgumentException(String.format("There is no corresponding EntityType for %s", displayName));
     }
 
-    public static EntityType fromFeedTypeName(String feedTypeName) {//wich feedtype is feedtype without systemName
+    public static EntityType fromFeedTypeName(String feedTypeName) {//which feedtype is feedtype without systemName
         for (EntityType entry : values()) {
             if (entry.getDefaultFeedTypeName().equalsIgnoreCase(feedTypeName)) {
                 return entry;
