@@ -9,7 +9,7 @@ public interface ExportFieldMetadataMappingEntityMgr {
 
     List<ExportFieldMetadataMapping> createAll(List<ExportFieldMetadataMapping> exportFieldMappings);
 
-    List<ExportFieldMetadataMapping> findByOrgId(String orgId);
+    List<ExportFieldMetadataMapping> findByOrgId(String orgId, Long tenantPid);
 
     List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap);
 }
