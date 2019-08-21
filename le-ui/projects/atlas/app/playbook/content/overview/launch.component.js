@@ -467,7 +467,8 @@ class LaunchComponent extends Component {
 
     makeAccountOptions() {
         let externalSystemName = this.state.externalSystemName;
-        if(externalSystemName === 'Salesforce') {
+        
+        if(externalSystemName === 'Salesforce' && (this.state.connection && this.state.connection.lookupIdMap && this.state.connection.lookupIdMap.accountId)) {
             return (
                 <Aux>
                     <li>
@@ -896,6 +897,10 @@ class LaunchComponent extends Component {
             audienceName: '',
             folderName: ''
         };
+
+        // if(this.state.externalSystemName === 'Salesforce' && !(this.connection && this.connection.lookupIdMap && this.connection.lookupIdMap.accountId)) {
+        //     connection.channelConfig['salesforce'].supressAccountsWithoutLookupId = false;
+        // }
 
         var channelConfig = connection.channelConfig || channelConfigDefault;
 
