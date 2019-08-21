@@ -17,11 +17,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -35,9 +32,6 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
 
     @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
-
-    @Inject
-    private BatonService batonService;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -58,11 +52,6 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
     public Boolean triggerScheduledCampaigns() {
         if (StringUtils.isBlank(internalAppUrl)) {
             log.warn("Common internal app url not found, ignoring this job");
-            return false;
-        }
-
-        if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS)) {
-            log.info("Cannot auto queue PlayLaunch if always on feature flag is disabled");
             return false;
         }
 

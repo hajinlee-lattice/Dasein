@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -23,9 +24,12 @@ import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.repository.PlayLaunchChannelRepository;
 import com.latticeengines.apps.cdl.repository.reader.PlayLaunchChannelReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.PlayLaunchChannelWriterRepository;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -56,6 +60,9 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Inject
     private PlayEntityMgr playEntityMgr;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -223,6 +230,9 @@ public class PlayLaunchChannelEntityMgrImpl
             Hibernate.initialize(c.getTenant());
             Hibernate.initialize(c.getPlay());
         });
+
+        channels = channels.stream().filter(c -> batonService.isEnabled(CustomerSpace.parse(c.getTenant().getId()),
+                LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS)).collect(Collectors.toList());
         return channels;
     }
 
