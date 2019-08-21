@@ -1,7 +1,28 @@
-import React, { Component } from "../../react-vendor";
-import { store } from 'store';
-import LePagination from "widgets/pagination/le-pagination";
 import "./le-itemview.scss";
+import React, { Component } from "../../react-vendor";
+import LePagination from "widgets/pagination/le-pagination";
+import { store, injectAsyncReducer } from "store";
+
+const actions = {
+	set: payload => {
+		return store.dispatch({
+			type: "SET_LEITEMVIEW",
+			payload: payload
+		});
+	}
+};
+
+const reducer = (state = {}, { type, payload }) => {
+	switch (type) {
+		case "SET_LEITEMVIEW":
+			return {
+				...state,
+				...payload
+			};
+		default:
+			return state;
+	}
+};
 
 export default class LeItemView extends Component {
 	constructor(props) {
@@ -9,7 +30,9 @@ export default class LeItemView extends Component {
 	}
 
 	componentDidMount() {
+		injectAsyncReducer(store, this.getPath(), reducer);
 		this.unsubscribe = store.subscribe(this.handleChange);
+		actions.set(this.props.config);
 	}
 
 	componentWillUnmount() {
@@ -17,8 +40,13 @@ export default class LeItemView extends Component {
 	}
 
 	handleChange = () => {
-		const state = store.getState()[this.props.store];
+		const state = store.getState()[this.getPath()];
 		this.setState(state);
+	};
+
+	getPath() {
+		let { path = "view", name = "items" } = this.props;
+		return `${path}.${name}`;
 	}
 
 	getContainerClass(view) {
@@ -26,51 +54,77 @@ export default class LeItemView extends Component {
 	}
 
 	getView(state) {
-		let name = state.itemview.stores.view;
-		let current = state.itembar[name].config.active || "grid";
-		let config = state.itemview.tile.views[current];
-		let component = state.itemview.tile.component;
-		return { current, config, component };
+		let name = state.stores.view;
+		let view = store.getState()[name];
+		let current = view.active || "grid";
+		let component = state.tile.component;
+		let controller = state.tile.controller;
+		return { current, component, controller };
 	}
 
 	getStores(state) {
-		let stores = state.itemview.stores;
+		let stores = state.stores;
 		let ret = {};
-		Object.keys(stores).forEach(store => {
-			let name = stores[store];
-			let conf = state.itembar[name] || {};
-			ret[store] = conf.config ? conf.config : state[name];
-		})
+		Object.keys(stores).forEach(key => {
+			let split = stores[key].split(":");
+			let path = split[0];
+			let property = split[1];
+			let conf = store.getState()[path] || {};
+
+			console.log("<itemview> store", key, path, property, conf);
+			if (typeof conf != undefined && property) {
+				conf = conf[property];
+			}
+
+			ret[key] = conf;
+		});
 		return ret;
 	}
 
+	// this method applies sorting via the SortBy widget
 	sortby(config, items) {
 		let property = config.property;
 		let direction = config.order;
 		let ret = items.sort((a, b) => {
 			switch (typeof a[property]) {
-				case 'string':
+				case "string":
 					return a[property].localeCompare(b[property]);
-				case 'number':
+				case "number":
 					return a[property] - b[property];
 				default:
 					throw new Error("Unsupported value to sort by");
 			}
 		});
-		return direction == '-' ? ret.reverse() : ret;
+		return direction == "-" ? ret.reverse() : ret;
 	}
 
+	// placeholder method for when I code the Refine/FilterBy widget
 	refine(config, items) {
 		return items;
 	}
 
-	query(config, items) {
+	// filter for the Query/Search widget
+	query(config, items, self = {}) {
+		// this represents the string to search for in items
 		let query = config.query;
+
+		self.state.query = query;
+
+		// default properties to search if none provided in conf
 		let properties = config.properties || [
-			'displayName', 'display_name', 'DisplayName', 'name', 'Name', 'title'
+			"displayName",
+			"display_name",
+			"DisplayName",
+			"name",
+			"Name",
+			"label",
+			"Label",
+			"title"
 		];
-		let ret = items.filter((item) => {
-			let value = '';
+
+		// query checked in all prop values concatenated
+		let ret = items.filter(item => {
+			let value = "";
 
 			properties.forEach(prop => {
 				if (item[prop]) {
@@ -78,87 +132,97 @@ export default class LeItemView extends Component {
 				}
 			});
 
-			return (!query || value.indexOf(query) >= 0);
+			return !query || value.indexOf(query) >= 0;
 		});
 
 		return ret;
 	}
 
-	changePagination = (page) => {
-		let pagination = this.state.itemview.pagination;
-		pagination.from = page.from;
-		pagination.to = page.to;
-		this.state.itemview.pagination.current = page.current;
-		this.setState(this.state);
-	}
-
+	// applies pagination to items after all other sorting/filters
 	pagination(items) {
+		items = items.slice();
 		let ret = [];
-		let conf = this.state.itemview.pagination;
+		let conf = this.state.pagination;
 		ret = items.splice(conf.from || 0, conf.pagesize);
 		return ret;
 	}
 
+	changePagination = page => {
+		let pagination = this.state.pagination;
+		pagination.from = page.from;
+		pagination.to = page.to;
+		this.state.pagination.current = page.current;
+		actions.set(this.state);
+	};
+
 	getItems(data) {
-		return data.items.slice();
+		// <object path>:<items key> format
+		let path = this.state.stores.items.split(":");
+
+		// use <path>:items by default if no itemskey is provided
+		let key = path.length > 1 ? path[1] : "items";
+		return data.items[key] || [];
 	}
 
 	render() {
-		let state = this.state || {};
-		if (!state.itemview) {
-			return '';
+		let state = this.state;
+
+		if (!state) {
+			return "";
 		}
 
 		let view = this.getView(state) || {};
 		let stores = this.getStores(state) || {};
-		let items = this.getItems(stores) || [];
+		let items = stores.items || []; // this.getItems(stores) || [];
 
+		// apply all sorting/filters in stores object
 		Object.keys(stores).forEach(name => {
-			if (typeof this[name] == 'function') {
-				items = this[name](stores[name], items);
+			if (typeof this[name] == "function") {
+				items = this[name](stores[name], items, this);
 			}
 		});
-		items = this.pagination(items);
 
-		console.log('> render view', this);
+		// apply the pagination filter
+		let paginated_items = this.pagination(items);
+
+		console.log("> render view", this);
+
 		return (
 			<div>
 				<ul class={this.getContainerClass(view)}>
-					{items.length > 0 && view.config
-						? this.renderView(view, items)
-						: ''
-					}
+					{paginated_items.length > 0 && view.component
+						? this.renderView(view, paginated_items, stores)
+						: ""}
 				</ul>
 				<LePagination
 					classesName="segment-pagination text-right"
-					total={stores.items.length}
-					perPage={state.itemview.pagination.pagesize}
-					start={state.itemview.pagination.current}
+					total={items.length}
+					perPage={state.pagination.pagesize}
+					start={state.pagination.current}
 					callback={this.changePagination}
 				/>
 			</div>
 		);
 	}
 
-	renderView(view, items) {
-		return (
-			items.map(item => {
-				return React.createElement(view.component, this.getAttrs(
-					view,
-					item,
-					this.state
-				));
-			})
-		);
+	renderView(view, items, stores) {
+		return items.map(item => {
+			return React.createElement(
+				view.component,
+				this.getAttrs(view, item, this.state, stores)
+			);
+		});
 	}
 
-	getAttrs(view, item, store) {
+	getAttrs(view, item, store, stores) {
 		let ret = Object.assign({});
-		ret.context = store.context;
+		ret.controller = view.controller;
 		ret.enrichments = store.enrichments;
 		ret.cube = store.cube;
 		ret.item = item;
 		ret.view = view.current;
+		ret.stores = stores;
+		ret.config = this.state.tile.config;
 		return ret;
 	}
 }

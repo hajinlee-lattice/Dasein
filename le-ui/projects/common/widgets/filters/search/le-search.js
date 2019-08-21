@@ -1,42 +1,70 @@
-import React, { Component } from "common/react-vendor";
 import "./le-search.scss";
+import React, { Component } from "common/react-vendor";
+import { store, injectAsyncReducer } from "store";
+
+const actions = {
+	set: payload => {
+		return store.dispatch({
+			type: "SET_LESEARCH",
+			payload: payload
+		});
+	}
+};
+
+const reducer = (state = {}, { type, payload }) => {
+	switch (type) {
+		case "SET_LESEARCH":
+			return {
+				...state,
+				...payload
+			};
+		default:
+			return state;
+	}
+};
 
 export default class LeSearch extends Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
-			placeholder: 'Search',
-			query: '',
+			placeholder: "Search",
+			query: "",
 			open: false
 		};
 	}
 
 	componentDidMount() {
-		this.setState(this.props.config);
+		let { path = "filters", name = "search" } = this.props;
+		injectAsyncReducer(store, `${path}.${name}`, reducer);
+		this.unsubscribe = store.subscribe(this.handleChange);
+		actions.set(this.props.config);
 	}
+
+	componentWillUnmount() {
+		this.unsubscribe();
+	}
+
+	handleChange = () => {
+		let { path = "filters", name = "search" } = this.props;
+		const state = store.getState()[`${path}.${name}`];
+		this.setState(state);
+	};
 
 	clickToggle = () => {
 		let state = Object.assign({}, this.state);
 		state.open = !state.open;
 		if (!state.open) {
-			state.query = '';
+			state.query = "";
 		}
-		this.setState(state);
-		this.updateParent();
-	}
+		actions.set(state);
+	};
 
-	changeQuery = (event) => {
-		this.state.query = event.target.value;
-		this.setState(this.state);
-		this.updateParent();
-	}
-
-	updateParent() {
-		if (this.props.update) {
-			this.props.update('search', this.state)
-		}
-	}
+	changeQuery = event => {
+		let state = Object.assign({}, this.state);
+		state.query = event.target.value;
+		actions.set(state);
+	};
 
 	getButtonClasses() {
 		let classes = "fa " + (this.state.open ? "fa-times" : "fa-search");
@@ -46,22 +74,23 @@ export default class LeSearch extends Component {
 	render() {
 		return (
 			<div class="select-menu ng-search open-absolute">
-				{
-					this.state.open
-						? <input
-							type="text"
-							className="form-control"
-							placeholder={this.state.placeholder}
-							onChange={this.changeQuery}
-							value={this.state.query}
-							autofocus
-						/>
-						: ''
-				}
-				<a className="button icon-button white-button"
+				{this.state.open ? (
+					<input
+						type="text"
+						className="form-control"
+						placeholder={this.state.placeholder}
+						onChange={this.changeQuery}
+						value={this.state.query}
+						autofocus
+					/>
+				) : (
+					""
+				)}
+				<a
+					className="button icon-button white-button"
 					onClick={this.clickToggle}
 				>
-					<span className={this.getButtonClasses()}></span>
+					<span className={this.getButtonClasses()} />
 				</a>
 			</div>
 		);
