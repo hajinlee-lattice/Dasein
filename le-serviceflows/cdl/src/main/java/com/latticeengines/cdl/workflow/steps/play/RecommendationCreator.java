@@ -118,11 +118,9 @@ class RecommendationCreator {
         String playLaunchId = playLaunchContext.getPlayLaunchId();
         Tenant tenant = playLaunchContext.getTenant();
 
-        Object accountId = checkAndGet(account,
-                entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name());
+        Object accountId = checkAndGet(account, InterfaceName.AccountId.name());
         if (accountId == null) {
-            throw new RuntimeException(entityMatchEnabled ? InterfaceName.CustomerAccountId.name()
-                    : InterfaceName.AccountId.name() + " can not be null");
+            throw new RuntimeException(InterfaceName.AccountId.name() + " can not be null");
         }
 
         Recommendation recommendation = new Recommendation();
@@ -136,8 +134,13 @@ class RecommendationCreator {
             launchTime = new Date(launchTimestampMillis);
         }
         recommendation.setLaunchDate(launchTime);
-        recommendation.setAccountId(accountId.toString());
-        recommendation.setLeAccountExternalID(accountId.toString());
+        if (entityMatchEnabled) {
+            recommendation.setAccountId(checkAndGet(account, InterfaceName.CustomerAccountId.name()));
+            recommendation.setLeAccountExternalID(recommendation.getAccountId());
+        } else {
+            recommendation.setAccountId(accountId.toString());
+            recommendation.setLeAccountExternalID(accountId.toString());
+        }
 
         if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
             String destinationAccountId = playLaunch.getDestinationAccountId().trim();
@@ -233,20 +236,20 @@ class RecommendationCreator {
             return 0;
 
         switch (bucket) {
-            case A:
-                return 95.0D;
-            case B:
-                return 70.0D;
-            case C:
-                return 40.0D;
-            case D:
-                return 20.0D;
-            case E:
-                return 10.0D;
-            case F:
-                return 5.0D;
-            default:
-                throw new UnsupportedOperationException("Unknown bucket " + bucket);
+        case A:
+            return 95.0D;
+        case B:
+            return 70.0D;
+        case C:
+            return 40.0D;
+        case D:
+            return 20.0D;
+        case E:
+            return 10.0D;
+        case F:
+            return 5.0D;
+        default:
+            throw new UnsupportedOperationException("Unknown bucket " + bucket);
         }
     }
 
