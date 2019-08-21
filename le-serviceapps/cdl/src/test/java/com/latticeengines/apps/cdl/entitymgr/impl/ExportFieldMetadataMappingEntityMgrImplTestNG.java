@@ -58,7 +58,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
     @Test(groups = "functional")
     public void testEmptyMappings() {
         List<ExportFieldMetadataMapping> fieldMappings = exportFieldMetadataMappingEntityMgr
-                .findByOrgId(lookupIdMap.getOrgId());
+                .findByOrgId(lookupIdMap.getOrgId(), mainTestTenant.getPid());
         assertNotNull(fieldMappings);
 
         assertEquals(fieldMappings.size(), 0);
@@ -119,7 +119,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testFind() {
         List<ExportFieldMetadataMapping> fieldMappings = exportFieldMetadataMappingEntityMgr
-                .findByOrgId(lookupIdMap.getOrgId());
+                .findByOrgId(lookupIdMap.getOrgId(), mainTestTenant.getPid());
         assertNotNull(fieldMappings);
 
         assertEquals(fieldMappings.size(), 3);
@@ -161,7 +161,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
         }
 
         List<ExportFieldMetadataMapping> updatedExportFieldMappings = exportFieldMetadataMappingEntityMgr
-                .findByOrgId(lookupIdMap.getOrgId());
+                .findByOrgId(lookupIdMap.getOrgId(), mainTestTenant.getPid());
 
         assertNotNull(updatedExportFieldMappings);
         assertNotEquals(updatedExportFieldMappings, exportFieldMappings);

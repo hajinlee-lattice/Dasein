@@ -37,7 +37,7 @@ public class ExportFieldMetadataMapping implements HasPid, HasTenant, HasAuditin
 
     public static final String NQ_FIND_FIELD_MAPPING_BY_LOOKUPMAP_ORG_ID = "ExportFieldMetadataMapping.findFieldMappingByOrgId";
     public static final String NQ_FIND_ALL_FIELD_MAPPINGS = "ExportFieldMetadataMapping.findAllFieldMappings";
-    static final String SELECT_FIELD_MAPPING_BY_LOOKUPMAP_ORG_ID = "FROM ExportFieldMetadataMapping fm WHERE fm.lookupIdMap.orgId = :orgId";
+    static final String SELECT_FIELD_MAPPING_BY_LOOKUPMAP_ORG_ID = "FROM ExportFieldMetadataMapping fm WHERE fm.lookupIdMap.orgId = :orgId AND fm.tenant.pid = :tenantPid";
     static final String SELECT_ALL_FIELD_MAPPINGS = "FROM ExportFieldMetadataMapping";
 
     @Id
