@@ -151,7 +151,8 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         }
         saveAccountIdInContactMatch(extraAttributes, traveler);
 
-        return new EntityAssociationRequest(standardizedTenant, entity,
+        // TODO add preferred entity ID here
+        return new EntityAssociationRequest(standardizedTenant, entity, null,
                 postProcessLookupResults(traveler, lookupResults), extraAttributes);
     }
 

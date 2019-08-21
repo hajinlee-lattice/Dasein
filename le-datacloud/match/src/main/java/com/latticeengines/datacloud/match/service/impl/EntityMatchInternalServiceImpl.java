@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
@@ -193,20 +194,30 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @Override
-    public String allocateId(@NotNull Tenant tenant, @NotNull String entity) {
+    public String allocateId(@NotNull Tenant tenant, @NotNull String entity, String preferredId) {
         checkNotNull(tenant, entity);
         if (!isAllocateMode()) {
             throw new UnsupportedOperationException("Not allowed to allocate ID in lookup mode");
         }
         EntityMatchEnvironment env = EntityMatchEnvironment.SERVING;
-        // [ idx, seedId ]
+        // try to allocate preferred ID
+        if (StringUtils.isNotBlank(preferredId)) {
+            boolean created = entityRawSeedService.createIfNotExists(env, tenant, entity, preferredId,
+                    shouldSetTTL(env));
+            if (created) {
+                // preferredId is not taken
+                return preferredId;
+            }
+        }
+
+        // allocate random ID, format = [ idx, seedId ]
         Optional<Pair<Integer, String>> allocatedId = IntStream
                 .range(0, MAX_ID_ALLOCATION_ATTEMPTS)
                 .mapToObj(idx -> {
                     String id = newId();
                     // use serving as the single source of truth
                     boolean created = entityRawSeedService
-                            .createIfNotExists(env, tenant, entity, id, shouldSetTTL(EntityMatchEnvironment.SERVING));
+                            .createIfNotExists(env, tenant, entity, id, shouldSetTTL(env));
                     return created ? Pair.of(idx, id) : null;
                 })
                 .findFirst();

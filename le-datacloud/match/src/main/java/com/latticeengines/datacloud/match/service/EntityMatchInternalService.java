@@ -74,11 +74,16 @@ public interface EntityMatchInternalService {
     /**
      * Allocate a new ID for given entity in the specified tenant.
      *
-     * @param tenant target tenant
-     * @param entity target entity
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            target entity
+     * @param preferredId
+     *            use this ID if not already taken, use {@literal null} or blank
+     *            string if no preference
      * @return the allocated ID, will not be {@literal null}
      */
-    String allocateId(@NotNull Tenant tenant, @NotNull String entity);
+    String allocateId(@NotNull Tenant tenant, @NotNull String entity, String preferredId);
 
     /**
      * Associate all lookup entries and attributes in the input
