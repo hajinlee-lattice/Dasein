@@ -161,6 +161,9 @@ public class CDLResource {
                                                   @RequestParam(value = "importData", required = false, defaultValue = "false") boolean importData,
                                                   @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
         try {
             EntityType entityType = EntityType.fromDisplayNameToEntityType(templateDisplay.getObject());
             String entity = entityType.getEntity().name();

@@ -378,8 +378,7 @@ public class CDLServiceImpl implements CDLService {
                 display.setLastEditedDate(task.getLastUpdated());
                 // get from data feed task
                 display.setTemplateName(task.getTemplateDisplayName());
-                EntityType entityType = EntityType.fromEntityAndSubType(BusinessEntity.getByName(task.getEntity()),
-                        task.getSubType());
+                EntityType entityType = EntityType.fromDataFeedTask(task);
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
                 display.setEntity(entityType.getEntity());

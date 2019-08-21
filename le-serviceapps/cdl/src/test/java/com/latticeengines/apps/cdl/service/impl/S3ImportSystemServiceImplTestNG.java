@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.query.EntityType;
 
 public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -43,6 +44,7 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
         Assert.assertEquals(system.getPriority(), 1);
         system.setPriority(2);
+        system.addSecondaryContactId(EntityType.Leads, "LeadsId");
 
         s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, system);
 
@@ -52,6 +54,8 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
         for (S3ImportSystem importSystem : allSystems) {
             if (importSystem.getName().equals("SYSTEM1")) {
                 Assert.assertEquals(importSystem.getPriority(), 2);
+                Assert.assertNotNull(importSystem.getSecondaryContactIds());
+                Assert.assertEquals(importSystem.getSecondaryContactId(EntityType.Leads), "LeadsId");
             } else {
                 Assert.assertEquals(importSystem.getPriority(), 1);
             }
