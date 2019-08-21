@@ -278,7 +278,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         log.info("filtering raw reqs against collection reqs done");
 
         //insert collection req
-        List<CollectionRequest> requests = new ArrayList<>(toAdd.size());
+        List<CollectionRequest> requests = new ArrayList<>(toAdd.size() - rawReqFilter.cardinality());
         for (int i = 0; i < toAdd.size(); ++i) {
 
             if (rawReqFilter.get(i)) {
