@@ -1,0 +1,133 @@
+{
+    "attributes": [
+        {
+            "name": "CustomerContactId",
+            "display_name": "Contact Id",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Unique ID",
+                "Required": false
+            }
+        },
+        {
+            "name": "State",
+            "display_name": "BillingState",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Match to Accounts - Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "Website",
+            "display_name": "EmailAddress",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Match to Accounts - Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "LastName",
+            "display_name": "Last Name",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Contact Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "LeadType",
+            "display_name": "Contact Type",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Analysis Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "LastModifiedDate",
+            "display_name": "Last_Modified_Date",
+            "physical_data_type": "long",
+            "properties": {
+                "SpecSectionName": "Analysis Fields",
+                "Required": false,
+                "DateFormatString": "MM.DDD.YY",
+                "TimeFormatString": "00 00 00.000 12H",
+                "Timezone": "Asia/Sakhalin"
+            }
+        },
+        {
+            "name": "BillingCity",
+            "display_name": "Billing City",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Match to Accounts - Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "user_DUNS",
+            "display_name": "DUNS",
+            "physical_data_type": "int",
+            "properties": {
+                "SpecSectionName": "Custom Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "user_JobTitle",
+            "display_name": "Job Title",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Custom Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "user_Gender",
+            "display_name": "Gender",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Custom Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "FirstName",
+            "display_name": "FirstName",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Contact Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "CompanyName",
+            "display_name": "Account_Name",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Match to Accounts - Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "PostalCode",
+            "display_name": "BILLING_ZIP_CODE",
+            "physical_data_type": "string",
+            "properties": {
+                "SpecSectionName": "Match to Accounts - Fields",
+                "Required": false
+            }
+        },
+        {
+            "name": "user_Do_Not_Call",
+            "display_name": "Do_Not_Call",
+            "physical_data_type": "boolean",
+            "properties": {
+                "SpecSectionName": "Custom Fields",
+                "Required": false
+            }
+        }
+    ]
+}

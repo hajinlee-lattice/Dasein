@@ -1,0 +1,256 @@
+{
+    "fieldDefinitionsRecordsMap": {
+        "Unique ID": [
+            {
+                "fieldName": "CustomerContactId",
+                "fieldType": "TEXT",
+                "screenName": "Contact ID",
+                "columnName": "Contact Id",
+                "required": false,
+                "inCurrentImport": true
+            }
+        ],
+        "Match IDs": [],
+        "Other IDs": [],
+        "Contact Fields": [
+            {
+                "fieldName": "FirstName",
+                "fieldType": "TEXT",
+                "screenName": "First Name",
+                "columnName": "FirstName",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "LastName",
+                "fieldType": "TEXT",
+                "screenName": "Last Name",
+                "columnName": "Last Name",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "Title",
+                "fieldType": "TEXT",
+                "screenName": "Title",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "Email",
+                "fieldType": "TEXT",
+                "screenName": "Email",
+                "required": false,
+                "inCurrentImport": false
+            }
+        ],
+        "Analysis Fields": [
+            {
+                "fieldName": "LeadSource",
+                "fieldType": "TEXT",
+                "screenName": "Lead Source",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "LeadType",
+                "fieldType": "TEXT",
+                "screenName": "Lead Type",
+                "columnName": "Contact Type",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "DoNotCall",
+                "fieldType": "BOOLEAN",
+                "screenName": "Has Opted Out of Phone Calls",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "CreatedDate",
+                "fieldType": "DATE",
+                "screenName": "Created Date",
+                "columnName": "CreatedDate",
+                "required": false,
+                "inCurrentImport": true,
+                "dateFormat": "MM/DD/YYYY"
+            },
+            {
+                "fieldName": "LastModifiedDate",
+                "fieldType": "DATE",
+                "screenName": "Last Modified Date",
+                "columnName": "Last_Modified_Date",
+                "required": false,
+                "inCurrentImport": false,
+                "dateFormat": "MM.DDD.YY",
+                "timeFormat": "00 00 00.000 12H",
+                "timeZone": "Asia/Sakhalin"
+            }
+        ],
+        "Match to Accounts - ID": [
+            {
+                "fieldName": "CustomerAccountId",
+                "fieldType": "TEXT",
+                "screenName": "Unique Account Identifier",
+                "columnName": "AccountExternalId",
+                "required": false,
+                "inCurrentImport": true
+            }
+        ],
+        "Match to Accounts - Fields": [
+            {
+                "fieldName": "Website",
+                "fieldType": "TEXT",
+                "screenName": "Website",
+                "columnName": "EmailAddress",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "CompanyName",
+                "fieldType": "TEXT",
+                "screenName": "Company Name",
+                "columnName": "Account_Name",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "DUNS",
+                "fieldType": "TEXT",
+                "screenName": "D-U-N-S",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "Country",
+                "fieldType": "TEXT",
+                "screenName": "Country",
+                "columnName": "BillingCountry",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "ZipCode",
+                "fieldType": "TEXT",
+                "screenName": "Zip Code",
+                "required": false,
+                "inCurrentImport": false
+            }
+        ],
+        "Custom Fields": [
+            {
+                "fieldName": "BillingCity",
+                "fieldType": "TEXT",
+                "screenName": "Billing City",
+                "columnName": "Billing City",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "PostalCode",
+                "fieldType": "TEXT",
+                "screenName": "BILLING_ZIP_CODE",
+                "columnName": "BILLING_ZIP_CODE",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "user_DUNS",
+                "fieldType": "INTEGER",
+                "screenName": "DUNS",
+                "columnName": "DUNS",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "user_Gender",
+                "fieldType": "TEXT",
+                "screenName": "Gender",
+                "columnName": "Gender",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldName": "user_Do_Not_Call",
+                "fieldType": "BOOLEAN",
+                "screenName": "Do_Not_Call",
+                "columnName": "Do_Not_Call",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "user_JobTitle",
+                "fieldType": "TEXT",
+                "screenName": "Job Title",
+                "columnName": "Job Title",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "State",
+                "fieldType": "TEXT",
+                "screenName": "BillingState",
+                "columnName": "BillingState",
+                "required": false,
+                "inCurrentImport": false
+            },
+            {
+                "fieldType": "TEXT",
+                "screenName": "First Name",
+                "columnName": "First Name",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldType": "TEXT",
+                "screenName": "LastName",
+                "columnName": "LastName",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldType": "NUMBER",
+                "screenName": "Earnings",
+                "columnName": "Earnings",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldType": "INTEGER",
+                "screenName": "Years At Company",
+                "columnName": "Years At Company",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldType": "TEXT",
+                "screenName": "Domain",
+                "columnName": "Domain",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldType": "TEXT",
+                "screenName": "Country",
+                "columnName": "Country",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldType": "BOOLEAN",
+                "screenName": "Heir to Throne",
+                "columnName": "Heir to Throne",
+                "required": false,
+                "inCurrentImport": true
+            },
+            {
+                "fieldType": "TEXT",
+                "screenName": "LeadType",
+                "columnName": "LeadType",
+                "required": false,
+                "inCurrentImport": true
+            }
+        ]
+    }
+}
