@@ -67,14 +67,14 @@ public class ExportFieldMetadataMappingEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    public List<ExportFieldMetadataMapping> findByOrgId(String orgId) {
-        return getReaderRepo().findByOrgId(orgId);
+    public List<ExportFieldMetadataMapping> findByOrgId(String orgId, Long tenantPid) {
+        return getReaderRepo().findByOrgId(orgId, tenantPid);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<ExportFieldMetadataMapping> update(LookupIdMap lookupIdMap) {
-        List<ExportFieldMetadataMapping> existingExportFieldMapping = findByOrgId(lookupIdMap.getOrgId());
+        List<ExportFieldMetadataMapping> existingExportFieldMapping = findByOrgId(lookupIdMap.getOrgId(), lookupIdMap.getTenant().getPid());
         List<ExportFieldMetadataMapping> updatedExportFieldMapping = lookupIdMap.getExportFieldMetadataMappings();
 
         updatedExportFieldMapping.forEach(fm -> {
