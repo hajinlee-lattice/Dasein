@@ -91,6 +91,20 @@ const GraphQLParser = {
             errorMessage = body.message;
         }
         return errorMessage || "";
+    },
+    getFacebookAudiences(body) {
+        if (body && body.data && body.data.callConnector && body.data.callConnector.output) {
+            var output = JSON.parse(body.data.callConnector.output);
+            if (!output.data) {
+                return [];
+            }
+            const audienceList = output.data.map(audience => {
+                return new Audience(audience.id, audience.name);
+            });
+            return audienceList;
+        } else {
+            return body;
+        }
     }
 };
 module.exports = GraphQLParser;
@@ -157,3 +171,12 @@ class SolutionConfiguration {
 
     }
 }
+
+class Audience {
+    constructor(audienceId="", audienceName=""){
+        this.id = audienceId;
+        this.name = audienceName;
+
+    }
+}
+
