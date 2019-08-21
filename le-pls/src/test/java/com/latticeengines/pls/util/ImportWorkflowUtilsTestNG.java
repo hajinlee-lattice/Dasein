@@ -115,18 +115,14 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
             IOException {
         T pojo = null;
         try {
-
             InputStream jsonInputStream = ClassLoader.getSystemResourceAsStream(resourceJsonFileRelativePath);
             if (jsonInputStream == null) {
-                log.error("Failed to convert resource file " + resourceJsonFileRelativePath +
-                        " to InputStream.  Please check path");
                 throw new IOException("Failed to convert resource file " + resourceJsonFileRelativePath +
                         " to InputStream.  Please check path");
             }
             pojo = JsonUtils.deserialize(jsonInputStream, clazz);
             if (pojo == null) {
                 String jsonString = IOUtils.toString(jsonInputStream, Charset.defaultCharset());
-                log.error("POJO was null. Failed to deserialize InputStream containing string: " + jsonString);
                 throw new IOException("POJO was null. Failed to deserialize InputStream containing string: " +
                         jsonString);
             }
