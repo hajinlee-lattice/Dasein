@@ -240,4 +240,24 @@ public final class PathBuilder {
     public static Path buildSchedulingPAFlagPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_PA_FLAG_FILE);
     }
+
+    public static Path buildWorkflowThrottlerPodsConfigPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    }
+
+    public static Path buildWorkflowThrottlerDivisionConfigPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    }
+
+    public static Path buildWorkflowThrottlerTenantConfigPath(String podId, CustomerSpace customerSpace) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, customerSpace.getContractId(), PathConstants.TENANTS, customerSpace.getTenantId(), PathConstants.SPACES, customerSpace.getSpaceId(), PathConstants.SERVICES, PathConstants.PLS, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    }
+
+    public static Path buildWorkflowThrottlerGlobalTenantConfigPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    }
+
+    public static Path buildWorkflowThrottlingFlagPath(String podId, String division) {
+        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division, PathConstants.WORKFLOW_THROTTLING_FLAG);
+    }
 }

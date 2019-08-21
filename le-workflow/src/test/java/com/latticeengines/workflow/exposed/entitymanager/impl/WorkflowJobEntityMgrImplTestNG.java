@@ -60,6 +60,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
     private Tenant tenant1;
     private Tenant tenant2;
 
+    private static final String TEST_CLUSTER_ID = "TestClusterId1";
+
     @BeforeClass(groups = "functional")
     @Override
     public void setup() throws Exception {
@@ -307,12 +309,16 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob1.setUserId(WorkflowUser.DEFAULT_USER.name());
         workflowJob1.setInputContextValue("filename", "abc");
         workflowJob1.setStack(leStack);
+        workflowJob1.setEmrClusterId(TEST_CLUSTER_ID);
+        workflowJob1.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name());
         workflowJobEntityMgr.create(workflowJob1);
 
         WorkflowJob workflowJob2 = new WorkflowJob();
         workflowJob2.setApplicationId("application_00002");
         workflowJob2.setTenant(tenant2);
         workflowJob2.setUserId("user2");
+        workflowJob2.setEmrClusterId(TEST_CLUSTER_ID);
+        workflowJob2.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name());
         workflowJobEntityMgr.create(workflowJob2);
 
         WorkflowJob workflowJob3 = new WorkflowJob();
@@ -320,6 +326,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob3.setTenant(tenant1);
         workflowJob3.setUserId("user3");
         workflowJob3.setStack(leStack);
+        workflowJob3.setEmrClusterId(TEST_CLUSTER_ID);
+        workflowJob3.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.ENQUEUED.name());
         workflowJobEntityMgr.create(workflowJob3);
 
         MultiTenantContext.setTenant(tenant1);
@@ -521,6 +529,26 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJobEntityMgr.updateInput(workflowJob2);
         WorkflowJob workflowJob3 = workflowJobEntityMgr.findByField("pid", workflowJob.getPid());
         assertEquals(workflowJob2.getInputContextString(), workflowJob3.getInputContextString());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
+    public void findByStatusesAndClusterId() {
+
+        MultiTenantContext.setTenant(tenant2);
+        List<WorkflowJob> results = workflowJobEntityMgr.findByStatusesAndClusterId(TEST_CLUSTER_ID, Arrays.asList(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name()));
+        Assert.assertEquals(results.size(), 1);
+
+        MultiTenantContext.setTenant(tenant1);
+        results = workflowJobEntityMgr.findByStatusesAndClusterId(TEST_CLUSTER_ID, Arrays.asList(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name()));
+        Assert.assertEquals(results.size(), 1);
+        results = workflowJobEntityMgr.findByStatusesAndClusterId(TEST_CLUSTER_ID, Arrays.asList(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name(), com.latticeengines.domain.exposed.workflow.JobStatus.ENQUEUED.name()));
+        Assert.assertEquals(results.size(), 2);
+
+        MultiTenantContext.clearTenant();
+        results = workflowJobEntityMgr.findByStatusesAndClusterId(TEST_CLUSTER_ID, Arrays.asList(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name()));
+        Assert.assertEquals(results.size(), 2);
+        results = workflowJobEntityMgr.findByStatusesAndClusterId(TEST_CLUSTER_ID, Arrays.asList(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name(), com.latticeengines.domain.exposed.workflow.JobStatus.ENQUEUED.name()));
+        Assert.assertEquals(results.size(), 3);
     }
 
     @DataProvider(name = "provideQueryByClusterIDData")
