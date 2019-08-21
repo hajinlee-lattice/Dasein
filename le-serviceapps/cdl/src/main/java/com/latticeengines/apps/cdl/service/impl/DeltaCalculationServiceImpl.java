@@ -17,8 +17,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -35,6 +37,9 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("common.internal.app.url")
     private String internalAppUrl;
@@ -56,6 +61,9 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
         }
 
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllValidScheduledChannels();
+
+        channels = channels.stream().filter(c -> batonService.isEnabled(CustomerSpace.parse(c.getTenant().getId()),
+                LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS)).collect(Collectors.toList());
 
         log.info("Found " + channels.size() + " channels scheduled for launch");
 
