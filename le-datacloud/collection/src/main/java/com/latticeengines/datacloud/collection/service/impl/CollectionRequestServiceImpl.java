@@ -397,6 +397,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         List<CollectionRequest> delivered = new ArrayList<>(domains.size());
 
         Timestamp ts = new Timestamp(System.currentTimeMillis());
+        int reqRetried = 0;
         for (CollectionRequest req: reqs) {
 
             if (domains.contains(req.getDomain())) {
@@ -406,17 +407,20 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
                 delivered.add(req);
 
+            } else if (req.getRetryAttempts() > 0) {
+
+                ++reqRetried;
+
             }
 
         }
 
         collectionRequestMgr.saveRequests(delivered);
 
-        int ret = reqs.size();
         reqs.clear();
         delivered.clear();
 
-        return ret;
+        return reqRetried;
 
     }
 
