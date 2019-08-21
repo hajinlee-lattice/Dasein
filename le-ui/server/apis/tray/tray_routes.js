@@ -5,6 +5,10 @@ const UIActionsFactory = require('../uiactions-factory');
  * Routing for tray's apis
  * End point for UI defined here
  */
+const LINKEDIN = "LinkedIn";
+const FACEBOOK = "Facebook";
+const MARKETO = "Marketo";
+const OUTREACH = "Outreach";
 
 class TrayRouter {
     constructor(express, app, bodyParser, chalk, API_URL, PATH, request, proxies, masterAuthorizationToken) {
@@ -35,14 +39,14 @@ class TrayRouter {
         return options;
     }
 
-    getEphemeralApiOptions(req, useUserAccessToken) {
+    getEphemeralApiOptions(req, useUserAccessToken, systemName) {
 
         var authorization = (req.headers && req.headers.useraccesstoken && useUserAccessToken == true) ?
             req.headers.useraccesstoken :
             this.masterAuthorizationToken;
 
         const options = {
-            url: "https://api.tray.io/v1/artisan/connectors/marketo/2.10/ephemeral",
+            url: this.getEphemeralAPIEndpoint(systemName),
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${authorization}`
@@ -50,6 +54,15 @@ class TrayRouter {
         };
 
         return options;
+    }
+
+    getEphemeralAPIEndpoint(systemName) {
+        switch (systemName) {
+            case MARKETO:
+                return "https://api.tray.io/v1/artisan/connectors/marketo/2.10/ephemeral"
+            default:
+                return this.API_URL + this.PATH;
+        }
     }
 
     createRoutes() {
@@ -324,7 +337,7 @@ class TrayRouter {
         this.router.get('/marketo/staticlists', function(req, res){
             var authenticationId = req.query.trayAuthenticationId || '';
             var programName = req.query.programName || '';
-            let options = this.getEphemeralApiOptions(req, true);
+            let options = this.getEphemeralApiOptions(req, true, MARKETO);
             options.json = Queries.listMarketoStaticLists(authenticationId, programName);
             this.request(options, function(error, response, body){
                 var errorMessage = GraphQLParser.getErrorMessage(body);
@@ -340,7 +353,7 @@ class TrayRouter {
 
         this.router.get('/marketo/programs', function(req, res){
             var authenticationId = req.query.trayAuthenticationId || '';
-            let options = this.getEphemeralApiOptions(req, true);
+            let options = this.getEphemeralApiOptions(req, true, MARKETO);
             if (req.query.includeDateFilter == true) {
                 var date = new Date();
                 date.setFullYear(date.getFullYear() - 1);
@@ -373,13 +386,31 @@ class TrayRouter {
         }.bind(this));
 
         this.router.get('/facebook/audiences', function(req, res){
-            res.send({
-                success: true,
-                errors: [],
-                requestId: "foo",
-                warnings: [],
-                result: []
+            var authenticationId = req.query.trayAuthenticationId || '';
+            var adAccountId = req.query.adAccountId || '';
+            let options = this.getApiOptions(req, true);
+            options.json = Queries.getFacebookAudiences(authenticationId, adAccountId);
+            console.log(options.json);
+            console.log(req.headers.useraccesstoken);
+            this.request(options, function(error, response, body){
+                console.log(body);
+                var errorMessage = GraphQLParser.getErrorMessage(body);
+
+                if (errorMessage) {
+                    console.log("Couldn't retrieve static lists for authenticationId " + authenticationId + ": " + JSON.stringify(body));
+                    res.send(UIActionsFactory.getUIActionsObject(errorMessage, 'Banner', 'Error'));
+                    return;
+                }
+
+                res.send(GraphQLParser.getFacebookAudiences(body));
             });
+            // res.send({
+            //     success: true,
+            //     errors: [],
+            //     requestId: "foo",
+            //     warnings: [],
+            //     result: []
+            // });
         }.bind(this));
 
         this.router.get('/linkedin/audiences', function(req, res){
