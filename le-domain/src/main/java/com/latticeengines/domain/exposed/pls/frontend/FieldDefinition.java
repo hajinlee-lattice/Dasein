@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,7 +30,7 @@ public class FieldDefinition {
 
     // The name to display on the UI for this field.  Only used for Lattice Fields and Match Fields.
     @JsonProperty
-    private String displayName;
+    private String screenName;
 
     // A priority ordered list of column names that should be matched to this field.  Only set in the Import Workflow
     // Specs.
@@ -115,12 +116,12 @@ public class FieldDefinition {
         this.fieldType = fieldType;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getScreenName() {
+        return screenName;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
     }
 
     public List<String> getMatchingColumnNames() {
@@ -225,7 +226,7 @@ public class FieldDefinition {
         String output = "";
         output += "fieldName: " + fieldName;
         output += "\nfieldType: " + fieldType;
-        output += "\ndisplayName: " + displayName;
+        output += "\nscreenName: " + screenName;
         output += "\nmatchingColumnNames:";
         if (CollectionUtils.isNotEmpty(matchingColumnNames)) {
             for (String name : matchingColumnNames) {
@@ -243,5 +244,55 @@ public class FieldDefinition {
         output += "\ntimeFormat: " + timeFormat;
         output += "\ntimeZone: " + timeZone;
         return output;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof FieldDefinition) {
+            FieldDefinition definition = (FieldDefinition) object;
+            if (!StringUtils.equals(this.fieldName, definition.fieldName) ||
+                    this.fieldType != definition.fieldType ||
+                    !StringUtils.equals(this.screenName, definition.screenName) ||
+                    !StringUtils.equals(this.columnName, definition.columnName) ||
+                    this.idEntityType != definition.idEntityType ||
+                    this.externalSystemType != definition.externalSystemType ||
+                    !StringUtils.equals(this.externalSystemName, definition.externalSystemName) ||
+                    !StringUtils.equals(this.dateFormat, definition.dateFormat) ||
+                    !StringUtils.equals(this.timeFormat, definition.timeFormat) ||
+                    !StringUtils.equals(this.timeZone, definition.timeZone)) {
+                return false;
+            }
+
+            if (this.matchingColumnNames == null) {
+                if (definition.matchingColumnNames != null) {
+                    return false;
+                }
+            } else if (!this.matchingColumnNames.equals(definition.matchingColumnNames)) {
+                return false;
+            }
+            if (this.required == null) {
+                if (definition.required != null) {
+                    return false;
+                }
+            } else if (!this.required.equals(definition.required)) {
+                return false;
+            }
+            if (this.inCurrentImport == null) {
+                if (definition.inCurrentImport != null) {
+                    return false;
+                }
+            } else if (!this.inCurrentImport.equals(definition.inCurrentImport)) {
+                return false;
+            }
+            if (this.mappedToLatticeId == null) {
+                if (definition.mappedToLatticeId != null) {
+                    return false;
+                }
+            } else if (!this.mappedToLatticeId.equals(definition.mappedToLatticeId)) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 }
