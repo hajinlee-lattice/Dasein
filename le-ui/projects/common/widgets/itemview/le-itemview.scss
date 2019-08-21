@@ -1,3 +1,9 @@
 .le-itemview {
-  display: block;
+	display: block;
+	&.tiles .tile-content-wrapper {
+	}
+	&.list .tile-content-wrapper {
+		display: inline-flex;
+		width: 100%;
+	}
 }

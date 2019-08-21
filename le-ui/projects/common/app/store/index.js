@@ -1,5 +1,6 @@
 import * as reduxStore from "./redux-store";
 import ngRedux from "ng-redux";
+import lodash from "lodash";
 
 export const store = reduxStore.store;
 export const injectAsyncReducer = reduxStore.injectAsyncReducer;

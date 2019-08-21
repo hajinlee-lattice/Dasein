@@ -183,8 +183,12 @@ export default function () {
             }
 
             vm.getQuerySnippet = function (enrichment, rule, type) {
+                console.log('attrtile getQuerySnippet() enrichment', enrichment);
+                console.log('attrtile getQuerySnippet() rule', rule);
+                console.log('attrtile getQuerySnippet() type', type);
+                console.log('attrtile getQuerySnippet() vm.cube', vm.cube);
                 var querySnippet = enrichment.DisplayName + ' ';
-                if (vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId] && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts) { //bucketable attributes
+                if (vm.cube && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId] && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts) { //bucketable attributes
                     querySnippet += 'is ';
                     querySnippet += (type == 'Enum' && rule.bucketRestriction.bkt.Vals && rule.bucketRestriction.bkt.Vals.length > 1) ? vm.generateBucketLabel(rule.bucketRestriction.bkt) : rule.bucketRestriction.bkt.Lbl;
                 } else { //non-bucketable attributes e.g. pure-string

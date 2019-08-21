@@ -15,47 +15,84 @@ export default class LeSegmentItem extends Component {
 	}
 
 	getEnrichmentsMap() {
-		let AttributesStore = this.props.context.AttributesStore;
-		let restrictions = AttributesStore.getTopNAttributes(this.props.item, 5);
-		let enrichments = this.props.enrichments;
-		let cube = this.props.cube;
+		let AttributesStore = this.props.controller.AttributesStore;
+		let restrictions = AttributesStore.getTopNAttributes(
+			this.props.item,
+			5
+		);
+		let stores = this.props.stores;
+		let enrichments = stores.enrichments;
+		let cube = stores.cube;
 
 		restrictions = AttributesStore.sortAttributesByCnt(restrictions);
 
-		let attrs = AttributesStore.formatAttributes(restrictions, cube, enrichments) || [];
+		let attrs =
+			AttributesStore.formatAttributes(restrictions, cube, enrichments) ||
+			[];
 
 		this.state.attributes = attrs;
-		//console.log('<segment_item>', '\ncube:', cube, '\nenrichments:', enrichments, '\nrestrictions:', restrictions, '\nattrs', attrs);
+		console.log(
+			"<segment_item>",
+			"\ncube:",
+			cube,
+			"\nenrichments:",
+			enrichments,
+			"\nrestrictions:",
+			restrictions,
+			"\nattrs",
+			attrs,
+			this
+		);
 	}
 
-	toggle = (path) => {
+	toggle = path => {
 		var state = Object.assign({}, this.state);
 		state[path] = !state[path];
 		this.setState(state);
-	}
+	};
 
-	toggleCustomMenu = () => {
-		this.toggle('openCustomMenu');
-	}
+	toggleCustomMenu = event => {
+		event.preventDefault();
+		event.stopPropagation();
+
+		this.toggle("openCustomMenu");
+	};
 
 	toggleEditMode = () => {
-		this.toggle('editing');
-	}
+		this.toggle("editing");
+	};
 
 	formatTS(ts, full) {
 		let d = new Date(ts);
-		let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		let months = [
+			"Jan",
+			"Feb",
+			"Mar",
+			"Apr",
+			"May",
+			"Jun",
+			"Jul",
+			"Aug",
+			"Sep",
+			"Oct",
+			"Nov",
+			"Dec"
+		];
 		let year = d.getFullYear();
 		let month = months[d.getMonth()];
 		let day = d.getDate();
-		let date = month + ' ' + day + ', ' + year;
-		return date + (full
-			? ' @ ' + d.toLocaleString('en-US', {
-				hour: 'numeric',
-				minute: 'numeric',
-				hour12: true
-			})
-			: '');
+		let date = month + " " + day + ", " + year;
+		return (
+			date +
+			(full
+				? " @ " +
+				  d.toLocaleString("en-US", {
+						hour: "numeric",
+						minute: "numeric",
+						hour12: true
+				  })
+				: "")
+		);
 	}
 
 	render() {
@@ -72,17 +109,35 @@ export default class LeSegmentItem extends Component {
 			this.renderFooter(item)
 		];
 
+		if (this.props.view == "list") {
+			content.push(this.renderControls(item));
+		}
+
 		switch (this.props.view) {
-			case 'grid': return this.renderTile(LeTile, content, editform);
-			case 'list': return this.renderTile(LeTileList, content, editform);
-			case 'table': return this.renderTable(LeTileList, content, editform);
+			case "grid":
+				return this.renderTile(LeTile, content, editform);
+			case "list":
+				return this.renderTile(LeTileList, content, editform);
+			case "table":
+				return this.renderTable(LeTileList, content, editform);
 		}
 	}
 
 	renderTile(TileComponent, content, editform) {
 		return (
 			<TileComponent>
-				{this.state.editing ? editform : content}
+				{this.state.editing ? (
+					editform
+				) : (
+					<div
+						class="tile-content-wrapper"
+						onClick={event => {
+							this.props.config.clickTile(event, this.props.item);
+						}}
+					>
+						{content}
+					</div>
+				)}
 			</TileComponent>
 		);
 	}
@@ -90,84 +145,96 @@ export default class LeSegmentItem extends Component {
 	renderHeader(item) {
 		return (
 			<div class="tile-header">
-				<h2 title={item.display_name}>
-					{item.display_name}
-				</h2>
-				{
-					console.log('renderHeader', this.props.view, this.state.openCustomMenu, item, this)
-				}{
-					this.props.view == 'grid' ? this.renderCustomMenu(item) : ''
-				}
+				<h2 title={item.display_name}>{item.display_name}</h2>
+				{this.props.view == "grid" ? this.renderCustomMenu(item) : ""}
 			</div>
 		);
 	}
 
 	renderCustomMenu(item) {
-		console.log('renderCustomMenu', item, this.props.view)
 		return (
 			<div class="edit">
-				<button type="button"
+				<button
+					type="button"
 					onClick={this.toggleCustomMenu}
-					className={this.state.openCustomMenu ? 'open' : ''}>
+					className={this.state.openCustomMenu ? "open" : ""}
+				>
 					<span
-						className={"fa fa-ellipsis-v" + (this.state.openCustomMenu ? ' fa-rotate-180' : '')}>
-					</span>
+						className={
+							"fa fa-ellipsis-v" +
+							(this.state.openCustomMenu ? " fa-rotate-180" : "")
+						}
+					/>
 				</button>
-				{() => {
-					return (this.state.openCustomMenu ? (<ul class="model-menu">
+				{this.state.openCustomMenu ? (
+					<ul class="model-menu">
 						<li onClick={this.toggleEditMode}>
 							<a href="javascript:void(0)">Edit</a>
-							<i class="fa fa-edit"></i>
+							<i class="fa fa-edit" />
 						</li>
 						<li onClick={this.clickDuplicateSegment}>
 							<a href="javascript:void(0)">Duplicate</a>
-							<i class="fa fa-copy"></i>
+							<i class="fa fa-copy" />
 						</li>
 						<li onClick={this.clickDeleteSegment}>
 							<a href="javascript:void(0)">Delete</a>
-							<i class="fa fa-trash"></i>
+							<i class="fa fa-trash" />
 						</li>
-					</ul>) : '')
-				}}
+					</ul>
+				) : (
+					""
+				)}
 			</div>
 		);
 	}
 
 	renderMetadata(item) {
 		return (
-			<div class="tile-metadata" ng-if="!vm.tileStates[item.name].editSegment">
+			<div
+				class="tile-metadata"
+				ng-if="!vm.tileStates[item.name].editSegment"
+			>
 				<ul>
 					<li>
 						Created by&nbsp;
-						<span class="blue-text"
-							title={item.created_by}>
-							{item.created_by.split('@')[0]}
-						</span> on&nbsp;
-						<span class="blue-text"
-							title={this.formatTS(item.created, true)}>
+						<span class="blue-text" title={item.created_by}>
+							{item.created_by.split("@")[0]}
+						</span>{" "}
+						on&nbsp;
+						<span
+							class="blue-text"
+							title={this.formatTS(item.created, true)}
+						>
 							{this.formatTS(item.created)}
 						</span>
 					</li>
 					<li>
-						Last updated <span class="blue-text">{this.formatTS(item.updated, true)}</span>
+						Last updated{" "}
+						<span class="blue-text">
+							{this.formatTS(item.updated, true)}
+						</span>
 					</li>
 					<li>
-						{item.description
-							? (<p title={item.description} className="description">
+						{item.description ? (
+							<p title={item.description} className="description">
 								Description:&nbsp;
-									<span class="blue-text">
-									{item.description}{item.description.length > 250 ? '&hellip;' : ''}
+								<span class="blue-text">
+									{item.description}
+									{item.description.length > 250
+										? "&hellip;"
+										: ""}
 								</span>
-							</p>)
-							: (<p className="description">
+							</p>
+						) : (
+							<p className="description">
 								<span
 									class="blue-text"
 									onClick={this.toggleEditMode}
 								>
 									Add a description.
-									</span>
-							</p>)
-						}
+								</span>
+							</p>
+						)}
 					</li>
 				</ul>
 			</div>
@@ -177,18 +244,24 @@ export default class LeSegmentItem extends Component {
 	renderBody() {
 		return (
 			<div class="tile-body wrap-body">
-				{
-					this.state.invalid
-						? <p class="attributesDisplay centered italicized">
-							<i class="fa fa-exclamation-triangle" style="color:#ca2b2b"></i>&nsbp;
-							This segment contains invalid or deleted attributes.
-							</p>
-						: this.state.attributes.map(attr => {
-							return (<p class="attributesDisplay">
+				{this.state.invalid ? (
+					<p class="attributesDisplay centered italicized">
+						<i
+							class="fa fa-exclamation-triangle"
+							style="color:#ca2b2b"
+						/>
+						&nsbp; This segment contains invalid or deleted
+						attributes.
+					</p>
+				) : (
+					this.state.attributes.map(attr => {
+						return (
+							<p class="attributesDisplay">
 								{attr.label} <em>{attr.value}</em>
-							</p>)
-						})
-				}
+							</p>
+						);
+					})
+				)}
 			</div>
 		);
 	}
@@ -198,19 +271,18 @@ export default class LeSegmentItem extends Component {
 			<div class="tile-footer segments">
 				<div class="account-count columns six">
 					<h4 class="entity-title">ACCOUNTS </h4>
-					<div class="blue-text">
-						{item.accounts || 0}
-					</div>
+					<div class="blue-text">{item.accounts || 0}</div>
 				</div>
 				<div class="contact-count columns six">
 					<h4 class="entity-title">CONTACTS </h4>
-					<div class="blue-text">
-						{item.contacts || 0}
-					</div>
+					<div class="blue-text">{item.contacts || 0}</div>
 				</div>
-				{this.props.view == 'list' ? this.renderCustomMenu(item) : ''}
 			</div>
 		);
+	}
+
+	renderControls(item) {
+		return <div class="tile-controls">{this.renderCustomMenu(item)}</div>;
 	}
 
 	renderEditForm(item) {
@@ -219,8 +291,10 @@ export default class LeSegmentItem extends Component {
 				config="vm.editConfig"
 				dataobj="segment"
 				saving="vm.saveInProgress"
-				callback={() => { this.saveNameDescription(obj, newData); }}>
-			</edit-form>
+				callback={() => {
+					this.saveNameDescription(obj, newData);
+				}}
+			/>
 		);
 	}
 }
