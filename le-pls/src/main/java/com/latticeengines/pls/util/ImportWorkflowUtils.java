@@ -445,7 +445,7 @@ public class ImportWorkflowUtils {
         log.error("    Successfully added Spec fieldName " + definition.getFieldName() + " to section " + section);
     }
 
-    public static Table getTableFromFieldDefinitionsRecord(FieldDefinitionsRecord record) {
+    public static Table getTableFromFieldDefinitionsRecord(FieldDefinitionsRecord record, boolean writeAllDefinitions) {
         Table table = new Table();
 
         if (record == null || MapUtils.isEmpty(record.getFieldDefinitionsRecordsMap())) {
@@ -460,11 +460,19 @@ public class ImportWorkflowUtils {
             }
 
             for (FieldDefinition definition : entry.getValue()) {
-                // Only write back FieldDefinitions with column names back to the table as this indicates that they
-                // have a current mapping column or had in the a previous import.
-                if (StringUtils.isNotBlank(definition.getColumnName())) {
+                if (definition == null) {
+                    log.error("During spec iteration, found null FieldDefinition in section " + entry.getKey());
+                    continue;
+                }
+
+                // If writeAllDefinitions is false, only write back FieldDefinitions with columnName set back to the
+                // table as this indicates that they have a current mapping column or had in the a previous import.
+                // In this case, skip FieldDefinitions that don't have columnName set as these are Spec fields that
+                // do not current or did not previously match a import file column.
+                if (writeAllDefinitions || StringUtils.isNotBlank(definition.getColumnName())) {
                     Attribute attribute = getAttributeFromFieldDefinition(definition, null);
                     table.addAttribute(attribute);
+                    log.error("   SectionName: " + entry.getKey() + " FieldName: " + definition.getFieldName());
                 }
             }
         }
@@ -770,7 +778,5 @@ public class ImportWorkflowUtils {
         return fieldDefinitionsRecord;
     }
     */
-
-
 
 }
