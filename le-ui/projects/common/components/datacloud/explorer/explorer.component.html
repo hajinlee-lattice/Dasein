@@ -33,12 +33,23 @@
                 <li explorer-company-profile ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights' && !vm.hideLookupResponse()"
                     class="category company first-spot-info-card" vm="vm">
                 </li>
-                <li explorer-category-tile ng-repeat="category in (vm.categoriesMenu = vm.removeEmptyCategories(vm.categories))
+                <li 
+                    explorer-category-tile ng-repeat="category in (vm.categoriesMenu = vm.removeEmptyCategories(vm.categories))
                         | startFrom: vm.categoryStartFrom()
                         | limitTo: vm.categoryLimitTo()"
-                    class="category" ng-if="(count = vm.categoryCount(category)) && (isEnabled = vm.lookupMode ? vm.highlightMetadata.categories[category].enabled : true) && (vm.lookupMode ? !vm.hideLookupResponse() : true) || (vm.query ? vm.checkEmptyCategory(category, count, isEnabled) : false)"
-                    ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'}"
-                    ng-click="vm.categoryClick(category, $event);" vm="vm" category="category" count="count">
+                    class="category" 
+                    ng-if="
+                        (count = vm.categoryCount(category)) && 
+                        (isEnabled = vm.lookupMode ? vm.highlightMetadata.categories[category].enabled : true) && 
+                        (vm.lookupMode ? !vm.hideLookupResponse() : true) || (vm.query ? vm.checkEmptyCategory(category, count, isEnabled) : false)"
+                    ng-class="{
+                        'active': vm.category == category, 
+                        'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'
+                    }"
+                    ng-click="vm.categoryClick(category, $event);" 
+                    vm="vm" 
+                    category="category" 
+                    count="count">
                 </li>
             </ul>
         </div>
