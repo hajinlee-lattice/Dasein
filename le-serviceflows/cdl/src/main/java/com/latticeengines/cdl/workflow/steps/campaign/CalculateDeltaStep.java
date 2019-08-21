@@ -12,8 +12,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -180,14 +178,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         log.info(logHDFSDataUnit(tableName, dataUnit));
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
-        dataUnitTable = metadataProxy.getTable(customerSpace.getTenantId(), dataUnitTable.getName());
         putObjectInContext(contextKey, tableName);
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
-    }
-
-    private String getTargetTablePath(String playId, String channelId, String executionId, String tableName) {
-        return PathBuilder.buildDataTablePath(podId, customerSpace).append(PathConstants.CAMPAIGNS).append(playId)
-                .append(channelId).append(executionId).append(tableName).toString();
     }
 
     private SparkJobResult executeSparkJob(FrontEndQuery accountQuery, FrontEndQuery contactQuery,
