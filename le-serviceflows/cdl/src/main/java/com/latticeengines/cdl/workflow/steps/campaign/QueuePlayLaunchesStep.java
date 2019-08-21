@@ -9,14 +9,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-<<<<<<< HEAD
-||||||| merged common ancestors
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.metadata.Table;
-=======
-import com.latticeengines.domain.exposed.metadata.Table;
->>>>>>> moved feature flag filter to deltacalculationworkflow
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.QueuePlayLaunchesStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -33,16 +25,7 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
     @Override
     public void execute() {
         log.info("Queueing Scheduled PlayLaunches");
-<<<<<<< HEAD
         String customerSpace = configuration.getCustomerSpace().getTenantId();
-||||||| merged common ancestors
-        if (!batonService.isEnabled(configuration.getCustomerSpace(), LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS)) {
-            log.info("Cannot auto queue PlayLaunch if always on feature flag is disabled");
-            return;
-        }
-=======
-
->>>>>>> moved feature flag filter to deltacalculationworkflow
         PlayLaunch launch = playProxy.queueNewLaunchByPlayAndChannel(configuration.getCustomerSpace().toString(),
                 configuration.getPlayId(), configuration.getChannelId());
 
