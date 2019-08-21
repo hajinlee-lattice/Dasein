@@ -229,7 +229,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
         }
         if (!getConfiguration().isExportKeyColumnsOnly()) {
-            putObjectInContext(FILTER_EVENT_TARGET_TABLE_NAME, eventTable);
+            putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, eventTable.getName());
         }
     }
 
