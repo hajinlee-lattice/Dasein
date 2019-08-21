@@ -193,7 +193,7 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                                                   ComparisonType operator, Object... vals) {
         Bucket bucket = new Bucket();
         bucket.setComparisonType(operator);
-        if (vals.length > 0) {
+        if (vals != null && vals.length > 0) {
             bucket.setValues(Arrays.asList(vals));
         }
         return new BucketRestriction(new AttributeLookup(entityType, attrName), bucket);
