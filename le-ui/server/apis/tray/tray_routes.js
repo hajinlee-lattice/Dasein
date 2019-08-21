@@ -39,14 +39,14 @@ class TrayRouter {
         return options;
     }
 
-    getEphemeralApiOptions(req, useUserAccessToken, systemName) {
+    getEphemeralApiOptions(req, useUserAccessToken) {
 
         var authorization = (req.headers && req.headers.useraccesstoken && useUserAccessToken == true) ?
             req.headers.useraccesstoken :
             this.masterAuthorizationToken;
 
         const options = {
-            url: this.getEphemeralAPIEndpoint(systemName),
+            url: "https://api.tray.io/v1/artisan/connectors/marketo/2.10/ephemeral",
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${authorization}`
@@ -54,15 +54,6 @@ class TrayRouter {
         };
 
         return options;
-    }
-
-    getEphemeralAPIEndpoint(systemName) {
-        switch (systemName) {
-            case MARKETO:
-                return "https://api.tray.io/v1/artisan/connectors/marketo/2.10/ephemeral"
-            default:
-                return this.API_URL + this.PATH;
-        }
     }
 
     createRoutes() {
@@ -337,7 +328,7 @@ class TrayRouter {
         this.router.get('/marketo/staticlists', function(req, res){
             var authenticationId = req.query.trayAuthenticationId || '';
             var programName = req.query.programName || '';
-            let options = this.getEphemeralApiOptions(req, true, MARKETO);
+            let options = this.getEphemeralApiOptions(req, true);
             options.json = Queries.listMarketoStaticLists(authenticationId, programName);
             this.request(options, function(error, response, body){
                 var errorMessage = GraphQLParser.getErrorMessage(body);
@@ -353,7 +344,7 @@ class TrayRouter {
 
         this.router.get('/marketo/programs', function(req, res){
             var authenticationId = req.query.trayAuthenticationId || '';
-            let options = this.getEphemeralApiOptions(req, true, MARKETO);
+            let options = this.getEphemeralApiOptions(req, true);
             if (req.query.includeDateFilter == true) {
                 var date = new Date();
                 date.setFullYear(date.getFullYear() - 1);
@@ -404,13 +395,6 @@ class TrayRouter {
 
                 res.send(GraphQLParser.getFacebookAudiences(body));
             });
-            // res.send({
-            //     success: true,
-            //     errors: [],
-            //     requestId: "foo",
-            //     warnings: [],
-            //     result: []
-            // });
         }.bind(this));
 
         this.router.get('/linkedin/audiences', function(req, res){
