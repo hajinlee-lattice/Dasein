@@ -49,7 +49,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
     public void execute() {
         PlayLaunchExportFilesGeneratorConfiguration config = getConfiguration();
         String recAvroHdfsFilePath = getStringValueFromContext(
-                PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH);
+                PlayLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH);
 
         try (PerformanceTimer timer = new PerformanceTimer(
                 String.format("Generating PlayLaunch Export Files for:%s", config.getPlayName()))) {
@@ -86,8 +86,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
         public void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException {
             AvroUtils.convertAvroToCSV(yarnConfiguration, recAvroHdfsFilePath, localFile,
                     new RecommendationAvroToCsvTransformer(config.getAccountDisplayNames(),
-                            config.getContactDisplayNames(),
-                            shouldIgnoreAccountsWithoutContacts(config)));
+                            config.getContactDisplayNames(), shouldIgnoreAccountsWithoutContacts(config)));
         }
 
         @Override
@@ -98,9 +97,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
     }
 
     private boolean shouldIgnoreAccountsWithoutContacts(PlayLaunchExportFilesGeneratorConfiguration config) {
-        return config.getDestinationSysType() == CDLExternalSystemType.MAP
-                || channelConfigProcessor.isContactAudienceType(config.getDestinationSysName(),
-                        config.getChannelConfig());
+        return config.getDestinationSysType() == CDLExternalSystemType.MAP || channelConfigProcessor
+                .isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 
     private class JsonFileExporter extends ExportFileCallable {

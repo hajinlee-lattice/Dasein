@@ -14,10 +14,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfigu
 public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
+    public static final String RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH = "RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH";
     public static final String RECOMMENDATION_EXPORT_FILES = "RECOMMENDATION_EXPORT_FILES";
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
-
 
     public static class Builder {
         private PlayLaunchWorkflowConfiguration configuration = new PlayLaunchWorkflowConfiguration();

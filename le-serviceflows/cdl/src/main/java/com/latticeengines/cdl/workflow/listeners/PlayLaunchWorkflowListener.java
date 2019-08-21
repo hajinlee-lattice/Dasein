@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.listeners;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -62,17 +63,18 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
     private void cleanupIntermediateFiles(JobExecution jobExecution) {
 
         List<String> hdfsIntermediateFiles = new ArrayList<>();
-        String avroFile = getStringValueFromContext(jobExecution,
-                PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH);
         List<String> s3UploadFiles = getListObjectFromContext(jobExecution,
                 PlayLaunchWorkflowConfiguration.RECOMMENDATION_EXPORT_FILES, String.class);
 
-        hdfsIntermediateFiles.add(avroFile);
+        hdfsIntermediateFiles.add(getStringValueFromContext(jobExecution,
+                PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH));
+        // hdfsIntermediateFiles.add(getStringValueFromContext(jobExecution,
+        // PlayLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH));
         if (s3UploadFiles != null) {
             hdfsIntermediateFiles.addAll(s3UploadFiles);
         }
 
-        log.info("Deleting files: " + hdfsIntermediateFiles);
+        log.info("Deleting files: " + Arrays.toString(hdfsIntermediateFiles.toArray()));
         for (String filePath : hdfsIntermediateFiles) {
             if (StringUtils.isBlank(filePath)) {
                 continue;
