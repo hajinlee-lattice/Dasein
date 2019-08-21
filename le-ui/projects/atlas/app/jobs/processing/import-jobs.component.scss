@@ -82,6 +82,12 @@ section.import-jobs {
 			margin-top: -5px;
 		}
 	}
+	.more-info-job {
+		display: flex;
+		// border: 1px solid red;
+		flex-direction: column;
+		margin-bottom: 1.5em;
+	}
 	.grid-footer {
 		margin-top: 20px;
 	}

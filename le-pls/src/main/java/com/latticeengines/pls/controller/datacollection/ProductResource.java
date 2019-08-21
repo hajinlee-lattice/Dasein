@@ -62,7 +62,7 @@ public class ProductResource extends BaseFrontEndEntityResource {
                 offset = offset == null ? 0 : offset;
                 query.setPageFilter(new PageFilter(offset, max));
             }
-            return super.getData(query);
+            return super.getData(query,false);
         } catch (Exception e) {
             log.error("Failed to get product data", e);
             throw new LedpException(LedpCode.LEDP_36002);

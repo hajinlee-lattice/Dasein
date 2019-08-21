@@ -14,6 +14,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
@@ -79,6 +80,9 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     private S3Service s3Service;
 
     @Inject
+    private S3ImportSystemService s3ImportSystemService;
+
+    @Inject
     private DataUnitCrossTenantService dataUnitCrossTenantService;
 
     @Inject
@@ -102,6 +106,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(cs.toString());
             log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
             provisionDropBox(cs);
+            s3ImportSystemService.createDefaultImportSystem(cs.toString());
             dropBoxService.createTenantDefaultFolder(cs.toString());
         } catch (Exception e) {
             log.error(String.format("Install CDL component for %s failed. %s", customerSpace, e.toString()));

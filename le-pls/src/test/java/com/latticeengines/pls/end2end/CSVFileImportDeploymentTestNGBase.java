@@ -176,13 +176,17 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     public String getFeedTypeByEntity(String system, String entity) {
         String feedType = entity + FEED_TYPE_SUFFIX;
         switch (entity) {
-            case ENTITY_ACCOUNT: feedType =
-                    system + SPLIT_CHART + EntityType.Accounts.getDefaultFeedTypeName();break;
-            case ENTITY_CONTACT: feedType =
-                    system + SPLIT_CHART + EntityType.Contacts.getDefaultFeedTypeName();break;
-            case ENTITY_TRANSACTION: feedType =
-                    system + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName();break;
-            default:break;
+            case ENTITY_ACCOUNT:
+                feedType = system + SPLIT_CHART + EntityType.Accounts.getDefaultFeedTypeName();
+                break;
+            case ENTITY_CONTACT:
+                feedType = system + SPLIT_CHART + EntityType.Contacts.getDefaultFeedTypeName();
+                break;
+            case ENTITY_TRANSACTION:
+                feedType = system + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName();
+                break;
+            default:
+                break;
         }
         return feedType;
     }

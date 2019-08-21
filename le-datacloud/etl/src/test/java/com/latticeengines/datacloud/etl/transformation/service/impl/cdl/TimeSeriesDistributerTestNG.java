@@ -41,7 +41,7 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
     private static final Set<Integer> PERIODS = IntStream.rangeClosed(MIN_PERIOD, MAX_PERIOD).boxed()
             .collect(Collectors.toSet());
     private static final String[] PERIOD_NAMES = { PeriodStrategy.Template.Week.name(),
-            PeriodStrategy.Template.Month.name() };
+            PeriodStrategy.Template.Month.name(), PeriodStrategy.Template.Quarter.name() };
     @SuppressWarnings("serial")
     private static final List<Pair<String, Class<?>>> SCHEMA = new ArrayList<Pair<String, Class<?>>>() {
         {
@@ -186,7 +186,7 @@ public class TimeSeriesDistributerTestNG extends DataCloudEtlFunctionalTestNGBas
         Object[][] arr = new Object[TOTAL][SCHEMA.size()];
         for (int i = 0; i < TOTAL; i++) {
             arr[i][0] = String.valueOf(i);
-            arr[i][1] = PERIOD_NAMES[random.nextInt(2)];
+            arr[i][1] = PERIOD_NAMES[random.nextInt(PERIOD_NAMES.length)];
             arr[i][2] = random.nextInt(MAX_PERIOD + 1 - MIN_PERIOD) + MIN_PERIOD;
         }
         return arr;

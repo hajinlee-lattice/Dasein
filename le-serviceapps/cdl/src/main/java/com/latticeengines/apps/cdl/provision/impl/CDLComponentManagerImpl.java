@@ -69,8 +69,8 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
-        dropBoxService.createTenantDefaultFolder(space.toString());
         s3ImportSystemService.createDefaultImportSystem(space.toString());
+        dropBoxService.createTenantDefaultFolder(space.toString());
         if (configDir.get("/ExportCronExpression") != null) {
             String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
             log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));

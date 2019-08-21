@@ -120,7 +120,7 @@ class RecommendationCreator {
 
         Object accountId = checkAndGet(account, InterfaceName.AccountId.name());
         if (accountId == null) {
-            throw new RuntimeException("Account Id can not be null");
+            throw new RuntimeException(InterfaceName.AccountId.name() + " can not be null");
         }
 
         Recommendation recommendation = new Recommendation();
@@ -134,13 +134,13 @@ class RecommendationCreator {
             launchTime = new Date(launchTimestampMillis);
         }
         recommendation.setLaunchDate(launchTime);
-
         if (entityMatchEnabled) {
             recommendation.setAccountId(checkAndGet(account, InterfaceName.CustomerAccountId.name()));
+            recommendation.setLeAccountExternalID(recommendation.getAccountId());
         } else {
             recommendation.setAccountId(accountId.toString());
+            recommendation.setLeAccountExternalID(accountId.toString());
         }
-        recommendation.setLeAccountExternalID(accountId.toString());
 
         if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
             String destinationAccountId = playLaunch.getDestinationAccountId().trim();

@@ -298,7 +298,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean shouldRebuildSome() {
         boolean rebuild = false;
-        if (hasActions) {
+        if (!shouldReset && hasActions) {
             log.info("Going to rebuild some, because has related actions.");
             rebuild = true;
         } else {

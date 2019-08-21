@@ -45,16 +45,16 @@ public class AccountExtensionUtil {
     private static List<String> LOOKUP_FIELDS = Collections.singletonList(InterfaceName.AccountId.name());
 
     public static FrontEndQuery constructFrontEndQuery(String customerSpace, List<String> accountIds,
-            String lookupIdColumn, Long start, boolean shouldAddLookupIdClause, boolean newEntityMatchEnabled) {
+            String lookupIdColumn, Long start, boolean shouldAddLookupIdClause, boolean isEntityMatchEnabled) {
 
         ArrayList<String> attributes = new ArrayList<String>(Arrays.asList(InterfaceName.AccountId.name()));
         return constructFrontEndQuery(customerSpace, accountIds, lookupIdColumn, attributes, start,
-                shouldAddLookupIdClause, newEntityMatchEnabled);
+                shouldAddLookupIdClause, isEntityMatchEnabled);
     }
 
     public static FrontEndQuery constructFrontEndQuery(String customerSpace, List<String> accountIds,
             String lookupIdColumn, List<String> attributes, Long start, boolean shouldAddLookupIdClause,
-            boolean newEntityMatchEnabled) {
+            boolean isEntityMatchEnabled) {
 
         List<Restriction> restrictions = new ArrayList<>();
         List<Restriction> idRestrictions = new ArrayList<>();
@@ -68,17 +68,18 @@ public class AccountExtensionUtil {
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
             RestrictionBuilder accoundIdRestrictionBuilder = Restriction.builder();
-            if (newEntityMatchEnabled) {
+            if (isEntityMatchEnabled) {
                 RestrictionBuilder custAccountIdRestrictions = Restriction.builder()
                         .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())
                         .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
                 accoundIdRestrictionBuilder.or(custAccountIdRestrictions);
-            } else {
-                Restriction accountIdRestriction = Restriction.builder()
-                        .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                        .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
-                accoundIdRestrictionBuilder.or(accountIdRestriction);
             }
+
+            Restriction accountIdRestriction = Restriction.builder()
+                    .let(BusinessEntity.Account, InterfaceName.AccountId.name())
+                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
+            accoundIdRestrictionBuilder.or(accountIdRestriction);
+
             idRestrictions.add(accoundIdRestrictionBuilder.build());
 
             if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
@@ -102,6 +103,7 @@ public class AccountExtensionUtil {
         List<AttributeLookup> sortLookups = new ArrayList<>();
         sortLookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CDLUpdatedTime.name()));
         sortLookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
+
         FrontEndSort sort = new FrontEndSort(sortLookups, false);
         frontEndQuery.setSort(sort);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -168,6 +170,7 @@ public class AccountExtensionUtil {
         matchInput.setEntityKeyMaps(keyMap);
 
         matchInput.setDataCloudVersion(dataCloudVersion);
+        attributes.add(InterfaceName.CustomerAccountId.name());
         List<Column> columnSelections = attributes.stream().map(Column::new).collect(Collectors.toList());
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setColumns(columnSelections);
@@ -280,7 +283,7 @@ public class AccountExtensionUtil {
         return dataPage;
     }
 
-    public static DataPage convertToDataPage(MatchOutput matchOutput) {
+    public static DataPage convertToDataPage(MatchOutput matchOutput, boolean isEntityMatchEnabled) {
         DataPage dataPage = createEmptyDataPage();
         List<String> fields = matchOutput.getOutputFields();
         AtomicInteger unmatched = new AtomicInteger(0), fullyMatched = new AtomicInteger(0);
@@ -304,6 +307,13 @@ public class AccountExtensionUtil {
                                 .forEach(j -> {
                                     tempDataRef.put(fields.get(j), values.get(j));
                                 });
+
+                        // Overwrite AccountId value with CustomerAccountId value for EntityMatchEnabled tenants
+                        if (isEntityMatchEnabled) {
+                            tempDataRef.put(InterfaceName.AccountId.name(),
+                                    tempDataRef.getOrDefault(InterfaceName.CustomerAccountId.name(),
+                                            tempDataRef.get(InterfaceName.AccountId.name())));
+                        }
                         data = tempDataRef;
 
                     }

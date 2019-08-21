@@ -44,13 +44,21 @@ class ResetPasswordRouter {
             try{
                 var payload = jwt.verify(req.query.jwt, 'e6b6376591584a6990e3a56306247cc2');
 
+                //TODO: remove this hack for identifying which public URL to use
+                let cleanHostPort = 'https://testapp.lattice-engines.com:443';
+                if (/(?<!test)app\.lattice-engines\.com$/i.test(payload.hostport)) {
+                    cleanHostPort = 'https://app.lattice-engines.com:443';
+                } else if (/(?<!test)app2\.lattice-engines\.com$/i.test(payload.hostport)) {
+                    cleanHostPort = 'https://app2.lattice-engines.com:443';
+                }
+
                 let body = {
                     Username: payload.username,
-                    HostPort: payload.hostport,
+                    HostPort: cleanHostPort,
                     Product: 'Lead Prioritization'
                 };
                 let options = {
-                    url: payload.hostport + '/pls/forgotpassword',
+                    url: cleanHostPort + '/pls/forgotpassword',
                     method: 'PUT',
                     timeout: 3000,
                     headers: {

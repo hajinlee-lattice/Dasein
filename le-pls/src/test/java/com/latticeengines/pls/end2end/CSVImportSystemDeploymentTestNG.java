@@ -21,10 +21,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
 
 public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
@@ -52,7 +54,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertNull(defaultSystem.getAccountSystemId());
         // create 2 new systems
         cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_SalesforceSystem",
-                S3ImportSystem.SystemType.Salesforce, false);
+                S3ImportSystem.SystemType.Other, false);
         cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_OtherSystem",
                 S3ImportSystem.SystemType.Other, false);
         allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
@@ -315,5 +317,81 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertEquals(allSystems.get(0).getPriority(), 1);
         Assert.assertEquals(allSystems.get(1).getPriority(), 2);
         Assert.assertEquals(allSystems.get(2).getPriority(), 3);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testPriorityList")
+    public void testMultipleSubType() {
+        List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
+        Assert.assertEquals(allSystems.size(), 3);
+        cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_SalesforceSystemLead",
+                S3ImportSystem.SystemType.Salesforce, false);
+        allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
+        String sfSystemName = null;
+        for (S3ImportSystem system : allSystems) {
+            if (system.getDisplayName().equals("Test_SalesforceSystemLead")) {
+                sfSystemName = system.getName();
+            }
+        }
+        Assert.assertFalse(StringUtils.isEmpty(sfSystemName));
+        S3ImportSystem sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
+
+        SourceFile sfContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+        String sfContactFeedType = getFeedTypeByEntity(sfSystemName, ENTITY_CONTACT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sfContactFile.getName(), ENTITY_CONTACT, SOURCE, sfContactFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                fieldMapping.setMappedToLatticeField(true);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(sfContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                sfContactFeedType);
+        sfContactFile = sourceFileService.findByName(sfContactFile.getName());
+
+        String sfContactDFId = cdlService.createS3Template(customerSpace, sfContactFile.getName(),
+                SOURCE, ENTITY_CONTACT, sfContactFeedType, null, ENTITY_CONTACT + "Data");
+        Assert.assertNotNull(sfContactFile);
+        Assert.assertNotNull(sfContactDFId);
+
+        sfContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+
+        String sfLeadFeedType = sfSystemName + "_LeadsData";
+        fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sfContactFile.getName(), ENTITY_CONTACT, SOURCE, sfLeadFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                fieldMapping.setMapToLatticeId(true);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(sfContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                sfLeadFeedType);
+        String sfLeadsDFId = cdlService.createS3Template(customerSpace, sfContactFile.getName(),
+                SOURCE, ENTITY_CONTACT, sfLeadFeedType, DataFeedTask.SubType.Lead.name(), "LeadsData");
+        Assert.assertNotNull(sfContactFile);
+        Assert.assertNotNull(sfLeadsDFId);
+
+        sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
+        Assert.assertNotNull(sfSystem);
+
+        Assert.assertNotNull(sfSystem.getSecondaryContactIds());
+        Assert.assertTrue(StringUtils.isNotEmpty(sfSystem.getContactSystemId()));
+
+        Table sfContactTable =
+                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), sfContactDFId).getImportTemplate();
+
+        Table sfLeadTable = dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), sfLeadsDFId).getImportTemplate();
+
+        Assert.assertNotNull(sfContactTable);
+        Assert.assertNotNull(sfLeadTable);
+
+        Assert.assertNotNull(sfContactTable.getAttribute(sfSystem.getContactSystemId()));
+        Assert.assertNotNull(sfLeadTable.getAttribute(sfSystem.getSecondaryContactId(EntityType.Leads)));
+
     }
 }
