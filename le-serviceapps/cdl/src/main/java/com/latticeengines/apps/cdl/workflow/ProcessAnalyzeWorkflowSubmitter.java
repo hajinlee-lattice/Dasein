@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -629,13 +630,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .filter(Objects::nonNull) //
                 // sort by system priority (lower number has higher priority)
                 .sorted(Comparator.comparing(S3ImportSystem::getPriority)) //
-                .map(sys -> {
-                    if (entity == BusinessEntity.Account) {
-                        return sys.getAccountSystemId();
-                    } else {
-                        return sys.getContactSystemId();
-                    }
-                }) //
+                .flatMap(sys -> getOneSystemIds(entity, sys).stream()) //
                 .filter(StringUtils::isNotBlank) //
                 .collect(Collectors.toList());
         String defaultSystemId = systems.stream() //
@@ -653,6 +648,34 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .findFirst() //
                 .orElse(null);
         return Pair.of(defaultSystemId, systemIds);
+    }
+
+    private List<String> getOneSystemIds(@NotNull BusinessEntity entity, @NotNull S3ImportSystem system) {
+        List<String> allIds = new ArrayList<>();
+        switch (entity) {
+            case Account:
+                if(StringUtils.isNotBlank(system.getAccountSystemId())) {
+                    allIds.add(system.getAccountSystemId());
+                }
+                List<String> secondaryAccountIdList = system.getSecondaryAccountIdsSortByPriority();
+                if (CollectionUtils.isNotEmpty(secondaryAccountIdList)) {
+                    allIds.addAll(secondaryAccountIdList);
+                }
+                break;
+            case Contact:
+                if(StringUtils.isNotBlank(system.getContactSystemId())) {
+                    allIds.add(system.getContactSystemId());
+                }
+                List<String> secondaryContactIdList = system.getSecondaryContactIdsSortByPriority();
+                if (CollectionUtils.isNotEmpty(secondaryContactIdList)) {
+                    allIds.addAll(secondaryContactIdList);
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Does not support retrieving system IDs for entity [%s]", entity.name()));
+        }
+        return allIds;
     }
 
     private void checkWorkflowId(String customerSpace, DataFeed datafeed, Long workflowId) {
