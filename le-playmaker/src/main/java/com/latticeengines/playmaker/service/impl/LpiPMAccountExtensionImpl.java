@@ -306,7 +306,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
-        return AccountExtensionUtil.convertToDataPage(matchOutput);
+        return AccountExtensionUtil.convertToDataPage(matchOutput, batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
     }
 
     @Override
