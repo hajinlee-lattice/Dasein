@@ -105,7 +105,7 @@ public class MetadataResolver {
 
     public void calculateBasedOnFieldMappingDocumentAndTable(Table metadata) {
         result.metadata = metadata;
-        calculateBasedOnMetadta();
+        calculateBasedOnMetadata();
         // sort the order based on header fields
         sortAttributesBasedOnSourceFileSequence(result.metadata);
     }
@@ -126,10 +126,10 @@ public class MetadataResolver {
 
     public void calculateBasedOnFieldMappingDocument(Table metadata) {
         result.metadata = metadata;
-        calculateBasedOnMetadta();
+        calculateBasedOnMetadata();
     }
 
-    private void calculateBasedOnMetadta() {
+    private void calculateBasedOnMetadata() {
         result.fieldMappings = new ArrayList<>();
         result.cdlExternalSystem = new CDLExternalSystem();
         List<String> crmIds = new ArrayList<>();
@@ -518,7 +518,7 @@ public class MetadataResolver {
         return attribute.getDisplayName().equalsIgnoreCase(header);
     }
 
-    private String standardizeAttrName(String attrName) {
+    public static String standardizeAttrName(String attrName) {
         return attrName.replace("_", "").replace(" ", "").toUpperCase();
     }
 
@@ -561,7 +561,7 @@ public class MetadataResolver {
     }
 
     @VisibleForTesting
-    String getCategoryBasedOnSchemaType(String schemaInterpretationString) {
+    public static String getCategoryBasedOnSchemaType(String schemaInterpretationString) {
         if (schemaInterpretationString == null) {
             log.warn("schema string is null");
             return ModelingMetadata.CATEGORY_LEAD_INFORMATION;
@@ -618,7 +618,7 @@ public class MetadataResolver {
         return statisticalType;
     }
 
-    private List<String> getColumnFieldsByHeader(String columnHeaderName) {
+    public List<String> getColumnFieldsByHeader(String columnHeaderName) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         List<String> columnFields = null;
         try {
@@ -725,14 +725,16 @@ public class MetadataResolver {
      * most occurrence format as result
      */
     @VisibleForTesting
-    public MutableTriple<String, String, String> distinguishDateAndTime(List<String> columnFields) {
+    public static MutableTriple<String, String, String> distinguishDateAndTime(List<String> columnFields) {
         int conformingDateCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
         // this list was used to memorize the formats in the phase of detecting date type, which can buy some time in
         // the method distinguishDateAndTime,
         List<String> supportedDateTimeFormat = TimeStampConvertUtils.SUPPORTED_JAVA_DATE_TIME_FORMATS;
         Map<String, Integer> hitMap = new HashMap<>();
-        boolean useTimeZone = false;
+        // This tracks if any column data using ISO 8601 (ie. T&Z) embedded time zones and thus the user should not
+        // specify the time zone in the import workflow.  True a column has been detected in ISO 8601 format.
+        boolean useColumnEmbeddedTimeZone = false;
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 columnField = columnField.trim().replaceFirst("(\\s{2,})", TimeStampConvertUtils.SYSTEM_DELIMITER);
@@ -743,9 +745,11 @@ public class MetadataResolver {
                     for (String format : formats) {
                         hitMap.put(format, hitMap.containsKey(format) ? hitMap.get(format) + 1 : 1);
                     }
-                    // if input field contains T&Z, will detect format with Time zone
-                    if (!useTimeZone && !trimmedColumnField.equals(columnField)) {
-                        useTimeZone = true;
+                    // If the useColumnEmbeddedTimeZone has not been set and the trimmed value of the column doesn't
+                    // match the original column (meaning T & Z characters where stripped out), then set the flag to
+                    // true.
+                    if (!useColumnEmbeddedTimeZone && !trimmedColumnField.equals(columnField)) {
+                        useColumnEmbeddedTimeZone = true;
                     }
                 }
             }
@@ -772,7 +776,7 @@ public class MetadataResolver {
         if (index == -1) {
              return new MutableTriple<>(TimeStampConvertUtils.mapJavaToUserDateFormat(expectedFormat), null, null);
         } else {
-            if (useTimeZone) {
+            if (useColumnEmbeddedTimeZone) {
                 return new MutableTriple<>(TimeStampConvertUtils.mapJavaToUserDateFormat(expectedFormat.substring(0,
                         index)),
                         TimeStampConvertUtils.mapJavaToUserTimeFormat(expectedFormat.substring(index + 1)),
@@ -785,9 +789,7 @@ public class MetadataResolver {
         }
     }
 
-
-    @VisibleForTesting
-    boolean isBooleanTypeColumn(List<String> columnFields) {
+    public static boolean isBooleanTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)
                     && !ACCEPTED_BOOLEAN_VALUES.contains(columnField.toLowerCase())) {
@@ -797,7 +799,7 @@ public class MetadataResolver {
         return true;
     }
 
-    private boolean isDoubleTypeColumn(List<String> columnFields) {
+    public static boolean isDoubleTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 try {
@@ -807,11 +809,10 @@ public class MetadataResolver {
                 }
             }
         }
-
         return true;
     }
 
-    private boolean isIntegerTypeColumn(List<String> columnFields) {
+    public static  boolean isIntegerTypeColumn(List<String> columnFields) {
         for (String columnField : columnFields) {
             if (StringUtils.isNotBlank(columnField)) {
                 try {
@@ -825,7 +826,7 @@ public class MetadataResolver {
         return true;
     }
 
-    private Set<String> getHeaderFields() {
+    public Set<String> getHeaderFields() {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
