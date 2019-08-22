@@ -21,6 +21,6 @@ public interface CollectionRequestRepository extends BaseJpaRepository<Collectio
     List<CollectionRequest> findByVendorAndStatusOrderByRequestedTimeAsc(String vendor,
                                                                          String status, Pageable pageable);
 
-    @Query("SELECT MIN(cr.pid) from CollectionRequest cr")
-    long getMinPid();
+    @Query("SELECT MIN(t.pid) from CollectionRequest t where t.vendor = ?1")
+    Long getMinPid(String vendor);
 }

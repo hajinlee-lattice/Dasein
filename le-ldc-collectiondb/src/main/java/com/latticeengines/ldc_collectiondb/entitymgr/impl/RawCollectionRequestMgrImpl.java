@@ -183,7 +183,13 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
     @Override
     public void cleanupTransferred(int batch) {
 
-        long minPid = readerRepository.getMinPid();
+        Long minPid = readerRepository.getMinPid();
+        if (minPid == null) {
+
+            return;
+
+        }
+
         repository.removeByTransferredAndPidLessThan(true, minPid + batch);
 
     }

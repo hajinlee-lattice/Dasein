@@ -17,5 +17,5 @@ public interface RawCollectionRequestRepository extends BaseJpaRepository<RawCol
     List<RawCollectionRequest> findByTransferredAndVendor(boolean transferred, String vendor);
 
     @Query("SELECT MIN(t.pid) from RawCollectionRequest t")
-    long getMinPid();
+    Long getMinPid();
 }
