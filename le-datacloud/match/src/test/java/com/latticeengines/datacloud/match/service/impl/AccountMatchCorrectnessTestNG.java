@@ -66,7 +66,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
     private static final String[] SYSTEM_ID_FIELDS = new String[] { ID_ACCT, ID_MKTO, ID_ELOQUA };
     private static final MatchKey[] MATCH_KEY_FIELDS = new MatchKey[] { MatchKey.Name, MatchKey.Domain,
-            MatchKey.Country, MatchKey.State, MatchKey.DUNS };
+            MatchKey.Country, MatchKey.State, MatchKey.DUNS, MatchKey.PreferredEntityId };
     private static final String[] NON_SYSTEM_ID_FIELDS = Arrays.stream(MATCH_KEY_FIELDS).map(MatchKey::name)
             .toArray(String[]::new);
     private static final List<String> FIELDS = Arrays.asList(ArrayUtils.addAll(SYSTEM_ID_FIELDS, NON_SYSTEM_ID_FIELDS));
@@ -137,9 +137,9 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = newTestTenant();
 
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
-        // State, DUNS
+        // State, DUNS, preferred ID
         // test allocate mode
-        List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null);
+        List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null, null);
         MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
         String entityId = verifyAndGetEntityId(output);
 
@@ -152,6 +152,46 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Assert.assertEquals(lookupAccount(tenant, null, null, null, "GOOGLE", null, "USA", null, null), entityId);
     }
 
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testPreferredIdAllocate() {
+        Tenant tenant = newTestTenant();
+        String preferredId = "legacy_entity_id";
+        String preferredId2 = "legacy_entity_id2";
+
+        List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null, preferredId);
+        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        String entityId = verifyAndGetEntityId(output);
+        Assert.assertEquals(entityId, preferredId);
+
+        // no need to allocate since this record match to preferredId
+        data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null, "some_other_id");
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        entityId = verifyAndGetEntityId(output);
+        Assert.assertEquals(entityId, preferredId);
+
+        data = Arrays.asList("acct_2", "mkto_2", null, "GOOGLE", null, "USA", null, null, preferredId);
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        String entityId2 = verifyAndGetEntityId(output);
+        Assert.assertNotEquals(entityId2, preferredId, "Preferred ID should already be taken by the first account");
+
+        // new record with empty/null preferred ID (system will take over and random)
+        data = Arrays.asList("acct_3", "mkto_3", null, "GOOGLE", null, "USA", null, null, "");
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        entityId = verifyAndGetEntityId(output);
+        Assert.assertFalse(entityId.isEmpty());
+        Assert.assertNotEquals(entityId, preferredId);
+        Assert.assertNotNull(entityId, entityId2);
+        data = Arrays.asList("acct_4", "mkto_4", null, "GOOGLE", null, "USA", null, null, null);
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        verifyAndGetEntityId(output);
+
+        // record has conflict with existing account + unused preferred ID
+        data = Arrays.asList("acct_5", "mkto_5", null, "GOOGLE", null, "USA", null, null, preferredId2);
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        entityId = verifyAndGetEntityId(output);
+        Assert.assertEquals(entityId, preferredId2, "Should get the preferred ID since it's not taken yet");
+    }
+
     /*
      * make sure that when many to many match key already map to other entity (and
      * existing data is in serving env), the existing mapping is NOT overridden.
@@ -161,7 +201,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = newTestTenant();
         String domain = "google.com";
 
-        List<Object> data1 = Arrays.asList("acct_1", null, null, null, domain, "USA", null, null);
+        List<Object> data1 = Arrays.asList("acct_1", null, null, null, domain, "USA", null, null, null);
         MatchOutput output = matchAccount(data1, true, tenant, getEntityKeyMap(), FIELDS).getRight();
         String entityId1 = verifyAndGetEntityId(output);
 
@@ -174,7 +214,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
         // account ID have diff value in existing account, create new one.
         // domain already used by existing account, and should NOT be mapped to account2
-        List<Object> data2 = Arrays.asList("acct_2", null, null, null, "google.com", "USA", null, null);
+        List<Object> data2 = Arrays.asList("acct_2", null, null, null, "google.com", "USA", null, null, null);
         output = matchAccount(data2, true, tenant, getEntityKeyMap(), FIELDS).getRight();
         String entityId2 = verifyAndGetEntityId(output);
         // should get two accounts since account id are different
@@ -198,23 +238,24 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = newTestTenant();
 
         // Baseline Normal Case
-        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS
+        // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country, State, DUNS,
+        // preferred ID
         // public domain without DUNS/name, but in email format, treat as public domain
-        List<Object> data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null);
+        List<Object> data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null, null);
         MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output,
                 Arrays.asList("All the domains are public domain: gmail.com"));
         Assert.assertEquals(verifyAndGetEntityId(output), DataCloudConstants.ENTITY_ANONYMOUS_ID);
 
         // public domain without DUNS/name, and not in email format, treat as normal domain
-        data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, null);
+        data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, null, null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         String publicAsNormalDomainEntityId = verifyAndGetEntityId(output);
         Assert.assertNotNull(publicAsNormalDomainEntityId);
 
         // public domain with name, treat as public domain
-        data = Arrays.asList(null, null, null, "public domain company name", "gmail.com", "USA", null, null);
+        data = Arrays.asList(null, null, null, "public domain company name", "gmail.com", "USA", null, null, null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output,
                 Arrays.asList("All the domains are public domain: gmail.com"));
@@ -225,7 +266,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Assert.assertNotEquals(entityId, DataCloudConstants.ENTITY_ANONYMOUS_ID);
 
         // public domain with (invalid) DUNS, treat as public domain
-        data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, "000000000");
+        data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, "000000000", null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output,
                 Arrays.asList("All the domains are public domain: gmail.com"));
@@ -236,7 +277,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
         // public domain, in email format, with PublicDomainAsNormalDomain set
         // true, treat as normal domain
-        data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null);
+        data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null, null);
         output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, true).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         entityId = verifyAndGetEntityId(output);
@@ -253,7 +294,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Setup match entry with domain as lattice-engines.com.
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
-        List<Object> data = Arrays.asList(null, null, null, null, "lattice-engines.com", "USA", null, null);
+        List<Object> data = Arrays.asList(null, null, null, null, "lattice-engines.com", "USA", null, null, null);
         MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         String latticeEntityId = verifyAndGetEntityId(output);
@@ -262,7 +303,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Setup match entry with domain as marketo.com.
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
-        data = Arrays.asList(null, null, null, null, "marketo.com", "USA", null, null);
+        data = Arrays.asList(null, null, null, null, "marketo.com", "USA", null, null, null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         String marketoEntityId = verifyAndGetEntityId(output);
@@ -278,7 +319,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         data = Arrays.asList(null, null, null, null, "www.lattice-engines.com", "USA", null, null,
                 "private@marketo.com");
         // Create an EntityKeyMap as in other tests.
-        EntityKeyMap entityKeyMap = getEntityKeyMap();
+        EntityKeyMap entityKeyMap = getEntityKeyMap(FIELDS_WITH_EMAIL);
         // Fix the KeyMap for domain to include Email and Website, in that order.
         entityKeyMap.getKeyMap().put(MatchKey.Domain, Arrays.asList("Email", "Website"));
         output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_EMAIL).getRight();
@@ -334,10 +375,10 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = new Tenant(tenantId);
 
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
-        // State, DUNS
+        // State, DUNS, preferred ID
         // Duns in input doesn't exist in LDC and there is no other match key,
         // return orphan EntityId
-        List<Object> data = Arrays.asList(null, null, null, null, null, null, null, "000000000");
+        List<Object> data = Arrays.asList(null, null, null, null, null, null, null, "000000000", null);
         MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         Assert.assertEquals(verifyAndGetEntityId(output), DataCloudConstants.ENTITY_ANONYMOUS_ID);
 
@@ -347,27 +388,27 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         testEntityMatchService.bumpVersion(tenantId);
         List<List<Object>> dataList = Arrays.asList( //
                 // google duns
-                Arrays.asList(null, null, null, null, null, null, null, "060902413"), //
+                Arrays.asList(null, null, null, null, null, null, null, "060902413", null), //
                 // google name + location
-                Arrays.asList(null, null, null, "google", null, "usa", "ca", null), //
+                Arrays.asList(null, null, null, "google", null, "usa", "ca", null, null), //
                 // google name + location + customer's non-existing duns
-                Arrays.asList(null, null, null, "google", null, "usa", "ca", "000000000"), //
+                Arrays.asList(null, null, null, "google", null, "usa", "ca", "000000000", null), //
                 // for domain based match, ldc match has these combinations of
                 // lookup: domain only, domain + country + zipcode (not tested
                 // here), domain + country + state, domain + country
                 // google domain + country + state
-                Arrays.asList(null, null, null, null, "google.com", "usa", "ca", null), //
+                Arrays.asList(null, null, null, null, "google.com", "usa", "ca", null, null), //
                 // google domain + country + state + customer's non-existing
                 // duns
-                Arrays.asList(null, null, null, null, "google.com", "usa", "ca", "000000000"), //
+                Arrays.asList(null, null, null, null, "google.com", "usa", "ca", "000000000", null), //
                 // google domain + country
-                Arrays.asList(null, null, null, null, "google.com", "usa", null, null), //
+                Arrays.asList(null, null, null, null, "google.com", "usa", null, null, null), //
                 // google domain + country + customer's non-existing duns
-                Arrays.asList(null, null, null, null, "google.com", "usa", null, "000000000"), //
+                Arrays.asList(null, null, null, null, "google.com", "usa", null, "000000000", null), //
                 // google domain
-                Arrays.asList(null, null, null, null, "google.com", null, null, null), //
+                Arrays.asList(null, null, null, null, "google.com", null, null, null, null), //
                 // google domain + customer's non-existing duns
-                Arrays.asList(null, null, null, null, "google.com", null, null, "000000000") //
+                Arrays.asList(null, null, null, null, "google.com", null, null, "000000000", null) //
         );
         String expectedEntityId = null;
         for (List<Object> dataItem : dataList) {
@@ -392,14 +433,14 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = new Tenant(tenantId);
 
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
-        // State, DUNS
+        // State, DUNS, preferred ID
 
         // Domain + Country
         // Country is mapped in match key without value
-        List<Object> data = Arrays.asList(null, null, null, null, "google.com", "usa", null, null);
+        List<Object> data = Arrays.asList(null, null, null, null, "google.com", "usa", null, null, null);
         MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         String entityId1 = verifyAndGetEntityId(output);
-        data = Arrays.asList(null, null, null, null, "google.com", null, null, null);
+        data = Arrays.asList(null, null, null, null, "google.com", null, null, null, null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         String entityId2 = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId1, entityId2);
@@ -412,10 +453,10 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
         // Name + Country
         // Country is mapped in match key without value
-        data = Arrays.asList(null, null, null, "google", null, "usa", null, null);
+        data = Arrays.asList(null, null, null, "google", null, "usa", null, null, null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         entityId1 = verifyAndGetEntityId(output);
-        data = Arrays.asList(null, null, null, "google", null, null, null, null);
+        data = Arrays.asList(null, null, null, "google", null, null, null, null, null);
         output = matchAccount(data, true, tenant, null, FIELDS).getRight();
         entityId2 = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId1, entityId2);
@@ -485,9 +526,9 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // DUNS needs to be real DUNS otherwise LDC match will not return
         // DUNS to Account match
         List<Object> baseData1 = Arrays.asList("acct_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
-                null, "060902413");
+                null, "060902413", null);
         List<Object> baseData2 = Arrays.asList("acct_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
-                null, "884745530");
+                null, "884745530", null);
 
         // Test 1
         List<Object> test1Data1 = baseData1;
@@ -597,13 +638,14 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = new Tenant(tenantId);
 
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
-        // State, DUNS (ID_ELOQUA, Country, State are not used in this test)
+        // State, DUNS, Preferred ID (ID_ELOQUA, Country, State are not used in this
+        // test)
         // DUNS needs to be real DUNS otherwise LDC match will not return
         // DUNS to Account match
         List<Object> baseData1 = Arrays.asList("acct_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null,
-                null, "060902413");
+                null, "060902413", null);
         List<Object> baseData2 = Arrays.asList("acct_id_2", "mkto_id_2", null, "fakename2", "fakedomain2.com", null,
-                null, "884745530");
+                null, "884745530", null);
 
         List<Object> data1 = baseData1;
         List<Object> data2 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
@@ -661,9 +703,9 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // DUNS needs to be real DUNS otherwise LDC match will not return
         // DUNS to Account match
         List<Object> baseData1 = Arrays.asList("acct_id_1", null, null, "fakename1", "fakedomain1.com", null,
-                null, "060902413");
+                null, "060902413", null);
         List<Object> baseData2 = Arrays.asList("acct_id_2", null, null, "fakename2", "fakedomain2.com", null,
-                null, "884745530");
+                null, "884745530", null);
 
         List<String> keysIntersection = getKeysIntersection(keys1, keys2);
         List<Object> data1 = new ArrayList<>(Collections.nCopies(baseData1.size(), null));
@@ -715,7 +757,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Data and Fields are all the same, but MatchKey passed to MatchInput
         // are different
         List<Object> data = Arrays.asList("acct_id", "mkto_id", "eloqua_id", "google", "google.com", "usa", "ca",
-                "060902413");
+                "060902413", null);
 
         runAndVerifyMatchPair(tenant, keys1, data, keys2, data, true);
     }
@@ -730,7 +772,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private void testNoUserMapping(EntityKeyMap accountKeyMap) {
         Tenant tenant = newTestTenant();
         List<Object> data = Arrays.asList("acct_id", "mkto_id", "eloqua_id", "google", "google.com", "usa", "ca",
-                "060902413");
+                "060902413", null);
         Pair<MatchInput, MatchOutput> inputOutput = matchAccount(data, true, tenant, accountKeyMap, FIELDS, false);
         String entityId = verifyAndGetEntityId(inputOutput.getRight());
         Assert.assertEquals(entityId, DataCloudConstants.ENTITY_ANONYMOUS_ID, String
@@ -804,7 +846,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     }
 
     private String matchCustomerAccountId(@NotNull String customerAccountId, @NotNull Tenant tenant) {
-        List<Object> data = Arrays.asList(customerAccountId, null, null, null, null, null, null, null);
+        List<Object> data = Arrays.asList(customerAccountId, null, null, null, null, null, null, null, null);
         Pair<MatchInput, MatchOutput> result = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS);
         String entityId = verifyAndGetEntityId(result.getRight());
         // after verifyAndGetEntityId, all intermediate object should be non-null
@@ -844,10 +886,14 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
     }
 
+    /*
+     * lookup mode will filter out MatchKey.PreferredEntityId since it's not
+     * allowed, other fields are the same as allocateId mode
+     */
     private String lookupAccount(Tenant tenant, String acctId, String mktoId, String eloquaId, String name,
             String domain, String country, String state, String duns) {
-        List<Object> data = Arrays.asList(acctId, mktoId, eloquaId, name, domain, country, state, duns);
-        MatchOutput output = matchAccount(data, false, tenant, getEntityKeyMap(), FIELDS).getRight();
+        List<Object> data = Arrays.asList(acctId, mktoId, eloquaId, name, domain, country, state, duns, null);
+        MatchOutput output = matchAccount(data, false, tenant, getEntityKeyMap(false), FIELDS).getRight();
         return verifyAndGetEntityId(output);
     }
 
@@ -895,9 +941,15 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     }
 
     private static EntityKeyMap getEntityKeyMap() {
+        return getEntityKeyMap(true);
+    }
+
+    private static EntityKeyMap getEntityKeyMap(boolean allocateId) {
         EntityKeyMap map = new EntityKeyMap();
-        Map<MatchKey, List<String>> fieldMap = Arrays.stream(MATCH_KEY_FIELDS).collect(
-                Collectors.toMap(matchKey -> matchKey, matchKey -> Collections.singletonList(matchKey.name())));
+        Map<MatchKey, List<String>> fieldMap = Arrays.stream(MATCH_KEY_FIELDS)
+                .filter(key -> allocateId || MatchKey.PreferredEntityId != key) // filter preferred ID for lookup mode
+                .collect(
+                        Collectors.toMap(matchKey -> matchKey, matchKey -> Collections.singletonList(matchKey.name())));
         fieldMap.put(MatchKey.SystemId, Arrays.asList(SYSTEM_ID_FIELDS));
         map.setKeyMap(fieldMap);
         return map;
@@ -1182,12 +1234,12 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                         new ClearConflictIDTestCase( //
                                 new String[][] { //
                                         { "acct_id_1", "mkto_id_1", null, "fakename1", "fakedomain1.com", null, null,
-                                                "060902413" } //
+                                                "060902413", null } //
                                 }, //
                                 new String[] { "acct_id_1", "mkto_id_2", null, "fakename1", "fakedomain1.com", null,
-                                        null, "060902413" },
+                                        null, "060902413", null },
                                 new String[] { "acct_id_1", null, null, "fakename1", "fakedomain1.com", null, null,
-                                        "060902413" }) //
+                                        "060902413", null }) //
                 }, //
                 { //
                         /*
@@ -1195,13 +1247,13 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                          */
                         new ClearConflictIDTestCase( //
                                 new String[][] { //
-                                        { "acct_id_1", null, null, null, null, null, null, null }, //
-                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null } //
+                                        { "acct_id_1", null, null, null, null, null, null, null, null }, //
+                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null, null } //
                                 }, //
                                 new String[] { "acct_id_1", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
-                                        null, "060902413" },
+                                        null, "060902413", null },
                                 new String[] { "acct_id_1", null, "eloqua_id_1", null, "fakedomain1.com", null, null,
-                                        "060902413" }) //
+                                        "060902413", null }) //
                 }, //
                 { //
                         /*
@@ -1211,12 +1263,12 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                          */
                         new ClearConflictIDTestCase( //
                                 new String[][] { //
-                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null } //
+                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null, null } //
                                 }, //
                                 new String[] { "acct_id_1", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
-                                        null, "060902413" },
+                                        null, "060902413", null },
                                 new String[] { "acct_id_1", null, "eloqua_id_1", null, "fakedomain1.com", null, null,
-                                        "060902413" }) //
+                                        "060902413", null }) //
                 }, //
                 { //
                         /*
@@ -1225,13 +1277,14 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                          */
                         new ClearConflictIDTestCase( //
                                 new String[][] { //
-                                        { "acct_id_1", null, null, null, "fakedomain1.com", null, null, "060902413" }, //
-                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null } //
+                                        { "acct_id_1", null, null, null, "fakedomain1.com", null, null, "060902413",
+                                                null }, //
+                                        { "acct_id_2", "mkto_id_2", null, null, null, null, null, null, null } //
                                 }, //
                                 new String[] { "acct_id_2", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
-                                        null, "060902413" },
+                                        null, "060902413", null },
                                 new String[] { "acct_id_2", "mkto_id_2", "eloqua_id_1", null, "fakedomain1.com", null,
-                                        null, "060902413" }) //
+                                        null, "060902413", null }) //
                 }, //
                 { //
                         /*
@@ -1240,13 +1293,13 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                          */
                         new ClearConflictIDTestCase( //
                                 new String[][] { //
-                                        { "acct_id_1", null, null, null, null, null, null, null }, //
-                                        { null, "mkto_id_2", null, null, "fakedomain2.com", null, null, null } //
+                                        { "acct_id_1", null, null, null, null, null, null, null, null }, //
+                                        { null, "mkto_id_2", null, null, "fakedomain2.com", null, null, null, null } //
                                 }, //
                                 new String[] { "acct_id_2", "mkto_id_2", null, null, "fakedomain1.com", null, null,
-                                        "060902413" },
+                                        "060902413", null },
                                 new String[] { "acct_id_2", "mkto_id_2", null, null, "fakedomain1.com", null, null,
-                                        "060902413" }) //
+                                        "060902413", null }) //
                 }, //
                 { //
                         /*
@@ -1254,13 +1307,13 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                          */
                         new ClearConflictIDTestCase( //
                                 new String[][] { //
-                                        { "acct_id_1", null, null, null, null, null, null, null }, //
-                                        { null, "mkto_id_2", null, null, "fakedomain1.com", null, null, null } //
+                                        { "acct_id_1", null, null, null, null, null, null, null, null }, //
+                                        { null, "mkto_id_2", null, null, "fakedomain1.com", null, null, null, null } //
                                 }, //
                                 new String[] { "acct_id_1", "mkto_id_1", null, null, "fakedomain1.com", null, null,
-                                        "060902413" },
+                                        "060902413", null },
                                 new String[] { "acct_id_1", "mkto_id_1", null, null, "fakedomain1.com", null, null,
-                                        "060902413" }) //
+                                        "060902413", null }) //
                 }, //
         };
     }

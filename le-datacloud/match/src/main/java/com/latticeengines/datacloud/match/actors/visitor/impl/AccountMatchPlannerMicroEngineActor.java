@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +76,7 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         if (!OperationalMode.isEntityMatch(matchTraveler.getMatchInput().getOperationalMode())) {
             throw new RuntimeException(this.getClass().getSimpleName() + " called when not in Entity Match.");
         }
-        if (!BusinessEntity.Account.name().equals(matchTraveler.getEntity())) {
+        if (!Account.name().equals(matchTraveler.getEntity())) {
             throw new UnsupportedOperationException(this.getClass().getSimpleName()
                     + " only handles Account entity, but found " + matchTraveler.getEntity());
         }
@@ -110,7 +112,7 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         List<Object> inputRecord = matchTraveler.getInputDataRecord();
         Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps()
-                .getOrDefault(BusinessEntity.Account.name(), new HashMap<>());
+                .getOrDefault(Account.name(), new HashMap<>());
         EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null, entityMatchKeyRecord);
@@ -121,8 +123,10 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createAccountMatchKeyTuple(entityMatchKeyRecord);
 
         Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(matchTraveler.getMatchInput(),
-                BusinessEntity.Account.name());
+                Account.name());
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
+                entityMatchKeyRecord);
+        matchStandardizationService.parseRecordForPreferredEntityId(Account.name(), inputRecord, keyPositionMap,
                 entityMatchKeyRecord);
 
         // Send domain data to DomainCollectionService since this was not done outside
@@ -135,7 +139,7 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         matchKeyTuple
                 .setDomainFromMultiCandidates(matchStandardizationService.hasMultiDomain(inputRecord, keyPositionMap));
         matchTraveler.setMatchKeyTuple(matchKeyTuple);
-        matchTraveler.addEntityMatchKeyTuple(BusinessEntity.Account.name(), matchKeyTuple);
+        matchTraveler.addEntityMatchKeyTuple(Account.name(), matchKeyTuple);
         matchTraveler.addEntityMatchKeyTuple(BusinessEntity.LatticeAccount.name(), matchKeyTuple);
     }
 }

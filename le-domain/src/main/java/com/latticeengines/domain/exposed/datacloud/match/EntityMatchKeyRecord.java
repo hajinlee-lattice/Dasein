@@ -17,6 +17,7 @@ public class EntityMatchKeyRecord {
     private String parsedEmail;
     private Tenant parsedTenant;
     private Map<String, String> parsedSystemIds;
+    private Map<String, String> parsedPreferredEntityIds;
     private Contact parsedContact;
 
     private String origDomain;
@@ -26,6 +27,7 @@ public class EntityMatchKeyRecord {
     private Tenant origTenant;
     private Map<String, String> origSystemIds;
     private Contact origContact;
+    private Map<String, String> origPreferredEntityIds;
 
     // TODO(jwinter): Fix handling of error messages which should be passed using the actor system.
     private Boolean failed = false;
@@ -141,6 +143,36 @@ public class EntityMatchKeyRecord {
 
     public void setOrigSystemIds(Map<String, String> origSystemIds) {
         this.origSystemIds = origSystemIds;
+    }
+
+    public Map<String, String> getParsedPreferredEntityIds() {
+        return parsedPreferredEntityIds;
+    }
+
+    public void setParsedPreferredEntityIds(Map<String, String> parsedPreferredEntityIds) {
+        this.parsedPreferredEntityIds = parsedPreferredEntityIds;
+    }
+
+    public boolean addParsedPreferredEntityId(String entity, String id) {
+        if (parsedPreferredEntityIds == null) {
+            parsedPreferredEntityIds = new HashMap<>();
+        }
+        return parsedPreferredEntityIds.putIfAbsent(entity, id) != null;
+    }
+
+    public Map<String, String> getOrigPreferredEntityIds() {
+        return origPreferredEntityIds;
+    }
+
+    public void setOrigPreferredEntityIds(Map<String, String> origPreferredEntityId) {
+        this.origPreferredEntityIds = origPreferredEntityIds;
+    }
+
+    public boolean addOrigPreferredEntityId(String entity, String id) {
+        if (origPreferredEntityIds == null) {
+            origPreferredEntityIds = new HashMap<>();
+        }
+        return origPreferredEntityIds.putIfAbsent(entity, id) != null;
     }
 
     public Boolean isFailed() {
