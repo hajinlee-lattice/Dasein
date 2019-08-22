@@ -9,6 +9,7 @@ import NgState from "atlas/ng-state";
 import "./react-main.component.scss";
 import LeModal from "common/widgets/modal/le-modal";
 import { store, injectAsyncReducer } from "store";
+import { Provider } from "react-redux";
 import { actions } from "common/widgets/banner/le-banner.redux";
 import { REDUX_STATE_MODAL, REDUX_STATE_BANNER } from "./redux.states";
 import LeBanner from "../../../common/widgets/banner/le-banner";
@@ -36,31 +37,33 @@ export default class ReactAngularMainComponent extends Component {
 	render() {
 		ReactRouter.getRouter()["ngservices"] = this.props.ngservices;
 		return (
-			<div className="main-panel" id="react-main-panel">
-				<div id="le-modal" />
+			<Provider store={store}>
+				<div className="main-panel" id="react-main-panel">
+					<div id="le-modal" />
 
-				<LeModal
-					store={store}
-					injectAsyncReducer={injectAsyncReducer}
-					reduxstate={REDUX_STATE_MODAL}
-				/>
-				<UIRouter router={ReactRouter.getRouter()}>
-					<UIView name="header" />
-
-					<UIView name="summary" />
-					<UIView name="subsummary" />
-					<div id="react-banner-container" />
-					<LeBanner
+					<LeModal
 						store={store}
 						injectAsyncReducer={injectAsyncReducer}
-						reduxstate={REDUX_STATE_BANNER}
+						reduxstate={REDUX_STATE_MODAL}
 					/>
-					<UIView name="notice" />
-					<div className="main-body" id="react-main-body">
-						<UIView name="main" />
-					</div>
-				</UIRouter>
-			</div>
+					<UIRouter router={ReactRouter.getRouter()}>
+						<UIView name="header" />
+
+						<UIView name="summary" />
+						<UIView name="subsummary" />
+						<div id="react-banner-container" />
+						<LeBanner
+							store={store}
+							injectAsyncReducer={injectAsyncReducer}
+							reduxstate={REDUX_STATE_BANNER}
+						/>
+						<UIView name="notice" />
+						<div className="main-body" id="react-main-body">
+							<UIView name="main" />
+						</div>
+					</UIRouter>
+				</div>
+			</Provider>
 		);
 	}
 }
