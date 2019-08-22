@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -129,8 +130,49 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     @Override
     public void cleanupRequests(Collection<String> statuses, String vendor, Timestamp before, int batch) {
 
-        long minPid = repository.getMinPid();
+        Long minPid = repository.getMinPid(vendor);
+        if (minPid == null) {
+
+            return;
+
+        }
+
         repository.removeByStatusInAndVendorAndDeliveryTimeBeforeAndPidLessThan(statuses, vendor, before, minPid + batch);
+
+    }
+
+    @Override
+    @Transactional
+    public void saveRequests(Collection<CollectionRequest> requests) {
+
+        int batch = 512;
+        if (requests.size() <= batch) {
+
+            repository.saveAll(requests);
+            return;
+
+        }
+
+        List<CollectionRequest> reqBuf = new ArrayList<>(batch);
+        for (CollectionRequest req: requests) {
+
+            reqBuf.add(req);
+
+            if (reqBuf.size() == batch) {
+
+                repository.saveAll(reqBuf);
+                reqBuf.clear();
+
+            }
+
+        }
+
+        if (reqBuf.size() > 0) {
+
+            repository.saveAll(reqBuf);
+            reqBuf.clear();
+
+        }
 
     }
 }
