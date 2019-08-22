@@ -44,11 +44,13 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
@@ -67,6 +69,9 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     // Target Products are shared with CrossSellModelEnd2EndDeploymentTestNG RefreshRatingDeploymentTestNG
     private static final ImmutableList<String> targetProducts = ImmutableList.of("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o");
@@ -145,6 +150,9 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
                 false, false);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.FAILED);
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);
+        Assert.assertEquals(job.getErrorMsg(), "Import failed because there were 4 errors : 3 missing product bundles" +
+                " in use (this import will completely replace the previous one), 2 product bundle has different product SKUs. Dependant models will need to be remodelled to get accurate scores. error when validating with input file, please reference error.csv for details.");
     }
 
     private void setupAIModels() {
