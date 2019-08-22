@@ -448,10 +448,10 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         worker.setRecordsCollected(recordsCollected);
 
-        log.info("END_COLLECTING_REQ=" + vendor + "," + domains.size() + "," + recordsCollected + "," + errDomains.size());
 
         //consumeFinished reqs
-        collectionRequestService.consumeFinished(workerId, domains);
+        int reqRetried = collectionRequestService.consumeFinished(workerId, domains);
+        log.info("END_COLLECTING_REQ=" + vendor + "," + domains.size() + "," + recordsCollected + "," + errDomains.size() + "," + reqRetried );
         domains.clear();
 
         //clean tmp files
