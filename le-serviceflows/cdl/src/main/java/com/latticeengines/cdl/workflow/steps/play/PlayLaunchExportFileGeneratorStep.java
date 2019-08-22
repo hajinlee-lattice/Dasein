@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +54,24 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
 
         try (PerformanceTimer timer = new PerformanceTimer(
                 String.format("Generating PlayLaunch Export Files for:%s", config.getPlayName()))) {
+
+            // Replace account and contact display names with values in context.
+            // For old PlayLaunchWorkflow, these two maps should be null.
+            // When we migrate to use CampaignLaunchWorkflow entirely, we can
+            // either remove the if check or set those two maps in submitter.
+            Map<String, String> accountDisplayNames = getMapObjectFromContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES,
+                    String.class, String.class);
+            Map<String, String> contactDisplayNames = getMapObjectFromContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES,
+                    String.class, String.class);
+            log.info("accountDisplayNames map: " + accountDisplayNames);
+            log.info("contactDisplayNames map: " + contactDisplayNames);
+            if (accountDisplayNames != null) {
+                config.setAccountDisplayNames(accountDisplayNames);
+            }
+            if (contactDisplayNames != null) {
+                config.setContactDisplayNames(contactDisplayNames);
+            }
+
             List<Callable<String>> fileExporters = new ArrayList<>();
             Date fileExportTime = new Date();
             fileExporters.add(new CsvFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));

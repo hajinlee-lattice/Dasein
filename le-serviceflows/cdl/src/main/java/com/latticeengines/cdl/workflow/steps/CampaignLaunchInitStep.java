@@ -4,9 +4,13 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +34,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -38,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
@@ -100,6 +106,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     + String.format("For playLaunchId: %s", playLaunchId));
 
             PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
+            setCustomDisplayNames(playLaunchContext);
 
             long totalAccountsAvailableForLaunch = playLaunchContext.getPlayLaunch().getAccountsSelected();
             long totalContactsAvailableForLaunch = playLaunchContext.getPlayLaunch().getContactsSelected();
@@ -235,6 +242,24 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
         playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Launched);
         playProxy.publishTalkingPoints(customerSpace.toString(), playName);
+    }
+
+    @VisibleForTesting
+    void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
+        List<ColumnMetadata> columnMetadata = playLaunchContext.getFieldMappingMetadata();
+        if (CollectionUtils.isNotEmpty(columnMetadata)) {
+            Map<String, String> contactDisplayNames = columnMetadata.stream()
+                    .filter(col -> BusinessEntity.Contact.equals(col.getEntity()))
+                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
+            Map<String, String> accountDisplayNames = columnMetadata.stream()
+                    .filter(col -> !BusinessEntity.Contact.equals(col.getEntity()))
+                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
+            log.info("accountDisplayNames map: " + accountDisplayNames);
+            log.info("contactDisplayNames map: " + contactDisplayNames);
+
+            putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
+            putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, accountDisplayNames);
+        }
     }
 
     @VisibleForTesting
