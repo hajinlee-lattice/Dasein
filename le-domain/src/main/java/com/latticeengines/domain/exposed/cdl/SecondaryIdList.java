@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -24,38 +26,38 @@ import com.latticeengines.domain.exposed.query.EntityType;
 public class SecondaryIdList {
 
     @JsonProperty("secondary_id_items")
-    private List<SecondaryIdItem> secondaryIdItems;
+    private Map<EntityType, SecondaryIdItem> secondaryIdItems = new HashedMap<>();
 
     @JsonIgnore
     public void addSecondaryId(EntityType entityType, String secondaryId) {
         Preconditions.checkNotNull(entityType);
-        if (secondaryIdItems == null) {
-            secondaryIdItems = new ArrayList<>();
+        if (secondaryIdItems.containsKey(entityType)) {
+            if (!secondaryIdItems.get(entityType).getColumnName().equals(secondaryId)) {
+                throw new RuntimeException(String.format("EntityType %s already have secondary Id: %s",
+                        entityType.name(), secondaryId));
+            }
         }
-        if (secondaryIdItems.stream().anyMatch(idItem -> idItem.getEntityType().equals(entityType))) {
-            return;
-        }
+
         SecondaryIdItem idItem = new SecondaryIdItem();
         idItem.setEntityType(entityType);
         idItem.setColumnName(secondaryId);
         idItem.setPriority(secondaryIdItems.size() + 1);
-        secondaryIdItems.add(idItem);
+        secondaryIdItems.put(entityType, idItem);
     }
 
     @JsonIgnore
     public String getSecondaryId(EntityType entityType) {
         Preconditions.checkNotNull(entityType);
-        if (CollectionUtils.isEmpty(secondaryIdItems)) {
+        if (MapUtils.isEmpty(secondaryIdItems)) {
             return StringUtils.EMPTY;
         }
-        SecondaryIdItem secondaryIdItem =
-                secondaryIdItems.stream().filter(idItem -> idItem.getEntityType().equals(entityType)).findAny().orElse(null);
+        SecondaryIdItem secondaryIdItem = secondaryIdItems.get(entityType);
         return secondaryIdItem == null ? StringUtils.EMPTY : secondaryIdItem.getColumnName();
     }
 
     @JsonIgnore
     public List<String> getSecondaryIds(SortBy sortBy) {
-        if (CollectionUtils.isEmpty(secondaryIdItems)) {
+        if (MapUtils.isEmpty(secondaryIdItems)) {
             return Collections.emptyList();
         }
         Comparator<SecondaryIdItem> comparator;
@@ -70,7 +72,7 @@ public class SecondaryIdList {
                 comparator = Comparator.comparing(SecondaryIdItem::getPriority);
                 break;
         }
-        List<SecondaryIdItem> sortedIds = new ArrayList<>(secondaryIdItems);
+        List<SecondaryIdItem> sortedIds = new ArrayList<>(secondaryIdItems.values());
         if (comparator != null) {
             sortedIds.sort(comparator);
         }
