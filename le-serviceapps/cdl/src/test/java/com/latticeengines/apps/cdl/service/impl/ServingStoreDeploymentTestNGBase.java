@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -64,6 +65,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(() -> {
             setupTestEnvironment();
+            overwriteFeatureFlag();
             cdlTestDataService.populateMetadata(mainTestTenant.getId(), 5);
             batonService.setFeatureFlag(CustomerSpace.parse(mainTestTenant.getId()), //
                     LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
@@ -137,7 +139,8 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
                 cmsToVerify.remove(cm.getAttrName());
             }
         });
-        Assert.assertTrue(cmsToVerify.isEmpty());
+        Assert.assertTrue(cmsToVerify.isEmpty(),
+                String.format("Expected metadata doesn't exist: %s", JsonUtils.serialize(cmsToVerify)));
     }
 
     // Currently only verify Category, Subcategory, Groups
@@ -154,7 +157,12 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
             Assert.assertNotNull(enabledGroups);
             Collections.sort(enabledGroups);
             Collections.sort(enabledGroupsExpected);
-            Assert.assertEquals(enabledGroups, enabledGroupsExpected);
+            Assert.assertEquals(enabledGroups, enabledGroupsExpected,
+                    String.format("Expected enabled groups: %s, actual enabled groups: %s",
+                            String.join(",", enabledGroupsExpected.stream().map(ColumnSelection.Predefined::getName)
+                                    .collect(Collectors.toList())),
+                            String.join(",", enabledGroups.stream().map(ColumnSelection.Predefined::getName)
+                                    .collect(Collectors.toList()))));
         }
     }
 
@@ -200,6 +208,10 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         ColumnMetadata build() {
             return cm;
         }
+    }
+
+    protected void overwriteFeatureFlag() {
+
     }
 
 }

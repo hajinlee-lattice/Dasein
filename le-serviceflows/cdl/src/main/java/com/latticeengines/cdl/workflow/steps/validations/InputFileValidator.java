@@ -76,6 +76,8 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         long errorLine;
         InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList,
                 enableEntityMatch, enableEntityMatchGA);
+        // this variable is used to generate statistics for product
+        StringBuilder statistics = new StringBuilder();
         if (fileConfiguration == null) {
             log.info(String.format(
                     "skip validation as file configuration is null, the validation for this file with %s waiting to be implemented.",
@@ -84,7 +86,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         } else {
             InputFileValidationService fileValidationService = InputFileValidationService
                     .getValidationService(fileConfiguration.getClass().getSimpleName());
-            errorLine = fileValidationService.validate(fileConfiguration, processedRecords);
+            errorLine = fileValidationService.validate(fileConfiguration, processedRecords, statistics);
         }
         // update eaiJobDetail if found error in validations
         if (errorLine != 0L) {
@@ -96,11 +98,14 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
 
         // add report for this step and import data step
         if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
+            Long totalFailed = 0L;
+            totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
+            totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
             getJson().put(entity.toString(), eaiImportJobDetail.getTotalRows())
                             .put("total_rows", eaiImportJobDetail.getTotalRows())
                             .put("ignored_rows", 0L)
                             .put("imported_rows", 0L)
-                            .put("deduped_rows", 0L).put("total_failed_rows", eaiImportJobDetail.getTotalRows());
+                            .put("deduped_rows", 0L).put("total_failed_rows", totalFailed);
         } else {
             Long totalFailed = 0L;
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
@@ -114,7 +119,8 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         super.execute();
         // make sure report first, then throw exception if necessary
         if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
-            throw new LedpException(LedpCode.LEDP_40059, new String[] { ImportProperty.ERROR_FILE });
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { statistics.toString(),
+                    ImportProperty.ERROR_FILE });
         }
     }
 

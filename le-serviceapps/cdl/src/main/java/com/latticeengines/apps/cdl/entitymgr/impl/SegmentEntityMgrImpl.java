@@ -24,7 +24,6 @@ import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
-import com.latticeengines.apps.cdl.util.SegmentDependencyUtil;
 import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -41,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
@@ -58,9 +58,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Inject
     private RatingAttributeNameParser ratingAttributeNameParser;
-
-    @Inject
-    private SegmentDependencyUtil segmentDependencyUtil;
 
     @Override
     public BaseDao<MetadataSegment> getDao() {
@@ -234,7 +231,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     public Set<Triple<String, String, String>> extractDependencies(MetadataSegment segment) {
         Set<Triple<String, String, String>> attrDepSet = new HashSet<Triple<String, String, String>>();
         if (segment != null) {
-            segmentDependencyUtil.findSegmentDependingAttributes(segment);
+            SegmentDependencyUtil.findSegmentDependingAttributes(segment);
             Set<AttributeLookup> attributeLookups = segment.getSegmentAttributes();
             for (AttributeLookup attributeLookup : attributeLookups) {
                 if (attributeLookup.getEntity() == BusinessEntity.Rating) {

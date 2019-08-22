@@ -2,6 +2,8 @@ package com.latticeengines.query.exposed.translator;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
@@ -94,7 +96,9 @@ public class MetricTranslator {
 
     private static boolean containsZero(ComparisonType comparator, List<Object> vals) {
         boolean containsZero = false;
-        if (vals.size() == 2) {
+        if (CollectionUtils.isEmpty(vals)) {
+            return false;
+        } else if (vals.size() == 2) {
             Double upperBound = toDouble(vals.get(1));
             Double lowerBound = toDouble(vals.get(0));
             containsZero = lowerBound * upperBound <= 0;

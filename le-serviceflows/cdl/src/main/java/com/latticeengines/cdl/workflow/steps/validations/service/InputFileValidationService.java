@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationConfiguration;
 
@@ -20,7 +22,8 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
     @Autowired
     protected Configuration yarnConfiguration;
 
-    public abstract long validate(T inputFileValidationServiceConfiguration, List<String> processedLines);
+    public abstract long validate(T inputFileValidationServiceConfiguration, List<String> processedLines,
+                                  StringBuilder stastistics);
 
 
     public InputFileValidationService(String serviceName) {
@@ -41,6 +44,26 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
             value = null;
         }
         return value;
+    }
+
+    protected static String getFieldDisplayName(GenericRecord record, String field, String defaultName) {
+        if (record == null) {
+            return defaultName;
+        }
+        Schema schema = record.getSchema();
+        if (schema == null) {
+            return defaultName;
+        }
+        Schema.Field schemaField = schema.getField(field);
+        if (schemaField == null) {
+            return defaultName;
+        }
+        String displayName = schemaField.getProp("displayName");
+        if (StringUtils.isEmpty(displayName)) {
+            return defaultName;
+        } else {
+            return displayName;
+        }
     }
 
 

@@ -17,7 +17,7 @@
             <div class="tab-container">
                 <h2>Launch History</h2>
                 <div class="enrichmentCounts">
-                    <span class="count">{{ vm.count('Launching') + vm.count('Launched') + vm.count('Failed') }}</span> {{ vm.count('Launching') + vm.count('Launched') + vm.count('Failed') == 1 ? "campaign" : "campaigns"}}
+                    <span class="count">{{ vm.countAll() }}</span> {{ vm.cumulativeCount == 1 ? "campaign" : "campaigns"}}
                     <span class="count">{{ vm.count('Launching') }}</span> launching
                 </div>
             </div>

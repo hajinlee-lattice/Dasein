@@ -23,16 +23,19 @@ div.advanced-query-builder {
                 line-height: 1.2em;
                 cursor: default;
 
-                &.category-contact_attributes { border-bottom: 2px solid #457eba; }
-                &.category-product { border-bottom: 2px solid #cd80bc; }
-                &.category-firmographics { border-bottom: 2px solid #33bdb7; }
-                &.category-intent { border-bottom: 2px solid #f15a5a; }
-                &.category-technology_profile { border-bottom: 2px solid #70bf4a; }
-                &.category-website_profile { border-bottom: 2px solid #26649b; }
-                &.category-growth_trends { border-bottom: 2px solid #65b7e6; }
-                &.category-engagement { border-bottom: 2px solid #aac43b; }
-                &.category-online_presence { border-bottom: 2px solid #8e71b2; }
-                &.category-website_keywords { border-bottom: 2px solid #fdbc49; }
+                &.category-firmographics { border-bottom: 2px solid $datacloud-color-firmographics; }
+                &.category-growth-trends { border-bottom: 2px solid $datacloud-color-growth-trends; }
+                &.category-intent { border-bottom: 2px solid $datacloud-color-intent; }
+                &.category-online-presence { border-bottom: 2px solid $datacloud-color-online-presence; }
+                &.category-technology-profile { border-bottom: 2px solid $datacloud-color-technology-profile; }
+                &.category-website-keywords { border-bottom: 2px solid $datacloud-color-website-keywords; }
+                &.category-website-profile { border-bottom: 2px solid $datacloud-color-website-profile; }
+                &.category-contact-attributes { border-bottom: 2px solid $datacloud-color-contact; }
+                &.category-product-spend-profile, &.category-product-spend { border-bottom: 2px solid $datacloud-color-product; }
+                &.category-engagement { border-bottom: 2px solid $datacloud-color-engagement; }
+                &.category-curated-account-attributes { border-bottom: 2px solid $datacloud-color-curated-accounts; }
+                &.category-my-attributes { border-bottom: 2px solid $datacloud-color-my-attributes; }
+                &.category-lattice-ratings { border-bottom: 2px solid $datacloud-color-lattice-ratings; }
             }
 
             span.query-input-operator {

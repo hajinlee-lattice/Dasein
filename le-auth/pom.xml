@@ -8,16 +8,12 @@
 
     <properties>
         <component-name>auth</component-name>
-        <le.common.version>4.18.0-SNAPSHOT</le.common.version>
-        <le.db.version>4.18.0-SNAPSHOT</le.db.version>
-        <le.domain.version>4.18.0-SNAPSHOT</le.domain.version>
-        <le.graph.version>4.18.0-SNAPSHOT</le.graph.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.18.0-SNAPSHOT</version>
+        <version>4.19.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -25,31 +21,31 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-graph</artifactId>
-            <version>${le.graph.version}</version>
+            <artifactId>le-graphdb</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

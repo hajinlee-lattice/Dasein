@@ -142,7 +142,11 @@ public class CDLResource {
         try {
             ApplicationId applicationId = cdlService.submitCSVImport(customerSpace.toString(), templateFileName,
                     dataFileName, source, entity, feedType);
-            return ResponseDocument.successResponse(applicationId.toString());
+            if (applicationId != null) {
+                return ResponseDocument.successResponse(applicationId.toString());
+            } else {
+                return ResponseDocument.successResponse("");
+            }
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit import job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"ImportFile", e.getMessage()});
@@ -157,6 +161,9 @@ public class CDLResource {
                                                   @RequestParam(value = "importData", required = false, defaultValue = "false") boolean importData,
                                                   @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
         try {
             EntityType entityType = EntityType.fromDisplayNameToEntityType(templateDisplay.getObject());
             String entity = entityType.getEntity().name();
@@ -336,7 +343,9 @@ public class CDLResource {
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
         } catch (LedpException e) {
             log.error("Failed to create S3ImportSystem: " + e.getMessage());
-            throw e;
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+                    Status.Error, e.getMessage());
+            throw new UIActionException(action, e.getCode());
         }
     }
 

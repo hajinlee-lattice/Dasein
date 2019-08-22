@@ -21,6 +21,9 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
     @JsonProperty
     private boolean useAccountFeature;
 
+    @JsonProperty
+    private boolean exportKeyColumnsOnly;
+
     public CreateCdlEventTableConfiguration() {
         setBeanName("createCdlEventTableFlow");
     }
@@ -63,6 +66,14 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
 
     public void setUseAccountFeature(boolean useAccountFeature) {
         this.useAccountFeature = useAccountFeature;
+    }
+
+    public boolean isExportKeyColumnsOnly() {
+        return exportKeyColumnsOnly;
+    }
+
+    public void setExportKeyColumnsOnly(boolean exportKeyColumnsOnly) {
+        this.exportKeyColumnsOnly = exportKeyColumnsOnly;
     }
 
 }

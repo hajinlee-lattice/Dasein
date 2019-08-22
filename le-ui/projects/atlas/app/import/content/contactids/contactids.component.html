@@ -114,6 +114,7 @@
         <input
           type="checkbox"
           ng-model="vm.match"
+          ng-disabled="vm.isMatchDisabled(vm.fieldMapping)"
           ng-change="vm.changeLatticeField(vm.fieldMapping, vm.form)"
         />
         Match this ID to Contact ID field in Lattice
@@ -132,10 +133,10 @@
     <div class="header">
       <h2>Match IDs</h2>
       <p>
-        Select Other IDS from in your file uploaded. This ids will be used to
-        match you accounts with accounts from other systems
+        Select Other IDS in your uploaded file. These ids will be used to
+        match your contacts with contacts from other systems
       </p>
-      <p>Note: These are not used to de-duplicate your accounts</p>
+      <p>Note: These are not used to de-duplicate your contacts</p>
       <br />
     </div>
 

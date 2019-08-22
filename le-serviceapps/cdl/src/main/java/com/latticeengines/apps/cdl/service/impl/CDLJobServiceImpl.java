@@ -1,11 +1,15 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +27,10 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.RedisZSetCommands;
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
@@ -32,6 +40,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
@@ -50,6 +59,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -59,6 +69,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
@@ -73,6 +84,8 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
+import javafx.util.Pair;
+
 @Component("cdlJobService")
 public class CDLJobServiceImpl implements CDLJobService {
 
@@ -83,13 +96,22 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static final String TEST_SCHEDULER = "qa_testing";
 
+    @Value("${common.le.environment}")
+    private String leEnv;
+
+    private static String MAIN_TRACKING_SET;
+
+    private static String NEW_TRACKING_SET;
+
+    private static String REDIS_TEMPLATE_KEY;
+
     @Inject
     private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
 
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
 
-    private static LinkedHashMap<String, String> EXPORT_APPID_MAP;
+    private static LinkedHashMap<String, Pair> EXPORT_APPID_MAP;
 
     @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
@@ -117,6 +139,9 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private AtlasExportService atlasExportService;
 
     @VisibleForTesting
     @Value("${cdl.processAnalyze.concurrent.job.count}")
@@ -152,6 +177,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Inject
     private WorkflowProxy workflowProxy;
 
+    @Inject
+    private RedisTemplate<String, Object> redisTemplate;
+
     private CDLProxy cdlProxy;
 
     @Value("${cdl.app.public.url:https://localhost:9081}")
@@ -168,9 +196,12 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         };
         EXPORT_APPID_MAP = new LinkedHashMap<>();
+
+        initTrackingSets();
     }
 
     private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
+    private List<String> exportTypes = Collections.singletonList("entityExportWorkflow");
     private List<String> jobStatuses = Collections.singletonList(JobStatus.RUNNING.getName());
 
     @PostConstruct
@@ -184,6 +215,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.info(String.format("CDLJobService running with cdlHostPort=%s, workflowHostPort=%s",
                     cdlProxy.getHostport(), workflowProxy.getHostport()));
         }
+
+        initTrackingSets();
     }
 
     @Override
@@ -346,7 +379,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
         if ((runningPAJobsCount < concurrentProcessAnalyzeJobs && autoScheduledPAJobsCount < maximumScheduledJobCount)
                 || runningPAJobsCount >= concurrentProcessAnalyzeJobs
-                        && autoScheduledPAJobsCount < minimumScheduledJobCount) {
+                && autoScheduledPAJobsCount < minimumScheduledJobCount) {
             log.info("Need to schedule a PA job.");
             list.sort(Comparator.comparing(Map.Entry::getKey));
             for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
@@ -374,6 +407,16 @@ public class CDLJobServiceImpl implements CDLJobService {
                 "Scheduled new PAs for tenants = {}, retry PAs for tenants = {}. schedulerName={}, dryRun={}, totalSize={}",
                 result.getNewPATenants(), result.getRetryPATenants(), schedulerName, dryRun,
                 result.getNewPATenants().size() + result.getRetryPATenants().size());
+
+        try {
+            Set<?> starvedTenants = detectStarvation(result);
+            if (CollectionUtils.isNotEmpty(starvedTenants)) {
+                log.warn("Starvation detected for the following tenant(s) in scheduler: {}", starvedTenants);
+            }
+        } catch (Exception e) {
+            log.error("Encounter error while detecting starvation:", e);
+        }
+
         Set<String> canRunRetryJobSet = result.getRetryPATenants();
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String tenantId : canRunRetryJobSet) {
@@ -381,10 +424,16 @@ public class CDLJobServiceImpl implements CDLJobService {
                     if (!dryRun) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
                         logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
+                        if (retryAppId != null) {
+                            removeFromSet(retryAppId, MAIN_TRACKING_SET, tenantId);
+                        }
+                    } else {
+                        removeFromSet(null, MAIN_TRACKING_SET, tenantId);
                     }
                 } catch (Exception e) {
                     log.error("Failed to retry PA for tenant {}, error = {}", tenantId, e);
                     updateRetryCount(tenantId);
+                    setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
                 }
             }
         }
@@ -394,13 +443,18 @@ public class CDLJobServiceImpl implements CDLJobService {
                 if (!dryRun) {
                     ApplicationId appId = submitProcessAnalyzeJob(tenantId);
                     logScheduledPA(schedulerName, tenantId, appId, false, result);
+                    if (appId != null) {
+                        removeFromSet(appId, MAIN_TRACKING_SET, tenantId);
+                    }
+                } else {
+                    removeFromSet(null, MAIN_TRACKING_SET, tenantId);
                 }
             }
         }
     }
 
     private void logScheduledPA(@NotNull String schedulerName, String tenantId, ApplicationId appId, boolean isRetry,
-            SchedulingResult result) {
+                                SchedulingResult result) {
         if (StringUtils.isEmpty(tenantId) || appId == null || appId.toString() == null || result == null) {
             return;
         }
@@ -561,6 +615,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.info("Submit PA job with appId = {} for tenant = {} successfully", applicationId, tenantId);
         } catch (Exception e) {
             log.error("Failed to submit job for tenant = {}, error = {}", tenantId, e);
+            setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
         }
         return applicationId;
     }
@@ -605,10 +660,10 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private boolean reachRetryLimit(CDLJobType cdlJobType, int retryCount) {
         switch (cdlJobType) {
-        case PROCESSANALYZE:
-            return retryCount >= processAnalyzeJobRetryCount;
-        default:
-            return false;
+            case PROCESSANALYZE:
+                return retryCount >= processAnalyzeJobRetryCount;
+            default:
+                return false;
         }
     }
 
@@ -666,12 +721,16 @@ public class CDLJobServiceImpl implements CDLJobService {
                         atlasSchedulingService.updateExportScheduling(atlasScheduling);
                     }
                     if (triggered) {
-                        if (EXPORT_APPID_MAP.containsValue(customerSpace)) {
-                            continue;
-                        }
-                        if (submitExportJob(customerSpace, tenant)) {
-                            log.info(String.format("ExportJob submitted invoke time: %s, tenant name: %s.",
-                                    atlasScheduling.getPrevFireTime(), tenant.getName()));
+                        List<AtlasExportType> atlasExportTypes = Arrays.asList(AtlasExportType.ACCOUNT, AtlasExportType.CONTACT);
+                        for (AtlasExportType atlasExportType : atlasExportTypes) {
+                            Pair<String, AtlasExportType> pair = new Pair<>(customerSpace, atlasExportType);
+                            if (EXPORT_APPID_MAP.containsValue(pair)) {
+                                continue;
+                            }
+                            if (submitExportJob(customerSpace, tenant, atlasExportType)) {
+                                log.info(String.format("ExportJob submitted invoke time: %s, tenant name: %s, export type: %s.",
+                                        atlasScheduling.getPrevFireTime(), tenant.getName(), atlasExportType));
+                            }
                         }
                     }
                 }
@@ -679,13 +738,13 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    boolean submitExportJob(String customerSpace, Tenant tenant) {
-        return submitExportJob(customerSpace, false, tenant);
+    boolean submitExportJob(String customerSpace, Tenant tenant, AtlasExportType atlasExportType) {
+        return submitExportJob(customerSpace, false, tenant, atlasExportType);
     }
 
     @VisibleForTesting
-    boolean submitExportJob(String customerSpace, boolean retry, Tenant tenant) {
-        String applicationId = null;
+    boolean submitExportJob(String customerSpace, boolean retry, Tenant tenant, AtlasExportType atlasExportType) {
+        String applicationId;
         boolean success = true;
         if (tenant == null) {
             setMultiTenantContext(customerSpace);
@@ -693,12 +752,16 @@ public class CDLJobServiceImpl implements CDLJobService {
             MultiTenantContext.setTenant(tenant);
         }
         try {
+            AtlasExport atlasExport = atlasExportService.createAtlasExport(customerSpace, atlasExportType);
             EntityExportRequest request = new EntityExportRequest();
+            request.setAtlasExportId(atlasExport.getUuid());
+            request.setSaveToDropfolder(true);
             request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace));
             ApplicationId tempApplicationId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
             applicationId = tempApplicationId.toString();
             if (!retry) {
-                EXPORT_APPID_MAP.put(applicationId, customerSpace);
+                Pair<String, AtlasExportType> value = new Pair<>(customerSpace, atlasExportType);
+                EXPORT_APPID_MAP.put(applicationId, value);
             }
             log.info("export applicationId map is " + JsonUtils.serialize(EXPORT_APPID_MAP));
         } catch (Exception e) {
@@ -718,7 +781,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         jobStatus.add(JobStatus.CANCELLED.getName());
         jobStatus.add(JobStatus.COMPLETED.getName());
         if (StringUtils.isNotEmpty(clusterId)) {
-            List<WorkflowJob> workflowJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, types,
+            List<WorkflowJob> workflowJobs = workflowProxy.queryByClusterIDAndTypesAndStatuses(clusterId, exportTypes,
                     jobStatus);
             if (CollectionUtils.isNotEmpty(workflowJobs)) {
                 for (WorkflowJob workflowJob : workflowJobs) {
@@ -728,8 +791,11 @@ public class CDLJobServiceImpl implements CDLJobService {
                         continue;
                     }
                     if (workflowJob.getStatus() == JobStatus.FAILED.getName()) {
-                        submitExportJob(EXPORT_APPID_MAP.get(workflowJob.getApplicationId()), true, null);
-                        EXPORT_APPID_MAP.remove(workflowJob.getApplicationId());
+                        Pair<String, AtlasExportType> pair = EXPORT_APPID_MAP.get(workflowJob.getApplicationId());
+                        if (pair != null) {
+                            submitExportJob(pair.getKey(), true, null, pair.getValue());
+                            EXPORT_APPID_MAP.remove(workflowJob.getApplicationId());
+                        }
                     }
                 }
             }
@@ -744,4 +810,49 @@ public class CDLJobServiceImpl implements CDLJobService {
         MultiTenantContext.setTenant(tenant);
     }
 
+    @VisibleForTesting
+    Set<?> detectStarvation(SchedulingResult result) {
+        Set<String> allTenantsInQ = result.getAllTenantsInQ();
+        Set<ZSetOperations.TypedTuple<Object>> newTrackingEntries = new HashSet<>();
+        Instant curTime = Instant.now();
+        allTenantsInQ.forEach(tenantId -> {
+            newTrackingEntries.add(new DefaultTypedTuple<>(tenantId, (double) curTime.toEpochMilli()));
+        });
+        if (CollectionUtils.isNotEmpty(newTrackingEntries)) {
+            redisTemplate.opsForZSet().add(NEW_TRACKING_SET, newTrackingEntries);
+            redisTemplate.opsForZSet().unionAndStore(MAIN_TRACKING_SET, Collections.singletonList(NEW_TRACKING_SET), MAIN_TRACKING_SET, RedisZSetCommands.Aggregate.MIN);
+            redisTemplate.delete(NEW_TRACKING_SET);
+        }
+        Set<?> starvedTenants = redisTemplate.opsForZSet().rangeByScore(MAIN_TRACKING_SET, 0, (double) curTime.minus(2, ChronoUnit.DAYS).toEpochMilli());
+        if (CollectionUtils.isNotEmpty(starvedTenants)) {
+            return starvedTenants;
+        }
+        return Collections.emptySet();
+    }
+
+    private void removeFromSet(ApplicationId appId, String key, String tenantId) {
+        log.info("Submitted PA for tenant {}. Application is {}. Removing from tracking set {}", tenantId, appId, key);
+        try {
+            redisTemplate.opsForZSet().remove(key, tenantId);
+        } catch (Exception e) {
+            log.warn("Failed to remove tenant {} from tracking set {}. {}", tenantId, key, e);
+        }
+    }
+
+    private void initTrackingSets() {
+        MAIN_TRACKING_SET = leEnv + "_PA_SCHEDULER_MAIN_TRACKING_SET";
+        NEW_TRACKING_SET = leEnv + "_PA_SCHEDULER_NEW_TRACKING_SET";
+        REDIS_TEMPLATE_KEY = "pa_scheduler_" + leEnv + "_pa_submit_failed";
+    }
+
+    private void setPASubmissionFailTime(String key, String customerSpace) {
+        try {
+            long currentTime = new Date().getTime();
+            redisTemplate.opsForHash().put(key, customerSpace, currentTime);
+            log.info("pa submit failed, tenant: " + customerSpace + ", fail time: " + currentTime);
+        } catch (Exception e) {
+            log.error("get redis cache fail.", e);
+        }
+    }
 }
+

@@ -68,7 +68,10 @@ public class LivySessionManager {
             String unit = executorMem.substring(executorMem.length()-1);
             int val = Integer.parseInt(executorMem.replace(unit, ""));
             String newMem = String.format("%d%s", 2 * val, unit);
-            log.info("Double executor memory to " + newMem + " based on scalingFactor=" + scalingMultiplier);
+            int newCores = 2 * executorCores;
+            log.info("Scale up executor cores to " + newCores + " memory to " + newMem //
+                    + " based on scalingFactor=" + scalingMultiplier);
+            conf.put("executorCores", newCores);
             conf.put("executorMemory", newMem);
         }
         return conf;
@@ -83,7 +86,7 @@ public class LivySessionManager {
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
-        int partitions = Math.max(maxExe * executorCores * 2, 200);
+        int partitions = minExe * executorCores;
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
         return conf;

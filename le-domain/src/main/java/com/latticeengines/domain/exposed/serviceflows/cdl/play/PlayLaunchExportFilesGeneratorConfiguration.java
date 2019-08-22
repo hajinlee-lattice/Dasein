@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 
 public class PlayLaunchExportFilesGeneratorConfiguration extends PlayLaunchInitStepConfiguration {
 
@@ -12,6 +13,7 @@ public class PlayLaunchExportFilesGeneratorConfiguration extends PlayLaunchInitS
     private CDLExternalSystemName destinationSysName;
     private Map<String, String> accountDisplayNames;
     private Map<String, String> contactDisplayNames;
+    private ChannelConfig channelConfig;
 
     public String getDestinationOrgId() {
         return destinationOrgId;
@@ -51,5 +53,13 @@ public class PlayLaunchExportFilesGeneratorConfiguration extends PlayLaunchInitS
 
     public void setContactDisplayNames(Map<String, String> contactDisplayNames) {
         this.contactDisplayNames = contactDisplayNames;
+    }
+
+    public ChannelConfig getChannelConfig() {
+        return channelConfig;
+    }
+
+    public void setChannelConfig(ChannelConfig channelConfig) {
+        this.channelConfig = channelConfig;
     }
 }

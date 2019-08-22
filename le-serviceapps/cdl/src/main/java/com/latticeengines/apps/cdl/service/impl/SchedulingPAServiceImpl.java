@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -106,6 +107,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
+    @Inject
+    private RedisTemplate<String, Object> redisTemplate;
+
     @Value("${cdl.processAnalyze.maximum.priority.large.account.count}")
     private long largeAccountCountLimit;
 
@@ -120,6 +124,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     private int concurrentProcessAnalyzeJobs;
+
+    @Value("${cdl.processAnalyze.retry.expired.time}")
+    private long retryExpiredTime;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
 
     private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
@@ -146,6 +156,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         Set<String> skippedMigrationTenants = new HashSet<>();
         log.info("Number of tenant with new actions after last PA = {}", actionStats.size());
         log.debug("Action stats = {}", actionStats);
+
+        Map<String, Long> paFailedMap = getPASubmitFailedRedisMap();
 
         for (DataFeed simpleDataFeed : allDataFeeds) {
             if (simpleDataFeed.getTenant() == null) {
@@ -186,6 +198,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     runningLargeJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
+                if (paFailedMap.containsKey(tenantId)) {
+                    continue;
+                }
                 TenantActivity tenantActivity = new TenantActivity();
                 tenantActivity.setTenantId(tenantId);
                 tenantActivity.setTenantType(tenant.getTenantType());
@@ -508,7 +523,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private boolean checkRetryPendingTime(long lastFinishedTime) {
-        return lastFinishedTime - (schedulingPATimeClock.getCurrentTime() - 6*7*24*3600000L) > 0;
+        return lastFinishedTime - (schedulingPATimeClock.getCurrentTime() - retryExpiredTime * 1000) > 0;
     }
 
     private String getSchedulingGroup(String schedulerName) {
@@ -548,5 +563,27 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.error("Failed to check whether scheduler [{}] is enabled", schedulerName);
             return false;
         }
+    }
+
+    private Map<String, Long> getPASubmitFailedRedisMap() {
+        String redisKey = "pa_scheduler_" + leEnv + "_pa_submit_failed";
+        Map<String, Long> paSubmitFailedMap = new HashMap<>();
+        try {
+            Map<Object, Object> redisMap = redisTemplate.opsForHash().entries(redisKey);
+            if (redisMap.size() > 0) {
+                for (Map.Entry<Object, Object> entry : redisMap.entrySet()) {
+                    Long failedTime = (Long) entry.getValue();
+                    if (schedulingPATimeClock.getCurrentTime() - failedTime < 60 * 60 * 1000) {
+                        paSubmitFailedMap.put((String) entry.getKey(), failedTime);
+                    } else {
+                        redisTemplate.opsForHash().delete(redisKey, entry.getKey());
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("get redis cache fail.", e);
+        }
+        return paSubmitFailedMap;
     }
 }

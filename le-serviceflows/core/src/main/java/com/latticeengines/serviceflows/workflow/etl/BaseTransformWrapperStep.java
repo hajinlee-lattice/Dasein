@@ -223,6 +223,8 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
             return lightEngineConfig();
         case HEAVY:
             return heavyEngineConfig();
+        case HEAVY_MEMORY:
+            return heavyMemoryEngineConfig();
         case EXTRA_HEAVY:
             return extraHeavyEngineConfig();
         default:
@@ -240,6 +242,26 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scalingMultiplier));
         jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scalingMultiplier));
         jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
+        engineConf.setJobProperties(jobProperties);
+        engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
+        return engineConf;
+    }
+
+    // TODO: Will merge into extraHeavyEngineConfig() in M31
+    protected TransformationFlowParameters.EngineConfiguration heavyMemoryEngineConfig() {
+        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+        engineConf.setEngine("TEZ");
+        Map<String, String> jobProperties = new HashMap<>();
+        // scalingMultiplier is in range [1, 5]
+        int scaleUp = scalingMultiplier > 2 ? 4 : Math.max(1, scalingMultiplier);
+        int scaleOut = scalingMultiplier > 2 ? scalingMultiplier - 1 : 1;
+        log.info("Set scaleUp={} and scaleOut={} based on scalingMultiplier={}", scaleUp, scaleOut, scalingMultiplier);
+        jobProperties.put("tez.task.resource.cpu.vcores", String.valueOf(tezVCores * scaleUp));
+        jobProperties.put("tez.task.resource.memory.mb", String.valueOf(tezMemGb * 1024 * scaleUp));
+        jobProperties.put("tez.am.resource.memory.mb", String.valueOf(tezAmMemGb * 1024 * scaleUp));
+        jobProperties.put("tez.grouping.split-count", String.valueOf(2 * cascadingPartitions * scaleOut));
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(cascadingPartitions * scaleOut));
+        jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scaleOut));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
         return engineConf;
@@ -272,6 +294,22 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     }
 
     protected void exportToS3AndAddToContext(String tableName, String contextKey) {
+        exportTableToS3(tableName, contextKey);
+        putStringValueInContext(contextKey, tableName);
+    }
+
+    protected void exportToS3AndAddToContext(List<String> tableNames, String contextKey) {
+        if (CollectionUtils.isEmpty(tableNames)) {
+            log.warn("Tries to export empty tableName list for contextKey = {}", contextKey);
+            return;
+        }
+
+        tableNames.forEach(tableName -> exportTableToS3(tableName, contextKey));
+        log.info("Published tables = {}, contextKey = {}", tableNames, contextKey);
+        putObjectInContext(contextKey, tableNames);
+    }
+
+    protected void exportTableToS3(String tableName, String contextKey) {
         boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
         if (!shouldSkip) {
             HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
@@ -292,6 +330,5 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         } else {
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }
-        putStringValueInContext(contextKey, tableName);
     }
 }

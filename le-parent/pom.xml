@@ -6,7 +6,7 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.18.0-SNAPSHOT</version>
+    <version>4.19.0-SNAPSHOT</version>
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
 
@@ -67,7 +67,7 @@
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <parquet.version>1.10.1</parquet.version>
-        <aws.version>1.11.546</aws.version> <!-- at least keep up with emr release -->
+        <aws.version>1.11.566</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
         <spark.version>2.4.3</spark.version>
         <scala.version>2.11.12</scala.version>
@@ -130,7 +130,7 @@
         <kryo.version>4.0.2</kryo.version>
         <kryo.serializers.version>0.42</kryo.serializers.version> <!-- needed for kryo 4.0.1 -->
         <zookeeper.version>3.4.13</zookeeper.version>
-        <tinkerpop.version>3.3.4</tinkerpop.version>
+        <tinkerpop.version>3.4.2</tinkerpop.version>
         <springfox.swagger.version>2.9.2</springfox.swagger.version>
         <io.swagger.version>1.5.22</io.swagger.version>
         <io.micrometer.version>1.1.5</io.micrometer.version>

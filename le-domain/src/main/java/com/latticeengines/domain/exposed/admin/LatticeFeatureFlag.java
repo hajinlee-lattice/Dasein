@@ -42,6 +42,11 @@ public enum LatticeFeatureFlag {
     ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
     BETA_FEATURE("BetaFeature", "Allows beta features"), //
     ENABLE_MULTI_TEMPLATE_IMPORT("EnableMultiTemplateImport", "Allows multiple templates for import"), //
+    ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
+    ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
+    ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
+    ENABLE_EXPORT_FIELD_METADATA("EnableExportFieldMetadata", "Enable export field metadata integration"), //
+    ENABLE_EXPORT_WITH_SPARK_SQL("EnableExportWithSparkSQL", "Enable segment export using spark SQL"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

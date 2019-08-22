@@ -228,6 +228,16 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder systemIdMap(Map<String, List<String>> systemIds) {
+            matchEntityWorkflowBuilder.systemIdMap(systemIds);
+            return this;
+        }
+
+        public Builder defaultSystemIdMap(Map<String, String> defaultSystemIds) {
+            matchEntityWorkflowBuilder.defaultSystemIdMap(defaultSystemIds);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             matchEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.workflow;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,11 +16,12 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -43,6 +46,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -56,6 +60,7 @@ import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
@@ -66,6 +71,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -77,11 +83,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
-    @Autowired
+    @Inject
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private ImportMigrateTrackingService importMigrateTrackingService;
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
@@ -117,10 +126,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final CDLAttrConfigProxy cdlAttrConfigProxy;
 
+    private final CDLProxy cdlProxy;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-                                           WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-                                           BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy) {
+            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
+            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy,
+            CDLProxy cdlProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
@@ -129,6 +141,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.batonService = batonService;
         this.zkConfigService = zkConfigService;
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
+        this.cdlProxy = cdlProxy;
     }
 
     @WithWorkflowJobPid
@@ -462,8 +475,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
         boolean alwaysOnCampain = FeatureFlagUtils.isAlwaysOnCampaign(flags);
-        log.info("Feature flags = {}, tenant = {}, entityMatchEnabled={}, workflowPid={}", flags, customerSpace,
-                entityMatchEnabled, workflowPid);
+        log.info("Submitting PA: FeatureFlags={}, tenant={}, entityMatchEnabled={}, workflowPid={}", flags,
+                customerSpace, entityMatchEnabled, workflowPid);
         if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
             throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
         }
@@ -483,6 +496,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName());
         inputProperties.put(WorkflowContextConstants.Inputs.ALWAYS_ON_CAMPAIGNS, String.valueOf(alwaysOnCampain));
         inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIds));
+
+        Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
+                entityMatchEnabled);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -505,6 +521,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .apsImputationEnabled(apsImputationEnabled) //
+                .systemIdMap(systemIdMaps.getRight()) //
+                .defaultSystemIdMap(systemIdMaps.getLeft()) //
                 .entityMatchEnabled(entityMatchEnabled) //
                 .entityMatchGAOnly(entityMatchGAOnly) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
@@ -556,6 +574,110 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
+    /*-
+     * [ defaultSysIdMap, sysIdsMap ]
+     *
+     * defaultSysIdMap: Entity -> defaultId
+     * sysIdsMap: Entity -> list(sysIds) ordered by priority
+     */
+    @VisibleForTesting
+    Pair<Map<String, String>, Map<String, List<String>>> getSystemIdMaps(@NotNull String customerSpace,
+            boolean entityMatchEnabled) {
+        if (!entityMatchEnabled) {
+            return Pair.of(Collections.emptyMap(), Collections.emptyMap());
+        }
+
+        List<S3ImportSystem> systems = cdlProxy.getS3ImportSystemList(customerSpace);
+        log.info("Systems={}, customerSpace={}", JsonUtils.serialize(systems), customerSpace);
+
+        Pair<String, List<String>> accountIds = getSystemIds(systems, BusinessEntity.Account);
+        Pair<String, List<String>> contactIds = getSystemIds(systems, BusinessEntity.Contact);
+
+        log.info("Default account id={}, account ids={}, customerSpace={}", accountIds.getLeft(), accountIds.getRight(),
+                customerSpace);
+        log.info("Default contact id={}, contact ids={}, customerSpace={}", contactIds.getLeft(), contactIds.getRight(),
+                customerSpace);
+
+        Map<String, List<String>> systemIds = new HashMap<>();
+        Map<String, String> defaultSystemIds = new HashMap<>();
+        defaultSystemIds.put(BusinessEntity.Account.name(), accountIds.getLeft());
+        systemIds.put(BusinessEntity.Account.name(), accountIds.getRight());
+        defaultSystemIds.put(BusinessEntity.Contact.name(), contactIds.getLeft());
+        systemIds.put(BusinessEntity.Contact.name(), contactIds.getRight());
+        return Pair.of(defaultSystemIds, systemIds);
+    }
+
+    /**
+     * Retrieve the default system ID and all system IDs for target entity of
+     * current tenant (sorted by system priority from high to low)
+     *
+     * @param systems
+     * @param entity
+     *            target entity
+     * @return non-null pair of [ default system ID, list of all system IDs ]
+     */
+    private Pair<String, List<String>> getSystemIds(@NotNull List<S3ImportSystem> systems,
+            @NotNull BusinessEntity entity) {
+        if (entity != BusinessEntity.Account && entity != BusinessEntity.Contact) {
+            throw new UnsupportedOperationException(
+                    String.format("Does not support retrieving system IDs for entity [%s]", entity.name()));
+        }
+        if (CollectionUtils.isEmpty(systems)) {
+            return Pair.of(null, Collections.emptyList());
+        }
+
+        List<String> systemIds = systems.stream() //
+                .filter(Objects::nonNull) //
+                // sort by system priority (lower number has higher priority)
+                .sorted(Comparator.comparing(S3ImportSystem::getPriority)) //
+                .flatMap(sys -> getOneSystemIds(entity, sys).stream()) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toList());
+        String defaultSystemId = systems.stream() //
+                .filter(Objects::nonNull) //
+                .map(sys -> {
+                    if (entity == BusinessEntity.Account && Boolean.TRUE.equals(sys.isMapToLatticeAccount())) {
+                        return sys.getAccountSystemId();
+                    }
+                    if (entity == BusinessEntity.Contact && Boolean.TRUE.equals(sys.isMapToLatticeContact())) {
+                        return sys.getContactSystemId();
+                    }
+                    return null;
+                }) //
+                .filter(Objects::nonNull) //
+                .findFirst() //
+                .orElse(null);
+        return Pair.of(defaultSystemId, systemIds);
+    }
+
+    private List<String> getOneSystemIds(@NotNull BusinessEntity entity, @NotNull S3ImportSystem system) {
+        List<String> allIds = new ArrayList<>();
+        switch (entity) {
+            case Account:
+                if(StringUtils.isNotBlank(system.getAccountSystemId())) {
+                    allIds.add(system.getAccountSystemId());
+                }
+                List<String> secondaryAccountIdList = system.getSecondaryAccountIdsSortByPriority();
+                if (CollectionUtils.isNotEmpty(secondaryAccountIdList)) {
+                    allIds.addAll(secondaryAccountIdList);
+                }
+                break;
+            case Contact:
+                if(StringUtils.isNotBlank(system.getContactSystemId())) {
+                    allIds.add(system.getContactSystemId());
+                }
+                List<String> secondaryContactIdList = system.getSecondaryContactIdsSortByPriority();
+                if (CollectionUtils.isNotEmpty(secondaryContactIdList)) {
+                    allIds.addAll(secondaryContactIdList);
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Does not support retrieving system IDs for entity [%s]", entity.name()));
+        }
+        return allIds;
+    }
+
     private void checkWorkflowId(String customerSpace, DataFeed datafeed, Long workflowId) {
         if (workflowId == null) {
             dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());
@@ -568,6 +690,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private ApplicationId submitWithOnlyImportActions(String customerSpace, ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
+        checkImportTrackingLinked(customerSpace);
         List<Long> importActionIds = getImportActionIds(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
 
@@ -586,10 +709,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
 
-        log.info(String.format("customer %s data feed %s initial status: %s", customerSpace, datafeed.getName(),
-                initialStatus.getName()));
+        log.info("customer {} data feed {} initial status: {}", customerSpace, datafeed.getName(),
+                initialStatus.getName());
 
-        log.info(String.format("Submitting migration PA workflow for customer %s", customerSpace));
+        log.info("Submitting migration PA workflow for customer {}", customerSpace);
 
         updateActions(importActionIds, pidWrapper.getPid());
 
@@ -602,8 +725,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
+    private void checkImportTrackingLinked(String customerSpace) {
+        if (migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking() == null) {
+            throw new IllegalStateException("No import migrate tracking record linked to current migration tracking record.");
+        }
+    }
+
     private List<Long> getImportActionIds(String customerSpace) {
-        // TODO get import action Ids using migrationTrackEntityMgr
-        return new ArrayList<>();
+        Long importMigrateTrackingPid = migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking().getPid();
+        return importMigrateTrackingService.getAllRegisteredActionIds(customerSpace, importMigrateTrackingPid);
     }
 }

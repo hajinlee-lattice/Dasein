@@ -99,6 +99,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "ERROR_CATEGORY")
     private String errorCategory;
 
+    @Column(name = "STACK")
+    private String stack;
+
     @Override
     public Long getPid() {
         return pid;
@@ -346,5 +349,13 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     public void setErrorCategory(String errorCategory) {
         this.errorCategory = errorCategory;
+    }
+
+    public String getStack() {
+        return stack;
+    }
+
+    public void setStack(String stack) {
+        this.stack = stack;
     }
 }

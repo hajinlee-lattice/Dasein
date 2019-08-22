@@ -83,6 +83,7 @@
       <label class="match-contact">
         <input
           type="checkbox"
+          ng-disabled="vm.isMatchDisabled(vm.fieldMapping)"
           ng-model="vm.match"
           ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
         />
@@ -101,8 +102,8 @@
     <div class="header">
       <h2>Match IDs</h2>
       <p>
-        Select Other IDS from in your file uploaded. This ids will be used to
-        match you accounts with accounts from other systems
+        Select Other IDS in your uploaded file. These ids will be used to
+        match your accounts with accounts from other systems
       </p>
       <p>Note: These are not used to de-duplicate your accounts</p>
       <br />

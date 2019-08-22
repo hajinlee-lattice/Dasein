@@ -1,13 +1,10 @@
 package com.latticeengines.cdl.dataflow;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -21,7 +18,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTransac
 public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanTransactionExportParameters> {
 
     public static final String DATAFLOW_BEAN_NAME = "orphanTransactionExportFlow";
-    private static final Logger log = LoggerFactory.getLogger(OrphanTransactionExportFlow.class);
     public static final String RENAME_PREFIX = "OrphanTransactionExport_";
 
     @Override
@@ -48,7 +44,6 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
         result = result.join(new FieldList(InterfaceName.ProductId.name()), srcProduct, new FieldList(renamedProduct),
                 JoinType.LEFT);
         List<String> filterFields = Arrays.asList(renamedAccount, renamedProduct);
-        log.info("rename: " + renamedAccount + ":" + renamedProduct);
         result = result.filter(String.format("%s == null || %s == null", renamedAccount, renamedProduct),
                 new FieldList(filterFields));
         result = result.retain(new FieldList(retainFields));
@@ -56,11 +51,8 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
     }
 
     public Node renameFields(Node node, String previousName, String newName) {
-        log.info("starting renaming: " + previousName + ":" + newName);
-        List<String> previousNames = node.getFieldNames();
-        List<String> newNames = new ArrayList<>(previousNames);
-        log.info(":" + previousNames.indexOf(previousName));
-        newNames.set(previousNames.indexOf(previousName), newName);
-        return node.rename(new FieldList(previousNames), new FieldList(newNames));
+        node = node.rename(new FieldList(previousName), new FieldList(newName));
+        // add retain to force syncing metadata
+        return node.retain(node.getFieldNamesArray());
     }
 }

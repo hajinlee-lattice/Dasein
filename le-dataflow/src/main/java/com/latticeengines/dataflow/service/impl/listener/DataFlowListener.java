@@ -11,7 +11,7 @@ import cascading.flow.FlowListener;
 @Component("dataFlowListener")
 public class DataFlowListener implements FlowListener {
     private static final Logger log = LoggerFactory.getLogger(DataFlowListener.class);
-    
+
     @Override
     public void onStarting(Flow flow) {
         log.info(String.format("Starting flow %s.", flow.getName()));
@@ -29,7 +29,7 @@ public class DataFlowListener implements FlowListener {
 
     @Override
     public boolean onThrowable(Flow flow, Throwable throwable) {
-        log.info(String.format("Exception during execution of flow %s.", flow.getName()), throwable);
+        log.warn(String.format("Exception during execution of flow %s.", flow.getName()), throwable);
         return false;
     }
 

@@ -204,7 +204,7 @@ class ViewAllComponent extends Component {
                                 <LeButton
                                   name="view-model"
                                   callback={() => {
-                                      console.log(this.props.$stateParams);
+                                      this.props.RatingsEngineStore.setRemodelIteration(cell.props.rowData);
                                       this.props.$state.go('home.model.datacloud', { rating_id: this.props.$stateParams.rating_id, modelId: cell.props.rowData.modelSummaryId, aiModel: cell.props.rowData.id})
                                   }}
                                   config={{

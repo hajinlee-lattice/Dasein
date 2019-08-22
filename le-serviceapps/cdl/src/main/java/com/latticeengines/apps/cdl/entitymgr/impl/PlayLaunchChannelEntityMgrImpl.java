@@ -29,8 +29,10 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrIm
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.proxy.exposed.quartz.QuartzSchedulerProxy;
 
 @Component("playLaunchChannelEntityMgr")
@@ -57,6 +59,9 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
+
+    @Inject
+    private TableEntityMgr tableEntityMgr;
 
     @Resource(name = "playLaunchChannelWriterRepository")
     private PlayLaunchChannelWriterRepository writerRepository;
@@ -164,6 +169,30 @@ public class PlayLaunchChannelEntityMgrImpl
                 existingPlayLaunchChannel.setChannelConfig(playLaunchChannel.getChannelConfig());
             }
         }
+        if (playLaunchChannel.getCurrentLaunchedAccountUniverseTable() != null) {
+            Table table = tableEntityMgr
+                    .findByName(playLaunchChannel.getCurrentLaunchedAccountUniverseTable().getName());
+            if (table != null) {
+                existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(table);
+            } else {
+                throw new LedpException(LedpCode.LEDP_32000,
+                        new String[] { "Failed to update channel: " + playLaunchChannel.getId()
+                                + " since no account universe table found by Id: "
+                                + playLaunchChannel.getCurrentLaunchedAccountUniverseTable().getName() });
+            }
+        }
+        if (playLaunchChannel.getCurrentLaunchedContactUniverseTable() != null) {
+            Table table = tableEntityMgr
+                    .findByName(playLaunchChannel.getCurrentLaunchedContactUniverseTable().getName());
+            if (table != null) {
+                existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(table);
+            } else {
+                throw new LedpException(LedpCode.LEDP_32000,
+                        new String[] { "Failed to update channel: " + playLaunchChannel.getId()
+                                + " since no contact universe table found by Id: "
+                                + playLaunchChannel.getCurrentLaunchedAccountUniverseTable().getName() });
+            }
+        }
         existingPlayLaunchChannel.setUpdatedBy(playLaunchChannel.getUpdatedBy());
 
         playLaunchChannelDao.update(existingPlayLaunchChannel);
@@ -226,7 +255,7 @@ public class PlayLaunchChannelEntityMgrImpl
         }
         String lookupIdMapId = playLaunchChannel.getLookupIdMap().getId();
         if (lookupIdMapId == null) {
-            throw new NullPointerException("Lookup map Id cannot be null.");
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Lookup map Id cannot be null." });
         }
         return lookupIdMappingEntityMgr.getLookupIdMap(lookupIdMapId);
     }

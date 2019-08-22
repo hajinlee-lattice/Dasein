@@ -1,15 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,15 +14,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.graph.StringGraphNode;
-import com.latticeengines.common.exposed.graph.utils.GraphUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -44,13 +34,11 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -70,13 +58,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private DataCollectionProxy dataCollectionProxy;
 
     @Inject
-    private ServingStoreProxy servingStoreProxy;
-
-    @Inject
     private BucketedScoreProxy bucketedScoreProxy;
-
-    @Value("${cdl.pa.default.max.iteration}")
-    private int defaultMaxIteration;
 
     private String customerSpace;
 
@@ -86,8 +68,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         List<RatingModelContainer> activeModels = readActiveRatingModels();
         log.info("Found " + CollectionUtils.size(activeModels) + " active rating models.");
         putObjectInContext(RATING_MODELS, activeModels);
-        putObjectInContext(RATING_MODELS_BY_ITERATION, splitIntoGenerations(activeModels));
-        putObjectInContext(CURRENT_RATING_ITERATION, 0);
 
         initializeRatingLifts();
 
@@ -242,105 +222,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             return false;
         }
         return true;
-    }
-
-    private List<List<RatingModelContainer>> splitIntoGenerations(List<RatingModelContainer> containers) {
-        List<List<RatingModelContainer>> iterations = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(containers)) {
-            int maxIteration = configuration.getMaxIteration();
-            if (maxIteration == 0) {
-                maxIteration = defaultMaxIteration;
-            }
-            log.info("Max iteration is " + maxIteration + ".");
-            if (maxIteration == 1) {
-                log.info("Max Iteration is " + maxIteration + ", run single pass.");
-                iterations = Collections.singletonList(containers);
-            } else {
-                try {
-                    List<List<String>> generations = getREDepGraphLayers(containers, maxIteration);
-                    log.info("Got dependency graph layers: \n" + JsonUtils.pprint(generations));
-                    if (CollectionUtils.isNotEmpty(generations) && generations.size() > 1) {
-                        Map<String, RatingModelContainer> containerMap = new HashMap<>();
-                        containers.forEach(
-                                container -> containerMap.put(container.getEngineSummary().getId(), container));
-                        for (List<String> generation : generations) {
-                            List<RatingModelContainer> iteration = generation.stream() //
-                                    .map(containerMap::get).collect(Collectors.toList());
-                            iterations.add(iteration);
-                        }
-                    } else {
-                        log.info("No more than 1 generation, run single pass.");
-                        iterations = Collections.singletonList(containers);
-                    }
-                } catch (Exception e) {
-                    log.warn("Failed to resolve dependency generations, just run single pass.", e);
-                    iterations = Collections.singletonList(containers);
-                }
-            }
-        }
-        return iterations;
-    }
-
-    private List<List<String>> getREDepGraphLayers(List<RatingModelContainer> containers, int maxIter) {
-        Map<String, StringGraphNode> nodes = getREDepGraph(containers);
-        List<StringGraphNode> graph = new ArrayList<>(nodes.values());
-        Map<StringGraphNode, Integer> depthMap = GraphUtils.getDepthMap(graph, StringGraphNode.class);
-        log.info("Resolved depth map: " + JsonUtils.serialize(depthMap));
-        if (MapUtils.isNotEmpty(depthMap)) {
-            int maxDepth = Math.min(depthMap.values().stream().max(Integer::compareTo).orElse(1) + 1, maxIter);
-            List<List<String>> generations = new ArrayList<>(maxDepth);
-            for (int i = 0; i < maxDepth; i++) {
-                generations.add(new ArrayList<>());
-            }
-            depthMap.forEach((engineIdNode, engineDepth) -> {
-                int engineItr = Math.min(engineDepth, maxDepth - 1);
-                generations.get(engineItr).add(engineIdNode.getVal());
-            });
-            return generations;
-        } else {
-            return null;
-        }
-    }
-
-    private Map<String, StringGraphNode> getREDepGraph(List<RatingModelContainer> containers) {
-        final ConcurrentMap<String, StringGraphNode> nodes = new ConcurrentHashMap<>();
-        final Set<String> engineIds = containers.stream() //
-                .map(container -> {
-                    String engineId = container.getEngineSummary().getId();
-                    if (!nodes.containsKey(engineId)) {
-                        nodes.putIfAbsent(engineId, new StringGraphNode(engineId));
-                    }
-                    return engineId;
-                }).collect(Collectors.toSet());
-        List<Runnable> runnables = new ArrayList<>();
-        containers.forEach(container -> {
-            Runnable runnable = () -> {
-                String engineId = container.getEngineSummary().getId();
-                RatingEngineType engineType = container.getEngineSummary().getType();
-                String modelId = container.getModel().getId();
-                List<AttributeLookup> attributeLookups = ratingEngineProxy.getDependingAttrsForModel(customerSpace,
-                        engineType, modelId);
-                if (CollectionUtils.isNotEmpty(attributeLookups)) {
-                    attributeLookups.forEach(attributeLookup -> {
-                        if (BusinessEntity.Rating.equals(attributeLookup.getEntity())) {
-                            String dependingEngineId = RatingEngine.toEngineId(attributeLookup.getAttribute());
-                            if (engineIds.contains(dependingEngineId)) {
-                                StringGraphNode child = nodes.get(dependingEngineId);
-                                nodes.get(engineId).addChild(child);
-                            }
-                        }
-                    });
-                }
-                List<String> childIds = nodes.get(engineId).getChildren().stream().map(StringGraphNode::getVal)
-                        .collect(Collectors.toList());
-                log.info(String.format("Engine %s depends on %s", engineId, childIds));
-            };
-            runnables.add(runnable);
-        });
-        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("dep-attrs", Math.min(8, engineIds.size()));
-        ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
-        threadPool.shutdown();
-        return new HashMap<>(nodes);
     }
 
     private void initializeRatingLifts() {

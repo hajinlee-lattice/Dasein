@@ -475,8 +475,11 @@ angular.module('lp.ratingsengine')
             ratingEngine = RatingsEngineStore.getRatingEngine(),
             engineId = ratingEngine.id,
             iteration = RatingsEngineStore.getRemodelIteration(),
+            validationModelId = iteration.id,
             clientSession = BrowserStorageUtility.getClientSession(),
             createdBy = clientSession.EmailAddress;
+
+        console.log(iteration);
 
         iteration.AI.derived_from_rating_model = iteration.AI.id;
         iteration.AI.createdBy = createdBy;
@@ -495,17 +498,18 @@ angular.module('lp.ratingsengine')
         delete iteration.AI.modelingJobStatus;
         delete iteration.AI.modelSummaryId;
 
-        // Save iteration
-        RatingsEngineService.saveIteration(engineId, iteration).then(function(result){
+        // Validate Model
+        RatingsEngineStore.setValidation(stateToValidate, false);
+        RatingsEngineService.validateModel(engineId, validationModelId, RatingsEngineStore.getRatingEngine()).then(function(result) {
 
-            var modelId = result.AI.id;
+            console.log(result);
 
-            RatingsEngineStore.setValidation(stateToValidate, false);
-            // Validate Model
-            RatingsEngineService.validateModel(engineId, modelId, RatingsEngineStore.getRatingEngine()).then(function(result) {
-                var success = result.data == true;
-                if (success) {
+            var success = result.data == true;
+            if (success) {
 
+                // Save iteration
+                RatingsEngineService.saveIteration(engineId, iteration).then(function(result){
+                    var modelId = result.AI.id;
                     var enrichments = RatingsEngineStore.getIterationEnrichments();
 
                     RatingsEngineService.launchModeling(engineId, modelId, enrichments).then(function(applicationId){
@@ -520,15 +524,16 @@ angular.module('lp.ratingsengine')
                         deferred.resolve(result);
                     });
 
-                } else {
-                    var errorResult = {
-                        result: result,
-                        showProgress: false
-                    }
-                    deferred.resolve(errorResult);
-                    RatingsEngineStore.setValidation(stateToValidate, !success);
+                    
+                });
+            } else {
+                var errorResult = {
+                    result: result,
+                    showProgress: false
                 }
-            });
+                deferred.resolve(errorResult);
+                RatingsEngineStore.setValidation(stateToValidate, !success);
+            }
         });
 
         return deferred.promise;

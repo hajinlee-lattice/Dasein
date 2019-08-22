@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.actors.visitor.AMLookupMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
+import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("domainCountryStateBasedMicroEngineActor")
@@ -33,7 +33,7 @@ public class DomainCountryStateBasedMicroEngineActor extends AMLookupMicroEngine
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
         traveler.addEntityLdcMatchTypeToTupleList(
-                Pair.of(EntityMatchType.LDC_DOMAIN_COUNTRY_STATE, prepareInputData(traveler.getMatchKeyTuple())));
+                Pair.of(LdcMatchType.DOMAIN_COUNTRY_STATE, prepareInputData(traveler.getMatchKeyTuple())));
     }
 
     @Override

@@ -201,10 +201,17 @@ class SystemsComponent extends Component {
                     }
                 };
 
-                if(launching || queued) {
-                    this.checkLaunching();
-                }
-
+// if(connection.id === 'channel__74b0b6e8-4578-4284-b3e8-5face8aabd51') {
+//     console.log({
+//         launch: launch,
+//         created: (launch ? launch.created : null),
+//         accounts: (launch ? launch.accountsLaunched : null),
+//         contacts: (launch ? launch.contactsLaunched : null),
+//         launched: launched,
+//         queued: queued,
+//         launching: launching
+//     });
+// }
             if(launch && launch.created && launch.accountsLaunched && launch.contactsLaunched && launched) {
                 text.push(
                     <div class="launch-text launched">
@@ -388,6 +395,16 @@ class SystemsComponent extends Component {
 
     render() {
         if(this.state.connections) {
+            let checkLaunchState = this.state.connections.find(function(connection) {
+                let lastLaunch = connection.lastLaunch,
+                    launchState = (connection.lastLaunch ? connection.lastLaunch.launchState : ''),
+                    states = ['Launching', 'Queued'];
+                return (states.indexOf(launchState) !== -1)
+            });
+            if(checkLaunchState) {
+                this.checkLaunching();
+            }
+
             return (
                 <div class="connected-systems">
                     <h2 className="panel-label">Channels</h2>

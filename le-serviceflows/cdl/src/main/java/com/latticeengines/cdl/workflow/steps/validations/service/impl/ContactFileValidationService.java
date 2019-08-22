@@ -42,7 +42,7 @@ public class ContactFileValidationService
 
     @Override
     public long validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration,
-            List<String> processedRecords) {
+            List<String> processedRecords, StringBuilder stastistics) {
         // first check entity match
 
         boolean enableEntityMatch = contactFileValidationServiceConfiguration.isEnableEntityMatch();
@@ -89,7 +89,8 @@ public class ContactFileValidationService
                                     String errorMessage = checkId(record, enableEntityMatch, enableEntityMatchGA);
                                     if (StringUtils.isNotEmpty(errorMessage)) {
                                         String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                        csvFilePrinter.printRecord(lineId, "", errorMessage);
+                                        csvFilePrinter.printRecord(lineId,
+                                                getContactId(record, enableEntityMatch, enableEntityMatchGA), errorMessage);
                                         rowError = true;
                                         fileError = true;
                                         errorInPath++;
@@ -99,7 +100,8 @@ public class ContactFileValidationService
                                         errorMessage = checkMatchField(record, enableEntityMatch);
                                         if (StringUtils.isNotEmpty(errorMessage)) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                            csvFilePrinter.printRecord(lineId, "", errorMessage);
+                                            csvFilePrinter.printRecord(lineId,
+                                                    getContactId(record, enableEntityMatch, enableEntityMatchGA), errorMessage);
                                             rowError = true;
                                             fileError = true;
                                             errorInPath++;
@@ -153,6 +155,17 @@ public class ContactFileValidationService
         return errorLine;
     }
 
+    private String getContactId(GenericRecord record, boolean enableEntityMatch, boolean enableEntityMatchGA) {
+        String contactIdName = (enableEntityMatch || enableEntityMatchGA) ? InterfaceName.CustomerContactId.name() :
+                InterfaceName.ContactId.name();
+        String contactId = getFieldValue(record, contactIdName);
+        if (StringUtils.isEmpty(contactId) && !InterfaceName.ContactId.name().equals(contactId)) {
+            // This is for legacy tenant that enable the GA flag and the migration is not complete.
+            contactId = getFieldValue(record, InterfaceName.ContactId.name());
+        }
+        return StringUtils.isEmpty(contactId) ? "" : contactId;
+    }
+
     private String checkId(GenericRecord record, boolean enableEntityMatch, boolean enableEntityMatchGA) {
         if (record == null) {
             return null;
@@ -169,14 +182,16 @@ public class ContactFileValidationService
         if (checkEmpty && StringUtils.isEmpty(contactId)) {
             contactId = getFieldValue(record, InterfaceName.ContactId.name());
             if (StringUtils.isEmpty(contactId)) {
-                message = "ContactId should not be empty!";
+                message = String.format("[Required Column %s is missing value.]",
+                        getFieldDisplayName(record, contactIdName, InterfaceName.ContactId.name()));
                 return message;
             }
         }
         if (checkEmpty && StringUtils.isEmpty(accountId)) {
             accountId = getFieldValue(record, InterfaceName.AccountId.name());
             if (StringUtils.isEmpty(accountId)) {
-                message = "AccountId should not be empty!";
+                message = String.format("[Required Column %s is missing value.]",
+                        getFieldDisplayName(record, accountIdName, InterfaceName.AccountId.name()));
                 return message;
             }
         }

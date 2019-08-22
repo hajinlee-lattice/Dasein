@@ -31,6 +31,7 @@ import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
+import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.util.DiagnoseTable;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -80,8 +81,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskManagerServiceImpl.class);
 
-    public static final int MAX_HEADER_LENGTH = 63;
-
     private final DataFeedProxy dataFeedProxy;
 
     private final TenantService tenantService;
@@ -108,8 +107,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
 
+    @Value("${common.microservice.url}")
+    private String hostUrl;
+
     @Inject
     private DataFeedTaskService dataFeedTaskService;
+
+    @Inject
+    private S3ImportService s3ImportService;
 
     @Inject
     private BatonService batonService;
@@ -281,12 +286,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         if (csvImportFileInfo.isPartialFile()) {
-            throw new RuntimeException(String.format("This source file %s can not auto import!",
-                    csvImportFileInfo.getReportFileDisplayName()));
+            s3ImportService.saveImportMessage(csvImportFileInfo.getS3Bucket(),
+                    csvImportFileInfo.getS3Path(), hostUrl);
+            return null;
+        } else {
+            ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
+                    csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
+            return appId.toString();
         }
-        ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
-                csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
-        return appId.toString();
     }
 
     @Override
@@ -406,8 +413,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
         emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                 dataFeedTask.getFeedType()));
-        emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
-                dataFeedTask.getSubType()));
+        emailInfo.setEntityType(EntityType.fromDataFeedTask(dataFeedTask));
         String templateName = dataFeedTask.getTemplateDisplayName() == null ? dataFeedTask.getFeedType() :
                 dataFeedTask.getTemplateDisplayName();
         emailInfo.setTemplateName(templateName);
@@ -434,8 +440,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
                 emailInfo.setDropFolder(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
                         dataFeedTask.getFeedType()));
-                emailInfo.setEntityType(EntityType.fromEntityAndSubType(BusinessEntity.getByName(dataFeedTask.getEntity()),
-                        dataFeedTask.getSubType()));
+                emailInfo.setEntityType(EntityType.fromDataFeedTask(dataFeedTask));
                 String templateName = dataFeedTask.getTemplateDisplayName() == null ? dataFeedTask.getFeedType() :
                         dataFeedTask.getTemplateDisplayName();
                 emailInfo.setTemplateName(templateName);

@@ -11,7 +11,9 @@ const connectorsList = {
   name: "connectorslist",
   url: "/connectorslist",
   onEnter: ($transition$, $state$) => {
-    const isExternalIntegrationEnabled = $transition$.router.ngservices.ConnectorsService.isExternalIntegrationEnabled();
+    const isExternalIntegrationEnabled = $transition$.router.ngservices.ConnectorsService.isExternalIntegrationEnabled() // MARKETO
+                                        || $transition$.router.ngservices.ConnectorsService.isLinkedInIntegrationEnabled() // LINKEDIN
+                                        || $transition$.router.ngservices.ConnectorsService.isFacebookIntegrationEnabled(); // FACEBOOK
     if (isExternalIntegrationEnabled) {
       actions.fetchUserDocument();
     }

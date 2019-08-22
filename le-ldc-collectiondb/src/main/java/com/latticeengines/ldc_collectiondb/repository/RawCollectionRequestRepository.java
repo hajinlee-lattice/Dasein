@@ -3,6 +3,7 @@ package com.latticeengines.ldc_collectiondb.repository;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
@@ -15,4 +16,6 @@ public interface RawCollectionRequestRepository extends BaseJpaRepository<RawCol
 
     List<RawCollectionRequest> findByTransferredAndVendor(boolean transferred, String vendor);
 
+    @Query("SELECT MIN(t.pid) from RawCollectionRequest t")
+    long getMinPid();
 }

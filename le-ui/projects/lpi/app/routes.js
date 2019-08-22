@@ -1512,38 +1512,14 @@ angular
 
                     return deferred.promise;
                 },
-                externaltypes: function($q, SfdcStore) {
-                    var deferred = $q.defer();
-
-                    SfdcStore.getExternalTypes().then(function (result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
+                externaltypes: function() {
+                    return null
                 },
-                accountids: function($q, SfdcStore, externaltypes) {
-                    var deferred = $q.defer();
-
-                    SfdcStore.getAccountIds(externaltypes).then(function (result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
+                accountids: function() {
+                    return null
                 },
-                orgs: function($q, SfdcService, SfdcStore, accountids, externaltypes) {
-                    var deferred = $q.defer(),
-                        orgs = [];
-
-                    SfdcStore.getOrgs().then(function (result) {
-                        externaltypes.forEach(function(type) {
-                            if (result[type] != undefined) {
-                                orgs = orgs.concat(result[type]);
-                            }
-                        });
-                        deferred.resolve(orgs);
-                    });
-                    
-                    return deferred.promise;
+                orgs: function() {
+                    return null
                 }
             },
             views: {

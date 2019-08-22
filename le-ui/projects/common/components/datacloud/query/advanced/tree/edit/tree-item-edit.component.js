@@ -151,8 +151,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                     if (numerical) {
                         showNumericalRange();
-                        vm.rangeConfig.from.value = undefined;
-                        vm.rangeConfig.to.value = undefined;
+                        if (vm.rangeConfig) {
+                            vm.rangeConfig.from.value = undefined;
+                            vm.rangeConfig.to.value = undefined;
+                        }
                         QueryTreeService.changeNumericalCmpValue(vm.tree.bucketRestriction, vm.operation);
                     } else {
                         QueryTreeService.changeCmpValue(vm.tree.bucketRestriction, vm.operation);

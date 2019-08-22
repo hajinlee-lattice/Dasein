@@ -65,12 +65,15 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   def loadHdfsUnit(spark: SparkSession, unit: HdfsDataUnit): DataFrame = {
     var path = unit.getPath
     val fmt = if (unit.getDataFormat != null) unit.getDataFormat.name.toLowerCase else "avro"
-    val suffix = "." + fmt
-    if (!path.endsWith(suffix)) {
-      if (path.endsWith("/")) {
-        path += "*" + suffix
-      } else {
-        path += "/*" + suffix
+    val partitionKeys = if (unit.getPartitionKeys == null) List() else unit.getPartitionKeys.asScala.toList
+    if (partitionKeys.isEmpty) {
+      val suffix = "." + fmt
+      if (!path.endsWith(suffix)) {
+        if (path.endsWith("/")) {
+          path += "*" + suffix
+        } else {
+          path += "/*" + suffix
+        }
       }
     }
     spark.read.format(fmt).load("hdfs://" + path)
@@ -88,10 +91,23 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val df = t._2
       val path = tgt.getPath
       val fmt = if (tgt.getDataFormat != null) tgt.getDataFormat.name.toLowerCase else "avro"
-      df.write.format(fmt).save(path)
+      val partitionKeys = if (tgt.getPartitionKeys == null) List() else tgt.getPartitionKeys.asScala.toList
+      if (partitionKeys.isEmpty) {
+        df.write.format(fmt).save(path)
+      } else {
+        df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
+      }
       val df2 = spark.read.format(fmt).load(path)
       tgt.setCount(df2.count())
       tgt
+    }
+  }
+
+  def setPartitionTargets(index: Int, list: Seq[String], lattice: LatticeContext[C]): Unit = {
+    if (index >= 0 && index < lattice.targets.size) {
+      lattice.targets(index).setPartitionKeys(list.asJava);
+    } else {
+      throw new RuntimeException(s"There's no Target $index")
     }
   }
 

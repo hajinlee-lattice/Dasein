@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -23,6 +24,8 @@ public interface DataFeedTaskService {
 
     List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity);
 
+    List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds);
+
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
     void updateS3ImportStatus(String customerSpace, String source, String dataFeedType, DataFeedTask.S3ImportStatus status);
@@ -42,4 +45,6 @@ public interface DataFeedTaskService {
     void resetImport(String customerSpace, DataFeedTask datafeedTask);
 
     List<Table> getTemplateTables(String customerSpace, String entity);
+
+    S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskUniqueId);
 }

@@ -23,5 +23,4 @@ class TestJoinJob extends AbstractSparkJob[TestJoinJobConfig] {
     lattice.output = out1::out2::Nil
     lattice.outputStr = "This is my output!"
   }
-
 }

@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -63,7 +62,7 @@ public class ProductResource extends BaseFrontEndEntityResource {
                 offset = offset == null ? 0 : offset;
                 query.setPageFilter(new PageFilter(offset, max));
             }
-            return super.getData(query);
+            return super.getData(query,false);
         } catch (Exception e) {
             log.error("Failed to get product data", e);
             throw new LedpException(LedpCode.LEDP_36002);
@@ -80,13 +79,6 @@ public class ProductResource extends BaseFrontEndEntityResource {
         return Arrays.asList( //
                 new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductId.name()), //
                 new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductName.name()));
-    }
-
-    @Override
-    List<AttributeLookup> getFreeTextSearchAttrs() {
-        return Collections.singletonList( //
-                new AttributeLookup(BusinessEntity.Product, InterfaceName.ProductName.name())
-        );
     }
 
 }

@@ -4,15 +4,17 @@ Define abstracted access to MySQL Database
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from os import getenv
+
+from models.action import Action
 from models.base_model import Base
-from models.tenant import Tenant
+from models.import_migrate_tracking import ImportMigrateTracking
 from models.metadata_data_collection import MetadataDataCollection
 from models.metadata_data_collection_status import MetadataDataCollectionStatus
+from models.metadata_data_collection_table import MetadataDataCollectionTable
 from models.metadata_statistics import MetadataStatistics
 from models.metadata_table import MetadataTable
-from models.metadata_data_collection_table import MetadataDataCollectionTable
 from models.migration_track import MigrationTrack
+from models.tenant import Tenant
 
 clsd = {
     'Tenant': Tenant,
@@ -21,7 +23,9 @@ clsd = {
     'MetadataDataCollectionTable': MetadataDataCollectionTable,
     'MetadataTable': MetadataTable,
     'MetadataStatistics': MetadataStatistics,
-    'MigrationTrack': MigrationTrack
+    'MigrationTrack': MigrationTrack,
+    'ImportMigrateTracking': ImportMigrateTracking,
+    'Action': Action
 }
 
 
@@ -83,6 +87,7 @@ class DBStorage:
         if cls is not None and isinstance(cls, str):
             cls = clsd.get(cls)
         try:
-            return None if cls is None or col is None or val is None else self.__session.query(cls).filter(cls.__getattribute__(cls, col) == val).all()
+            return None if cls is None or col is None or val is None else self.__session.query(cls).filter(
+                cls.__getattribute__(cls, col) == val).all()
         except AttributeError:
             raise AttributeError('{} doesn not have column {}'.format(cls.__tablename__, col))

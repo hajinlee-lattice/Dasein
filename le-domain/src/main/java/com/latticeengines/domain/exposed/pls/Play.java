@@ -67,8 +67,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "pid")
 public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, SoftDeletable {
 
-    public static final String PLAY_NAME_PREFIX = "play";
-    public static final String PLAY_NAME_FORMAT = "%s__%s";
+    private static final String PLAY_NAME_PREFIX = "play";
+    private static final String PLAY_NAME_FORMAT = "%s__%s";
 
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     @Id
@@ -102,7 +102,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     @JsonProperty("ratingEngine")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = true)
+    @JoinColumn(name = "FK_RATING_ENGINE_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private RatingEngine ratingEngine;
 

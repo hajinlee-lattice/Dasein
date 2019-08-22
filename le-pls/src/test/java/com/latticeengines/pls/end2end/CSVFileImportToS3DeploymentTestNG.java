@@ -31,6 +31,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
 
     @Inject
     private DropBoxProxy dropBoxProxy;
+
     @Inject
     private S3Service s3Service;
 
@@ -61,9 +62,11 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
                     Assert.assertEquals(fileLists.size(), 4);
                     testConfigTemplate(fileLists.get(0), display.getEntity().name(), display.getFeedType());
                     break;
-                case ENTITY_CONTACT: Assert.assertEquals(fileLists.size(), 1);break;
-                case ENTITY_TRANSACTION: Assert.assertEquals(fileLists.size(), 1);
-                default:break;
+                case ENTITY_CONTACT:
+                case ENTITY_TRANSACTION:
+                    Assert.assertEquals(fileLists.size(), 1);
+                default:
+                    break;
 
             }
         }
@@ -127,7 +130,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
         try {
             restTemplate.postForObject(getRestAPIHostPort() + uri, null, ResponseDocument.class);
         } catch (RuntimeException e) {
-            Assert.assertTrue(e.getMessage().contains("can not auto import"));
+            Assert.fail("Should not have exception!");
         }
     }
 }

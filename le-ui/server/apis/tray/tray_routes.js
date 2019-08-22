@@ -5,6 +5,10 @@ const UIActionsFactory = require('../uiactions-factory');
  * Routing for tray's apis
  * End point for UI defined here
  */
+const LINKEDIN = "LinkedIn";
+const FACEBOOK = "Facebook";
+const MARKETO = "Marketo";
+const OUTREACH = "Outreach";
 
 class TrayRouter {
     constructor(express, app, bodyParser, chalk, API_URL, PATH, request, proxies, masterAuthorizationToken) {
@@ -370,6 +374,37 @@ class TrayRouter {
                     res.send(body);
                 }
             }.bind(this));
+        }.bind(this));
+
+        this.router.get('/facebook/audiences', function(req, res){
+            var authenticationId = req.query.trayAuthenticationId || '';
+            var adAccountId = req.query.adAccountId || '';
+            let options = this.getApiOptions(req, true);
+            options.json = Queries.getFacebookAudiences(authenticationId, adAccountId);
+            console.log(options.json);
+            console.log(req.headers.useraccesstoken);
+            this.request(options, function(error, response, body){
+                console.log(body);
+                var errorMessage = GraphQLParser.getErrorMessage(body);
+
+                if (errorMessage) {
+                    console.log("Couldn't retrieve static lists for authenticationId " + authenticationId + ": " + JSON.stringify(body));
+                    res.send(UIActionsFactory.getUIActionsObject(errorMessage, 'Banner', 'Error'));
+                    return;
+                }
+
+                res.send(GraphQLParser.getFacebookAudiences(body));
+            });
+        }.bind(this));
+
+        this.router.get('/linkedin/audiences', function(req, res){
+            res.send({
+                success: true,
+                errors: [],
+                requestId: "foo",
+                warnings: [],
+                result: []
+            });
         }.bind(this));
 
         return this.router;

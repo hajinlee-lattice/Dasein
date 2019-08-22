@@ -28,6 +28,11 @@ public class PeriodDataDistributorConfig extends TransformerConfig {
     private Map<String, Integer> transactionIdxes; // PeriodName ->
                                                    // TransactionIdx
 
+    // Whether to retry distribution of failed periods -- will cleanup impacted
+    // period file in target dir before start/re-start distributing
+    @JsonProperty("Retryable")
+    private boolean retryable;
+
     public String getPeriodField() {
         return periodField;
     }
@@ -84,4 +89,11 @@ public class PeriodDataDistributorConfig extends TransformerConfig {
         this.transactionIdxes = transactionIdxes;
     }
 
+    public boolean isRetryable() {
+        return retryable;
+    }
+
+    public void setRetryable(boolean retryable) {
+        this.retryable = retryable;
+    }
 }

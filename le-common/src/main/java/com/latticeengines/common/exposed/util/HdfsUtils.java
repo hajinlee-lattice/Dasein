@@ -526,12 +526,12 @@ public class HdfsUtils {
                 LocatedFileStatus file = iterator.next();
                 Path filePath = file.getPath();
                 switch (LogFileEncodingType.valueOf(encoding.toUpperCase())) {
-                case NONE:
-                    is = fs.open(filePath);
-                    break;
-                case GZ:
-                    is = new GZIPInputStream(fs.open(filePath));
-                    break;
+                    case NONE:
+                        is = fs.open(filePath);
+                        break;
+                    case GZ:
+                        is = new GZIPInputStream(fs.open(filePath));
+                        break;
                 }
             }
             return is;
@@ -586,6 +586,9 @@ public class HdfsUtils {
         }
         try (FileSystem fs = getFileSystem(configuration, src)) {
             return fs.rename(new Path(src), new Path(dst));
+        } catch (Exception e) {
+            log.error("Failed to copy Source path: " + src + " to Destination: " + dst + "\n" + e.getMessage(), e);
+            return false;
         }
     }
 
@@ -702,15 +705,16 @@ public class HdfsUtils {
     }
 
     public static long copyCSVStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath,
-                                             long totalRows) throws IOException {
+            long totalRows) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
                 try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
-                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
-                                ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
-                                ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
-                    try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
+                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                                ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                        StandardCharsets.UTF_8)), format)) {
+                    try (CSVPrinter csvPrinter = new CSVPrinter(
+                            new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
                             LECSVFormat.format.withHeader(parser.getHeaderMap().keySet().toArray(new String[] {})))) {
                         Iterator<CSVRecord> iterator = parser.iterator();
                         long rows = 0;
@@ -751,13 +755,11 @@ public class HdfsUtils {
     }
 
     public static long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,
-                                                                    InputStream inputStream, String hdfsPath) throws IOException {
+            InputStream inputStream, String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
-                return copyLarge(
-                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                                ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                        outputStream);
+                return copyLarge(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream);
             }
         }
     }

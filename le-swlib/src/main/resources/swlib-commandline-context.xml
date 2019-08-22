@@ -6,7 +6,7 @@
     <bean id="yarnConfiguration" class="org.apache.hadoop.conf.Configuration" />
     <bean id="versionManager"
           class="com.latticeengines.common.exposed.version.VersionManager">
-        <constructor-arg index="0" value="4.18.0-SNAPSHOT" />
+        <constructor-arg index="0" value="4.19.0-SNAPSHOT" />
     </bean>
 
     <import resource="classpath:swlib-context.xml" />

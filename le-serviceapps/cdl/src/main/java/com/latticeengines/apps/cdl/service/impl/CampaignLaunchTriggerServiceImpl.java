@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -44,6 +45,10 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
     public CampaignLaunchTriggerServiceImpl() {
         super(PropertyUtils.getProperty("common.internal.app.url"), "cdl");
+        String env = PropertyUtils.getProperty("common.le.environment");
+        if ("dev".equals(env) || "devcluster".equals(env)) {
+            setHostport(PropertyUtils.getProperty("common.microservice.url"));
+        }
     }
 
     @Override
@@ -74,12 +79,26 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                     launchingPlayLaunches.size()));
             return true;
         }
+        Set<String> currentlyLaunchingChannels = launchingPlayLaunches.stream()
+                .filter(launch -> launch.getPlayLaunchChannel() != null)
+                .map(launch -> launch.getPlayLaunchChannel().getId()).collect(Collectors.toSet());
 
         Iterator<PlayLaunch> iterator = queuedPlayLaunches.iterator();
         int i = launchingPlayLaunches.size();
 
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
+            if (launch.getPlayLaunchChannel() == null) {
+                log.info(String.format("No play channel for this play launch %s", launch.getId()));
+                continue;
+            }
+            if (currentlyLaunchingChannels.contains(launch.getPlayLaunchChannel().getId())) {
+                log.info(String.format(
+                        "Launch: %s skipped since a play launch is already being launched to this channel",
+                        launch.getId()));
+                continue;
+            }
+
             String url = constructUrl(kickoffLaunchPrefix,
                     CustomerSpace.parse(launch.getTenant().getId()).getTenantId(), launch.getPlay().getName(),
                     launch.getId());
@@ -100,7 +119,8 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
     private boolean clearStuckOrFailedLaunches(List<PlayLaunch> launchingPlayLaunches) {
         boolean launchesProcessed = false;
 
-        // Case 1) Launches are Launching state but have no applicationId -> set pl to cancelled
+        // Case 1) Launches are Launching state but have no applicationId -> set
+        // pl to cancelled
         List<PlayLaunch> launchesToProcess = launchingPlayLaunches.stream()
                 .filter(launch -> StringUtils.isBlank(launch.getApplicationId())).collect(Collectors.toList());
         if (launchesToProcess.size() > 0) {
@@ -109,7 +129,8 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
             launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
         }
 
-        // Case 2) Launches have an ApplicationId but applicationId doesn't exist in Workflowjob -> set pl to cancelled
+        // Case 2) Launches have an ApplicationId but applicationId doesn't
+        // exist in Workflowjob -> set pl to cancelled
         launchesToProcess = launchingPlayLaunches.stream()
                 .filter(launch -> StringUtils.isNotBlank(launch.getApplicationId()))
                 .filter(launch -> workflowProxy.getWorkflowJobFromApplicationId(launch.getApplicationId()) == null)
@@ -120,7 +141,8 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
             launchesProcessed = processInvalidLaunches(launchesToProcess, LaunchState.Canceled);
         }
 
-        // Case 3) Launches are Launching State but WorkflowJob has terminated -> set pl to Failed
+        // Case 3) Launches are Launching State but WorkflowJob has terminated
+        // -> set pl to Failed
         launchesToProcess = launchingPlayLaunches.stream()
                 .filter(launch -> StringUtils.isNotBlank(launch.getApplicationId())).filter(launch -> {
                     Job job = workflowProxy.getWorkflowJobFromApplicationId(launch.getApplicationId());
@@ -137,7 +159,8 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
             launchesProcessed = processInvalidLaunches(launchesToProcess, null);
         }
 
-        // Case 4) Launches are queued but the play has been soft deleted -> mark pl to Cancelled
+        // Case 4) Launches are queued but the play has been soft deleted ->
+        // mark pl to Cancelled
         launchesToProcess = launchingPlayLaunches.stream().filter(launch -> launch.getPlay().getDeleted())
                 .collect(Collectors.toList());
         if (launchesToProcess.size() > 0) {

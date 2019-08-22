@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.List;
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
@@ -38,6 +41,20 @@ public class MatchEntityWorkflowConfiguration extends BaseCDLWorkflowConfigurati
 
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
             processAccountStepConfiguration.setDataCloudVersion(dataCloudVersion.getVersion());
+            return this;
+        }
+
+        public Builder systemIdMap(Map<String, List<String>> systemIds) {
+            processAccountStepConfiguration.setSystemIdMap(systemIds);
+            processContactStepConfiguration.setSystemIdMap(systemIds);
+            processTxnStepConfiguration.setSystemIdMap(systemIds);
+            return this;
+        }
+
+        public Builder defaultSystemIdMap(Map<String, String> defaultSystemIds) {
+            processAccountStepConfiguration.setDefaultSystemIdMap(defaultSystemIds);
+            processContactStepConfiguration.setDefaultSystemIdMap(defaultSystemIds);
+            processTxnStepConfiguration.setDefaultSystemIdMap(defaultSystemIds);
             return this;
         }
 

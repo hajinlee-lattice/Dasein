@@ -156,23 +156,6 @@ public class AttrSpecification {
         );
     }
 
-    public static AttrSpecification CDL_INTERNAL_LOOKUP_ID_ACC() {
-        return new AttrSpecification("CDL Internal Lookup Ids", //
-                false, // segment
-                true, // export
-                false, // cp
-                false, // tp
-                false, // model
-                false, // type
-                false, // display name
-                false, // description
-                false, // category
-                false, // icon
-                false, // state
-                false // approved usage
-        );
-    }
-
     public static AttrSpecification getAttrSpecification(AttrType attrType, AttrSubType attrSubType,
             BusinessEntity entity) {
         if (attrType == null) {
@@ -206,8 +189,6 @@ public class AttrSpecification {
                 } else if (entity != null && entity == BusinessEntity.Contact) {
                     return AttrSpecification.CDL_CONTACT_EXTENSION();
                 }
-            case InternalLookupId:
-                return AttrSpecification.CDL_INTERNAL_LOOKUP_ID_ACC();
             default:
                 break;
             }

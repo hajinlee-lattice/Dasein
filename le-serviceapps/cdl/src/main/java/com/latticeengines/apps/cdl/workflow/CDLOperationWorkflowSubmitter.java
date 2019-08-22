@@ -16,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -74,10 +73,10 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Value("${cdl.modeling.workflow.mem.mb}")
@@ -218,8 +217,8 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName)//
                         .put(WorkflowContextConstants.Inputs.DATAFEED_EXECUTION_ID, executionId)//
-                        .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName())
-                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()).build())
+                        .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()).build()) //
                 .build();
     }
 

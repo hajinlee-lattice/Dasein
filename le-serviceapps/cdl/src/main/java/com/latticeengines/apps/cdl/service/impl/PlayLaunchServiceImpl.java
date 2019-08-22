@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
@@ -66,6 +68,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
+
+    @Inject
+    private TableEntityMgr tableEntityMgr;
 
     @Override
     public void create(PlayLaunch playLaunch) {
@@ -133,8 +138,39 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public PlayLaunch update(PlayLaunch playLaunch) {
+        handleTablesInLaunch(playLaunch);
         playLaunchEntityMgr.update(playLaunch);
         return playLaunchEntityMgr.findByKey(playLaunch);
+    }
+
+    private void handleTablesInLaunch(PlayLaunch playLaunch) {
+        if (playLaunch.getAddAccountsTable() != null && playLaunch.getAddAccountsTable().getPid() == null) {
+            playLaunch.setAddAccountsTable(
+                    handleTable(playLaunch.getAddAccountsTable(), playLaunch.getLaunchId(), "AddAccounts"));
+        }
+        if (playLaunch.getRemoveAccountsTable() != null && playLaunch.getRemoveAccountsTable().getPid() == null) {
+            playLaunch.setRemoveAccountsTable(
+                    handleTable(playLaunch.getRemoveAccountsTable(), playLaunch.getLaunchId(), "RemoveAccounts"));
+        }
+        if (playLaunch.getAddContactsTable() != null && playLaunch.getAddContactsTable().getPid() == null) {
+            playLaunch.setAddContactsTable(
+                    handleTable(playLaunch.getAddContactsTable(), playLaunch.getLaunchId(), "AddContacts"));
+        }
+        if (playLaunch.getRemoveContactsTable() != null && playLaunch.getRemoveContactsTable().getPid() == null) {
+            playLaunch.setRemoveContactsTable(
+                    handleTable(playLaunch.getRemoveContactsTable(), playLaunch.getLaunchId(), "RemoveContacts"));
+        }
+
+    }
+
+    private Table handleTable(Table table, String launchId, String tag) {
+        table = tableEntityMgr.findByName(table.getName());
+        if (table != null) {
+            return table;
+        } else {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Failed to update Launch: " + launchId
+                    + " since no " + tag + " table found by Id: " + table.getName() });
+        }
     }
 
     @Override
@@ -179,8 +215,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
         launchSummaries.forEach(ls -> {
             if (ls.getIntegrationStatusMonitor() != null)
-                ls.getIntegrationStatusMonitor().setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP
-                        ? s3CustomerExportBucket : s3CustomerBucket);
+                ls.getIntegrationStatusMonitor()
+                        .setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket
+                                : s3CustomerBucket);
         });
     }
 
@@ -222,9 +259,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (MapUtils.isNotEmpty(allLookupIdMapping)) {
             allLookupIdMapping.keySet().stream() //
                     .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
-                    .forEach(k -> allLookupIdMapping.get(k).stream()
-                            .filter(mapping -> uniqueOrgIdSet //
-                                    .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
+                    .forEach(k -> allLookupIdMapping.get(k).stream().filter(mapping -> uniqueOrgIdSet //
+                            .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
                             .forEach(mapping -> {
                                 if (!uniqueLookupIdMapping.containsKey(k)) {
                                     uniqueLookupIdMapping.put(k, new ArrayList<>());

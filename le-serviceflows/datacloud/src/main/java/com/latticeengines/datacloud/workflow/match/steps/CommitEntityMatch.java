@@ -1,13 +1,10 @@
 package com.latticeengines.datacloud.workflow.match.steps;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,19 +13,21 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -60,7 +59,14 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
     private EntityLookupEntryService entityLookupEntryService;
 
     @Inject
+    @Lazy
+    private EntityMatchCommitter entityMatchCommitter;
+
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Value("${cdl.processAnalyze.entity.commit.parallel}")
+    private boolean useParallelCommitter;
 
     @Override
     public void execute() {
@@ -72,73 +78,25 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                 throw new RuntimeException(
                         "Cannot find tenant with customerSpace: " + configuration.getCustomerSpace().toString());
             }
+
+            log.info("Use {} committer to commit entities", useParallelCommitter ? "parallel" : "sequential");
             Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
-            ENTITIES_TO_COMMIT.forEach(entity -> commitEntity(standardizedTenant, entity));
+            ENTITIES_TO_COMMIT.forEach(entity -> {
+                if (useParallelCommitter) {
+                    commitWithCommitter(standardizedTenant, entity);
+                } else {
+                    commitEntity(standardizedTenant, entity);
+                }
+            });
         }
     }
 
-    @VisibleForTesting
-    Set<String> getEntitySet(@NotNull Set<String> publishedEntities) {
-        Set<String> entityImportSet = getEntityImportSet();
-        Set<String> entitySet = new HashSet<>(entityImportSet);
-        if (CollectionUtils.isNotEmpty(configuration.getEntitySet())) {
-            entitySet.addAll(configuration.getEntitySet());
-        }
-        log.info("Entities to check for import = {}, checkAllEntitiesForImport = {}",
-                configuration.getEntityImportSetToCheck(), configuration.isCheckAllEntityImport());
-        log.info("Candidate entities to publish = {}. Entities with import = {}, entitySet in config = {}", entitySet,
-                entityImportSet, configuration.getEntitySet());
-        log.info("Already published entities = {}, skipPublishedEntities = {}", publishedEntities,
-                configuration.isSkipPublishedEntities());
-        return entitySet.stream() //
-                // always publish if the flag to skip published entities is false
-                // otherwise skip entities that are already published
-                .filter(entity -> !configuration.isSkipPublishedEntities() || !publishedEntities.contains(entity)) //
-                .collect(Collectors.toSet());
-    }
-
-    private Set<String> getPublishedEntities() {
-        Set<String> entities = getSetObjectFromContext(PUBLISHED_ENTITIES, String.class);
-        return entities == null ? Collections.emptySet() : entities;
-    }
-
-    /*
-     * update published entity set (copy to a new set to be safe)
-     */
-    private void setPublishedEntities(Set<String> commitEntities, Set<String> publishedEntities) {
-        Set<String> entities = new HashSet<>();
-        entities.addAll(commitEntities);
-        entities.addAll(publishedEntities);
-        putObjectInContext(PUBLISHED_ENTITIES, entities);
-    }
-
-    /*
-     * if configuration.isCheckAllEntityImport() flag is set, return all entities
-     * that have import
-     *
-     * otherwise return all entities in configuration.getEntityImportSetToCheck()
-     * AND have import
-     */
-    private Set<String> getEntityImportSet() {
-        @SuppressWarnings("rawtypes")
-        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
-                BusinessEntity.class, List.class);
-        if (MapUtils.isNotEmpty(entityImportsMap)) {
-            return entityImportsMap.keySet() //
-                    .stream() //
-                    .map(Enum::name) //
-                    .filter(entity -> {
-                        if (configuration.isCheckAllEntityImport()) {
-                            return true;
-                        }
-
-                        Set<String> entitySet = configuration.getEntityImportSetToCheck();
-                        return entitySet != null && entitySet.contains(entity);
-                    }) //
-                    .collect(Collectors.toSet());
-        } else {
-            return Collections.emptySet();
-        }
+    private void commitWithCommitter(Tenant tenant, String entity) {
+        log.info("Committing entity {}", entity);
+        EntityPublishStatistics stats = entityMatchCommitter.commit(entity, tenant, null);
+        log.info("Entity {} committed. nSeeds={}, nLookups={}, nlookupNotInStaging={}", entity, stats.getSeedCount(),
+                stats.getLookupCount(), stats.getNotInStagingLookupCount());
+        setStats(entity, stats.getSeedCount(), stats.getLookupCount());
     }
 
     private void commitEntity(Tenant tenant, String entity) {
@@ -178,10 +136,13 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         } while (CollectionUtils.isNotEmpty(getSeedIds));
         log.info("Published {} seeds and {} lookup entries for entity = {}. {} lookup entries are not in staging.",
                 nSeeds, nLookups, entity, nNotInStaging);
+        setStats(entity, nSeeds, nLookups);
+    }
+
+    private void setStats(String entity, int nSeeds, int nLookups) {
         // Assume CommitEntityMatch step might run multiple times but same
         // entity is only published once
         // entity name -> {"PUBLISH_SEED":nSeeds, "PUBLISH_LOOKUP":nLookups}
-        @SuppressWarnings("rawtypes")
         Map<String, Map> entityPublishStats = getMapObjectFromContext(ENTITY_PUBLISH_STATS, String.class, Map.class);
         if (entityPublishStats == null) {
             entityPublishStats = new HashMap<>();

@@ -27,8 +27,6 @@ public class AttrTypeResolver {
     private static Map<BusinessEntity, Set<String>> internalMapEntityMatchEnabled = new HashMap<>();
     private static Map<BusinessEntity, Set<String>> standardMap = new HashMap<>();
     private static Map<BusinessEntity, Set<String>> standardMapEntityMatchEnabled = new HashMap<>();
-    private static Map<BusinessEntity, Set<String>> internalLookupIdMap = new HashMap<>();
-    private static Map<BusinessEntity, Set<String>> internalLookupIdMapEntityMatchEnabled = new HashMap<>();
 
     static {
         BusinessEntity.SEGMENT_ENTITIES.forEach(e -> internalMap.put(e,
@@ -40,11 +38,6 @@ public class AttrTypeResolver {
                 .stream().map(InterfaceName::name).collect(Collectors.toSet())));
         BusinessEntity.SEGMENT_ENTITIES.forEach(e -> standardMapEntityMatchEnabled.put(e, SchemaRepository
                 .getStandardAttributes(e, true).stream().map(InterfaceName::name).collect(Collectors.toSet())));
-        BusinessEntity.SEGMENT_ENTITIES
-                .forEach(e -> internalLookupIdMap.put(e, SchemaRepository.getInternalLookupIdAttributes(e, false)
-                        .stream().map(InterfaceName::name).collect(Collectors.toSet())));
-        BusinessEntity.SEGMENT_ENTITIES.forEach(e -> internalLookupIdMapEntityMatchEnabled.put(e, SchemaRepository
-                .getInternalLookupIdAttributes(e, true).stream().map(InterfaceName::name).collect(Collectors.toSet())));
     }
 
     public static AttrType resolveType(ColumnMetadata metadata, boolean entityMatchEnabled) {
@@ -98,10 +91,7 @@ public class AttrTypeResolver {
             }
             break;
         case Custom:
-            if (entity != null && getInternalLookupIdMap(entityMatchEnabled).get(entity) != null
-                    && getInternalLookupIdMap(entityMatchEnabled).get(entity).contains(metadata.getAttrName())) {
-                subType = AttrSubType.InternalLookupId;
-            } else if (entity != null && getStandardMap(entityMatchEnabled).get(entity) != null
+            if (entity != null && getStandardMap(entityMatchEnabled).get(entity) != null
                     && getStandardMap(entityMatchEnabled).get(entity).contains(metadata.getAttrName())) {
                 subType = AttrSubType.Standard;
             } else if (metadata.isEnabledFor(ColumnSelection.Predefined.LookupId)) {
@@ -129,14 +119,6 @@ public class AttrTypeResolver {
             return standardMapEntityMatchEnabled;
         } else {
             return standardMap;
-        }
-    }
-
-    private static Map<BusinessEntity, Set<String>> getInternalLookupIdMap(boolean entityMatchEnabled) {
-        if (entityMatchEnabled) {
-            return internalLookupIdMapEntityMatchEnabled;
-        } else {
-            return internalLookupIdMap;
         }
     }
 }

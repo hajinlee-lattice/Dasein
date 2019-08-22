@@ -19,7 +19,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceMicroEngineTe
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
-import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
+import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -61,8 +61,7 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
 
     @Override
     protected void recordActorAndTuple(MatchTraveler traveler) {
-        traveler.addEntityLdcMatchTypeToTupleList(
-                Pair.of(EntityMatchType.LDC_LOCATION_DUNS, traveler.getMatchKeyTuple()));
+        traveler.addEntityLdcMatchTypeToTupleList(Pair.of(LdcMatchType.LOCATION_DUNS, traveler.getMatchKeyTuple()));
     }
 
     private boolean triedDunsFromLocation(MatchTraveler traveler) {

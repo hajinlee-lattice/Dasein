@@ -29,14 +29,25 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
+
 public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
+
+    private static final String EXPORT_TIME = "ExportTime";
+    private static final long now = System.currentTimeMillis();
+    private static final String FMT_1 = "yyyy.MM.dd HH:mm:ss z";
+    private static final String FMT_2 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     @Inject
     private Configuration yarnConfiguration;
 
-    private long now = System.currentTimeMillis();
-    private String fmt1 = "yyyy.MM.dd HH:mm:ss z";
-    private String fmt2 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    private static final SimpleDateFormat fmtr1 = new SimpleDateFormat(FMT_1);
+    private static final SimpleDateFormat fmtr2 = new SimpleDateFormat(FMT_2);
+    private static final SimpleDateFormat fmtr3 = new SimpleDateFormat(ConvertToCSVConfig.ISO_8601);
+    static {
+        fmtr1.setTimeZone(TimeZone.getTimeZone("UTC"));
+        fmtr2.setTimeZone(TimeZone.getTimeZone("UTC"));
+        fmtr3.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     @Test(groups = "functional")
     public void test() {
@@ -48,9 +59,11 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
                 "Attr3", "My Attr 3" //
         ));
         config.setDateAttrsFmt(ImmutableMap.of( //
-                "Attr2", fmt1, //
-                "Attr3", fmt2 //
+                "Attr2", FMT_1, //
+                "Attr3", FMT_2, //
+                EXPORT_TIME, ConvertToCSVConfig.ISO_8601
         ));
+        config.setExportTimeAttr(EXPORT_TIME);
         SparkJobResult result = runSparkJob(ConvertToCSVJob.class, config);
         verifyResult(result);
     }
@@ -80,7 +93,6 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
             List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path, //
                     (HdfsUtils.HdfsFilenameFilter) filename -> filename.endsWith(".csv.gz"));
             Assert.assertEquals(files.size(), 1);
-            System.out.println(files.get(0));
             is = new GZIPInputStream(HdfsUtils.getInputStream(yarnConfiguration, files.get(0)));
         } catch (IOException e) {
             throw new RuntimeException("Failed to read " + path);
@@ -93,70 +105,104 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
             throw new RuntimeException("Failed to parse csv input stream", e);
         }
 
-        Map<String, Integer> headerMap = records.getHeaderMap();
-        Assert.assertEquals(headerMap.get("Id"), Integer.valueOf(0));
-        Assert.assertEquals(headerMap.get("My Attr 1"), Integer.valueOf(1));
-        Assert.assertEquals(headerMap.get("Attr2"), Integer.valueOf(2));
-        Assert.assertEquals(headerMap.get("My Attr 3"), Integer.valueOf(3));
+        verifyHeaders(records.getHeaderMap());
 
-        SimpleDateFormat fmtr1 = new SimpleDateFormat(fmt1);
-        SimpleDateFormat fmtr2 = new SimpleDateFormat(fmt2);
-        fmtr1.setTimeZone(TimeZone.getTimeZone("UTC"));
-        fmtr2.setTimeZone(TimeZone.getTimeZone("UTC"));
         int count = 0;
         for (CSVRecord record : records) {
             System.out.println(record);
-            long rowNum = record.getRecordNumber();
-            String id = record.get("Id");
-            String val1 = record.get("My Attr 1");
-            String val2 = record.get("Attr2");
-            String val3 = record.get("My Attr 3");
-            try {
-                switch ((int) rowNum) {
-                    case 1:
-                        Assert.assertEquals(id, "1");
-                        Assert.assertEquals(val1, "1");
-                        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
-                        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
-                        break;
-                    case 2:
-                        Assert.assertEquals(id, "2");
-                        Assert.assertEquals(val1, "2");
-                        Assert.assertEquals(val2, "");
-                        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
-                        break;
-                    case 3:
-                        Assert.assertEquals(id, "3");
-                        Assert.assertEquals(val1, "");
-                        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
-                        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
-                        break;
-                    case 4:
-                        Assert.assertEquals(id, "4");
-                        Assert.assertEquals(val1, "4");
-                        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
-                        Assert.assertEquals(val3, "");
-                        break;
-                    case 5:
-                        Assert.assertEquals(id, "5");
-                        Assert.assertEquals(val1, "Hello world, \"Aloha\", yeah?");
-                        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
-                        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
-                        break;
-                    default:
-                        Assert.fail("Should not have this line: " + record);
-                }
-            } catch (ParseException e) {
-                Assert.fail("Failed to parse date string.", e);
-            }
+            verifyRecord(record);
             count++;
         }
         Assert.assertEquals(tgt.getCount(), Long.valueOf(count));
         return true;
     }
 
+    private void verifyHeaders(Map<String, Integer> headerMap) {
+        Assert.assertEquals(headerMap.get("Id"), Integer.valueOf(0));
+        Assert.assertEquals(headerMap.get("My Attr 1"), Integer.valueOf(1));
+        Assert.assertEquals(headerMap.get("Attr2"), Integer.valueOf(2));
+        Assert.assertEquals(headerMap.get("My Attr 3"), Integer.valueOf(3));
+        Assert.assertEquals(headerMap.get(EXPORT_TIME), Integer.valueOf(4));
+    }
+
+    private void verifyRecord(CSVRecord record) {
+        long rowNum = record.getRecordNumber();
+        String id = record.get("Id");
+        String val1 = record.get("My Attr 1");
+        String val2 = record.get("Attr2");
+        String val3 = record.get("My Attr 3");
+        try {
+            switch ((int) rowNum) {
+                case 1:
+                    verifyRecord1(id, val1, val2, val3);
+                    break;
+                case 2:
+                    verifyRecord2(id, val1, val2, val3);
+                    break;
+                case 3:
+                    verifyRecord3(id, val1, val2, val3);
+                    break;
+                case 4:
+                    verifyRecord4(id, val1, val2, val3);
+                    break;
+                case 5:
+                    verifyRecord5(id, val1, val2, val3);
+                    break;
+                default:
+                    Assert.fail("Should not have this line: " + record);
+            }
+            verifyExportTime(record);
+        } catch (ParseException e) {
+            Assert.fail("Failed to parse date string.", e);
+        }
+    }
+
+    private void verifyRecord1(String id, String val1, String val2, String val3) throws ParseException {
+        Assert.assertEquals(id, "1");
+        Assert.assertEquals(val1, "1");
+        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
+        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
+    }
+
+    private void verifyRecord2(String id, String val1, String val2, String val3) throws ParseException {
+        Assert.assertEquals(id, "2");
+        Assert.assertEquals(val1, "2");
+        Assert.assertEquals(val2, "");
+        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
+    }
+
+    private void verifyRecord3(String id, String val1, String val2, String val3) throws ParseException {
+        Assert.assertEquals(id, "3");
+        Assert.assertEquals(val1, "");
+        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
+        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
+    }
+
+    private void verifyRecord4(String id, String val1, String val2, String val3) throws ParseException {
+        Assert.assertEquals(id, "4");
+        Assert.assertEquals(val1, "4");
+        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
+        Assert.assertEquals(val3, "");
+    }
+
+    private void verifyRecord5(String id, String val1, String val2, String val3) throws ParseException {
+        Assert.assertEquals(id, "5");
+        Assert.assertEquals(val1, "Hello world, \"Aloha\", yeah?");
+        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
+        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
+    }
+
+    private void verifyExportTime(CSVRecord record) throws ParseException {
+        String val = record.get(EXPORT_TIME);
+        Assert.assertTrue(betweenThenAndNow(fmtr3.parse(val).getTime(), now));
+    }
+
     private boolean withInOneSec(long ts1, long ts2) {
         return Math.abs(ts1 - ts2) <= 1000;
+    }
+
+    private boolean betweenThenAndNow(long ts1, long ts2) {
+        return ts1 > ts2 && ts1 < System.currentTimeMillis();
     }
 
 }

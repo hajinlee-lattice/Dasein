@@ -77,13 +77,18 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.PLAYBOOK_MODULE, //
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
                 LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, //
                 LatticeFeatureFlag.ADVANCED_MODELING, //
                 LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, //
                 LatticeFeatureFlag.MIGRATION_TENANT, //
                 LatticeFeatureFlag.PROTOTYPE_FEATURE, //
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
-                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT);
+                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
+                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA,
+                LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
         Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //
@@ -106,14 +111,18 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.IMPORT_WITHOUT_ID,
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
                 LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, //
                 LatticeFeatureFlag.ADVANCED_MODELING, //
-                LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, //
                 LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, //
                 LatticeFeatureFlag.MIGRATION_TENANT, //
                 LatticeFeatureFlag.PROTOTYPE_FEATURE, //
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
-                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT);
+                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
+                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA,
+                LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +31,7 @@ import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
@@ -42,6 +44,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -79,6 +82,9 @@ public class DropBoxServiceImpl implements DropBoxService {
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private S3ImportSystemService s3ImportSystemService;
 
     @Inject
     private IAMService iamService;
@@ -157,7 +163,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         s3Service.createFolder(dropBoxBucket, subPath);
         subPath = path + "/" + PS_SHARE_OUTBOX;
         s3Service.createFolder(dropBoxBucket, subPath);
-        createFolderWithSystemName(dropBoxBucket, dropBoxPrefix, DEFAULTSYSTEM);
+        createFolderWithSystemName(customerSpace, dropBoxBucket, dropBoxPrefix, DEFAULTSYSTEM);
     }
 
     @Override
@@ -166,7 +172,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         String dropBoxPrefix = getDropBoxPrefix();
 
         if (StringUtils.isNotEmpty(systemName)) {// new logic that every system all have five folder, can not be edit.
-            createFolderWithSystemName(dropBoxBucket, dropBoxPrefix, systemName);
+            createFolderWithSystemName(customerSpace, dropBoxBucket, dropBoxPrefix, systemName);
         } else {// the old logic without systemName
             s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null, formatPath(objectName), null));
 
@@ -772,11 +778,17 @@ public class DropBoxServiceImpl implements DropBoxService {
         return new ArrayList<>(formatedFolders);
     }
 
-    private void createFolderWithSystemName(String dropBoxBucket, String dropBoxPrefix, String systemName) {
+    private void createFolderWithSystemName(String customerSpace, String dropBoxBucket, String dropBoxPrefix,
+                                            String systemName) {
         if (StringUtils.isEmpty(systemName)) {
             throw new IllegalArgumentException("systemName can not be null.");
         }
-        List<String> defaultFolders = EntityType.getDefaultFolders();
+        S3ImportSystem s3ImportSystem = s3ImportSystemService.getS3ImportSystem(customerSpace, systemName);
+        if (s3ImportSystem == null) {
+            throw new IllegalArgumentException("Cannot find import system with name: " + systemName);
+        }
+        Collection<EntityType> entityTypes = s3ImportSystem.getSystemType().getEntityTypes();
+        List<String> defaultFolders = entityTypes.stream().map(EntityType::getDefaultFeedTypeName).collect(Collectors.toList());
         for (String folderName : defaultFolders) {
             s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName, folderName, null));
         }

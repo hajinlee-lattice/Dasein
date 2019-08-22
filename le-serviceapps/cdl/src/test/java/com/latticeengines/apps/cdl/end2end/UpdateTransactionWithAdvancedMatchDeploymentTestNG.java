@@ -52,7 +52,7 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
 
     @Override
     protected void verifyCheckPoint() {
-        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_PT_EM);
+        Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), ACCOUNT_PT_EMGA);
         Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Contact)), CONTACT_PA_EM);
         verifyTxnDailyStore(DAILY_TXN_DAYS_PT, MIN_TXN_DATE_PT, MAX_TXN_DATE_PT, //
                 VERIFY_DAILYTXN_AMOUNT_PT, //
@@ -64,20 +64,20 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                NEW_ACCOUNT_UT_EM);
+                NEW_ACCOUNT_UT_EMGA);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         // FIXME: Currently UNMATCH is same as new Account which is wrong
         // accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UNMATCH, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                ACCOUNT_UT_EM);
+                ACCOUNT_UT_EMGA);
 
         Map<String, Object> contactReport = new HashMap<>();
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE, 0L);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
-                CONTACT_PA_EM);
+                CONTACT_PA_EMGA);
 
         Map<String, Object> productReport = new HashMap<>();
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, 0L);
@@ -111,8 +111,8 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
     @Override
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_UT_EM);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
+        map.put(BusinessEntity.Account, ACCOUNT_UT_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
         map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM);
         map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_EM);
@@ -122,16 +122,16 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
     @Override
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_UT_EM);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
+        map.put(BusinessEntity.Account, ACCOUNT_UT_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
         return map;
     }
 
     @Override
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_UT_EM);
-        map.put(BusinessEntity.Contact, CONTACT_PA_EM);
+        map.put(BusinessEntity.Account, ACCOUNT_UT_EMGA);
+        map.put(BusinessEntity.Contact, CONTACT_PA_EMGA);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM);

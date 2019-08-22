@@ -7,11 +7,13 @@ import org.apache.avro.Schema;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext.PlayLaunchSparkContextBuilder;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -51,6 +53,8 @@ public class PlayLaunchContext {
 
     private List<Object> modifiableAccountIdCollectionForContacts;
 
+    private List<ColumnMetadata> fieldMappingMetadata;
+
     private Counter counter;
 
     private Table recommendationTable;
@@ -61,8 +65,8 @@ public class PlayLaunchContext {
             PlayLaunch playLaunch, Play play, long launchTimestampMillis, RatingEngine ratingEngine,
             MetadataSegment segment, String segmentName, String modelId, String ratingId,
             RatingModel publishedIteration, FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts, Counter counter, Table recommendationTable,
-            Schema schema) {
+            List<Object> modifiableAccountIdCollectionForContacts, List<ColumnMetadata> fieldMappingMetadata,
+            Counter counter, Table recommendationTable, Schema schema) {
         super();
         this.customerSpace = customerSpace;
         this.tenant = tenant;
@@ -80,14 +84,25 @@ public class PlayLaunchContext {
         this.accountFrontEndQuery = accountFrontEndQuery;
         this.contactFrontEndQuery = contactFrontEndQuery;
         this.modifiableAccountIdCollectionForContacts = modifiableAccountIdCollectionForContacts;
+        this.fieldMappingMetadata = fieldMappingMetadata;
         this.counter = counter;
         this.recommendationTable = recommendationTable;
         this.schema = schema;
     }
 
     public PlayLaunchSparkContext toPlayLaunchSparkContext() {
-        return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
-                this.launchTimestampMillis, this.ratingId, this.publishedIteration);
+        return new PlayLaunchSparkContextBuilder()//
+                .tenant(this.tenant)//
+                .playName(this.playName)//
+                .playLaunchId(this.playLaunchId)//
+                .playLaunch(this.playLaunch)//
+                .play(this.play)//
+                .ratingEngine(this.ratingEngine)//
+                .segment(this.segment)//
+                .launchTimestampMillis(this.launchTimestampMillis)//
+                .ratingId(this.ratingId)//
+                .publishedIteration(this.publishedIteration)//
+                .build();
     }
 
     public CustomerSpace getCustomerSpace() {
@@ -162,6 +177,10 @@ public class PlayLaunchContext {
         return modifiableAccountIdCollectionForContacts;
     }
 
+    public List<ColumnMetadata> getFieldMappingMetadata() {
+        return fieldMappingMetadata;
+    }
+
     public Counter getCounter() {
         return counter;
     }
@@ -206,6 +225,8 @@ public class PlayLaunchContext {
         private FrontEndQuery contactFrontEndQuery;
 
         private List<Object> modifiableAccountIdCollectionForContacts;
+
+        private List<ColumnMetadata> fieldMappingMetadata;
 
         private Counter counter;
 
@@ -297,6 +318,11 @@ public class PlayLaunchContext {
             return this;
         }
 
+        public PlayLaunchContextBuilder fieldMappingMetadata(List<ColumnMetadata> fieldMappingMetadata) {
+            this.fieldMappingMetadata = fieldMappingMetadata;
+            return this;
+        }
+
         public PlayLaunchContextBuilder counter(Counter counter) {
             this.counter = counter;
             return this;
@@ -316,7 +342,8 @@ public class PlayLaunchContext {
             return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
                     launchTimestampMillis, ratingEngine, segment, segmentName, publishedIterationId, ratingId,
                     publishedIteration, accountFrontEndQuery, contactFrontEndQuery,
-                    modifiableAccountIdCollectionForContacts, counter, recommendationTable, schema);
+                    modifiableAccountIdCollectionForContacts, fieldMappingMetadata, counter, recommendationTable,
+                    schema);
         }
     }
 

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
@@ -79,6 +80,24 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     rhs = convertValueLookup(restriction, bkts, (String) valueLookup.getValue());
                 } else {
                     rhs = convertValueLookup(bkts, (String) valueLookup.getValue());
+                }
+            }
+        } else if (lhs instanceof AttributeLookup) {
+            AttributeLookup attrLookup = (AttributeLookup) lhs;
+            ColumnMetadata cm = getAttrRepo().getColumnMetadata(attrLookup);
+            Class<?> javaClz = parseNumericalJavaClass(cm.getJavaClass());
+            if (javaClz != null) {
+                if (rhs instanceof CollectionLookup) {
+                    Collection<Object> vals = ((CollectionLookup) rhs).getValues();
+                    if (CollectionUtils.isNotEmpty(vals)) {
+                        List<Object> newVals = RestrictionUtils.convertNumericalValues(new ArrayList<>(vals), javaClz);
+                        ((CollectionLookup) rhs).setValues(newVals);
+                    }
+                } else if (rhs instanceof ValueLookup) {
+                    Object val = ((ValueLookup) rhs).getValue();
+                    List<Object> newVals = RestrictionUtils.convertNumericalValues( //
+                            Collections.singletonList(val), javaClz);
+                    ((ValueLookup) rhs).setValue(newVals.get(0));
                 }
             }
         }
@@ -453,6 +472,22 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             return (String) bucket.getValues().get(0);
         } else {
             return bucket.getLabel();
+        }
+    }
+
+    private Class<?> parseNumericalJavaClass(String javaClzName) {
+        Class<?> javaClz = null;
+        if (StringUtils.isNotBlank(javaClzName)) {
+            try {
+                javaClz = Class.forName("java.lang." + javaClzName);
+            } catch (ClassNotFoundException e) {
+                log.error("Cannot parse java class " + javaClzName);
+            }
+        }
+        if (javaClz != null && Number.class.isAssignableFrom(javaClz)) {
+            return javaClz;
+        } else {
+            return null;
         }
     }
 

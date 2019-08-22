@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class RestrictionUtils {
 
     public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
             "HasPurchased");
+    private static final Pattern INTEGER_PATTERN = Pattern.compile("^\\d$");
 
     public static void inspectBucketRestriction(BucketRestriction bucketRestriction,
             Map<ComparisonType, Set<AttributeLookup>> map, TimeFilterTranslator timeTranslator) {
@@ -106,9 +108,7 @@ public class RestrictionUtils {
         if (restriction != null) {
             if (restriction instanceof LogicalRestriction) {
                 BreadthFirstSearch search = new BreadthFirstSearch();
-                search.run(restriction, (object, ctx) -> {
-                    accumulateInvalidBkts(object, invalidBkts);
-                });
+                search.run(restriction, (object, ctx) -> accumulateInvalidBkts(object, invalidBkts));
             } else if (restriction instanceof BucketRestriction) {
                 accumulateInvalidBkts(restriction, invalidBkts);
             }
@@ -207,6 +207,7 @@ public class RestrictionUtils {
         } else if (bkt.getDateFilter() != null) {
             restriction = convertDateBucket(bucketRestriction, translatePriorOnly);
         } else {
+            cleanupBucketRestriction(bucketRestriction);
             ComparisonType comparisonType = bkt.getComparisonType();
             List<Object> values = bkt.getValues();
             if (comparisonType == null) {
@@ -468,13 +469,45 @@ public class RestrictionUtils {
 
     private static void validateEmptyValue(ComparisonType comparisonType, List<Object> values) {
         if (CollectionUtils.isNotEmpty(values)) {
-            throw new IllegalArgumentException(comparisonType + " should not have any value.");
+            log.warn(comparisonType + " should not have any value.");
         }
     }
 
     private static void validateNonEmptyValue(ComparisonType comparisonType, List<Object> values) {
         if (CollectionUtils.isEmpty(values)) {
             throw new IllegalArgumentException(comparisonType + " should have at least one value.");
+        }
+    }
+
+    public static <T> List<Object> convertNumericalValues(List<Object> vals, Class<T> attrClz) {
+        if (CollectionUtils.isNotEmpty(vals)) {
+            List<Object> newVals = new ArrayList<>();
+            vals.forEach(val -> {
+                Object newVal;
+                if (val == null) {
+                    newVal = null;
+                } else if (Number.class.isAssignableFrom(val.getClass())) {
+                    newVal = val;
+                } else if (val instanceof String) {
+                    try {
+                        String strVal = val.toString();
+                        if (INTEGER_PATTERN.matcher(strVal).matches()) {
+                            newVal = Long.parseLong(strVal);
+                        } else {
+                            newVal = Double.parseDouble(strVal);
+                        }
+                    } catch (NumberFormatException e) {
+                        throw new UnsupportedOperationException("Cannot cast value " + val + " to number.");
+                    }
+                } else {
+                    throw new IllegalArgumentException("Cannot make the operand " + val //
+                            + " compatible with attribute type " + attrClz);
+                }
+                newVals.add(newVal);
+            });
+            return newVals;
+        } else {
+            return vals;
         }
     }
 

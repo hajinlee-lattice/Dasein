@@ -14,7 +14,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import java.io.StringWriter;
 
-class Flatten(schema: StructType) extends UserDefinedAggregateFunction {
+class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDefinedAggregateFunction {
 
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = schema
@@ -27,26 +27,38 @@ class Flatten(schema: StructType) extends UserDefinedAggregateFunction {
   override def dataType: DataType = StringType
 
   override def deterministic: Boolean = true
+  
+  var cols: Seq[String] = Seq.empty[String]
+  var useConfiguredCols: Boolean = false
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
     buffer(0) = IndexedSeq[Map[String, String]]()
+    cols = configuredColumns
+    useConfiguredCols = if (cols.isEmpty) false else true
   }
 
   // This is how to update your buffer schema given an input.
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    val ele = Map(PlaymakerConstants.Email -> getInputValue(input, InterfaceName.Email.name()), //
-    			  PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_1.name()), //
-    			  PlaymakerConstants.Phone -> getInputValue(input, InterfaceName.PhoneNumber.name()), //
-    			  PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
-    			  PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
-    			  PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
-    			  PlaymakerConstants.SfdcContactID -> "", //
-    			  PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
-    			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
-    			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()))
+    var ele = Map.empty[String, String]
+    if (useConfiguredCols) {
+        for (col <- cols) {
+            ele = ele + (col -> getInputValue(input, col))
+        }
+    } else {
+      ele = Map(PlaymakerConstants.Email -> getInputValue(input, InterfaceName.Email.name()), //
+      			  PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_1.name()), //
+      			  PlaymakerConstants.Phone -> getInputValue(input, InterfaceName.PhoneNumber.name()), //
+      			  PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
+      			  PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
+      			  PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
+      			  PlaymakerConstants.SfdcContactID -> "", //
+      			  PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
+      			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
+      			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()))
+    } 
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
-    buffer(0) = cur :+ ele   
+    buffer(0) = cur :+ ele  
   }
   
   private def getInputValue(input: Row, key: String): String = {

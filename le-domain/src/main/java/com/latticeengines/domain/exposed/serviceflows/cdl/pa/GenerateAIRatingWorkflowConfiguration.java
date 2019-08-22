@@ -135,6 +135,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder exportKeyColumnsOnly(boolean exportKeyColumnsOnly) {
+            cdlEventTable.setExportKeyColumnsOnly(exportKeyColumnsOnly);
+            return this;
+        }
+
         public Builder uniqueKeyColumn(String uniqueKeyColumn) {
             score.setUniqueKeyColumn(uniqueKeyColumn);
             return this;

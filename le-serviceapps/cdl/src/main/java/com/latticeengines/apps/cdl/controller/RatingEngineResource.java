@@ -630,8 +630,15 @@ public class RatingEngineResource {
             @PathVariable RatingEngineType engineType, @PathVariable String modelId) {
         return ratingEngineService.getDependingAttrsInModel(engineType, modelId);
     }
-    // -------------------
-    // RatingEngine Others
-    // -------------------
 
+    // -------------------
+    // RatingEngine
+    // get all models created in customer space
+    // -------------------
+    @GetMapping(value = "/allmodels")
+    @ResponseBody
+    @ApiOperation(value = "get all models in customer space")
+    public List<RatingModel> getAllModels(@PathVariable String customerSpace) {
+        return ratingEngineService.getAllRatingModels();
+    }
 }

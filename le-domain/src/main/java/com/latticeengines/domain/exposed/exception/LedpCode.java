@@ -829,7 +829,7 @@ public enum LedpCode {
     LEDP_40056("Failed to submit S3 import job, error: {0}"),
     LEDP_40057("Detected invalid buckets: {0}"),
     LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"),
-    LEDP_40059("Error when validating with input file, please reference {0}."),
+    LEDP_40059("{0} error when validating with input file, please reference {1} for details."),
     LEDP_40060("Invalid business calendar"),
     LEDP_40061("Cannot update Import System: {0}"),
     LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."),
@@ -841,8 +841,14 @@ public enum LedpCode {
     LEDP_40068("Cannot find Export Field Metadata Service for CDL External System Name {0}."),
     LEDP_40069("Cannot find attribute name {0} in Export Field Metadata Defaults for {1} or in serving store."),
 
+    // le-domain
+    LEDP_41001("PeriodName field {0} is null for record {1}."),
+    LEDP_41002("PeriodId field {0} is null for record {1}."),
+    LEDP_41003("Fail to shutdown batch write executor properly"),
+
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
+
 
     private String message;
 

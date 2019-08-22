@@ -144,27 +144,30 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract rating containers via Spark SQL.");
             }
-            try {
+            do {
                 round = containers.stream() //
                         .filter(container -> container.getExtractedTarget() == null) //
+                        .limit(16) //
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(round)) {
-                    boolean persistOnDisk = getTotalRatingWeights() > 8;
-                    startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
-                    String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
-                    if (StringUtils.isNotBlank(trxnTable)) {
-                        String period = configuration.getApsRollupPeriod();
-                        if (StringUtils.isBlank(period)) {
-                            period = "Month";
+                    try {
+                        boolean persistOnDisk = getTotalRatingWeights() > 8;
+                        startSparkSQLSession(getHdfsPaths(attrRepo), persistOnDisk);
+                        String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
+                        if (StringUtils.isNotBlank(trxnTable)) {
+                            String period = configuration.getApsRollupPeriod();
+                            if (StringUtils.isBlank(period)) {
+                                period = "Month";
+                            }
+                            prepareForCrossSellQueries(period, trxnTable, persistOnDisk);
                         }
-                        prepareForCrossSellQueries(period, trxnTable, persistOnDisk);
+                        round.forEach(this::extractOneContainer);
+                    } finally {
+                        stopSparkSQLSession();
                     }
-                    round.forEach(this::extractOneContainer);
                 }
-                return true;
-            } finally {
-                stopSparkSQLSession();
-            }
+            } while (CollectionUtils.isNotEmpty(round));
+            return true;
         });
     }
 
@@ -242,7 +245,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
 
     protected int scaleBySize(double totalSizeInGb) {
         int ratingWeights = getTotalRatingWeights();
-        int scalingByWeights = (int) Math.floor(ratingWeights / 40.) + 1;
+        int scalingByWeights = (int) Math.floor(ratingWeights / 32.) + 1;
         int maxMultiplier = ScalingUtils.getMultiplier(1000);
         int scalingFactor = Math.min(maxMultiplier, scalingByWeights * ScalingUtils.getMultiplier(totalSizeInGb));
         if (scalingFactor > 1) {
@@ -258,10 +261,8 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
             round.forEach(container -> {
                 switch (container.getEngineSummary().getType()) {
                     case CROSS_SELL:
-                        weights.addAndGet(4);
-                        break;
                     case RULE_BASED:
-                        weights.addAndGet(2);
+                        weights.addAndGet(4);
                         break;
                     default:
                         weights.addAndGet(1);

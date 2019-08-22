@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -98,6 +99,15 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace, entity);
     }
 
+    @RequestMapping(value = "/byuniqueids", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task")
+    public List<DataFeedTask> getDataFeedTaskByUniqueIds(@PathVariable String customerSpace,
+                                                            @RequestBody List<String> uniqueIds) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getDataFeedTaskByUniqueIds(customerSpace, uniqueIds);
+    }
+
     @RequestMapping(value = "/{taskId}/registerextract/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
@@ -151,6 +161,15 @@ public class DataFeedTaskResource {
                                          @PathVariable String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getTemplateTables(customerSpace, entity);
+    }
+
+    @RequestMapping(value = "/{taskId}/getSystem", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task template tables")
+    public S3ImportSystem getSystemFromTaskId(@PathVariable String customerSpace,
+                                              @PathVariable String taskId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getImportSystemByTaskId(customerSpace, taskId);
     }
 
 }

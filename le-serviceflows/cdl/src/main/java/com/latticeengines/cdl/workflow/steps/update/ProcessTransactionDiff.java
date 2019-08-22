@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodCollectorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodConvertorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataAggregaterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataCleanerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataFilterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProductMapperConfig;
@@ -39,6 +38,7 @@ import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 @Component(ProcessTransactionDiff.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -89,6 +89,15 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 String.class);
         diffTableName = diffTableNames.get(BusinessEntity.Transaction);
 
+        Table diffTable = metadataProxy.getTable(customerSpace.toString(), diffTableName);
+        if (diffTable == null) {
+            throw new RuntimeException("Cannot find diff txn table " + diffTableName);
+        }
+        double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, diffTable);
+        int multiplier = ScalingUtils.getMultiplier(sizeInGb);
+        log.info("Set scalingMultiplier=" + multiplier + " base on diff txn table size=" + sizeInGb + " gb.");
+        scalingMultiplier = multiplier;
+
         DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
         earliestTransaction = DateTimeUtils.dayPeriodToDate(feed.getEarliestTransaction());
 
@@ -137,7 +146,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
         TransformationStepConfig dailyRetained = retainFields(dailyAgrStep, //
                 TableRoleInCollection.AggregatedTransaction);
-        TransformationStepConfig cleanDaily = cleanupDailyHistory();
         TransformationStepConfig updateDaily = updateDailyStore();
 
         steps.add(dailyRaw);
@@ -145,14 +153,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         steps.add(periodAdded);
         steps.add(dailyAgr);
         steps.add(dailyRetained);
-        steps.add(cleanDaily);
         steps.add(updateDaily);
 
-        addPeriodStep = 7;
-        periodsStep = 8;
-        periodDataStep = 9;
-        periodDataWithPeriodIdStep = 10;
-        periodAgrStep = 11;
+        addPeriodStep = 6;
+        periodsStep = 7;
+        periodDataStep = 8;
+        periodDataWithPeriodIdStep = 9;
+        periodAgrStep = 10;
         periodAdded = addPeriod(dailyAgrStep, periodStrategies); // periodedStep
         TransformationStepConfig periods = collectPeriods(addPeriodStep); // periodsStep
         TransformationStepConfig periodData = collectPeriodData(periodsStep); // periodDataStep
@@ -160,7 +167,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         TransformationStepConfig periodAgr = aggregatePeriods(periodDataWithPeriodIdStep); // periodAgrStep
         TransformationStepConfig periodRetained = retainFields(periodAgrStep, periodTablePrefix, //
                 servingStorePrimaryKey, TableRoleInCollection.AggregatedPeriodTransaction);
-        TransformationStepConfig cleanPeriod = cleanupPeriodHistory(periodsStep, periodTables);
         TransformationStepConfig updatePeriod = updatePeriodStore(periodTables, periodsStep, periodAgrStep);
 
         steps.add(periodAdded);
@@ -169,7 +175,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         steps.add(periodDataWithPeriodId);
         steps.add(periodAgr);
         steps.add(periodRetained);
-        steps.add(cleanPeriod);
         steps.add(updatePeriod);
 
         request.setSteps(steps);
@@ -232,17 +237,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setPeriodStrategies(periodStrategies);
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
-        return step;
-    }
-
-    private TransformationStepConfig cleanupDailyHistory() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(DataCloudConstants.PERIOD_DATA_CLEANER);
-        addBaseTables(step, diffTableName);
-        addBaseTables(step, dailyTable.getName());
-        PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
-        config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
@@ -277,7 +271,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
         config.setGroupByFields(groupByFields);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -293,6 +287,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setInputIdx(0);
         config.setPeriodIdx(1);
         config.setTransactinIdx(2);
+        config.setRetryable(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
@@ -325,7 +320,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
                 InterfaceName.PeriodName.name()));
         config.setGroupByFields(groupByFields);
         step.setConfiguration(JsonUtils.serialize(config));
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -336,7 +331,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -351,28 +346,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setEarliestTransactionDate(earliestTransaction);
         config.setPeriodStrategies(periodStrategies);
-        config.setMultiPeriod(true);
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig cleanupPeriodHistory(int periodsStep, List<Table> periodTables) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(DataCloudConstants.PERIOD_DATA_CLEANER);
-        step.setInputSteps(Collections.singletonList(periodsStep));
-
-        Map<String, Integer> transactionIdxes = new HashMap<>();
-        for (int i = 0; i < periodTables.size(); i++) {
-            Table periodTable = periodTables.get(i);
-            addBaseTables(step, periodTable.getName());
-            transactionIdxes.put(PeriodStrategyUtils.getPeriodStrategyNameFromPeriodTableName(periodTable.getName(),
-                    TableRoleInCollection.ConsolidatedPeriodTransaction), i + 1);
-        }
-
-        PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
-        config.setPeriodField(InterfaceName.PeriodId.name());
-        config.setPeriodNameField(InterfaceName.PeriodName.name());
-        config.setTransactionIdxes(transactionIdxes);
         config.setMultiPeriod(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
@@ -399,7 +372,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
-        step.setConfiguration(JsonUtils.serialize(config));
+        config.setRetryable(true);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 

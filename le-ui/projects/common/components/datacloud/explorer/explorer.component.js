@@ -931,12 +931,17 @@ export default function (
 
     vm.removeEmptyCategories = function (categories) {
         var ret = [];
+        var loopItemNum = 0;
+
         categories.forEach(function (category, index) {
             if (vm.categoryCount(category)) {
+                if (loopItemNum == 0) {
+                    DataCloudStore.setMetadata('subheadercategory', category);
+                }
                 ret.push(category);
+                loopItemNum++;
             }
         });
-        DataCloudStore.setPresentCategories(ret);
         return ret;
     }
 
@@ -951,6 +956,8 @@ export default function (
                 }
             });
         }
+
+        DataCloudStore.setCategories(vm.categories);
 
         for (var i in vm.categories) {
             vm.categoryCounts[vm.categories[i]] = null;

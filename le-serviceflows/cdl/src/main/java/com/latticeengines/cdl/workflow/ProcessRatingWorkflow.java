@@ -13,6 +13,7 @@ import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.PostIterationInitialization;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
+import com.latticeengines.cdl.workflow.steps.rating.SplitRatingEngines;
 import com.latticeengines.cdl.workflow.steps.rating.StartIteration;
 import com.latticeengines.cdl.workflow.steps.reset.ResetRating;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration;
@@ -30,6 +31,9 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
 
     @Inject
     private PrepareForRating prepareForRating;
+
+    @Inject
+    private SplitRatingEngines splitRatingEngines;
 
     @Inject
     private ResetRating resetRating;
@@ -70,6 +74,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
                 .next(prepareForRating) //
                 .next(cloneInactiveServingStores) //
                 .next(importGeneratingRatingFromS3) //
+                .next(splitRatingEngines) //
                 .next(resetRating); //
         int maxIteration = config.getMaxIteration() > 0 ? config.getMaxIteration() : defaultMaxIteration;
         for (int i = 0; i < maxIteration; i++) {

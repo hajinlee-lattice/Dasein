@@ -47,6 +47,7 @@ public class CommitEntityMatchConfiguration extends BaseStepConfiguration {
         return customerSpace;
     }
 
+
     public void setCustomerSpace(CustomerSpace customerSpace) {
         this.customerSpace = customerSpace;
     }

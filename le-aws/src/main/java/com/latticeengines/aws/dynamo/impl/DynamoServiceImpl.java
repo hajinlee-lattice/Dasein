@@ -363,6 +363,15 @@ public class DynamoServiceImpl implements DynamoService {
         }
     }
 
+    @Override
+    public boolean isCapacityOnDemand(String tableName) {
+        TableDescription description = describeTable(tableName);
+        if (description == null || description.getBillingModeSummary() == null) {
+            return false;
+        }
+        return "PAY_PER_REQUEST".equals(description.getBillingModeSummary().getBillingMode());
+    }
+
     private static String buildTableResourceID(String tableName) {
         return "table/" + tableName;
     }

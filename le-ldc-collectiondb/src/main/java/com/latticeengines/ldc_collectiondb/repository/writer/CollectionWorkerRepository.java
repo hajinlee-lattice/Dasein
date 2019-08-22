@@ -17,7 +17,7 @@ public interface CollectionWorkerRepository extends BaseJpaRepository<Collection
     List<CollectionWorker> findByStatusInAndVendor(Collection<String> statuses, String vendor);
 
     List<CollectionWorker> findByStatusInAndVendorAndSpawnTimeIsAfter(Collection<String> statuses, String vendor,
-                                                                         Timestamp spawnTime);
+                                                                      Timestamp spawnTime);
 
     @Transactional
     @Modifying
@@ -25,4 +25,5 @@ public interface CollectionWorkerRepository extends BaseJpaRepository<Collection
 
     List<CollectionWorker> findBySpawnTimeBetween(Timestamp start, Timestamp end);
 
+    List<CollectionWorker> findByTerminationTimeIsAfterAndStatus(Timestamp start, String status);
 }

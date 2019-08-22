@@ -81,22 +81,48 @@ public class AtlasExportTypeUnitTestNG {
     @Test(groups = "unit")
     public void getDefaultExportAttributesAccount() {
         Set<InterfaceName> defaultExportAttributes = AtlasExportType
-                .getDefaultExportAttributes(BusinessEntity.Account);
+                .getDefaultExportAttributes(BusinessEntity.Account, false);
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultExportAttributes));
-        defaultExportAttributes.stream().forEach(p -> {
+        defaultExportAttributes.forEach(p -> {
             Assert.assertNotNull(p);
         });
         Assert.assertEquals(defaultExportAttributes.size(), 9);
+        Assert.assertTrue(defaultExportAttributes.contains(InterfaceName.AccountId));
+        Assert.assertFalse(defaultExportAttributes.contains(InterfaceName.CustomerAccountId));
+
+        defaultExportAttributes = AtlasExportType.getDefaultExportAttributes(BusinessEntity.Account, true);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(defaultExportAttributes));
+        defaultExportAttributes.forEach(p -> {
+            Assert.assertNotNull(p);
+        });
+        Assert.assertEquals(defaultExportAttributes.size(), 9);
+        Assert.assertTrue(defaultExportAttributes.contains(InterfaceName.CustomerAccountId));
+        Assert.assertFalse(defaultExportAttributes.contains(InterfaceName.AccountId));
     }
 
     @Test(groups = "unit")
     public void getDefaultExportAttributesContact() {
         Set<InterfaceName> defaultExportAttributes = AtlasExportType
-                .getDefaultExportAttributes(BusinessEntity.Contact);
+                .getDefaultExportAttributes(BusinessEntity.Contact, false);
         Assert.assertTrue(CollectionUtils.isNotEmpty(defaultExportAttributes));
-        defaultExportAttributes.stream().forEach(p -> {
+        defaultExportAttributes.forEach(p -> {
             Assert.assertNotNull(p);
         });
         Assert.assertEquals(defaultExportAttributes.size(), 5);
+        Assert.assertTrue(defaultExportAttributes.contains(InterfaceName.ContactId));
+        Assert.assertFalse(defaultExportAttributes.contains(InterfaceName.CustomerContactId));
+        Assert.assertTrue(defaultExportAttributes.contains(InterfaceName.AccountId));
+        Assert.assertFalse(defaultExportAttributes.contains(InterfaceName.CustomerAccountId));
+
+        defaultExportAttributes = AtlasExportType.getDefaultExportAttributes(BusinessEntity.Contact, true);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(defaultExportAttributes));
+        defaultExportAttributes.forEach(p -> {
+            Assert.assertNotNull(p);
+        });
+        Assert.assertEquals(defaultExportAttributes.size(), 5);
+        Assert.assertTrue(defaultExportAttributes.contains(InterfaceName.CustomerContactId));
+        Assert.assertFalse(defaultExportAttributes.contains(InterfaceName.ContactId));
+        Assert.assertTrue(defaultExportAttributes.contains(InterfaceName.CustomerAccountId));
+        Assert.assertFalse(defaultExportAttributes.contains(InterfaceName.AccountId));
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,9 +63,10 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
+    public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery,
+            @RequestParam(value = "use-internal-account-id", required = false, defaultValue = "false") boolean useInternalAccountId) {
         try {
-            return super.getData(frontEndQuery);
+            return super.getData(frontEndQuery, useInternalAccountId);
         } catch (Exception e) {
             log.error("Failed to get contact data", e);
             throw new LedpException(LedpCode.LEDP_36002);
@@ -80,17 +82,8 @@ public class ContactResource extends BaseFrontEndEntityResource {
     List<Lookup> getDataLookups() {
         return Arrays.asList(//
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
-                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.CompanyName.name()), //
                 new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()));
-    }
-
-    @Override
-    List<AttributeLookup> getFreeTextSearchAttrs() {
-        return Arrays.asList( //
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
-                new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
-                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
-        );
     }
 
 }

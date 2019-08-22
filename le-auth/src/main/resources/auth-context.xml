@@ -8,6 +8,6 @@
 
     <import resource="classpath:auth-persistence-context.xml"/>
     <import resource="classpath:auth-aspects-context.xml"/>
-    <import resource="classpath:graph-context.xml" />
-    
+    <import resource="classpath:graphdb-context.xml" />
+
 </beans>

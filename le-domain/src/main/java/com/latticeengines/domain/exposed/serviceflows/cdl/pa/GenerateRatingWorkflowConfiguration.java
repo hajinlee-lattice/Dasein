@@ -61,6 +61,11 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder exportKeyColumnsOnly(boolean exportKeyColumnsOnly) {
+            generateAIRating.exportKeyColumnsOnly(exportKeyColumnsOnly);
+            return this;
+        }
+
         public Builder fetchOnly(boolean fetchOnly) {
             generateAIRating.fetchOnly(fetchOnly);
             return this;

@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -204,6 +205,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return get("getDataFeedTaskById", url, DataFeedTask.class);
     }
 
+    public S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/getSystem",
+                shortenCustomerSpace(customerSpace), taskId);
+        return get("getImportSystemByTaskId", url, S3ImportSystem.class);
+    }
+
     public Long nextInvokeTime(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/nextinvoketime",
                 shortenCustomerSpace(customerSpace));
@@ -214,6 +221,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{entity}/list",
                 shortenCustomerSpace(customerSpace), entity);
         List<?> res = get("getDataFeedTaskWithSameEntity", url, List.class);
+        return JsonUtils.convertList(res, DataFeedTask.class);
+    }
+
+    public List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/byuniqueids",
+                shortenCustomerSpace(customerSpace));
+        List<?> res = post("getDataFeedTaskWithSameEntity", url, uniqueIds, List.class);
         return JsonUtils.convertList(res, DataFeedTask.class);
     }
 

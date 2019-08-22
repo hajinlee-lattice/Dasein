@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaArtifactsFromS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
@@ -14,6 +15,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.Impor
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchListOfEntitiesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ImportTemplateMigrateStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.RegisterImportActionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
@@ -52,7 +56,11 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = MatchCdlStepConfiguration.class, name = "MatchCdlStepConfiguration"),
         @Type(value = LdcOnlyAttributesConfiguration.class, name = "LdcOnlyAttributesConfiguration"),
         @Type(value = UseConfiguredModelingAttributesConfiguration.class, name = "UseConfiguredModelingAttributesConfiguration"),
-        @Type(value = WriteOutputStepConfiguration.class, name = "WriteOutputStepConfiguration"), })
+        @Type(value = RegisterImportActionStepConfiguration.class, name = "RegisterImportActionStepConfiguration"),
+        @Type(value = EntityMatchMigrateStepConfiguration.class, name = "EntityMatchMigrateStepConfiguration"),
+        @Type(value = ImportTemplateMigrateStepConfiguration.class, name = "ImportTemplateMigrateStepConfiguration"),
+        @Type(value = WriteOutputStepConfiguration.class, name = "WriteOutputStepConfiguration"),
+        @Type(value = ImportDeltaArtifactsFromS3Configuration.class, name = "ImportDeltaArtifactsFromS3Configuration") })
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 
     private String podId;

@@ -45,7 +45,7 @@ public class DynamoPublishService extends AbstractPublishService
 
     private static final String PARTITION_KEY = "Id";
     private static final String PREFIX = "_REPO_DataCloud_RECORD_";
-    private static final Long ONE_DAY = TimeUnit.DAYS.toSeconds(1);
+    private static final Long THREE_DAYS = TimeUnit.DAYS.toSeconds(3);
 
     static final String TAG_LE_ENV = "le-env";
     static final String TAG_LE_PRODUCT = "le-product";
@@ -154,7 +154,7 @@ public class DynamoPublishService extends AbstractPublishService
         HdfsToDynamoConfiguration eaiConfig = generateEaiConfig(tableName, sourceName, sourceVersion, configuration);
         AppSubmission appSubmission = eaiProxy.submitEaiJob(eaiConfig);
         String appId = appSubmission.getApplicationIds().get(0);
-        JobStatus jobStatus = jobService.waitFinalJobStatus(appId, ONE_DAY.intValue());
+        JobStatus jobStatus = jobService.waitFinalJobStatus(appId, THREE_DAYS.intValue());
         if (!FinalApplicationStatus.SUCCEEDED.equals(jobStatus.getStatus())) {
             resumeThroughput(dynamoService, tableName, configuration);
             throw new RuntimeException("Yarn application " + appId + " did not finish in SUCCEEDED status, but " //
@@ -171,7 +171,8 @@ public class DynamoPublishService extends AbstractPublishService
 
     /**
      * Update read & write capacity of Dynamo table. Retry 3 times, waiting
-     * intervals are 30s, 60s, 120s.
+     * intervals are 30s, 60s, 120s. If the table capacity is on demand, skip
+     * updating
      *
      * Reason: If Dynamo table is configured as auto-scaling and it's already
      * under scaling status, request of updating capacity will fail
@@ -183,6 +184,10 @@ public class DynamoPublishService extends AbstractPublishService
      */
     private void updateThroughput(DynamoService dynamoService, String tableName, long readCapacity,
             long writeCapacity) {
+        if (dynamoService.isCapacityOnDemand(tableName)) {
+            log.warn("Capacity for table {} is on demand. Skip updating throughput.", tableName);
+            return;
+        }
         RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(3, 30, 2, null);
         try {
             retry.execute(context -> {

@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
@@ -24,7 +26,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -35,7 +36,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Pe
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataAggregaterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProductMapperConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -102,7 +103,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
 
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList(
-                AGG_DAILY_TRXN_TABLE_NAME, AGG_PERIOD_TRXN_TABLE_NAME));
+                AGG_DAILY_TRXN_TABLE_NAME, AGG_PERIOD_TRXN_TABLE_NAME, DAILY_TRXN_TABLE_NAME),
+                Collections.singletonList(PERIOD_TRXN_TABLE_NAME));
         shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
 
         if (shortCut) {
@@ -110,8 +112,19 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
             log.info("Found both daily and period aggregated tables in context, going thru short-cut mode.");
             sortedDailyTableName = tablesInCtx.get(0).getName();
             sortedPeriodTableName = tablesInCtx.get(1).getName();
-            finishing();
 
+            // link daily & period batch store tables
+            List<String> periodTableNames = getListObjectFromContext(PERIOD_TRXN_TABLE_NAME, String.class);
+            if (CollectionUtils.isNotEmpty(periodTableNames)) {
+                dataCollectionProxy.upsertTables(customerSpace.toString(), periodTableNames,
+                        TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+            }
+            String dailyTableName = getStringValueFromContext(DAILY_TRXN_TABLE_NAME);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), dailyTableName,
+                    TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+            log.info("Adding daily txn table = {} and period txn tables = {}", dailyTableName, periodTableNames);
+
+            finishing();
         } else {
 
             ChoreographerContext context = getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
@@ -126,7 +139,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
             double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
             int multiplier = ScalingUtils.getMultiplier(sizeInGb);
-            log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
+            log.info("Set scalingMultiplier=" + multiplier + " base on raw txn store size=" + sizeInGb + " gb.");
             scalingMultiplier = multiplier;
 
             periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
@@ -236,6 +249,15 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
         exportToS3AndAddToContext(sortedPeriodTableName, AGG_PERIOD_TRXN_TABLE_NAME);
 
+        // export batch stores
+        exportToS3AndAddToContext(dailyTable.getName(), DAILY_TRXN_TABLE_NAME);
+        if (CollectionUtils.isNotEmpty(periodTables)) {
+            exportToS3AndAddToContext(periodTables.stream().map(Table::getName).collect(Collectors.toList()),
+                    PERIOD_TRXN_TABLE_NAME);
+        } else {
+            putObjectInContext(PERIOD_TRXN_TABLE_NAME, Collections.emptyList());
+        }
+
         finishing();
     }
 
@@ -286,14 +308,12 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         TransformationStepConfig periodAgr = aggregatePeriods(); // periodAgrStep
         TransformationStepConfig periods = collectPeriods(); // periodsStep
         TransformationStepConfig updatePeriod = updatePeriodStore(periodTables);
-        TransformationStepConfig sortDaily = sort(dailyTable.getName(), null, sortedDailyTablePrefix);
-        TransformationStepConfig sortPeriod = sort(null, periodAgrStep, sortedPeriodTablePrefix);
+        TransformationStepConfig copyDaily = copyDailyServingStore();
         steps.add(perioded); // step 5
         steps.add(periodAgr); // step 6
         steps.add(periods); // step 7
         steps.add(updatePeriod); // step 8
-        steps.add(sortDaily); // step 9
-        steps.add(sortPeriod); // step 10
+        steps.add(copyDaily); // step 9
 
         request.setSteps(steps);
         return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
@@ -332,7 +352,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setProductField(InterfaceName.ProductId.name());
         config.setProductTypeField(InterfaceName.ProductType.name());
 
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -344,7 +364,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setPeriodStrategies(periodStrategies);
         config.setPeriodField(InterfaceName.PeriodId.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -376,7 +396,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
         config.setGroupByFields(groupByFields);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -386,7 +406,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setInputSteps(Collections.singletonList(dailyAgrStep));
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -409,7 +429,24 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        config.setRetryable(true);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig copyDailyServingStore() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        addBaseTables(step, dailyTable.getName());
+        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+
+        CopyConfig conf = new CopyConfig();
+        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(sortedDailyTablePrefix);
+        targetTable.setPrimaryKey(InterfaceName.__Composite_Key__.name());
+        step.setTargetTable(targetTable);
         return step;
     }
 
@@ -439,7 +476,14 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
                 InterfaceName.PeriodId.name(), //
                 InterfaceName.PeriodName.name()));
         config.setGroupByFields(groupByFields);
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(sortedPeriodTablePrefix);
+        targetTable.setPrimaryKey(InterfaceName.__Composite_Key__.name());
+        step.setTargetTable(targetTable);
+
         return step;
     }
 
@@ -450,7 +494,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -483,43 +527,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setPeriodField(InterfaceName.PeriodId.name());
         config.setPeriodNameField(InterfaceName.PeriodName.name());
         config.setTransactionIdxes(transactionIdxes);
-        step.setConfiguration(JsonUtils.serialize(config));
-        return step;
-    }
-
-    private TransformationStepConfig sort(String sourceTableName, Integer inputStep, String prefix) {
-        if (sourceTableName != null && inputStep != null) {
-            throw new RuntimeException(TRANSFORMER_SORTER + " can only sort one base table");
-        }
-        TransformationStepConfig step = new TransformationStepConfig();
-        if (sourceTableName != null) {
-            String tableSourceName = "CustomerUniverse";
-            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-            List<String> baseSources = Collections.singletonList(tableSourceName);
-            step.setBaseSources(baseSources);
-            Map<String, SourceTable> baseTables = new HashMap<>();
-            baseTables.put(tableSourceName, sourceTable);
-            step.setBaseTables(baseTables);
-        }
-        if (inputStep != null) {
-            List<Integer> inputSteps = Collections.singletonList(inputStep);
-            step.setInputSteps(inputSteps);
-        }
-        step.setTransformer(TRANSFORMER_SORTER);
-
-        SorterConfig config = new SorterConfig();
-        config.setPartitions(50);
-        String sortingKey = InterfaceName.AccountId.name();
-        config.setSortingField(sortingKey);
-        config.setCompressResult(true);
-        step.setConfiguration(appendEngineConf(config, extraHeavyEngineConfig()));
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(prefix);
-        targetTable.setPrimaryKey(InterfaceName.__Composite_Key__.name());
-        step.setTargetTable(targetTable);
-
+        config.setRetryable(true);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 }

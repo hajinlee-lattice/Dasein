@@ -1,10 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
@@ -35,11 +31,6 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
-        public Builder exportEntities(Collection<ExportEntity> entities) {
-            step.setExportEntities(new ArrayList<>(entities));
-            return this;
-        }
-
         public Builder compressResult(boolean compress) {
             step.setCompressResult(compress);
             return this;
@@ -54,6 +45,7 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         public EntityExportWorkflowConfiguration build() {
             configuration.setContainerConfiguration("entityExportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
+            step.setAddExportTimestamp(true); // always add export timestamp
             configuration.add(importS3);
             configuration.add(step);
             return configuration;

@@ -107,7 +107,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'LESS_THAN': '<',
             'LESS_OR_EQUAL': '<=',
             'IS_NULL': 'is empty',
-            'IS_NOT_NULL': 'is present'
+            'IS_NOT_NULL': 'is present',
+            'IN_COLLECTION': 'is equal to'
         };
 
         this.prevBucketCountAttr = null;
@@ -380,7 +381,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
         this.changeBktValsSize = function (bucketRestriction, value) {
             let notChips = ['IN_COLLECTION', 'NOT_IN_COLLECTION'].indexOf(value) < 0;
             let notTwoInputs = QueryTreeService.two_inputs.indexOf(value) < 0;
-            let hasVals = bucketRestriction.bkt.Vals.length == 2;
+            let hasVals =
+				bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals
+					.length == 2;
 
             if (notChips && notTwoInputs && hasVals) {
                 bucketRestriction.bkt.Vals.splice(1, 1);

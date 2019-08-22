@@ -40,7 +40,7 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
                 Arrays.asList(BusinessEntity.Contact));
 
-        List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId());
+        List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(), channel.getLookupIdMap().getTenant().getPid());
 
         List<ColumnMetadata> exportColumnMetadataList;
 
@@ -56,8 +56,8 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     }
 
-    private List<String> getMappedFieldNames(String orgId) {
-        List<ExportFieldMetadataMapping> mapping = exportFieldMetadataMappingEntityMgr.findByOrgId(orgId);
+    private List<String> getMappedFieldNames(String orgId, Long tenantPid) {
+        List<ExportFieldMetadataMapping> mapping = exportFieldMetadataMappingEntityMgr.findByOrgId(orgId, tenantPid);
         return mapping.stream().map(ExportFieldMetadataMapping::getSourceField).collect(Collectors.toList());
     }
 }

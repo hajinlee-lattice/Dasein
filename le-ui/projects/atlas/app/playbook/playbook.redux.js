@@ -20,6 +20,7 @@ var CONST = {
     FETCH_STATIC_LISTS: 'FETCH_STATIC_LISTS',
     FETCH_ACCOUNTS_DATA: 'FETCH_ACCOUNTS_DATA',
     FETCH_ACCOUNTS_COUNT: 'FETCH_ACCOUNTS_COUNT',
+    FETCH_ENTITIES_COUNT: 'FETCH_ENTITIES_COUNT',
     SAVE_LAUNCH: 'SAVE_LAUNCH',
     SAVE_PLAY: 'SAVE_PLAY',
     ACCOUNTS_COVERAGE: 'ACCOUNTS_COVERAGE',
@@ -202,6 +203,24 @@ export const actions = {
         // var query = { 'preexisting_segment_name': data.targetSegment.name };
         httpService.post(`/pls/accounts/count`, query, observer, {});
     },
+    fetchEntitiesCounts: (query, cb, deferred) => {
+        deferred = deferred || { resolve: (data) => data }
+        let observer = new Observer(
+            response => {
+                httpService.unsubscribeObservable(observer);
+                store.dispatch({
+                    type: CONST.FETCH_ENTITIES_COUNT,
+                    payload: response.data
+                });
+                if(cb && typeof cb === 'function') {
+                    cb(response.data);
+                }
+                return deferred.resolve(response.data);
+            }
+        );
+        // var query = { 'preexisting_segment_name': data.targetSegment.name }; ??
+        httpService.post(`/pls/entities/counts`, query, observer, {});
+    },
     fetchTypes: (cb, deferred) => {
         deferred = deferred || { resolve: (data) => data }
         let observer = new Observer(
@@ -270,9 +289,19 @@ export const actions = {
         if(playstore && (playstore.lookupIdMapping && playstore.lookupIdMapping.MAP) && (playstore.userDocument && playstore.userDocument.accessToken)) {
             let map = playstore.lookupIdMapping.MAP.find(function(system) { return system.externalSystemName === opts.externalSystemName }),
                 trayAuthenticationId = (map  && map.externalAuthentication ? map.externalAuthentication.trayAuthenticationId : null),
-                useraccesstoken = playstore.userDocument.accessToken;
+                useraccesstoken = playstore.userDocument.accessToken,
+                urls = (externalSystemName) => {
+                    let urls = {
+                        default: `/tray/${externalSystemName.toLowerCase()}/audiences`,
+                        Marketo: '/tray/marketo/programs'
+                    };
+                    if(urls[externalSystemName]) {
+                        return urls[externalSystemName];
+                    }
+                    return urls['default'];
+                };
 
-            http.get('/tray/marketo/programs', {
+            http.get(urls(opts.externalSystemName), {
                 params: {
                     trayAuthenticationId: trayAuthenticationId
                 }, 
@@ -389,6 +418,10 @@ export const actions = {
             launchType: launchType,
             channelConfig: channelConfig
         };
+
+        if(opts.debug) {
+            return console.log(channelObj);
+        }
 
         http[method](`/pls/play/${play_name}/channels/${id}${launchNow}`, channelObj).then((response) => {
             if(id) {
@@ -536,6 +569,11 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 accountsCount: action.payload
+            }
+        case CONST.FETCH_ENTITIES_COUNT:
+            return {
+                ...state,
+                entitiesCount: action.payload
             }
         case CONST.FETCH_TYPES:
             return {

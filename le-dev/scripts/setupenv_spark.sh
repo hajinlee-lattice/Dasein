@@ -54,8 +54,8 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     if [[ ! -f "${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip" ]]; then
         APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
         echo "Use apache mirror: ${APACHE_MIRROR}"
-        SPARK_TGZ_URL="${APACHE_MIRROR}incubator/livy/${LIVY_VERSION}/${ARTIFACT_NAME}.zip"
-        wget ${SPARK_TGZ_URL} -O ${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip
+        LIVY_TGZ_URL="${APACHE_MIRROR}/incubator/livy/${LIVY_VERSION}/${ARTIFACT_NAME}.zip"
+        wget ${LIVY_TGZ_URL} -O ${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip
     fi
 
     if [[ -d "${ARTIFACT_DIR}/${ARTIFACT_NAME}" ]]; then

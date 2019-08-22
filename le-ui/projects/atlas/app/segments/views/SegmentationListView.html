@@ -96,7 +96,7 @@
                         </p> -->
                         <p ng-if="!vm.invalidSegments.has(segment.name)"
                             ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index"
-                            class="attributesDisplay">
+                            class="text-ellipsis attributesDisplay">
                             {{attr.label}}<em>{{attr.value}}</em>
                         </p>
                         <p ng-if="vm.invalidSegments.has(segment.name)" class="attributesDisplay centered italicized">

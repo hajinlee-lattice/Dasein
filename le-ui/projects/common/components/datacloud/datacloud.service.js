@@ -52,7 +52,8 @@ angular.module('common.datacloud')
                 enrichmentsTotal: -1,
                 tabSection: 'browse',
                 category: null,
-                subcategory: null
+                subcategory: null,
+                subheadercategory: null
             };
             this.feedbackModal = {
                 show: false,

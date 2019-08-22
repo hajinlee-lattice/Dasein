@@ -85,6 +85,8 @@ export default class OverviewSummaryContainer extends Component {
             }
         }
         if(!Object.keys(opts).length) { // no changes were made
+            this.state.saving = false;
+            this.setState(this.state);
             return false;
         }
 
@@ -118,7 +120,11 @@ export default class OverviewSummaryContainer extends Component {
             if(type.displayName === play.playType.displayName) {
                 selected = true;
             }
-            options.push(<li className={`${selected ? 'selected' : ''}`} onClick={() => {save(type)} }>{type.displayName}</li>);
+            options.push(
+                <li className={`${selected ? 'selected' : ''}`} onClick={() => {save(type)} }>
+                    {type.displayName}
+                </li>
+            );
         });
 
         let toggle = () => {
@@ -181,8 +187,7 @@ export default class OverviewSummaryContainer extends Component {
                 types = this.state.types,
                 defaultDescriptionText = (!this.state.editing.description && !play.description ? 'Add a description' : '');
 
-// console.log(this.state.saving, defaultDescriptionText);
-                if(this.state.saving) {
+                if(this.state.saving && !defaultDescriptionText) {
                     defaultDescriptionText = '';
                 }
             return (
@@ -252,8 +257,8 @@ export default class OverviewSummaryContainer extends Component {
                             <div className="le-flex-h-panel boxes-container">
                                 {this.makeSummaryBoxes({
                                     Segment: play.targetSegment.display_name,
-                                    Accounts: play.targetSegment.accounts.toLocaleString(),
-                                    Contacts: play.targetSegment.contacts.toLocaleString(),
+                                    Accounts: (play.targetSegment && play.targetSegment.accounts ? play.targetSegment.accounts.toLocaleString() : ''),
+                                    Contacts: (play.targetSegment && play.targetSegment.contacts ? play.targetSegment.contacts.toLocaleString() : ''),
                                     "Scoring Model": (play.ratingEngine ? play.ratingEngine.displayName : null)
                                 })}
                             </div>

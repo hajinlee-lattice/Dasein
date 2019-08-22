@@ -6,7 +6,10 @@ var CONST = {
     USER_ID: 'USER_ID',
     USER_DOCUMENT: 'USER_DOCUMENT',
     AUTH_CODE: 'AUTHORIZATION_CODE',
-    EXTERNAL_INTEGRATION_ENABLED: 'EXTERNAL_INTEGRATION_ENABLED'
+    EXTERNAL_INTEGRATION_ENABLED: 'EXTERNAL_INTEGRATION_ENABLED', //MARKETO
+    FACEBOOK_INTEGRATION_ENABLED: 'FACEBOOK_INTEGRATION_ENABLED',
+    LINKEDIN_INTEGRATION_ENABLED: 'LINKEDIN_INTEGRATION_ENABLED',
+    OUTREACH_INTEGRATION_ENABLED: 'OUTREACH_INTEGRATION_ENABLED'
 };
 const initialState = {
     templates: []
@@ -50,6 +53,27 @@ export const actions = {
             type: CONST.EXTERNAL_INTEGRATION_ENABLED,
             isExternalIntegrationEnabled: isExternalIntegrationEnabled
         });
+    },
+    setFacebookIntegrationEnabled: (isFacebookIntegrationEnabled) => {
+        console.log(isFacebookIntegrationEnabled);
+        return store.dispatch({
+            type: CONST.FACEBOOK_INTEGRATION_ENABLED,
+            isFacebookIntegrationEnabled: isFacebookIntegrationEnabled
+        });
+    },
+    setLinkedInIntegrationEnabled: (isLinkedInIntegrationEnabled) => {
+        console.log(isLinkedInIntegrationEnabled);
+        return store.dispatch({
+            type: CONST.LINKEDIN_INTEGRATION_ENABLED,
+            isLinkedInIntegrationEnabled: isLinkedInIntegrationEnabled
+        });
+    },
+    setOutreachIntegrationEnabled: (isOutreachIntegrationEnabled) => {
+        console.log(isOutreachIntegrationEnabled);
+        return store.dispatch({
+            type: CONST.OUTREACH_INTEGRATION_ENABLED,
+            isOutreachIntegrationEnabled: isOutreachIntegrationEnabled
+        });
     }
 };
 
@@ -63,6 +87,12 @@ export const reducer = (state = {}, action) => {
             return Object.assign({}, state, { userId: action.userId });
         case CONST.EXTERNAL_INTEGRATION_ENABLED:
             return Object.assign({}, state, { isExternalIntegrationEnabled: action.isExternalIntegrationEnabled });
+        case CONST.FACEBOOK_INTEGRATION_ENABLED:
+            return Object.assign({}, state, { isFacebookIntegrationEnabled: action.isFacebookIntegrationEnabled });
+        case CONST.LINKEDIN_INTEGRATION_ENABLED:
+            return Object.assign({}, state, { isLinkedInIntegrationEnabled: action.isLinkedInIntegrationEnabled });
+        case CONST.OUTREACH_INTEGRATION_ENABLED:
+            return Object.assign({}, state, { isOutreachIntegrationEnabled: action.isOutreachIntegrationEnabled });
         default:
             return state;
     }

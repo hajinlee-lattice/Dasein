@@ -17,12 +17,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext.PlayLaunchSparkContextBuilder;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -58,7 +60,9 @@ public class TestSqoopTestNG extends TestJoinTestNGBase {
         playLaunch.setId(PlayLaunch.generateLaunchId());
         playLaunch.setDestinationAccountId(destinationAccountId);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
+        MetadataSegment segment = new MetadataSegment();
         Play play = new Play();
+        play.setTargetSegment(segment);
         play.setDescription("play description");
         play.setName(UUID.randomUUID().toString());
         playLaunch.setPlay(play);
@@ -73,8 +77,18 @@ public class TestSqoopTestNG extends TestJoinTestNGBase {
         aiModel.setRatingEngine(ratingEngine);
         ratingEngine.setLatestIteration(aiModel);
 
-        PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContext(tenant, play.getName(), playLaunch.getId(),
-                playLaunch, play, launchTime, ratingId, aiModel);
+        PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
+                .tenant(tenant)//
+                .playName(play.getName())//
+                .playLaunchId(playLaunch.getId())//
+                .playLaunch(playLaunch)//
+                .play(play)//
+                .ratingEngine(ratingEngine)//
+                .segment(segment)//
+                .launchTimestampMillis(launchTime)//
+                .ratingId(ratingId)//
+                .publishedIteration(aiModel)//
+                .build();
         return sparkContext;
     }
 

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -42,18 +44,20 @@ public class DataLakeAccountResource {
     private final DataLakeService dataLakeService;
     private final Oauth2RestApiProxy tenantProxy;
     private final PeriodTransactionProxy periodTransactionProxy;
+    private final BatonService batonService;
 
     @Inject
     public DataLakeAccountResource(DataLakeService dataLakeService, Oauth2RestApiProxy tenantProxy,
-            PeriodTransactionProxy periodTransactionProxy) {
+            PeriodTransactionProxy periodTransactionProxy, BatonService batonService) {
         this.dataLakeService = dataLakeService;
         this.tenantProxy = tenantProxy;
         this.periodTransactionProxy = periodTransactionProxy;
+        this.batonService = batonService;
     }
 
     @Inject
     @Qualifier(AccountDanteFormatter.Qualifier)
-    private AccountDanteFormatter accountDanteFormatter;
+    private Provider<AccountDanteFormatter> accountDanteFormatterProvider;
 
     @RequestMapping(value = "/{accountId}/{attributeGroup}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -70,6 +74,7 @@ public class DataLakeAccountResource {
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
         try {
+            CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
             List<String> requiredAttributes = Collections.singletonList(InterfaceName.SpendAnalyticsSegment.name());
             DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup, requiredAttributes);
             if (accountRawData.getData().size() != 1) {
@@ -77,7 +82,9 @@ public class DataLakeAccountResource {
                 log.warn("Failed to get account data for account id: " + message);
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
-            return new FrontEndResponse<>(accountDanteFormatter.format(accountRawData.getData().get(0)));
+            AccountDanteFormatter accountFormatter = accountDanteFormatterProvider.get();
+            accountFormatter.setIsEntityMatchEnabled(batonService.isEntityMatchEnabled(customerSpace));
+            return new FrontEndResponse<>(accountFormatter.format(accountRawData.getData().get(0)));
         } catch (LedpException le) {
             log.error("Failed to get account data for account id: " + accountId, le.getMessage());
             return new FrontEndResponse<>(le.getErrorDetails());
@@ -100,8 +107,11 @@ public class DataLakeAccountResource {
                 log.warn("Failed to get account data for account id: " + message);
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
+            CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
+            AccountDanteFormatter accountFormatter = accountDanteFormatterProvider.get();
+            accountFormatter.setIsEntityMatchEnabled(batonService.isEntityMatchEnabled(customerSpace));
             return new FrontEndResponse<>(
-                    Collections.singletonList(accountDanteFormatter.format(accountRawData.getData().get(0))));
+                    Collections.singletonList(accountFormatter.format(accountRawData.getData().get(0))));
         } catch (LedpException le) {
             log.error("Failed to get account data for account id: " + accountId, le);
             return new FrontEndResponse<>(le.getErrorDetails());
@@ -117,7 +127,10 @@ public class DataLakeAccountResource {
     public FrontEndResponse<List<String>> getAccountSegmentsInDanteFormat() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         try {
-            return new FrontEndResponse<>(accountDanteFormatter
+            AccountDanteFormatter accountFormatter = accountDanteFormatterProvider.get();
+            accountFormatter
+                    .setIsEntityMatchEnabled(batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
+            return new FrontEndResponse<>(accountFormatter
                     .format(periodTransactionProxy.getAllSpendAnalyticsSegments(customerSpace).getData()));
         } catch (LedpException le) {
             log.error("Failed to get spend analytics segments for customerspace : " + customerSpace, le);

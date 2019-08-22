@@ -1,12 +1,15 @@
 package com.latticeengines.ldc_collectiondb.entitymgr.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -40,39 +43,131 @@ public class RawCollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<RawC
 
     }
 
-    @Override
-    public void saveRequests(Iterable<RawCollectionRequest> reqs) {
+    private void saveRequestsInternal(List<RawCollectionRequest> reqBuf, int bufCap, Iterable<String> domains, String vendor, String reqId) {
 
-        repository.saveAll(reqs);
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+
+        for (String domain : domains) {
+
+            //add to buf
+            reqBuf.add(RawCollectionRequest.generate(vendor, domain, ts, reqId));
+
+            //save
+            if (reqBuf.size() == bufCap) {
+
+                repository.saveAll(reqBuf);
+                reqBuf.clear();
+                ts = new Timestamp(System.currentTimeMillis());
+            }
+
+        }
+
+        //save
+        if (reqBuf.size() > 0) {
+
+            repository.saveAll(reqBuf);
+            reqBuf.clear();
+
+        }
 
     }
 
     @Override
-    public void saveDomains(Iterable<String> domains, String reqId) {
+    @Transactional
+    public void saveRequests(Iterable<String> domains, String reqId) {
 
+        int batch = 512;
+        List<RawCollectionRequest> reqBuf = new ArrayList<>(batch);
         for (String vendor: VendorConfig.EFFECTIVE_VENDOR_SET) {
 
-            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            saveRequestsInternal(reqBuf, batch, domains, vendor, reqId);
 
-            for (String domain : domains) {
+        }
 
-                repository.save(RawCollectionRequest.generate(vendor, domain, ts, reqId));
+    }
+
+    @Override
+    @Transactional
+    public void saveRequests(Iterable<String> domains, String vendor, String reqId) {
+
+        int batch = 512;
+        List<RawCollectionRequest> reqBuf = new ArrayList<>(batch);
+        saveRequestsInternal(reqBuf, batch, domains, vendor, reqId);
+
+    }
+
+    @Override
+    @Transactional
+    public void updateTransferred(Iterable<RawCollectionRequest> added, BitSet filter, boolean deleteFiltered) {
+
+        //temp buf
+        int batch = 512;
+        List<RawCollectionRequest> updBuf = new ArrayList<>(batch);
+        List<RawCollectionRequest> delBuf = new ArrayList<>(batch);
+
+        int i = 0;
+        for (RawCollectionRequest req : added) {
+
+            //add to temp del/update buf
+            boolean toDel = filter.get(i);
+            if (!toDel) {
+
+                updBuf.add(req);
+
+            } else if (deleteFiltered) {
+
+                delBuf.add(req);
 
             }
+            ++i;
+
+            //update in batch
+            if (updBuf.size() == batch) {
+
+                repository.saveAll(updBuf);
+                updBuf.clear();
+
+            }
+
+            //delete in batch
+            if (delBuf.size() == batch) {
+
+                repository.deleteAll(delBuf);
+                delBuf.clear();
+
+            }
+        }
+
+        //update if buf not empty
+        if (updBuf.size() > 0) {
+
+            repository.saveAll(updBuf);
+            updBuf.clear();
+
+        }
+
+        //delete if buf not empty
+        if (delBuf.size() > 0) {
+
+            repository.deleteAll(delBuf);
+            delBuf.clear();
+
         }
 
     }
 
     @Override
     public void cleanupRequestsBetween(Timestamp start, Timestamp end) {
+
         repository.removeByRequestedTimeBetween(start, end);
+
     }
 
-
     @Override
-    public void cleanupTransferred() {
+    public void cleanupTransferred(int batch) {
 
-        repository.removeByTransferred(true);
+        long minPid = readerRepository.getMinPid();
+        repository.removeByTransferredAndPidLessThan(true, minPid + batch);
 
     }
 }

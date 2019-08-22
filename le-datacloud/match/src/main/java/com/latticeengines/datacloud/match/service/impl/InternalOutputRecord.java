@@ -52,6 +52,7 @@ public class InternalOutputRecord extends OutputRecord {
     private DnBReturnCode dnbCode;
     private MatchHistory fabricMatchHistory = new MatchHistory();
     private Date requestTimeStamp = new Date();
+    private String dataCloudVersion;
 
     // field names that should be cleared out in the output
     private Set<String> fieldsToClear;
@@ -292,6 +293,14 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setRequestTimeStamp(Date requestTimeStamp) {
         this.requestTimeStamp = requestTimeStamp;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
     public Set<String> getFieldsToClear() {

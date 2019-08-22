@@ -160,18 +160,18 @@ angular
                     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK"),
                     icon: "ico-playbook"
                 }, {
-                    if: store.showPlayBook && store.alwaysOnCampaigns,
-                    disabled: !store.isDataAvailable && store.showCdlEnabledPage,
-                    active: function () {
-                        return store.state.includes('home.playbook.listchannels') && !store.isTransitingFrom(['home.playbook']);
-                    },
-                    transitioning: function () {
-                        return store.isTransitingTo(['home.playbook']);
-                    },
-                    sref: "home.playbook.listchannels",
-                    label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK") + ' (new)',
-                    icon: "ico-playbook"
-                }, {
+                //     if: store.showPlayBook && store.alwaysOnCampaigns,
+                //     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
+                //     active: function () {
+                //         return store.state.includes('home.playbook.listchannels') && !store.isTransitingFrom(['home.playbook']);
+                //     },
+                //     transitioning: function () {
+                //         return store.isTransitingTo(['home.playbook']);
+                //     },
+                //     sref: "home.playbook.listchannels",
+                //     label: ResourceUtility.getString("NAVIGATION_SIDEBAR_LP_PLAY_BOOK") + ' (new)',
+                //     icon: "ico-playbook"
+                // }, {
                     if: !store.showCdlEnabledPage,
                     disabled: !store.isDataAvailable && store.showCdlEnabledPage,
                     active: function () {

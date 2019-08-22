@@ -86,19 +86,24 @@
                         left: -15px;
                         padding: 0;
                         font-size: 12px;
-                        color: black;
-                        background: rgba(255,255,255,1);
-                        box-shadow: 0px 0px 6px -1px rgba(0,0,0,0.75);
+                        color: #eee;
+                        background: #222;
+                        border-radius: 0 0 6px 6px;
+                        //box-shadow: 0px 0px 6px -1px rgba(0,0,0,0.75);
                         z-index: 1000;
+                        overflow: hidden;
                         &.show-type {
                             display: initial;
                         }
                         & > li {
-                            padding: 5px 15px;
+                            padding: 4px 11px;
                             cursor: pointer;
-                            &.selected,
+                            &.selected {
+                                color: #f16a22;
+                            }
                             &:hover {
-                                background: rgba(0,0,0,0.1);
+                                background: #444;
+                                color: #f16a22;
                             }
                         }
                     }
@@ -171,6 +176,7 @@
                 padding: 0 0.7%;
                 padding-left: 30px;
                 opacity: 0.7;
+                min-width: 200px;
                 span {
                     padding: 0;
                     &:before {

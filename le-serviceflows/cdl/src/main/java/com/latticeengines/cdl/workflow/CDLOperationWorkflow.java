@@ -52,7 +52,7 @@ public class CDLOperationWorkflow extends AbstractWorkflow<CDLOperationWorkflowC
                 .next(deleteFileUploadStep)//
                 .next(cleanupByUploadWrapper)//
                 .next(operationExecuteStep)//
-                .next(exportCleanupToS3)
+                .next(exportCleanupToS3) //
                 .listener(maintenanceOperationListener)//
                 .build();
     }

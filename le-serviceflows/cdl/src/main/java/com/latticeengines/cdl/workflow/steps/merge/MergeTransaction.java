@@ -51,7 +51,6 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
@@ -84,6 +83,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private boolean entityMatchEnabled;
 
+    private boolean emptyRawStore;
+
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
@@ -94,7 +95,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         }
 
         mergedBatchStoreName = TableRoleInCollection.ConsolidatedRawTransaction.name() + "_Merged";
-        initOrClonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
+        initOrCloneRawStore(TableRoleInCollection.ConsolidatedRawTransaction, SchemaInterpretation.TransactionRaw);
         rawTable = dataCollectionProxy.getTable(customerSpace.toString(), //
                 TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         if (rawTable == null) {
@@ -264,7 +265,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         config.setTrxTimeField(InterfaceName.TransactionTime.name());
         config.setTrxDateField(InterfaceName.TransactionDate.name());
         config.setTrxDayPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -273,8 +274,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         addBaseTables(step, rawTable.getName());
         step.setInputSteps(Collections.singletonList(dailyStep));
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
-        step.setConfiguration(appendEngineConf(getConsolidateDataTxmfrConfig(false, false, true),
-                getEngineConfig(ETLEngineLoad.HEAVY)));
+        step.setConfiguration(appendEngineConf(getConsolidateDataTxmfrConfig(false, false, true), lightEngineConfig()));
 
         return step;
     }
@@ -288,7 +288,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         config.setLongFields(longFields);
         config.setIntFields(intFields);
         config.setCustomField(InterfaceName.CustomTrxField.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -304,7 +304,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         targetTable.setNamePrefix(diffTablePrefix);
         step.setTargetTable(targetTable);
 
-        step.setConfiguration(JsonUtils.serialize(config));
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -346,11 +346,17 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-        step.setConfiguration(JsonUtils.serialize(config));
+        // If raw store doesn't exist before: if some periods fail during
+        // distribution, they could be deleted and retry
+        // If raw store exists: period data is appended to existing period file,
+        // if some periods fail during distribution, cannot retry due to
+        // existing period data could be lost
+        config.setRetryable(emptyRawStore);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
-    private void initOrClonePeriodStore(TableRoleInCollection role, SchemaInterpretation schema) {
+    private void initOrCloneRawStore(TableRoleInCollection role, SchemaInterpretation schema) {
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
         if (StringUtils.isNotBlank(activeTableName)) {
             log.info("Cloning " + role + " from " + active + " to " + inactive);
@@ -358,6 +364,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         } else {
             log.info("Building a brand new " + role);
             buildPeriodStore(role, schema);
+            emptyRawStore = true;
         }
     }
 

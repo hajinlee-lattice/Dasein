@@ -136,7 +136,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         Restriction accountRestriction = Restriction.builder().and(b1, b2).build();
 
         Restriction b3 = createBucketRestriction( //
-                BusinessEntity.Contact, "Attr1", ComparisonType.IS_NOT_NULL);
+                BusinessEntity.Contact, "Attr1", ComparisonType.EQUAL, 4);
         Restriction b4 = createBucketRestriction( //
                 BusinessEntity.Contact, "Attr2", ComparisonType.IN_COLLECTION, 1, 2);
         Restriction contactRestriction = Restriction.builder().and(b3, b4).build();
@@ -175,8 +175,9 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         ((LogicalRestriction) accountRestriction).getRestrictions().set(0, b1);
         ((LogicalRestriction) accountRestriction).getRestrictions().set(1, b2);
 
+        /* Disable this check for now because we need to relax validation until UI doesn't set "" as value in array
         Restriction b3c = cloneRestriction(b3);
-        ((BucketRestriction) b3c).getBkt().setValues(Collections.singletonList(2));
+        ((BucketRestriction) b3c).getBkt().setValues(Collections.emptyList());
         ((LogicalRestriction) contactRestriction).getRestrictions().set(0, b3c);
         segment = createSegment("Invalid Bucket b3", accountRestriction, contactRestriction);
         try {
@@ -186,6 +187,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_40057);
             Assert.assertTrue(e.getMessage().contains("Contact.Attr1"), e.getMessage());
         }
+        */
 
         Restriction b4c = cloneRestriction(b4);
         ((BucketRestriction) b4c).getBkt().setValues(Collections.emptyList());
