@@ -26,7 +26,7 @@ public class RecommendationAvroToCsvTransformerTestNG {
     private Map<String, String> contactDisplayNames;
     private Schema schema;
 
-    @BeforeClass
+    @BeforeClass(groups = "unit")
     public void setup() throws IOException {
         accountDisplayNames = readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv");
         Assert.assertTrue(MapUtils.isNotEmpty(accountDisplayNames));
