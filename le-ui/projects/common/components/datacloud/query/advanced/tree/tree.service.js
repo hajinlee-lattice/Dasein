@@ -107,7 +107,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'LESS_THAN': '<',
             'LESS_OR_EQUAL': '<=',
             'IS_NULL': 'is empty',
-            'IS_NOT_NULL': 'is present'
+            'IS_NOT_NULL': 'is present',
+            'IN_COLLECTION': 'is equal to'
         };
 
         this.prevBucketCountAttr = null;

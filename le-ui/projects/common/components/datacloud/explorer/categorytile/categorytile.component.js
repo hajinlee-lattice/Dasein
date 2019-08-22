@@ -15,9 +15,16 @@ export default function () {
 
             angular.extend(vm, {});
 
+            var subheader = DataCloudStore.getRatingIterationFilter();
+            $scope.$watch(subheader, function(newVal, oldVal) {
+                if(newVal !== oldVal) {
+                    vm.setCategory(DataCloudStore.getMetadata('subheadercategory'));
+                }
+            });
+
             vm.setCategory = function (category) {
-                vm.category = category;
                 DataCloudStore.setMetadata('category', category);
+                vm.category = category;
             }
 
             vm.categoryClass = function (category) {
