@@ -186,7 +186,10 @@ public class ModelRetrieverUnitTestNG {
         Assert.assertNotNull(scoringArtifacts);
         Assert.assertEquals(cache.asMap().size(), 2);
         System.out.println("map key set is " + cache.asMap().keySet());
-        Assert.assertFalse(cache.asMap().keySet().toString().contains(modelId1));
+        Assert.assertFalse(
+                cache.asMap().keySet().toString().contains(modelId1)
+                        && cache.asMap().keySet().toString().contains(modelId2),
+                "One of the previous models should be evicted");
 
         // Test case where exception happens during fetching the pmml file size
         doThrow(new LedpException(LedpCode.LEDP_31000, new String[] { "modelPath" })).when(modelRetriever)
@@ -196,7 +199,10 @@ public class ModelRetrieverUnitTestNG {
         Assert.assertNotNull(scoringArtifacts);
         Assert.assertEquals(cache.asMap().size(), 3);
         System.out.println("map key set is " + cache.asMap().keySet());
-        Assert.assertFalse(cache.asMap().keySet().toString().contains(modelId1));
+        Assert.assertFalse(
+                cache.asMap().keySet().toString().contains(modelId1)
+                        && cache.asMap().keySet().toString().contains(modelId2),
+                "One of the previous models should be evicted");
 
         // TODO going to remove the comment after the behavior of Guava is clear
         // Test case where pmml file size is too large
