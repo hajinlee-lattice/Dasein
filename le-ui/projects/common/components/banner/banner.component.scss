@@ -1,9 +1,14 @@
 div.le-banner {
-    .blue-badge {
-        cursor: pointer;
-    }
-    .long-word {
-        //overflow-wrap: break-word;
-        word-wrap: break-word;
-    }
+	.blue-badge {
+		cursor: pointer;
+	}
+	.long-word {
+		//overflow-wrap: break-word;
+		word-wrap: break-word;
+	}
+	.messaging-message {
+		width: 100%;
+		max-height: 10.5em;
+		overflow: auto;
+	}
 }

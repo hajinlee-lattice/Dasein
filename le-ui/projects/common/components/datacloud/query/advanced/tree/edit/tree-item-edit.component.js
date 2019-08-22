@@ -331,7 +331,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     if (value !== 'Custom') {
                         var bucket = vm.getCubeBktList()[0];
                         if (bucket) {
-                            vm.vm.editMode == 'Preset' == bucket.Lbl;
+                            vm.editMode == 'Preset' == bucket.Lbl;
                         }
                         vm.changePreset(bucket);
                     } else {

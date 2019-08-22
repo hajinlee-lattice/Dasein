@@ -302,7 +302,9 @@ angular
                     return config;
                 }
 
-
+                // console.log('getConfigField vm.getPeriodNumericalConfString()',vm.periodNumericalConf,vm.getPeriodNumericalConfString());
+                // var values = JSON.parse(vm.getPeriodNumericalConfString());
+                // var config = values[Object.keys(values)[position]];
                 vm.isPeriodRangeValid = function () {
                     var valid = true;
                     var confFrom = getConfigField(0);
