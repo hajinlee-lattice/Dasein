@@ -111,6 +111,7 @@ angular
 
         vm.clickIterationFilter = function (type) {
             DataCloudStore.setRatingIterationFilter(type);
+            $rootScope.$broadcast('iterationFilterChange',type);
         }
 
         vm.checkIterationFilter = function (type) {
