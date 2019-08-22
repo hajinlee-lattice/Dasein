@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
 import scala.concurrent.Future;
@@ -270,10 +271,14 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         List<InternalOutputRecord> currentCompletedRecords = new ArrayList<>();
         for (int i = 0; i < futures.size(); i++) {
             Future<Object> future = futures.get(i);
-            InternalOutputRecord internRecord = internalRecords.get(i);
+            InternalOutputRecord record = internalRecords.get(i);
             if (future == null) {
-                if (CollectionUtils.isNotEmpty(internRecord.getErrorMessages())) {
-                    log.warn("There's match input errors=" + String.join("|", internRecord.getErrorMessages()));
+                if (isAttrLookup(processorContext) && record.isMatched()) {
+                    // can already found custom account during pre-lookup by account ID
+                    currentCompletedfutures.add(null);
+                    currentCompletedRecords.add(record);
+                } else if (CollectionUtils.isNotEmpty(record.getErrorMessages())) {
+                    log.warn("There's match input errors=" + String.join("|", record.getErrorMessages()));
                 } else {
                     log.warn("Match future is null for unknown reason!");
                 }
@@ -281,7 +286,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             }
             if (future.isCompleted()) {
                 currentCompletedfutures.add(future);
-                currentCompletedRecords.add(internRecord);
+                currentCompletedRecords.add(record);
             }
         }
         if (currentCompletedfutures.size() > 0) {
@@ -293,6 +298,16 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             internalRecords.removeAll(currentCompletedRecords);
         }
         matchMonitorService.pushMetrics("FUTURES", String.format("futures in actor system: %d", futures.size()));
+    }
+
+    private boolean isAttrLookup(ProcessorContext ctx) {
+        if (ctx == null || ctx.getOriginalInput() == null) {
+            return false;
+        }
+
+        // check only entity match attr lookup for now, add cdl lookup later if
+        // necessary
+        return OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(ctx.getOriginalInput().getOperationalMode());
     }
 
     private void checkIfProceed(ProcessorContext processorContext) {
