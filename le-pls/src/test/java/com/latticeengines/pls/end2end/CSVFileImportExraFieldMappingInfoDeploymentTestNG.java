@@ -8,9 +8,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.ExtraFieldMappingInfo;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 
 public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
@@ -39,9 +41,15 @@ public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileIm
 
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(extraInfoSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            // html special character in user field is escaped
+            if (fieldMapping.getUserField().equals("Test HTML &amp")) {
+                Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.INTEGER);
+            }
+        }
         ExtraFieldMappingInfo extraInfo = fieldMappingDocument.getExtraFieldMappingInfo();
         Assert.assertEquals(extraInfo.getMissedMappings().size(), 1);
-        Assert.assertEquals(extraInfo.getNewMappings().size(), 1);
+        Assert.assertEquals(extraInfo.getNewMappings().size(), 2);
         Assert.assertTrue(extraInfo.getExistingMappings().size() > 1);
 
         modelingFileMetadataService.resolveMetadata(extraInfoSF.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
