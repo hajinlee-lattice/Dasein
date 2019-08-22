@@ -258,7 +258,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info("contactDisplayNames map: " + contactDisplayNames);
 
             putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
-            putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, accountDisplayNames);
+            putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, contactDisplayNames);
         }
     }
 
