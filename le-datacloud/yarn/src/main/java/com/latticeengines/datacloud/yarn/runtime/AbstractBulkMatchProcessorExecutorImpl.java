@@ -196,7 +196,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             throws IOException {
         List<GenericRecord> records = new ArrayList<>();
         for (OutputRecord outputRecord : outputRecords) {
-            if (outputRecord.getOutput() == null || outputRecord.getOutput().isEmpty()) {
+            if (outputRecord.getOutput() == null) {
                 continue;
             }
 
