@@ -244,8 +244,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
         playProxy.publishTalkingPoints(customerSpace.toString(), playName);
     }
 
-    @VisibleForTesting
-    void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
+    private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
         List<ColumnMetadata> columnMetadata = playLaunchContext.getFieldMappingMetadata();
         if (CollectionUtils.isNotEmpty(columnMetadata)) {
             Map<String, String> contactDisplayNames = columnMetadata.stream()
