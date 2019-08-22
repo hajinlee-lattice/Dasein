@@ -41,12 +41,15 @@ public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileIm
 
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(extraInfoSF.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        boolean columnExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             // html special character in user field is escaped
-            if (fieldMapping.getUserField().equals("Test HTML &amp")) {
+            if (fieldMapping.getUserField().equals("Test_HTML_&amp;")) {
+                columnExist = true;
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.INTEGER);
             }
         }
+        Assert.assertTrue(columnExist);
         ExtraFieldMappingInfo extraInfo = fieldMappingDocument.getExtraFieldMappingInfo();
         Assert.assertEquals(extraInfo.getMissedMappings().size(), 1);
         Assert.assertEquals(extraInfo.getNewMappings().size(), 2);
