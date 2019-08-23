@@ -347,22 +347,30 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                         + bestEffortMapping.getTimeFormatString();
 
                         // deal with case format can't parse the value
-                        String errorValue = resolver.checkUserDateType(fieldMapping);
-                        if (errorValue != null){
+                        StringBuilder timezoneMessage = new StringBuilder();
+                        String errorValue = resolver.checkUserDateType(fieldMapping, timezoneMessage);
+                        if (errorValue != null || timezoneMessage.length() > 0) {
                             // deal with special case that format in field mapping provided by system and field mapping
                             // after user changed are inconsistent
                             String message;
-                            if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
-                                message = String
-                                        .format("%s is set as %s from the system-provided %s in your file.", userField,
-                                                userFormat, correctFormat);
-                            } else {
-                                message = String
-                                        .format("%s is set as %s which can't parse the %s from uploaded file.", userField,
-                                                userFormat, errorValue);
+                            if (errorValue != null) {
+                                if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
+                                    message = String
+                                            .format("%s is set as %s from the system-provided %s in your file.", userField,
+                                                    userFormat, correctFormat);
+                                } else {
+                                    // this check the format inherit from the first time's date/time setting
+                                    message = String
+                                            .format("%s is set as %s which can't parse the %s from uploaded file.", userField,
+                                                    userFormat, errorValue);
+                                }
+                                validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                        message));
                             }
-                            validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                                    message));
+                            if (timezoneMessage.length() > 0) {
+                                validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
+                                        timezoneMessage.toString()));
+                            }
                         } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
                             // this is case that user change the date/time format which can be parsed
                             String message =  String

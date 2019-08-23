@@ -513,10 +513,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             boolean matchTZ = TimeStampConvertUtils.isIso8601TandZFromDateTime(fieldCsvValue);
             if (isISO8601 && !matchTZ) {
                 // time zone is in ISO-8601, validate its value using T&Z
-                throw new IllegalArgumentException("Value isn't in ISO-8601 format");
+                throw new IllegalArgumentException("Time zone should be part of value but is not.");
             } else if (!isISO8601 && matchTZ){
                 // time zone is not in ISO-8601, validate value not using T&Z
-                throw new IllegalArgumentException("Value is in ISO-8601 format");
+                throw new IllegalArgumentException(String.format("Time zone set to %s. Value should not contain time " +
+                        "zone setting.", timeZone));
             }
         }
     }

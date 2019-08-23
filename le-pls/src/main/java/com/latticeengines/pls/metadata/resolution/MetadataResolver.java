@@ -670,22 +670,27 @@ public class MetadataResolver {
     }
 
 
-    /*
-     * check the given format can be used to parse column value, if number of
-     * column value can be parsed is more than 10% of size of columnFields
-     * return null if the check can pass, return one error value if the check can't pass
+    /**
+     *
+     * @param fieldMapping
+     * @param timeZoneMessage indicate the message returned by time zone validation
+     * check the given format can be used to parse column value, if number of column value can be parsed is more than
+     * 10% of size of columnFields return null if the check can pass, return one error value if the check can't pass
      */
     @VisibleForTesting
-    public String checkUserDateType(FieldMapping fieldMapping) {
+    public String checkUserDateType(FieldMapping fieldMapping, StringBuilder timeZoneMessage) {
         String columnHeaderName = fieldMapping.getUserField();
         String errorValue = null;
         List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
         String dateFormat = fieldMapping.getDateFormatString();
         String timeFormat = fieldMapping.getTimeFormatString();
+        String timezone = fieldMapping.getTimezone();
+        boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
         if (StringUtils.isEmpty(dateFormat)) {
             return null;
         }
         int conformingDateCount = 0;
+        int nonConformingTimeZoneCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
         String javaDateFormat = TimeStampConvertUtils.userToJavaDateFormatMap.get(dateFormat);
         String javaTimeFormat = StringUtils.isEmpty(timeFormat) ? "" : TimeStampConvertUtils.userToJavaTimeFormatMap.get(timeFormat);
@@ -697,6 +702,12 @@ public class MetadataResolver {
                 TemporalAccessor dateTime = null;
                 String trimmedField = columnField.trim().replaceFirst("(\\s{2,})",
                         TimeStampConvertUtils.SYSTEM_DELIMITER);
+                // validate time zone before stripe out the T&Z
+                boolean matchTZ = TimeStampConvertUtils.isIso8601TandZFromDateTime(trimmedField);
+                if ((isISO8601 && !matchTZ) || (!isISO8601 && matchTZ)) {
+                    nonConformingTimeZoneCount++;
+                }
+
                 trimmedField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(trimmedField);
                 try {
                     dateTime = dtf.parse(trimmedField);
@@ -713,6 +724,15 @@ public class MetadataResolver {
                 if (errorValue == null && dateTime == null) {
                     errorValue = columnField;
                 }
+
+            }
+        }
+        if (nonConformingTimeZoneCount > 0) {
+            if (isISO8601) {
+                timeZoneMessage.append("Time zone should be part of value but is not.");
+            } else {
+                timeZoneMessage.append(String.format("Time zone set to %s. Value should not contain time " +
+                        "zone setting.", timezone));
             }
         }
         if (conformingDateCount < dateThreshold) {
