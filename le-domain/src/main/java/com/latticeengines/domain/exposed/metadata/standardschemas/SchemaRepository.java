@@ -582,7 +582,7 @@ public class SchemaRepository {
                         .build());
             } else {
                 table.addAttribute(attr(InterfaceName.AccountId.name()) //
-                        .allowedDisplayNames(Sets.newHashSet("ATLAS ACCOUNT ID", "ACCOUNT ID", "ACCOUNTID")) //
+                        .allowedDisplayNames(Sets.newHashSet("ATLAS ACCOUNT ID", "ACCOUNT ID", "ACCOUNTID", "ID")) //
                         .physicalDataType(Schema.Type.STRING) //
                         .required() //
                         .interfaceName(InterfaceName.AccountId) //
