@@ -394,8 +394,13 @@ public class MetadataResolver {
         for (final String headerField : headerFields) {
             FieldMapping unknownColumn = new FieldMapping();
 
-            unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
+            // PLS-14582 use raw csv header to get 100 row values
+            unknownColumn.setUserField(headerField);
             unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
+            String escapedHeader = StringEscapeUtils.escapeHtml4(headerField);
+            if (!headerField.equals(escapedHeader)) {
+                unknownColumn.setUserField(escapedHeader);
+            }
             //unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
             unknownColumn.setMappedToLatticeField(false);
 
@@ -460,8 +465,12 @@ public class MetadataResolver {
         for (final String headerField : headerFields) {
             FieldMapping unknownColumn = new FieldMapping();
 
-            unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
+            unknownColumn.setUserField(headerField);
             unknownColumn.setFieldType(getFieldTypeFromColumnContent(unknownColumn));
+            String escapedHeader = StringEscapeUtils.escapeHtml4(headerField);
+            if (!headerField.equals(escapedHeader)) {
+                unknownColumn.setUserField(escapedHeader);
+            }
             unknownColumn.setMappedToLatticeField(false);
 
             result.fieldMappings.add(unknownColumn);
