@@ -389,8 +389,6 @@ public class CDLServiceImpl implements CDLService {
                 templates.add(display);
             }
         }
-        // ensure there exists 5 templates at least in the returned list
-        populateDefaultTemplate(templates);
 
         if (StringUtils.isNotEmpty(sortBy)) {
             Comparator<S3ImportTemplateDisplay> compareBySystemType =
@@ -580,23 +578,6 @@ public class CDLServiceImpl implements CDLService {
             fieldPreview.setTimezone(attribute.getTimezone());
         }
         return fieldPreview;
-    }
-
-    private void populateDefaultTemplate(List<S3ImportTemplateDisplay> templates) {
-        Set<String> existingObjects = templates.stream().map(entry -> entry.getObject()).collect(Collectors.toSet());
-        for (EntityType object : EntityType.values()) {
-            if (!existingObjects.contains(object.getDisplayName())) {
-                S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
-                display.setPath(PATHNAME);
-                display.setExist(Boolean.FALSE);
-                display.setObject(object.getDisplayName());
-                display.setTemplateName(object.getDisplayName());
-                display.setEntity(object.getEntity());
-                display.setFeedType(object.getDefaultFeedTypeName());
-                display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
-                templates.add(display);
-            }
-        }
     }
 
     /*
