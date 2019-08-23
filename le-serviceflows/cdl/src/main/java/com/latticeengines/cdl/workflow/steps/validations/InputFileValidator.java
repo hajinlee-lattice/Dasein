@@ -97,8 +97,8 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         }
 
         // add report for this step and import data step
+        long totalFailed = 0L;
         if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
-            Long totalFailed = 0L;
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
             totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
             getJson().put(entity.toString(), eaiImportJobDetail.getTotalRows())
@@ -107,7 +107,6 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
                             .put("imported_rows", 0L)
                             .put("deduped_rows", 0L).put("total_failed_rows", totalFailed);
         } else {
-            Long totalFailed = 0L;
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
             totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
             getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords())
@@ -119,7 +118,9 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         super.execute();
         // make sure report first, then throw exception if necessary
         if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
-            throw new LedpException(LedpCode.LEDP_40059, new String[] { statistics.toString(),
+            String errorMessage = String.format("Import failed because there were %s errors : %s",
+                    String.valueOf(totalFailed), statistics.toString());
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
     }
