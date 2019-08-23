@@ -1,5 +1,6 @@
 import httpService from "app/http/http-service";
 import Observer from "app/http/observer";
+import { store } from 'store';
 
 var CONST = {
     SET_CONTEXT: 'SET_CONTEXT',
@@ -18,31 +19,33 @@ const initialState = {
     itemview: {},
     segments: [],
     enrichments: [],
+    filters: {},
     cube: {}
 };
 
 export const actions = {
-    setContext: (payload) => dispatch => {
-        return dispatch({
+    setContext: (payload) => {
+        return store.dispatch({
             type: CONST.SET_CONTEXT,
             payload: payload
         });
     },
-    setItemBar: (payload) => dispatch => {
-        return dispatch({
+    setItemBar: (payload) => {
+        return store.dispatch({
             type: CONST.SET_ITEMBAR,
             payload: payload
         });
     },
-    setItemView: (payload) => dispatch => {
-        return dispatch({
+    setItemView: (payload) => {
+        return store.dispatch({
             type: CONST.SET_ITEMVIEW,
             payload: payload
         });
     },
-    getEnrichments: (enrichments) => dispatch => {
+    getEnrichments: (enrichments) => {
+        console.log('getEnrichments', enrichments, store.dispatch);
         if (enrichments.length > 0) {
-            return dispatch({
+            return store.dispatch({
                 type: CONST.GET_ENRICHMENTS,
                 payload: enrichments
             });
@@ -51,7 +54,7 @@ export const actions = {
         httpService.get(
             "/pls/datacollection/attributes",
             new Observer(response => {
-                dispatch({
+                store.dispatch({
                     type: CONST.GET_ENRICHMENTS,
                     payload: response.data
                 });
@@ -62,11 +65,11 @@ export const actions = {
             }
         );
     },
-    getSegments: () => dispatch => {
+    getSegments: () => {
         httpService.get(
             "/pls/datacollection/segments",
             new Observer(response => {
-                dispatch({
+                store.dispatch({
                     type: CONST.GET_SEGMENTS,
                     payload: response.data
                 });
@@ -77,9 +80,9 @@ export const actions = {
             }
         );
     },
-    getCube: (cube) => dispatch => {
+    getCube: (cube) => {
         if (cube && cube.data) {
-            return dispatch({
+            return store.dispatch({
                 type: CONST.GET_CUBE,
                 payload: cube.data
             });
@@ -88,7 +91,7 @@ export const actions = {
         httpService.get(
             "/pls/datacollection/statistics/cubes",
             new Observer(response => {
-                dispatch({
+                store.dispatch({
                     type: CONST.GET_CUBE,
                     payload: response.data
                 });
@@ -99,13 +102,13 @@ export const actions = {
             }
         );
     },
-    clearSegments: () => dispatch => {
-        return dispatch({
+    clearSegments: () => {
+        return store.dispatch({
             type: CONST.CLEAR_SEGMENTS
         });
     },
-    clearCube: () => dispatch => {
-        return dispatch({
+    clearCube: () => {
+        return store.dispatch({
             type: CONST.CLEAR_CUBE
         });
     }

@@ -175,7 +175,6 @@ public class ProductFileValidationService
         // the product map after rollup
         Map<String, Product> inputProductMap = new HashMap<>();
         boolean foundProductBundle = false;
-        boolean foundProductHierarchy = false;
         for (Map.Entry<String, Product> entry : inputProducts.entrySet()) {
             Product inputProduct = entry.getValue();
             if (inputProduct.getProductId() == null) {
@@ -199,7 +198,6 @@ public class ProductFileValidationService
 
 
             if (inputProduct.getProductCategory() != null) {
-                foundProductHierarchy = true;
                 String category = inputProduct.getProductCategory();
                 String family = inputProduct.getProductFamily();
                 String line = inputProduct.getProductLine();
@@ -255,9 +253,6 @@ public class ProductFileValidationService
             }
         }
 
-        if (foundProductHierarchy && errorLine != 0L) {
-            generateStatistics(errorLine, 0, 0, statistics);
-        }
         if (foundProductBundle) {
 
             // get inout bundle to product list mapping
@@ -317,10 +312,10 @@ public class ProductFileValidationService
             if (CollectionUtils.isNotEmpty(activeXSellModel)) {
                 Set<String> activeXsellModelNames =
                         activeXSellModel.stream().map(RatingEngineSummary::getDisplayName).collect(Collectors.toSet());
-                for (String bundle : bundleToBeRemoved) {
+                if (CollectionUtils.isNotEmpty(bundleToBeRemoved)) {
                     String errMsg = String.format("Error: \"%s\" can't be removed as existing active cross sell model" +
                                     " %s",
-                            bundle, StringUtils.join(activeXsellModelNames));
+                            StringUtils.join(bundleToBeRemoved), StringUtils.join(activeXsellModelNames));
                     csvFilePrinter.printRecord("", "", errMsg);
                     errorLine++;
                 }
@@ -369,6 +364,8 @@ public class ProductFileValidationService
                                     bundle, StringUtils.join(bundleIdToModelName.get(bundleId)));
                             csvFilePrinter.printRecord("", "", errMsg);
                             missingBundleInUse++;
+                            // only print one error for one-to-many relationship of bundle to product id
+                            break;
                         }
                     }
                 }
@@ -394,6 +391,7 @@ public class ProductFileValidationService
                                         "can't be removed.", bundle, segmentNameStr, modelNameStr);
                         csvFilePrinter.printRecord("", "", errMsg);
                         missingBundleInUse++;
+                        break;
                     }
                 }
             }
@@ -432,16 +430,15 @@ public class ProductFileValidationService
             }
             // generate statistics info
             if (errorLine != 0L) {
-                generateStatistics(errorLine, missingBundleInUse, bundleWithDiffSku, statistics);
+                generateStatistics(missingBundleInUse, bundleWithDiffSku, statistics);
             }
 
         }
         return errorLine;
     }
 
-    private void generateStatistics(long errorLine, int missingBundleInUse, int bundleWithDiffSku,
+    private void generateStatistics(int missingBundleInUse, int bundleWithDiffSku,
                                     StringBuilder statistics) {
-        statistics.append(String.format("Import failed because there were %s errors : ", String.valueOf(errorLine)));
         if (missingBundleInUse != 0) {
             statistics.append(String.format("%s missing product bundles in use (this import will " +
             "completely replace the previous one), ", String.valueOf(missingBundleInUse)));

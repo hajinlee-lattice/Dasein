@@ -4,9 +4,13 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +21,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
@@ -25,9 +30,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -36,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
@@ -64,6 +72,9 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
 
     @Inject
     private PeriodProxy periodProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     protected SparkJobService sparkJobService;
@@ -95,6 +106,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     + String.format("For playLaunchId: %s", playLaunchId));
 
             PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
+            setCustomDisplayNames(playLaunchContext);
 
             long totalAccountsAvailableForLaunch = playLaunchContext.getPlayLaunch().getAccountsSelected();
             long totalContactsAvailableForLaunch = playLaunchContext.getPlayLaunch().getContactsSelected();
@@ -120,10 +132,16 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 log.warn("Contact is null");
             }
             log.info(createRecJobResult.getOutput());
-            String targetPath = createRecJobResult.getTargets().get(0).getPath();
-            log.info("Target HDFS path: " + targetPath);
+            String recHistoryTargetPath = createRecJobResult.getTargets().get(0).getPath();
+            log.info("Target HDFS path for Recommendation history table: " + recHistoryTargetPath);
             putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(targetPath));
+                    PathUtils.toAvroGlob(recHistoryTargetPath));
+            String recCsvTargetPath = batonService.isEnabled(customerSpace,
+                    LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA) ? createRecJobResult.getTargets().get(1).getPath()
+                            : recHistoryTargetPath;
+            log.info("Target HDFS path for csv file table: " + recCsvTargetPath);
+            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(recCsvTargetPath));
 
             /*
              * 4. export to mysql database using sqoop
@@ -134,7 +152,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 throw new LedpException(LedpCode.LEDP_18159, new Object[] { launchedAccountNum, 0L });
             } else {
                 runScoopExport(playLaunchContext, tenant, launchedAccountNum, launchedContactNum,
-                        totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch, targetPath);
+                        totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch, recHistoryTargetPath);
                 successUpdates(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
             }
         } catch (Exception ex) {
@@ -224,6 +242,23 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
         playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Launched);
         playProxy.publishTalkingPoints(customerSpace.toString(), playName);
+    }
+
+    private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
+        List<ColumnMetadata> columnMetadata = playLaunchContext.getFieldMappingMetadata();
+        if (CollectionUtils.isNotEmpty(columnMetadata)) {
+            Map<String, String> contactDisplayNames = columnMetadata.stream()
+                    .filter(col -> BusinessEntity.Contact.equals(col.getEntity()))
+                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
+            Map<String, String> accountDisplayNames = columnMetadata.stream()
+                    .filter(col -> !BusinessEntity.Contact.equals(col.getEntity()))
+                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
+            log.info("accountDisplayNames map: " + accountDisplayNames);
+            log.info("contactDisplayNames map: " + contactDisplayNames);
+
+            putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
+            putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, contactDisplayNames);
+        }
     }
 
     @VisibleForTesting

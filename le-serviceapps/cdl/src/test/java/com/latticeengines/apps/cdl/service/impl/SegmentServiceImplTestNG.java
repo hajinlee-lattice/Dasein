@@ -187,8 +187,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_40057);
             Assert.assertTrue(e.getMessage().contains("Contact.Attr1"), e.getMessage());
         }
-        */
-
+        
         Restriction b4c = cloneRestriction(b4);
         ((BucketRestriction) b4c).getBkt().setValues(Collections.emptyList());
         ((LogicalRestriction) contactRestriction).getRestrictions().set(1, b4c);
@@ -202,6 +201,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         }
         ((LogicalRestriction) contactRestriction).getRestrictions().set(0, b3);
         ((LogicalRestriction) contactRestriction).getRestrictions().set(1, b4);
+        */
     }
 
     private MetadataSegment createSegment(String displayName, Restriction account, Restriction contact) {

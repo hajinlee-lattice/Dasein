@@ -26,7 +26,7 @@ public class RecommendationAvroToCsvTransformerTestNG {
     private Map<String, String> contactDisplayNames;
     private Schema schema;
 
-    @BeforeClass
+    @BeforeClass(groups = "unit")
     public void setup() throws IOException {
         accountDisplayNames = readCsvIntoMap("com/latticeengines/play/launch/account_display_names.csv");
         Assert.assertTrue(MapUtils.isNotEmpty(accountDisplayNames));
@@ -39,12 +39,25 @@ public class RecommendationAvroToCsvTransformerTestNG {
     }
 
     @Test(groups = "unit")
-    public void testExportFields() {
+    public void testS3ExportFields() {
         RecommendationAvroToCsvTransformer transformer = new RecommendationAvroToCsvTransformer(accountDisplayNames,
                 contactDisplayNames, false);
 
         List<String> fields = transformer.getFieldNames(schema);
         Assert.assertEquals(fields.size(), 26);
+    }
+
+    @Test(groups = "unit", dependsOnMethods = "testS3ExportFields")
+    public void testDefaultExportFields() throws IOException {
+        accountDisplayNames = readCsvIntoMap("com/latticeengines/play/launch/default/account_display_names.csv");
+        Assert.assertTrue(MapUtils.isNotEmpty(accountDisplayNames));
+        contactDisplayNames = readCsvIntoMap("com/latticeengines/play/launch/default/contact_display_names.csv");
+        Assert.assertTrue(MapUtils.isNotEmpty(contactDisplayNames));
+        RecommendationAvroToCsvTransformer transformer = new RecommendationAvroToCsvTransformer(accountDisplayNames,
+                contactDisplayNames, false);
+
+        List<String> fields = transformer.getFieldNames(schema);
+        Assert.assertEquals(fields.size(), 34);
     }
 
     private Map<String, String> readCsvIntoMap(String filePath) throws IOException {

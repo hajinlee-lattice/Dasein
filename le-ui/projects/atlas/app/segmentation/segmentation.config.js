@@ -1,5 +1,3 @@
-import { actions, reducer } from './segmentation.redux.js';
-
 export default function ($stateProvider) {
     'ngInject';
     $stateProvider
@@ -10,22 +8,20 @@ export default function ($stateProvider) {
                 pageIcon: 'ico-segments',
                 edit: null
             },
-            onEnter: function (ReduxService, $state) {
-                ReduxService.connect(
-                    'segmentation',
-                    actions,
-                    reducer,
-                    $state.get('home.segmentation')
-                );
-            },
-            onExit: function ($state) {
-                $state.get('home.segmentation').data.redux.unsubscribe();
+            resolve: {
+                path: () => {
+                    return 'segmentationlist';
+                },
+                ngservices: (DataCloudStore, AttributesStore) => {
+                    let obj = {
+                        DataCloudStore : DataCloudStore,
+                        AttributesStore: AttributesStore
+                    }
+                    return obj;
+                }
             },
             views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/summary/BlankLine.html'
-                },
-                "main@": 'atlasSegmentation'
+                "main@": 'reactAngularMainComponent'
             }
-        });
+        })
 };

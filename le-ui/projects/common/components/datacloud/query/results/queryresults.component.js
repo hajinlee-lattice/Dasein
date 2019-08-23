@@ -322,9 +322,11 @@ angular.module('common.datacloud.query.results', [
                                     }
                                 ],
                                 "descending": false
-                            }
+                            },
+                            account_restriction: data.targetSegment.account_restriction,
+                            contact_restriction: data.targetSegment.contact_restriction
                         };
-                    
+
                     PlaybookWizardService.getAccountsData(accountQuery).then(function(results) { 
                         PlaybookWizardStore.setTargetData(results.data);
                         vm.accounts = PlaybookWizardStore.getTargetData();

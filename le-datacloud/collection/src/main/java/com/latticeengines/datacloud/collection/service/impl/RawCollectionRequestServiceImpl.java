@@ -111,9 +111,17 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
         }
 
-        //call entity-mgr to update & del obj in db
-        rawCollectionRequestMgr.updateTransferred(added, filter, deleteFiltered);
+        //update raw req in db
+        rawCollectionRequestMgr.updateTransferred(added, filter);
         log.info("updating raw req transferred status done");
+
+        //delete filtered raw req in db
+        if (deleteFiltered) {
+
+            rawCollectionRequestMgr.deleteFiltered(added, filter);
+
+        }
+        log.info("deleting filtered raw req done");
 
     }
 

@@ -1,7 +1,6 @@
 package com.latticeengines.common.exposed.transformer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,16 +21,11 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
 
     private static final Logger log = LoggerFactory.getLogger(RecommendationAvroToCsvTransformer.class);
 
-    final String[] DEFAULT_CONTACT_FIELDS = new String[] { "Email", "Address", "Phone", "State", "ZipCode", "Country",
-            "SfdcContactID", "City", "ContactID", "Name" };
-
-    private List<Schema.Field> accountFields;
+    private List<String> accountFields;
     private List<String> contactFields;
     private Map<String, String> accountDisplayNames;
     private Map<String, String> contactDisplayNames;
     private boolean ignoreAccountsWithoutContacts;
-
-    private final String defaultContactFieldPrefix = "CONTACT:";
 
     public RecommendationAvroToCsvTransformer(Map<String, String> accountDisplayNames,
             Map<String, String> contactDisplayNames, boolean ignoreAccountsWithoutContacts) {
@@ -42,24 +36,10 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
 
     @Override
     public List<String> getFieldNames(Schema schema) {
-        accountFields = schema.getFields().stream()
-                .filter(f -> MapUtils.isEmpty(accountDisplayNames) || accountDisplayNames.containsKey(f.name()))
-                .collect(Collectors.toList());
-        accountFields.stream().filter(f -> f.name().equals("CONTACTS")).findAny()
-                .ifPresent(contactsField -> accountFields.remove(contactsField));
-
-        List<String> fieldNames = accountFields.stream()
-                .map(f -> accountDisplayNames.containsKey(f.name()) ? accountDisplayNames.get(f.name()) : f.name())
-                .collect(Collectors.toList());
-
-        fieldNames.remove("CONTACTS");
-
-        contactFields = Arrays.stream(DEFAULT_CONTACT_FIELDS)
-                .filter(f -> MapUtils.isEmpty(contactDisplayNames) || contactDisplayNames.containsKey(f))
-                .collect(Collectors.toList());
-
-        contactFields.forEach(f -> fieldNames.add(contactDisplayNames.getOrDefault(f, defaultContactFieldPrefix + f)));
-
+        accountFields = accountDisplayNames.keySet().stream().collect(Collectors.toList());
+        List<String> fieldNames = accountDisplayNames.values().stream().collect(Collectors.toList());
+        contactFields = contactDisplayNames.keySet().stream().collect(Collectors.toList());
+        fieldNames.addAll(contactDisplayNames.values());
         log.info("Fields: " + String.join(", ", fieldNames));
         return fieldNames;
     }
@@ -71,8 +51,8 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
 
             // Construct Account Value List
             List<String> accountValues = new ArrayList<>();
-            for (Schema.Field field : accountFields) {
-                accountValues.add(genRecord.get(field.name()) != null ? genRecord.get(field.name()).toString() : "");
+            for (String field : accountFields) {
+                accountValues.add(genRecord.get(field) != null ? genRecord.get(field).toString() : "");
             }
 
             Object obj = genRecord.get("CONTACTS");
