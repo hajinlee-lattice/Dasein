@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflow
 
 public interface ImportWorkflowSpecService {
 
-    ImportWorkflowSpec loadSpecFromS3(String systemType, String systemObject);
+    ImportWorkflowSpec loadSpecFromS3(String systemType, String systemObject) throws Exception;
 
     Table tableFromSpec(ImportWorkflowSpec spec);
 }

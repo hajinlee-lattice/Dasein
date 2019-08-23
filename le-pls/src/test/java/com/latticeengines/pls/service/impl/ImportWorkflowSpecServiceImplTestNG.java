@@ -1,7 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +32,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
     }
 
     @Test(groups = "functional")
-    public void testLoadSpecFromS3() throws IOException {
+    public void testLoadSpecFromS3() throws Exception {
         ImportWorkflowSpec expectedTestSpec = ImportWorkflowUtilsTestNG.pojoFromJsonResourceFile(testSpecFileName,
                 ImportWorkflowSpec.class);
 
@@ -60,7 +58,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
     }
 
     @Test(groups = "functional")
-    public void testTableFromSpec() throws IOException {
+    public void testTableFromSpec() throws Exception {
         ImportWorkflowSpec testSpec = null;
         try {
             testSpec = importWorkflowSpecService.loadSpecFromS3("test", "contact");
