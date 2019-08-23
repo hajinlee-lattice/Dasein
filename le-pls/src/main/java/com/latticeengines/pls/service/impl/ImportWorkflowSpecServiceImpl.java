@@ -90,7 +90,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
 
 
         ImportWorkflowSpec workflowSpec = null;
-        if (specInputStream == null) {
+        if (specInputStream != null) {
         //if (specString != null) {
             try {
                 workflowSpec = JsonUtils.deserialize(specInputStream, ImportWorkflowSpec.class);
