@@ -55,7 +55,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info(String.format("For playLaunchId: %s", playLaunchId));
 
             String recAvroHdfsFilePath = playLaunchProcessor.launchPlay(tenant, config);
-            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
+            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     recAvroHdfsFilePath);
 
             successUpdates(customerSpace, playName, playLaunchId);
