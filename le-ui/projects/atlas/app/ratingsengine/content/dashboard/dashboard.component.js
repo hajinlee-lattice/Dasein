@@ -188,11 +188,7 @@ angular.module('lp.ratingsengine.dashboard', [
                             message: 'Your scoring has been ' + msgStatus + '.'
                         });
 
-                        console.log("here");
-
                         RatingsEngineService.getRatingDashboard(newRating.id).then(function (data) {
-
-                            console.log("here 2");
 
                             vm.dashboard.plays = data.plays;
                             vm.initDataModel();
@@ -228,10 +224,6 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
                 });
             }
-        }
-
-        vm.activateIteration = function (iteration) {
-            console.log(iteration);
         }
 
         vm.initDataModel = function () {
@@ -295,9 +287,9 @@ angular.module('lp.ratingsengine.dashboard', [
 
                 if (type === 'cross_sell') {
 
-                    angular.forEach(vm.dashboard.iterations, function(iteration){
-                        vm.iterationHasProducts(iteration);
-                    });
+                    // angular.forEach(vm.dashboard.iterations, function(iteration){
+                    //     vm.iterationHasProducts(iteration);
+                    // });
 
                     if (Array.isArray(vm.targetProducts)) {
                         vm.targetProductsIsArray = true;
@@ -468,18 +460,20 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         }
 
-        vm.iterationHasProducts = function(iteration){
-            var engineId = vm.ratingEngine.id,
-                modelId = iteration.id;
+        // vm.iterationHasProducts = function(iteration){
+        //     var engineId = vm.ratingEngine.id,
+        //         modelId = iteration.id;
 
-            RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
-                if (result.AI.advancedModelingConfig.cross_sell.targetProducts != undefined) {
-                    iteration.hasProducts = true;
-                } else {
-                    iteration.hasProducts = false;
-                }
-            });
-        }
+        //     console.log("vm.iterationHasProducts", modelId);
+
+        //     RatingsEngineStore.getRatingModel(engineId, modelId).then(function(result){
+        //         if (result.AI.advancedModelingConfig.cross_sell.targetProducts != undefined) {
+        //             iteration.hasProducts = true;
+        //         } else {
+        //             iteration.hasProducts = false;
+        //         }
+        //     });
+        // }
 
         vm.viewIteration = function (destination, iterationToView) {
 
