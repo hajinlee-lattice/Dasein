@@ -122,6 +122,12 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             MatchKey.Email.name(), //
     };
 
+    private static final String[] FIELDS_PREFERRED_ID = { //
+            TEST_ID, //
+            InterfaceName.CustomerAccountId.name(), //
+            MatchKey.PreferredEntityId.name(), //
+    };
+
     private static final List<Class<?>> SCHEMA = new ArrayList<>(Collections.nCopies(FIELDS.length, String.class));
 
     private static final List<Class<?>> SCHEMA_FETCHONLY = new ArrayList<>(
@@ -132,6 +138,9 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final List<Class<?>> SCHEMA_LEAD_TO_ACCT_NOAID = new ArrayList<>(
             Collections.nCopies(FIELDS_LEAD_TO_ACCT_NOAID.length, String.class));
+
+    private static final List<Class<?>> SCHEMA_PREFERRED_ID = new ArrayList<>(
+            Collections.nCopies(FIELDS_PREFERRED_ID.length, String.class));
 
     /***************************************************************
      * TestId is designed with format C<CaseGroupId>_<CaseId>
@@ -363,6 +372,22 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "C14_05", null, null, null, null, null, null, "aABBcd123FGHIjkl11xyz", "ABc124   " }, //
     };
 
+    // Schema: TestId, CustomerAccountId, PreferredEntityId
+    private static final Object[][] DATA_PREFERRED_ID = { //
+            /*-
+             * valid preferred IDs
+             */
+            { "C15_01", "caid_1", "acc_1" }, //
+            { "C15_02", "caid_2", "acc_2" }, //
+            { "C15_03", "caid_3", "acc_3" }, //
+            { "C15_04", "caid_4", "acc_4" }, //
+            /*-
+             * blank preferred IDs, will get random ID
+             */
+            { "C15_05", "caid_5", "" }, //
+            { "C15_06", "caid_6", "    " }, //
+            { "C15_07", "caid_7", null }, //
+    };
 
     // prepare in the run time because it needs EntityId got from non-fetch-only
     // mode test
@@ -374,6 +399,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String CASE_LEAD_TO_ACCT = "LEAD_TO_ACCT";
     private static final String CASE_LEAD_TO_ACCT_NOAID = "LEAD_TO_ACCT_NOAID";
     private static final String CASE_ID_CASEINSENSITIVE_MATCH = "SYSTEM_ID_CASE_INSENSITIVE";
+    private static final String CASE_PREFERRED_ID = "PREFERRED_ID";
 
     private String googleEntityId = null;
 
@@ -444,6 +470,16 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         verifySystemIdCaseInsensitiveMatch(runAndVerifyBulkMatch(input, this.getClass().getSimpleName()));
     }
 
+    /*-
+     * Basic testing that if a valid preferred ID is provided, it's used to allocate.
+     * Only to make sure bulk match work, use realtime correctness detailed coverage tests
+     */
+    @Test(groups = "deployment", priority = 7)
+    public void testPreferredEntityId() {
+        MatchInput input = preparePreferredIdMatchInput();
+        runAndVerify(input, CASE_PREFERRED_ID);
+    }
+
     private void publishBaseSet() {
         // No need to bump up version because test generates new test every time
         EntityPublishRequest request = new EntityPublishRequest();
@@ -459,12 +495,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private void runAndVerify(MatchInput input, String scenario) {
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, this.getClass().getSimpleName());
         int numNewAccounts = CASE_ALL_KEYS.equals(scenario) ? DATA_ALL_KEYS.length : 0;
-        validateNewlyAllocatedAcct(finalStatus.getResultLocation(), numNewAccounts);
+        validateNewlyAllocatedAcct(finalStatus.getNewEntitiesLocation(), numNewAccounts);
 
         if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
             validateAllocateAcctResult(finalStatus.getResultLocation());
         } else if (CASE_LEAD_TO_ACCT.equals(scenario) || CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
             validateLeadToAcctResult(finalStatus, scenario);
+        } else if (CASE_PREFERRED_ID.equals(scenario)) {
+            validatePreferredEntityIdResult(finalStatus);
         } else if (input.isFetchOnly()) {
             validateAcctMatchFetchOnlyResult(finalStatus.getResultLocation());
         } else {
@@ -544,6 +582,29 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         return input;
     }
 
+    private MatchInput preparePreferredIdMatchInput() {
+        MatchInput input = new MatchInput();
+        input.setTenant(tenant);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        input.setPredefinedSelection(Predefined.ID);
+        input.setFields(Arrays.asList(FIELDS_PREFERRED_ID));
+        input.setSkipKeyResolution(true);
+        input.setOperationalMode(OperationalMode.ENTITY_MATCH);
+        input.setTargetEntity(BusinessEntity.Account.name());
+        input.setAllocateId(true);
+        input.setUseDnBCache(true);
+        input.setUseRemoteDnB(true);
+        // not testing new entity feature
+        input.setOutputNewEntities(false);
+
+        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+        map.addMatchKey(MatchKey.SystemId, InterfaceName.CustomerAccountId.name());
+        map.addMatchKey(MatchKey.PreferredEntityId, MatchKey.PreferredEntityId.name());
+        input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
+        input.setInputBuffer(prepareBulkData(CASE_PREFERRED_ID));
+        return input;
+    }
+
     private Map<String, MatchInput.EntityKeyMap> prepareKeyMaps(String[] fields, String[] systemIdFields, String
             emailField) {
         Map<String, MatchInput.EntityKeyMap> keyMaps = new HashMap<>();
@@ -596,6 +657,10 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         case CASE_ID_CASEINSENSITIVE_MATCH:
             uploadAvroData(DATA_ID_CASEINSENSITIVE_MATCH, Arrays.asList(FIELDS), SCHEMA, avroDir,
                     CASE_ID_CASEINSENSITIVE_MATCH + ".avro");
+            break;
+        case CASE_PREFERRED_ID:
+            uploadAvroData(DATA_PREFERRED_ID, Arrays.asList(FIELDS_PREFERRED_ID), SCHEMA_PREFERRED_ID, avroDir,
+                    CASE_PREFERRED_ID + ".avro");
             break;
         default:
             throw new UnsupportedOperationException("Unknown test scenario " + scenario);
@@ -759,6 +824,37 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             Assert.assertTrue(matchResultMap.containsKey(EntityMatchResult.MATCHED_BY_ACCOUNTID));
             Assert.assertEquals(matchResultMap.get(EntityMatchResult.MATCHED_BY_ACCOUNTID).longValue(), 0L);
         }
+    }
+
+    /*-
+     * Validate that
+     * (a) if preferred ID is provided, should be used to allocate new entity.
+     * (b) if no valid preferred ID, random ID should be used.
+     */
+    private void validatePreferredEntityIdResult(@NotNull MatchCommand command) {
+        Assert.assertNotNull(command);
+        Assert.assertNotNull(command.getResultLocation());
+
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration,
+                command.getResultLocation() + "/*.avro");
+        Set<String> testIds = new HashSet<>();
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            testIds.add(record.get(TEST_ID).toString());
+            String entityId = record.get(ENTITY_ID_FIELD).toString();
+            Object preferredIdObj = record.get(MatchKey.PreferredEntityId.name());
+            String preferredEntityId = preferredIdObj == null ? null : preferredIdObj.toString();
+
+            if (StringUtils.isNotBlank(preferredEntityId)) {
+                Assert.assertEquals(entityId, preferredEntityId,
+                        "valid preferredEntityId should be used to allocate new entity");
+            } else {
+                Assert.assertTrue(StringUtils.isNotBlank(entityId),
+                        "Should not get blank entity ID even if no valid preferred entity ID is provided");
+            }
+        }
+        Assert.assertEquals(testIds.size(), DATA_PREFERRED_ID.length,
+                "Output records should have the same number as input data");
     }
 
     /*

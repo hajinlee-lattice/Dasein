@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationRequest;
@@ -152,6 +154,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         saveAccountIdInContactMatch(extraAttributes, traveler);
 
         return new EntityAssociationRequest(standardizedTenant, entity,
+                getPreferredEntityId(traveler.getEntity(), traveler.getEntityMatchKeyRecord()),
                 postProcessLookupResults(traveler, lookupResults), extraAttributes);
     }
 
@@ -267,6 +270,18 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         } else {
             log.error("Got invalid entity lookup response in actor {}, should not have happened", self());
         }
+    }
+
+    private String getPreferredEntityId(String entity, EntityMatchKeyRecord record) {
+        if (StringUtils.isBlank(entity) || record == null) {
+            return null;
+        }
+
+        Map<String, String> ids = record.getParsedPreferredEntityIds();
+        if (MapUtils.isEmpty(ids)) {
+            return null;
+        }
+        return ids.get(entity);
     }
 
     /*

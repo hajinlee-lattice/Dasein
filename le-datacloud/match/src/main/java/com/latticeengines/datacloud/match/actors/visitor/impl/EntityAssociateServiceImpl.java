@@ -265,7 +265,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             return entityMatchInternalService.getOrCreateAnonymousSeed(tenant, entity);
         } else {
             // allocate new seed
-            String seedId = entityMatchInternalService.allocateId(tenant, entity);
+            String seedId = entityMatchInternalService.allocateId(tenant, entity, request.getPreferredEntityId());
             return new EntityRawSeed(seedId, entity, true);
         }
     }
