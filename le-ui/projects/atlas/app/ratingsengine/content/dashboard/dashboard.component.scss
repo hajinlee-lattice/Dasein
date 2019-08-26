@@ -99,6 +99,9 @@
         float: right;
         &.link {
             color: #467dba;
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
     .icon {
