@@ -12,6 +12,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -49,6 +50,10 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             long scoringStartTime = System.currentTimeMillis();
             for (String uuid : scoreContext.uuidToModeId.keySet()) {
                 URI uri = uuidURIMap.get(uuid);
+                if (CollectionUtils.isEmpty(recordsMap.get(uuid))) {
+                    log.warn("There's no records for model uuid=" + uuid);
+                    continue;
+                }
                 Map<String, JsonNode> models = transformRecords(dataType, scoreContext, recordsMap, uuid, uri);
                 ScoringMapperPredictUtil.evaluate(uuid, scoreContext, context);
                 if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(), false)) {
