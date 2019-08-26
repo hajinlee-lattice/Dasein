@@ -21,6 +21,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -158,6 +159,27 @@ public class MatchInputValidator {
             Map<MatchKey, List<String>> keyMap = entityKeyMap.getKeyMap();
 
             validateAccountMatchKeys(keyMap, input.isFetchOnly(), input.getOperationalMode());
+        }
+        validatePreferredEntityIdMatchKey(input);
+    }
+
+    /*
+     * make sure only when allocateId=true we allow MatchKey.PreferredEntityId to be
+     * set
+     */
+    private static void validatePreferredEntityIdMatchKey(@NotNull MatchInput input) {
+        if (input.isAllocateId() || MapUtils.isEmpty(input.getEntityKeyMaps())) {
+            return;
+        }
+
+        for (Map.Entry<String, EntityKeyMap> entry : input.getEntityKeyMaps().entrySet()) {
+            String entity = entry.getKey();
+            EntityKeyMap map = entry.getValue();
+            if (map.getKeyMap() != null && map.getKeyMap().containsKey(MatchKey.PreferredEntityId)) {
+                String msg = String.format("Not allowed to have preferred entity id in non-allocate mode for entity %s",
+                        entity);
+                throw new IllegalArgumentException(msg);
+            }
         }
     }
 

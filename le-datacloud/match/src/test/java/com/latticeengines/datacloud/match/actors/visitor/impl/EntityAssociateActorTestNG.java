@@ -125,7 +125,7 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
                         .stream() //
                         .map(entry -> Pair.of(tuple, LOOKUP_MAP.get(entry)))) //
                 .collect(Collectors.toList());
-        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity, lookupResults,
+        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity, null, lookupResults,
                 Collections.emptyMap());
         msg.setInputData(request);
 
@@ -166,7 +166,7 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
         Map<String, String> attrsToUpdate = seedToUpdate.getAttributes();
         DataSourceLookupRequest msg = getBaseRequest();
         // use the first lookup entry to make sure it is associated to the target
-        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity,
+        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity, null,
                 singletonList(Pair.of(toMatchKeyTuple(currSeed.getLookupEntries().get(0)), entityId)), attrsToUpdate);
         msg.setInputData(request);
 

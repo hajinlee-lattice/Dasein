@@ -298,7 +298,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     }
 
     /*
-     * allocate ID in parallel
+     * allocate ID without preference in parallel
      */
     @Test(groups = "functional", dataProvider = "entityIdAllocation", retryAnalyzer = SimpleRetryAnalyzer.class, priority = 6)
     private void testIDAllocation(int nAllocations, int nThreads) {
@@ -308,7 +308,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         List<Future<String>> futures = IntStream
                 .range(0, nAllocations)
                 .mapToObj(idx -> service.submit(() ->
-                entityMatchInternalService.allocateId(tenant, TEST_ENTITY)))
+                entityMatchInternalService.allocateId(tenant, TEST_ENTITY, null)))
                 .collect(Collectors.toList());
         List<String> entityIds = futures.stream().map(future -> {
             try {
@@ -638,6 +638,24 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         Assert.assertNotNull(seed);
         Assert.assertEquals(seed.getId(), ENTITY_ANONYMOUS_ID);
         Assert.assertTrue(seed.isNewlyAllocated(), "Anonymous account for another tenant should be newly allocated");
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, priority = 13)
+    private void testPreferredIdAllocation() {
+        Tenant tenant = newTestTenant();
+        entityMatchConfigurationService.setIsAllocateMode(true);
+        String preferredId = "entity_match_preferred_id";
+
+        String id = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), preferredId);
+        Assert.assertEquals(id, preferredId, "Should be able to allocate preferred ID when it's not taken yet");
+
+        id = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), preferredId);
+        Assert.assertNotEquals(id, preferredId, "Should not be able to allocate preferred ID when it's already taken");
+
+        // no preference, let system create ID at will
+        String randomId = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), null);
+        Assert.assertNotEquals(randomId, id);
+        Assert.assertNotEquals(randomId, preferredId);
     }
 
     // [ nAllocations, nThreads ]

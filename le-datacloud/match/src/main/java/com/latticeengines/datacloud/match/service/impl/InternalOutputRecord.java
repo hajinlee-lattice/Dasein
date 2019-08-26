@@ -66,6 +66,10 @@ public class InternalOutputRecord extends OutputRecord {
     // Match result: entity -> entityId
     private Map<String, String> entityIds;
 
+    // Preferred IDs when there is a need to allocate new entity: entity ->
+    // preferredEntityId
+    private Map<String, String> preferredEntityIds;
+
     // Store the EntityMatchHistory so it can be passed between the MatchTraveler and the MatchHistory.
     private EntityMatchHistory entityMatchHistory;
 
@@ -341,6 +345,14 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setEntityIds(Map<String, String> entityIds) {
         this.entityIds = entityIds;
+    }
+
+    public Map<String, String> getPreferredEntityIds() {
+        return preferredEntityIds;
+    }
+
+    public void setPreferredEntityIds(Map<String, String> preferredEntityIds) {
+        this.preferredEntityIds = preferredEntityIds;
     }
 
     public EntityMatchHistory getEntityMatchHistory() {

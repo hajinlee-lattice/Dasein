@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput.EntityKeyMap
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -483,6 +484,34 @@ public class MatchInputValidatorUnitTestNG {
             e.printStackTrace();
         }
         Assert.assertFalse(failed, "Entity Match Column Selection Validation should have passed.");
+    }
+
+    /*
+     * use of MatchKey.PreferredEntityId in non-allocate ID mode is not allowed
+     */
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Not allowed to have preferred entity id in non-allocate mode.*")
+    private void validatePreferredIdMatchKey() {
+        MatchInput input = new MatchInput();
+        // non-allocate mode
+        input.setAllocateId(false);
+        // other required fields, nothing important
+        input.setOperationalMode(OperationalMode.ENTITY_MATCH);
+        input.setTenant(new Tenant("test_tenant_id"));
+        input.setFields(Arrays.asList(MatchKey.PreferredEntityId.name(), InterfaceName.CustomerContactId.name()));
+        input.setData(Collections.singletonList(Arrays.asList("account_id_123", "contact_cid_123")));
+        input.setPredefinedSelection(Predefined.ID);
+
+        // account key map contains preferred entity id
+        EntityKeyMap accountMap = new EntityKeyMap();
+        accountMap.addMatchKey(MatchKey.PreferredEntityId, MatchKey.PreferredEntityId.name());
+        // contact key map is valid since it has only system ID
+        EntityKeyMap contactMap = new EntityKeyMap();
+        contactMap.addMatchKey(MatchKey.SystemId, "CustomerContactId");
+        Map<String, EntityKeyMap> entityKeyMaps = new HashMap<>();
+        entityKeyMaps.put(BusinessEntity.Account.name(), accountMap);
+        input.setEntityKeyMaps(entityKeyMaps);
+
+        MatchInputValidator.validateRealTimeInput(input, 100);
     }
 
     @Test(groups = "unit", dataProvider = "requiredAccountMatchKey")

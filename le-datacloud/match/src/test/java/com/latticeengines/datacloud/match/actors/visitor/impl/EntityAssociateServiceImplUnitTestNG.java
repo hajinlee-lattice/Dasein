@@ -455,7 +455,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                     MatchKeyTuple tuple = EntityLookupEntryConverter.toMatchKeyTuple(entry);
                     return Pair.of(tuple, seedId);
                 }).collect(Collectors.toList());
-        return new EntityAssociationRequest(TEST_TENANT, TEST_ENTITY, lookupResults, null);
+        return new EntityAssociationRequest(TEST_TENANT, TEST_ENTITY, null, lookupResults, null);
     }
 
     private EntityAssociateServiceImpl mock(

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
@@ -238,6 +240,33 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                 record.addErrorMessages("Error when cleanup duns field: " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    public void parseRecordForPreferredEntityId(@NotNull String entity, @NotNull List<Object> inputRecord,
+            @NotNull Map<MatchKey, List<Integer>> keyPositionMap, @NotNull EntityMatchKeyRecord record) {
+        if (!keyPositionMap.containsKey(MatchKey.PreferredEntityId)) {
+            return;
+        }
+
+        keyPositionMap.get(MatchKey.PreferredEntityId).stream() //
+                .filter(Objects::nonNull) //
+                .map(inputRecord::get) //
+                .map(val -> {
+                    if (val instanceof String) {
+                        return (String) val;
+                    } else if (val instanceof Utf8 || val instanceof Long || val instanceof Integer) {
+                        return val.toString();
+                    } else {
+                        return null;
+                    }
+                }).filter(StringUtils::isNotBlank) //
+                .map(origId -> Pair.of(origId, StringStandardizationUtils.getStandardizedSystemId(origId))) //
+                .findFirst() //
+                .ifPresent(pair -> {
+                    record.addOrigPreferredEntityId(entity, pair.getLeft());
+                    record.addParsedPreferredEntityId(entity, pair.getRight());
+                });
     }
 
     @Override
