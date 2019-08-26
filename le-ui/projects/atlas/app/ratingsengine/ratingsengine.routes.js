@@ -1106,8 +1106,6 @@ angular
                                 model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
                             }
 
-                            // console.log(model);
-
                             RatingsEngineStore.checkRatingsBuckets(model.rule.ratingRule.bucketToRuleMap);
 
                             deferred.resolve(model);
@@ -1162,8 +1160,6 @@ angular
                     },
                     RatingEngineModel: function (DataCloudStore, RatingsEngineModels) {
                         var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
-
-                        // console.log(RatingsEngineModels);
 
                         if (selectedAttributes) {
                             RatingsEngineModels.rule.selectedAttributes = selectedAttributes;

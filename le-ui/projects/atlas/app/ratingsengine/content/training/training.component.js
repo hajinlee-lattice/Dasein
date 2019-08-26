@@ -70,69 +70,7 @@ angular
 					? vm.iteration.AI
 					: vm.ratingEngine.latest_iteration.AI;
 				vm.engineType = vm.ratingEngine.type.toLowerCase();
-				vm.periodType = vm.datacollectionstatus.ApsRollingPeriod
-					? vm.datacollectionstatus.ApsRollingPeriod.toLowerCase()
-					: "quarter";
-				vm.spendingConfig = {
-					from: {
-						name: "from-spend",
-						value: vm.spendValue,
-						position: 0,
-						type: "Spend",
-						min: "0",
-						max: "2147483647"
-					},
-					to: {
-						name: "to-spend",
-						value: vm.spendValue,
-						position: 1,
-						type: "Spend",
-						min: "0",
-						max: "2147483647"
-					}
-				};
-				vm.quantityConfig = {
-					from: {
-						name: "from-quantity",
-						value: vm.quantityValue,
-						position: 0,
-						type: "Quantity",
-						min: "0",
-						max: "2147483647",
-						disabled: true,
-						visible: true
-					},
-					to: {
-						name: "to-quantity",
-						value: vm.quantityValue,
-						position: 1,
-						type: "Quantity",
-						min: "0",
-						max: "2147483647",
-						disbaled: true,
-						visible: false
-					}
-				};
-
-				vm.periodConfig = {
-					from: {
-						name: "from-period",
-						value: vm.periodsValue,
-						position: 0,
-						type: "Period",
-						min: "0",
-						max: "2147483647"
-					},
-					to: {
-						name: "to-period",
-						value: vm.periodsValue,
-						position: 1,
-						type: "Period",
-						min: "0",
-						max: "2147483647"
-					}
-				};
-				vm.numericalConfig = { debounce: 800 };
+				
 				if ($stateParams.section != "wizard.ratingsengine_segment") {
 					if (vm.engineType == "cross_sell") {
 						vm.filters = angular.copy(
@@ -195,6 +133,71 @@ angular
 						vm.periodsValue = vm.filters.TRAINING_SET_PERIOD
 							? vm.filters.TRAINING_SET_PERIOD.value
 							: 2;
+
+
+						vm.periodType = vm.datacollectionstatus.ApsRollingPeriod
+							? vm.datacollectionstatus.ApsRollingPeriod.toLowerCase()
+							: "quarter";
+						vm.spendingConfig = {
+							from: {
+								name: "from-spend",
+								value: vm.spendValue,
+								position: 0,
+								type: "Spend",
+								min: "0",
+								max: "2147483647"
+							},
+							to: {
+								name: "to-spend",
+								value: vm.spendValue,
+								position: 1,
+								type: "Spend",
+								min: "0",
+								max: "2147483647"
+							}
+						};
+						vm.quantityConfig = {
+							from: {
+								name: "from-quantity",
+								value: vm.quantityValue,
+								position: 0,
+								type: "Quantity",
+								min: "0",
+								max: "2147483647",
+								disabled: true,
+								visible: true
+							},
+							to: {
+								name: "to-quantity",
+								value: vm.quantityValue,
+								position: 1,
+								type: "Quantity",
+								min: "0",
+								max: "2147483647",
+								disbaled: true,
+								visible: false
+							}
+						};
+
+						vm.periodConfig = {
+							from: {
+								name: "from-period",
+								value: vm.periodsValue,
+								position: 0,
+								type: "Period",
+								min: "0",
+								max: "2147483647"
+							},
+							to: {
+								name: "to-period",
+								value: vm.periodsValue,
+								position: 1,
+								type: "Period",
+								min: "0",
+								max: "2147483647"
+							}
+						};
+						vm.numericalConfig = { debounce: 800 };
 
 						vm.validateCrossSellForm();
 					} else {
@@ -509,9 +512,6 @@ angular
 
 					vm.ratingEngine.latest_iteration.AI.advancedModelingConfig.cross_sell.filters =
 						vm.configFilters;
-
-					// console.log(vm.ratingEngine);
-					// console.log(vm.engineId, vm.modelId, vm.ratingModel);
 
 					$timeout(function() {
 						RatingsEngineStore.setConfigFilters(vm.configFilters);
