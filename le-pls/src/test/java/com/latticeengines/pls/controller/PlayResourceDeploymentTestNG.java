@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -49,6 +51,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -79,6 +82,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private LookupIdMappingProxy lookupIdMappingProxy;
 
     private RatingEngine ruleBasedRatingEngine;
     private RatingEngine crossSellRatingEngine;
@@ -382,10 +388,12 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
         logInterceptor();
 
+        LookupIdMap lookupIdMap = createDefaultLookupIdMap();
         playLaunch = restTemplate.postForObject(
                 getRestAPIHostPort() + //
                         "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
-                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount), PlayLaunch.class);
+                createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount, lookupIdMap),
+                PlayLaunch.class);
 
         assertPlayLaunch(playLaunch, bucketsToLaunch, isDryRunMode);
     }
@@ -628,21 +636,33 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private PlayLaunch createDefaultPlayLaunch() {
-        return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null);
+        LookupIdMap lookupIdMap = createDefaultLookupIdMap();
+        return createDefaultPlayLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())), false, null,
+                lookupIdMap);
     }
 
     private PlayLaunch createDefaultPlayLaunch(Set<RatingBucketName> bucketsToLaunch,
-            Boolean excludeItemsWithoutSalesforceId, Long topNCount) {
+            Boolean excludeItemsWithoutSalesforceId, Long topNCount, LookupIdMap lookupIdMap) {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setBucketsToLaunch(bucketsToLaunch);
-        playLaunch.setDestinationOrgId("O_" + System.currentTimeMillis());
-        playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
-        playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
+        playLaunch.setDestinationOrgId(lookupIdMap.getOrgId());
+        playLaunch.setDestinationSysType(lookupIdMap.getExternalSystemType());
+        playLaunch.setDestinationAccountId(lookupIdMap.getAccountId());
         playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
         playLaunch.setTopNCount(topNCount);
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;
+    }
+
+    private LookupIdMap createDefaultLookupIdMap() {
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
+        lookupIdMap.setOrgId("O_" + System.currentTimeMillis());
+        lookupIdMap.setOrgName("O_" + System.currentTimeMillis());
+        lookupIdMap.setAccountId(InterfaceName.SalesforceAccountID.name());
+        return lookupIdMappingProxy.registerExternalSystem(CustomerSpace.parse(tenant.getId()).toString(), lookupIdMap);
     }
 
     public void setShouldSkipAutoTenantCreation(boolean shouldSkipAutoTenantCreation) {
