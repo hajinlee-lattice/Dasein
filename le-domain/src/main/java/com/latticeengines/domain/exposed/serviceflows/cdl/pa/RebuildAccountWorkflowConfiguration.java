@@ -52,6 +52,13 @@ public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder cleanupEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Account)) {
+                processAccountStepConfiguration.setNeedCleanup(true);
+            }
+            return this;
+        }
+
         public RebuildAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

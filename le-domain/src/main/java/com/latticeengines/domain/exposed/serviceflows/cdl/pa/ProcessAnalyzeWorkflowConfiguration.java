@@ -282,6 +282,14 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder cleanupEntities(Set<BusinessEntity> entities) {
+            processAccountWorkflowBuilder.cleanupEntities(entities);
+            processContactWorkflowBuilder.cleanupEntities(entities);
+            processProductWorkflowBuilder.cleanupEntities(entities);
+            processTransactionWorkflowBuilder.cleanupEntities(entities);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

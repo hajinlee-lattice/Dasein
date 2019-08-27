@@ -58,6 +58,13 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder cleanupEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Transaction)) {
+                processTransactionStepConfiguration.setNeedCleanup(true);
+            }
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;

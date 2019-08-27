@@ -53,6 +53,13 @@ public class RebuildContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder cleanupEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Contact)) {
+                processContactStepConfiguration.setNeedCleanup(true);
+            }
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;

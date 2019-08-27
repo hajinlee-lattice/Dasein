@@ -369,12 +369,15 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private void initOrCloneRawStore(TableRoleInCollection role, SchemaInterpretation schema) {
-        String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
+        String activeTableName = "";
+        if (!Boolean.TRUE.equals(configuration.getNeedCleanup())) {
+            activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
+        }
         if (StringUtils.isNotBlank(activeTableName)) {
-            log.info("Cloning " + role + " from " + active + " to " + inactive);
+            log.info("Cloning {} from {} to {}.", role, active, inactive);
             clonePeriodStore(role);
         } else {
-            log.info("Building a brand new " + role);
+            log.info("Building a brand new {}.", role);
             buildPeriodStore(role, schema);
             emptyRawStore = true;
         }

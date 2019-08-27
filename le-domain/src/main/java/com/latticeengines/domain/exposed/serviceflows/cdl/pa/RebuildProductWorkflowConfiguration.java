@@ -53,6 +53,13 @@ public class RebuildProductWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder cleanupEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Product)) {
+                processProductStepConfiguration.setNeedCleanup(true);
+            }
+            return this;
+        }
+
         public RebuildProductWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildProductWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

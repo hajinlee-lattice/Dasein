@@ -67,6 +67,15 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public  Builder cleanupEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Contact)) {
+                processContactStepConfiguration.setNeedCleanup(true);
+                updateContactWorkflowBuilder.cleanupEntities(entities);
+                rebuildContactWorkflowBuilder.cleanupEntities(entities);
+            }
+            return this;
+        }
+
         public ProcessContactWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

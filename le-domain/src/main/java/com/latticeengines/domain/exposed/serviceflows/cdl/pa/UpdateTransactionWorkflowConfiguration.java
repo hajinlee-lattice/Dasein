@@ -58,6 +58,13 @@ public class UpdateTransactionWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder cleanupEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Transaction)) {
+                processTransactionStepConfiguration.setNeedCleanup(true);
+            }
+            return this;
+        }
+
         public Builder apsRollingPeriod(String apsRollingPeriod) {
             return this;
         }
