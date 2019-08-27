@@ -78,7 +78,7 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
         System.out.println(sql);
         long count = entityQueryServiceSparkSQL.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue,
                 SPARK_BATCH_USER);
-        Assert.assertEquals(count, 23029L);
+        Assert.assertEquals(count, 25958L);
         long count2 = entityQueryService.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue,
                 SEGMENT_USER);
         Assert.assertEquals(count, count2);
