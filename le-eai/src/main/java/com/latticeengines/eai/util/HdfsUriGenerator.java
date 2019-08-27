@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public class HdfsUriGenerator {
 
-    public static final String EXTRACT_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
+    public static final String EXTRACT_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss.SSS";
 
     @SuppressWarnings("unchecked")
     public String getHdfsUriForCamel(Exchange exchange, Table table, String fileName) {
