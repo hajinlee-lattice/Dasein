@@ -43,6 +43,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private static final String ATTR_ACCOUNT_NAME = "CompanyName";
     private static final String ATTR_ACCOUNT_NUM_FAM_MEMBERS = "NUMBER_OF_FAMILY_MEMBERS";
+    private static final String ATTR_ACCOUNT_INTENT = "BmbrSurge_AccountOverdrafts_Intent";
     private static final String ATTR_CONTACT_TITLE = "Occupation";
     private static final String VALUE_CONTACT_TITLE = "Analyst";
 
@@ -149,9 +150,11 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals(count, Long.valueOf(1687));
+                Assert.assertEquals(count, Long.valueOf(1286));
             } else if (RatingBucketName.C.getName().equals(score)) {
                 Assert.assertEquals(count, Long.valueOf(371));
+            } else if (RatingBucketName.D.getName().equals(score)) {
+                Assert.assertEquals(count, Long.valueOf(401));
             }
         });
     }
@@ -263,6 +266,13 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         ruleC.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.rangeBkt("A", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
+
+        Map<String, Restriction> ruleD = new HashMap<>();
+        ruleD.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_INTENT, Bucket.nullBkt()));
+        ruleD.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
+                new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.notNullBkt()));
+        rule.getBucketToRuleMap().put(RatingBucketName.D.getName(), ruleD);
 
         rule.setDefaultBucketName(RatingBucketName.A.getName());
 

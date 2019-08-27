@@ -143,6 +143,10 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract rating containers via Spark SQL.");
+                Throwable t = ctx.getLastThrowable();
+                if (t != null) {
+                    log.warn("Spark script failed.", t);
+                }
             }
             do {
                 round = containers.stream() //

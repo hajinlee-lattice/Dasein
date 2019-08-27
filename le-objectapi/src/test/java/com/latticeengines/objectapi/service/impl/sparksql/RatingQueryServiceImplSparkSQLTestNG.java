@@ -50,6 +50,7 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
 
     private final class AccountAttr {
         static final String CompanyName = "CompanyName";
+        static final String Intent = "BmbrSurge_AccountOverdrafts_Intent";
     }
 
     private final class ContactAttr {
@@ -152,8 +153,10 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
                 sqlUser);
         Assert.assertTrue(ratingCounts.containsKey("A"), JsonUtils.serialize(ratingCounts));
         Assert.assertTrue(ratingCounts.containsKey("C"), JsonUtils.serialize(ratingCounts));
+        Assert.assertTrue(ratingCounts.containsKey("D"), JsonUtils.serialize(ratingCounts));
         testAndAssertCountFromTester(sqlUser, ratingCounts.get("A"), 1687L);
         testAndAssertCountFromTester(sqlUser, ratingCounts.get("C"), 371L);
+        testAndAssertCountFromTester(sqlUser, ratingCounts.get("D"), 401L);
     }
 
     private RuleBasedModel ruleBasedModel() {
@@ -174,6 +177,13 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
         ruleC.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.Contact, ContactAttr.Occupation, Bucket.rangeBkt("A", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
+
+        Map<String, Restriction> ruleD = new HashMap<>();
+        ruleD.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+                new BucketRestriction(BusinessEntity.Account, AccountAttr.Intent, Bucket.nullBkt()));
+        ruleD.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
+                new BucketRestriction(BusinessEntity.Contact, ContactAttr.Occupation, Bucket.notNullBkt()));
+        rule.getBucketToRuleMap().put(RatingBucketName.D.getName(), ruleD);
 
         rule.setDefaultBucketName(RatingBucketName.A.getName());
 
