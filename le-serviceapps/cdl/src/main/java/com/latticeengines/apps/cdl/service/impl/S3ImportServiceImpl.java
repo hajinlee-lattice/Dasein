@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -30,6 +31,8 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 public class S3ImportServiceImpl implements S3ImportService {
 
     private static final Logger log = LoggerFactory.getLogger(S3ImportServiceImpl.class);
+
+    private static final Long MESSAGE_REMOVE_THRESHOLD = TimeUnit.DAYS.toMillis(1);
 
     private static final String SOURCE = "File";
     private static final String TEMPLATES = "Templates";
@@ -117,7 +120,13 @@ public class S3ImportServiceImpl implements S3ImportService {
                     s3ImportMessageService.deleteMessage(message);
                 }
             } catch (RuntimeException e) {
-                log.error(String.format("Cannot submit import for: %s", message.getKey()), e);
+                // Only log message instead of stack trace to reduce log.
+                log.error(String.format("Cannot submit import for: %s, error: %s", message.getKey(), e.getMessage()));
+                if (System.currentTimeMillis() - message.getUpdated().getTime() > MESSAGE_REMOVE_THRESHOLD) {
+                    log.warn(String.format("Remove message %s from import message queue due to timeout.",
+                            message.getKey()));
+                    s3ImportMessageService.deleteMessage(message);
+                }
             }
         }
         return false;
