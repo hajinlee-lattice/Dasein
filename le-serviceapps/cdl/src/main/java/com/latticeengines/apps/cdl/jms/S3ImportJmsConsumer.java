@@ -169,7 +169,10 @@ public class S3ImportJmsConsumer {
                             redisTemplate.opsForValue().set(REDIS_PREFIX + key, System.currentTimeMillis(),
                                     idleFrame, TimeUnit.SECONDS);
                             log.info(String.format("S3 import for %s / %s / %s / %s", bucket, tenantId, feedType, fileName));
-                            s3ImportService.saveImportMessage(bucket, key, hostUrl);
+                            if (!s3ImportService.saveImportMessage(bucket, key, hostUrl)) {
+                                log.warn(String.format("Cannot save import message: bucket %s, key %s, hostUrl %s",
+                                        bucket, key, hostUrl));
+                            }
                         }
                     }
                 }
