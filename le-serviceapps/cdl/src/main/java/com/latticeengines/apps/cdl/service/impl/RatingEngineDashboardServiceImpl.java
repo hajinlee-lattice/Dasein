@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,10 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
     @SuppressWarnings("unchecked")
     @Override
     public RatingEngineDashboard getRatingsDashboard(String customerSpace, String ratingEngineId) {
+        if (StringUtils.isBlank(ratingEngineId)) {
+            log.warn("Null or empty rating engine ID, cannot build dashboard");
+            return null;
+        }
 
         log.info(String.format("Loading rating dashboard for : %s", ratingEngineId));
 
@@ -46,6 +51,12 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
 
         // get rating engine summary
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
+        if (ratingEngine == null) {
+            log.warn(String.format("Unable to find a rating engine by ID: %s for tenant: %s", ratingEngineId,
+                    customerSpace));
+            return null;
+        }
+
         RatingEngineSummary ratingEngineSummary = constructRatingEngineSummary(ratingEngine, customerSpace);
         log.info(String.format("Step 1 - Loading rating engine summary completed for : %s", ratingEngineId));
 
