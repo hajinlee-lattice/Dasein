@@ -136,7 +136,8 @@ public class MetadataServiceImpl implements MetadataService {
             log.error("Tenant {} is in migration. Deleting active table is not allowed.", customerSpace.toString());
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace.toString()));
         }
-        DatabaseUtils.retry("deleteTable", //
+        DatabaseUtils.retry("deleteTable", 10, RollbackException.class, "RollbackException  detected performing",
+                null, //
                 input -> tableEntityMgr.deleteTableAndCleanupByName(tableName));
     }
 
