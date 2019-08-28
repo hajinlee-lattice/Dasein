@@ -4,7 +4,6 @@ pexpect
 psutil
 kazoo
 zc.zk
-git+https://github.com/LatticeEngines/rbtools.git#egg=rbtools
 zk-shell
 requests
 awscli
