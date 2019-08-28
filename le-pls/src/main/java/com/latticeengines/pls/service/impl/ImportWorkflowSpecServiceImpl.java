@@ -60,52 +60,18 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
 
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
 
-        /*
-        try {
-            s3Service.downloadS3File(s3ObjectSummary, specFile);
-        } catch (Exception e) {
-            log.error("Downloading S3 file failed with error:", e);
-            throw e;
-        }
-
-        // TODO(jwinter): Consider reading the spec file into an input stream to avoid overflowing String size limits.
-        String specString = null;
-        if (specFile != null) {
-            try {
-                specString = org.apache.commons.io.FileUtils.readFileToString(specFile, Charset.defaultCharset());
-                log.error("Spec is:\n" + specString);
-            } catch (Exception e) {
-                log.error("Reading Spec file from S3 bucket " + s3Bucket + " and path " + s3Path +
-                                " into string caused exception:", e);
-                throw e;
-            }
-        } else {
-            log.error("Null Spec file read from S3 bucket " + s3Bucket + " and path " + s3Path);
-            throw new IOException("Null Spec file read from S3 bucket " + s3Bucket + " and path " + s3Path);
-        }
-        */
-
         // Read in S3 file as InputStream.
         InputStream specInputStream = s3Service.readObjectAsStream(s3Bucket, s3Path);
-
-
         ImportWorkflowSpec workflowSpec = null;
         if (specInputStream != null) {
-        //if (specString != null) {
             try {
                 workflowSpec = JsonUtils.deserialize(specInputStream, ImportWorkflowSpec.class);
-                //workflowSpec = JsonUtils.deserialize(specString, ImportWorkflowSpec.class);
-                //workflowSpec.setSystemType(systemType);
-                //workflowSpec.setSystemObject(systemObject);
             } catch (Exception e) {
                 log.error("JSON deserialization of Spec file from S3 bucket " + s3Bucket + " and path " + s3Path +
                         " failed with error:", e);
                 throw e;
             }
         } else {
-            //log.error("Spec string was null when read from S3 bucket " + s3Bucket + " and path " + s3Path);
-            //throw new IOException("Spec string was null when read from S3 bucket " + s3Bucket + " and path " +
-            //s3Path);
             log.error("Null Spec InputStream read from S3 bucket " + s3Bucket + " and path " + s3Path);
             throw new IOException("Null Spec InputStream read from S3 bucket " + s3Bucket + " and path " + s3Path);
         }

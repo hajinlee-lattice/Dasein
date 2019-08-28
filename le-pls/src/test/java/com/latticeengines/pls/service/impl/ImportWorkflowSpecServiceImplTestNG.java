@@ -17,10 +17,10 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowSpecServiceImplTestNG.class);
 
     private static String testSpecFileName =
-            "com/latticeengines/pls/service/impl/importworkflowspecservice/test-contact-spec.json";
+            "com/latticeengines/pls/service/impl/importworkflowspecservice/expected-contact-spec.json";
 
     private static String expectedTableFileName =
-            "com/latticeengines/pls/service/impl/importworkflowspecservice/expected-table.json";
+            "com/latticeengines/pls/service/impl/importworkflowspecservice/expected-spec-table.json";
 
 
     @Autowired
@@ -49,7 +49,10 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
         log.error("Actual import workflow spec is:\n" + JsonUtils.pprint(actualTestSpec));
 
         // TODO(jwinter): Figure out the proper way to compare JSON objects for test.
-        Assert.assertEquals(JsonUtils.serialize(actualTestSpec), JsonUtils.serialize(expectedTestSpec));
+        //Assert.assertEquals(JsonUtils.serialize(actualTestSpec), JsonUtils.serialize(expectedTestSpec));
+        //ObjectMapper mapper = new ObjectMapper();
+        //Assert.assertTrue(mapper.valueToTree(actualTestSpec).equals(mapper.valueToTree(expectedTestSpec)));
+        Assert.assertEquals(actualTestSpec, expectedTestSpec);
 
         /*
         Assert.assertEquals(actualTestSpec.getSystemType(), expectedTestSpec.getSystemType());
@@ -74,6 +77,8 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
         log.error("Expected table generated from import workflow spec is:\n" + JsonUtils.pprint(expectedTable));
 
         Assert.assertEquals(JsonUtils.serialize(actualTable), JsonUtils.serialize(expectedTable));
+        //ObjectMapper mapper = new ObjectMapper();
+        //Assert.assertTrue(mapper.valueToTree(actualTable).equals(mapper.valueToTree(expectedTable)));
     }
 
 }
