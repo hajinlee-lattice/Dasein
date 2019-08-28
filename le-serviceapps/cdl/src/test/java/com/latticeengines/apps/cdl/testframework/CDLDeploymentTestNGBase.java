@@ -59,7 +59,6 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -76,11 +75,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;
-
-    @Value("${common.test.pls.url}")
-    protected String internalResourceHostPort;
-
-    protected InternalResourceRestApiProxy internalResourceProxy;
 
     @Inject
     private WorkflowProxy workflowProxy;
@@ -138,7 +132,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         checkpointService.setMainTestTenant(mainTestTenant);
     }
 
@@ -149,7 +142,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
             mainCustomerSpace = mainTestTenant.getId();
             MultiTenantContext.setTenant(mainTestTenant);
             testBed.switchToSuperAdmin();
-            internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
             checkpointService.setMainTestTenant(mainTestTenant);
         }
     }
@@ -316,12 +308,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         newTable.addAttribute(attr);
         metadataProxy.createTable(mainCustomerSpace, tableName, newTable);
     }
-
-//    protected void activateRatingEngine(String engineId, Tenant tenant) {
-//        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), engineId);
-//        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
-//        ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine, false);
-//    }
 
     protected void activateRatingEngine(String engineId, Tenant tenant) {
         RatingEngine ratingEngine = new RatingEngine();

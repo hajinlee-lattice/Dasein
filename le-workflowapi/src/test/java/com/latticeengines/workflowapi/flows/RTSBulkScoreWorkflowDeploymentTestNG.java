@@ -14,7 +14,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -53,9 +52,6 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
-
-    @Value("${common.test.pls.url}")
-    private String plsApiHostPort;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -126,11 +122,11 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         System.out.println("The deselected attributes are: " + selectedAttributeMap.getDeselectedAttributes());
         System.out.println("The selected attributes are: " + selectedAttributeNameList);
-        internalResourceProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         List<String> selectedAttributes = new ArrayList<>();

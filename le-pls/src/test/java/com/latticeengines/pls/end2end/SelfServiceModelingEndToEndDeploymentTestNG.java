@@ -89,6 +89,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
@@ -96,10 +97,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private static final Logger log = LoggerFactory.getLogger(SelfServiceModelingEndToEndDeploymentTestNG.class);
-    protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
 
     @Inject
     protected ScoreCorrectnessService scoreCompareService;
@@ -698,16 +701,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     private void saveAttributeSelection(CustomerSpace customerSpace) {
         log.info("Saving attribute selection via internal api ...");
-        internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
-                getRestAPIHostPort());
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         System.out.println(selectedAttributeMap.getDeselectedAttributes());
         System.out.println(selectedAttributeMap.getSelectedAttributes());
-        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         List<String> selectedAttributes = new ArrayList<>();

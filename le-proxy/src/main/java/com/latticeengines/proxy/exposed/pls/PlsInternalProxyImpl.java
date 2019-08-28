@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
-import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
@@ -63,6 +62,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         super(hostPort, "pls");
     }
 
+    @Override
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
                                                                      String attributeDisplayNameFilter, Category category, //
                                                                      Boolean onlySelectedAttributes) {
@@ -84,6 +84,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
                 onlySelectedAttributes, null, null, considerInternalAttributes);
     }
 
+    @Override
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
                                                                      String attributeDisplayNameFilter, Category category, String subcategory, //
                                                                      Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
@@ -104,6 +105,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
                                                 Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         try {
@@ -120,6 +122,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes() {
         try {
             String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + "/all" + INSIGHTS_PATH));
@@ -133,6 +136,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
                                              LeadEnrichmentAttributesOperationMap attributes) {
         try {
@@ -143,6 +147,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public Map<String, Integer> getPremiumAttributesLimitation(CustomerSpace customerSpace) {
         try {
             String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/premiumattributeslimitation",
@@ -162,6 +167,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public Integer getSelectedAttributeCount(CustomerSpace customerSpace, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedattributes/count",
@@ -175,6 +181,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public Integer getSelectedAttributePremiumCount(CustomerSpace customerSpace, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedpremiumattributes/count",
@@ -188,6 +195,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public List<String> getLeadEnrichmentCategories(CustomerSpace customerSpace) {
         try {
             String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/categories",
@@ -199,6 +207,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category) {
         try {
             String url = constructUrl(combine(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/subcategories",
@@ -211,25 +220,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, String> getActiveStack() {
-        try {
-            String url = constructUrl("/health/stackinfo");
-            return get("getActiveStack", url, Map.class);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31112, new String[]{e.getMessage()});
-        }
-    }
-
-    public StatusDocument systemCheck() {
-        try {
-            String url = constructUrl("/health/systemstatus");
-            return get("systemCheck", url, StatusDocument.class);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_31115, new String[]{e.getMessage()});
-        }
-    }
-
+    @Override
     public void createSourceFile(SourceFile sourceFile, String tenantId) {
         try {
             String url = constructUrl(combine("/internal/sourcefiles", sourceFile.getName(), tenantId));
@@ -240,6 +231,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public SourceFile findSourceFileByName(String name, String tenantId) {
         try {
             String url = constructUrl(combine("/internal/sourcefiles", name, tenantId));
@@ -250,6 +242,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void updateSourceFile(SourceFile sourceFile, String tenantId) {
         try {
             String url = constructUrl(combine("/internal/sourcefiles", sourceFile.getName(), tenantId));
@@ -322,15 +315,6 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         String url = constructUrl(combine("/internal/segment/" + segmentName + "/restriction",
                 customerSpace.toString()));
         return get("getSegmentRestrictionQuery", url, Restriction.class);
-    }
-
-    public Report findReportByName(CustomerSpace customerSpace, String reportName) {
-        try {
-            String url = constructUrl(combine("/internal/reports/" + reportName, customerSpace.toString()));
-            return get("findReportByName", url, Report.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getReport: Remote call failure: " + e.getMessage(), e);
-        }
     }
 
     @Override
@@ -417,6 +401,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         return constructUrl(urlStr.toString());
     }
 
+    @Override
     public void registerReport(Report report, String tenantId) {
         try {
             String url = constructUrl(combine("/internal/reports", tenantId));
@@ -428,6 +413,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public Report findReportByName(String name, String tenantId) {
         try {
             String url = constructUrl(combine("/internal/reports", name, tenantId));
@@ -438,6 +424,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void copyNotes(String fromModelSummaryId, String toModelSummaryId) {
         try {
             String url = constructUrl(combine("/internal/modelnotes/", fromModelSummaryId, toModelSummaryId));
@@ -458,6 +445,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void createNote(String modelId, NoteParams noteParams) {
         try {
             String url = constructUrl(combine("/internal/modelnotes/", modelId));
@@ -468,6 +456,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void sendCDLProcessAnalyzeEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl(combine("/internal/emails/processanalyze/result", result, tenantId));
@@ -520,6 +509,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void sendPlsCreateModelEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl(combine("/internal/emails/createmodel/result", result, tenantId));
@@ -530,6 +520,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void sendPlsScoreEmail(String result, String tenantId, AdditionalEmailInfo info) {
         try {
             String url = constructUrl(combine("/internal/emails/score/result", result, tenantId));
@@ -540,6 +531,7 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
         }
     }
 
+    @Override
     public void sendPlsEnrichInternalAttributeEmail(String result, String tenantId,
                                                     AdditionalEmailInfo info) {
         try {

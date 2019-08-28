@@ -64,7 +64,7 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
@@ -95,6 +95,9 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private ApplicationContext applicationContext;
 
     @Autowired
+    private PlsInternalProxy plsInternalProxy;
+
+    @Autowired
     private Configuration yarnConfiguration;
 
     @Autowired
@@ -102,8 +105,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     @Autowired
     private BatonService batonService;
-
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     private String idColumnName = InterfaceName.Id.name();
 
@@ -136,8 +137,6 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         }
         log.info("Inside the rts bulk scoring processor.");
         log.info(String.format("idColumnName is %s", idColumnName));
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(
-                rtsBulkScoringConfig.getInternalResourceHostPort());
         String path = getExtractPath(rtsBulkScoringConfig);
         log.info(String.format("The extract path before process is: %s", path));
         path = processExtractPath(path);
@@ -270,7 +269,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private void getLeadEnrichmentAttributes(CustomerSpace customerSpace, Map<String, Schema.Type> attributeMap,
             Map<String, String> attributeDisplayNameMap, Map<String, Boolean> internalAttributeFlagMap,
             boolean enrichmentEnabledForInternalAttributes) {
-        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = internalResourceRestApiProxy
+        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = plsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, Boolean.TRUE,
                         enrichmentEnabledForInternalAttributes);
         leadEnrichmentAttributeList.sort((e1, e2) -> {

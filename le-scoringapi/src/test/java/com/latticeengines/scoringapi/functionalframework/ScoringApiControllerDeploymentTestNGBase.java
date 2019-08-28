@@ -52,7 +52,7 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
 import com.latticeengines.scoringapi.controller.TestRegisterModels;
@@ -61,7 +61,7 @@ import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
+@Listeners({GlobalAuthCleanupTestListener.class})
 public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringApiControllerDeploymentTestNGBase.class);
@@ -89,9 +89,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Value("${common.test.oauth.url}")
     protected String authHostPort;
 
-    @Value("${common.test.pls.url}")
-    protected String plsApiHostPort;
-
     @Autowired
     protected Configuration yarnConfiguration;
 
@@ -114,9 +111,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Inject
     protected ModelSummaryProxy modelSummaryProxy;
 
-    protected OAuthUserEntityMgr userEntityMgr;
+    @Inject
+    protected PlsInternalProxy plsInternalProxy;
 
-    protected InternalResourceRestApiProxy plsRest;
+    protected OAuthUserEntityMgr userEntityMgr;
 
     protected DataComposition eventTableDataComposition;
 
@@ -128,8 +126,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected Tenant tenant;
 
-    protected InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     protected TestModelSummaryParser testModelSummaryParser;
 
     protected List<String> selectedAttributes;
@@ -138,7 +134,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     public void beforeClass() throws IOException {
         testModelSummaryParser = new TestModelSummaryParser();
         MODEL_ID = generateRandomModelId();
-        plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         tenant = setupTenantAndModelSummary(true);
         setupHdfsArtifacts(tenant);
 
@@ -150,7 +145,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         }
 
         if (shouldSelectAttributeBeforeTest()) {
-            internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
             saveAttributeSelectionBeforeTest(customerSpace);
         }
     }
@@ -212,13 +206,13 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected void saveAttributeSelectionBeforeTest(CustomerSpace customerSpace) {
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
-        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
         Assert.assertNotNull(selectedAttributes);
         Assert.assertEquals(selectedAttributes.size(), 6);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         selectedAttributes = new ArrayList<>();
@@ -385,11 +379,11 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     protected List<Integer> getExpectedScoresForScoreCorrectness() {
         List<Integer> expectedScores = new ArrayList<>();
-        int[] expected = { 90, 71, 91, 88 };
+        int[] expected = {90, 71, 91, 88};
         // (YSong) When cutting M25 release RC, 3rd expected changed from 89 to 91.
         // The reason for the score change is still unknown, might be DC 2.0.16
         // release.
-        int[] newExpected = { 96, 89, 96, 94 };
+        int[] newExpected = {96, 89, 96, 94};
         // TODO - data model score not match with csv records
         for (int score : newExpected) {
             expectedScores.add(score);

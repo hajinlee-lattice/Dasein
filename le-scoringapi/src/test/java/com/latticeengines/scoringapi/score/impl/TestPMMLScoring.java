@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.controller.InternalScoringResourceDeploymentTestNG;
 
 @Component
@@ -19,7 +18,6 @@ public class TestPMMLScoring extends InternalScoringResourceDeploymentTestNG {
     public void scoreRecords(String modelName, CustomerSpace customerSpace, Tenant pmmlTenant)
             throws IOException, InterruptedException {
         final String url = apiHostPort + "/score/records";
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
         runScoringTest(url, modelName, customerSpace, pmmlTenant, true, true);
     }
 

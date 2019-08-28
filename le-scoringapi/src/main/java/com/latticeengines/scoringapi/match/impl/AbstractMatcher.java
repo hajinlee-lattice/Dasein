@@ -5,14 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
@@ -35,7 +33,6 @@ import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
@@ -61,16 +58,6 @@ public abstract class AbstractMatcher implements Matcher {
 
     @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
-
-    protected InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    @PostConstruct
-    public void initialize() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
 
     public boolean isAccountMasterBasedModel(ModelSummary modelSummary) {
         return modelSummary.getDataCloudVersion() != null && modelSummary.getDataCloudVersion().startsWith("2.");

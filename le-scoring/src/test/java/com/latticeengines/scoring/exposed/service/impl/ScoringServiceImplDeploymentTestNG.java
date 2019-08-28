@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequ
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
@@ -75,6 +76,9 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
+
     private static String TEST_INPUT_DATA_DIR;
 
     private static final String AVRO_FILE_SUFFIX = "File/SourceFile_file_1462229180545_csv/Extracts/2016-05-02-18-47-03/";
@@ -90,8 +94,6 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     protected static String targetDir;
 
     protected static CustomerSpace customerSpace;
-
-    protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     protected Tenant tenant;
 
@@ -277,14 +279,12 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     }
 
     private void saveAttributeSelection(CustomerSpace customerSpace) {
-        internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
-                plsApiHostPort);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
-        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        plsInternalProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         List<String> selectedAttributes = new ArrayList<>();

@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
@@ -40,14 +40,14 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowApiFunctionalTestNGBase.class);
 
+    @Value("${common.test.pls.url}")
+    protected String internalResourceHostPort;
+
     @Value("${common.test.microservice.url}")
     protected String microServiceHostPort;
 
     @Value("${workflowapi.modelingservice.basedir}")
     protected String modelingServiceHdfsBaseDir;
-
-    @Value("${common.test.pls.url}")
-    protected String internalResourceHostPort;
 
     @Autowired
     protected SoftwareLibraryService softwareLibraryService;
@@ -70,7 +70,8 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    protected InternalResourceRestApiProxy internalResourceProxy;
+    @Autowired
+    protected PlsInternalProxy plsInternalProxy;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected YarnFunctionalTestNGBase platformTestBase;
@@ -89,8 +90,6 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
-
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         setupYarnPlatform();
 
         tenant = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());

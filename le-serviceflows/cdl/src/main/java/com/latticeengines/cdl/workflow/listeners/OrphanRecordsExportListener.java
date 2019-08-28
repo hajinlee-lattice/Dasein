@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -15,6 +14,7 @@ import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -26,8 +26,8 @@ public class OrphanRecordsExportListener extends LEJobListener {
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Value("${yarn.pls.url}")
-    private String internalResourceHostPort;
+    @Inject
+    private PlsInternalProxy plsInternalProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -49,9 +49,6 @@ public class OrphanRecordsExportListener extends LEJobListener {
             String createdBy = job.getInputContextValue(OrphanRecordsExportWorkflowConfiguration.CREATED_BY);
             try {
                 log.info(String.format("userId=%s; exportId=%s", CustomerSpace.parse(tenantId).toString(), exportId));
-                com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy emailProxy =
-                        new com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy(
-                                internalResourceHostPort);
                 BatchStatus jobStatus = jobExecution.getStatus();
 
                 OrphanRecordsExportRequest request = new OrphanRecordsExportRequest();
@@ -60,10 +57,10 @@ public class OrphanRecordsExportListener extends LEJobListener {
                 request.setCreatedBy(createdBy);
 
                 if (jobStatus == BatchStatus.COMPLETED) {
-                    emailProxy.sendOrphanRecordsExportEmail(
+                    plsInternalProxy.sendOrphanRecordsExportEmail(
                             DataCollectionArtifact.Status.READY.name(), tenantId, request);
                 } else if (jobStatus.isRunning()) {
-                    emailProxy.sendOrphanRecordsExportEmail(
+                    plsInternalProxy.sendOrphanRecordsExportEmail(
                             DataCollectionArtifact.Status.GENERATING.name(), tenantId, request);
                 }
             } catch (Exception e) {
