@@ -42,21 +42,6 @@
         <qualifier value="propdata" />
     </bean>
 
-    <bean name="dataCloudCollector" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-        <property name="driverClass" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-        <property name="jdbcUrl" value="jdbc:sqlserver://10.51.15.130:1433;databaseName=LEDataDB_30;"/>
-        <property name="user" value="DLTransfer" />
-        <property name="password" value="free&amp;NSE" />
-        <property name="acquireIncrement" value="1"/>
-        <property name="maxPoolSize" value="4"/>
-        <property name="checkoutTimeout" value="10000"/>
-        <property name="idleConnectionTestPeriod" value="10"/>
-        <property name="maxIdleTime" value="30"/>
-    </bean>
-
-    <bean id="dataCloudCollectorJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
-          p:dataSource-ref="dataCloudCollector" />
-
     <tx:annotation-driven/>
 
     <bean id="commandDao" class="com.latticeengines.datacloud.match.dao.impl.CommandDaoImpl">
