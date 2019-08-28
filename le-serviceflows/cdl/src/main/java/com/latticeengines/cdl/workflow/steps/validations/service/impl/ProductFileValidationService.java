@@ -35,11 +35,13 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -55,6 +57,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.serv
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
@@ -78,6 +81,8 @@ public class ProductFileValidationService
     @Inject
     private SegmentProxy segmentProxy;
 
+    @Inject
+    private DataFeedProxy dataFeedProxy;
 
     @Override
     public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
@@ -107,7 +112,8 @@ public class ProductFileValidationService
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter,
-                    productFileValidationServiceConfiguration.getCustomerSpace(), statistics);
+                    productFileValidationServiceConfiguration.getCustomerSpace(), statistics,
+                    productFileValidationServiceConfiguration.getDataFeedTaskId());
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
@@ -169,9 +175,10 @@ public class ProductFileValidationService
     }
 
     private long mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
-            CSVPrinter csvFilePrinter, CustomerSpace space, StringBuilder statistics) throws IOException {
+            CSVPrinter csvFilePrinter, CustomerSpace space, StringBuilder statistics, String dataFeedTaskId) throws IOException {
         long errorLine = 0L;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
+        boolean existProductNameInTemplate = checkExistProductNameInTemplate(space, dataFeedTaskId);
         // the product map after rollup
         Map<String, Product> inputProductMap = new HashMap<>();
         boolean foundProductBundle = false;
@@ -179,6 +186,13 @@ public class ProductFileValidationService
             Product inputProduct = entry.getValue();
             if (inputProduct.getProductId() == null) {
                 continue;
+            }
+
+            if (existProductNameInTemplate && inputProduct.getProductName() == null) {
+                errorLine++;
+                String message = String.format("product name is required for product %s in the upload file.",
+                        inputProduct.getProductId());
+                csvFilePrinter.printRecord(entry.getKey(), "", message);
             }
 
             if (inputProduct.getProductBundle() != null) {
@@ -449,6 +463,22 @@ public class ProductFileValidationService
                     " to be remodelled to get accurate" +
                     " scores.", String.valueOf(bundleWithDiffSku)));
         }
+    }
+
+    boolean checkExistProductNameInTemplate(CustomerSpace space, String dataFeedTaskId) {
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(space.toString(), dataFeedTaskId);
+        if (dataFeedTask == null) {
+            log.info(String.format("dataFeedTask is null for space %s and task id %s."), space.toString(), dataFeedTaskId);
+            return false;
+        }
+        Table table = dataFeedTask.getImportTemplate();
+        if (table == null) {
+            log.info(String.format("template table is null for task id %s."), dataFeedTaskId);
+            return false;
+        }
+        Attribute attr = table.getAttribute(InterfaceName.ProductName.name());
+        return attr != null;
+
     }
 
     private Product mergeSpendingProduct(String id, String name, String categoryId, String familyId, String lineId,

@@ -10,6 +10,9 @@ public class ProductFileValidationConfiguration extends InputFileValidationConfi
     @JsonProperty("customerSpace")
     private CustomerSpace customerSpace;
 
+    @JsonProperty("dataFeedTaskId")
+    private String dataFeedTaskId;
+
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
@@ -18,4 +21,11 @@ public class ProductFileValidationConfiguration extends InputFileValidationConfi
         this.customerSpace = customerSpace;
     }
 
+    public String getDataFeedTaskId() {
+        return dataFeedTaskId;
+    }
+
+    public void setDataFeedTaskId(String dataFeedTaskId) {
+        this.dataFeedTaskId = dataFeedTaskId;
+    }
 }

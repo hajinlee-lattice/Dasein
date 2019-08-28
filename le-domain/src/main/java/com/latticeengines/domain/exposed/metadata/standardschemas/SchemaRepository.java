@@ -866,7 +866,7 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .failImportValidator().build());
+                .build());
         table.addAttribute(attr(InterfaceName.Description.name()) //
                 .allowedDisplayNames(Sets.newHashSet("DESCRIPTION", "PRODUCT DESCRIPTION")) //
                 .physicalDataType(Schema.Type.STRING) //
