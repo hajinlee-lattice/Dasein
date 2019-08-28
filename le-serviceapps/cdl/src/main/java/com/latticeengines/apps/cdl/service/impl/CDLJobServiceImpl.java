@@ -92,6 +92,8 @@ public class CDLJobServiceImpl implements CDLJobService {
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
     private static final String TEST_SCHEDULER = "qa_testing";
+    private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
+    private static final String USER_ERROR_CATEGORY = "User Error";
 
     @Value("${common.le.environment}")
     private String leEnv;
@@ -417,7 +419,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String tenantId : canRunRetryJobSet) {
                 try {
-                    if (!dryRun) {
+                    if (!dryRun && canRetry(tenantId)) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
                         logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
                         if (retryAppId != null) {
@@ -843,5 +845,47 @@ public class CDLJobServiceImpl implements CDLJobService {
             log.error("get redis cache fail.", e);
         }
     }
-}
 
+    private boolean canRetry(String tenantId) {
+        Job job;
+        DataFeedExecution execution;
+        try {
+            execution = getLastFailedPAExecution(tenantId);
+            job = getFailedPAJob(execution, tenantId);
+        } catch (Exception e) {
+            log.warn("cannot retry this tenant {}, error: {}", tenantId, e);
+            return false;
+        }
+
+        if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
+            execution.setRetryCount(execution.getRetryCount() + 1);
+            dataFeedExecutionEntityMgr.updateRetryCount(execution);
+            log.warn("due to user error, tenant {} cannot be retry.", tenantId);
+            return false;
+        }
+        return true;
+    }
+
+    private DataFeedExecution getLastFailedPAExecution(String tenantId) {
+        DataFeed dataFeed = dataFeedService.getDefaultDataFeed(tenantId);
+        if (dataFeed == null) {
+            throw new NullPointerException("can not find datafeed in tenant " + tenantId);
+        }
+        DataFeedExecution execution;
+        execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
+                DataFeedExecutionJobType.PA);
+        if (execution.getWorkflowId() == null) {
+            throw new NullPointerException("can not find workflowId in tenant " + tenantId);
+        }
+        return execution;
+    }
+
+    private Job getFailedPAJob(DataFeedExecution execution, String tenantId) {
+
+        Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), tenantId);
+        if (job == null || !PA_JOB_TYPE.equalsIgnoreCase(job.getJobType()) || job.getJobStatus() != JobStatus.FAILED) {
+            throw new IllegalArgumentException("the last pa job isn't failed in tenant " + tenantId);
+        }
+        return job;
+    }
+}
