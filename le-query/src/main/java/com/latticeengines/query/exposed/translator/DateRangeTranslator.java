@@ -74,9 +74,10 @@ public class DateRangeTranslator extends TranslatorCommon {
             if (aggPredicate != null) {
                 rhsQry = rhsQry.groupBy(accountId).having(aggPredicate);
             }
+            StringPath accountTable = AttrRepoUtils.getTablePath(repository, BusinessEntity.Account);
             query = SQLExpressions //
                     .select(lhsId) //
-                    .from(table.as(lhsPath)) //
+                    .from(accountTable.as(lhsPath)) //
                     .leftJoin(rhsQry, rhsPath) //
                     .on(lhsId.eq(rhsId)) //
                     .where(rhsId.isNull());
