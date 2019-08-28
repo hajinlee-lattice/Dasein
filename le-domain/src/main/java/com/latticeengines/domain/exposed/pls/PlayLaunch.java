@@ -230,6 +230,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DELETED", nullable = false)
     private Boolean deleted = Boolean.FALSE;
 
+    @JsonProperty("audienceSize")
+    @Column(name = "AUDIENCE_SIZE")
+    private Long audienceSize;
+
+    @JsonProperty("matchedCount")
+    @Column(name = "MATCHED_COUNT")
+    private Long matchedCount;
+
     @JsonProperty("channelConfig")
     @Column(name = "CHANNEL_CONFIG")
     @Lob
@@ -597,6 +605,22 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setExportFile(String exportFile) {
         this.exportFile = exportFile;
+    }
+
+    public Long getAudienceSize() {
+        return audienceSize;
+    }
+
+    public void setAudienceSize(Long audienceSize) {
+        this.audienceSize = audienceSize;
+    }
+
+    public Long getMatchedCount() {
+        return matchedCount;
+    }
+
+    public void setMatchedCount(Long matchedCount) {
+        this.matchedCount = matchedCount;
     }
 
     public ChannelConfig getChannelConfig() {

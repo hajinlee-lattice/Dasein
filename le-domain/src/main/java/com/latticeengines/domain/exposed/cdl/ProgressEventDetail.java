@@ -20,7 +20,15 @@ public class ProgressEventDetail extends EventDetail {
 
     private Long warning;
 
+    private Long duplicates;
+
     private String message;
+
+    @JsonProperty("audience_size")
+    private Long audienceSize;
+
+    @JsonProperty("matched_count")
+    private Long matchedCount;
 
     @JsonProperty("total_records_submitted")
     private Long totalRecordsSubmitted;
@@ -73,12 +81,36 @@ public class ProgressEventDetail extends EventDetail {
         this.warning = warning;
     }
 
+    public Long getDuplicates() {
+        return duplicates;
+    }
+
+    public void setDuplicates(Long duplicates) {
+        this.duplicates = duplicates;
+    }
+
     public String getMessage() {
         return message;
     }
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Long getAudienceSize() {
+        return audienceSize;
+    }
+
+    public void setAudienceSize(Long audienceSize) {
+        this.audienceSize = audienceSize;
+    }
+
+    public Long getMatchedCount() {
+        return matchedCount;
+    }
+
+    public void setMatchedCount(Long matchedCount) {
+        this.matchedCount = matchedCount;
     }
 
     public Long getTotalRecordsSubmitted() {
