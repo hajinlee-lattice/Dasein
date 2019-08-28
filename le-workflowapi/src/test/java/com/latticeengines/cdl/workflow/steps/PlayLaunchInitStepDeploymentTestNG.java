@@ -201,7 +201,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertTrue(recommendations.size() > 0);
 
         recommendations.forEach(rec -> {
-            log.info("Cleaning up recommendation: " + rec.getId());
+            if (log.isDebugEnabled()) {
+                log.debug("Cleaning up recommendation: " + rec.getId());
+            }
             recommendationService.delete(rec, false);
         });
         recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
