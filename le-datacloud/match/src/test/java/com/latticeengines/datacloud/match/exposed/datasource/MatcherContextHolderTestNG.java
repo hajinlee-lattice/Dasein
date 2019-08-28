@@ -23,7 +23,7 @@ public class MatcherContextHolderTestNG extends DataCloudMatchFunctionalTestNGBa
 
     private ExecutorService executor = Executors.newFixedThreadPool(MatchClient.values().length);
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void switchMatcherClient() throws InterruptedException, ExecutionException {
         Map<MatchClient, Future<Boolean>> results = new ConcurrentHashMap<>();
         for (MatchClient client: MatchClient.values()) {
