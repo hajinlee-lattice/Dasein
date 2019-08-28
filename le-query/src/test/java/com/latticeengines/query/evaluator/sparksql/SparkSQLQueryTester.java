@@ -12,6 +12,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -106,8 +107,13 @@ public class SparkSQLQueryTester {
     }
 
     public long getCountFromSpark(Query query) {
-        String sql = queryEvaluatorService.getQueryStr(attrRepo, query, SparkQueryProvider.SPARK_BATCH_USER);
-        return sparkSQLService.getCount(customerSpace, session, sql);
+        String sql1 = queryEvaluatorService.getQueryStr(attrRepo, query, SparkQueryProvider.SPARK_BATCH_USER);
+        long count1 = sparkSQLService.getCount(customerSpace, session, sql1);
+        // test idempotent
+        String sql2 = queryEvaluatorService.getQueryStr(attrRepo, query, SparkQueryProvider.SPARK_BATCH_USER);
+        long count2 = sparkSQLService.getCount(customerSpace, session, sql2);
+        Assert.assertEquals(count1, count2);
+        return count1;
     }
 
     public HdfsDataUnit getDataFromSpark(Query query) {

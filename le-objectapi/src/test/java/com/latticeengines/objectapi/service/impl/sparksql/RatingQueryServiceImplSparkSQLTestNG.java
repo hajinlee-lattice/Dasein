@@ -119,10 +119,10 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         long count;
         if (SPARK_BATCH_USER.equals(sqlUser)) {
-            count = ratingQueryServiceSparkSQL.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue, //
+            count = ratingQueryServiceSparkSQL.getCount(frontEndQuery, DataCollection.Version.Blue, //
                     sqlUser);
         } else {
-            count = ratingQueryService.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue, sqlUser);
+            count = ratingQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, sqlUser);
         }
         testAndAssertCountFromTester(sqlUser, count, 5806L);
     }

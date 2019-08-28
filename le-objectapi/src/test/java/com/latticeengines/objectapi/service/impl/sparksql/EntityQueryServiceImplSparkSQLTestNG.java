@@ -73,13 +73,13 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
     public void testCountInSpark() {
         FrontEndQuery frontEndQuery = loadFrontEndQueryFromResource("prior2.json");
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
-        String sql = entityQueryServiceSparkSQL.getQueryStr(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue,
+        String sql = entityQueryServiceSparkSQL.getQueryStr(frontEndQuery, DataCollection.Version.Blue,
                 SPARK_BATCH_USER, true);
         System.out.println(sql);
-        long count = entityQueryServiceSparkSQL.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue,
+        long count = entityQueryServiceSparkSQL.getCount(frontEndQuery, DataCollection.Version.Blue,
                 SPARK_BATCH_USER);
         Assert.assertEquals(count, 25958L);
-        long count2 = entityQueryService.getCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue,
+        long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue,
                 SEGMENT_USER);
         Assert.assertEquals(count, count2);
     }
