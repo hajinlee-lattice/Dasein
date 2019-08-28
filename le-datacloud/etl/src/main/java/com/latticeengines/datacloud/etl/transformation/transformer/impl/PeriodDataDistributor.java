@@ -90,8 +90,10 @@ public class PeriodDataDistributor
                 TimeSeriesUtils.distributePeriodDataWithRetry(yarnConfiguration, inputDir, targetDir, periods,
                         config.getPeriodField());
             } else {
+                // M30 temporary solution to avoid PA failure as regression: if
+                // retry is disabled, intermittent HDFS write failure is ignored
                 TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDir, periods,
-                        config.getPeriodField());
+                        config.getPeriodField(), true);
             }
         } else {
             @SuppressWarnings("serial")
@@ -149,8 +151,10 @@ public class PeriodDataDistributor
                 TimeSeriesUtils.distributePeriodDataWithRetry(yarnConfiguration, inputDir, targetDirs, periods,
                         config.getPeriodField(), config.getPeriodNameField());
             } else {
+                // M30 temporary solution to avoid PA failure as regression: if
+                // retry is disabled, intermittent HDFS write failure is ignored
                 TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDirs, periods,
-                        config.getPeriodField(), config.getPeriodNameField());
+                        config.getPeriodField(), config.getPeriodNameField(), true);
             }
         } else {
             TimeSeriesDistributer distributer = new TimeSeriesDistributer.DistributerBuilder() //

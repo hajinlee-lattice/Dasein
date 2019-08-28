@@ -43,6 +43,7 @@ public class TimeSeriesUtils {
     private static final Logger log = LoggerFactory.getLogger(TimeSeriesUtils.class);
     private static final String TIMESERIES_FILENAME_PREFIX = "Period-";
     private static final String TIMESERIES_FILENAME_SUFFIX = "-data.avro";
+    private static final int MAX_ATTEMPTS = 3;
 
     // ONLY for testing purpose -- for testing retry time-series distribution
     // with failed period
@@ -277,7 +278,7 @@ public class TimeSeriesUtils {
             Set<Integer> periods, String periodField) {
         Set<Integer> periodsRemained = new HashSet<>(periods);
         // Only retry for non-LedpException
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singletonList(Exception.class),
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_ATTEMPTS, Collections.singletonList(Exception.class),
                 Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -290,12 +291,12 @@ public class TimeSeriesUtils {
             TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periodsRemained);
             // distribute to target dir
             Set<Integer> failedPeriods = TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDir,
-                    periodsRemained, periodField);
+                    periodsRemained, periodField, ctx.getRetryCount() + 1 == MAX_ATTEMPTS);
             periodsRemained.clear();
             if (CollectionUtils.isNotEmpty(failedPeriods)) {
                 periodsRemained.addAll(failedPeriods);
             }
-            if (CollectionUtils.isNotEmpty(periodsRemained)) {
+            if (ctx.getRetryCount() + 1 < MAX_ATTEMPTS && CollectionUtils.isNotEmpty(periodsRemained)) {
                 throw new RuntimeException("Has periods failed to distribute");
             }
             return true;
@@ -311,10 +312,12 @@ public class TimeSeriesUtils {
      * @param targetDir
      * @param periods
      * @param periodField
+     * @param ignoreFailure:
+     *            whether to ignore intermittent HDFS write failure
      * @return failed periodIds -- return null if there is no failed period
      */
     public static Set<Integer> distributePeriodData(Configuration yarnConfiguration, String inputDir,
-            String targetDir, Set<Integer> periods, String periodField) {
+            String targetDir, Set<Integer> periods, String periodField, boolean ignoreFailure) {
         verifySchemaCompatibility(yarnConfiguration, inputDir, targetDir);
         inputDir = getPath(inputDir) + "/*.avro";
         targetDir = getPath(targetDir);
@@ -348,7 +351,7 @@ public class TimeSeriesUtils {
                 if (pendingRecords > 4 * 128 * 1024) {
                     log.info("Schedule " + pendingRecords + "records to write");
                     writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap,
-                            failedPeriods);
+                            failedPeriods, ignoreFailure);
                     dateRecordMap.clear();
                     pendingRecords = 0;
                 }
@@ -356,7 +359,7 @@ public class TimeSeriesUtils {
             log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords
                     + " records to write");
             writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap,
-                    failedPeriods);
+                    failedPeriods, ignoreFailure);
             syncWrites(pendingWrites, failedPeriods);
             Set<Integer> failedPeriodIds = failedPeriods.get(PeriodStrategy.Template.Day.name());
             if (CollectionUtils.isNotEmpty(failedPeriodIds)) {
@@ -388,7 +391,7 @@ public class TimeSeriesUtils {
             Map<String, String> targetDirs, Map<String, Set<Integer>> periods, String periodField,
             String periodNameField) {
         Map<String, Set<Integer>> periodsRemained = new HashMap<>(periods);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singletonList(Exception.class),
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_ATTEMPTS, Collections.singletonList(Exception.class),
                 Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -404,12 +407,12 @@ public class TimeSeriesUtils {
             }
             // distribute to target dirs
             Map<String, Set<Integer>> failedPeriods = TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir,
-                    targetDirs, periodsRemained, periodField, periodNameField);
+                    targetDirs, periodsRemained, periodField, periodNameField, ctx.getRetryCount() + 1 == MAX_ATTEMPTS);
             periodsRemained.clear();
             if (MapUtils.isNotEmpty(failedPeriods)) {
                 periodsRemained.putAll(failedPeriods);
             }
-            if (MapUtils.isNotEmpty(periodsRemained)) {
+            if (ctx.getRetryCount() + 1 < MAX_ATTEMPTS && MapUtils.isNotEmpty(periodsRemained)) {
                 throw new RuntimeException("Has periods failed to distribute");
             }
             return true;
@@ -427,11 +430,13 @@ public class TimeSeriesUtils {
      *            (periodName -> set(periodIds))
      * @param periodField
      * @param periodNameField
+     * @param ignoreFailure:
+     *            whether to ignore intermittent HDFS write failure
      * @return failed periodIds: periodName -> set(periodIds)
      */
     public static Map<String, Set<Integer>> distributePeriodData(Configuration yarnConfiguration, String inputDir,
             Map<String, String> targetDirs, Map<String, Set<Integer>> periods, String periodField,
-            String periodNameField) {
+            String periodNameField, boolean ignoreFailure) {
         for (String targetDir : targetDirs.values()) {
             verifySchemaCompatibility(yarnConfiguration, inputDir, targetDir);
         }
@@ -479,7 +484,7 @@ public class TimeSeriesUtils {
                 if (pendingRecords > 2 * 128 * 1024) {
                     log.info("Schedule " + pendingRecords + "records to write");
                     writeRecordsMultiPeriod(yarnConfiguration, executor,
-                            pendingWrites, schema, periodFileMap, dateRecordMap, failedPeriods);
+                            pendingWrites, schema, periodFileMap, dateRecordMap, failedPeriods, ignoreFailure);
                     pendingRecords = 0;
                     dateRecordMap.clear();
                 }
@@ -487,7 +492,7 @@ public class TimeSeriesUtils {
             log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords
                     + " records to write");
             writeRecordsMultiPeriod(yarnConfiguration, executor, pendingWrites, schema,
-                    periodFileMap, dateRecordMap, failedPeriods);
+                    periodFileMap, dateRecordMap, failedPeriods, ignoreFailure);
             syncWrites(pendingWrites, failedPeriods);
             if (MapUtils.isNotEmpty(failedPeriods)) {
                 for (Map.Entry<String, Set<Integer>> period : failedPeriods.entrySet()) {
@@ -518,11 +523,13 @@ public class TimeSeriesUtils {
      *            periodId -> [records]
      * @param failedPeriods:
      *            (periodName -> set(periodId))
+     * @param ignoreFailure:
+     *            whether to ignore intermittent HDFS write failures
      */
     private static void writeRecords(Configuration yarnConfiguration,
             ExecutorService executor, List<Future<Pair<Boolean, Pair<String, Integer>>>> pendingWrites, Schema schema,
             Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap,
-            Map<String, Set<Integer>> failedPeriods) {
+            Map<String, Set<Integer>> failedPeriods, boolean ignoreFailure) {
         syncWrites(pendingWrites, failedPeriods);
         for (Integer period : dateRecordMap.keySet()) {
             List<GenericRecord> records = dateRecordMap.get(period);
@@ -535,9 +542,12 @@ public class TimeSeriesUtils {
             if ((records == null) || (records.size() == 0)) {
                 continue;
             }
-            // This period is already failed in previous write job, all the data
-            // belonging to this period need to re-distribute anyway
-            if (failedPeriods.getOrDefault(PeriodStrategy.Template.Day.name(), new HashSet<>()).contains(period)) {
+            // If HDFS write failure is not ignored and a period
+            // already failed in previous write job, all the data
+            // belonging to this period need to re-distribute anyway, thus no
+            // need to continue distribute this period
+            if (!ignoreFailure && failedPeriods.getOrDefault(PeriodStrategy.Template.Day.name(), new HashSet<>())
+                    .contains(period)) {
                 continue;
             }
             PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records,
@@ -560,11 +570,14 @@ public class TimeSeriesUtils {
      *            periodName -> (periodId -> records)
      * @param failedPeriods:
      *            periodName -> set(periodId)
+     * @param ignoreFailure:
+     *            whether to ignore intermittent HDFS write failure
      */
     private static void writeRecordsMultiPeriod(Configuration yarnConfiguration,
             ExecutorService executor, List<Future<Pair<Boolean, Pair<String, Integer>>>> pendingWrites, Schema schema,
             Map<String, Map<Integer, String>> periodFileMap,
-            Map<String, Map<Integer, List<GenericRecord>>> dateRecordMap, Map<String, Set<Integer>> failedPeriods) {
+            Map<String, Map<Integer, List<GenericRecord>>> dateRecordMap, Map<String, Set<Integer>> failedPeriods,
+            boolean ignoreFailure) {
         syncWrites(pendingWrites, failedPeriods);
         for (Map.Entry<String, Map<Integer, List<GenericRecord>>> ent : dateRecordMap.entrySet()) {
             String periodName = ent.getKey();
@@ -580,9 +593,11 @@ public class TimeSeriesUtils {
                 if ((records == null) || (records.size() == 0)) {
                     continue;
                 }
-                // This period is already failed in previous write job, all the
-                // data belonging to this period need to re-distribute anyway
-                if (failedPeriods.getOrDefault(periodName, new HashSet<>()).contains(period)) {
+                // If HDFS write failure is not ignored and a period
+                // already failed in previous write job, all the data
+                // belonging to this period need to re-distribute anyway, thus
+                // no need to continue distribute this period
+                if (!ignoreFailure && failedPeriods.getOrDefault(periodName, new HashSet<>()).contains(period)) {
                     continue;
                 }
                 PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records,
