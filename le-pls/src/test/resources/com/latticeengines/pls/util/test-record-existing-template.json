@@ -1,0 +1,389 @@
+{
+    "fieldDefinitionsRecordsMap": {
+        "Unique ID": [
+            {
+                "fieldName": "CustomerContactId",
+                "fieldType": "TEXT",
+                "screenName": "Contact ID",
+                "columnName": "Contact Id",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            }
+        ],
+        "Match IDs": [],
+        "Other IDs": [],
+        "Contact Fields": [
+            {
+                "fieldName": "FirstName",
+                "fieldType": "TEXT",
+                "screenName": "First Name",
+                "columnName": "FirstName",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "LastName",
+                "fieldType": "TEXT",
+                "screenName": "Last Name",
+                "columnName": "Last Name",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA",
+                "category": "Account Information"
+            },
+            {
+                "fieldName": "Title",
+                "fieldType": "TEXT",
+                "screenName": "Title",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "Model"
+                ],
+                "fundamentalType": "ALPHA",
+                "subcategory": "Account Information"
+            },
+            {
+                "fieldName": "Email",
+                "fieldType": "TEXT",
+                "screenName": "Email",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "EMAIL",
+                "statisticalType": "nominal"
+            }
+        ],
+        "Analysis Fields": [
+            {
+                "fieldName": "LeadSource",
+                "fieldType": "TEXT",
+                "screenName": "Lead Source",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "subcategory": "Account Information"
+            },
+            {
+                "fieldName": "LeadType",
+                "fieldType": "TEXT",
+                "screenName": "Lead Type",
+                "columnName": "Contact Type",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "DoNotCall",
+                "fieldType": "BOOLEAN",
+                "screenName": "Has Opted Out of Phone Calls",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "BOOLEAN"
+            },
+            {
+                "fieldName": "CreatedDate",
+                "fieldType": "DATE",
+                "screenName": "Created Date",
+                "columnName": "CreatedDate",
+                "inCurrentImport": true,
+                "dateFormat": "MM/DD/YYYY",
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": "Date",
+                "fundamentalType": "DATE"
+            },
+            {
+                "fieldName": "LastModifiedDate",
+                "fieldType": "DATE",
+                "screenName": "Last Modified Date",
+                "columnName": "Last_Modified_Date",
+                "inCurrentImport": false,
+                "dateFormat": "MM.DDD.YY",
+                "timeFormat": "00 00 00.000 12H",
+                "timeZone": "Asia/Sakhalin",
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "DATE"
+            }
+        ],
+        "Match to Accounts - ID": [
+            {
+                "fieldName": "CustomerAccountId",
+                "fieldType": "TEXT",
+                "screenName": "Unique Account Identifier",
+                "columnName": "AccountExternalId",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA"
+            }
+        ],
+        "Match to Accounts - Fields": [
+            {
+                "fieldName": "Website",
+                "fieldType": "TEXT",
+                "screenName": "Website",
+                "columnName": "EmailAddress",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal"
+            },
+            {
+                "fieldName": "CompanyName",
+                "fieldType": "TEXT",
+                "screenName": "Company Name",
+                "columnName": "Account_Name",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "DUNS",
+                "fieldType": "TEXT",
+                "screenName": "D-U-N-S",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "Country",
+                "fieldType": "TEXT",
+                "screenName": "Country",
+                "columnName": "BillingCountry",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "ZipCode",
+                "fieldType": "TEXT",
+                "screenName": "Zip Code",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            }
+        ],
+        "Custom Fields": [
+            {
+                "fieldName": "BillingCity",
+                "fieldType": "TEXT",
+                "columnName": "Billing City",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "PostalCode",
+                "fieldType": "TEXT",
+                "columnName": "BILLING_ZIP_CODE",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "user_DUNS",
+                "fieldType": "INTEGER",
+                "columnName": "DUNS",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "user_Gender",
+                "fieldType": "TEXT",
+                "columnName": "Gender",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "user_Do_Not_Call",
+                "fieldType": "BOOLEAN",
+                "columnName": "Do_Not_Call",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "BOOLEAN"
+            },
+            {
+                "fieldName": "user_JobTitle",
+                "fieldType": "TEXT",
+                "columnName": "Job Title",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "State",
+                "fieldType": "TEXT",
+                "columnName": "BillingState",
+                "inCurrentImport": false,
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldType": "TEXT",
+                "columnName": "First Name",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "category": "Lead Information"
+            },
+            {
+                "fieldType": "TEXT",
+                "columnName": "LastName",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "category": "Lead Information"
+            },
+            {
+                "fieldType": "NUMBER",
+                "columnName": "Earnings",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "NUMERIC",
+                "statisticalType": "ratio",
+                "category": "Lead Information"
+            },
+            {
+                "fieldType": "INTEGER",
+                "columnName": "Years At Company",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "NUMERIC",
+                "statisticalType": "ratio",
+                "category": "Lead Information"
+            },
+            {
+                "fieldType": "TEXT",
+                "columnName": "Domain",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "category": "Lead Information"
+            },
+            {
+                "fieldType": "TEXT",
+                "columnName": "Country",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "category": "Lead Information"
+            },
+            {
+                "fieldType": "BOOLEAN",
+                "columnName": "Heir to Throne",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "BOOLEAN",
+                "statisticalType": "nominal",
+                "category": "Lead Information"
+            },
+            {
+                "fieldType": "TEXT",
+                "columnName": "LeadType",
+                "inCurrentImport": true,
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "category": "Lead Information"
+            }
+        ]
+    }
+}

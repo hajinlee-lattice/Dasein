@@ -242,7 +242,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.Id) //
-                .logicalType(LogicalDataType.Reference) //
+                .logicalDataType(LogicalDataType.Reference) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
@@ -251,7 +251,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.Id) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
@@ -268,7 +268,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.LONG) //
                 .notNull() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -292,7 +292,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.AccountId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
@@ -301,7 +301,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.SubcategoryId) //
-                .logicalType(LogicalDataType.Reference) //
+                .logicalDataType(LogicalDataType.Reference) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
@@ -310,7 +310,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.LONG) //
                 .notNull() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalDataType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -320,7 +320,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.LONG) //
                 .notNull() //
                 .interfaceName(InterfaceName.Quantity) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -330,7 +330,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.LONG) //
                 .notNull() //
                 .interfaceName(InterfaceName.Amount) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -349,7 +349,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.Id) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
@@ -359,7 +359,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.BOOLEAN) //
                 .notNull() //
                 .interfaceName(InterfaceName.Event) //
-                .logicalType(LogicalDataType.Event) //
+                .logicalDataType(LogicalDataType.Event) //
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
@@ -394,7 +394,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED DATE")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -403,7 +403,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -421,7 +421,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("ISCLOSED", "IS CLOSED", "CLOSED")) //
                 .physicalDataType(Schema.Type.BOOLEAN) //
                 .interfaceName(InterfaceName.IsClosed) //
-                .logicalType(LogicalDataType.Opportunity) //
+                .logicalDataType(LogicalDataType.Opportunity) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -430,7 +430,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("STAGE NAME", "STAGE")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
-                .logicalType(LogicalDataType.Opportunity) //
+                .logicalDataType(LogicalDataType.Opportunity) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -449,7 +449,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.Id) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -458,7 +458,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("EVENT", "WON", "P1_EVENT")) //
                 .notNull()//
                 .interfaceName(InterfaceName.Event) //
-                .logicalType(LogicalDataType.Event) //
+                .logicalDataType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
                 .build());
@@ -466,7 +466,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED DATE")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -475,7 +475,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -517,7 +517,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("ISCLOSED", "IS CLOSED", "CLOSED")) //
                 .physicalDataType(Schema.Type.BOOLEAN) //
                 .interfaceName(InterfaceName.IsClosed) //
-                .logicalType(LogicalDataType.Opportunity) //
+                .logicalDataType(LogicalDataType.Opportunity) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -526,7 +526,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("STAGE NAME", "STAGE")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
-                .logicalType(LogicalDataType.Opportunity) //
+                .logicalDataType(LogicalDataType.Opportunity) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -576,7 +576,7 @@ public class SchemaRepository {
                         .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
                         .physicalDataType(Schema.Type.STRING) //
                         .interfaceName(InterfaceName.CustomerAccountId) //
-                        .logicalType(LogicalDataType.Id) //
+                        .logicalDataType(LogicalDataType.Id) //
                         .fundamentalType(FundamentalType.ALPHA.name()) //
                         .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                         .build());
@@ -586,7 +586,7 @@ public class SchemaRepository {
                         .physicalDataType(Schema.Type.STRING) //
                         .required() //
                         .interfaceName(InterfaceName.AccountId) //
-                        .logicalType(LogicalDataType.Id) //
+                        .logicalDataType(LogicalDataType.Id) //
                         .fundamentalType(FundamentalType.ALPHA.name()) //
                         .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                         .build());
@@ -598,7 +598,7 @@ public class SchemaRepository {
                     .notNull() //
                     .required() //
                     .interfaceName(InterfaceName.AccountId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .fundamentalType(FundamentalType.ALPHA.name()) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                     .build());
@@ -673,7 +673,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("EVENT", "WON", "P1_EVENT")) //
                 .physicalDataType(Schema.Type.BOOLEAN) //
                 .interfaceName(InterfaceName.Event) //
-                .logicalType(LogicalDataType.Event) //
+                .logicalDataType(LogicalDataType.Event) //
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build();
@@ -695,7 +695,7 @@ public class SchemaRepository {
                     .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
                     .physicalDataType(Schema.Type.STRING) //
                     .interfaceName(InterfaceName.CustomerContactId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
@@ -706,7 +706,7 @@ public class SchemaRepository {
                     .notNull() //
                     .required() //
                     .interfaceName(InterfaceName.ContactId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
@@ -741,7 +741,7 @@ public class SchemaRepository {
                             Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                     .physicalDataType(Schema.Type.STRING) //
                     .interfaceName(InterfaceName.CustomerAccountId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
@@ -753,7 +753,7 @@ public class SchemaRepository {
                     .notNull() //
                     .required() //
                     .interfaceName(InterfaceName.AccountId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
@@ -833,14 +833,14 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
         return table;
@@ -855,7 +855,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .required().notNull() //
                 .interfaceName(InterfaceName.ProductId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -917,7 +917,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("ID", "TRANSACTION_ID", "TRANSACTION ID")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -933,7 +933,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(accountId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -943,7 +943,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .defaultValueStr("") //
                 .interfaceName(contactId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -953,7 +953,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.ProductId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -961,7 +961,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("ORDER_ID", "ORDERID", "ORDER ID")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.OrderId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -969,7 +969,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalDataType(LogicalDataType.Timestamp) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
                 .build());
         table.addAttribute(attr(InterfaceName.Quantity.name()) //
@@ -978,7 +978,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.Quantity) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
         table.addAttribute(attr(InterfaceName.Amount.name()) //
@@ -987,14 +987,14 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.Amount) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.Cost.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COST")) //
                 .physicalDataType(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.Cost) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
@@ -1004,7 +1004,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.TransactionTime) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalDataType(LogicalDataType.Timestamp) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionType.name()) //
@@ -1030,7 +1030,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("ID", "TRANSACTION_ID", "TRANSACTION ID")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1040,7 +1040,7 @@ public class SchemaRepository {
                             Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                     .physicalDataType(Schema.Type.STRING) //
                     .interfaceName(InterfaceName.CustomerAccountId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
@@ -1050,7 +1050,7 @@ public class SchemaRepository {
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.AccountId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1059,7 +1059,7 @@ public class SchemaRepository {
                         Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .defaultValueStr("").interfaceName(InterfaceName.ContactId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1069,7 +1069,7 @@ public class SchemaRepository {
                             Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                     .physicalDataType(Schema.Type.STRING) //
                     .defaultValueStr("").interfaceName(InterfaceName.CustomerContactId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
@@ -1080,7 +1080,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.ProductId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1088,7 +1088,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("ORDER_ID", "ORDERID", "ORDER ID")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.OrderId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1096,7 +1096,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalDataType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -1105,7 +1105,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("QUANTITY")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.Quantity) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -1114,7 +1114,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("AMOUNT")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.Amount) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -1123,7 +1123,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("COST")) //
                 .physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.Cost) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -1132,7 +1132,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME", "TRANSACTION TIME")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionTime) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalDataType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
@@ -1149,7 +1149,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("DATE", "TRANSACTION_DATE", "TRANSACTION DATE")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1173,7 +1173,7 @@ public class SchemaRepository {
                     .physicalDataType(Schema.Type.LONG) //
                     .notNull() //
                     .interfaceName(InterfaceName.CDLCreatedTime) //
-                    .logicalType(LogicalDataType.Timestamp) //
+                    .logicalDataType(LogicalDataType.Timestamp) //
                     .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
             table.addAttribute(attr(InterfaceName.CDLUpdatedTime.name()) //
@@ -1181,7 +1181,7 @@ public class SchemaRepository {
                     .physicalDataType(Schema.Type.LONG) //
                     .notNull() //
                     .interfaceName(InterfaceName.CDLUpdatedTime) //
-                    .logicalType(LogicalDataType.Timestamp) //
+                    .logicalDataType(LogicalDataType.Timestamp) //
                     .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
         }
@@ -1197,7 +1197,7 @@ public class SchemaRepository {
                             Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                     .physicalDataType(Schema.Type.STRING) //
                     .interfaceName(InterfaceName.CustomerAccountId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
         }
@@ -1206,7 +1206,7 @@ public class SchemaRepository {
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.AccountId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.ContactId.name()) //
@@ -1214,7 +1214,7 @@ public class SchemaRepository {
                         Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.ContactId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         if (enableEntityMatch) {
@@ -1223,7 +1223,7 @@ public class SchemaRepository {
                             Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                     .physicalDataType(Schema.Type.STRING) //
                     .interfaceName(InterfaceName.CustomerContactId) //
-                    .logicalType(LogicalDataType.Id) //
+                    .logicalDataType(LogicalDataType.Id) //
                     .fundamentalType(ModelingMetadata.FT_ALPHA) //
                     .build());
         }
@@ -1232,7 +1232,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.ProductId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionType.name()) //
@@ -1245,7 +1245,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("DATE", "TRANSACTION_DATE", "TRANSACTION DATE")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionDate) //
-                .logicalType(LogicalDataType.Date) //
+                .logicalDataType(LogicalDataType.Date) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionDayPeriod.name()) //
@@ -1271,14 +1271,14 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.DOUBLE) //
                 .notNull() //
                 .interfaceName(InterfaceName.TotalAmount) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.TotalCost.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COST", "TOTAL COST")) //
                 .physicalDataType(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.TotalCost) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_CURRENCY) //
                 .build());
         table.addAttribute(attr(InterfaceName.TotalQuantity.name()) //
@@ -1286,7 +1286,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.LONG) //
                 .notNull() //
                 .interfaceName(InterfaceName.TotalQuantity) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionCount.name()) //
@@ -1294,7 +1294,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.LONG) //
                 .notNull() //
                 .interfaceName(InterfaceName.TransactionCount) //
-                .logicalType(LogicalDataType.Metric) //
+                .logicalDataType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
         if (includeCdlTimestamps) {
@@ -1303,7 +1303,7 @@ public class SchemaRepository {
                     .physicalDataType(Schema.Type.LONG) //
                     .notNull() //
                     .interfaceName(InterfaceName.CDLCreatedTime) //
-                    .logicalType(LogicalDataType.Timestamp) //
+                    .logicalDataType(LogicalDataType.Timestamp) //
                     .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
             table.addAttribute(attr(InterfaceName.CDLUpdatedTime.name()) //
@@ -1311,7 +1311,7 @@ public class SchemaRepository {
                     .physicalDataType(Schema.Type.LONG) //
                     .notNull() //
                     .interfaceName(InterfaceName.CDLUpdatedTime) //
-                    .logicalType(LogicalDataType.Timestamp) //
+                    .logicalDataType(LogicalDataType.Timestamp) //
                     .fundamentalType(FundamentalType.DATE.getName()) //
                     .build());
         }
@@ -1327,7 +1327,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(accountId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
@@ -1344,7 +1344,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(contactId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1363,7 +1363,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(accountId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1372,7 +1372,7 @@ public class SchemaRepository {
                         Sets.newHashSet("CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .defaultValueStr("").interfaceName(contactId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1381,7 +1381,7 @@ public class SchemaRepository {
                 .physicalDataType(Schema.Type.STRING) //
                 .notNull() //
                 .interfaceName(InterfaceName.ProductId) //
-                .logicalType(LogicalDataType.Id) //
+                .logicalDataType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -1391,7 +1391,7 @@ public class SchemaRepository {
                 .notNull() //
                 .required() //
                 .interfaceName(InterfaceName.TransactionTime) //
-                .logicalType(LogicalDataType.Timestamp) //
+                .logicalDataType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //

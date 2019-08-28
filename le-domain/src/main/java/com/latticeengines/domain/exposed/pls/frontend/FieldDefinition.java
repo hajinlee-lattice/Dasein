@@ -10,49 +10,120 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 
+// FieldDefinition defines the properties of each column to field mapping in the Import Workflow Redesign and
+// replaces the FieldMapping class.
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FieldDefinition {
 
     //
-    // Basic properties that all FieldDefinitions should have.
+    // Properties that are part of the API with the UI.
     //
 
-    // Internal name of the schema field that columns are mapped to.  Must be unique for each mapping.
+    // Defined in Spec
+    // Internal name of the schema field that columns are mapped to.  Must be unique in each template and unique
+    // across all templates representing the same business entity.
     @JsonProperty
     private String fieldName;
 
-    // The data format of this schema
+    // Defined in Spec
+    // The data format of this schema field.
     @JsonProperty
     private UserDefinedType fieldType;
 
+    // Defined in Spec
     // The name to display on the UI for this field.  Only used for Lattice Fields and Match Fields.
     @JsonProperty
     private String screenName;
 
-    // A priority ordered list of column names that should be matched to this field.  Only set in the Import Workflow
-    // Specs.
-    @JsonProperty
-    private List<String> matchingColumnNames;
-
-    // The name of the mapped column in the imported files for this schema field.  Also know as display name.
+    // The name of the mapped column in the imported files for this schema field.  Also know as display name.  This
+    // is the header name of each CSV column and can be configured by the user.
     @JsonProperty
     private String columnName;
-
-    // True if this field is required for this template.
-    @JsonProperty
-    Boolean required;
 
     // True if this field is mapped to a column in the current import process.  Only provided in API request and
     // response bodies.
     @JsonProperty
-    Boolean inCurrentImport;
+    private Boolean inCurrentImport;
+
 
     //
-    // These properties are specialized metadata properties that are only required for some FieldDefinitions
+    // Properties that only apply for fields with fieldType "DATE", ie. Date Attributes.
     //
+
+    // Represents the date format string provided by the user.  Eg. "MM/DD/YYYY"
+    @JsonProperty
+    private String dateFormat;
+
+    // Represents the time format string provided by the user.  Eg. "00:00:00 24H"
+    @JsonProperty
+    private String timeFormat;
+
+    // Represents the time zone for date/time values provided by the user.  Eg. America/New_York.
+    @JsonProperty
+    private String timeZone;
+
+
+    //
+    // Properties defined by the template specification (Spec) which may need to be propagated by the UI back to the
+    // backend to be stored in the template (Attribute Metadata Table).  Some of these fields are used for
+    // autodetection and validation while others are used for P&A and modeling.
+    //
+
+    // Defined in Spec
+    // A priority ordered list of column names that should be autodetected to match to this field.
+    @JsonProperty
+    private List<String> matchingColumnNames;
+
+    // Defined in Spec
+    // True if this field is required for this template.  Use for validation.
+    @JsonProperty
+    private Boolean required;
+
+    // TODO(jwinter): Figure out where there is an enum (ApprovedUsage) and a class (ModelingMetadata) with similar
+    //     defined values for this field.
+    // Defined in Spec
+    // Defines the allowed modeling usage of this property.
+    @JsonProperty
+    private List<String> approvedUsage;
+
+    // TODO(jwinter): Can we somehow do away with this partially redundant data type?
+    // Defined in Spec
+    // The logical meaning of the data type format, used in modeling.
+    @JsonProperty
+    private LogicalDataType logicalDataType;
+
+    // TODO(jwinter): Can we somehow do away with this mostly redundant data type?
+    // Defined in Spec
+    // Yet another field describing the data type format, used in the P&A pipeline and modeling, and VisiDB and LPI.
+    @JsonProperty
+    private FundamentalType fundamentalType;
+
+    // Yet another field describing the data type format, used possibly only in VisiDB and LPI.
+    // Defined in Spec
+    @JsonProperty
+    private String statisticalType;
+
+    // Field category for modeling.
+    // Defined in Spec
+    @JsonProperty
+    private String category;
+
+    // Field subcategory for modeling.
+    // Defined in Spec
+    @JsonProperty
+    private String subcategory;
+
+
+    //
+    // Properties for defining template IDs and linking with external systems.  These are not set for most fields.
+    //
+    // TODO(jwinter): These field are probably better as FieldDefinitionsRecord fields rather than defining them for
+    //     every field in the template when their usage is so sparse.
 
     // TODO(jwinter):  Need to better explain what this property represents.
     // Indicates whether this field should be treated as the global ID for this entity type, which represents the
@@ -80,21 +151,6 @@ public class FieldDefinition {
     @JsonProperty
     private String externalSystemName;
 
-    //
-    // The properties only apply for fields with fieldType "DATE", ie. Date Attributes.
-    //
-
-    // Represents the date format string provided by the user.  Eg. "MM/DD/YYYY"
-    @JsonProperty
-    private String dateFormat;
-
-    // Represents the time format string provided by the user.  Eg. "00:00:00 24H"
-    @JsonProperty
-    private String timeFormat;
-
-    // Represents the time zone for date/time values provided by the user.  Eg. America/New_York.
-    @JsonProperty
-    private String timeZone;
 
     //
     // Getters and setters.
@@ -124,6 +180,46 @@ public class FieldDefinition {
         this.screenName = screenName;
     }
 
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public Boolean isInCurrentImport() {
+        return inCurrentImport;
+    }
+
+    public void setInCurrentImport(Boolean inCurrentImport) {
+        this.inCurrentImport = inCurrentImport;
+    }
+
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
+    public String getTimeFormat() {
+        return timeFormat;
+    }
+
+    public void setTimeFormat(String timeFormat) {
+        this.timeFormat = timeFormat;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
     public List<String> getMatchingColumnNames() {
         return matchingColumnNames;
     }
@@ -141,14 +237,6 @@ public class FieldDefinition {
         }
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
     public Boolean isRequired() {
         return required;
     }
@@ -157,12 +245,52 @@ public class FieldDefinition {
         this.required = required;
     }
 
-    public Boolean isInCurrentImport() {
-        return inCurrentImport;
+    public List<String> getApprovedUsage() {
+        return approvedUsage;
     }
 
-    public void setInCurrentImport(Boolean inCurrentImport) {
-        this.inCurrentImport = inCurrentImport;
+    public void setApprovedUsage(List<String> approvedUsage) {
+        this.approvedUsage = approvedUsage;
+    }
+
+    public LogicalDataType getLogicalDataType() {
+        return logicalDataType;
+    }
+
+    public void setLogicalDataType(LogicalDataType logicalDataType) {
+        this.logicalDataType = logicalDataType;
+    }
+
+    public FundamentalType getFundamentalType() {
+        return fundamentalType;
+    }
+
+    public void setFundamentalType(FundamentalType fundamentalType) {
+        this.fundamentalType = fundamentalType;
+    }
+
+    public String getStatisticalType() {
+        return statisticalType;
+    }
+
+    public void setStatisticalType(String statisticalType) {
+        this.statisticalType = statisticalType;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
     }
 
     public Boolean isMappedToLatticeId() {
@@ -197,52 +325,35 @@ public class FieldDefinition {
         this.externalSystemName = externalSystemName;
     }
 
-    public String getDateFormat() {
-        return dateFormat;
-    }
-
-    public void setDateFormat(String dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    public String getTimeFormat() {
-        return timeFormat;
-    }
-
-    public void setTimeFormat(String timeFormat) {
-        this.timeFormat = timeFormat;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
-    }
-
     @Override
     public String toString() {
         String output = "";
         output += "fieldName: " + fieldName;
         output += "\nfieldType: " + fieldType;
         output += "\nscreenName: " + screenName;
+        output += "\ncolumnName: " + columnName;
+        output += "\ninCurrentImport: " + inCurrentImport;
+        output += "\ndateFormat: " + dateFormat;
+        output += "\ntimeFormat: " + timeFormat;
+        output += "\ntimeZone: " + timeZone;
         output += "\nmatchingColumnNames:";
         if (CollectionUtils.isNotEmpty(matchingColumnNames)) {
-            for (String name : matchingColumnNames) {
-                output += " " + name;
-            }
+            output += String.join(" ", matchingColumnNames);
         }
-        output += "\ncolumnName: " + columnName;
         output += "\nrequired: " + required;
-        output += "\ninCurrentImport: " + inCurrentImport;
+        output += "\napprovedUsage:";
+        if (CollectionUtils.isNotEmpty(approvedUsage)) {
+            output += String.join(" ", approvedUsage);
+        }
+        output += "\nlogicalDataType: " + logicalDataType;
+        output += "\nfundamentalType: " + fundamentalType;
+        output += "\nstatisticalType: " + statisticalType;
+        output += "\ncategory: " + category;
+        output += "\nsubcategory: " + subcategory;
         output += "\nmappedToLatticeId: " + mappedToLatticeId;
         output += "\nidEntityType: " + idEntityType;
         output += "\nexternalSystemType: " + externalSystemType;
         output += "\nexternalSystemName: " + externalSystemName;
-        output += "\ndateFormat: " + dateFormat;
-        output += "\ntimeFormat: " + timeFormat;
-        output += "\ntimeZone: " + timeZone;
         return output;
     }
 
@@ -254,12 +365,17 @@ public class FieldDefinition {
                     this.fieldType != definition.fieldType ||
                     !StringUtils.equals(this.screenName, definition.screenName) ||
                     !StringUtils.equals(this.columnName, definition.columnName) ||
-                    this.idEntityType != definition.idEntityType ||
-                    this.externalSystemType != definition.externalSystemType ||
-                    !StringUtils.equals(this.externalSystemName, definition.externalSystemName) ||
                     !StringUtils.equals(this.dateFormat, definition.dateFormat) ||
                     !StringUtils.equals(this.timeFormat, definition.timeFormat) ||
-                    !StringUtils.equals(this.timeZone, definition.timeZone)) {
+                    !StringUtils.equals(this.timeZone, definition.timeZone) ||
+                    this.logicalDataType != definition.logicalDataType ||
+                    this.fundamentalType != definition.fundamentalType ||
+                    !StringUtils.equals(this.statisticalType, definition.statisticalType) ||
+                    !StringUtils.equals(this.category, definition.category) ||
+                    !StringUtils.equals(this.subcategory, definition.subcategory) ||
+                    this.idEntityType != definition.idEntityType ||
+                    this.externalSystemType != definition.externalSystemType ||
+                    !StringUtils.equals(this.externalSystemName, definition.externalSystemName)) {
                 return false;
             }
 
@@ -275,6 +391,13 @@ public class FieldDefinition {
                     return false;
                 }
             } else if (!this.required.equals(definition.required)) {
+                return false;
+            }
+            if (this.approvedUsage == null) {
+                if (definition.approvedUsage != null) {
+                    return false;
+                }
+            } else if (!this.approvedUsage.equals(definition.approvedUsage)) {
                 return false;
             }
             if (this.inCurrentImport == null) {

@@ -56,22 +56,24 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
                 "com/latticeengines/pls/util/test-contact-spec.json",
                 ImportWorkflowSpec.class);
 
-        // Generate actual fetch response based on Contact import CSV and Spec.
-        FieldDefinitionsRecord actualResponse = ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(
+        // Generate actual FieldDefinitionsRecord based on Contact import CSV and Spec.
+        FieldDefinitionsRecord actualRecord = ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(
                 importWorkflowSpec, null, resolver);
 
-        //log.error("Output (no existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualResponse));
+        log.info("Actual (no existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
 
-        FieldDefinitionsRecord expectedResponse = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-response-no-existing-template.json",
+        FieldDefinitionsRecord expectedRecord = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-record-no-existing-template.json",
                 FieldDefinitionsRecord.class);
 
-        ObjectMapper mapper = new ObjectMapper();
-        Assert.assertTrue(mapper.valueToTree(actualResponse).equals(mapper.valueToTree(expectedResponse)));
+        log.info("Expected (no existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(expectedRecord));
 
-        Assert.assertEquals(actualResponse, expectedResponse,
-                "Actual Response:\n" + JsonUtils.pprint(actualResponse) + "\nvs\n\nExpected Response:\n" +
-                        JsonUtils.pprint(expectedResponse));
+        ObjectMapper mapper = new ObjectMapper();
+        Assert.assertTrue(mapper.valueToTree(actualRecord).equals(mapper.valueToTree(expectedRecord)));
+
+        Assert.assertEquals(actualRecord, expectedRecord,
+                "Actual Record:\n" + JsonUtils.pprint(actualRecord) + "\nvs\n\nExpected Record:\n" +
+                        JsonUtils.pprint(expectedRecord));
     }
 
     @Test(groups = "functional")
@@ -92,22 +94,24 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         log.error("Existing Table is:\n" + JsonUtils.pprint(existingTemplateTable));
 
-        // Generate actual fetch response based on Contact import CSV and Spec.
-        FieldDefinitionsRecord actualResponse = ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(
+        // Generate actual FieldDefinitionsRecord based on Contact import CSV, Spec, and existing template table.
+        FieldDefinitionsRecord actualRecord = ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(
                 importWorkflowSpec, existingTemplateTable, resolver);
 
-        //log.error("Output (existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualResponse));
+        log.info("Actual (existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
 
-        FieldDefinitionsRecord expectedResponse = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-response-existing-template.json",
+        FieldDefinitionsRecord expectedRecord = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-record-existing-template.json",
                 FieldDefinitionsRecord.class);
 
-        ObjectMapper mapper = new ObjectMapper();
-        Assert.assertTrue(mapper.valueToTree(actualResponse).equals(mapper.valueToTree(expectedResponse)));
+        log.info("Expected (existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(expectedRecord));
 
-        Assert.assertEquals(actualResponse, expectedResponse,
-                "Actual Response:\n" + JsonUtils.pprint(actualResponse) + "\nvs\n\nExpected Response:\n" +
-                        JsonUtils.pprint(expectedResponse));
+        ObjectMapper mapper = new ObjectMapper();
+        Assert.assertTrue(mapper.valueToTree(actualRecord).equals(mapper.valueToTree(expectedRecord)));
+
+        Assert.assertEquals(actualRecord, expectedRecord,
+                "Actual Record:\n" + JsonUtils.pprint(actualRecord) + "\nvs\n\nExpected Record:\n" +
+                        JsonUtils.pprint(expectedRecord));
     }
 
     // resourceJsonFileRelativePath should start "com/latticeengines/...".

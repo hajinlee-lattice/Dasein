@@ -1,4 +1,6 @@
 {
+    "systemType": "Default",
+    "systemObject": "Contacts",
     "fieldDefinitionsRecordsMap": {
         "Unique ID": [
             {
@@ -15,7 +17,14 @@
                     "EXTERNAL ID",
                     "EXTERNAL_ID"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null
             }
         ],
         "Match IDs": [],
@@ -30,7 +39,15 @@
                     "FIRST NAME",
                     "FIRST_NAME"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null,
+                "subcategory": "Account Information"
             },
             {
                 "fieldName": "LastName",
@@ -41,7 +58,15 @@
                     "LAST NAME",
                     "LAST_NAME"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null,
+                "subcategory": "Account Information"
             },
             {
                 "fieldName": "Title",
@@ -50,7 +75,15 @@
                 "matchingColumnNames": [
                     "TITLE"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "Model"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null,
+                "subcategory": "Account Information"
             },
             {
                 "fieldName": "Email",
@@ -60,7 +93,14 @@
                     "EMAIL",
                     "EMAIL_ADDRESS"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "EMAIL",
+                "statisticalType": "nominal",
+                "category": null
             }
         ],
         "Analysis Fields": [
@@ -73,7 +113,14 @@
                     "LEAD SOURCE",
                     "LEAD_SOURCE"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "ModelAndAllInsights"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "subcategory": "Account Information"
             },
             {
                 "fieldName": "LeadType",
@@ -84,7 +131,14 @@
                     "LEAD TYPE",
                     "LEAD_TYPE"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null
             },
             {
                 "fieldName": "DoNotCall",
@@ -95,7 +149,14 @@
                     "DO NOT CALL",
                     "DO_NOT_CALL"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "BOOLEAN",
+                "statisticalType": null,
+                "category": null
             },
             {
                 "fieldName": "CreatedDate",
@@ -106,7 +167,14 @@
                     "CREATED DATE",
                     "CREATED_DATE"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": "Date",
+                "fundamentalType": "DATE",
+                "statisticalType": null,
+                "category": null
             },
             {
                 "fieldName": "LastModifiedDate",
@@ -120,7 +188,14 @@
                     "LAST MODIFIED",
                     "LAST_MODIFIED"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": "Date",
+                "fundamentalType": "DATE",
+                "statisticalType": null,
+                "category": null
             }
         ],
         "Match to Accounts - ID": [
@@ -136,7 +211,14 @@
                     "ACCOUNT_EXTERNAL_ID",
                     "ACCOUNT"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null
             }
         ],
         "Match to Accounts - Fields": [
@@ -148,7 +230,14 @@
                     "WEBSITE",
                     "DOMAIN"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal",
+                "category": null
             },
             {
                 "fieldName": "CompanyName",
@@ -161,7 +250,14 @@
                     "ACCOUNT NAME",
                     "ACCOUNT_NAME"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null
             },
             {
                 "fieldName": "DUNS",
@@ -172,7 +268,14 @@
                     "DUNS NUMBER",
                     "DUNS_NUMBER"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null
             },
             {
                 "fieldName": "Country",
@@ -183,7 +286,14 @@
                     "BILLING COUNTRY",
                     "BILLING_COUNTRY"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null
             },
             {
                 "fieldName": "ZipCode",
@@ -206,7 +316,14 @@
                     "BILLING POSTAL CODE",
                     "BILLING_POSTAL_CODE"
                 ],
-                "required": false
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "logicalDataType": null,
+                "fundamentalType": "ALPHA",
+                "statisticalType": null,
+                "category": null
             }
         ],
         "Custom Fields": []

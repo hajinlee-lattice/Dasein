@@ -4,54 +4,70 @@
             "name": "CustomerContactId",
             "display_name": "Contact Id",
             "physical_data_type": "string",
+            "nullable": true,
+            "logicalDataType": "Id",
             "properties": {
-                "SpecSectionName": "Unique ID",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "State",
             "display_name": "BillingState",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Match to Accounts - Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "Website",
             "display_name": "EmailAddress",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Match to Accounts - Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA",
+                "StatisticalType": "nominal"
             }
         },
         {
             "name": "LastName",
             "display_name": "Last Name",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Contact Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA",
+                "Category": "Account Information"
             }
         },
         {
             "name": "LeadType",
             "display_name": "Contact Type",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Analysis Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "LastModifiedDate",
             "display_name": "Last_Modified_Date",
             "physical_data_type": "long",
+            "nullable": true,
+            "logicalDataType": "Date",
             "properties": {
-                "SpecSectionName": "Analysis Fields",
                 "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "DATE",
                 "DateFormatString": "MM.DDD.YY",
                 "TimeFormatString": "00 00 00.000 12H",
                 "Timezone": "Asia/Sakhalin"
@@ -61,72 +77,89 @@
             "name": "BillingCity",
             "display_name": "Billing City",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Match to Accounts - Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "user_DUNS",
             "display_name": "DUNS",
             "physical_data_type": "int",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Custom Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "ModelAndAllInsights" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "user_JobTitle",
             "display_name": "Job Title",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Custom Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "ModelAndAllInsights" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "user_Gender",
             "display_name": "Gender",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Custom Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "ModelAndAllInsights" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "FirstName",
             "display_name": "FirstName",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Contact Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "ModelAndAllInsights" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "CompanyName",
             "display_name": "Account_Name",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Match to Accounts - Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "PostalCode",
             "display_name": "BILLING_ZIP_CODE",
             "physical_data_type": "string",
+            "nullable": true,
             "properties": {
                 "SpecSectionName": "Match to Accounts - Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "None" ],
+                "FundamentalType": "ALPHA"
             }
         },
         {
             "name": "user_Do_Not_Call",
             "display_name": "Do_Not_Call",
             "physical_data_type": "boolean",
+            "nullable": true,
             "properties": {
-                "SpecSectionName": "Custom Fields",
-                "Required": false
+                "Required": false,
+                "ApprovedUsage": [ "ModelAndAllInsights" ],
+                "FundamentalType": "BOOLEAN"
             }
         }
     ]
