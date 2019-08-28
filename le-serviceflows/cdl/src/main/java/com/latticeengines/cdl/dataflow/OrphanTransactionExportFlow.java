@@ -1,7 +1,9 @@
 package com.latticeengines.cdl.dataflow;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +34,7 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
         // dedup by ProductId
         srcProduct = srcProduct.groupByAndLimit(new FieldList(InterfaceName.ProductId.name()), 1);
 
-        List<String> validatedColumns = parameters.getValidatedColumns();
+        Set<String> validatedColumns = new HashSet<>(parameters.getValidatedColumns());
         List<String> retainFields = srcTxn.getFieldNames().stream().filter(name -> validatedColumns.contains(name))
                 .collect(Collectors.toList());
         String renamedAccount = RENAME_PREFIX + InterfaceName.AccountId.name();
@@ -41,8 +43,12 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
         srcProduct = renameFields(srcProduct, InterfaceName.ProductId.name(), renamedProduct);
         Node result = srcTxn.join(new FieldList(InterfaceName.AccountId.name()), srcAccount, new FieldList(renamedAccount),
                 JoinType.LEFT);
+        // add retain to force syncing metadata
+        result = result.retain(result.getFieldNamesArray());
         result = result.join(new FieldList(InterfaceName.ProductId.name()), srcProduct, new FieldList(renamedProduct),
                 JoinType.LEFT);
+        // add retain to force syncing metadata
+        result = result.retain(result.getFieldNamesArray());
         List<String> filterFields = Arrays.asList(renamedAccount, renamedProduct);
         result = result.filter(String.format("%s == null || %s == null", renamedAccount, renamedProduct),
                 new FieldList(filterFields));
