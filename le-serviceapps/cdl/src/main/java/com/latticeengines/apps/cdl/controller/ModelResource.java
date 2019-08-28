@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -23,7 +22,6 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.proxy.exposed.lp.ModelMetadataProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,8 +35,6 @@ public class ModelResource {
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
 
     @Autowired
     private CdlModelMetadataService cdlModelMetadataService;
@@ -57,11 +53,6 @@ public class ModelResource {
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
 
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody

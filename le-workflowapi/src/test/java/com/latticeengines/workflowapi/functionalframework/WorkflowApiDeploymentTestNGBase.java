@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -56,7 +55,6 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
     protected void setupTestEnvironment(LatticeProduct product) throws Exception {
         setupTestTenant(product);
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         setupYarnPlatform();
     }
 

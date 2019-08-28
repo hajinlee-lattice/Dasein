@@ -66,7 +66,6 @@ import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
@@ -98,9 +97,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @VisibleForTesting
     static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
     @Autowired
     private MetadataProxy metadataProxy;
 
@@ -128,9 +124,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @SuppressWarnings("unused")
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     private String localPathToPersist = null;
 
     @Value("${scoringapi.modeljson.cache.dir}")
@@ -149,7 +142,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @PostConstruct
     public void initialize() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         localModelJsonCacheDirIdentifier = StringUtils.defaultIfBlank(NetworkUtils.getHostName(), UUID_IDENTIFIER);
         instantiateCache();
     }

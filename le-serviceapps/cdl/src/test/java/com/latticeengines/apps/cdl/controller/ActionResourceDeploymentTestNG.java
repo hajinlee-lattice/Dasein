@@ -48,8 +48,6 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
-
-        log.info("internalResourceHostPort is " + internalResourceHostPort);
         actions = new ArrayList<>();
         Action actionWithOwner = generateCDLImportAction();
         actionWithOwner.setOwnerId(OWNER_ID);

@@ -3,7 +3,6 @@ package com.latticeengines.scoringapi.controller;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.scoringapi.exposed.ScoreUtils;
 
 import io.swagger.annotations.Api;
@@ -42,12 +41,8 @@ public class EnrichmentResource {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @PostConstruct
-    public void initialize() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Autowired
+    private PlsInternalProxy plsInternalProxy;
 
     // ------------START for LeadEnrichment-------------------//
     @RequestMapping(value = "/categories", method = RequestMethod.GET, //
@@ -56,7 +51,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return internalResourceRestApiProxy.getLeadEnrichmentCategories(customerSpace);
+        return plsInternalProxy.getLeadEnrichmentCategories(customerSpace);
     }
 
     @RequestMapping(value = "/subcategories", method = RequestMethod.GET, //
@@ -67,7 +62,7 @@ public class EnrichmentResource {
             @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return internalResourceRestApiProxy.getLeadEnrichmentSubcategories(customerSpace, category);
+        return plsInternalProxy.getLeadEnrichmentSubcategories(customerSpace, category);
     }
 
     // NOTE - anoop - based on discussion with Jeff, we'enable put operation if
@@ -122,7 +117,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
-        return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
+        return plsInternalProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes, offset, max,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
@@ -152,7 +147,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
-        return internalResourceRestApiProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
+        return plsInternalProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
@@ -164,7 +159,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return internalResourceRestApiProxy.getPremiumAttributesLimitation(customerSpace);
+        return plsInternalProxy.getPremiumAttributesLimitation(customerSpace);
     }
 
     @RequestMapping(value = "/selectedattributes/count", //
@@ -174,7 +169,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get selected attributes count")
     public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return internalResourceRestApiProxy.getSelectedAttributeCount(customerSpace,
+        return plsInternalProxy.getSelectedAttributeCount(customerSpace,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
 
@@ -185,7 +180,7 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return internalResourceRestApiProxy.getSelectedAttributePremiumCount(customerSpace,
+        return plsInternalProxy.getSelectedAttributePremiumCount(customerSpace,
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace));
     }
 

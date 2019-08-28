@@ -17,7 +17,6 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,7 +30,7 @@ import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 import com.latticeengines.modelquality.service.PipelineService;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
 
 public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase {
 
@@ -41,7 +40,7 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
     @Autowired
     private PipelineEntityMgr pipelineEntityMgr;
 
-    private InternalResourceRestApiProxy proxy = null;
+    private PlsHealthCheckProxy plsHealthCheckProxy = null;
 
     protected Pipeline pipeline;
     protected Pipeline newPipeline;
@@ -49,12 +48,10 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
     @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        proxy = mock(InternalResourceRestApiProxy.class);
+        plsHealthCheckProxy = mock(PlsHealthCheckProxy.class);
         Map<String, String> activeStack = new HashMap<>();
         activeStack.put("CurrentStack", "");
-        when(proxy.getActiveStack()).thenReturn(activeStack);
-        ReflectionTestUtils.setField(pipelineService, "internalResourceRestApiProxy", proxy);
-
+        when(plsHealthCheckProxy.getActiveStack()).thenReturn(activeStack);
         String pipelineStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
                         .getFile()),

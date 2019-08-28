@@ -167,7 +167,7 @@ public abstract class BaseRestApiProxy {
 
             if (i != parts.length - 1) {
                 if (part.endsWith("/")) {
-                    part = part.substring(0, part.length() - 2);
+                    part = part.substring(0, part.length() - 1);
                 }
             }
             toCombine.add(part);

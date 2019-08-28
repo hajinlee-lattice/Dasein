@@ -39,7 +39,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
 
     @Test(groups = "deployment", enabled = true)
     public void getAllLeadEnrichmentAttributes() {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false, false);
         Assert.assertNotNull(enrichmentAttributeList);
         Assert.assertTrue(enrichmentAttributeList.size() > 0);
@@ -57,7 +57,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
 
     @Test(groups = "deployment", enabled = true)
     public void getSelectedLeadEnrichmentAttributes() {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = plsInternalProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, true, false);
         Assert.assertNotNull(enrichmentAttributeList);
         Assert.assertEquals(enrichmentAttributeList.size(), selectedAttributes.size());

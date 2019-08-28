@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
@@ -287,6 +288,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     @Autowired
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
+    @Autowired
+    protected PlsInternalProxy plsInternalProxy;
+
     @Inject
     protected MetadataProxy metadataProxy;
 
@@ -365,12 +369,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         if (name == null) {
             return null;
         }
-        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        return proxy.findSourceFileByName(name, space.toString());
-    }
-
-    protected InternalResourceRestApiProxy getInternalResourceProxy() {
-        return new InternalResourceRestApiProxy(getConfiguration().getInternalResourceHostPort());
+        return plsInternalProxy.findSourceFileByName(name, space.toString());
     }
 
     protected void registerReport(CustomerSpace customerSpace, Report report) {
@@ -385,15 +384,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
         saveReport(map);
         putObjectInContext(WorkflowContextConstants.REPORTS, map);
-
-        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
         RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(3, 5000L, 2.0, null);
         template.execute(context -> {
             if (context.getRetryCount() >= 1) {
                 log.warn("Last registering report for tenant {} failed. Retrying for {} times.", customerSpace,
                         context.getRetryCount());
             }
-            proxy.registerReport(report, customerSpace.toString());
+            plsInternalProxy.registerReport(report, customerSpace.toString());
             return null;
         });
     }
@@ -410,9 +407,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         if (name == null) {
             return null;
         }
-
-        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        return proxy.findReportByName(name, space.toString());
+        return plsInternalProxy.findReportByName(name, space.toString());
     }
 
     protected Report createReport(String json, ReportPurpose purpose, String name) {
