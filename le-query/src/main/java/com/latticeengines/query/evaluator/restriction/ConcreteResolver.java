@@ -135,12 +135,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             }
         }
 
-        LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
-        List<ComparableExpression> lhsPaths = lhsResolver.resolveForCompare(lhs);
-        ComparableExpression lhsPath = lhsPaths.get(0);
-
         if (ComparisonType.EQUAL.equals(operator) && isNullValueLookup(rhs)) {
-                if (negate) {
+            if (negate) {
                 log.info("Converting [Not EQUAL null] to [IS_NOT_NULL]");
                 operator = ComparisonType.IS_NOT_NULL;
                 negate = false;
@@ -150,6 +146,12 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             }
         }
 
+        // resolve lhs
+        LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
+        List<ComparableExpression> lhsPaths = lhsResolver.resolveForCompare(lhs);
+        ComparableExpression lhsPath = lhsPaths.get(0);
+
+        // resolve the whole boolean expression
         if (ComparisonType.IS_NULL.equals(operator)) {
             return lhsPath.isNull();
         } else if (ComparisonType.IS_NOT_NULL.equals(operator)) {
@@ -158,27 +160,10 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
             List<ComparableExpression> rhsPaths = rhsResolver.resolveForCompare(rhs);
 
-            BooleanExpression booleanExpression;
-
+            BooleanExpression booleanExpression = null;
             switch (operator) {
                 case EQUAL:
-                    if (rhs instanceof SubQueryAttrLookup) {
-                        SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
-                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                            booleanExpression = lhsPaths.get(0).eq((SQLQuery<?>) subQueryAttrLookup
-                                    .getSubQuery().getSubQueryExpression());
-                        } else {
-                            ComparableExpression<String> subselect = rhsResolver
-                                    .resolveForSubselect(rhs);
-                            booleanExpression = lhsPath.eq(subselect);
-                        }
-                    } else {
-                        if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
-                            booleanExpression = Expressions.asString(lhsPath).equalsIgnoreCase(rhsPaths.get(0));
-                        } else {
-                            booleanExpression = lhsPath.eq(rhsPaths.get(0));
-                        }
-                    }
+
                     break;
                 case NOT_EQUAL:
                     if (rhs instanceof SubQueryAttrLookup) {
@@ -303,22 +288,23 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         throw new LedpException(LedpCode.LEDP_37006,
                                 new String[] { operator.toString() });
                     }
-                case NOT_CONTAINS:
                 default:
                     throw new LedpException(LedpCode.LEDP_37006,
                             new String[] { operator.toString() });
             }
 
-            if (negate) {
-                booleanExpression = booleanExpression.not();
-            }
+            if (booleanExpression != null) {
+                if (negate) {
+                    booleanExpression = booleanExpression.not();
+                }
 
-            if (isBitEncoded && !isBitEncodedNullQuery && isNegativeBitEncodedLookup(operator, negate)) {
-                // for bit encoded, make sure not equal or not in collection
-                // won't return null
-                Restriction notNull = Restriction.builder().let(lhs).isNotNull().build();
-                BooleanExpression notNullExpn = resolve((ConcreteRestriction) notNull);
-                booleanExpression = booleanExpression.and(notNullExpn);
+                if (isBitEncoded && !isBitEncodedNullQuery && isNegativeBitEncodedLookup(operator, negate)) {
+                    // for bit encoded, make sure not equal or not in collection
+                    // won't return null
+                    Restriction notNull = Restriction.builder().let(lhs).isNotNull().build();
+                    BooleanExpression notNullExpn = resolve((ConcreteRestriction) notNull);
+                    booleanExpression = booleanExpression.and(notNullExpn);
+                }
             }
 
             return booleanExpression;
