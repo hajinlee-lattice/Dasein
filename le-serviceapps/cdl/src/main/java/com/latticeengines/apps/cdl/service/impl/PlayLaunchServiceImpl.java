@@ -1,12 +1,14 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -187,16 +189,22 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
                 startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
 
-        addDataIntegrationStatusFor(launchSummaries);
+        Map<String, List<LookupIdMap>> uniqueLookupIdMaps = calculateUniqueLookupIdMapping(playId, launchStates,
+                startTimestamp, endTimestamp, orgId, externalSysType, skipLoadingAllLookupIdMapping);
+        Map<String, LookupIdMap> lookupIdMaps = uniqueLookupIdMaps.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(LookupIdMap::getOrgId, Function.identity()));
+
+        addDataIntegrationStatusFor(launchSummaries, lookupIdMaps);
         dashboard.setLaunchSummaries(launchSummaries);
         dashboard.setCumulativeStats(totalCounts);
         dashboard.setUniquePlaysWithLaunches(uniquePlaysWithLaunches);
-        dashboard.setUniqueLookupIdMapping(calculateUniqueLookupIdMapping(playId, launchStates, startTimestamp,
-                endTimestamp, orgId, externalSysType, skipLoadingAllLookupIdMapping));
+        dashboard.setUniqueLookupIdMapping(uniqueLookupIdMaps);
         return dashboard;
     }
 
-    private void addDataIntegrationStatusFor(List<LaunchSummary> launchSummaries) {
+    private void addDataIntegrationStatusFor(List<LaunchSummary> launchSummaries,
+            Map<String, LookupIdMap> lookupIdMaps) {
         if (CollectionUtils.isEmpty(launchSummaries)) {
             return;
         }
@@ -214,10 +222,15 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                 .collect(Collectors.toMap(DataIntegrationStatusMonitor::getEntityId, dism -> dism));
         launchSummaries.forEach(ls -> ls.setIntegrationStatusMonitor(dataIntegrationStatusMap.get(ls.getLaunchId())));
         launchSummaries.forEach(ls -> {
-            if (ls.getIntegrationStatusMonitor() != null)
+            if (ls.getIntegrationStatusMonitor() != null) {
+                LookupIdMap lookupIdMap = lookupIdMaps.get(ls.getDestinationOrgId());
                 ls.getIntegrationStatusMonitor()
-                        .setS3Bucket(ls.getDestinationSysType() == CDLExternalSystemType.MAP ? s3CustomerExportBucket
-                                : s3CustomerBucket);
+                        .setS3Bucket(lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null
+                                && !StringUtils
+                                        .isBlank(lookupIdMap.getExternalAuthentication().getTrayAuthenticationId())
+                                        ? s3CustomerExportBucket
+                                        : s3CustomerBucket);
+            }
         });
     }
 
