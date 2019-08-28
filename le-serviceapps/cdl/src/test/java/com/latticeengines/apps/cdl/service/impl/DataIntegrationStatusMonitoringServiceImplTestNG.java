@@ -246,6 +246,9 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         eventDetail.setFailed(1L);
         eventDetail.setProcessed(2L);
         eventDetail.setTotalRecordsSubmitted(4L);
+        eventDetail.setDuplicates(1L);
+        eventDetail.setAudienceSize(1L);
+        eventDetail.setMatchedCount(1L);
         updateStatusMonitorMessage.setEventDetail(eventDetail);
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
@@ -260,6 +263,8 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
         Assert.assertEquals(new Long(1), playLaunch.getContactsErrored());
         Assert.assertEquals(new Long(1), playLaunch.getContactsDuplicated());
+        Assert.assertEquals(new Long(1), playLaunch.getAudienceSize());
+        Assert.assertEquals(new Long(1), playLaunch.getMatchedCount());
 
         updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
         updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
