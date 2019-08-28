@@ -1,0 +1,8 @@
+Contact Id,First Name,LastName,Job Title,EmailAddress,CreatedDate,Earnings,Years At Company,Last Name,Billing City,AccountExternalId,BillingCountry,BILLING_ZIP_CODE,Domain,Country,Do_Not_Call,Heir to Throne,LeadType
+1,Jon,Snow,Night's Watch,jon@thewall.org,01/01/2008,100000.00,6,snow,Castle Black,10001,Westeros,12345,thewall.org,USA,true,yes,phone
+2,Tyrion,Lannister,Hand of the King,tyrion@kingslanding.gov,02/02/2009,123456.78,2,lannister,King's Landing,10002,Westeros,23456,kingslanding.gov,Canada,false,no,email
+3,Daenerys,Targaryen,Queen of the Seven Kingsdoms,daenerys@hell.edu,03/03/2010,666.66,20,targaryen,Dragonstone,10003,Esos,34567,hell.edu,China,true,yes,web
+4,Varys,Lord,Master of Whispers,varys@kingslanding.gov,04/04/2011,,35,lord,King's Landing,10004,Esos,45678,kingslanding.gov,India,true,no,email
+5,Sansa,Stark,Queen of the North,sansa@thenorth.gov,05/05/2012,999999.90,1,stark,Winterfell,10005,Westeros,56789,thenorth.gov,India,false,yes,deman gen
+6,Arya,Stark,unemployed,arya@westofwesteros.org,06/06/2013,987654321.09,3,stark,Bravos,10006,Westeros,67890,westofwesteros.org,Mexico,true,yes,phone
+
