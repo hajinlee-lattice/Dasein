@@ -40,9 +40,6 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
         // dedup by ProductId
         srcProduct = srcProduct.groupByAndLimit(new FieldList(InterfaceName.ProductId.name()), 1);
 
-        Set<String> validatedColumns = new HashSet<>(parameters.getValidatedColumns());
-        List<String> retainFields = srcTxn.getFieldNames().stream().filter(name -> validatedColumns.contains(name))
-                .collect(Collectors.toList());
         String renamedAccount = RENAME_PREFIX + InterfaceName.AccountId.name();
         String renamedProduct = RENAME_PREFIX + InterfaceName.ProductId.name();
         srcAccount = renameFields(srcAccount, InterfaceName.AccountId.name(), renamedAccount);
@@ -58,17 +55,25 @@ public class OrphanTransactionExportFlow extends TypesafeDataFlowBuilder<OrphanT
         List<String> filterFields = Arrays.asList(renamedAccount, renamedProduct);
         result = result.filter(String.format("%s == null || %s == null", renamedAccount, renamedProduct),
                 new FieldList(filterFields));
+
+        // only export selected columns
+        Set<String> validatedColumns = new HashSet<>(parameters.getValidatedColumns());
+        Set<String> selectedColumns = srcTxn.getFieldNames().stream().filter(fld -> validatedColumns.contains(fld))
+                .collect(Collectors.toSet());
+        List<String> retainFields = result.getFieldNames().stream().filter(name -> selectedColumns.contains(name))
+                .collect(Collectors.toList());
+
         // Only for debugging purpose. Will remove after PLS-14499 is resolved
         List<String> resFlds = new ArrayList<>(result.getFieldNames());
         Collections.sort(resFlds);
         log.info("Current transaction table attributes: " + String.join(",", resFlds));
-        Collections.sort(retainFields);
-        log.info("Transaction table attributes to retain: " + String.join(",", retainFields));
+        List<String> retainFlds = new ArrayList<>(retainFields);
+        Collections.sort(retainFlds);
+        log.info("Transaction table attributes to retain: " + String.join(",", retainFlds));
         Set<String> resFldSet = new HashSet<>(resFlds);
-        List<String> diffFlds = retainFields.stream().filter(fld -> !resFldSet.contains(fld))
+        List<String> diffFlds = retainFlds.stream().filter(fld -> !resFldSet.contains(fld))
                 .collect(Collectors.toList());
         log.info("Attributes to retain which don't exist in current transaction table: " + String.join(",", diffFlds));
-        retainFields = retainFields.stream().filter(fld -> resFldSet.contains(fld)).collect(Collectors.toList());
 
         result = result.retain(new FieldList(retainFields));
         return result;
