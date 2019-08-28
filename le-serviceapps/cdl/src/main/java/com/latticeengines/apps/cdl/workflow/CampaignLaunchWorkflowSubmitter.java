@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("campaignLaunchWorkflowSubmitter")
 public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
@@ -39,7 +39,7 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     private BatonService batonService;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private ProxyResourceService proxyResourceService;
 
     @Inject
     private LookupIdMappingService lookupIdMappingService;
@@ -57,7 +57,7 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION)
                 || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION);
         boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch, lookupIdMap);
-        DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
+        DataCollection.Version version = proxyResourceService.getActiveVersion(getCustomerSpace().toString());
         CampaignLaunchWorkflowConfiguration configuration = new CampaignLaunchWorkflowConfiguration.Builder()
                 .workflow("campaignLaunchWorkflow") //
                 .customer(getCustomerSpace()) //

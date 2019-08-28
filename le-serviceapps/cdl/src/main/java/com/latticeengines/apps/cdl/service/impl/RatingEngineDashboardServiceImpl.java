@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineDashboardService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelDTO;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("ratingEngineDashboardService")
 public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate implements RatingEngineDashboardService {
@@ -35,7 +35,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
     private RatingEngineService ratingEngineService;
 
     @Inject
-    private PlayProxy playProxy;
+    private PlayService playService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -69,7 +69,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         MetadataSegment segment = ratingEngine.getSegment();
 
         // get related plays
-        List<Play> plays = playProxy.getPlays(customerSpace, false, ratingEngineId);
+        List<Play> plays = playService.getAllFullPlays(false, ratingEngineId);
         log.info(String.format("Step 3 - Loading related plays completed for : %s", ratingEngineId));
 
         // get dependencies

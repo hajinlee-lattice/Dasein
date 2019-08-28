@@ -32,8 +32,11 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
 
     private static final Logger log = LoggerFactory.getLogger(RatingDisplayMetadataStoreImpl.class);
 
-    private final CDLNamespaceService cdlNamespaceService;
-    private final RatingEngineService ratingEngineService;
+    @Inject
+    private CDLNamespaceService cdlNamespaceService;
+
+    @Inject
+    private RatingEngineService ratingEngineService;
 
     private static final List<String> SUFFIXES = new ArrayList<>();
 
@@ -42,13 +45,6 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
         SUFFIXES.add("");
         SUFFIXES.addAll(
                 RatingEngine.SCORE_ATTR_SUFFIX.values().stream().map(s -> "_" + s).collect(Collectors.toList()));
-    }
-
-    @Inject
-    public RatingDisplayMetadataStoreImpl(CDLNamespaceService cdlNamespaceService,
-            RatingEngineService ratingEngineService) {
-        this.cdlNamespaceService = cdlNamespaceService;
-        this.ratingEngineService = ratingEngineService;
     }
 
     @Override

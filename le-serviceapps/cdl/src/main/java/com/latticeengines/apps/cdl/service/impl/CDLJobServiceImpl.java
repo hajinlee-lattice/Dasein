@@ -42,6 +42,7 @@ import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ZKConfigService;
@@ -76,7 +77,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -137,7 +137,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     private SchedulingPAService schedulingPAService;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private ProxyResourceService proxyResourceService;
 
     @Inject
     private AtlasExportService atlasExportService;
@@ -161,10 +161,6 @@ public class CDLJobServiceImpl implements CDLJobService {
     @VisibleForTesting
     @Value("${common.adminconsole.url:}")
     private String quartzMicroserviceHostPort;
-
-    @VisibleForTesting
-    @Value("${common.microservice.url}")
-    private String microserviceHostPort;
 
     @VisibleForTesting
     @Value("${common.quartz.stack.flag:false}")
@@ -209,12 +205,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             cdlProxy = new CDLProxy(quartzMicroserviceHostPort);
             log.info(String.format("CDLJobService running on quartz stack with cdlHostPort=%s, workflowHostPort=%s",
                     cdlProxy.getHostport(), workflowProxy.getHostport()));
-        } else {
-            cdlProxy = new CDLProxy(microserviceHostPort);
-            log.info(String.format("CDLJobService running with cdlHostPort=%s, workflowHostPort=%s",
-                    cdlProxy.getHostport(), workflowProxy.getHostport()));
         }
-
         initTrackingSets();
     }
 
@@ -420,7 +411,14 @@ public class CDLJobServiceImpl implements CDLJobService {
             for (String tenantId : canRunRetryJobSet) {
                 try {
                     if (!dryRun && retryValidation(tenantId)) {
-                        ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
+                        ApplicationId retryAppId;
+                        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+                        MultiTenantContext.setTenant(tenant);
+                        if (isQuartzStack) {
+                            retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
+                        } else {
+                            retryAppId = proxyResourceService.restart(tenantId, null, true, false);
+                        }
                         logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
                         if (retryAppId != null) {
                             removeFromSet(retryAppId, MAIN_TRACKING_SET, tenantId);
@@ -566,12 +564,20 @@ public class CDLJobServiceImpl implements CDLJobService {
         cdlJobDetail = cdlJobDetailEntityMgr.createJobDetail(CDLJobType.PROCESSANALYZE, tenant);
         try {
             if (retry) {
-                applicationId = cdlProxy.restartProcessAnalyze(tenant.getId(), Boolean.TRUE);
+                if (isQuartzStack) {
+                    applicationId = cdlProxy.restartProcessAnalyze(tenant.getId(), Boolean.TRUE);
+                } else {
+                    applicationId = proxyResourceService.restart(tenant.getId(), null, Boolean.TRUE, false);
+                }
             } else {
                 ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
                 request.setAutoSchedule(true);
-                applicationId = cdlProxy.processAnalyze(tenant.getId(), request);
+                if (isQuartzStack) {
+                    applicationId = cdlProxy.processAnalyze(tenant.getId(), request);
+                } else {
+                    applicationId = proxyResourceService.processAnalyze(request);
+                }
             }
             appIdMap.put(applicationId.toString(), System.currentTimeMillis());
             cdlJobDetail.setApplicationId(applicationId.toString());
@@ -602,7 +608,11 @@ public class CDLJobServiceImpl implements CDLJobService {
                 request = new ProcessAnalyzeRequest();
                 request.setUserId(USERID);
             }
-            applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
+            if (isQuartzStack) {
+                applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
+            } else {
+                applicationId = proxyResourceService.processAnalyze(request);
+            }
             log.info("Submit PA job with appId = {} for tenant = {} successfully", applicationId, tenantId);
         } catch (Exception e) {
             log.error("Failed to submit job for tenant = {}, error = {}", tenantId, e);
@@ -747,7 +757,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             EntityExportRequest request = new EntityExportRequest();
             request.setAtlasExportId(atlasExport.getUuid());
             request.setSaveToDropfolder(true);
-            request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace));
+
+            request.setDataCollectionVersion(proxyResourceService.getActiveVersion(customerSpace));
             ApplicationId tempApplicationId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
             applicationId = tempApplicationId.toString();
             if (!retry) {
@@ -890,3 +901,4 @@ public class CDLJobServiceImpl implements CDLJobService {
         return job;
     }
 }
+

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
@@ -68,7 +69,6 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
@@ -99,7 +99,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     private EventProxy eventProxy;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private ProxyResourceService proxyResourceService;
 
     @Inject
     private RatingProxy ratingProxy;
@@ -604,7 +604,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             unscoredFrontEndQuery.setContactRestriction(accountFrontEndQuery.getContactRestriction());
             coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
 
-            boolean hasContactTable = dataCollectionProxy.hasContact(tenant.getId(), null);
+            boolean hasContactTable = proxyResourceService.hasContact(tenant.getId(), null);
             // TODO: this is not working as expected. Though contact table
             // exists, this api still returns false.
             if (!hasContactTable) {

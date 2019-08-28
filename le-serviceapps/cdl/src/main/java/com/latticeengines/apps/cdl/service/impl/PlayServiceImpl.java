@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -52,7 +53,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
 @Component("playService")
@@ -82,7 +82,7 @@ public class PlayServiceImpl implements PlayService {
     private RatingEngineService ratingEngineService;
 
     @Inject
-    private DataFeedProxy dataFeedProxy;
+    private ProxyResourceService proxyResourceService;
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
@@ -488,7 +488,7 @@ public class PlayServiceImpl implements PlayService {
 
     private Date findLastRefreshedDate() {
         Tenant tenant = MultiTenantContext.getTenant();
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(tenant.getId());
+        DataFeed dataFeed = proxyResourceService.getDataFeed(tenant.getId());
         return dataFeed.getLastPublished();
     }
 

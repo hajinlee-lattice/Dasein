@@ -1,13 +1,10 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Date;
-
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ConvertBatchStoreToImportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
@@ -32,7 +29,6 @@ import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 
 import io.swagger.annotations.Api;
@@ -52,10 +48,7 @@ public class DataFeedController {
     private final ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter;
     private final CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter;
     private final DataFeedService dataFeedService;
-    private final DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;
-
-    @Value("${cdl.processAnalyze.retry.expired.time}")
-    private long retryExpiredTime;
+    private final ProxyResourceService proxyResourceService;
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
@@ -63,14 +56,14 @@ public class DataFeedController {
                               EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
                               ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter,
                               CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter,
-                              DataFeedService dataFeedService, DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr) {
+                              DataFeedService dataFeedService, ProxyResourceService proxyResourceService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
         this.convertBatchStoreToImportWorkflowSubmitter = convertBatchStoreToImportWorkflowSubmitter;
         this.cdlEntityMatchMigrationWorkflowSubmitter = cdlEntityMatchMigrationWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
-        this.dataFeedExecutionEntityMgr = dataFeedExecutionEntityMgr;
+        this.proxyResourceService = proxyResourceService;
     }
 
     @PostMapping(value = "/processanalyze", headers = "Accept=application/json")
@@ -109,9 +102,7 @@ public class DataFeedController {
                                             @RequestParam(value = "memory", required = false) Integer memory,
                                             @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry,
                                             @RequestParam(value = "skipMigrationCheck", required = false, defaultValue = "false") Boolean skipMigrationTrack) {
-        customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        checkRetry(customerSpace);
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory, autoRetry, skipMigrationTrack);
+        ApplicationId appId = proxyResourceService.restart(customerSpace, memory, autoRetry, skipMigrationTrack);
         return ResponseDocument.successResponse(appId.toString());
     }
 
@@ -196,44 +187,6 @@ public class DataFeedController {
             String errorMessage = String.format(
                     "We can't start processAnalyze workflow for %s, need to import data first.", customerSpace);
             throw new IllegalStateException(errorMessage);
-        }
-    }
-
-    private void checkRetry(String customerSpace) {
-        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
-        if (dataFeed == null) {
-            String errorMessage = String. format(
-                    "we can't restart processAnalyze workflow for %s, dataFeed is empty.", customerSpace);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
-        }
-        DataFeedExecution execution;
-        try {
-            execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
-                    DataFeedExecutionJobType.PA);
-        } catch (Exception e) {
-            execution = null;
-        }
-        if (execution == null) {
-            String errorMessage = String.format("we can't restart processAnalyze workflow for %s, dataFeedExecution " +
-                            "is empty."
-                    , customerSpace);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
-        }
-        if (!DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
-            String errorMessage = String.format("we can't restart processAnalyze workflow for %s, last PA isn't fail. "
-                    , customerSpace);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
-        }
-        long currentTime = new Date().getTime();
-        if (execution.getUpdated() == null || (execution.getUpdated().getTime() - (currentTime - retryExpiredTime * 1000) < 0)) {
-            String errorMessage = String.format("we can't restart processAnalyze workflow for %s, last PA has been " +
-                            "more than %d second. "
-                    , customerSpace, retryExpiredTime);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
         }
     }
 

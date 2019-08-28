@@ -12,12 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("campaignDeltaCalculationWorkflowSubmitter")
 public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter {
@@ -25,12 +25,12 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
     private static final Logger log = LoggerFactory.getLogger(CampaignDeltaCalculationWorkflowSubmitter.class);
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private ProxyResourceService proxyResourceService;
 
     public ApplicationId submit(String customerSpace, String playId, String channelId) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignDeltaCalculationWorkflow");
-        DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
+        DataCollection.Version version = proxyResourceService.getActiveVersion(getCustomerSpace().toString());
         log.info("In Submitter: " + customerSpace);
         CampaignDeltaCalculationWorkflowConfiguration configuration = new CampaignDeltaCalculationWorkflowConfiguration.Builder()
                 .workflow("campaignDeltaCalculationWorkflow") //

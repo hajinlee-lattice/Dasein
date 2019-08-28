@@ -30,7 +30,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -71,9 +74,6 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -110,9 +110,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
-    private final DataCollectionProxy dataCollectionProxy;
-
-    private final DataFeedProxy dataFeedProxy;
+    private final DataCollectionService dataCollectionService;
 
     private final WorkflowProxy workflowProxy;
 
@@ -126,22 +124,23 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final CDLAttrConfigProxy cdlAttrConfigProxy;
 
-    private final CDLProxy cdlProxy;
+    private final S3ImportSystemService s3ImportSystemService;
+
+    private final ProxyResourceService proxyResourceService;
 
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy,
-            CDLProxy cdlProxy) {
-        this.dataCollectionProxy = dataCollectionProxy;
-        this.dataFeedProxy = dataFeedProxy;
+    public ProcessAnalyzeWorkflowSubmitter(ProxyResourceService proxyResourceService, DataCollectionService dataCollectionService, WorkflowProxy workflowProxy,
+                                           ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
+                                           CDLAttrConfigProxy cdlAttrConfigProxy, S3ImportSystemService s3ImportSystemService) {
+        this.proxyResourceService = proxyResourceService;
+        this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
         this.batonService = batonService;
         this.zkConfigService = zkConfigService;
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
-        this.cdlProxy = cdlProxy;
+        this.s3ImportSystemService = s3ImportSystemService;
     }
 
     @WithWorkflowJobPid
@@ -158,12 +157,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.error("Tenant {} is not in migration and should not kickoff migration PA", customerSpace);
             throw new IllegalStateException(String.format("Tenant %s is not in migration.", customerSpace));
         }
-        DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        DataCollection dataCollection = dataCollectionService.getDataCollection(customerSpace, null);
         if (dataCollection == null) {
             throw new LedpException(LedpCode.LEDP_37014);
         }
 
-        DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
+        DataFeed datafeed = proxyResourceService.getDataFeed(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
                 datafeedStatus.getName()));
@@ -186,26 +186,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             } catch (Exception e) {
                 log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                         + ExceptionUtils.getStackTrace(e));
-                dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+                proxyResourceService.failExecution(customerSpace, datafeedStatus.getName());
                 throw new RuntimeException(String.format("Failed to submit %s's P&A migration workflow", customerSpace), e);
             }
         }
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace,
                 request.isInheritAllCompleteImportActions(), request.getImportActionPidsToInherit());
-
-        if (dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
-            String errorMessage;
-            if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
-                errorMessage = String.format(
-                        "We can't start processAnalyze workflow for %s, need to import data first.", customerSpace);
-            } else {
-                errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
-                        customerSpace, datafeedStatus.getName());
-            }
-
-            throw new RuntimeException(errorMessage);
-        }
-
+        lockExecution(customerSpace, datafeedStatus);
         Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
 
         log.info(String.format("customer %s data feed %s initial status: %s", customerSpace, datafeed.getName(),
@@ -248,7 +235,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         } catch (Exception e) {
             log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                     + ExceptionUtils.getStackTrace(e));
-            dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+            proxyResourceService.failExecution(customerSpace, datafeedStatus.getName());
             throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace), e);
         }
     }
@@ -311,7 +298,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @VisibleForTesting
     List<Action> getActionsFromLastFailedPA(@NotNull String customerSpace, boolean inheritAllCompleteImportActions,
                                             List<Long> importActionPidsToInherit) {
-        DataFeedExecution lastDataFeedExecution = dataFeedProxy.getLatestExecution(customerSpace,
+        DataFeedExecution lastDataFeedExecution = proxyResourceService.getLatestExecution(customerSpace,
                 DataFeedExecutionJobType.PA);
         if (lastDataFeedExecution == null || lastDataFeedExecution.getWorkflowId() == null) {
             return Collections.emptyList();
@@ -539,9 +526,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
         }
-        DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
+        DataFeed datafeed = proxyResourceService.getDataFeed(customerSpace);
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace, true, null);
-        Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
+        Long workflowId = proxyResourceService.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
         checkWorkflowId(customerSpace, datafeed, workflowId);
 
         try {
@@ -569,7 +556,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             return appId;
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());
+            proxyResourceService.failExecution(customerSpace, datafeed.getStatus().getName());
             throw new RuntimeException(String.format("Failed to retry %s's P&A workflow", customerSpace));
         }
     }
@@ -587,7 +574,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             return Pair.of(Collections.emptyMap(), Collections.emptyMap());
         }
 
-        List<S3ImportSystem> systems = cdlProxy.getS3ImportSystemList(customerSpace);
+        List<S3ImportSystem> systems = s3ImportSystemService.getAllS3ImportSystem(customerSpace);
         log.info("Systems={}, customerSpace={}", JsonUtils.serialize(systems), customerSpace);
 
         Pair<String, List<String>> accountIds = getSystemIds(systems, BusinessEntity.Account);
@@ -680,7 +667,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private void checkWorkflowId(String customerSpace, DataFeed datafeed, Long workflowId) {
         if (workflowId == null) {
-            dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());
+            proxyResourceService.failExecution(customerSpace, datafeed.getStatus().getName());
             String msg = String.format(
                     "Failed to retry %s's P&A workflow because there's no workflow Id, run the new P&A workflow instead.",
                     customerSpace);
@@ -689,12 +676,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private ApplicationId submitWithOnlyImportActions(String customerSpace, ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
-        checkImportTrackingLinked(customerSpace);
-        List<Long> importActionIds = getImportActionIds(customerSpace);
-        Status datafeedStatus = datafeed.getStatus();
-
-        if (dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
+    private void lockExecution(String customerSpace, Status datafeedStatus){
+        if (proxyResourceService.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
             String errorMessage;
             if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
                 errorMessage = String.format(
@@ -706,6 +689,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             throw new RuntimeException(errorMessage);
         }
+    }
+
+    private ApplicationId submitWithOnlyImportActions(String customerSpace, ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
+        checkImportTrackingLinked(customerSpace);
+        List<Long> importActionIds = getImportActionIds(customerSpace);
+        Status datafeedStatus = datafeed.getStatus();
+       lockExecution(customerSpace, datafeedStatus);
 
         Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
 

@@ -9,23 +9,23 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.S3ImportMessageService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component("s3ImportService")
 public class S3ImportServiceImpl implements S3ImportService {
@@ -45,7 +45,10 @@ public class S3ImportServiceImpl implements S3ImportService {
     private DropBoxService dropBoxService;
 
     @Inject
-    private DataFeedProxy dataFeedProxy;
+    private ProxyResourceService proxyResourceService;
+
+    @Inject
+    private DataFeedTaskManagerService dataFeedTaskManagerService;
 
     @Override
     public boolean saveImportMessage(String bucket, String key, String hostUrl) {
@@ -100,7 +103,9 @@ public class S3ImportServiceImpl implements S3ImportService {
                 Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
                 log.info("Tenant: " + tenant.getId());
                 String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
-                DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(tenantId, SOURCE, feedType);
+                Tenant previousTenant = MultiTenantContext.getTenant();
+                MultiTenantContext.setTenant(tenant);
+                DataFeedTask dataFeedTask = proxyResourceService.getDataFeedTask(tenantId, SOURCE, feedType);
                 if (dataFeedTask == null) {
                     log.info(String.format("Template not exist for key: %s feedType %s", message.getKey(), feedType));
                     continue;
@@ -115,10 +120,11 @@ public class S3ImportServiceImpl implements S3ImportService {
                     continue;
                 }
                 log.info(String.format("S3 import for %s / %s", message.getBucket(), message.getKey()));
-                if (submitApplication(tenantId, message.getBucket(), feedType, message.getKey(), message.getHostUrl())) {
+                if (submitApplication(tenantId, message.getBucket(), feedType, message.getKey())) {
                     dropBoxSet.add(message.getDropBox().getDropBox());
                     s3ImportMessageService.deleteMessage(message);
                 }
+                MultiTenantContext.setTenant(previousTenant);
             } catch (RuntimeException e) {
                 // Only log message instead of stack trace to reduce log.
                 log.error(String.format("Cannot submit import for: %s, error: %s", message.getKey(), e.getMessage()));
@@ -132,17 +138,16 @@ public class S3ImportServiceImpl implements S3ImportService {
         return false;
     }
 
-    private boolean submitApplication(String tenantId, String bucket, String feedType, String key, String hostUrl) {
+    private boolean submitApplication(String tenantId, String bucket, String feedType, String key) {
         S3FileToHdfsConfiguration config = new S3FileToHdfsConfiguration();
         config.setFeedType(feedType);
         config.setS3Bucket(bucket);
         config.setS3FilePath(key);
         try {
-            CDLProxy cdlProxy = new CDLProxy(hostUrl);
-            ApplicationId applicationId =  cdlProxy.submitS3ImportJob(tenantId, config);
-            log.info("Start S3 file import by applicationId : " + applicationId.toString());
+            String applicationId = dataFeedTaskManagerService.submitS3ImportJob(tenantId, config);
+            log.info("Start S3 file import by applicationId : " + applicationId);
             return true;
-        } catch(LedpException e) {
+        } catch (LedpException e) {
             log.error("S3 import file validation failed!", e);
             return true;
         } catch (Exception e) {
