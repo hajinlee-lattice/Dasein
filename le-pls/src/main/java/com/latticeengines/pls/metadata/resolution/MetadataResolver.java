@@ -591,7 +591,7 @@ public class MetadataResolver {
         }
     }
 
-    private String getFundamentalTypeFromFieldType(String fieldType) {
+    public static String getFundamentalTypeFromFieldType(String fieldType) {
         String fundamentalType = null;
         switch (fieldType.toUpperCase()) {
             case "BOOLEAN":
@@ -612,7 +612,7 @@ public class MetadataResolver {
         return fundamentalType;
     }
 
-    private String getStatisticalTypeFromFieldType(String fieldType) {
+    public static String getStatisticalTypeFromFieldType(String fieldType) {
         String statisticalType = null;
         switch (fieldType.toUpperCase()) {
             case "BOOLEAN":

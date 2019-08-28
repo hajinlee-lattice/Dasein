@@ -61,7 +61,7 @@ public class AttributeBuilder {
         return this;
     }
 
-    public AttributeBuilder logicalType(LogicalDataType logicalDataType) {
+    public AttributeBuilder logicalDataType(LogicalDataType logicalDataType) {
         attribute.setLogicalDataType(logicalDataType);
         return this;
     }
@@ -83,6 +83,10 @@ public class AttributeBuilder {
         return this;
     }
 
+    public AttributeBuilder approvedUsage(List<String> approvedUsage) {
+        attribute.setApprovedUsage(approvedUsage);
+        return this;
+    }
 
     public AttributeBuilder approvedUsage(String approvedUsage) {
         attribute.setApprovedUsage(approvedUsage);
