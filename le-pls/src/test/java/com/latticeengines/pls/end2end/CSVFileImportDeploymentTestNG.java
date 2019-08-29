@@ -195,9 +195,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
         long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
         log.info("File path to avros is: " + avroFilePath + "/*.avro");
-        // after adding the timezone validation, the second, third and fifth row in raw csv file will be removed
-        // from generated avro
-        Assert.assertEquals(rowCount, 47);
+        // modify file to match T&Z in 30th data line
+        Assert.assertEquals(rowCount, 49);
 
         // Validate TestDate1
         String fieldName1 = "user_TestDate1";
@@ -212,11 +211,19 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 "UTC-4");
         Assert.assertEquals(expected1a, 1501128000000L);
         Assert.assertEquals(records.get(0).get(fieldName1).toString(), Long.toString(expected1a));
-
+        long expected1b = computeTimestamp("27/7/2018", false, "d/M/yyyy",
+                "UTC-4");
+        Assert.assertEquals(expected1b, 1532664000000L);
+        Assert.assertEquals(records.get(1).get(fieldName1).toString(), Long.toString(expected1b));
+        long expected1c = computeTimestamp("27/7/2019", false, "d/M/yyyy",
+                "UTC-4");
+        Assert.assertEquals(expected1c, 1564200000000L);
+        Assert.assertEquals(records.get(2).get(fieldName1).toString(), Long.toString(expected1c));
+        // The 4th row has a value that is pre-Epoch so 0 should be returned as the timestamp.
         long expected1d = 0L;
-        Assert.assertEquals(records.get(1).get(fieldName1).toString(), Long.toString(expected1d));
+        Assert.assertEquals(records.get(3).get(fieldName1).toString(), Long.toString(expected1d));
         log.info("Value returned for input 31/12/1969 America/New_York was: "
-                + records.get(1).get(fieldName1).toString());
+                + records.get(3).get(fieldName1).toString());
 
 
         // Validate TestDate2
@@ -230,7 +237,21 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 "M.d.yy H:m:s", "GMT+8");
         Assert.assertEquals(expected2a, 1514826061000L);
         Assert.assertEquals(records.get(0).get(fieldName2).toString(), Long.toString(expected2a));
-
+        long expected2b = computeTimestamp("12.31.18 23:59:59", true,"M.d.yy H:m:s", "GMT+8");
+        Assert.assertEquals(expected2b, 1546271999000L);
+        Assert.assertEquals(records.get(1).get(fieldName2).toString(), Long.toString(expected2b));
+        long expected2c = computeTimestamp("5.6.99 12:34:56", true,
+                "M.d.yy H:m:s", "GMT+8");
+        Assert.assertEquals(expected2c, 4081725296000L);
+        Assert.assertEquals(records.get(2).get(fieldName2).toString(), Long.toString(expected2c));
+        // Test that two digit date which if it had started with "19" instead of "20" would be pre-Epoch time, works
+        // correctly.
+        long expected2d = computeTimestamp("12.12.68 12:12:12", true,
+                "M.d.yy H:m:s", "GMT+8");
+        Assert.assertEquals(expected2d, 3122511132000L);
+        Assert.assertEquals(records.get(4).get(fieldName2).toString(), Long.toString(expected2d));
+        log.info("Value returned for input 12.12.68 12:12:12 Asia/Shanghai was: "
+                + records.get(4).get(fieldName2).toString());
 
         // Validate TestDate3
         String fieldName3 = "user_TestDate3";
@@ -243,10 +264,18 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 "yyyy-MMM-d h:m a", "GMT-6");
         Assert.assertEquals(expected3a, 600000L);
         Assert.assertEquals(records.get(0).get(fieldName3).toString(), Long.toString(expected3a));
+        long expected3b = computeTimestamp("2069-Dec-31 7:15 PM", true,
+                "yyyy-MMM-d h:m a", "GMT-6");
+        Assert.assertEquals(expected3b, 3155764500000L);
+        Assert.assertEquals(records.get(1).get(fieldName3).toString(), Long.toString(expected3b));
+        long expected3c = computeTimestamp("2019-Nov-11 11:11 AM", true,
+                "yyyy-MMM-d h:m a", "GMT-6");
+        Assert.assertEquals(expected3c, 1573492260000L);
+        Assert.assertEquals(records.get(2).get(fieldName3).toString(), Long.toString(expected3c));
         long expected3d = computeTimestamp("1980-Jul-18 8:00 AM", true,
                 "yyyy-MMM-d h:m a", "GMT-5");
         Assert.assertEquals(expected3d, 332773200000L);
-        Assert.assertEquals(records.get(1).get(fieldName3).toString(), Long.toString(expected3d));
+        Assert.assertEquals(records.get(3).get(fieldName3).toString(), Long.toString(expected3d));
     }
 
     @Test(groups = "deployment")
@@ -455,7 +484,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 .filter(validation -> ValidationStatus.WARNING.equals(validation.getStatus()))
                 .collect(Collectors.toList());
         Assert.assertNotNull(warningValidations);
-        Assert.assertEquals(warningValidations.size(), 2);
+        Assert.assertEquals(warningValidations.size(), 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")

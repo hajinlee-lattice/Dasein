@@ -340,44 +340,24 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 fieldMapping.getDateFormatString() :
                                 fieldMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
                                         + fieldMapping.getTimeFormatString();
-                        String correctFormat = StringUtils
+                        String formatWithBestEffort = StringUtils
                                 .isBlank(bestEffortMapping.getTimeFormatString()) ?
                                 bestEffortMapping.getDateFormatString() :
                                 bestEffortMapping.getDateFormatString() + TimeStampConvertUtils.SYSTEM_DELIMITER
                                         + bestEffortMapping.getTimeFormatString();
 
                         // deal with case format can't parse the value
-                        StringBuilder timezoneMessage = new StringBuilder();
-                        String errorValue = resolver.checkUserDateType(fieldMapping, timezoneMessage);
-                        if (errorValue != null || timezoneMessage.length() > 0) {
-                            // deal with special case that format in field mapping provided by system and field mapping
-                            // after user changed are inconsistent
-                            String message;
-                            if (errorValue != null) {
-                                if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
-                                    message = String
-                                            .format("%s is set as %s from the system-provided %s in your file.", userField,
-                                                    userFormat, correctFormat);
-                                } else {
-                                    // this check the format inherit from the first time's date/time setting
-                                    message = String
-                                            .format("%s is set as %s which can't parse the %s from uploaded file.", userField,
-                                                    userFormat, errorValue);
-                                }
-                                validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                                        message));
-                            }
-                            if (timezoneMessage.length() > 0) {
-                                validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                                        timezoneMessage.toString()));
-                            }
-                        } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(correctFormat)) {
+                        StringBuilder warningMessage = new StringBuilder();
+                        boolean match = resolver.checkUserDateType(fieldMapping, warningMessage, formatWithBestEffort);
+                        if (!match && warningMessage.length() > 0) {
+                            validations.add(createValidation(userField, fieldMapping.getMappedField(),
+                                    ValidationStatus.WARNING, warningMessage.toString()));
+                        } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
                             // this is case that user change the date/time format which can be parsed
-                            String message =  String
-                                    .format("%s is set as %s which can parse the value from uploaded file.", userField,
-                                            userFormat);
-                            validations.add(createValidation(userField, fieldMapping.getMappedField(), ValidationStatus.WARNING,
-                                    message));
+                            String message =  String.format("%s is set as %s which can parse the value from uploaded " +
+                                    "file.", userField, userFormat);
+                            validations.add(createValidation(userField, fieldMapping.getMappedField(),
+                                    ValidationStatus.WARNING, message));
                         }
                     }
                 }

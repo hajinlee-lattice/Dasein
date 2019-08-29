@@ -673,12 +673,13 @@ public class MetadataResolver {
     /**
      *
      * @param fieldMapping
-     * @param timeZoneMessage indicate the message returned by time zone validation
+     * @param  warningMessage indicate the message returned by date/time format and time zone validation
      * check the given format can be used to parse column value, if number of column value can be parsed is more than
      * 10% of size of columnFields return null if the check can pass, return one error value if the check can't pass
      */
     @VisibleForTesting
-    public String checkUserDateType(FieldMapping fieldMapping, StringBuilder timeZoneMessage) {
+    public boolean checkUserDateType(FieldMapping fieldMapping, StringBuilder warningMessage,
+                                     String formatWithBestEffort) {
         String columnHeaderName = fieldMapping.getUserField();
         String errorValue = null;
         List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
@@ -687,8 +688,10 @@ public class MetadataResolver {
         String timezone = fieldMapping.getTimezone();
         boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
         if (StringUtils.isEmpty(dateFormat)) {
-            return null;
+            return false;
         }
+        String userFormat = StringUtils.isBlank(timeFormat) ? dateFormat :
+                dateFormat + TimeStampConvertUtils.SYSTEM_DELIMITER + timeFormat;
         int conformingDateCount = 0;
         int nonConformingTimeZoneCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
@@ -702,15 +705,15 @@ public class MetadataResolver {
                 TemporalAccessor dateTime = null;
                 String trimmedField = columnField.trim().replaceFirst("(\\s{2,})",
                         TimeStampConvertUtils.SYSTEM_DELIMITER);
+
+                String trimmedTZField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(trimmedField);
                 // validate time zone before stripe out the T&Z
-                boolean matchTZ = TimeStampConvertUtils.isIso8601TandZFromDateTime(trimmedField);
+                boolean matchTZ = !trimmedTZField.equals(trimmedField);
                 if ((isISO8601 && !matchTZ) || (!isISO8601 && matchTZ)) {
                     nonConformingTimeZoneCount++;
                 }
-
-                trimmedField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(trimmedField);
                 try {
-                    dateTime = dtf.parse(trimmedField);
+                    dateTime = dtf.parse(trimmedTZField);
                 } catch (DateTimeParseException e) {
                     log.debug("Found columnField unparsable as date/time: " + trimmedField);
                 }
@@ -729,16 +732,24 @@ public class MetadataResolver {
         }
         if (nonConformingTimeZoneCount > 0) {
             if (isISO8601) {
-                timeZoneMessage.append("Time zone should be part of value but is not.");
+                warningMessage.append("Time zone should be part of value but is not.");
             } else {
-                timeZoneMessage.append(String.format("Time zone set to %s. Value should not contain time " +
+                warningMessage.append(String.format("Time zone set to %s. Value should not contain time " +
                         "zone setting.", timezone));
             }
         }
         if (conformingDateCount < dateThreshold) {
-            return errorValue;
+            if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
+                warningMessage.append(String.format("%s is set as %s from the system-provided %s in your file.",
+                        columnHeaderName, userFormat, formatWithBestEffort));
+            } else {
+                // this check the format inherit from the first time's date/time setting
+                warningMessage.append(String.format("%s is set as %s which can't parse the %s from uploaded file.",
+                        columnHeaderName, userFormat, errorValue));
+            }
+            return false;
         }
-        return null;
+        return true;
     }
 
     /*
