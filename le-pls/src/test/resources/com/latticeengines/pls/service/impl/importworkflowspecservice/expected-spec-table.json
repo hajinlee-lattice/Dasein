@@ -1,0 +1,41 @@
+{
+    "name": "Contact",
+    "display_name": "Contact",
+    "attributes": [
+        {
+            "name": "CustomerContactId",
+            "display_name": null,
+            "nullable": true,
+            "physical_data_type": "STRING",
+            "logical_type": "Id",
+            "enum_values": "",
+            "properties": {
+                "AllowedDisplayNames": [
+                    "ID",
+                    "CONTACT",
+                    "CONTACT_ID"
+                ],
+                "FundamentalType": "alpha",
+                "Category": null,
+                "Required": false,
+                "Subcategory": null,
+                "ApprovedUsage": [
+                    "None"
+                ],
+                "InterfaceName": "CustomerContactId"
+            },
+            "validatorWrappers": []
+        }
+    ],
+    "level_hierarchies": [],
+    "extracts": [],
+    "primary_key": null,
+    "last_modified_key": null,
+    "interpretation": "Contact",
+    "marked_for_purge": false,
+    "data_rules": [],
+    "storage_mechanism": null,
+    "namespace": null,
+    "count": null,
+    "extracts_directory": null
+}
