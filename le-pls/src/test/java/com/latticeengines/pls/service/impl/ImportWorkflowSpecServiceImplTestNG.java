@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import com.latticeengines.pls.service.ImportWorkflowSpecService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
 
 
     @Autowired
-    private ImportWorkflowSpecServiceImpl importWorkflowSpecService;
+    private ImportWorkflowSpecService importWorkflowSpecService;
 
     @Override
     @BeforeClass(groups = "functional")

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -52,12 +51,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                     " and SystemObject " + systemObject + ".  Error was: " + e.getMessage());
         }
 
-        S3ObjectSummary s3ObjectSummary = new S3ObjectSummary();
-        s3ObjectSummary.setBucketName(s3Bucket);
         String s3Path = s3Dir + fileSystemType + "-" + fileSystemObject + "-spec.json";
-        s3ObjectSummary.setKey(s3Path);
-
-
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
 
         // Read in S3 file as InputStream.
