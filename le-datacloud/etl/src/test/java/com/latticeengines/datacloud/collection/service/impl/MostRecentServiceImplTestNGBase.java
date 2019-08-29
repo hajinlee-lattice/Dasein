@@ -20,6 +20,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
+//DataCloud SQL Servers are shutdown. Disable related tests.
+@Deprecated
 public abstract class MostRecentServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     private RefreshService refreshService;
@@ -56,7 +58,7 @@ public abstract class MostRecentServiceImplTestNGBase extends DataCloudCollectio
         getBaseSourceTestBean().tearDown();
     }
 
-    @Test(groups = "collection")
+    @Test(groups = "collection", enabled = false)
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;

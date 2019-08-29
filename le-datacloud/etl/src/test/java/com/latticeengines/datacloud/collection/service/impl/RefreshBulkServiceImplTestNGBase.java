@@ -18,6 +18,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
+//DataCloud SQL Servers are shutdown. Disable related tests.
+@Deprecated
 public abstract class RefreshBulkServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
     RefreshService refreshService;
     RefreshProgressEntityMgr progressEntityMgr;

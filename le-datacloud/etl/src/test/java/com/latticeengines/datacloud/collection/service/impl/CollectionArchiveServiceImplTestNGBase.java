@@ -19,6 +19,8 @@ import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
+// DataCloud SQL Servers are shutdown. Disable related tests.
+@Deprecated
 public abstract class CollectionArchiveServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     CollectedArchiveService collectedArchiveService;
