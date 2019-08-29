@@ -16,6 +16,8 @@ import com.latticeengines.datacloud.core.source.BulkSource;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
+//DataCloud SQL Servers are shutdown. Disable related tests.
+@Deprecated
 public abstract class BulkArchiveServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     BulkArchiveService archiveService;
@@ -29,7 +31,7 @@ public abstract class BulkArchiveServiceImplTestNGBase extends DataCloudCollecti
 
     abstract BulkSource getSource();
 
-    @BeforeMethod(groups = "collection")
+    @BeforeMethod(groups = "collection", enabled = false)
     public void setUp() throws Exception {
         source = getSource();
         prepareCleanPod(source);
@@ -42,7 +44,7 @@ public abstract class BulkArchiveServiceImplTestNGBase extends DataCloudCollecti
         progressEntityMgr = getProgressEntityMgr();
     }
 
-    @AfterMethod(groups = "collection")
+    @AfterMethod(groups = "collection", enabled = false)
     public void tearDown() throws Exception {
     }
 

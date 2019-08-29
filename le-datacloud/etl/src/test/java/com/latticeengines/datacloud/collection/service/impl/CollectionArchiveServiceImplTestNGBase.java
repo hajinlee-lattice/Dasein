@@ -19,6 +19,8 @@ import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
+// DataCloud SQL Servers are shutdown. Disable related tests.
+@Deprecated
 public abstract class CollectionArchiveServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     CollectedArchiveService collectedArchiveService;
@@ -36,7 +38,7 @@ public abstract class CollectionArchiveServiceImplTestNGBase extends DataCloudCo
 
     abstract Date[] getDates();
 
-    @BeforeMethod(groups = "collection")
+    @BeforeMethod(groups = "collection", enabled = false)
     public void setUp() throws Exception {
         source = getSource();
         prepareCleanPod(source);
@@ -50,11 +52,11 @@ public abstract class CollectionArchiveServiceImplTestNGBase extends DataCloudCo
         dates = getDates();
     }
 
-    @AfterMethod(groups = "collection")
+    @AfterMethod(groups = "collection", enabled = false)
     public void tearDown() throws Exception {
     }
 
-    @Test(groups = "collection", enabled = true)
+    @Test(groups = "collection", enabled = false)
     public void testWholeProgress() {
         purgeRawData();
 

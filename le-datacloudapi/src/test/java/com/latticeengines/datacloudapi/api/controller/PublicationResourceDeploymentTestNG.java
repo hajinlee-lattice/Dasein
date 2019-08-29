@@ -80,7 +80,8 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         dynamoService.deleteTable(tableName);
     }
 
-    @Test(groups = "deployment")
+    // DataCloud SQL Servers are shutdown. Disable the test
+    @Test(groups = "deployment", enabled = false)
     public void testPublish() {
         publicationName.set("Test" + SQL_SOURCE + "Publication");
 

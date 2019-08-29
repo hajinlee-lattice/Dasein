@@ -42,36 +42,58 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     private static final String STAGE_SUFFIX = "_Stage";
     private static final String BACKUP_SUFFIX = "_Bak";
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.host}")
     private String collectionHost;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.port}")
     private int collectionPort;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.db}")
     private String collectionDb;
 
+    // DataCloud BulkDB is shutdown
+    @Deprecated
     @Value("${datacloud.bulk.host}")
     private String bulkHost;
 
+    // DataCloud BulkDB is shutdown
+    @Deprecated
     @Value("${datacloud.bulk.port}")
     private int bulkPort;
 
+    // DataCloud BulkDB is shutdown
+    @Deprecated
     @Value("${datacloud.bulk.db}")
     private String bulkDb;
 
+    // DataCloud TestDB is shutdown
+    @Deprecated
     @Value("${datacloud.test.host}")
     private String testHost;
 
+    // DataCloud TestDB is shutdown
+    @Deprecated
     @Value("${datacloud.test.port}")
     private int testPort;
 
+    // DataCloud TestDB is shutdown
+    @Deprecated
     @Value("${datacloud.test.db}")
     private String testDb;
 
+    // DataCloud TestDB is shutdown
+    @Deprecated
     @Value("${datacloud.user}")
     private String dbUser;
 
+    // DataCloud TestDB is shutdown
+    @Deprecated
     @Value("${datacloud.password.encrypted}")
     private String dbPassword;
 
@@ -102,6 +124,8 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     @Inject
     private DynamoService defaultDynamoSerivce;
 
+    // DataCloud SQL Servers are shutdown
+    @Deprecated
     @Override
     public <T extends PublishToSqlConfiguration> T parseSqlAlias(T sqlConfiguration) {
         PublishToSqlConfiguration.Alias alias = sqlConfiguration.getAlias();
@@ -295,6 +319,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
         return dynamoConfiguration;
     }
 
+    @Override
     public DynamoService constructDynamoService(PublishToDynamoConfiguration dynamoConfiguration) {
         String awsKeyEncrypted = dynamoConfiguration.getAwsAccessKeyEncrypted();
         String awsSecretEncrypted = dynamoConfiguration.getAwsSecretKeyEncrypted();
