@@ -17,6 +17,7 @@
         { "Node": "Account", "Data": 500},
         { "Node": "Contact", "Data": 500}
       ]
-    }
+    },
+    {"Node":  "workflowThrottlerConfig.json", "Data":  "{}"}
   ]
 }

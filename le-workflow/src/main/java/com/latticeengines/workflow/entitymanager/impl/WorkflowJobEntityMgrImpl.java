@@ -261,4 +261,10 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         }
         return workflowJobDao.findByClusterIDAndTypesAndStatuses(null, null, statuses);
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByStatusesAndClusterId(String clusterId, List<String> statuses) {
+        return workflowJobDao.findByClusterIDAndTypesAndStatuses(clusterId, null, statuses);
+    }
 }
