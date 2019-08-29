@@ -328,8 +328,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         log.info(String.format("Wait %s for %d seconds", applicationId, timeoutInSec));
         JobStatus finalStatus = null;
         long startTime = System.currentTimeMillis();
-        int maxTries = 17280; // maximum wait time 24h
-        int i = 0;
         int nContExceptions = 0; // number of continuous exceptions
         do {
             try {
@@ -363,9 +361,8 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             } catch (InterruptedException e) {
                 // Do nothing for InterruptedException
             }
-            i++;
 
-            if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
+            if ((System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
                 break;
             }
         } while (finalStatus == null || !TERMINAL_STATUS.contains(finalStatus.getStatus()));
