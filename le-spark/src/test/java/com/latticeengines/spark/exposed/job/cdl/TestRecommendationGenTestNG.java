@@ -55,6 +55,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     private static final int contactPerAccount = 10;
     private String accountData;
     private String contactData;
+    private Object[][] accounts;
+    private Object[][] contacts;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -78,7 +80,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     protected void verifyOutput(String output) {
         log.info("Contact count is " + output);
         if (inputs.size() == 2) {
-            Assert.assertEquals(output, "100");
+            // there is one account that does not have any mapped contact
+            Assert.assertEquals(output, String.valueOf(contactPerAccount * (accounts.length - 1)));
         } else {
             Assert.assertEquals(output, "0");
         }
@@ -101,27 +104,30 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
         verifyAndReadTarget(target).forEachRemaining(record -> {
             count.incrementAndGet();
-            String contacts = record.get(RecommendationColumnName.CONTACTS.name()).toString();
-            if (count.get() == 1) {
-                List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
-                        .collect(Collectors.toList());
-                verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight());
-                ObjectMapper jsonParser = new ObjectMapper();
-                try {
-                    JsonNode jsonObject = jsonParser.readTree(contacts);
-                    Assert.assertTrue(jsonObject.isArray());
-                    List<String> contactCols = new ArrayList<>();
-                    if (jsonObject.size() > 0) {
-                        jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
-                        verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight());
+            Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
+            if (contactObject != null) {
+                String contacts = contactObject.toString();
+                if (count.get() == 1) {
+                    List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
+                            .collect(Collectors.toList());
+                    verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight());
+                    ObjectMapper jsonParser = new ObjectMapper();
+                    try {
+                        JsonNode jsonObject = jsonParser.readTree(contacts);
+                        Assert.assertTrue(jsonObject.isArray());
+                        List<String> contactCols = new ArrayList<>();
+                        if (jsonObject.size() > 0) {
+                            jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
+                            verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight());
+                        }
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
             }
         });
-        Assert.assertEquals(count.get(), 10);
+        Assert.assertEquals(count.get(), accounts.length);
         return true;
     }
 
@@ -157,7 +163,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.Website.name(), String.class), //
                 Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
-        Object[][] accounts = new Object[][] { //
+        accounts = new Object[][] { //
                 { "0L", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000",
                         "www.lattice-engines.com", "01/01/2019" }, //
                 { "1L", "destinationAccountId", "DnB", "DnB", 97, "B", "2000", "www.dnb.com", "01/01/2019" }, //
@@ -171,6 +177,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 { "7L", "destinationAccountId", "Eloqua", "Eloqua", 40, "F", "100", "www.eloqua.com", "01/01/2019" }, //
                 { "8L", "destinationAccountId", "Dell", "Dell", 8, "F", "10", "www.dell.com", "01/01/2019" }, //
                 { "9L", "destinationAccountId", "HP", "HP", 38, "E", "500", "www.hp.com", "01/01/2019" }, //
+                // the following account has no matched contacts
+                { "100L", "destinationAccountId", "Fake Co", "Fake Co", 3, "F", "5", "", "" } //
         };
         accountData = uploadHdfsDataUnit(accounts, accountFields);
 
@@ -193,25 +201,26 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
 
-        Object[][] contacts = new Object[accounts.length * contactPerAccount][contactfields.size()];
+        contacts = new Object[accounts.length * contactPerAccount][contactfields.size()];
         for (int i = 0; i < accounts.length; i++) {
             for (int j = 0; j < contactPerAccount; j++) {
-                contacts[accounts.length * i + j][0] = String.valueOf(i) + "L";
-                contacts[accounts.length * i + j][1] = String.valueOf(accounts.length * i + j);
-                contacts[accounts.length * i + j][2] = "Kind Inc.";
-                contacts[accounts.length * i + j][3] = "michael@kind.com";
-                contacts[accounts.length * i + j][4] = "Michael Jackson";
-                contacts[accounts.length * i + j][5] = "SMO";
-                contacts[accounts.length * i + j][6] = "CA";
-                contacts[accounts.length * i + j][7] = "US";
-                contacts[accounts.length * i + j][8] = "94404";
-                contacts[accounts.length * i + j][9] = "650-898-3928";
-                contacts[accounts.length * i + j][10] = "CEO";
-                contacts[accounts.length * i + j][11] = "Michael";
-                contacts[accounts.length * i + j][12] = "Jackson";
-                contacts[accounts.length * i + j][13] = "08/08/2019";
+                contacts[contactPerAccount * i + j][0] = String.valueOf(i) + "L";
+                contacts[contactPerAccount * i + j][1] = String.valueOf(accounts.length * i + j);
+                contacts[contactPerAccount * i + j][2] = "Kind Inc.";
+                contacts[contactPerAccount * i + j][3] = "michael@kind.com";
+                contacts[contactPerAccount * i + j][4] = "Michael Jackson";
+                contacts[contactPerAccount * i + j][5] = "SMO";
+                contacts[contactPerAccount * i + j][6] = "CA";
+                contacts[contactPerAccount * i + j][7] = "US";
+                contacts[contactPerAccount * i + j][8] = "94404";
+                contacts[contactPerAccount * i + j][9] = "650-898-3928";
+                contacts[contactPerAccount * i + j][10] = "CEO";
+                contacts[contactPerAccount * i + j][11] = "Michael";
+                contacts[contactPerAccount * i + j][12] = "Jackson";
+                contacts[contactPerAccount * i + j][13] = "08/08/2019";
             }
         }
+
         contactData = uploadHdfsDataUnit(contacts, contactfields);
         // inputs = Arrays.asList(accountData, contactData);
     }

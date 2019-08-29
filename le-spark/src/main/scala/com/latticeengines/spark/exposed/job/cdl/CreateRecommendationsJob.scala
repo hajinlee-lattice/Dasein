@@ -250,10 +250,16 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       val contactCount = recommendations.agg( //
     	  sum("CONTACT_NUM")
       ).first.get(0)
+      recommendations.select(joinKey, "CONTACT_NUM").show()
       finalRecommendations = recommendations//
         .withColumnRenamed(joinKey,"ACCOUNT_ID") //
         .drop("CONTACT_NUM")
-      finalOutput = contactCount.toString
+      
+      if (contactCount != null) {
+        finalOutput = contactCount.toString
+      } else {
+        finalOutput = "0"
+      }
     } else {
       // join
       val recommendations = limitedAccountTable.withColumn("CONTACTS", lit("[]").cast(StringType))
