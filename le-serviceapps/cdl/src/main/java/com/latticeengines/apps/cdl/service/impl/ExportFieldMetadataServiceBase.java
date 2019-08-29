@@ -119,7 +119,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
         defaultFieldsMetadataMap.values().forEach(defaultField -> {
             String attrName = defaultField.getAttrName();
-            ColumnMetadata cm;
+            ColumnMetadata cm = null;
 
             if (defaultField.getStandardField() && accountAttributesMap.containsKey(attrName)) {
                 cm = accountAttributesMap.get(attrName);
@@ -129,11 +129,13 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
                 cm = contactAttributesMap.get(attrName);
                 cm.setDisplayName(defaultField.getDisplayName());
                 contactAttributesMap.remove(attrName);
-            } else {
+            } else if(!"SDR_Email".equals(attrName)){
                 cm = constructCampaignDerivedColumnMetadata(defaultField);
             }
 
-            exportColumnMetadataList.add(cm);
+            if(cm != null){
+                exportColumnMetadataList.add(cm);
+            }
         });
 
         return exportColumnMetadataList;

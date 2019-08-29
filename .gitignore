@@ -8,7 +8,7 @@
 .idea/
 *.iml
 *.iws
-
+.editorconfig
 # Mac
 .DS_Store
 

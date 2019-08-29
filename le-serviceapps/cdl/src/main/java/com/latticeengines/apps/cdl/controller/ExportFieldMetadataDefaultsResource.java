@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "export-field-metadata-defaults", description = "Rest resource for default play launch export fields")
 @RestController
-@RequestMapping("/customerspaces/export-field-metadata/defaults")
+@RequestMapping("/export-field-metadata/defaults")
 public class ExportFieldMetadataDefaultsResource {
 
     @Inject
