@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.latticeengines.common.exposed.util.YarnUtils;
 
@@ -27,7 +28,8 @@ public enum JobStatus {
     SKIPPED(5, "Skipped", true), //
     READY(6, "Ready", false), //
     PENDING_RETRY(7, "Pending Retry", true), //
-    RETRIED(8, "Retried", true); //
+    RETRIED(8, "Retried", true), //
+    ENQUEUED(9, "Enqueued", false); //
 
     private static Logger log = LoggerFactory.getLogger(JobStatus.class);
     private static Map<String, JobStatus> statusCodeMap = new HashMap<>();
@@ -52,6 +54,7 @@ public enum JobStatus {
         return statusCodeMap.get(statusCode);
     }
 
+    @JsonCreator
     public static JobStatus fromString(String status) {
         return fromString(status, null);
     }
