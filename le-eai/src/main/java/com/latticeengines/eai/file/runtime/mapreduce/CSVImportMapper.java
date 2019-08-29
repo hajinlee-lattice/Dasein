@@ -333,6 +333,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
+                try {
+                    validateAttribute(csvRecord, attr, csvColumnName);
+                } catch (Exception e) {
+                    LOG.warn(e.getMessage());
+                    errorMap.put(attr.getDisplayName(), e.getMessage());
+                }
                 if (attr.getRequired() || !attr.isNullable()) {
                     errorMap.put(attr.getName(), String.format("%s cannot be empty!", attr.getName()));
                 } else {
