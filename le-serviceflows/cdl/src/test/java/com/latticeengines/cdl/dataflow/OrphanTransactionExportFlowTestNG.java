@@ -7,8 +7,6 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -22,67 +20,55 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowF
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-dataflow-context.xml" })
 public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(OrphanTransactionExportFlowTestNG.class);
-
     private static final String ACCOUNT_TABLE = "AccountTable";
     private static final String PRODUCT_TABLE = "ProductTable";
     private static final String TRANSACTION_TABLE = "TransactionTable";
     private static final String ACCOUNT_DIR = "/tmp/OrphanTransactionExportFlowTestNG/account/";
     private static final String PRODUCT_DIR = "/tmp/OrphanTransactionExportFlowTestNG/product/";
     private static final String TRANSACTION_DIR = "/tmp/OrphanTransactionExportFlowTestNG/transaction/";
-    private static final String[] TXN_ATTRS = new String[] { InterfaceName.TransactionId.name(),
-            InterfaceName.AccountId.name(), InterfaceName.ProductId.name(), InterfaceName.TransactionCount.name() };
-    private static final String[] TXN_NOAID_ATTRS = new String[] { InterfaceName.TransactionId.name(),
-            InterfaceName.ProductId.name(), InterfaceName.TransactionCount.name() };
 
     private Object[][] accountData = new Object[][] {
             // "AccountId", "Name"
-            { "A001", "Husky" }, //
-            { "A002", "Alaskan Malamute" }, //
-            { "A003", "Collie" }, //
-            { "A004", "Chihuahua" }, //
-            { "A005", "Labrador Retriever" } //
+            { "A001", "Husky" },
+            { "A002", "Alaskan Malamute" },
+            { "A003", "Collie" },
+            { "A004", "Chihuahua" },
+            { "A005", "Labrador Retriever" }
     };
 
     private Object[][] productData = new Object[][] {
             // "ProductId", "ProductName"
-            { "P0001", "test_product_1" }, //
-            { "P0002", "test_product_2" }, //
-            { "P0003", "test_product_3" }, //
-            { "P0004", "test_product_4" }, //
-            { "P0004", "test_product_4" }, //
-            { "P0005", "test_product_5" } //
+            { "P0001", "test_product_1" },
+            { "P0002", "test_product_2" },
+            { "P0003", "test_product_3" },
+            { "P0004", "test_product_4" },
+            { "P0004", "test_product_4" },
+            { "P0005", "test_product_5" }
     };
 
     private Object[][] transactionData = new Object[][] {
             // "TransactionId", "AccountId", "ProductId", "TransactionCount"
-            { "T00200", "A001", "P0002", 200L }, //
-            { "T01234", "A005", "P0010", 200L }, //
-            { "T06666", "A010", "P0088", 300L }, //
-            { "T08080", "A004", "P0003", 150L }, //
-            { "T18888", "A006", "P0004", 998L } //
+            { "T00200", "A001", "P0002", 200L },
+            { "T01234", "A005", "P0010", 200L },
+            { "T06666", "A010", "P0088", 300L },
+            { "T08080", "A004", "P0003", 150L },
+            { "T18888", "A006", "P0004", 998L }
     };
 
     private Object[][] expectedData = new Object[][] {
-            // "TransactionId", "AccountId", "ProductId", "TransactionCount"
-            { "T18888", "A006", "P0004", 998L }, //
-            { "T01234", "A005", "P0010", 200L }, //
-            { "T06666", "A010", "P0088", 300L } };
-
-    private Object[][] expectedNoAIDData = new Object[][] {
-            // "TransactionId", "ProductId", "TransactionCount"
-            { "T18888", "P0004", 998L }, //
-            { "T01234", "P0010", 200L }, //
-            { "T06666", "P0088", 300L } //
+            // "AccountId", "ProductId", "TransactionId", "TransactionCount"
+            { "A006", "P0004", "T18888", 998L },
+            { "A005", "P0010", "T01234", 200L },
+            { "A010", "P0088", "T06666", 300L }
     };
 
     private Object[][] expectNullCaseData = new Object[][] {
-            // "TransactionId", "AccountId", "ProductId", "TransactionCount"
-            { "T00200", "A001", "P0002", 200L }, //
-            { "T01234", "A005", "P0010", 200L }, //
-            { "T06666", "A010", "P0088", 300L }, //
-            { "T08080", "A004", "P0003", 150L }, //
-            { "T18888", "A006", "P0004", 998L } //
+            // "AccountId", "ProductId", "TransactionId", "TransactionCount"
+            { "A001", "P0002", "T00200", 200L },
+            { "A005", "P0010", "T01234", 200L },
+            { "A010", "P0088", "T06666", 300L },
+            { "A004", "P0003", "T08080", 150L },
+            { "A006", "P0004", "T18888", 998L }
     };
 
     @BeforeClass(groups = "functional")
@@ -94,31 +80,23 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
 
     @Test(groups = "functional")
     public void testOrphanTransactionExportFlow() {
-        OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionData, null);
+        OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionData);
         executeDataFlow(parameters);
-        verifyResult(expectedData, 3, TXN_ATTRS);
+        verifyResult(expectedData,3);
     }
 
     @Test(groups = "functional")
     public void testNullAccountTable() {
-        OrphanTransactionExportParameters parameters = prepareInput(null, productData, transactionData, null);
+        OrphanTransactionExportParameters parameters = prepareInput(null, productData, transactionData);
         executeDataFlow(parameters);
-        verifyResult(expectNullCaseData, 5, TXN_ATTRS);
+        verifyResult(expectNullCaseData,5);
     }
 
     @Test(groups = "functional")
     public void testNullProductTable() {
-        OrphanTransactionExportParameters parameters = prepareInput(accountData, null, transactionData, null);
+        OrphanTransactionExportParameters parameters = prepareInput(accountData,null, transactionData);
         executeDataFlow(parameters);
-        verifyResult(expectNullCaseData, 5, TXN_ATTRS);
-    }
-
-    @Test(groups = "functional")
-    public void testOrphanTransactionNoAIDExportFlow() {
-        OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionData,
-                new ArrayList<>());
-        executeDataFlow(parameters);
-        verifyResult(expectedNoAIDData, 3, TXN_NOAID_ATTRS);
+        verifyResult(expectNullCaseData,5);
     }
 
     @Override
@@ -135,7 +113,7 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
     }
 
     private OrphanTransactionExportParameters prepareInput(Object[][] accountData, Object[][] productData,
-            Object[][] transactionData, List<String> validatedColumns) {
+                                                           Object[][] transactionData) {
         OrphanTransactionExportParameters parameters = new OrphanTransactionExportParameters();
         if (accountData != null) {
             uploadAvro(accountData, prepareAccountData(), ACCOUNT_TABLE, ACCOUNT_DIR);
@@ -148,25 +126,19 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
 
         uploadAvro(transactionData, prepareTxnData(), TRANSACTION_TABLE, TRANSACTION_DIR);
         parameters.setTransactionTable(TRANSACTION_TABLE);
-        if (validatedColumns == null) {
-            // Export attributes passed in is only for Account & Contact entity,
-            // don't include Transaction attributes
-            parameters.setValidatedColumns(Arrays.asList(InterfaceName.AccountId.name()));
-        } else {
-            parameters.setValidatedColumns(validatedColumns);
-        }
-
+        parameters.setValidatedColumns(Arrays.asList(InterfaceName.TransactionId.name(), InterfaceName.AccountId.name(),
+                InterfaceName.ProductId.name(), InterfaceName.TransactionCount.name()));
         return parameters;
     }
 
-    private void verifyResult(Object[][] expectedData, int expectNumOfRows, String[] attributes) {
+    private void verifyResult(Object[][] expectedData, int expectNumOfRows) {
         List<GenericRecord> records = readOutput();
         int rowNum = 0;
         for (GenericRecord record : records) {
-            log.info(record.toString());
-            for (int i = 0; i < attributes.length; i++) {
-                Assert.assertTrue(isObjEquals(record.get(attributes[i]), expectedData[rowNum][i]));
-            }
+            Assert.assertEquals(record.get(0).toString(), expectedData[rowNum][0]);
+            Assert.assertEquals(record.get(1).toString(), expectedData[rowNum][1]);
+            Assert.assertEquals(record.get(2).toString(), expectedData[rowNum][2]);
+            Assert.assertEquals(record.get(3), expectedData[rowNum][3]);
             rowNum ++;
         }
         Assert.assertEquals(rowNum, expectNumOfRows);
