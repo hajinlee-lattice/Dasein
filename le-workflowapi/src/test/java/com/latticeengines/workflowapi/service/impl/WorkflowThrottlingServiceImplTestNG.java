@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -124,16 +123,9 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
         assertTotalExistingMatch(status, fakedWorkflowJobs, div, JobStatus.RUNNING);
         assertTotalExistingMatch(status, fakedWorkflowJobs, div, JobStatus.ENQUEUED);
-        assertAllowedCorrect(status.getCanRunWorkflowInEnv(), populated.getEnvConfig(), fakedWorkflowJobs, JobStatus.RUNNING);
-        assertAllowedCorrect(status.getCanEnqueueWorkflowInEnv(), populated.getEnvConfig(), fakedWorkflowJobs, JobStatus.ENQUEUED);
 
-        List<WorkflowJob> stackSpecificList = fakedWorkflowJobs.stream().filter(wf -> wf.getStack().equals(div)).collect(Collectors.toList());
-        assertAllowedCorrect(status.getCanRunWorkflowInStack(), populated.getStackConfig(), stackSpecificList, JobStatus.RUNNING);
-        assertAllowedCorrect(status.getCanEnqueueWorkflowInStack(), populated.getStackConfig(), stackSpecificList, JobStatus.ENQUEUED);
-
-        List<WorkflowJob> tenantSpecificList = fakedWorkflowJobs.stream().filter(wf -> wf.getTenant().equals(tenant)).collect(Collectors.toList());
-        assertTenantCorrect(status.getTenantCanRunWorkflow(), tenantSpecificList, JobStatus.RUNNING);
-        assertTenantCorrect(status.getTenantCanEnqueueWorkflow(), tenantSpecificList, JobStatus.ENQUEUED);
+        assertTenantExistingMatch(status.getTenantRunningWorkflow(), fakedWorkflowJobs, JobStatus.RUNNING);
+        assertTenantExistingMatch(status.getTenantEnqueuedWorkflow(), fakedWorkflowJobs, JobStatus.ENQUEUED);
     }
 
     @Test(groups = "functional", dataProvider = "flagProvider")
@@ -320,17 +312,10 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                 fakeWorkflows.stream().filter(wf -> wf.getStatus().equals(jobStatus.name()) && wf.getType().equals(TEST_WF_TYPE) && wf.getStack().equals(division)).count());
     }
 
-    private void assertAllowedCorrect(Map<String, Integer> allowed, Map<String, Map<String, Map<JobStatus, Integer>>> config, List<WorkflowJob> fakeWorkflows, JobStatus jobStatus) {
-        Assert.assertEquals((int) allowed.get(GLOBAL_KEY),
-                config.get(GLOBAL_KEY).get(GLOBAL_KEY).get(jobStatus) - fakeWorkflows.stream().filter(wf -> wf.getStatus().equals(jobStatus.name())).count());
-        Assert.assertEquals((int) allowed.getOrDefault(TEST_WF_TYPE, 0),
-                config.get(GLOBAL_KEY).get(TEST_WF_TYPE).get(jobStatus) - fakeWorkflows.stream().filter(wf -> wf.getStatus().equals(jobStatus.name()) && wf.getType().equals(TEST_WF_TYPE)).count());
-    }
-
-    private void assertTenantCorrect(Map<String, Map<String, Integer>> allowed, List<WorkflowJob> fakeWorkflows, JobStatus jobStatus) {
-        Map<String, Integer> workflowMap = allowed.get(CustomerSpace.parse(tenant.getId()).toString());
-        Assert.assertNotNull(workflowMap);
-        Assert.assertEquals((int) workflowMap.get(TEST_WF_TYPE),
-                populated.getTenantConfig().get(TEST_TENANT_ID).get(TEST_WF_TYPE).get(jobStatus) - fakeWorkflows.stream().filter(wf -> wf.getStatus().equals(jobStatus.name()) && wf.getType().equals(TEST_WF_TYPE)).count());
+    private void assertTenantExistingMatch(Map<String, Map<String, Integer>> existingWorkflows, List<WorkflowJob> fakeWorkflows, JobStatus jobStatus) {
+        Assert.assertEquals((int) existingWorkflows.get(tenant.getId()).get(GLOBAL_KEY),
+                fakeWorkflows.stream().filter(wfj -> wfj.getTenant().getId().equals(tenant.getId()) && wfj.getStatus().equals(jobStatus.name())).count());
+        Assert.assertEquals((int) existingWorkflows.get(tenant.getId()).getOrDefault(TEST_WF_TYPE, 0),
+                fakeWorkflows.stream().filter(wfj -> wfj.getTenant().getId().equals(tenant.getId()) && wfj.getStatus().equals(jobStatus.name()) && wfj.getType().equals(TEST_WF_TYPE)).count());
     }
 }

@@ -2,10 +2,10 @@ package com.latticeengines.workflowapi.service.impl;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -105,8 +105,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         try {
             MultiTenantContext.clearTenant();
             List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByStatusesAndClusterId(emrCacheService.getClusterId(), Arrays.asList(JobStatus.RUNNING.name(), JobStatus.ENQUEUED.name(), JobStatus.PENDING.name()));
-            addCurrentSystemState(status, workflowJobs, division);
-            addCanRunState(status, workflowJobs, podid, division);
+            addCurrentSystemState(status, workflowJobs, podid, division);
         } finally {
             MultiTenantContext.setTenant(originTenant);
         }
@@ -114,7 +113,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         return status;
     }
 
-    private void addCurrentSystemState(WorkflowThrottlingSystemStatus status, List<WorkflowJob> workflowJobs, String division) {
+    private void addCurrentSystemState(WorkflowThrottlingSystemStatus status, List<WorkflowJob> workflowJobs, String podid, String division) {
         Map<String, Integer> runningWorkflowInEnv = new HashMap<String, Integer>() {{
             put(GLOBAL_KEY, 0);
         }};
@@ -129,10 +128,12 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         }};
         Map<String, Map<String, Integer>> tenantRunningWorkflow = new HashMap<>();
         Map<String, Map<String, Integer>> tenantEnqueuedWorkflow = new HashMap<>();
+        Set<String> tenantIds = new HashSet<>();
 
 
         for (WorkflowJob workflow : workflowJobs) {
             String customerSpace = CustomerSpace.parse(workflow.getTenant().getId()).toString();
+            tenantIds.add(customerSpace);
 
             if (workflow.getStatus().equals(JobStatus.RUNNING.name())) {
                 tenantRunningWorkflow.putIfAbsent(customerSpace, new HashMap<>());
@@ -160,62 +161,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         status.setEnqueuedWorkflowInStack(enqueuedWorkflowInStack);
         status.setTenantRunningWorkflow(tenantRunningWorkflow);
         status.setTenantEnqueuedWorkflow(tenantEnqueuedWorkflow);
-    }
-
-    private void addCanRunState(WorkflowThrottlingSystemStatus status, List<WorkflowJob> workflowJobs, String podid, String division) {
-        Set<String> tenantIds = workflowJobs.stream().map(wfj -> wfj.getTenant().getId()).collect(Collectors.toSet());
-        WorkflowThrottlerConfiguration config = getThrottlingConfig(podid, division, tenantIds);
-        if (config == null) {
-            throw new IllegalArgumentException("Failed to get throttling configuration from ZK.");
-        }
-
-
-        status.setCanRunWorkflowInEnv(getAllowedWorkflowCount(config.getEnvConfig(), JobStatus.RUNNING, status.getRunningWorkflowInEnv(), GLOBAL_KEY));
-        status.setCanEnqueueWorkflowInEnv(getAllowedWorkflowCount(config.getEnvConfig(), JobStatus.ENQUEUED, status.getEnqueuedWorkflowInEnv(), GLOBAL_KEY));
-
-        status.setCanRunWorkflowInStack(getAllowedWorkflowCount(config.getStackConfig(), JobStatus.RUNNING, status.getRunningWorkflowInStack(), GLOBAL_KEY));
-        status.setCanRunWorkflowInStackSpecific(getAllowedWorkflowCount(config.getStackConfig(), JobStatus.RUNNING, status.getRunningWorkflowInStack(), division));
-        status.setCanEnqueueWorkflowInStack(getAllowedWorkflowCount(config.getStackConfig(), JobStatus.ENQUEUED, status.getEnqueuedWorkflowInStack(), GLOBAL_KEY));
-        status.setCanEnqueueWorkflowInStackSpecific(getAllowedWorkflowCount(config.getStackConfig(), JobStatus.ENQUEUED, status.getEnqueuedWorkflowInStack(), division));
-
-        status.setTenantCanRunWorkflow(getTenantAllowedWorkflowCount(status.getTenantRunningWorkflow(), config.getTenantConfig(), JobStatus.RUNNING));
-        status.setTenantCanEnqueueWorkflow(getTenantAllowedWorkflowCount(status.getTenantEnqueuedWorkflow(), config.getTenantConfig(), JobStatus.ENQUEUED));
-    }
-
-    private Map<String, Integer> getAllowedWorkflowCount(Map<String, Map<String, Map<JobStatus, Integer>>> config, JobStatus quotaType, Map<String, Integer> existingWorkflows, String configId) {
-        Map<String, Integer> allowedWorkflowCount = new HashMap<>();
-        Map<String, Map<JobStatus, Integer>> workflowMap = config.get(configId);
-
-        if (workflowMap != null) {
-            workflowMap.forEach((workflowType, jobStatusMap) -> {
-                int count = existingWorkflows.getOrDefault(workflowType, 0);
-                Integer quota = jobStatusMap.get(quotaType);
-                if (quota != null) {
-                    allowedWorkflowCount.put(workflowType, quota - count);
-                }
-            });
-        }
-        return allowedWorkflowCount;
-    }
-
-    private Map<String, Map<String, Integer>> getTenantAllowedWorkflowCount(Map<String, Map<String, Integer>> existingWorkflows, Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig, JobStatus quotaType) {
-        Map<String, Map<String, Integer>> allowedWorkflowCount = new HashMap<>();
-        tenantConfig.forEach((tenantId, workflowConfigMap) -> {
-            if (!tenantId.equals(GLOBAL_KEY)) {
-                allowedWorkflowCount.put(tenantId, new HashMap<>());
-                workflowConfigMap.forEach((workflowType, jobStatusConfigMap) -> {
-                    int count = 0;
-                    if (existingWorkflows.get(tenantId) != null) {
-                        count = existingWorkflows.get(tenantId).getOrDefault(workflowType, 0);
-                    }
-                    Integer quota = jobStatusConfigMap.get(quotaType);
-                    if (quota != null) {
-                        allowedWorkflowCount.get(tenantId).put(workflowType, quota - count);
-                    }
-                });
-            }
-        });
-        return allowedWorkflowCount;
+        status.setConfig(getThrottlingConfig(podid, division, tenantIds));
     }
 
     private void addWorkflowToMap(Map<String, Integer> map, WorkflowJob workflow) {
