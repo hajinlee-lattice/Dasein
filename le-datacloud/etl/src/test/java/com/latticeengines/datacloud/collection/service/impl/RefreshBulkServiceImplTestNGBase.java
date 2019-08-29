@@ -35,7 +35,7 @@ public abstract class RefreshBulkServiceImplTestNGBase extends DataCloudCollecti
 
     abstract BulkArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
-    @BeforeMethod(groups = "collection")
+    @BeforeMethod(groups = "collection", enabled = false)
     public void setUp() throws Exception {
         source = getSource();
         prepareCleanPod(source);
@@ -45,12 +45,12 @@ public abstract class RefreshBulkServiceImplTestNGBase extends DataCloudCollecti
         baseSource = (BulkSource) source.getBaseSources()[0];
     }
 
-    @AfterMethod(groups = "collection")
+    @AfterMethod(groups = "collection", enabled = false)
     public void tearDown() throws Exception {
         getBaseSourceTestBean().tearDown();
     }
 
-    @Test(groups = "collection")
+    @Test(groups = "collection", enabled = false)
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;
