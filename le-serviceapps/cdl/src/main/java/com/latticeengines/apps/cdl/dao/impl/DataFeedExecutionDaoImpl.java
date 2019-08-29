@@ -36,11 +36,11 @@ public class DataFeedExecutionDaoImpl extends BaseDaoImpl<DataFeedExecution> imp
         Session session = getSessionFactory().getCurrentSession();
         Class<DataFeedExecution> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s execution set execution.retry_count=:retry_count where execution.pid=:pid",
+                "update %s execution set execution.retryCount=:retryCount where execution.pid=:pid",
                 entityClz.getSimpleName());
         @SuppressWarnings("unchecked")
         Query<DataFeedExecution> query = session.createQuery(queryStr);
-        query.setParameter("retry_count", execution.getRetryCount());
+        query.setParameter("retryCount", execution.getRetryCount());
         query.setParameter("pid", execution.getPid());
         query.executeUpdate();
         return execution;
