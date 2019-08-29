@@ -41,8 +41,6 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     private static TypeReference<Map<String, Map<JobStatus, Integer>>> tenantConfigTypeRef = new TypeReference<Map<String, Map<JobStatus, Integer>>>() {
     };
 
-    private volatile WorkflowThrottlerConfiguration config;
-
     @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
@@ -52,7 +50,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     @Override
     public WorkflowThrottlerConfiguration getThrottlingConfig(String podid, String division, Set<String> customerSpaces) {
         Camille c = CamilleEnvironment.getCamille();
-        config = new WorkflowThrottlerConfiguration();
+        WorkflowThrottlerConfiguration config = new WorkflowThrottlerConfiguration();
         try {
             config.setEnvConfig(JsonUtils.deserializeByTypeRef(c.get(PathBuilder.buildWorkflowThrottlerPodsConfigPath(podid)).getData(), configTypeRef));
         } catch (Exception e) {
