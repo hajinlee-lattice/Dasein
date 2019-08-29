@@ -47,6 +47,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder dataFeedTaskId(String dataFeedTaskId) {
             importDataFeedTaskConfiguration.setDataFeedTaskId(dataFeedTaskId);
+            inputFileValidatorConfiguration.setDataFeedTaskId(dataFeedTaskId);
             return this;
         }
 

@@ -14,6 +14,9 @@ public class InputFileValidatorConfiguration extends BaseReportStepConfiguration
     @JsonProperty("enable_entity_match_ga")
     private boolean enableEntityMatchGA;
 
+    @JsonProperty("data_feed_task_id")
+    private String dataFeedTaskId;
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -36,5 +39,13 @@ public class InputFileValidatorConfiguration extends BaseReportStepConfiguration
 
     public void setEnableEntityMatchGA(boolean enableEntityMatchGA) {
         this.enableEntityMatchGA = enableEntityMatchGA;
+    }
+
+    public String getDataFeedTaskId() {
+        return dataFeedTaskId;
+    }
+
+    public void setDataFeedTaskId(String dataFeedTaskId) {
+        this.dataFeedTaskId = dataFeedTaskId;
     }
 }

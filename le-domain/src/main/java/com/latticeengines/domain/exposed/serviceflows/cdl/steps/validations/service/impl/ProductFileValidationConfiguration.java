@@ -7,8 +7,11 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.serv
 
 public class ProductFileValidationConfiguration extends InputFileValidationConfiguration {
 
-    @JsonProperty("customerSpace")
+    @JsonProperty("customer_space")
     private CustomerSpace customerSpace;
+
+    @JsonProperty("data_feed_task_id")
+    private String dataFeedTaskId;
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -18,4 +21,11 @@ public class ProductFileValidationConfiguration extends InputFileValidationConfi
         this.customerSpace = customerSpace;
     }
 
+    public String getDataFeedTaskId() {
+        return dataFeedTaskId;
+    }
+
+    public void setDataFeedTaskId(String dataFeedTaskId) {
+        this.dataFeedTaskId = dataFeedTaskId;
+    }
 }

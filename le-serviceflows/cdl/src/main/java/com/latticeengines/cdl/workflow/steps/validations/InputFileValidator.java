@@ -72,10 +72,11 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
                 String.valueOf(enableEntityMatch)));
         boolean enableEntityMatchGA = configuration.isEnableEntityMatchGA();
+        String dataFeedTaskId = configuration.getDataFeedTaskId();
         // errorLine is used to count number of error found in this step
         long errorLine;
         InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList,
-                enableEntityMatch, enableEntityMatchGA);
+                enableEntityMatch, enableEntityMatchGA, dataFeedTaskId);
         // this variable is used to generate statistics for product
         StringBuilder statistics = new StringBuilder();
         if (fileConfiguration == null) {
@@ -126,7 +127,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
     }
 
     private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList,
-            boolean enableEntityMatch, boolean enableEntityMatchGA) {
+            boolean enableEntityMatch, boolean enableEntityMatchGA, String dataFeedTaskId) {
         switch (entity) {
         case Account:
             AccountFileValidationConfiguration accountConfig = new AccountFileValidationConfiguration();
@@ -148,6 +149,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             productConfig.setEntity(entity);
             productConfig.setPathList(pathList);
             productConfig.setEnableEntityMatchGA(enableEntityMatchGA);
+            productConfig.setDataFeedTaskId(configuration.getDataFeedTaskId());
             return productConfig;
         default:
             return null;
