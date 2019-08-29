@@ -317,6 +317,12 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
                 return Arrays.asList(EntityType.Accounts, EntityType.Contacts);
             }
         },
+        Website {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Arrays.asList(EntityType.WebVisit, EntityType.WebVisitPathPattern);
+            }
+        },
         Other;
 
         public Collection<EntityType> getEntityTypes() {
