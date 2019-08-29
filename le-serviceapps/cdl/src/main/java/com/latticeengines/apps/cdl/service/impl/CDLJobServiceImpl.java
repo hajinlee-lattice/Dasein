@@ -848,6 +848,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     /**
      * Don't retry if last PA failed due to user error
+     * will update retryCount in table DataFeedExecution
      */
     private boolean retryValidation(String tenantId) {
         try {
