@@ -1,12 +1,10 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,10 +19,8 @@ import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
-import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -249,55 +245,4 @@ public class ProxyResourceServiceImpl implements ProxyResourceService {
         return dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace, entity);
     }
 
-    @Override
-    public ApplicationId restart(String customerSpace, Integer memory, Boolean autoRetry, Boolean skipMigrationTrack) {
-        customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        checkRetry(customerSpace);
-        return processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory, autoRetry,
-                skipMigrationTrack);
-    }
-
-    private void checkRetry(String customerSpace) {
-        DataFeed dataFeed = datafeedService.getOrCreateDataFeed(customerSpace);
-        if (dataFeed == null) {
-            String errorMessage = String.format(
-                    "we can't restart processAnalyze workflow for %s, dataFeed is empty.", customerSpace);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
-        }
-        DataFeedExecution execution;
-        try {
-            execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
-                    DataFeedExecutionJobType.PA);
-        } catch (Exception e) {
-            execution = null;
-        }
-        if (execution == null) {
-            String errorMessage = String.format("we can't restart processAnalyze workflow for %s, dataFeedExecution " +
-                            "is empty."
-                    , customerSpace);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
-        }
-        if (!DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
-            String errorMessage = String.format("we can't restart processAnalyze workflow for %s, last PA isn't fail. "
-                    , customerSpace);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
-        }
-        long currentTime = new Date().getTime();
-        if (execution.getUpdated() == null || (execution.getUpdated().getTime() - (currentTime - retryExpiredTime * 1000) < 0)) {
-            String errorMessage = String.format("we can't restart processAnalyze workflow for %s, last PA has been " +
-                            "more than %d second. "
-                    , customerSpace, retryExpiredTime);
-            log.info(errorMessage);
-            throw new RuntimeException(errorMessage);
-        }
-    }
-
-    @Override
-    public ApplicationId processAnalyze(ProcessAnalyzeRequest request) {
-        return processAnalyzeWorkflowSubmitter.submit(MultiTenantContext.getCustomerSpace().toString(),
-                request == null ? new ProcessAnalyzeRequest() : request, new WorkflowPidWrapper(-1L));
-    }
 }

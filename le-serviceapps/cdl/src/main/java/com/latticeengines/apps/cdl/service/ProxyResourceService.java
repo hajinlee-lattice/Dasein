@@ -2,10 +2,8 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
@@ -75,8 +73,4 @@ public interface ProxyResourceService {
     DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType);
 
     List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity);
-
-    ApplicationId restart(String customerSpace, Integer memory, Boolean autoRetry, Boolean skipMigrationTrack);
-
-    ApplicationId processAnalyze(ProcessAnalyzeRequest request);
 }
