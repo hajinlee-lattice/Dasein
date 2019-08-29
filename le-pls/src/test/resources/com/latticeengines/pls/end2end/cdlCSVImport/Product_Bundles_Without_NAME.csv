@@ -1,0 +1,32 @@
+ProductId,ProductBundle,Description
+21807495,CMT4: Autosampler Vials and Closures Update,some product description
+25459994,CMT3: Other Plasticware Update,
+7269258,CMT3: Diagnostics,diagnostic bundles
+91224090,CMT4: Benchtop Centrifugation,CMT4: Benchtop Centrifugation
+84454578,CMT3: Controlled Environments,CMT3: Controlled Environments
+94573850,CMT3: Clinical Supplies,for clinical usage
+39529465,CMT5: Filtered Pipette Specific Tips,
+87190632,CMT3: Glassware,Glassware 1
+25162382,CMT3: Glassware,Glassware 2
+94414582,CMT3: Facility Safety and Maintenance,
+29955173,CMT4: Shaker Accessories,Accessory 1
+375698,CMT4: Shaker Accessories,Accessory 2
+83882166,CMT4: Shaker Accessories,Accessory 3
+38032937,CMT4: Solution[s] for Chemical Testing,
+99811243,CMT4: Microbiology Apparatus,Apparatus 1
+69890948,CMT4: Microbiology Apparatus,
+23001922,CMT4: Microbiology Apparatus,
+83226399,CMT4: Microbiology Apparatus,Apparatus 4
+87386411,CMT4: Round Plastic Narrow Mouth Bottles,CMT4: Round Plastic Narrow Mouth Bottles
+13347029,CMT4: Acetonitrile,
+94573850,CMT3: Clinical Supplies,for clinical usage
+25459994,CMT3: Other Plasticware Update,
+25162382,CMT3: Glassware,Glassware 2
+91224090,CMT3: Facility Safety and Maintenance,
+39529465,CMT4: Solution[s] for Chemical Testing,
+21807495,CMT4: Autosampler Vials and Closures Update,should trigger a warning message
+99811243,CMT4: Microbiology Apparatus,should trigger a warning message
+23001922,CMT4: Microbiology Apparatus,should trigger a warning message
+87386411,CMT4: Round Plastic Narrow Mouth Bottles,should trigger a warning message
+83882167,CMT4: Shaker Accessories,should trigger a warning message
+87234567,CMT4: Round Plastic Narrow Mouth Bottles,should trigger a warning message

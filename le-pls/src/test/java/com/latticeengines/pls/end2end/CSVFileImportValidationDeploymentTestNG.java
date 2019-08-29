@@ -3,10 +3,13 @@ package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -19,7 +22,11 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 
@@ -31,6 +38,8 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
     private static final String CONTACT_SOURCE_FILE = "Contact_Insufficient_Info.csv";
 
     private static final String PRODUCT_HIERARCHY_SOURCE_FILE = "Product_Without_Family_File.csv";
+
+    private static final String PRODUCT_BUNDLE_WITHOUT_NAME = "Product_Bundles_Without_NAME.csv";
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
@@ -76,7 +85,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyFailed(productFile, ENTITY_PRODUCT);
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
-        Collections.sort(reports, (one, two) -> one.getCreated().compareTo(two.getCreated()));
+        Collections.sort(reports, Comparator.comparing(Report::getCreated));
         Assert.assertEquals(reports.size(), 3);
         Report accountReport = reports.get(0);
         Report contactReport = reports.get(1);
@@ -86,5 +95,32 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyReport(productReport, 0L, 2L, 0L);
     }
 
+    @Test(groups = "deployment")
+    public void testProductNameMissing() {
+        SourceFile sourceFile = uploadSourceFile(PRODUCT_SOURCE_FILE, ENTITY_PRODUCT);
+        startCDLImport(sourceFile, ENTITY_PRODUCT);
+        // re-import the file without product name
+        sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_PRODUCT), ENTITY_PRODUCT, PRODUCT_BUNDLE_WITHOUT_NAME,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + PRODUCT_BUNDLE_WITHOUT_NAME));
+
+        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_PRODUCT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_PRODUCT, SOURCE, feedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_PRODUCT, SOURCE,
+                feedType);
+        sourceFile = sourceFileService.findByName(sourceFile.getName());
+        ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
+                sourceFile.getName(), SOURCE, ENTITY_PRODUCT, getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_PRODUCT));
+
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        Assert.assertEquals(completedStatus, JobStatus.FAILED);
+    }
 
 }

@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 
-import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
 public class AttributeBuilder {
@@ -137,11 +136,6 @@ public class AttributeBuilder {
     @SuppressWarnings("unused")
     public AttributeBuilder withValidator(String otherField) {
         attribute.addValidator(new RequiredIfOtherFieldIsEmpty(otherField));
-        return this;
-    }
-
-    public AttributeBuilder failImportValidator() {
-        attribute.addValidator(new FailImportIfFieldIsEmpty());
         return this;
     }
 

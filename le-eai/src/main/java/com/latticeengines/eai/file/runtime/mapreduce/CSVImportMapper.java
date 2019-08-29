@@ -61,7 +61,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
-import com.latticeengines.domain.exposed.exception.CriticalImportException;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
@@ -70,7 +69,6 @@ import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.validators.FailImportIfFieldIsEmpty;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
@@ -117,8 +115,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private String avroFileName;
 
     private String id;
-
-    private boolean failMapper = false;
 
     private GenericRecord avroRecord;
 
@@ -200,10 +196,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 while (true) {
                     // capture IO exception produced during dealing with line
                     try {
-                        if (failMapper) {
-                            throw new CriticalImportException(
-                                    "There's critical exception in import, will fail the job!");
-                        }
                         beforeEachRecord();
                         GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
                         if (errorMap.size() == 0 && duplicateMap.size() == 0) {
@@ -229,8 +221,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         break;
                     }
                 }
-            } catch (CriticalImportException critical) {
-                throw critical;
             } catch (Exception e) {
                 LOG.warn(e.getMessage(), e);
             }
@@ -328,10 +318,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                     }
                     avroRecord.put(attr.getName(), avroFieldValue);
-                } catch(CriticalImportException e) {
-                    LOG.error(String.format("Import will fail because of critical exception %s", e.getMessage()));
-                    errorMap.put(attr.getDisplayName(), e.getMessage());
-                    failMapper = true;
                 } catch (LedpException e) {
                     // Comment out warnings because log files are too large.
                     //LOG.warn(e.getMessage());
@@ -349,10 +335,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             } else {
                 try {
                     validateAttribute(csvRecord, attr, csvColumnName);
-                } catch (CriticalImportException e) {
-                    LOG.error(String.format("Import will fail because of critical exception %s", e.getMessage()));
-                    errorMap.put(attr.getDisplayName(), e.getMessage());
-                    failMapper = true;
                 } catch (Exception e) {
                     LOG.warn(e.getMessage());
                     errorMap.put(attr.getDisplayName(), e.getMessage());
@@ -385,10 +367,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     } catch (Exception e) {
                         missingRequiredColValue = true;
                         throw new RuntimeException(e.getMessage());
-                    }
-                } else if (validatorWrapper.getType().equals(FailImportIfFieldIsEmpty.class)) {
-                    if (!validatorWrapper.getValidator().validate(attrKey, csvRecord.toMap(), table)) {
-                        throw new CriticalImportException(String.format("Field %s is empty from import file!", attrKey));
                     }
                 }
             }
