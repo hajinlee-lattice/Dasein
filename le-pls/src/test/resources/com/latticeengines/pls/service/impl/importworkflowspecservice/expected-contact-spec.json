@@ -1,0 +1,23 @@
+{
+    "systemType": "Test",
+    "systemObject": "Contacts",
+    "fieldDefinitionsRecordsMap": {
+        "Unique ID": [
+            {
+                "fieldName": "CustomerContactId",
+                "fieldType": "TEXT",
+                "screenName": "Contact ID",
+                "matchingColumnNames": [
+                    "ID",
+                    "CONTACT",
+                    "CONTACT_ID"
+                ],
+                "required": false,
+                "logicalDataType": "Id",
+                "fundamentalType": "ALPHA",
+                "approvedUsage": [ "None" ]
+            }
+        ],
+        "Match IDs": []
+    }
+}
