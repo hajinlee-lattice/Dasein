@@ -82,18 +82,28 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     @Qualifier(value = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.host}")
     private String dbHost;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.port}")
     private int dbPort;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.db}")
     private String db;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.user}")
     private String dbUser;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.password.encrypted}")
     private String dbPassword;
 
@@ -230,6 +240,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         return count;
     }
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     protected SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
@@ -241,6 +253,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
                 .setSync(false).build();
     }
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String splitColumn,
             String whereClause) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();

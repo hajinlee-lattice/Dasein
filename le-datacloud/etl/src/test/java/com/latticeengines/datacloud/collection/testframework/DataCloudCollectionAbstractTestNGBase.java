@@ -22,18 +22,28 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
     @Value("${datacloud.test.env}")
     protected String testEnv;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.host}")
     private String dbHost;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.port}")
     private int dbPort;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.collection.db}")
     private String db;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.user}")
     private String dbUser;
 
+    // DataCloud CollectionDB is shutdown
+    @Deprecated
     @Value("${datacloud.password.encrypted}")
     private String dbPassword;
 
@@ -49,14 +59,20 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
+    // PropData CollectionDB is shutdown
+    @Deprecated
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
 
+    // PropData BulkDB is shutdown
+    @Deprecated
     @Autowired
     @Qualifier(value = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
 
+    // PropData CollectionDB is shutdown
+    @Deprecated
     protected void uploadAvroToCollectionDB(String avroDir, String destTable) {
         truncateJdbcTableIfExists(destTable);
 
@@ -65,12 +81,16 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
         // sqoopProxy.exportDataSync(destTable, avroDir, creds, assignedQueue, customer + "-upload-" + destTable, numMappers, null);
     }
 
+    // PropData CollectionDB is shutdown
+    @Deprecated
     @SuppressWarnings("unused")
     private void dropJdbcTableIfExists(String tableName) {
         jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + tableName + "') AND type in (N'U')) DROP TABLE " + tableName);
     }
 
+    // PropData CollectionDB is shutdown
+    @Deprecated
     private void truncateJdbcTableIfExists(String tableName) {
         jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);

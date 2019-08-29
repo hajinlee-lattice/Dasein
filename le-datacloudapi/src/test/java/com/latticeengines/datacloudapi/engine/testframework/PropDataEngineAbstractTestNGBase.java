@@ -24,21 +24,6 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
     @Value("${datacloud.test.env}")
     protected String testEnv;
 
-    @Value("${datacloud.collection.host}")
-    private String dbHost;
-
-    @Value("${datacloud.collection.port}")
-    private int dbPort;
-
-    @Value("${datacloud.collection.db}")
-    private String db;
-
-    @Value("${datacloud.user}")
-    private String dbUser;
-
-    @Value("${datacloud.password.encrypted}")
-    private String dbPassword;
-
     @Value("${datacloud.collection.sqoop.mapper.number}")
     private int numMappers;
 
@@ -51,10 +36,14 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
+    // PropData CollectionDB is shutdown
+    @Deprecated
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
 
+    // PropData BulkDB is shutdown
+    @Deprecated
     @Autowired
     @Qualifier(value = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;

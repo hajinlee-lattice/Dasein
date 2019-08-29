@@ -51,21 +51,6 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
     @Value("${datacloud.test.env}")
     protected String testEnv;
 
-    @Value("${datacloud.collection.host}")
-    private String dbHost;
-
-    @Value("${datacloud.collection.port}")
-    private int dbPort;
-
-    @Value("${datacloud.collection.db}")
-    private String db;
-
-    @Value("${datacloud.user}")
-    private String dbUser;
-
-    @Value("${datacloud.password.encrypted}")
-    private String dbPassword;
-
     @Value("${datacloud.collection.sqoop.mapper.number:4}")
     private int numMappers;
 

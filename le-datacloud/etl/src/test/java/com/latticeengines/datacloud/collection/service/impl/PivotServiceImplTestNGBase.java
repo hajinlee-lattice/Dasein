@@ -22,6 +22,8 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
+//DataCloud SQL Servers are shutdown. Disable related tests.
+@Deprecated
 public abstract class PivotServiceImplTestNGBase extends DataCloudCollectionFunctionalTestNGBase {
 
     PivotService pivotService;
@@ -39,7 +41,7 @@ public abstract class PivotServiceImplTestNGBase extends DataCloudCollectionFunc
 
     abstract Integer getExpectedRows();
 
-    @BeforeMethod(groups = "collection")
+    @BeforeMethod(groups = "collection", enabled = false)
     public void setUp() throws Exception {
         source = getSource();
         prepareCleanPod(source);
@@ -48,11 +50,11 @@ public abstract class PivotServiceImplTestNGBase extends DataCloudCollectionFunc
         baseSource = source.getBaseSources()[0];
     }
 
-    @AfterMethod(groups = "collection")
+    @AfterMethod(groups = "collection", enabled = false)
     public void tearDown() throws Exception {
     }
 
-    @Test(groups = "collection")
+    @Test(groups = "collection", enabled = false)
     public void testWholeProgress() {
         uploadBaseAvro();
 
