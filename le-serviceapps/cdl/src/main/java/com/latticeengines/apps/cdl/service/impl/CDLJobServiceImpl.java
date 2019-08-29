@@ -419,7 +419,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String tenantId : canRunRetryJobSet) {
                 try {
-                    if (!dryRun && canRetry(tenantId)) {
+                    if (!dryRun && retryValidation(tenantId)) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
                         logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
                         if (retryAppId != null) {
@@ -846,24 +846,24 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    private boolean canRetry(String tenantId) {
-        Job job;
-        DataFeedExecution execution;
+    /**
+     * Don't retry if last PA failed due to user error
+     */
+    private boolean retryValidation(String tenantId) {
         try {
-            execution = getLastFailedPAExecution(tenantId);
-            job = getFailedPAJob(execution, tenantId);
+            DataFeedExecution execution = getLastFailedPAExecution(tenantId);
+            Job job = getFailedPAJob(execution, tenantId);
+            if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
+                execution.setRetryCount(execution.getRetryCount() + 1);
+                dataFeedExecutionEntityMgr.updateRetryCount(execution);
+                log.warn("due to user error, tenant {} cannot be retry.", tenantId);
+                return false;
+            }
+            return true;
         } catch (Exception e) {
             log.warn("cannot retry this tenant {}, error: {}", tenantId, e);
             return false;
         }
-
-        if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
-            execution.setRetryCount(execution.getRetryCount() + 1);
-            dataFeedExecutionEntityMgr.updateRetryCount(execution);
-            log.warn("due to user error, tenant {} cannot be retry.", tenantId);
-            return false;
-        }
-        return true;
     }
 
     private DataFeedExecution getLastFailedPAExecution(String tenantId) {
