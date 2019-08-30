@@ -289,7 +289,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                     new String[] { "No destination system selected for the channel for play: " + play.getName() });
         }
 
-        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM
+        if (channel.getLookupIdMap().getExternalSystemName() == CDLExternalSystemName.Salesforce
                 && ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountsWithoutLookupId()
                 && StringUtils.isBlank(channel.getLookupIdMap().getAccountId())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {

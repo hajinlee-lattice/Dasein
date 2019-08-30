@@ -66,6 +66,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
@@ -350,7 +351,38 @@ public class TestPlayCreationHelper {
         playLaunch.setAudienceId(testPlayChannelConfig.getAudienceId());
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
+        playLaunch.setChannelConfig(createChannelConfig(testPlayChannelConfig));
         return playLaunch;
+    }
+
+    private ChannelConfig createChannelConfig(TestPlayChannelConfig testPlayChannelConfig) {
+        ChannelConfig config;
+        switch (testPlayChannelConfig.getDestinationSystemName()) {
+        case Salesforce:
+            config = new SalesforceChannelConfig();
+            break;
+        case Marketo:
+            config = new MarketoChannelConfig();
+            break;
+        case AWS_S3:
+            config = new S3ChannelConfig();
+            break;
+        case Eloqua:
+            config = new EloquaChannelConfig();
+            break;
+        case Facebook:
+            config = new FacebookChannelConfig();
+            ((FacebookChannelConfig) config).setAudienceType(testPlayChannelConfig.getAudienceType());
+            break;
+        case LinkedIn:
+            config = new LinkedInChannelConfig();
+            ((LinkedInChannelConfig) config).setAudienceType(testPlayChannelConfig.getAudienceType());
+            break;
+        default:
+            config = new SalesforceChannelConfig();
+            break;
+        }
+        return config;
     }
 
     private void assertPlayLaunch(PlayLaunch playLaunch) {

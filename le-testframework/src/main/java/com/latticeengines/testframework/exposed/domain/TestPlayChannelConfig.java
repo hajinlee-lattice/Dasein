@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 
 public class TestPlayChannelConfig {
 
@@ -20,6 +21,8 @@ public class TestPlayChannelConfig {
     private Long topNCount;
 
     private String audienceId;
+
+    private AudienceType audienceType;
 
     private String trayAuthenticationId;
 
@@ -66,6 +69,11 @@ public class TestPlayChannelConfig {
 
         public TestPlayChannelConfig.Builder audienceId(String audienceId) {
             testPlayChannelSetupConfig.audienceId = audienceId;
+            return this;
+        }
+
+        public TestPlayChannelConfig.Builder audienceType(AudienceType audienceType) {
+            testPlayChannelSetupConfig.audienceType = audienceType;
             return this;
         }
 
@@ -136,6 +144,14 @@ public class TestPlayChannelConfig {
 
     public void setAudienceId(String audienceId) {
         this.audienceId = audienceId;
+    }
+
+    public AudienceType getAudienceType() {
+        return audienceType;
+    }
+
+    public void setAudienceType(AudienceType audienceType) {
+        this.audienceType = audienceType;
     }
 
     public String getTrayAuthenticationId() {
