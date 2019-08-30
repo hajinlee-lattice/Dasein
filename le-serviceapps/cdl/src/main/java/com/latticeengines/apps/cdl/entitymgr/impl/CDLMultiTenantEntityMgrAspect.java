@@ -110,6 +110,9 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @SuppressWarnings({"rawtypes", "deprecation"})
     private void enableSoftDeleteFilter(JoinPoint joinPoint, SessionFactory sessionFactory,
                                         Collection<EntityManager> entityManagers) {
+        if (((BaseEntityMgr) joinPoint.getTarget()).getDao() == null) {
+            return;
+        }
         Class entityClass = ((AbstractBaseDaoImpl) ((BaseEntityMgr) joinPoint.getTarget()).getDao())
                 .getEntityClassReference();
         if (SoftDeletable.class.isAssignableFrom(entityClass)) {
