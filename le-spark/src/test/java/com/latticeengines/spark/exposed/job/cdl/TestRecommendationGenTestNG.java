@@ -55,6 +55,9 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     private static final int contactPerAccount = 10;
     private String accountData;
     private String contactData;
+    private Object[][] accounts;
+    private Object[][] contacts;
+    private boolean useEntityMatch = true;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -78,7 +81,8 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     protected void verifyOutput(String output) {
         log.info("Contact count is " + output);
         if (inputs.size() == 2) {
-            Assert.assertEquals(output, "100");
+            // there is one account that does not have any mapped contact
+            Assert.assertEquals(output, String.valueOf(contactPerAccount * (accounts.length - 1)));
         } else {
             Assert.assertEquals(output, "0");
         }
@@ -101,27 +105,33 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
         verifyAndReadTarget(target).forEachRemaining(record -> {
             count.incrementAndGet();
-            String contacts = record.get(RecommendationColumnName.CONTACTS.name()).toString();
             if (count.get() == 1) {
-                List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
-                        .collect(Collectors.toList());
-                verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight());
-                ObjectMapper jsonParser = new ObjectMapper();
-                try {
-                    JsonNode jsonObject = jsonParser.readTree(contacts);
-                    Assert.assertTrue(jsonObject.isArray());
-                    List<String> contactCols = new ArrayList<>();
-                    if (jsonObject.size() > 0) {
-                        jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
-                        verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight());
+                log.info(record.toString());
+            }
+            Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
+            if (contactObject != null) {
+                String contacts = contactObject.toString();
+                if (count.get() == 1) {
+                    List<String> accountCols = record.getSchema().getFields().stream().map(field -> field.name())
+                            .collect(Collectors.toList());
+                    verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight());
+                    ObjectMapper jsonParser = new ObjectMapper();
+                    try {
+                        JsonNode jsonObject = jsonParser.readTree(contacts);
+                        Assert.assertTrue(jsonObject.isArray());
+                        List<String> contactCols = new ArrayList<>();
+                        if (jsonObject.size() > 0) {
+                            jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
+                            verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight());
+                        }
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
             }
         });
-        Assert.assertEquals(count.get(), 10);
+        Assert.assertEquals(count.get(), accounts.length);
         return true;
     }
 
@@ -148,6 +158,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     protected void uploadInputAvro() {
         List<Pair<String, Class<?>>> accountFields = Arrays.asList( //
                 Pair.of(InterfaceName.AccountId.name(), String.class), //
+                Pair.of(InterfaceName.CustomerAccountId.name(), String.class), //
                 Pair.of(destinationAccountId, String.class), //
                 Pair.of(InterfaceName.CompanyName.name(), String.class), //
                 Pair.of(InterfaceName.LDC_Name.name(), String.class), //
@@ -157,20 +168,26 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.Website.name(), String.class), //
                 Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
-        Object[][] accounts = new Object[][] { //
-                { "0L", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000",
+        accounts = new Object[][] { //
+                { "0L", "0000", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000",
                         "www.lattice-engines.com", "01/01/2019" }, //
-                { "1L", "destinationAccountId", "DnB", "DnB", 97, "B", "2000", "www.dnb.com", "01/01/2019" }, //
-                { "2L", "destinationAccountId", "Google", "Google", 98, "C", "3000", "www.google.com", "01/01/2019" }, //
-                { "3L", "destinationAccountId", "Facebook", "FB", 93, "E", "1000000", "www.facebook.com",
+                { "1L", "0001", "destinationAccountId", "DnB", "DnB", 97, "B", "2000", "www.dnb.com", "01/01/2019" }, //
+                { "2L", "0002", "destinationAccountId", "Google", "Google", 98, "C", "3000", "www.google.com",
                         "01/01/2019" }, //
-                { "4L", "destinationAccountId", "Apple", "Apple", null, null, null, "www.apple.com", "01/01/2019" }, //
-                { "5L", "destinationAccountId", "SalesForce", "SalesForce", null, "A", null, "www.salesforce.com",
+                { "3L", "0003", "destinationAccountId", "Facebook", "FB", 93, "E", "1000000", "www.facebook.com",
                         "01/01/2019" }, //
-                { "6L", "destinationAccountId", "Adobe", "Adobe", 98, null, "1000", "www.adobe.com", "01/01/2019" }, //
-                { "7L", "destinationAccountId", "Eloqua", "Eloqua", 40, "F", "100", "www.eloqua.com", "01/01/2019" }, //
-                { "8L", "destinationAccountId", "Dell", "Dell", 8, "F", "10", "www.dell.com", "01/01/2019" }, //
-                { "9L", "destinationAccountId", "HP", "HP", 38, "E", "500", "www.hp.com", "01/01/2019" }, //
+                { "4L", "0004", "destinationAccountId", "Apple", "Apple", null, null, null, "www.apple.com",
+                        "01/01/2019" }, //
+                { "5L", "0005", "destinationAccountId", "SalesForce", "SalesForce", null, "A", null,
+                        "www.salesforce.com", "01/01/2019" }, //
+                { "6L", "0006", "destinationAccountId", "Adobe", "Adobe", 98, null, "1000", "www.adobe.com",
+                        "01/01/2019" }, //
+                { "7L", "0007", "destinationAccountId", "Eloqua", "Eloqua", 40, "F", "100", "www.eloqua.com",
+                        "01/01/2019" }, //
+                { "8L", "0008", "destinationAccountId", "Dell", "Dell", 8, "F", "10", "www.dell.com", "01/01/2019" }, //
+                { "9L", "0009", "destinationAccountId", "HP", "HP", 38, "E", "500", "www.hp.com", "01/01/2019" }, //
+                // the following account has no matched contacts
+                { "100L", "0100", "destinationAccountId", "Fake Co", "Fake Co", 3, "F", "5", "", "" } //
         };
         accountData = uploadHdfsDataUnit(accounts, accountFields);
 
@@ -179,6 +196,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         List<Pair<String, Class<?>>> contactfields = Arrays.asList( //
                 Pair.of(InterfaceName.AccountId.name(), String.class), //
                 Pair.of(InterfaceName.ContactId.name(), String.class), //
+                Pair.of(InterfaceName.CustomerContactId.name(), String.class), //
                 Pair.of(InterfaceName.CompanyName.name(), String.class), //
                 Pair.of(InterfaceName.Email.name(), String.class), //
                 Pair.of(InterfaceName.ContactName.name(), String.class), //
@@ -193,27 +211,29 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 Pair.of(InterfaceName.CreatedDate.name(), String.class) //
         );
 
-        Object[][] contacts = new Object[accounts.length * contactPerAccount][contactfields.size()];
+        // the last contact does not have corresponding account
+        contacts = new Object[accounts.length * contactPerAccount][contactfields.size()];
         for (int i = 0; i < accounts.length; i++) {
             for (int j = 0; j < contactPerAccount; j++) {
-                contacts[accounts.length * i + j][0] = String.valueOf(i) + "L";
-                contacts[accounts.length * i + j][1] = String.valueOf(accounts.length * i + j);
-                contacts[accounts.length * i + j][2] = "Kind Inc.";
-                contacts[accounts.length * i + j][3] = "michael@kind.com";
-                contacts[accounts.length * i + j][4] = "Michael Jackson";
-                contacts[accounts.length * i + j][5] = "SMO";
-                contacts[accounts.length * i + j][6] = "CA";
-                contacts[accounts.length * i + j][7] = "US";
-                contacts[accounts.length * i + j][8] = "94404";
-                contacts[accounts.length * i + j][9] = "650-898-3928";
-                contacts[accounts.length * i + j][10] = "CEO";
-                contacts[accounts.length * i + j][11] = "Michael";
-                contacts[accounts.length * i + j][12] = "Jackson";
-                contacts[accounts.length * i + j][13] = "08/08/2019";
+                contacts[contactPerAccount * i + j][0] = String.valueOf(i) + "L";
+                contacts[contactPerAccount * i + j][1] = String.valueOf(contactPerAccount * i + j);
+                contacts[contactPerAccount * i + j][2] = String.valueOf(accounts.length * i + j) + "L";
+                contacts[contactPerAccount * i + j][3] = "Kind Inc.";
+                contacts[contactPerAccount * i + j][4] = "michael@kind.com";
+                contacts[contactPerAccount * i + j][5] = "Michael Jackson";
+                contacts[contactPerAccount * i + j][6] = "SMO";
+                contacts[contactPerAccount * i + j][7] = "CA";
+                contacts[contactPerAccount * i + j][8] = "US";
+                contacts[contactPerAccount * i + j][9] = "94404";
+                contacts[contactPerAccount * i + j][10] = "650-898-3928";
+                contacts[contactPerAccount * i + j][11] = "CEO";
+                contacts[contactPerAccount * i + j][12] = "Michael";
+                contacts[contactPerAccount * i + j][13] = "Jackson";
+                contacts[contactPerAccount * i + j][14] = "08/08/2019";
             }
         }
+
         contactData = uploadHdfsDataUnit(contacts, contactfields);
-        // inputs = Arrays.asList(accountData, contactData);
     }
 
     private void overwriteInputs(boolean accountDataOnly) {
@@ -536,9 +556,12 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     }
 
     private List<String> generateContactColsForS3() {
-        return ImmutableList.<String> builder().addAll(standardRecommendationContactColumns())
-                .add(InterfaceName.FirstName.name()).add(InterfaceName.LastName.name())
-                .add(InterfaceName.CreatedDate.name()).build();
+        return ImmutableList.<String> builder().add(InterfaceName.Email.name())
+                .add(InterfaceName.Address_Street_1.name()).add(InterfaceName.PhoneNumber.name())
+                .add(InterfaceName.State.name()).add(InterfaceName.PostalCode.name()).add(InterfaceName.Country.name())
+                .add(InterfaceName.SalesforceContactID.name()).add(InterfaceName.City.name())
+                .add(InterfaceName.ContactId.name()).add(InterfaceName.Name.name()).add(InterfaceName.FirstName.name())
+                .add(InterfaceName.LastName.name()).build();
     }
 
     // ---- end of S3 Account and Contact columns---
@@ -631,6 +654,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 .launchTimestampMillis(launchTime) //
                 .ratingId(ratingId) //
                 .publishedIteration(aiModel) //
+                .useEntityMatch(useEntityMatch) //
                 .build();
         return sparkContext;
     }

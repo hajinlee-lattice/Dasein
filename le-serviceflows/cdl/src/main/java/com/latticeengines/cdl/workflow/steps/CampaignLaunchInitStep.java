@@ -213,6 +213,8 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                         processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
                 ;
                 playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
+                playLaunchSparkContext.setUseEntityMatch(batonService.isEntityMatchEnabled(customerSpace));
+
                 return executeSparkJob(CreateRecommendationsJob.class,
                         generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));
             } finally {

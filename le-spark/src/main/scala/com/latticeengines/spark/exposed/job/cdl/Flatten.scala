@@ -14,7 +14,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import java.io.StringWriter;
 
-class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDefinedAggregateFunction {
+class Flatten(schema: StructType, configuredColumns: Seq[String], entityMatch: Boolean) extends UserDefinedAggregateFunction {
 
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = schema
@@ -30,11 +30,13 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
   
   var cols: Seq[String] = Seq.empty[String]
   var useConfiguredCols: Boolean = false
+  var useEntityMatch: Boolean = false
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
     buffer(0) = IndexedSeq[Map[String, String]]()
     cols = configuredColumns
+    useEntityMatch = entityMatch
     useConfiguredCols = if (cols.isEmpty) false else true
   }
 
@@ -43,7 +45,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
     var ele = Map.empty[String, String]
     if (useConfiguredCols) {
         for (col <- cols) {
-            ele = ele + (col -> getInputValue(input, col))
+            ele = ele + (col -> getInputValue(input, processColName(col)))
         }
     } else {
       ele = Map(PlaymakerConstants.Email -> getInputValue(input, InterfaceName.Email.name()), //
@@ -54,11 +56,24 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
       			  PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
       			  PlaymakerConstants.SfdcContactID -> "", //
       			  PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
-      			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
+      			  PlaymakerConstants.ContactID -> processCustomerContactId(input), //
       			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()))
     } 
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
     buffer(0) = cur :+ ele  
+  }
+  
+  private def processCustomerContactId(input: Row): String = {
+    return if (useEntityMatch) getInputValue(input, InterfaceName.CustomerContactId.name()) 
+      			      else getInputValue(input, InterfaceName.ContactId.name())
+  }
+  
+  private def processColName(col: String): String = {
+    if (InterfaceName.ContactId.name() == col && useEntityMatch) {
+      return InterfaceName.CustomerContactId.name()
+    } else {
+      return col
+    }
   }
   
   private def getInputValue(input: Row, key: String): String = {

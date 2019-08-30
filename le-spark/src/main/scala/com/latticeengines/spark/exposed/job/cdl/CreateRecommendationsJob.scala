@@ -22,6 +22,7 @@ object CreateRecommendationsJob {
   case class Recommendation(PID: Option[Long], //
                             EXTERNAL_ID: String, //
                             AccountId: String, //
+                            CustomerAccountId: String, //
                             LE_ACCOUNT_EXTERNAL_ID: String, //
                             PLAY_ID: String, //
                             LAUNCH_ID: String, //
@@ -52,8 +53,10 @@ object CreateRecommendationsJob {
     val playId: String = playLaunchContext.getPlayName
     val playLaunchId: String = playLaunchContext.getPlayLaunchId
     val tenantId: Long = playLaunchContext.getTenantPid
+    val useEntityMatch: Boolean = playLaunchContext.getUseEntityMatch
     val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
-    val externalAccountId: String = accountId
+    val customerAccountId: String = if (useEntityMatch) checkAndGet(account, InterfaceName.CustomerAccountId.name) else accountId
+    val externalAccountId: String = customerAccountId
     val uuid: String = UUID.randomUUID().toString
     val description: String = playLaunchContext.getPlayDescription
     val ratingModelId: String = playLaunchContext.getModelId
@@ -117,6 +120,7 @@ object CreateRecommendationsJob {
     Recommendation(None, // PID
       uuid, // EXTERNAL_ID
       accountId, // ACCOUNT_ID
+      customerAccountId, // CUSTOMER_ACCOUNT_ID
       externalAccountId, // LE_ACCOUNT_EXTERNAL_ID
       playId, // PLAY_ID
       playLaunchId, // LAUNCH_ID
@@ -206,6 +210,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       .toDF("PID", //
       "EXTERNAL_ID", //
       "AccountId", //
+      "CUSTOMER_ACCOUNT_ID", //
       "LE_ACCOUNT_EXTERNAL_ID", //
       "PLAY_ID", //
       "LAUNCH_ID", //
@@ -239,7 +244,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
-      val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey)
+      val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
         
       // join
       val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey :: Nil, "left")
@@ -250,26 +255,32 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       val contactCount = recommendations.agg( //
     	  sum("CONTACT_NUM")
       ).first.get(0)
+      recommendations.select(joinKey, "CONTACT_NUM").show()
       finalRecommendations = recommendations//
         .withColumnRenamed(joinKey,"ACCOUNT_ID") //
         .drop("CONTACT_NUM")
-      finalOutput = contactCount.toString
+      
+      if (contactCount != null) {
+        finalOutput = contactCount.toString
+      } else {
+        finalOutput = "0"
+      }
     } else {
       // join
       val recommendations = limitedAccountTable.withColumn("CONTACTS", lit("[]").cast(StringType))
-      finalRecommendations = recommendations.withColumnRenamed(joinKey,"ACCOUNT_ID")
+      finalRecommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
       finalOutput = "0"
     }
+        
+    lattice.outputStr = finalOutput
     
-    // finish
-    val orderedRec = finalRecommendations.select("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID",
+    // 1. drop the internal account id (ACCOUNT_ID) and rename "CUSTOMER_ACCOUNT_ID" to "ACCOUNT_ID"
+    // 2. make sure the order is the same as Recommendation table
+    val orderedRec = finalRecommendations.drop("ACCOUNT_ID").withColumnRenamed("CUSTOMER_ACCOUNT_ID", "ACCOUNT_ID").select("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID",
         "DESCRIPTION", "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID",
         "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "CONTACTS",
         "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
         
-    lattice.outputStr = finalOutput
-    // generate dataframe for csv file exporter
-    
     // No user configured field mapping is provided. Only generate Recommendation DF
     if (accountColsRecIncluded.isEmpty //
         && accountColsRecNotIncludedStd.isEmpty //
@@ -277,17 +288,18 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         && contactCols.isEmpty) {
       lattice.output = List(orderedRec, orderedRec)
     } else {
-      val userConfiguredDataFrame = generateUserConfiguredDataFrame(orderedRec, accountTable, playLaunchContext, joinKey)
+      // generate dataframe for csv file exporter
+      val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendations, accountTable, playLaunchContext, joinKey)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
     }
   }
   
-  private def generateUserConfiguredDataFrame(orderedRec: DataFrame, accountTable: DataFrame, playLaunchContext: PlayLaunchSparkContext, joinKey: String): DataFrame = {
+  private def generateUserConfiguredDataFrame(finalRecommendations: DataFrame, accountTable: DataFrame, playLaunchContext: PlayLaunchSparkContext, joinKey: String): DataFrame = {
     val accountColsRecIncluded: Seq[String] = if (playLaunchContext.getAccountColsRecIncluded != null ) playLaunchContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
     val accountColsRecNotIncludedStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedStd != null) playLaunchContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
     val accountColsRecNotIncludedNonStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedNonStd != null) playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
     val contactCols: Seq[String] = if (playLaunchContext.getContactCols != null) playLaunchContext.getContactCols.asScala else Seq.empty[String]
-    
+    println("Four categories of column metadata are as follows:")
     println(accountColsRecIncluded)
     println(accountColsRecNotIncludedStd)
     println(accountColsRecNotIncludedNonStd)     
@@ -300,12 +312,13 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     
     val needContactsColumn = contactCols.nonEmpty
     val containsJoinKey = accountColsRecIncluded.contains(joinKey)
-    val joinKeyCol: Option[String] = if (!containsJoinKey) Some(joinKey) else None
+    // internal accountId and customer accountId always come hand in hand
+    val joinKeyCol: Option[Seq[String]] = if (!containsJoinKey) Some(Seq(joinKey, "CUSTOMER_ACCOUNT_ID")) else Some(Seq("CUSTOMER_ACCOUNT_ID"))
     val contactsCol: Option[String] = if (needContactsColumn) Some(RecommendationColumnName.CONTACTS.name) else None
     var internalAppendedCols: Seq[String] = Seq.empty[String]
     
     if (accountColsRecNotIncludedStd.nonEmpty) {
-      internalAppendedCols = (accountColsRecIncluded ++ joinKeyCol ++ contactsCol).toSeq
+      internalAppendedCols = (accountColsRecIncluded ++ joinKeyCol.toSeq.flatten ++ contactsCol).toSeq
     } else if (accountColsRecIncluded.nonEmpty && accountColsRecNotIncludedStd.isEmpty) {
       internalAppendedCols = (accountColsRecIncluded ++ contactsCol).toSeq
     } else {
@@ -317,7 +330,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     // get the map from Recommendation column names to internal column names for later rename purpose
     val recColsToInternalNameMap = mappedToRecAppendedCols.map{col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}}.toMap
     // select columns from Recommendation Dataframe
-    val selectedRecTable = orderedRec.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
+    val selectedRecTable = finalRecommendations.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
     // translate Recommendation column name to internal column name
     val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
       
@@ -327,7 +340,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       if (containsJoinKey) {
         recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left")
       } else {
-        recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left").drop(joinKey)
+        recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left").drop(joinKey).drop("CUSTOMER_ACCOUNT_ID")
       }
     } else {
       recContainedCombinedWithStd = selectedRecTableTranslated
@@ -354,12 +367,17 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       userConfiguredDataFrame = userConfiguredDataFrame.drop(RecommendationColumnName.CONTACTS.name)
     }
     
+    // 5. Rename "CUSTOMER_ACCOUNT_ID" Id column to AccountId column if present
+    if (userConfiguredDataFrame.columns.contains(joinKey)) {
+      userConfiguredDataFrame = userConfiguredDataFrame.drop(joinKey).withColumnRenamed("CUSTOMER_ACCOUNT_ID", joinKey)
+    }
+    
     return userConfiguredDataFrame
   }
   
-  private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], joinKey: String): DataFrame = {
+  private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], joinKey: String, getUseEntityMatch: Boolean): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, getUseEntityMatch)
       val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //
