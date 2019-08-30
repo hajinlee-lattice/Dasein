@@ -393,6 +393,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                     errorMsgAvroType = "DATE";
+                    // DP-11078 Add Time Zone Validation to Import Workflow
+                    //　timezone is ISO 8601, value should be in T&Z format
+                    checkTimeZoneValidity(fieldCsvValue, attr.getTimezone());
                     Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
                             attr.getTimeFormatString(), attr.getTimezone());
                     if (timestamp < 0) {
@@ -476,6 +479,24 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             return Boolean.FALSE;
         } else {
             throw new IllegalArgumentException(String.format("Cannot parse %s as Boolean!", val));
+        }
+    }
+
+    @VisibleForTesting
+    void checkTimeZoneValidity(String fieldCsvValue, String timeZone) throws IllegalArgumentException{
+        fieldCsvValue = fieldCsvValue.trim().replaceFirst("(\\s{2,})",
+                TimeStampConvertUtils.SYSTEM_DELIMITER);
+        if (StringUtils.isNotBlank(fieldCsvValue) && StringUtils.isNotBlank(timeZone)) {
+            boolean isISO8601 = TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(timeZone);
+            boolean matchTZ = TimeStampConvertUtils.isIso8601TandZFromDateTime(fieldCsvValue);
+            if (isISO8601 && !matchTZ) {
+                // time zone is in ISO-8601, validate its value using T&Z
+                throw new IllegalArgumentException("Time zone should be part of value but is not.");
+            } else if (!isISO8601 && matchTZ){
+                // time zone is not in ISO-8601, validate value not using T&Z
+                throw new IllegalArgumentException(String.format("Time zone set to %s. Value should not contain time " +
+                        "zone setting.", timeZone));
+            }
         }
     }
 

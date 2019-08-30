@@ -34,6 +34,7 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -194,7 +195,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
         long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
         log.info("File path to avros is: " + avroFilePath + "/*.avro");
-        Assert.assertEquals(rowCount, 50);
+        // modify file to match T&Z in 30th data line
+        Assert.assertEquals(rowCount, 49);
 
         // Validate TestDate1
         String fieldName1 = "user_TestDate1";
@@ -235,8 +237,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 "M.d.yy H:m:s", "GMT+8");
         Assert.assertEquals(expected2a, 1514826061000L);
         Assert.assertEquals(records.get(0).get(fieldName2).toString(), Long.toString(expected2a));
-        long expected2b = computeTimestamp("12.31.18 23:59:59", true,
-                "M.d.yy H:m:s", "GMT+8");
+        long expected2b = computeTimestamp("12.31.18 23:59:59", true,"M.d.yy H:m:s", "GMT+8");
         Assert.assertEquals(expected2b, 1546271999000L);
         Assert.assertEquals(records.get(1).get(fieldName2).toString(), Long.toString(expected2b));
         long expected2c = computeTimestamp("5.6.99 12:34:56", true,
@@ -251,7 +252,6 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertEquals(records.get(4).get(fieldName2).toString(), Long.toString(expected2d));
         log.info("Value returned for input 12.12.68 12:12:12 Asia/Shanghai was: "
                 + records.get(4).get(fieldName2).toString());
-
 
         // Validate TestDate3
         String fieldName3 = "user_TestDate3";
@@ -448,13 +448,43 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     }
 
     @Test(groups = "deployment")
-    public void verifyRequiredFieldMissingV2() {
-        List<FieldValidation> validations = getFieldValidation(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
+    public void verifyFieldMappingValidations() {
+        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE_MISSING,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + TRANSACTION_SOURCE_FILE_MISSING));
+
+        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_TRANSACTION);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_TRANSACTION, SOURCE, feedType);
+        boolean dateExist = false;
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            if (fieldMapping.getUserField().equals("Date")) {
+                dateExist = true;
+                // 5/26/2016 12:00:00 AM
+                Assert.assertEquals(fieldMapping.getDateFormatString(), "MM/DD/YYYY");
+                Assert.assertEquals(fieldMapping.getTimeFormatString(), "00:00:00 12H");
+                // set wrong date format and time zone
+                fieldMapping.setDateFormatString("MM-DD-YYYY");
+                fieldMapping.setTimezone(TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+            }
+        }
+        Assert.assertTrue(dateExist);
+        List<FieldValidation> validations = modelingFileMetadataService
+                .validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_TRANSACTION, SOURCE, feedType);;
         Assert.assertNotNull(validations);
         List<FieldValidation> errorValidations = validations.stream()
                 .filter(validation -> ValidationStatus.ERROR.equals(validation.getStatus()))
                 .collect(Collectors.toList());
         Assert.assertNotNull(errorValidations);
+        List<FieldValidation> warningValidations = validations.stream()
+                .filter(validation -> ValidationStatus.WARNING.equals(validation.getStatus()))
+                .collect(Collectors.toList());
+        Assert.assertNotNull(warningValidations);
+        Assert.assertEquals(warningValidations.size(), 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")

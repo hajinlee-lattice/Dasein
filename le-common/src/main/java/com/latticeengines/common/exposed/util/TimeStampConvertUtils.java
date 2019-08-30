@@ -856,4 +856,14 @@ public class TimeStampConvertUtils {
         return strippedDateTime;
     }
 
+    /**
+     *
+     * @param dateTime
+     * judge the date time format is ISO-8601
+     */
+    public static boolean isIso8601TandZFromDateTime(String dateTime) {
+        Matcher dateTimeMatcher = TZ_DATE_TIME.matcher(dateTime);
+        return  dateTimeMatcher.find();
+    }
+
 }
