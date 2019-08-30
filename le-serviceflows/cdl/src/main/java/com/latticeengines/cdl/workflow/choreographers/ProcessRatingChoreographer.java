@@ -197,6 +197,11 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private void initializeIteration(AbstractStep<? extends BaseStepConfiguration> step) {
         if (shouldRebuildAll || shouldRebuildSome) {
             if (!iterationFinished) {
+                if (!step.hasKeyInContext(CURRENT_RATING_ITERATION)) {
+                    iterationFinished = true;
+                    log.info("Rating iteration skipped due to no iteration set.");
+                    return;
+                }
                 iteration = step.getObjectFromContext(CURRENT_RATING_ITERATION, Integer.class);
                 List<RatingModelContainer> containers = step.getListObjectFromContext(ITERATION_RATING_MODELS,
                         RatingModelContainer.class);
