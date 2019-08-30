@@ -78,6 +78,9 @@ public class ChannelConfigProcessor {
         case LinkedIn:
             LinkedInChannelConfig linkedinConfig = (LinkedInChannelConfig) channelConfig;
             return linkedinConfig.getAudienceType() == AudienceType.ACCOUNTS;
+        case Facebook:
+            FacebookChannelConfig fbConfig = (FacebookChannelConfig) channelConfig;
+            return fbConfig.getAudienceType() == AudienceType.ACCOUNTS;
         default:
             return false;
         }

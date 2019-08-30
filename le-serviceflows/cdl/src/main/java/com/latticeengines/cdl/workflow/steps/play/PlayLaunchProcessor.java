@@ -29,6 +29,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -51,6 +52,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -102,6 +104,9 @@ public class PlayLaunchProcessor {
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
+
+    @Autowired
+    private ChannelConfigProcessor channelConfigProcessor;
 
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
@@ -222,7 +227,7 @@ public class PlayLaunchProcessor {
             DataCollection.Version version) {
         long totalAccountsCount = handleBasicConfigurationAndBucketSelection(playLaunchContext, version);
 
-        applyEmailFilterToQueries(playLaunchContext);
+        applyFiltersToQueries(playLaunchContext);
 
         totalAccountsCount = handleLookupIdBasedSuppression(playLaunchContext, totalAccountsCount, version);
 
@@ -340,12 +345,12 @@ public class PlayLaunchProcessor {
         return effectiveAccountCount;
     }
 
-    private void applyEmailFilterToQueries(PlayLaunchContext playLaunchContext) {
+    private void applyFiltersToQueries(PlayLaunchContext playLaunchContext) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
                 launch.getDestinationOrgId(), launch.getDestinationSysType());
         CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
-        if (CDLExternalSystemName.Marketo.equals(destinationSystemName)) {
+        if (channelConfigProcessor.shouldApplyEmailFilter(destinationSystemName, launch.getChannelConfig())) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
                     accountFrontEndQuery.getContactRestriction().getRestriction());
@@ -356,12 +361,30 @@ public class PlayLaunchProcessor {
                     contactFrontEndQuery.getContactRestriction().getRestriction());
             contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForContactQuery));
         }
+
+        if (channelConfigProcessor.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName,
+                launch.getChannelConfig())) {
+            FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
+            Restriction newAccountRestrictionForAccountQuery = applyAccountNameOrWebsiteFilterToAccountRestriction(
+                    accountFrontEndQuery.getAccountRestriction().getRestriction());
+            accountFrontEndQuery.setAccountRestriction(new FrontEndRestriction(newAccountRestrictionForAccountQuery));
+        }
     }
 
     private Restriction applyEmailFilterToContactRestriction(Restriction contactRestriction) {
         Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
                 .isNotNull().build();
         return Restriction.builder().and(contactRestriction, emailFilter).build();
+    }
+
+    private Restriction applyAccountNameOrWebsiteFilterToAccountRestriction(Restriction accountRestriction) {
+        RestrictionBuilder websiteFilter = Restriction.builder()
+                .let(BusinessEntity.Account, InterfaceName.Website.name())
+                .isNotNull();
+        RestrictionBuilder companyNameFilter = Restriction.builder()
+                .let(BusinessEntity.Account, InterfaceName.CompanyName.name()).isNotNull();
+        return Restriction.builder()
+                .and(accountRestriction, Restriction.builder().or(websiteFilter, companyNameFilter).build()).build();
     }
 
     private long fetchAndProcessPage(PlayLaunchContext playLaunchContext, long segmentAccountsCount,
