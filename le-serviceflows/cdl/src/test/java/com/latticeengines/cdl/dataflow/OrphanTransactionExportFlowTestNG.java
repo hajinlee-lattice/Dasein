@@ -1,5 +1,13 @@
 package com.latticeengines.cdl.dataflow;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionCount;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionId;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,13 +35,15 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
     private static final String ACCOUNT_TABLE = "AccountTable";
     private static final String PRODUCT_TABLE = "ProductTable";
     private static final String TRANSACTION_TABLE = "TransactionTable";
+    private static final String TRANSACTION_EM_TABLE = "TransactionEMTable";
     private static final String ACCOUNT_DIR = "/tmp/OrphanTransactionExportFlowTestNG/account/";
     private static final String PRODUCT_DIR = "/tmp/OrphanTransactionExportFlowTestNG/product/";
-    private static final String TRANSACTION_DIR = "/tmp/OrphanTransactionExportFlowTestNG/transaction/";
-    private static final String[] TXN_ATTRS = new String[] { InterfaceName.TransactionId.name(),
-            InterfaceName.AccountId.name(), InterfaceName.ProductId.name(), InterfaceName.TransactionCount.name() };
-    private static final String[] TXN_NOAID_ATTRS = new String[] { InterfaceName.TransactionId.name(),
-            InterfaceName.ProductId.name(), InterfaceName.TransactionCount.name() };
+    private static final String TRANSACTION_DIR = "/tmp/OrphanTransactionExportFlowTestNG/transaction/legacy/";
+    private static final String TRANSACTION_EM_DIR = "/tmp/OrphanTransactionExportFlowTestNG/transaction/em/";
+    private static final String[] TXN_ATTRS = new String[] { //
+            TransactionId.name(), AccountId.name(), ProductId.name(), TransactionCount.name() };
+    private static final String[] TXN_NOAID_ATTRS = new String[] { //
+            TransactionId.name(), ProductId.name(), TransactionCount.name() };
 
     private Object[][] accountData = new Object[][] {
             // "AccountId", "Name"
@@ -63,6 +73,16 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
             { "T18888", "A006", "P0004", 998L } //
     };
 
+    private Object[][] transactionEMData = new Object[][] {
+            // "TransactionId", "AccountId", "CustomerAccountId", "ProductId",
+            // "TransactionCount"
+            { "T00200", "A001", "CA001", "P0002", 200L }, //
+            { "T01234", "A005", "CA005", "P0010", 200L }, //
+            { "T06666", "A010", "CA010", "P0088", 300L }, //
+            { "T08080", "A004", "CA004", "P0003", 150L }, //
+            { "T18888", "A006", "CA006", "P0004", 998L } //
+    };
+
     private Object[][] expectedData = new Object[][] {
             // "TransactionId", "AccountId", "ProductId", "TransactionCount"
             { "T18888", "A006", "P0004", 998L }, //
@@ -88,28 +108,30 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
 
     @BeforeClass(groups = "functional")
     public void setupOrphanTransactionExportFlowTestNG() {
-        uploadAvro(accountData, prepareAccountData(), ACCOUNT_TABLE, ACCOUNT_DIR);
-        uploadAvro(productData, prepareProductData(), PRODUCT_TABLE, PRODUCT_DIR);
-        uploadAvro(transactionData, prepareTxnData(), TRANSACTION_TABLE, TRANSACTION_DIR);
+        uploadAvro(accountData, getAccountSchema(), ACCOUNT_TABLE, ACCOUNT_DIR);
+        uploadAvro(productData, getProductSchema(), PRODUCT_TABLE, PRODUCT_DIR);
+        uploadAvro(transactionData, getTxnSchema(), TRANSACTION_TABLE, TRANSACTION_DIR);
+        uploadAvro(transactionEMData, getTxnEMSchema(), TRANSACTION_EM_TABLE, TRANSACTION_EM_DIR);
     }
 
     @Test(groups = "functional")
     public void testOrphanTransactionExportFlow() {
-        OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionData, null);
+        OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionData, null,
+                false);
         executeDataFlow(parameters);
         verifyResult(expectedData, 3, TXN_ATTRS);
     }
 
     @Test(groups = "functional")
     public void testNullAccountTable() {
-        OrphanTransactionExportParameters parameters = prepareInput(null, productData, transactionData, null);
+        OrphanTransactionExportParameters parameters = prepareInput(null, productData, transactionData, null, false);
         executeDataFlow(parameters);
         verifyResult(expectNullCaseData, 5, TXN_ATTRS);
     }
 
     @Test(groups = "functional")
     public void testNullProductTable() {
-        OrphanTransactionExportParameters parameters = prepareInput(accountData, null, transactionData, null);
+        OrphanTransactionExportParameters parameters = prepareInput(accountData, null, transactionData, null, false);
         executeDataFlow(parameters);
         verifyResult(expectNullCaseData, 5, TXN_ATTRS);
     }
@@ -117,9 +139,17 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
     @Test(groups = "functional")
     public void testOrphanTransactionNoAIDExportFlow() {
         OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionData,
-                new ArrayList<>());
+                new ArrayList<>(), false);
         executeDataFlow(parameters);
         verifyResult(expectedNoAIDData, 3, TXN_NOAID_ATTRS);
+    }
+
+    @Test(groups = "functional")
+    public void testOrphanTransactionEMExportFlow() {
+        OrphanTransactionExportParameters parameters = prepareInput(accountData, productData, transactionEMData, null,
+                true);
+        executeDataFlow(parameters);
+        verifyResult(expectedData, 3, TXN_ATTRS);
     }
 
     @Override
@@ -132,23 +162,30 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
         return ImmutableMap.of(
                 ACCOUNT_TABLE, ACCOUNT_DIR + ACCOUNT_TABLE + ".avro",
                 PRODUCT_TABLE, PRODUCT_DIR + PRODUCT_TABLE + ".avro",
-                TRANSACTION_TABLE, TRANSACTION_DIR + TRANSACTION_TABLE + ".avro");
+                TRANSACTION_TABLE, TRANSACTION_DIR + TRANSACTION_TABLE + ".avro", TRANSACTION_EM_TABLE,
+                TRANSACTION_EM_DIR + TRANSACTION_EM_TABLE + ".avro");
     }
 
     private OrphanTransactionExportParameters prepareInput(Object[][] accountData, Object[][] productData,
-            Object[][] transactionData, List<String> validatedColumns) {
+            Object[][] transactionData, List<String> validatedColumns, boolean entityMatchEnabled) {
         OrphanTransactionExportParameters parameters = new OrphanTransactionExportParameters();
         if (accountData != null) {
-            uploadAvro(accountData, prepareAccountData(), ACCOUNT_TABLE, ACCOUNT_DIR);
+            uploadAvro(accountData, getAccountSchema(), ACCOUNT_TABLE, ACCOUNT_DIR);
             parameters.setAccountTable(ACCOUNT_TABLE);
         }
         if (productData != null){
-            uploadAvro(productData, prepareProductData(), PRODUCT_TABLE, PRODUCT_DIR);
+            uploadAvro(productData, getProductSchema(), PRODUCT_TABLE, PRODUCT_DIR);
             parameters.setProductTable(PRODUCT_TABLE);
         }
 
-        uploadAvro(transactionData, prepareTxnData(), TRANSACTION_TABLE, TRANSACTION_DIR);
-        parameters.setTransactionTable(TRANSACTION_TABLE);
+        if (entityMatchEnabled) {
+            uploadAvro(transactionData, getTxnEMSchema(), TRANSACTION_EM_TABLE, TRANSACTION_EM_DIR);
+            parameters.setTransactionTable(TRANSACTION_EM_TABLE);
+        } else {
+            uploadAvro(transactionData, getTxnSchema(), TRANSACTION_TABLE, TRANSACTION_DIR);
+            parameters.setTransactionTable(TRANSACTION_TABLE);
+        }
+
         if (validatedColumns == null) {
             // Export attributes passed in is only for Account & Contact entity,
             // don't include Transaction attributes
@@ -173,26 +210,38 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
         Assert.assertEquals(rowNum, expectNumOfRows);
     }
 
-    private List<Pair<String, Class<?>>> prepareAccountData() {
+    private List<Pair<String, Class<?>>> getAccountSchema() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of(InterfaceName.AccountId.name(), String.class));
-        columns.add(Pair.of(InterfaceName.Name.name(), String.class));
+        columns.add(Pair.of(AccountId.name(), String.class));
+        columns.add(Pair.of(Name.name(), String.class));
         return columns;
     }
 
-    private List<Pair<String, Class<?>>> prepareProductData() {
+    private List<Pair<String, Class<?>>> getProductSchema() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of(InterfaceName.ProductId.name(), String.class));
-        columns.add(Pair.of(InterfaceName.ProductName.name(), String.class));
+        columns.add(Pair.of(ProductId.name(), String.class));
+        columns.add(Pair.of(ProductName.name(), String.class));
         return columns;
     }
 
-    private List<Pair<String, Class<?>>> prepareTxnData() {
+    // For legacy tenant
+    private List<Pair<String, Class<?>>> getTxnSchema() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of(InterfaceName.TransactionId.name(), String.class));
-        columns.add(Pair.of(InterfaceName.AccountId.name(), String.class));
-        columns.add(Pair.of(InterfaceName.ProductId.name(), String.class));
-        columns.add(Pair.of(InterfaceName.TransactionCount.name(), Long.class));
+        columns.add(Pair.of(TransactionId.name(), String.class));
+        columns.add(Pair.of(AccountId.name(), String.class));
+        columns.add(Pair.of(ProductId.name(), String.class));
+        columns.add(Pair.of(TransactionCount.name(), Long.class));
+        return columns;
+    }
+
+    // For entity match tenant
+    private List<Pair<String, Class<?>>> getTxnEMSchema() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        columns.add(Pair.of(TransactionId.name(), String.class));
+        columns.add(Pair.of(AccountId.name(), String.class));
+        columns.add(Pair.of(CustomerAccountId.name(), String.class));
+        columns.add(Pair.of(ProductId.name(), String.class));
+        columns.add(Pair.of(TransactionCount.name(), Long.class));
         return columns;
     }
 }
