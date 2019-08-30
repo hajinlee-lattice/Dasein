@@ -102,6 +102,9 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("ContactCols")
     private List<String> contactCols;
 
+    @JsonProperty("UseEntityMatch")
+    private boolean useEntityMatch;
+
     public PlayLaunchSparkContext() {
     }
 
@@ -109,7 +112,7 @@ public class PlayLaunchSparkContext implements Serializable {
             RatingEngine ratingEngine, MetadataSegment segment, long launchTimestampMillis, String ratingId,
             RatingModel publishedIteration, List<String> accountColsRecIncluded,
             List<String> accountColsRecNotIncludedStd, List<String> accountColsRecNotIncludedNonStd,
-            List<String> contactCols) {
+            List<String> contactCols, boolean useEntityMatch) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
         this.tenantPid = tenant.getPid();
@@ -132,6 +135,7 @@ public class PlayLaunchSparkContext implements Serializable {
         this.accountColsRecNotIncludedStd = accountColsRecNotIncludedStd;
         this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
         this.contactCols = contactCols;
+        this.useEntityMatch = useEntityMatch;
         setSyncDestination(playLaunch);
     }
 
@@ -291,6 +295,14 @@ public class PlayLaunchSparkContext implements Serializable {
         this.contactCols = contactCols;
     }
 
+    public boolean getUseEntityMatch() {
+        return this.useEntityMatch;
+    }
+
+    public void setUseEntityMatch(boolean useEntityMatch) {
+        this.useEntityMatch = useEntityMatch;
+    }
+
     public String getModelId() {
         return this.modelId;
     }
@@ -350,6 +362,7 @@ public class PlayLaunchSparkContext implements Serializable {
         private List<String> accountColsRecNotIncludedStd;
         private List<String> accountColsRecNotIncludedNonStd;
         private List<String> contactCols;
+        private boolean useEntityMatch = false;
 
         public PlayLaunchSparkContextBuilder tenant(Tenant tenant) {
             this.tenant = tenant;
@@ -422,11 +435,16 @@ public class PlayLaunchSparkContext implements Serializable {
             return this;
         }
 
+        public PlayLaunchSparkContextBuilder useEntityMatch(boolean useEntityMatch) {
+            this.useEntityMatch = useEntityMatch;
+            return this;
+        }
+
         public PlayLaunchSparkContext build() {
             return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
                     this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId, this.publishedIteration,
                     this.accountColsRecIncluded, this.accountColsRecNotIncludedStd,
-                    this.accountColsRecNotIncludedNonStd, this.contactCols);
+                    this.accountColsRecNotIncludedNonStd, this.contactCols, this.useEntityMatch);
         }
     }
 
