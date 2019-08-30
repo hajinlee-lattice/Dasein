@@ -68,7 +68,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     private static final Logger log = LoggerFactory.getLogger(EntityExportWorkflowDeploymentTestNG.class);
 
     @Inject
-    protected AttrConfigService attrConfigService;
+    private AttrConfigService attrConfigService;
 
     @Inject
     private DataCollectionService dataCollectionService;
@@ -97,8 +97,6 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     private AtlasExport atlasExport;
     protected boolean saveCsvToLocal;
 
-    protected DataCollection.Version version;
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
@@ -107,7 +105,6 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
                 CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
         configExportAttrs();
         saveCsvToLocal = false;
-        version = dataCollectionService.getActiveVersion(mainCustomerSpace);
     }
 
     @BeforeClass(groups = "manual")
@@ -128,13 +125,13 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         saveCsvToLocal = true;
-        version = dataCollectionService.getActiveVersion(mainCustomerSpace);
     }
 
     @Override
     @Test(groups = {"deployment", "manual"})
     public void testWorkflow() throws Exception {
         EntityExportRequest request = new EntityExportRequest();
+        DataCollection.Version version = dataCollectionService.getActiveVersion(mainCustomerSpace);
         request.setDataCollectionVersion(version);
         atlasExport = atlasExportService.createAtlasExport(mainTestCustomerSpace.toString(),
                 AtlasExportType.ACCOUNT_AND_CONTACT);
@@ -196,7 +193,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         Assert.assertTrue(hasAccountCsv, "Cannot find Account csv in s3 folder.");
     }
 
-    private void configExportAttrs() {
+    protected void configExportAttrs() {
         AttrConfig enable1 = enableExport(BusinessEntity.Account, "user_Test_Date"); // date attr
         AttrConfig enable2 = enableExport(BusinessEntity.Account, "TechIndicator_OracleCommerce"); // bit encode
         AttrConfig enable3 = enableExport(BusinessEntity.Account, "CHIEF_EXECUTIVE_OFFICER_NAME"); // non-segmentable
