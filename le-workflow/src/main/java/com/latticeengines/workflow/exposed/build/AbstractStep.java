@@ -215,7 +215,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         }
     }
 
-    protected boolean hasKeyInContext(String key) {
+    public boolean hasKeyInContext(String key) {
         return executionContext.containsKey(key);
     }
 
