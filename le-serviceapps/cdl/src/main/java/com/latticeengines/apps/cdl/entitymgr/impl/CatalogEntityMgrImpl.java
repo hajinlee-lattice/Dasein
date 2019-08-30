@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
+import com.latticeengines.apps.cdl.repository.jpa.writer.CatalogWriterRepository;
 import com.latticeengines.apps.cdl.repository.reader.CatalogReaderRepository;
-import com.latticeengines.apps.cdl.repository.writer.CatalogWriterRepository;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
