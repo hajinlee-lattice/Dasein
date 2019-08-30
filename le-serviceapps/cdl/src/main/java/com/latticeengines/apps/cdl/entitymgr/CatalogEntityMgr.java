@@ -9,7 +9,23 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface CatalogEntityMgr extends BaseEntityMgrRepository<Catalog, Long> {
 
-    List<Catalog> findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant);
+    /**
+     * Find the unique {@link Catalog} with target name in specific tenant.
+     *
+     * @param name
+     *            target catalog name
+     * @param tenant
+     *            target tenant
+     * @return matching catalog object, {@code null} if no such catalog exists
+     */
+    Catalog findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant);
 
+    /**
+     * Retrieve all catalog in target tenant
+     *
+     * @param tenant
+     *            target tenant
+     * @return list of catalog, will not be {@code null}
+     */
     List<Catalog> findByTenant(@NotNull Tenant tenant);
 }

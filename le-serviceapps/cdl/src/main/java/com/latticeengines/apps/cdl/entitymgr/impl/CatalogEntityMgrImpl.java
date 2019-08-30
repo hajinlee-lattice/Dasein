@@ -4,31 +4,23 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Preconditions;
-import com.latticeengines.apps.cdl.dao.CatalogDao;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
-import com.latticeengines.apps.cdl.repository.CatalogRepository;
 import com.latticeengines.apps.cdl.repository.reader.CatalogReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.CatalogWriterRepository;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("catalogEntityMgr")
-public class CatalogEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<CatalogRepository, Catalog, Long> implements
-        CatalogEntityMgr {
-
-    @Inject
-    private CatalogEntityMgrImpl self;
-
-    @Inject
-    private CatalogDao catalogDao;
+public class CatalogEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Catalog, Long> implements CatalogEntityMgr {
 
     @Inject
     private CatalogReaderRepository readerRepository;
@@ -38,40 +30,27 @@ public class CatalogEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Catalog
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Catalog> findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant) {
+    public Catalog findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant) {
         Preconditions.checkNotNull(name, "Name should not be null");
         Preconditions.checkNotNull(tenant, "Tenant should not be null");
-        return getCurrentRepo().findByNameAndTenant(name, tenant);
+        List<Catalog> catalogs = readerRepository.findByNameAndTenant(name, tenant);
+        if (CollectionUtils.isEmpty(catalogs)) {
+            return null;
+        }
+        Preconditions.checkArgument(catalogs.size() == 1, String.format(
+                "Catalog %s should be unique for tenant %s, got %d instead", name, tenant.getId(), catalogs.size()));
+        return catalogs.get(0);
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Catalog> findByTenant(@NotNull Tenant tenant) {
         Preconditions.checkNotNull(tenant, "Tenant should not be null");
-        return getCurrentRepo().findByTenant(tenant);
+        return readerRepository.findByTenant(tenant);
     }
 
     @Override
-    protected CatalogRepository getReaderRepo() {
-        return readerRepository;
-    }
-
-    @Override
-    protected CatalogRepository getWriterRepo() {
+    public BaseJpaRepository<Catalog, Long> getRepository() {
         return writerRepository;
-    }
-
-    @Override
-    protected BaseReadWriteRepoEntityMgrImpl<CatalogRepository, Catalog, Long> getSelf() {
-        return self;
-    }
-
-    @Override
-    public BaseDao<Catalog> getDao() {
-        return catalogDao;
-    }
-
-    private CatalogRepository getCurrentRepo() {
-        return isReaderConnection() ? readerRepository : writerRepository;
     }
 }

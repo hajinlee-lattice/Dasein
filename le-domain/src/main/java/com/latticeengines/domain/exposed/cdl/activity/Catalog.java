@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "CATALOG", uniqueConstraints = @UniqueConstraint(columnNames = { "NAME", "FK_TASK_ID" }))
+@Table(name = "ATLAS_CATALOG", uniqueConstraints = @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID" }))
 public class Catalog implements HasPid, Serializable, HasAuditingFields {
 
     private static final long serialVersionUID = -8455242959058500143L;

@@ -20,11 +20,11 @@
 	<jpa:repositories base-package="com.latticeengines.apps.cdl.repository.writer"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactory"
-                      transaction-manager-ref="transactionManager"  />
+                      transaction-manager-ref="jpaTransactionManager"/>
 
     <jpa:repositories base-package="com.latticeengines.apps.cdl.repository.reader"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
                       entity-manager-factory-ref="entityManagerFactoryReader"
-                      transaction-manager-ref="transactionManagerReader"  />
+                      transaction-manager-ref="transactionManagerReader"/>
 
 </beans>

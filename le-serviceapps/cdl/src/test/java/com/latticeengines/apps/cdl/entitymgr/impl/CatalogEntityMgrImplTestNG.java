@@ -9,11 +9,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
@@ -22,9 +22,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -64,7 +62,6 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     private void setup() {
         setupTestEnvironmentWithDataCollection();
-        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(mainCustomerSpace));
     }
 
     @Test(groups = "functional")
@@ -87,9 +84,10 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     /*-
-     * [ Name + DataFeedTask ] need to be unique
+     * [ Name + Tenant ] need to be unique
      */
-    @Test(groups = "functional", dependsOnMethods = "testCreate", expectedExceptions = { PersistenceException.class })
+    @Test(groups = "functional", dependsOnMethods = "testCreate", expectedExceptions = {
+            DataIntegrityViolationException.class })
     private void testCreateConflict() {
         // all of these catalog names should already be created
         String name = CATALOG_NAMES.get(RandomUtils.nextInt(0, CATALOG_NAMES.size()));
@@ -106,27 +104,21 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         for (String name : CATALOG_NAMES) {
             log.info("Querying Catalog {} for tenant {}", name, mainCustomerSpace);
             // use existing tenant + valid name
-            List<Catalog> results = catalogEntityMgr.findByNameAndTenant(name, mainTestTenant);
-            Assert.assertNotNull(results);
-            Assert.assertEquals(results.size(), 1,
-                    String.format("Should only have one catalog named %s for tenant %s", name, mainCustomerSpace));
-            assertEqual(results.get(0), catalogs.get(name));
+            Catalog result = catalogEntityMgr.findByNameAndTenant(name, mainTestTenant);
+            Assert.assertNotNull(result);
+            assertEqual(result, catalogs.get(name));
 
-            List<Catalog> notExistingCatalogs = catalogEntityMgr.findByNameAndTenant(name, notExistTenant);
-            Assert.assertNotNull(notExistingCatalogs);
-            Assert.assertTrue(notExistingCatalogs.isEmpty(),
-                    String.format("Querying catalog %s for tenant %s should get no result, got %s instead", name,
-                            notExistTenant.getId(), JsonUtils.serialize(notExistingCatalogs)));
+            Catalog notExistingCatalog = catalogEntityMgr.findByNameAndTenant(name, notExistTenant);
+            Assert.assertNull(notExistingCatalog,
+                    String.format("Catalog %s should not exist in tenant %s", name, notExistTenant.getId()));
 
         }
 
         // existing tenant + invalid name
         String notExistingCatalogName = NamingUtils.uuid("not_existing_catalog");
-        List<Catalog> notExistingCatalogs = catalogEntityMgr.findByNameAndTenant(notExistingCatalogName, mainTestTenant);
-        Assert.assertNotNull(notExistingCatalogs, String.format("Should not get null list query catalog %s for tenant %s", notExistingCatalogName, mainCustomerSpace));
-        Assert.assertTrue(notExistingCatalogs.isEmpty(),
-                String.format("Querying catalog %s for tenant %s should get no result, got %s instead", notExistingCatalogName,
-                        notExistTenant.getId(), JsonUtils.serialize(notExistingCatalogs)));
+        Catalog notExistingCatalog = catalogEntityMgr.findByNameAndTenant(notExistingCatalogName, mainTestTenant);
+        Assert.assertNull(notExistingCatalog, String.format("Catalog %s should not exist in tenant %s",
+                notExistingCatalogName, notExistTenant.getId()));
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryListener.class, dependsOnMethods = "testCreate")
@@ -141,8 +133,6 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // verify individual catalogs
         catalogMap.values().forEach(catalog -> assertEqual(catalog, catalogs.get(catalog.getName())));
     }
-
-    // TODO multiple catalog with the same name & diff DataFeedTask
 
     private void assertEqual(Catalog catalog, Catalog expectedCatalog) {
         if (expectedCatalog == null) {
