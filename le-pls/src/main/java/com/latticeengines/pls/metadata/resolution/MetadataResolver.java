@@ -740,7 +740,8 @@ public class MetadataResolver {
         }
         if (conformingDateCount < dateThreshold) {
             if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
-                warningMessage.append(String.format("%s is set as %s from the system-provided %s in your file.",
+                warningMessage.append(String.format("%s is set to the format %s rather than the auto-detected format " +
+                                "%s based on the data in your file",
                         columnHeaderName, userFormat, formatWithBestEffort));
             } else {
                 // this check the format inherit from the first time's date/time setting
