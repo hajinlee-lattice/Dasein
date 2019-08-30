@@ -340,14 +340,12 @@ public class MetadataResolver {
                             knownColumn
                                     .setTimeFormatString(result.getMiddle());
                             knownColumn.setTimezone(result.getRight());
-                            knownColumn.setMappedToDateBefore(false);
                         }
                     }
                 } else {
                     knownColumn.setDateFormatString(attribute.getDateFormatString());
                     knownColumn.setTimeFormatString(attribute.getTimeFormatString());
                     knownColumn.setTimezone(attribute.getTimezone());
-                    knownColumn.setMappedToDateBefore(true);
                 }
                 result.fieldMappings.add(knownColumn);
                 pickedHeaders.add(attribute.getDisplayName());
@@ -373,14 +371,12 @@ public class MetadataResolver {
                                     knownColumn.setDateFormatString(result.getLeft());
                                     knownColumn.setTimeFormatString(result.getMiddle());
                                     knownColumn.setTimezone(result.getRight());
-                                    knownColumn.setMappedToDateBefore(false);
                                 }
                             }
                         } else {
                             knownColumn.setDateFormatString(attribute.getDateFormatString());
                             knownColumn.setTimeFormatString(attribute.getTimeFormatString());
                             knownColumn.setTimezone(attribute.getTimezone());
-                            knownColumn.setMappedToDateBefore(true);
                         }
 
                         result.fieldMappings.add(knownColumn);
@@ -445,7 +441,6 @@ public class MetadataResolver {
                             knownColumn.setDateFormatString(result.getLeft());
                             knownColumn.setTimeFormatString(result.getMiddle());
                             knownColumn.setTimezone(result.getRight());
-                            knownColumn.setMappedToDateBefore(false);
                         }
                     }
                     knownColumn.setMappedToLatticeField(true);
@@ -667,7 +662,6 @@ public class MetadataResolver {
             fieldMapping.setDateFormatString(formatForDateAndTime.getLeft());
             fieldMapping.setTimeFormatString(formatForDateAndTime.getMiddle());
             fieldMapping.setTimezone(formatForDateAndTime.getRight());
-            fieldMapping.setMappedToDateBefore(false);
         } else {
             fundamentalType = UserDefinedType.TEXT;
         }
@@ -676,22 +670,30 @@ public class MetadataResolver {
     }
 
 
-    /*
-     * check the given format can be used to parse column value, if number of
-     * column value can be parsed is more than 10% of size of columnFields
-     * return null if the check can pass, return one error value if the check can't pass
+    /**
+     *
+     * @param fieldMapping
+     * @param  warningMessage indicate the message returned by date/time format and time zone validation
+     * check the given format can be used to parse column value, if number of column value can be parsed is more than
+     * 10% of size of columnFields return null if the check can pass, return one error value if the check can't pass
      */
     @VisibleForTesting
-    public String checkUserDateType(FieldMapping fieldMapping) {
+    public boolean checkUserDateType(FieldMapping fieldMapping, StringBuilder warningMessage,
+                                     String formatWithBestEffort) {
         String columnHeaderName = fieldMapping.getUserField();
         String errorValue = null;
         List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
         String dateFormat = fieldMapping.getDateFormatString();
         String timeFormat = fieldMapping.getTimeFormatString();
+        String timezone = fieldMapping.getTimezone();
+        boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
         if (StringUtils.isEmpty(dateFormat)) {
-            return null;
+            return false;
         }
+        String userFormat = StringUtils.isBlank(timeFormat) ? dateFormat :
+                dateFormat + TimeStampConvertUtils.SYSTEM_DELIMITER + timeFormat;
         int conformingDateCount = 0;
+        int nonConformingTimeZoneCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
         String javaDateFormat = TimeStampConvertUtils.userToJavaDateFormatMap.get(dateFormat);
         String javaTimeFormat = StringUtils.isEmpty(timeFormat) ? "" : TimeStampConvertUtils.userToJavaTimeFormatMap.get(timeFormat);
@@ -703,9 +705,15 @@ public class MetadataResolver {
                 TemporalAccessor dateTime = null;
                 String trimmedField = columnField.trim().replaceFirst("(\\s{2,})",
                         TimeStampConvertUtils.SYSTEM_DELIMITER);
-                trimmedField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(trimmedField);
+
+                String trimmedTZField = TimeStampConvertUtils.removeIso8601TandZFromDateTime(trimmedField);
+                // validate time zone before stripe out the T&Z
+                boolean matchTZ = !trimmedTZField.equals(trimmedField);
+                if ((isISO8601 && !matchTZ) || (!isISO8601 && matchTZ)) {
+                    nonConformingTimeZoneCount++;
+                }
                 try {
-                    dateTime = dtf.parse(trimmedField);
+                    dateTime = dtf.parse(trimmedTZField);
                 } catch (DateTimeParseException e) {
                     log.debug("Found columnField unparsable as date/time: " + trimmedField);
                 }
@@ -719,12 +727,30 @@ public class MetadataResolver {
                 if (errorValue == null && dateTime == null) {
                     errorValue = columnField;
                 }
+
+            }
+        }
+        if (nonConformingTimeZoneCount > 0) {
+            if (isISO8601) {
+                warningMessage.append("Time zone should be part of value but is not.");
+            } else {
+                warningMessage.append(String.format("Time zone set to %s. Value should not contain time " +
+                        "zone setting.", timezone));
             }
         }
         if (conformingDateCount < dateThreshold) {
-            return errorValue;
+            if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
+                warningMessage.append(String.format("%s is set to the format %s rather than the auto-detected format " +
+                                "%s based on the data in your file",
+                        columnHeaderName, userFormat, formatWithBestEffort));
+            } else {
+                // this check the format inherit from the first time's date/time setting
+                warningMessage.append(String.format("%s is set as %s which can't parse the %s from uploaded file.",
+                        columnHeaderName, userFormat, errorValue));
+            }
+            return false;
         }
-        return null;
+        return true;
     }
 
     /*
