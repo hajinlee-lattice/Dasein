@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
@@ -65,6 +66,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     @Inject
     private AtlasExportProxy atlasExportProxy;
 
+    @Inject
+    private BatonService batonService;
+
     private DataCollection.Version version;
     private String evaluationDate;
     private AtlasExport atlasExport;
@@ -105,15 +109,13 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                     entities.add(ExportEntity.Contact);
                     resultForCurrentAttempt = getResultAttempt(entities);
                     addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
-                    if (!atlasExport.getScheduled()) {
-                        SparkJobResult sparkJobResult = executeSparkJob(AccountContactExportJob.class,
-                                generateAccountAndContactExportConfig(resultForCurrentAttempt.get(ExportEntity.Account),
-                                        resultForCurrentAttempt.get(ExportEntity.Contact)));
-                        resultForCurrentAttempt = new HashMap<>();
-                        HdfsDataUnit hdfsDataUnit = sparkJobResult.getTargets().get(0);
-                        filesToDelete.add(hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/")));
-                        resultForCurrentAttempt.put(ExportEntity.AccountContact, hdfsDataUnit);
-                    }
+                    SparkJobResult sparkJobResult = executeSparkJob(AccountContactExportJob.class,
+                            generateAccountAndContactExportConfig(resultForCurrentAttempt.get(ExportEntity.Account),
+                                    resultForCurrentAttempt.get(ExportEntity.Contact)));
+                    resultForCurrentAttempt = new HashMap<>();
+                    HdfsDataUnit hdfsDataUnit = sparkJobResult.getTargets().get(0);
+                    filesToDelete.add(hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/")));
+                    resultForCurrentAttempt.put(ExportEntity.AccountContact, hdfsDataUnit);
                 }
             } finally {
                 stopSparkSQLSession();
@@ -146,10 +148,15 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             accountContactExportConfig.setInput(Collections.singletonList(accountDataUnit));
         }
         accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
+        // need to remove Account ID after left join
+        if (batonService.isEntityMatchEnabled(customerSpace)) {
+            List<String> dropKeys = new ArrayList<>();
+            dropKeys.add(InterfaceName.AccountId.name());
+            accountContactExportConfig.setDropKeys(dropKeys);
+        }
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
     }
-
 
     private Map<ExportEntity, HdfsDataUnit> getResultAttempt(List<ExportEntity> exportEntities) {
         Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
@@ -204,6 +211,22 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return attrRepo;
     }
 
+    private void addAccountId(BusinessEntity businessEntity, List<Lookup> lookups) {
+        AttributeLookup accountIdLookup = new AttributeLookup(businessEntity,
+                InterfaceName.AccountId.name());
+        if (!lookups.contains(accountIdLookup)) {
+            lookups.add(accountIdLookup);
+        }
+    }
+
+    private void addContactId(BusinessEntity businessEntity, List<Lookup> lookups) {
+        AttributeLookup contactIdLookup = new AttributeLookup(businessEntity,
+                InterfaceName.ContactId.name());
+        if (!lookups.contains(contactIdLookup)) {
+            lookups.add(contactIdLookup);
+        }
+    }
+
     private List<Lookup> getAccountLookup() {
         List<Lookup> lookups = new ArrayList<>();
         for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
@@ -212,13 +235,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 cms.forEach(cm -> lookups.add(new AttributeLookup(entity, cm.getAttrName())));
             }
         }
-        // from GUI export
-        if (!atlasExport.getScheduled()) {
-            AttributeLookup accountIdLookup = new AttributeLookup(BusinessEntity.Account,
-                    InterfaceName.AccountId.name());
-            if (!lookups.contains(accountIdLookup)) {
-                lookups.add(accountIdLookup);
-            }
+        // when the export type is ACCOUNT_AND_CONTACT, needs to set the join used by AccountContactExportJob
+        if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType()) || !batonService.isEntityMatchEnabled(customerSpace)) {
+            addAccountId(BusinessEntity.Account, lookups);
         }
         lookups.sort((lookup1, lookup2) -> {
             AttributeLookup attributeLookup1 = (AttributeLookup) lookup1;
@@ -242,46 +261,32 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 cms.forEach(cm -> lookupMap.put(cm.getAttrName(), new AttributeLookup(entity, cm.getAttrName())));
             }
         }
-        // from GUI export
-        if (!atlasExport.getScheduled()) {
-            if (!lookupMap.containsKey(InterfaceName.AccountId.name())) {
-                lookupMap.put(InterfaceName.AccountId.name(), new AttributeLookup(BusinessEntity.Account,
-                        InterfaceName.AccountId.name()));
-            }
-        }
         return lookupMap;
     }
 
     private List<Lookup> getContactLookup() {
         List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
         List<Lookup> lookups;
-        // from GUI export
-        if (!atlasExport.getScheduled()) {
-            // remove the attribute already exist in account if query account and contact together
-            if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
-                Map<String, Lookup> accountLookupMap = getAccountLookupMap();
-                lookups =
-                        cms.stream().filter(cm -> !accountLookupMap.containsKey(cm.getAttrName()) && !InterfaceName.AccountId.name().equals(cm.getAttrName()))
-                                .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
-                                .collect(Collectors.toList());
-            } else {
-                lookups = cms.stream().map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
-                        .collect(Collectors.toList());
-            }
-            AttributeLookup contactIdLookup = new AttributeLookup(BusinessEntity.Contact,
-                    InterfaceName.ContactId.name());
-            if (!lookups.contains(contactIdLookup)) {
-                lookups.add(contactIdLookup);
-            }
-            AttributeLookup accountIdLookup = new AttributeLookup(BusinessEntity.Contact,
-                    InterfaceName.AccountId.name());
-            if (!lookups.contains(accountIdLookup)) {
-                lookups.add(accountIdLookup);
-            }
+        boolean alreadyHaveAccountId = false;
+        // remove the attribute already exist in account if query account and contact together
+        if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
+            Map<String, Lookup> accountLookupMap = getAccountLookupMap();
+            lookups =
+                    cms.stream().filter(cm -> !accountLookupMap.containsKey(cm.getAttrName()) && !InterfaceName.AccountId.name().equals(cm.getAttrName()))
+                            .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
+                            .collect(Collectors.toList());
+            // needs to add account id for left join operation later
+            alreadyHaveAccountId = true;
+            addAccountId(BusinessEntity.Contact, lookups);
         } else {
-            lookups = cms.stream()
-                    .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
+            lookups = cms.stream().map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
                     .collect(Collectors.toList());
+        }
+        if (!batonService.isEntityMatchEnabled(customerSpace)) {
+            if (!alreadyHaveAccountId) {
+                addAccountId(BusinessEntity.Contact, lookups);
+            }
+            addContactId(BusinessEntity.Contact, lookups);
         }
         lookups.sort((lookup1, lookup2) -> {
             AttributeLookup attributeLookup1 = (AttributeLookup) lookup1;
