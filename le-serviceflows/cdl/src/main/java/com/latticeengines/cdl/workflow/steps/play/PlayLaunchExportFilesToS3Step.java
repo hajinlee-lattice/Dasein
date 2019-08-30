@@ -1,13 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.shaded.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +21,11 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
 import com.latticeengines.domain.exposed.cdl.MessageType;
+import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -69,8 +69,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         }
 
         log.info("Uploading all HDFS files to S3. {}", exportFiles);
-        if (Arrays.asList(CDLExternalSystemType.MAP, CDLExternalSystemType.ADS)
-                .contains(getConfiguration().getPlayLaunchDestination())) {
+        LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();
+        ExternalSystemAuthentication externalAuth = lookupIdMap.getExternalAuthentication();
+        if (externalAuth != null && !StringUtils.isBlank(externalAuth.getTrayAuthenticationId())) {
             exportFiles.forEach(hdfsFilePath -> {
                 ImportExportRequest request = new ImportExportRequest();
                 request.srcPath = hdfsFilePath;

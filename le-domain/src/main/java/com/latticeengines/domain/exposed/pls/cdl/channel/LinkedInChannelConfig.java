@@ -20,6 +20,9 @@ public class LinkedInChannelConfig implements ChannelConfig {
     @JsonProperty("supressAccountWithoutContacts")
     private Boolean supressAccountWithoutContacts = false;
 
+    @JsonProperty("suppressAccountsWithoutNameOrDomain")
+    private Boolean suppressAccountsWithoutNameOrDomain = false;
+
     @JsonProperty("audienceId")
     private String audienceId;
 
@@ -54,6 +57,14 @@ public class LinkedInChannelConfig implements ChannelConfig {
 
     public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
         this.supressAccountWithoutContacts = supressAccountWithoutContacts;
+    }
+
+    public Boolean isSuppressAccountsWithoutNameOrDomain() {
+        return suppressAccountsWithoutNameOrDomain;
+    }
+
+    public void setSuppressAccountsWithoutNameOrDomain(boolean suppressAccountsWithoutNameOrDomain) {
+        this.suppressAccountsWithoutNameOrDomain = suppressAccountsWithoutNameOrDomain;
     }
 
     public String getAudienceId() {

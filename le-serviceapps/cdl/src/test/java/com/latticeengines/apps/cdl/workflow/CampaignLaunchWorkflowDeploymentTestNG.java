@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
@@ -121,7 +122,8 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
                 .destinationSystemType(CDLExternalSystemType.ADS).destinationSystemName(CDLExternalSystemName.LinkedIn)
                 .destinationSystemId("LinkedIn_" + System.currentTimeMillis())
                 .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B))).topNCount(160L)
-                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString()).build();
+                .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
+                .audienceType(AudienceType.ACCOUNTS).build();
 
         linkedInTestPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant)
                 .mockRatingTable(false).testPlayCrud(false).addChannel(linkedInTestPlayChannelSetupConfig)

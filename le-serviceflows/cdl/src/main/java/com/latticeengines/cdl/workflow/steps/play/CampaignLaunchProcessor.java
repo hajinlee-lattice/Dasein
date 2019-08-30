@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -80,6 +81,9 @@ public class CampaignLaunchProcessor {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    private ChannelConfigProcessor channelConfigProcessor;
+
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
 
@@ -114,7 +118,7 @@ public class CampaignLaunchProcessor {
             DataCollection.Version version) {
         // prepare basic account and contact front end queries
         ProcessedFieldMappingMetadata result = frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext, true);
-        applyEmailFilterToQueries(playLaunchContext);
+        applyFiltersToQueries(playLaunchContext);
         handleLookupIdBasedSuppression(playLaunchContext);
         return result;
     }
@@ -190,12 +194,12 @@ public class CampaignLaunchProcessor {
         }
     }
 
-    private void applyEmailFilterToQueries(PlayLaunchContext playLaunchContext) {
+    private void applyFiltersToQueries(PlayLaunchContext playLaunchContext) {
         PlayLaunch launch = playLaunchContext.getPlayLaunch();
         LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
                 launch.getDestinationOrgId(), launch.getDestinationSysType());
         CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
-        if (CDLExternalSystemName.Marketo.equals(destinationSystemName)) {
+        if (channelConfigProcessor.shouldApplyEmailFilter(destinationSystemName, launch.getChannelConfig())) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
                     accountFrontEndQuery.getContactRestriction().getRestriction());
@@ -206,12 +210,27 @@ public class CampaignLaunchProcessor {
                     contactFrontEndQuery.getContactRestriction().getRestriction());
             contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForContactQuery));
         }
+
+        if (channelConfigProcessor.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName,
+                launch.getChannelConfig())) {
+            FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
+            Restriction newAccountRestrictionForAccountQuery = applyAccountNameOrWebsiteFilterToAccountRestriction(
+                    accountFrontEndQuery.getAccountRestriction().getRestriction());
+            accountFrontEndQuery.setAccountRestriction(new FrontEndRestriction(newAccountRestrictionForAccountQuery));
+        }
     }
 
     private Restriction applyEmailFilterToContactRestriction(Restriction contactRestriction) {
         Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
                 .isNotNull().build();
         return Restriction.builder().and(contactRestriction, emailFilter).build();
+    }
+
+    private Restriction applyAccountNameOrWebsiteFilterToAccountRestriction(Restriction accountRestriction) {
+        Restriction filter = Restriction.builder().let(BusinessEntity.Account, InterfaceName.Website.name()).isNotNull()
+                .or(Restriction.builder().let(BusinessEntity.Account, InterfaceName.CompanyName.name()).isNotNull())
+                .build();
+        return Restriction.builder().and(accountRestriction, filter).build();
     }
 
     public PlayLaunchContext initPlayLaunchContext(Tenant tenant, CampaignLaunchInitStepConfiguration config) {
