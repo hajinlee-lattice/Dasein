@@ -1,5 +1,8 @@
 package com.latticeengines.workflowapi.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -16,7 +19,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -33,17 +38,23 @@ import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.batch.core.repository.dao.MapStepExecutionDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.api.EnqueueSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -52,16 +63,18 @@ import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
-import com.latticeengines.workflowapi.service.WorkflowJobService;
+import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
 
 public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplTestNG.class);
 
+    private static final String TEST_WF_NAME = "testWorkflowName";
+
     @Inject
     TenantEntityMgr tenantEntityMgr;
 
-    @Inject
-    private WorkflowJobService workflowJobService;
+    @Mock
+    private WorkflowThrottlingService workflowThrottlingService;
 
     private Map<Long, Long> workflowIds = new HashMap<>();
     private Map<Long, Long> workflowPids = new HashMap<>();
@@ -82,6 +95,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     private WorkflowJob workflowJob3;
     private WorkflowJob workflowJob31;
     private WorkflowJob workflowJobNoWorkflowId;
+
+    private WorkflowJob shouldEnqueuedWorkflowJob;
+    private WorkflowConfiguration shouldEnqueuedWorkflowConfig;
 
     private WorkflowJobUpdate jobUpdate1;
     private WorkflowJobUpdate jobUpdate11;
@@ -116,6 +132,16 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         return job;
     };
 
+    @BeforeClass(groups = "functional")
+    public void setupThrottlingWorkflow() throws NoSuchFieldException {
+        MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(workflowJobService, "workflowThrottlingService", workflowThrottlingService);
+
+        shouldEnqueuedWorkflowConfig = new WorkflowConfiguration();
+        shouldEnqueuedWorkflowConfig.setCustomerSpace(WFAPITEST_CUSTOMERSPACE);
+        shouldEnqueuedWorkflowConfig.setWorkflowName(TEST_WF_NAME);
+    }
+
     @PostConstruct
     public void init() {
         heartbeatThreshold = TimeUnit.MILLISECONDS.convert(2L, TimeUnit.MINUTES);
@@ -146,6 +172,34 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJobUpdateEntityMgr.delete(jobUpdate31);
 
         tenantEntityMgr.delete(tenant3);
+    }
+
+    @Test(groups = "functional", dataProvider = "enqueueWorkflowDataProvider")
+    public void testEnqueueWorkflow(boolean expectBackPressure) {
+        when(workflowThrottlingService.queueLimitReached(any(), any(), any(), any())).thenReturn(expectBackPressure);
+        if (expectBackPressure) {
+            Assert.assertThrows(IllegalStateException.class, () -> workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null));
+        } else {
+            EnqueueSubmission enqueueSubmission = workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null);
+            Assert.assertNotNull(enqueueSubmission.getWorkflowJobId());
+            shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(enqueueSubmission.getWorkflowJobId());
+            Assert.assertNotNull(shouldEnqueuedWorkflowJob);
+            Assert.assertEquals(shouldEnqueuedWorkflowJob.getType(), shouldEnqueuedWorkflowConfig.getWorkflowName());
+            Assert.assertEquals(shouldEnqueuedWorkflowJob.getWorkflowConfiguration().getCustomerSpace(), shouldEnqueuedWorkflowConfig.getCustomerSpace());
+            Assert.assertEquals(shouldEnqueuedWorkflowJob.getStatus(), JobStatus.ENQUEUED.name());
+            Assert.assertEquals(shouldEnqueuedWorkflowJob.getStack(), CamilleEnvironment.getDivision());
+            Assert.assertNull(shouldEnqueuedWorkflowJob.getEmrClusterId());
+            workflowJobEntityMgr.delete(shouldEnqueuedWorkflowJob);
+        }
+    }
+
+    @DataProvider(name = "enqueueWorkflowDataProvider")
+    public Object[][] enqueueWorkflowDataProvider() {
+        // with or without back pressure
+        return new Object[][]{
+                {true},
+                {false}
+        };
     }
 
     @Test(groups = "functional")
@@ -219,7 +273,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob2.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.READY.name());
         workflowJobEntityMgr.create(workflowJob2);
 
-        WorkflowJob workflowJob3  = new WorkflowJob();
+        WorkflowJob workflowJob3 = new WorkflowJob();
         workflowJob3.setApplicationId(null);
         workflowJob3.setWorkflowId(null);
         workflowJob3.setTenant(tenant);
@@ -353,7 +407,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetJobStatus", expectedExceptions = {
-            RuntimeException.class }, expectedExceptionsMessageRegExp = "No tenant found with id .*")
+            RuntimeException.class}, expectedExceptionsMessageRegExp = "No tenant found with id .*")
     public void testGetJobs() {
         mockWorkflowService();
         setupLEJobExecutionRetriever();
@@ -525,7 +579,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertNull(workflowJobService.getStepNames(WFAPITEST_CUSTOMERSPACE.toString(), workflowPid));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetJobStatus", "testGetJobs" })
+    @Test(groups = "functional", dependsOnMethods = {"testGetJobStatus", "testGetJobs"})
     public void testUpdateParentJobId() {
         List<Long> testWorkflowIds = new ArrayList<>();
         testWorkflowIds.add(workflowIds.get(10001L));
@@ -551,7 +605,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(workflowjob2.getParentJobId(), parentJobId);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testUpdateParentJobId" })
+    @Test(groups = "functional", dependsOnMethods = {"testUpdateParentJobId"})
     private void testUpdateStatusAfterRetry() throws Exception {
         long workflowId = workflowIds.get(30001L);
 
@@ -621,8 +675,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     public void testGetJobExecutionAndGetExecutionContext() {
         JobExecution jobExecution1a = workflowJobService.getJobExecutionByWorkflowId(
                 WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10000L));
-        Assert.assertEquals(jobExecution1a.getStartTime().getTime(),  1530327693564L);
-        Assert.assertEquals(jobExecution1a.getLastUpdated().getTime(),  1530327694564L);
+        Assert.assertEquals(jobExecution1a.getStartTime().getTime(), 1530327693564L);
+        Assert.assertEquals(jobExecution1a.getLastUpdated().getTime(), 1530327694564L);
         Assert.assertEquals(jobExecution1a.getJobParameters().getString("jobName"), "application_1549391605495_10000");
         JobExecution jobExecution1b = workflowJobService.getJobExecutionByWorkflowPid(
                 WFAPITEST_CUSTOMERSPACE.toString(), workflowPids.get(1L));
@@ -648,8 +702,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
         JobExecution jobExecution11a = workflowJobService.getJobExecutionByWorkflowId(
                 WFAPITEST_CUSTOMERSPACE.toString(), workflowIds.get(10001L));
-        Assert.assertEquals(jobExecution11a.getStartTime().getTime(),  1530327693564L);
-        Assert.assertEquals(jobExecution11a.getLastUpdated().getTime(),  1530327694564L);
+        Assert.assertEquals(jobExecution11a.getStartTime().getTime(), 1530327693564L);
+        Assert.assertEquals(jobExecution11a.getLastUpdated().getTime(), 1530327694564L);
         Assert.assertEquals(jobExecution11a.getJobParameters().getString("jobName"), "application_1549391605495_10001");
         JobExecution jobExecution11b = workflowJobService.getJobExecutionByWorkflowPid(
                 WFAPITEST_CUSTOMERSPACE.toString(), workflowPids.get(11L));

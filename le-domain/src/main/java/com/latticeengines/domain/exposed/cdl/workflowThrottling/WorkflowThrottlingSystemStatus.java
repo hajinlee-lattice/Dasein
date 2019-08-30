@@ -6,7 +6,7 @@ public class WorkflowThrottlingSystemStatus {
 
     private final String GLOBAL_KEY = "global";
 
-    private WorkflowThrottlerConfiguration config;
+    private WorkflowThrottlingConfiguration config;
 
     // workflowType(or global) -> count
     private Map<String, Integer> runningWorkflowInEnv; //
@@ -67,11 +67,11 @@ public class WorkflowThrottlingSystemStatus {
         this.tenantEnqueuedWorkflow = tenantEnqueuedWorkflow;
     }
 
-    public WorkflowThrottlerConfiguration getConfig() {
+    public WorkflowThrottlingConfiguration getConfig() {
         return config;
     }
 
-    public void setConfig(WorkflowThrottlerConfiguration config) {
+    public void setConfig(WorkflowThrottlingConfiguration config) {
         this.config = config;
     }
 

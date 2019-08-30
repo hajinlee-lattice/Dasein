@@ -4,23 +4,23 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
-public class WorkflowThrottlerConfiguration {
+public class WorkflowThrottlingConfiguration {
     /**
-     * Env (global only as config file specific for environment) -> workflowType (or global) -> RUNNING/ENQUEUED
-     * Stack (global/A/B/C) -> workflowType (or global) -> RUNNING/ENQUEUED
+     * workflowType (or global) -> RUNNING/ENQUEUED
+     * Stack (A/B/C) -> workflowType (or global) -> RUNNING/ENQUEUED
      * CustomerSpace (or global) -> workflowType (or global) -> RUNNING/ENQUEUED
      */
-    private Map<String, Map<String, Map<JobStatus, Integer>>> envConfig;
+    private  Map<String, Map<JobStatus, Integer>> envConfig;
 
     private Map<String, Map<String, Map<JobStatus, Integer>>> stackConfig;
 
     private Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig;
 
-    public Map<String, Map<String, Map<JobStatus, Integer>>> getEnvConfig() {
+    public Map<String, Map<JobStatus, Integer>> getEnvConfig() {
         return envConfig;
     }
 
-    public void setEnvConfig(Map<String, Map<String, Map<JobStatus, Integer>>> envConfig) {
+    public void setEnvConfig(Map<String, Map<JobStatus, Integer>> envConfig) {
         this.envConfig = envConfig;
     }
 

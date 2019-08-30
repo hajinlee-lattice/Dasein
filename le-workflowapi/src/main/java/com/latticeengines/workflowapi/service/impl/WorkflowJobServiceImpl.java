@@ -22,10 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.api.EnqueueSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -41,11 +44,14 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
+import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
+import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
 
 @Component("workflowApiWorkflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
@@ -53,6 +59,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private static final List<String> NON_TERMINAL_JOB_STATUSES = Job.NON_TERMINAL_JOB_STATUS.stream()
             .map(JobStatus::getName).collect(Collectors.toList());
+
+    private static final String PA_WORKFLOW = "processAnalyzeWorkflow";
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String atimelineServiceUrl;
@@ -86,6 +94,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private WorkflowContainerService workflowContainerService;
+
+    @Inject
+    private WorkflowThrottlingService workflowThrottlingService;
+
+    @Inject
+    private WorkflowTenantService workflowTenantService;
 
     private static final long HEARTBEAT_FAILURE_THRESHOLD = TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES);
     private static final long ALLOWED_PENDING_THRESHOLD = TimeUnit.MILLISECONDS.convert(30L, TimeUnit.MINUTES);
@@ -495,6 +509,56 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
+    public EnqueueSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        String podid = CamilleEnvironment.getPodId();
+        String division = CamilleEnvironment.getDivision();
+        if (workflowThrottlingService.queueLimitReached(customerSpace, workflowConfiguration.getWorkflowName(), podid, division)) {
+            log.error("Unable to enqueue {} workflow to {} - {} for {} due to back pressure.", workflowConfiguration.getWorkflowName(), podid, division, customerSpace);
+            throw new IllegalStateException(String.format("Unable to submit workflow for %s due to back pressure.", customerSpace));
+        }
+
+        return new EnqueueSubmission(enqueueWorkflowJob(workflowConfiguration, division, workflowJobPid));
+    }
+
+    private Long enqueueWorkflowJob(WorkflowConfiguration workflowConfig, String division, Long workflowJobPid) {
+        Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfig);
+        String user = workflowConfig.getUserId();
+        user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
+
+        WorkflowJob workflowJob = workflowJobPid == null ? new WorkflowJob() : workflowJobEntityMgr.findByWorkflowPid(workflowJobPid);
+        if (workflowJob == null) {
+            log.error("Failed to create or update workflowJob. WorkflowPid=" + workflowJobPid);
+            return null;
+        }
+        workflowJob.setTenant(tenant);
+        workflowJob.setUserId(user);
+        workflowJob.setInputContext(workflowConfig.getInputProperties());
+        workflowJob.setStatus(JobStatus.ENQUEUED.name());
+        workflowJob.setType(workflowConfig.getWorkflowName());
+        workflowJob.setStack(division);
+        workflowJob.setWorkflowConfiguration(workflowConfig);
+
+        workflowJobEntityMgr.createOrUpdate(workflowJob);
+
+        Long currentTime = System.currentTimeMillis();
+        if (workflowJobPid == null) {
+            Long pid = workflowJob.getPid();
+            WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
+            jobUpdate.setWorkflowPid(pid);
+            jobUpdate.setCreateTime(currentTime);
+            jobUpdate.setLastUpdateTime(currentTime);
+            workflowJobUpdateEntityMgr.create(jobUpdate);
+        } else {
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJobPid);
+            jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+            workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+        }
+
+        return workflowJob.getPid();
+    }
+
+    @Override
     @WithCustomerSpace
     public String submitAwsWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration) {
         return workflowContainerService.submitAwsWorkflow(workflowConfiguration, null);
@@ -665,6 +729,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
 
             if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
+                continue;
+            }
+
+            if (JobStatus.ENQUEUED.name().equals(workflowJob.getStatus())) {
                 continue;
             }
 
