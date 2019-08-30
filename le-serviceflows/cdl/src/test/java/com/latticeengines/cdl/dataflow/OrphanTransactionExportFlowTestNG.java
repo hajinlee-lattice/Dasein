@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.dataflow;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomTrxField;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
@@ -75,12 +76,12 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
 
     private Object[][] transactionEMData = new Object[][] {
             // "TransactionId", "AccountId", "CustomerAccountId", "ProductId",
-            // "TransactionCount"
-            { "T00200", "A001", "CA001", "P0002", 200L }, //
-            { "T01234", "A005", "CA005", "P0010", 200L }, //
-            { "T06666", "A010", "CA010", "P0088", 300L }, //
-            { "T08080", "A004", "CA004", "P0003", 150L }, //
-            { "T18888", "A006", "CA006", "P0004", 998L } //
+            // "TransactionCount", "CustomTrxField"
+            { "T00200", "A001", "CA001", "P0002", 200L, "{111}" }, //
+            { "T01234", "A005", "CA005", "P0010", 200L, "{222}" }, //
+            { "T06666", "A010", "CA010", "P0088", 300L, "{333}" }, //
+            { "T08080", "A004", "CA004", "P0003", 150L, "{444}" }, //
+            { "T18888", "A006", "CA006", "P0004", 998L, "{555}" } //
     };
 
     private Object[][] expectedData = new Object[][] {
@@ -242,6 +243,7 @@ public class OrphanTransactionExportFlowTestNG extends ServiceFlowsDataFlowFunct
         columns.add(Pair.of(CustomerAccountId.name(), String.class));
         columns.add(Pair.of(ProductId.name(), String.class));
         columns.add(Pair.of(TransactionCount.name(), Long.class));
+        columns.add(Pair.of(CustomTrxField.name(), String.class));
         return columns;
     }
 }
