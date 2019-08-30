@@ -1,10 +1,13 @@
 package com.latticeengines.db.exposed.entitymgr.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 
 public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMgrRepository<T , ID> {
@@ -35,6 +38,7 @@ public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMg
     }
 
     public void save(T entity) {
+        setAuditingFields(entity);
         getRepository().save(entity);
     }
 
@@ -71,5 +75,15 @@ public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMg
     @Override
     public ParsedDependencies parse(T entity, T existingEntity) {
         return null;
+    }
+
+    private void setAuditingFields(T entity) {
+        if (entity instanceof HasAuditingFields) {
+            Date now = new Date();
+            if (entity instanceof HasPid && ((HasPid) entity).getPid() == null) {
+                ((HasAuditingFields) entity).setCreated(now);
+            }
+            ((HasAuditingFields) entity).setUpdated(now);
+        }
     }
 }
