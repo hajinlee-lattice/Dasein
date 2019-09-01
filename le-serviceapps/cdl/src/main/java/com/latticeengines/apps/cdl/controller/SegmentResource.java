@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.annotation.Action;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -47,7 +47,7 @@ public class SegmentResource {
     private SegmentService segmentService;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private ActionService actionService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -91,7 +91,7 @@ public class SegmentResource {
             @RequestBody MetadataSegment segment,
             @RequestParam(value = "user", required = false, defaultValue = "DEFAULT_USER") String user) {
         MetadataSegment res = segmentService.createOrUpdateSegment(segment);
-        proxyResourceService.registerAction(ActionContext.getAction(), user);
+        actionService.registerAction(ActionContext.getAction(), user);
         return res;
     }
 

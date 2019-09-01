@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.mds.AttrConfigDecorator;
@@ -37,7 +37,7 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
     private TenantEntityMgr tenantEntityMgr;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private AttrConfigDecorator attrConfigDecorator;
@@ -64,7 +64,7 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
 
     private void loadViaMds() {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        DataCollection.Version active = proxyResourceService.getActiveVersion(customerSpace);
+        DataCollection.Version active = dataCollectionService.getActiveVersion(customerSpace);
         try (PerformanceTimer timer = new PerformanceTimer("Load full serving store schema.")) {
             ParallelFlux<ColumnMetadata> pFlux = servingStoreService.getFullyDecoratedMetadata(
                     BusinessEntity.Account, active);
@@ -76,8 +76,8 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
 
     private void loadViaLegacyWay() {
         try (PerformanceTimer timer = new PerformanceTimer("Load full data collection table.")) {
-            Table table = proxyResourceService.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                    TableRoleInCollection.BucketedAccount);
+            Table table = dataCollectionService.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                    TableRoleInCollection.BucketedAccount, null);
             Assert.assertNotNull(table);
             List<ColumnMetadata> cms = table.getAttributes().stream().map(Attribute::getColumnMetadata).collect(Collectors.toList());
             Assert.assertEquals(cms.size(), 21734L);

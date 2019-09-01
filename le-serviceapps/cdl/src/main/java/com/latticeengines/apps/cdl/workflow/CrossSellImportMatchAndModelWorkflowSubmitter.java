@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -57,7 +57,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
     protected MetadataProxy metadataProxy;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private DataCollectionService dataCollectionService;
 
     @Autowired
     protected BatonService batonService;
@@ -107,7 +107,8 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
 
         String targetTableName = tableName + "_TargetTable";
-        DataCollection.Version version = proxyResourceService.getDataCollection(getCustomerSpace().toString()).getVersion();
+        DataCollection.Version version =
+                dataCollectionService.getDataCollection(getCustomerSpace().toString(), null).getVersion();
         CrossSellImportMatchAndModelWorkflowConfiguration.Builder builder = new CrossSellImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -167,7 +168,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .notesContent(parameters.getNotesContent()) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
-                .apsRollupPeriod(proxyResourceService
+                .apsRollupPeriod(dataCollectionService
                         .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version).getApsRollingPeriod());
         return builder.build();
     }

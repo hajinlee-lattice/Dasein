@@ -13,12 +13,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -33,7 +36,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionManagerServiceImpl.class);
 
-    private final ProxyResourceService proxyResourceService;
+    private final DataFeedService dataFeedService;
 
     private final WorkflowProxy workflowProxy;
 
@@ -43,22 +46,31 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
 
     private final SegmentService segmentService;
 
+    private final DataCollectionService dataCollectionService;
+
+    private final ActionService actionService;
+
     @Resource(name = "localCacheService")
     private CacheService localCacheService;
 
     @Inject
     public DataCollectionManagerServiceImpl(WorkflowProxy workflowProxy, RatingEngineService ratingEngineService, EntityProxy entityProxy,
-                                            SegmentService segmentService, ProxyResourceService proxyResourceService) {
+                                            SegmentService segmentService, DataFeedService dataFeedService, DataCollectionService dataCollectionService,
+                                            ActionService actionService) {
         this.workflowProxy = workflowProxy;
         this.ratingEngineService = ratingEngineService;
         this.entityProxy = entityProxy;
         this.segmentService = segmentService;
-        this.proxyResourceService = proxyResourceService;
+        this.dataFeedService = dataFeedService;
+        this.dataCollectionService = dataCollectionService;
+        this.actionService = actionService;
     }
 
     @Override
     public boolean resetAll(String customerSpaceStr) {
-        DataFeed df = proxyResourceService.getDataFeed(customerSpaceStr);
+        CustomerSpace customerSpace = CustomerSpace.parse(customerSpaceStr);
+        String customerSpaceParseStr = customerSpace.toString();
+        DataFeed df = dataFeedService.getOrCreateDataFeed(customerSpaceParseStr);
         DataFeed.Status status = df.getStatus();
         if ((status == DataFeed.Status.Deleting) || (status == DataFeed.Status.Initing)) {
             return true;
@@ -67,21 +79,19 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         if (status == DataFeed.Status.ProcessAnalyzing) {
             quiesceDataFeed(customerSpaceStr, df);
         }
-
-        proxyResourceService.updateDataFeedStatus(customerSpaceStr, DataFeed.Status.Initing.getName());
-
+        dataFeedService.updateDataFeed(customerSpaceParseStr, "", DataFeed.Status.Initing.getName());
         resetBatchStore(customerSpaceStr, BusinessEntity.Contact);
         resetBatchStore(customerSpaceStr, BusinessEntity.Account);
 
-        resetImport(customerSpaceStr);
-
+        resetImport(customerSpaceParseStr);
         return true;
-
     }
 
     @Override
     public boolean resetEntity(String customerSpaceStr, BusinessEntity entity) {
-        DataFeed df = proxyResourceService.getDataFeed(customerSpaceStr);
+        CustomerSpace customerSpace = CustomerSpace.parse(customerSpaceStr);
+        String customerSpaceParseStr = customerSpace.toString();
+        DataFeed df = dataFeedService.getOrCreateDataFeed(customerSpaceParseStr);
         DataFeed.Status status = df.getStatus();
         if ((status == DataFeed.Status.Deleting) || (status == DataFeed.Status.Initing)
                 || (status == DataFeed.Status.InitialLoaded)) {
@@ -90,7 +100,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
             return false;
         }
         resetBatchStore(customerSpaceStr, entity);
-        proxyResourceService.updateDataFeedStatus(customerSpaceStr, DataFeed.Status.InitialLoaded.getName());
+        dataFeedService.updateDataFeed(customerSpaceParseStr, "",DataFeed.Status.InitialLoaded.getName());
         return true;
     }
 
@@ -112,16 +122,17 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         DataFeedExecution exec = df.getActiveExecution();
         if (exec != null) {
             stopWorkflow(customerSpaceStr, exec.getWorkflowId());
-            proxyResourceService.finishExecution(customerSpaceStr, DataFeed.Status.Active.getName());
+            dataFeedService.finishExecution(CustomerSpace.parse(customerSpaceStr).toString(), "",
+                    DataFeed.Status.Active.getName());
         }
     }
 
     private void resetImport(String customerSpaceStr) {
-        proxyResourceService.resetImport(customerSpaceStr);
+        dataFeedService.resetImport(customerSpaceStr, "");
     }
 
     private void resetBatchStore(String customerSpaceStr, BusinessEntity entity) {
-        proxyResourceService.resetTable(customerSpaceStr, entity.getBatchStore());
+        dataCollectionService.resetTable(customerSpaceStr, null, entity.getBatchStore());
     }
 
     @Override
@@ -140,7 +151,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
                         log.error("Failed to get " + entity + " count for segment " + segment.getName());
                     }
                     segmentService.createOrUpdateSegment(segment);
-                    proxyResourceService.registerAction(ActionContext.getAction(), "DEFAULT_USER");
+                    actionService.registerAction(ActionContext.getAction(), "DEFAULT_USER");
                 }
                 updateRatingEngineCounts(segment.getName());
             });

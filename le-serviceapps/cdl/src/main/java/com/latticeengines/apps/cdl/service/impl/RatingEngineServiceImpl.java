@@ -37,10 +37,10 @@ import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PlayService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
@@ -152,7 +152,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private BucketedScoreProxy bucketedScoreProxy;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private ServingStoreService servingStoreService;
 
     @Inject
     private DependencyChecker dependencyChecker;
@@ -663,7 +663,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (aiModel.getIteration() == 1) {
                 Set<Category> selectedCategories = CustomEventModelingDataStoreUtil
                         .getCategoriesByDataStores(dataStores);
-                Flux<ColumnMetadata> flux = proxyResourceService.getNewModelingAttrs(customerSpace,
+                Flux<ColumnMetadata> flux = servingStoreService.getNewModelingAttrs(customerSpace,
                         BusinessEntity.Account, null);
                 List<ColumnMetadata> userSelectedAttributesForModeling = flux.filter(cm -> selectedCategories.contains(cm.getCategory()))
                         .collectList().block();

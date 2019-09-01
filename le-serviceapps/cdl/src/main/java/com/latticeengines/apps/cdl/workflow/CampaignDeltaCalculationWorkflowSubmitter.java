@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -25,12 +25,12 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
     private static final Logger log = LoggerFactory.getLogger(CampaignDeltaCalculationWorkflowSubmitter.class);
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private DataCollectionService dataCollectionService;
 
     public ApplicationId submit(String customerSpace, String playId, String channelId) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignDeltaCalculationWorkflow");
-        DataCollection.Version version = proxyResourceService.getActiveVersion(getCustomerSpace().toString());
+        DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
         log.info("In Submitter: " + customerSpace);
         CampaignDeltaCalculationWorkflowConfiguration configuration = new CampaignDeltaCalculationWorkflowConfiguration.Builder()
                 .workflow("campaignDeltaCalculationWorkflow") //

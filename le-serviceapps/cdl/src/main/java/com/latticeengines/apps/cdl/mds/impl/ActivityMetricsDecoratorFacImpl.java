@@ -28,7 +28,8 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.ActivityMetricsDecoratorFac;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
+import com.latticeengines.apps.cdl.service.ActivityMetricsService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DummyDecorator;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -77,13 +79,16 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
     private String s3Bucket;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private ActivityMetricsService activityMetricsService;
 
     @Inject
     private S3Service s3Service;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @Override
     public Decorator getDecorator(Namespace1<String> namespace) {
@@ -117,13 +122,12 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
     }
 
     private Pair<Map<String, List<Product>>, List<ActivityMetrics>> getProductMapAndMetrics(CustomerSpace customerSpace) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
-        Tenant preTenant = MultiTenantContext.getTenant();
-        MultiTenantContext.setTenant(tenant);
         Map<String, List<Product>> productMap = loadProductMap(customerSpace);
-        List<ActivityMetrics> metrics = proxyResourceService.getActivityMetrics();
+        List<ActivityMetrics> metrics = activityMetricsService.findWithType(ActivityType.PurchaseHistory);
+        if (metrics == null) {
+            metrics = Collections.emptyList();
+        }
         Pair<Map<String, List<Product>>, List<ActivityMetrics>> result = Pair.of(productMap, metrics);
-        MultiTenantContext.setTenant(preTenant);
         return result;
     }
 
@@ -160,11 +164,11 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
      * @return ProductId -> [Products]
      */
     private Map<String, List<Product>> loadProductMap(CustomerSpace customerSpace) {
-        Tenant tenant = MultiTenantContext.getTenant();
         try (PerformanceTimer timer = new PerformanceTimer()) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
             MultiTenantContext.setTenant(tenant);
-            Table productTable = proxyResourceService.getTable(customerSpace.toString(),
-                    TableRoleInCollection.ConsolidatedProduct);
+            Table productTable = dataCollectionService.getTable(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedProduct, null);
             if (productTable == null) {
                 log.warn(
                         "Active product table with table role {} for tenant {} doesn't exist. "

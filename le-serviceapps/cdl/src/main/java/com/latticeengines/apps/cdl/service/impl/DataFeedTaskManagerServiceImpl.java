@@ -27,10 +27,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.DLTenantMappingService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.util.DiagnoseTable;
@@ -81,8 +81,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskManagerServiceImpl.class);
 
-    private final ProxyResourceService proxyResourceService;
-
     private final TenantService tenantService;
 
     private final DLTenantMappingService dlTenantMappingService;
@@ -123,12 +121,14 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private PlsInternalProxy plsInternalProxy;
 
     @Inject
-    public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter,
-            ProxyResourceService proxyResourceService, TenantService tenantService, DLTenantMappingService dlTenantMappingService,
-            CDLExternalSystemService cdlExternalSystemService, ActionService actionService, MetadataProxy metadataProxy,
-            AttrConfigEntityMgr attrConfigEntityMgr, S3Service s3Service, S3ImportFolderService s3ImportFolderService) {
+    private DataFeedService dataFeedService;
+
+    @Inject
+    public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter, TenantService tenantService,
+                                          DLTenantMappingService dlTenantMappingService, CDLExternalSystemService cdlExternalSystemService,
+                                          ActionService actionService, MetadataProxy metadataProxy, AttrConfigEntityMgr attrConfigEntityMgr,
+                                          S3Service s3Service, S3ImportFolderService s3ImportFolderService) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
-        this.proxyResourceService = proxyResourceService;
         this.tenantService = tenantService;
         this.dlTenantMappingService = dlTenantMappingService;
         this.cdlExternalSystemService = cdlExternalSystemService;
@@ -177,13 +177,13 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
-        DataFeedTask dataFeedTask = proxyResourceService.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask != null) {
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
                     schemaTable, dataFeedTask.getImportTemplate());
             crosscheckDataType(customerSpace, entity, source, newMeta, dataFeedTask.getUniqueId());
             Table originMeta = dataFeedTask.getImportTemplate();
-            DataFeed dataFeed = proxyResourceService.getDataFeed(customerSpace.toString());
+            DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace.toString());
             if (!dataFeedMetadataService.compareMetadata(originMeta, newMeta,
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
@@ -192,7 +192,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
-                proxyResourceService.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
+                dataFeedTaskService.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
                 if (sendEmail) {
                     sendS3TemplateChangeEmail(customerSpace.toString(), dataFeedTask, user, false);
@@ -226,16 +226,16 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             } else {
                 dataFeedTask.setTemplateDisplayName(feedType);
             }
-            proxyResourceService.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+            dataFeedTaskService.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             if (StringUtils.isEmpty(S3PathBuilder.getSystemNameFromFeedType(feedType))) {
                 String objectName = S3PathBuilder.getFolderNameFromFeedType(feedType);
                 dropBoxService.createFolder(customerSpace.toString(), null, formatFolder(objectName), "");
             }
             updateAttrConfig(newMeta, attrConfigs, entity, customerSpace);
             if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
-                DataFeed dataFeed = proxyResourceService.getDataFeed(customerSpace.toString());
+                DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace.toString());
                 if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
-                    proxyResourceService.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Initialized.getName());
+                    dataFeedService.updateDataFeed(customerSpace.toString(), "", DataFeed.Status.Initialized.getName());
                 }
             }
             if (sendEmail) {
@@ -294,7 +294,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
         }
         MultiTenantContext.setTenant(tenant);
-        DataFeedTask dataFeedTask = proxyResourceService.getDataFeedTask(customerSpace.toString(), taskIdentifier);
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace.toString(), taskIdentifier);
         if (dataFeedTask == null) {
             throw new RuntimeException("Cannot find the data feed task!");
         }
@@ -365,7 +365,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (StringUtils.isEmpty(importConfig.getS3FilePath())) {
             throw new IllegalArgumentException("Template path cannot be empty for S3 import!");
         }
-        DataFeedTask dataFeedTask = proxyResourceService.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
                 importConfig.getFeedType());
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new RuntimeException("Cannot find the template for S3 file: " + importConfig.getS3FilePath());
@@ -464,7 +464,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             entityList.add(entity);
         }
         for (BusinessEntity businessEntity : entityList) {
-            List<DataFeedTask> dataFeedTasks = proxyResourceService.getDataFeedTaskWithSameEntity(customerSpaceStr,
+            List<DataFeedTask> dataFeedTasks = dataFeedTaskService.getDataFeedTaskWithSameEntity(CustomerSpace.parse(customerSpaceStr).toString(),
                     businessEntity.name());
             if (CollectionUtils.isNotEmpty(dataFeedTasks)) {
                 allTasks.addAll(dataFeedTasks);
@@ -487,7 +487,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,
             String dataFeedTaskUniqueId) {
-        List<DataFeedTask> dataFeedTasks = proxyResourceService.getDataFeedTaskWithSameEntity(customerSpace.toString(),
+        List<DataFeedTask> dataFeedTasks = dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace.toString(),
                 entity);
         if (dataFeedTasks == null || dataFeedTasks.size() == 0) {
             return;

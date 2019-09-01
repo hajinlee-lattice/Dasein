@@ -31,8 +31,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
@@ -126,13 +126,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final S3ImportSystemService s3ImportSystemService;
 
-    private final ProxyResourceService proxyResourceService;
+    private final DataFeedService dataFeedService;
 
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(ProxyResourceService proxyResourceService, DataCollectionService dataCollectionService, WorkflowProxy workflowProxy,
+    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService, DataCollectionService dataCollectionService,
+                                           WorkflowProxy workflowProxy,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy, S3ImportSystemService s3ImportSystemService) {
-        this.proxyResourceService = proxyResourceService;
+        this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
         this.columnMetadataProxy = columnMetadataProxy;
@@ -163,7 +164,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_37014);
         }
 
-        DataFeed datafeed = proxyResourceService.getDataFeed(customerSpace);
+        DataFeed datafeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("customer: %s, data feed: %s, status: %s", customerSpace, datafeed.getName(),
                 datafeedStatus.getName()));
@@ -186,7 +187,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             } catch (Exception e) {
                 log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                         + ExceptionUtils.getStackTrace(e));
-                proxyResourceService.failExecution(customerSpace, datafeedStatus.getName());
+                dataFeedService.failExecution(customerSpace, "", datafeedStatus.getName());
                 throw new RuntimeException(String.format("Failed to submit %s's P&A migration workflow", customerSpace), e);
             }
         }
@@ -235,7 +236,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         } catch (Exception e) {
             log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                     + ExceptionUtils.getStackTrace(e));
-            proxyResourceService.failExecution(customerSpace, datafeedStatus.getName());
+            dataFeedService.failExecution(customerSpace, "", datafeedStatus.getName());
             throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace), e);
         }
     }
@@ -298,7 +299,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @VisibleForTesting
     List<Action> getActionsFromLastFailedPA(@NotNull String customerSpace, boolean inheritAllCompleteImportActions,
                                             List<Long> importActionPidsToInherit) {
-        DataFeedExecution lastDataFeedExecution = proxyResourceService.getLatestExecution(customerSpace,
+        DataFeedExecution lastDataFeedExecution = dataFeedService.getLatestExecution(customerSpace,
                 DataFeedExecutionJobType.PA);
         if (lastDataFeedExecution == null || lastDataFeedExecution.getWorkflowId() == null) {
             return Collections.emptyList();
@@ -526,11 +527,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
         }
-        DataFeed datafeed = proxyResourceService.getDataFeed(customerSpace);
+        DataFeed datafeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         List<Action> lastFailedActions = getActionsFromLastFailedPA(customerSpace, true, null);
-        Long workflowId = proxyResourceService.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
+        Long workflowId = dataFeedService.restartExecution(customerSpace, "", DataFeedExecutionJobType.PA);
         checkWorkflowId(customerSpace, datafeed, workflowId);
-
         try {
             log.info(String.format("restarted execution with workflowId=%s", workflowId));
             ApplicationId appId = workflowJobService.restart(workflowId, customerSpace, memory, autoRetry);
@@ -556,7 +556,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             return appId;
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            proxyResourceService.failExecution(customerSpace, datafeed.getStatus().getName());
+            dataFeedService.failExecution(customerSpace, "", datafeed.getStatus().getName());
             throw new RuntimeException(String.format("Failed to retry %s's P&A workflow", customerSpace));
         }
     }
@@ -667,7 +667,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private void checkWorkflowId(String customerSpace, DataFeed datafeed, Long workflowId) {
         if (workflowId == null) {
-            proxyResourceService.failExecution(customerSpace, datafeed.getStatus().getName());
+            dataFeedService.failExecution(customerSpace, "", datafeed.getStatus().getName());
             String msg = String.format(
                     "Failed to retry %s's P&A workflow because there's no workflow Id, run the new P&A workflow instead.",
                     customerSpace);
@@ -676,8 +676,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private void lockExecution(String customerSpace, Status datafeedStatus){
-        if (proxyResourceService.lockExecution(customerSpace, DataFeedExecutionJobType.PA) == null) {
+    private void lockExecution(String customerSpace, Status datafeedStatus) {
+        if (dataFeedService.lockExecution(customerSpace, "", DataFeedExecutionJobType.PA) == null) {
             String errorMessage;
             if (Status.Initing.equals(datafeedStatus) || Status.Initialized.equals(datafeedStatus)) {
                 errorMessage = String.format(
@@ -686,7 +686,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 errorMessage = String.format("We can't start processAnalyze workflow for %s by dataFeedStatus %s",
                         customerSpace, datafeedStatus.getName());
             }
-
             throw new RuntimeException(errorMessage);
         }
     }

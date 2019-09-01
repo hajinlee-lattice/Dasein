@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -39,7 +39,7 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     private BatonService batonService;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private LookupIdMappingService lookupIdMappingService;
@@ -57,7 +57,7 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION)
                 || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION);
         boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch, lookupIdMap);
-        DataCollection.Version version = proxyResourceService.getActiveVersion(getCustomerSpace().toString());
+        DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
         CampaignLaunchWorkflowConfiguration configuration = new CampaignLaunchWorkflowConfiguration.Builder()
                 .workflow("campaignLaunchWorkflow") //
                 .customer(getCustomerSpace()) //

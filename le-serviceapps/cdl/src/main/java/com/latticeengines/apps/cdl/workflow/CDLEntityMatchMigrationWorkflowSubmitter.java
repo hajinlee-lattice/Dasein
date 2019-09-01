@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
@@ -46,7 +46,7 @@ public class CDLEntityMatchMigrationWorkflowSubmitter extends WorkflowSubmitter 
     private DataFeedService dataFeedService;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private TenantService tenantService;
@@ -88,18 +88,17 @@ public class CDLEntityMatchMigrationWorkflowSubmitter extends WorkflowSubmitter 
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
-    private Map<BusinessEntity, Action> registerEmptyAction(CustomerSpace customerSpace, String userId,
-                                                            Long workflowPid) {
+    private Map<BusinessEntity, Action> registerEmptyAction(CustomerSpace customerSpace, String userId, Long workflowPid) {
         Map<BusinessEntity, Action> actionMap = new HashedMap<>();
-        if (proxyResourceService.getTable(customerSpace.toString(), BusinessEntity.Account.getBatchStore()) != null) {
+        if (dataCollectionService.getTable(customerSpace.toString(), BusinessEntity.Account.getBatchStore(), null) != null) {
             Action action = getAction(customerSpace, userId, workflowPid);
             actionMap.put(BusinessEntity.Account, actionService.create(action));
         }
-        if (proxyResourceService.getTable(customerSpace.toString(), BusinessEntity.Contact.getBatchStore()) != null) {
+        if (dataCollectionService.getTable(customerSpace.toString(), BusinessEntity.Contact.getBatchStore(), null) != null) {
             Action action = getAction(customerSpace, userId, workflowPid);
             actionMap.put(BusinessEntity.Contact, actionService.create(action));
         }
-        if (proxyResourceService.getTable(customerSpace.toString(), TableRoleInCollection.ConsolidatedRawTransaction) != null) {
+        if (dataCollectionService.getTable(customerSpace.toString(), TableRoleInCollection.ConsolidatedRawTransaction, null) != null) {
             Action action = getAction(customerSpace, userId, workflowPid);
             actionMap.put(BusinessEntity.Transaction, actionService.create(action));
         }

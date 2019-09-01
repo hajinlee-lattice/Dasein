@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -33,9 +32,6 @@ public class ServingStoreResource {
 
     @Inject
     private ServingStoreService servingStoreService;
-
-    @Inject
-    private ProxyResourceService proxyResourceService;
 
     @GetMapping(value = "/{entity}/decoratedmetadata")
     @ResponseBody
@@ -68,7 +64,7 @@ public class ServingStoreResource {
         if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
             throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
         }
-        return proxyResourceService.getNewModelingAttrs(customerSpace, entity, version);
+        return servingStoreService.getNewModelingAttrs(customerSpace, entity, version);
     }
 
     @GetMapping(value = "/allow-modeling")

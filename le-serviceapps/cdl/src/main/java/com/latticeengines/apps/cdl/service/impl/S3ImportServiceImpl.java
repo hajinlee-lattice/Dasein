@@ -14,12 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.S3ImportMessageService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
@@ -45,7 +44,7 @@ public class S3ImportServiceImpl implements S3ImportService {
     private DropBoxService dropBoxService;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private DataFeedTaskService dataFeedTaskService;
 
     @Inject
     private DataFeedTaskManagerService dataFeedTaskManagerService;
@@ -102,10 +101,10 @@ public class S3ImportServiceImpl implements S3ImportService {
                 log.info("FeedType: " + feedType);
                 Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
                 log.info("Tenant: " + tenant.getId());
-                String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
-                Tenant previousTenant = MultiTenantContext.getTenant();
-                MultiTenantContext.setTenant(tenant);
-                DataFeedTask dataFeedTask = proxyResourceService.getDataFeedTask(tenantId, SOURCE, feedType);
+                CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+                String tenantId = customerSpace.getTenantId();
+                DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace.toString(),
+                        SOURCE, feedType);
                 if (dataFeedTask == null) {
                     log.info(String.format("Template not exist for key: %s feedType %s", message.getKey(), feedType));
                     continue;
@@ -124,7 +123,6 @@ public class S3ImportServiceImpl implements S3ImportService {
                     dropBoxSet.add(message.getDropBox().getDropBox());
                     s3ImportMessageService.deleteMessage(message);
                 }
-                MultiTenantContext.setTenant(previousTenant);
             } catch (RuntimeException e) {
                 // Only log message instead of stack trace to reduce log.
                 log.error(String.format("Cannot submit import for: %s, error: %s", message.getKey(), e.getMessage()));

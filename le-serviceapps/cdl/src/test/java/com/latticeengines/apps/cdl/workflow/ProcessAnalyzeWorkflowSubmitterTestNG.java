@@ -26,7 +26,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -71,7 +71,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private ActionService actionService;
 
     @Mock
-    private ProxyResourceService proxyResourceService;
+    private DataFeedService dataFeedService;
 
     @Mock
     private WorkflowProxy workflowProxy;
@@ -169,7 +169,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")
     public void testGetInheritableActionsFromLastFailedPA(DataFeedExecution dataFeedExecution, Job workflowExection,
                                                           List<Action> actions, List<Long> inheritableActionIds) {
-        when(proxyResourceService.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
+        when(dataFeedService.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
         when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
 

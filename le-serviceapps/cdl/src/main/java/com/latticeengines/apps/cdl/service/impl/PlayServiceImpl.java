@@ -25,11 +25,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
-import com.latticeengines.apps.cdl.service.ProxyResourceService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -82,7 +82,7 @@ public class PlayServiceImpl implements PlayService {
     private RatingEngineService ratingEngineService;
 
     @Inject
-    private ProxyResourceService proxyResourceService;
+    private DataFeedService dataFeedService;
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
@@ -488,7 +488,7 @@ public class PlayServiceImpl implements PlayService {
 
     private Date findLastRefreshedDate() {
         Tenant tenant = MultiTenantContext.getTenant();
-        DataFeed dataFeed = proxyResourceService.getDataFeed(tenant.getId());
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(MultiTenantContext.getCustomerSpace().toString());
         return dataFeed.getLastPublished();
     }
 

@@ -32,4 +32,6 @@ public interface ActionService {
     List<Action> getActionsByJobPids(List<Long> jobPids);
 
     List<Action> findByOwnerIdAndActionStatus(Long ownerId, ActionStatus actionStatus);
+
+    void registerAction(Action action, String user);
 }
