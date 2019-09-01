@@ -80,4 +80,6 @@ public interface DataFeedService {
     Boolean increasedRetryCount(String customerSpace);
 
     AttributeLimit getAttributeQuotaLimit(String customerSpace);
+
+    DataFeedExecution getLatestExecution(String customerSpace, DataFeedExecutionJobType jobType);
 }

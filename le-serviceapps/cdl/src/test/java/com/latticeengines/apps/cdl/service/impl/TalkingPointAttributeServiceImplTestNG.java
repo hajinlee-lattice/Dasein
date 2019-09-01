@@ -76,6 +76,11 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
                 return null;
             }
 
+            @Override
+            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+                return null;
+            }
+
         });
         ((TalkingPointAttributeServiceImpl) talkingPointAttributeService)
                 .setServingStoreService(spiedServingStoreService);

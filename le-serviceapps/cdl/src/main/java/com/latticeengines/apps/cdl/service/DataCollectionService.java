@@ -93,4 +93,6 @@ public interface DataCollectionService {
     List<DataCollectionStatusHistory> getCollectionStatusHistory(String customerSpace);
 
     ImportTemplateDiagnostic diagnostic(String customerSpaceStr, Long dataCollectionTablePid);
+
+    Table getTable(String customerSpace, TableRoleInCollection role, DataCollection.Version version);
 }

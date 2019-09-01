@@ -53,7 +53,6 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.mds.MetadataStoreName;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
@@ -71,7 +70,6 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelin
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -154,12 +152,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public AIModel createOrUpdate(AIModel ratingModel, String ratingEngineId) {
-        Tenant tenant = MultiTenantContext.getTenant();
         if (ratingModel.getTrainingSegment() != null) {
             String segmentName = ratingModel.getTrainingSegment().getName();
-            MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(tenant.getId(), segmentName);
-            MetadataSegment segment = segmentDTO.getMetadataSegment();
-            segment.setPid(segmentDTO.getPrimaryKey());
+            MetadataSegment segment = segmentService.findByName(segmentName);
+            segment.setPid(segment.getPid());
             ratingModel.setTrainingSegment(segment);
         }
         if (ratingModel.getId() == null) {

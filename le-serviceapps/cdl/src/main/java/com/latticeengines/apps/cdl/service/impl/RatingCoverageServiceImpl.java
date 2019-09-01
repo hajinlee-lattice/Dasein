@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
@@ -36,6 +37,8 @@ import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -68,7 +71,6 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
@@ -99,7 +101,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     private EventProxy eventProxy;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private RatingProxy ratingProxy;
@@ -604,7 +606,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             unscoredFrontEndQuery.setContactRestriction(accountFrontEndQuery.getContactRestriction());
             coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
 
-            boolean hasContactTable = dataCollectionProxy.hasContact(tenant.getId(), null);
+            boolean hasContactTable = hasContact(tenant.getId(), null);
             // TODO: this is not working as expected. Though contact table
             // exists, this api still returns false.
             if (!hasContactTable) {
@@ -676,6 +678,12 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 .isNotNull().build();
         Restriction newContactRestriction = Restriction.builder().and(contactRestriction, emailFilter).build();
         return newContactRestriction;
+    }
+
+    private boolean hasContact(String customerSpace, DataCollection.Version version) {
+        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
+        Long count = status.getContactCount();
+        return count != null && count > 0;
     }
 
     private void processSingleSegmentIdModelRulesPair(Tenant tenant,

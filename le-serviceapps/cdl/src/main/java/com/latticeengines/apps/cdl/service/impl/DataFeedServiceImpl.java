@@ -583,4 +583,11 @@ public class DataFeedServiceImpl implements DataFeedService {
         limit.setContactAttributeQuotaLimit(contactLimit);
         return limit;
     }
+
+    @Override
+    public DataFeedExecution getLatestExecution(String customerSpace, DataFeedExecutionJobType jobType) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        DataFeed dataFeed = getDefaultDataFeed(customerSpace);
+        return getLatestExecution(customerSpace, dataFeed.getName(), jobType);
+    }
 }

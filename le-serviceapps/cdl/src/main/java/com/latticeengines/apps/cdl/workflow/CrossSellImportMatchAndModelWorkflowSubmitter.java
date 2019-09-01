@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -41,7 +42,6 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -57,7 +57,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
     protected MetadataProxy metadataProxy;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionService dataCollectionService;
 
     @Autowired
     protected BatonService batonService;
@@ -107,7 +107,8 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
 
         String targetTableName = tableName + "_TargetTable";
-        DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
+        DataCollection.Version version =
+                dataCollectionService.getDataCollection(getCustomerSpace().toString(), null).getVersion();
         CrossSellImportMatchAndModelWorkflowConfiguration.Builder builder = new CrossSellImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -167,7 +168,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .notesContent(parameters.getNotesContent()) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
-                .apsRollupPeriod(dataCollectionProxy
+                .apsRollupPeriod(dataCollectionService
                         .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version).getApsRollingPeriod());
         return builder.build();
     }
