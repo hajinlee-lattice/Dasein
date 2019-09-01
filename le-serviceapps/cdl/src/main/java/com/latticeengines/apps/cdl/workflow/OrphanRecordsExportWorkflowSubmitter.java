@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -39,8 +41,6 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.OrphanRecordsExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component("orphanRecordsExportWorkflowSubmitter")
 public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
@@ -53,13 +53,13 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
     private String microServiceHostPort;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedTaskService dataFeedTaskService;
 
     @Inject
     private AttrConfigService attrConfigService;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @WithWorkflowJobPid
     public ApplicationId submit(String customerSpace, OrphanRecordsExportRequest request,
@@ -70,14 +70,13 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         if (StringUtils.isBlank(request.getExportId())) {
             request.setExportId(UUID.randomUUID().toString());
         }
-
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (StringUtils.isBlank(request.getDataCollectionName())) {
-            String name = dataCollectionProxy.getDefaultDataCollection(customerSpace).getName();
+            String name = dataCollectionService.getDataCollection(customerSpace, null).getName();
             request.setDataCollectionName(name);
         }
-
         if (request.getArtifactVersion() == null) {
-            request.setArtifactVersion(dataCollectionProxy.getActiveVersion(customerSpace));
+            request.setArtifactVersion(dataCollectionService.getDataCollection(customerSpace, null).getVersion());
         }
         log.info("Use artifact version=" + request.getArtifactVersion().name());
 
@@ -91,8 +90,9 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
         artifact.setName(orphanRecordsType.getOrphanType());
         artifact.setUrl(null);
         artifact.setStatus(request.getOrphanRecordsArtifactStatus());
-        artifact = dataCollectionProxy.createDataCollectionArtifact(customerSpace, request.getArtifactVersion(),
-                artifact);
+
+        artifact = dataCollectionService.createArtifact(customerSpace, artifact.getName(), artifact.getUrl(),
+                artifact.getStatus(), request.getArtifactVersion());
         log.info("Created dataCollectionArtifact=" + JsonUtils.serialize(artifact));
 
         List<Attribute> importedAttributes = getImportAttributes(orphanRecordsType.getDataSource(),
@@ -172,7 +172,8 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private String getTableName(TableRoleInCollection tableRoleInCollection, DataCollection.Version version) {
-        Table table = dataCollectionProxy.getTable(getCustomerSpace().toString(), tableRoleInCollection, version);
+        Table table = dataCollectionService.getTable(getCustomerSpace().toString(), tableRoleInCollection,
+                version);
         if (table == null) {
             return null;
         }
@@ -181,7 +182,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
 
     private List<Attribute> getImportAttributes(String source, String dataFeedType, String entity) {
         String tenant = getCustomerSpace().toString();
-        DataFeedTask task = dataFeedProxy.getDataFeedTask(tenant, source, dataFeedType, entity);
+        DataFeedTask task = dataFeedTaskService.getDataFeedTask(tenant, source, dataFeedType, entity);
 
         if (task == null) {
             return null;

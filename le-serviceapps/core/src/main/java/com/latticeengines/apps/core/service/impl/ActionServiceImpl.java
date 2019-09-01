@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -134,4 +135,17 @@ public class ActionServiceImpl implements ActionService {
         return actionEntityMgr.findByOwnerIdAndActionStatus(ownerId, actionStatus);
     }
 
+    @Override
+    public void registerAction(Action action, String user) {
+        if (action != null) {
+            action.setTenant(MultiTenantContext.getTenant());
+            action.setActionInitiator(user);
+            log.info(String.format("Registering action %s", action));
+            ActionConfiguration actionConfig = action.getActionConfiguration();
+            if (actionConfig != null) {
+                action.setDescription(actionConfig.serialize());
+            }
+            create(action);
+        }
+    }
 }

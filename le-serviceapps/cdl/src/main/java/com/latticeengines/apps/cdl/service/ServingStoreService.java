@@ -29,4 +29,5 @@ public interface ServingStoreService {
     Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity,
                                                    DataCollection.Version version);
 
+    Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version);
 }

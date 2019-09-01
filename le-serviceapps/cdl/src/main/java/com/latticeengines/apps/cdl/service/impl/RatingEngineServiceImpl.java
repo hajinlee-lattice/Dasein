@@ -40,6 +40,7 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
@@ -88,7 +89,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
@@ -152,7 +152,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private BucketedScoreProxy bucketedScoreProxy;
 
     @Inject
-    private ServingStoreProxy servingStoreProxy;
+    private ServingStoreService servingStoreService;
 
     @Inject
     private DependencyChecker dependencyChecker;
@@ -663,10 +663,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (aiModel.getIteration() == 1) {
                 Set<Category> selectedCategories = CustomEventModelingDataStoreUtil
                         .getCategoriesByDataStores(dataStores);
-                List<ColumnMetadata> userSelectedAttributesForModeling = servingStoreProxy
-                        .getNewModelingAttrs(customerSpace).filter(cm -> selectedCategories.contains(cm.getCategory()))
+                Flux<ColumnMetadata> flux = servingStoreService.getNewModelingAttrs(customerSpace,
+                        BusinessEntity.Account, null);
+                List<ColumnMetadata> userSelectedAttributesForModeling = flux.filter(cm -> selectedCategories.contains(cm.getCategory()))
                         .collectList().block();
-
                 if (CollectionUtils.isEmpty(userSelectedAttributesForModeling)) {
                     errors.add(LedpCode.LEDP_40044.getMessage());
                 }

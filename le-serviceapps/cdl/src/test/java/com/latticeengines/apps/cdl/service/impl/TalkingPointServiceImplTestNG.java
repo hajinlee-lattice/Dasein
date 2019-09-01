@@ -22,18 +22,17 @@ import com.latticeengines.apps.cdl.dao.DataCollectionDao;
 import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.dao.PlayTypeDao;
 import com.latticeengines.apps.cdl.dao.SegmentDao;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayType;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -52,7 +51,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Autowired
     private DataCollectionDao dataCollectionDao;
 
-    private PlayProxy playProxy;
+    private PlayService playService;
 
     private static final String PLAY_DISPLAY_NAME = "Test TP Plays hard";
     private static final String PLAY_TYPE_DISPLAY_NAME = "TestTPPlayType";
@@ -66,10 +65,9 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironment();
         testPlayType = createTestPlayType();
         testPlay = createTestPlay();
-        playProxy = spy(new PlayProxy());
-        ((TalkingPointServiceImpl) talkingPointService).setPlayProxy(playProxy);
-        doReturn(testPlay).when(playProxy).getPlay(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                testPlay.getName());
+        playService = spy(new PlayServiceImpl());
+        ((TalkingPointServiceImpl) talkingPointService).setPlayService(playService);
+        doReturn(testPlay).when(playService).getFullPlayByName(testPlay.getName(), false);
     }
 
     @Test(groups = "functional")

@@ -22,6 +22,7 @@ import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -194,4 +195,17 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         return flux;
     }
 
+    @Override
+    public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+        Flux<ColumnMetadata> flux = getDecoratedMetadata(customerSpace, entity, version,
+                Collections.singletonList(ColumnSelection.Predefined.Model));
+        flux = flux.map(cm -> {
+            cm.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS));
+            if (cm.getTagList() == null || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
+                cm.setTagList(Collections.singletonList(Tag.INTERNAL));
+            }
+            return cm;
+        });
+        return flux;
+    }
 }

@@ -84,12 +84,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("get dataCollection status", url, DataCollectionStatus.class);
     }
 
-    public boolean hasContact(String customerSpace, DataCollection.Version version) {
-        DataCollectionStatus status = getOrCreateDataCollectionStatus(customerSpace, version);
-        Long count = status.getContactCount();
-        return count != null && count > 0;
-    }
-
     public void saveOrUpdateDataCollectionStatus(String customerSpace, DataCollectionStatus detail,
             DataCollection.Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/version/{version}/status",

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.util.ArtifactUtils;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
@@ -44,7 +45,6 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
@@ -81,7 +81,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
 
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionService dataCollectionService;
 
     private RatingEngineType ratingEngineType;
 
@@ -166,7 +166,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
         boolean isLPI = CustomEventModelingType.LPI.equals(parameters.getCustomEventModelingType());
         DataCollection.Version version = null;
         if (!isLPI) {
-            version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
+            version = dataCollectionService.getDataCollection(getCustomerSpace().toString(), null).getVersion();
         }
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
         String idColumnName = InterfaceName.InternalId.name();
@@ -243,7 +243,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
                 .apsRollupPeriod(isLPI ? null
-                        : dataCollectionProxy.getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version)
+                        : dataCollectionService.getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version)
                                 .getApsRollingPeriod())
                 .build();
         return configuration;
