@@ -1,4 +1,4 @@
-package com.latticeengines.pls.util;
+package com.latticeengines.playmaker.util;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,28 +18,15 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
 
     private static final List<String> loggingForUris = //
             Arrays.asList( //
-                    "/pls/entities/counts", //
-                    "/pls/accounts/count", //
-                    "/pls/accounts/data", //
-                    "/pls/contacts/count", //
-                    "/pls/contacts/data", //
-                    "/pls/products/data", //
-                    "/pls/datacollection/segment", //
-                    "/pls/datacollection/segments/export", //
-                    "/pls/ratingengines/(.*)/entitypreview/count", //
-                    "/pls/ratingengines/coverage", //
-                    "/pls/ratingengines/coverage/segment/(.*)", //
-                    "/pls/dante/attributes", //
-                    "/pls/dante/attributes/accountattributes", //
-                    "/pls/play/(.*)/launches/(.*)/launch", //
-                    "/pls/play/(.*)/launches/(.*)/kickoff-launch");
+                    "/playmaker/contactextensionschema", //
+                    "/playmaker/plays");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (loggingForUris.stream().anyMatch(str -> request.getRequestURI().matches(str))) {
 
             long startTime = System.currentTimeMillis();
-            log.info("PLS Request URL:" + request.getRequestURL().toString() + " Start Time=" + startTime);
+            log.info("Playmaker Request URL:" + request.getRequestURL().toString() + " Start Time=" + startTime);
             request.setAttribute(START_TIME, startTime);
         }
         return true;
@@ -51,7 +38,7 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
         if (loggingForUris.stream().anyMatch(str -> request.getRequestURI().matches(str))) {
             long startTime = (Long) request.getAttribute(START_TIME);
 
-            log.info("PLS Request URL:" + request.getRequestURL().toString() + " Time Taken="
+            log.info("Playmaker Request URL:" + request.getRequestURL().toString() + " Time Taken="
                     + (System.currentTimeMillis() - startTime) + "ms");
         }
     }
