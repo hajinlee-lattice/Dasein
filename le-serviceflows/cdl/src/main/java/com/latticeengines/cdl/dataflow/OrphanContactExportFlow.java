@@ -1,5 +1,10 @@
 package com.latticeengines.cdl.dataflow;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerContactId;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,9 +43,10 @@ public class OrphanContactExportFlow extends TypesafeDataFlowBuilder<OrphanConta
         srcContact = srcContact.join(new FieldList(InterfaceName.AccountId.name()),
                 srcAccount, new FieldList(renamedAccountId), JoinType.LEFT);
 
-        return srcContact
+        srcContact = srcContact
                 .filter(String.format("%s == null", renamedAccountId), new FieldList(renamedAccountId))
                 .retain(new FieldList(retainFields));
+        return finalizeSchema(srcContact);
     }
 
     private Node renameFields(Node node, String oldName, String newName) {
@@ -48,5 +54,15 @@ public class OrphanContactExportFlow extends TypesafeDataFlowBuilder<OrphanConta
         List<String> newNames = new ArrayList<>(oldNames);
         newNames.set(oldNames.indexOf(oldName), newName);
         return node.rename(new FieldList(oldNames), new FieldList(newNames));
+    }
+
+    private Node finalizeSchema(Node node) {
+        if (node.getSchema(AccountId.name()) == null && node.getSchema(CustomerAccountId.name()) != null) {
+            node = node.rename(new FieldList(CustomerAccountId.name()), new FieldList(AccountId.name()));
+        }
+        if (node.getSchema(ContactId.name()) == null && node.getSchema(CustomerContactId.name()) != null) {
+            node = node.rename(new FieldList(CustomerContactId.name()), new FieldList(ContactId.name()));
+        }
+        return node;
     }
 }

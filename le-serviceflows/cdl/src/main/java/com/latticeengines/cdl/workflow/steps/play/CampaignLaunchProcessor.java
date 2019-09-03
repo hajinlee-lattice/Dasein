@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -48,6 +47,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
+import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ExportFieldMetadataProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
@@ -80,9 +80,6 @@ public class CampaignLaunchProcessor {
 
     @Autowired
     private JobService jobService;
-
-    @Autowired
-    private ChannelConfigProcessor channelConfigProcessor;
 
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
@@ -199,7 +196,7 @@ public class CampaignLaunchProcessor {
         LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
                 launch.getDestinationOrgId(), launch.getDestinationSysType());
         CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
-        if (channelConfigProcessor.shouldApplyEmailFilter(destinationSystemName, launch.getChannelConfig())) {
+        if (ChannelConfigUtil.shouldApplyEmailFilter(destinationSystemName, launch.getChannelConfig())) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
                     accountFrontEndQuery.getContactRestriction().getRestriction());
@@ -211,7 +208,7 @@ public class CampaignLaunchProcessor {
             contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForContactQuery));
         }
 
-        if (channelConfigProcessor.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName,
+        if (ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName,
                 launch.getChannelConfig())) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newAccountRestrictionForAccountQuery = applyAccountNameOrWebsiteFilterToAccountRestriction(

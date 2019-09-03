@@ -14,6 +14,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import javax.inject.Inject;
@@ -93,9 +95,9 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     private String dropFolderTagValue;
 
     private AtlasExport atlasExport;
-    private boolean saveCsvToLocal;
+    protected boolean saveCsvToLocal;
 
-    @BeforeClass(groups = "deployment" )
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
         checkpointService.resumeCheckpoint( //
@@ -105,7 +107,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         saveCsvToLocal = false;
     }
 
-    @BeforeClass(groups = "manual" )
+    @BeforeClass(groups = "manual")
     public void setupManual() throws Exception {
         boolean useExistingTenant = false;
         if (useExistingTenant) {
@@ -126,10 +128,10 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
     }
 
     @Override
-    @Test(groups = { "deployment", "manual" })
+    @Test(groups = {"deployment", "manual"})
     public void testWorkflow() throws Exception {
-        DataCollection.Version version = dataCollectionService.getActiveVersion(mainCustomerSpace);
         EntityExportRequest request = new EntityExportRequest();
+        DataCollection.Version version = dataCollectionService.getActiveVersion(mainCustomerSpace);
         request.setDataCollectionVersion(version);
         atlasExport = atlasExportService.createAtlasExport(mainTestCustomerSpace.toString(),
                 AtlasExportType.ACCOUNT_AND_CONTACT);
@@ -160,7 +162,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         Assert.assertNotNull(atlasExport);
         Assert.assertNotNull(atlasExport.getFilesUnderDropFolder());
         Assert.assertTrue(atlasExport.getFilesUnderDropFolder().size() > 0);
-        Assert.assertEquals(atlasExport.getFilesUnderDropFolder().size(), 2);
+        Assert.assertEquals(atlasExport.getFilesUnderDropFolder().size(), 1);
         String targetPath = s3ExportFolderService.getDropFolderExportPath(mainTestCustomerSpace.toString(),
                 atlasExport.getExportType(), atlasExport.getDatePrefix(), "");
         boolean hasAccountCsv = false;
@@ -170,7 +172,9 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             Assert.assertTrue(tagList.size() > 0);
             Assert.assertEquals(tagList.get(0).getKey(), dropFolderTag);
             Assert.assertEquals(tagList.get(0).getValue(), dropFolderTagValue);
-            if (fileName.equalsIgnoreCase("Account.csv.gz")) {
+            Pattern pattern = Pattern.compile("^AccountContact.*\\.csv\\.gz$");
+            Matcher matcher = pattern.matcher(fileName);
+            if (matcher.find()) {
                 hasAccountCsv = true;
                 InputStream csvStream = s3Service.readObjectAsStream(s3Bucket, targetPath + fileName);
                 if (saveCsvToLocal) {
@@ -183,13 +187,13 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
                     }
                     csvStream = s3Service.readObjectAsStream(s3Bucket, targetPath + fileName);
                 }
-                verifyAccountCsvGz(csvStream);
+                verifyAccountContactCsvGz(csvStream);
             }
         }
         Assert.assertTrue(hasAccountCsv, "Cannot find Account csv in s3 folder.");
     }
 
-    private void configExportAttrs() {
+    protected void configExportAttrs() {
         AttrConfig enable1 = enableExport(BusinessEntity.Account, "user_Test_Date"); // date attr
         AttrConfig enable2 = enableExport(BusinessEntity.Account, "TechIndicator_OracleCommerce"); // bit encode
         AttrConfig enable3 = enableExport(BusinessEntity.Account, "CHIEF_EXECUTIVE_OFFICER_NAME"); // non-segmentable
@@ -210,18 +214,13 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         return attrConfig;
     }
 
-    private void verifyAccountCsvGz(InputStream s3Stream) {
+    private void verifyAccountContactCsvGz(InputStream s3Stream) {
         try {
             InputStream gzipIs = new GZIPInputStream(s3Stream);
             Reader in = new InputStreamReader(gzipIs);
             CSVParser records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             Map<String, Integer> headerMap = records.getHeaderMap();
-            Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
-            Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
-            Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"), //
-                    "Header map: " + JsonUtils.serialize(headerMap));
-            Assert.assertTrue(headerMap.containsKey(InterfaceName.AtlasExportTime.name()), //
-                    "Header map: " + JsonUtils.serialize(headerMap));
+            verifyCsvGzHeder(headerMap);
             // FIXME: This purchase history attribute is deprecated due to
             // product table doesn't exist in S3. Should improve checkpoint.
             // Assert.assertTrue(headerMap.containsKey("CMT3: Glassware: % Share
@@ -248,4 +247,10 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         }
     }
 
+    protected void verifyCsvGzHeder(Map<String, Integer> headerMap) {
+        Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
+        Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
+        Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"), "Header map: " + JsonUtils.serialize(headerMap));
+        Assert.assertTrue(headerMap.containsKey(InterfaceName.AtlasExportTime.name()), "Header map: " + JsonUtils.serialize(headerMap));
+    }
 }
