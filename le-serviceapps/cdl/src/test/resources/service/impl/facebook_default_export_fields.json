@@ -125,7 +125,7 @@
     "entity": "Account",
     "javaClass": "String",
     "externalSystemName": "Facebook",
-    "standardField": true,
+    "standardField": false,
     "exportEnabled": false,
     "historyEnabled": true
   },
@@ -355,7 +355,7 @@
     "entity": "Contact",
     "javaClass": "String",
     "externalSystemName": "Facebook",
-    "standardField": true,
+    "standardField": false,
     "exportEnabled": false,
     "historyEnabled": true
   },

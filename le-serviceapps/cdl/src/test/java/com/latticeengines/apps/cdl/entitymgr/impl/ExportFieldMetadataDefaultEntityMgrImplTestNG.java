@@ -3,11 +3,14 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -42,6 +45,8 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         if (defaultMarketoExportFields.size() == 0) {
             createDefaultExportFields(CDLExternalSystemName.Marketo);
+        }else {
+            defaultMarketoExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Marketo, defaultMarketoExportFields);
         }
 
         defaultS3ExportFields = defaultExportFieldMetadataEntityMgr
@@ -49,6 +54,8 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         if (defaultS3ExportFields.size() == 0) {
             createDefaultExportFields(CDLExternalSystemName.AWS_S3);
+        }else {
+            defaultS3ExportFields = updateFieldMetadataDefault(CDLExternalSystemName.AWS_S3, defaultS3ExportFields);
         }
 
         defaultLinkedInExportFields = defaultExportFieldMetadataEntityMgr
@@ -56,6 +63,8 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         if (defaultLinkedInExportFields.size() == 0) {
             defaultLinkedInExportFields = createDefaultExportFields(CDLExternalSystemName.LinkedIn);
+        }else {
+            defaultLinkedInExportFields = updateFieldMetadataDefault(CDLExternalSystemName.LinkedIn, defaultLinkedInExportFields);
         }
 
         defaultFacebookExportFields = defaultExportFieldMetadataEntityMgr
@@ -63,6 +72,8 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         if (defaultFacebookExportFields.size() == 0) {
             defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Facebook);
+        }else {
+            defaultFacebookExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Facebook, defaultFacebookExportFields);
         }
 
 
@@ -71,6 +82,8 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         if (defaultOutreachExportFields.size() == 0) {
             defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
+        }else {
+            defaultOutreachExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Outreach, defaultOutreachExportFields);
         }
 
 
@@ -165,6 +178,43 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
                 .convertList(JsonUtils.deserialize(inputStream, List.class), ExportFieldMetadataDefaults.class);
         defaultExportFieldMetadataEntityMgr.createAll(defaultExportFields);
         return defaultExportFields;
+    }
+
+    private List<ExportFieldMetadataDefaults> updateFieldMetadataDefault(CDLExternalSystemName systemName, List<ExportFieldMetadataDefaults> oldDefaultExportFields){
+        String filePath = String.format("service/impl/%s_default_export_fields.json",
+            systemName.toString().toLowerCase());
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
+        List<ExportFieldMetadataDefaults> defaultExportFields = JsonUtils
+            .convertList(JsonUtils.deserialize(inputStream, List.class), ExportFieldMetadataDefaults.class);
+
+        List<ExportFieldMetadataDefaults> listToSave = new ArrayList<>();
+        List<ExportFieldMetadataDefaults> listToCreate = new ArrayList<>();
+        defaultExportFields.forEach( defaultField -> {
+            ExportFieldMetadataDefaults updated = oldDefaultExportFields.stream()
+                .filter( oldField -> defaultField.getAttrName().equals(oldField.getAttrName()) && defaultField.getExternalSystemName().equals((oldField.getExternalSystemName())))
+                .findAny()
+                .orElse(null);
+            if(updated != null){
+                defaultField.setPid(updated.getPid());
+                log.info(defaultField.getAttrName() + "  " + defaultField.getStandardField());
+                listToSave.add(defaultField);
+            }else {
+                listToCreate.add(defaultField);
+            }
+        });
+        List<ExportFieldMetadataDefaults> listCreated = addNewFields(systemName, listToCreate);
+        List<ExportFieldMetadataDefaults> finalList = Stream.of(listCreated, listToSave)
+            .flatMap(x -> x.stream())
+            .collect(Collectors.toList());
+        return defaultExportFieldMetadataEntityMgr.updateDefaultFields(systemName, finalList);
+    }
+
+    private List<ExportFieldMetadataDefaults> addNewFields(CDLExternalSystemName systemName, List<ExportFieldMetadataDefaults> newFields){
+        if(!newFields.isEmpty()) {
+            return defaultExportFieldMetadataEntityMgr.createAll(newFields);
+        } else {
+            return newFields;
+        }
     }
 
 
