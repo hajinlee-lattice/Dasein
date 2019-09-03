@@ -10,8 +10,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.cdl.operationflow.service.impl.ChannelConfigProcessor;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToJsonFunction;
@@ -35,6 +32,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("playLaunchExportFileGeneratorStep")
@@ -42,9 +40,6 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaunchExportFilesGeneratorConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchExportFileGeneratorStep.class);
-
-    @Inject
-    private ChannelConfigProcessor channelConfigProcessor;
 
     @Override
     public void execute() {
@@ -116,8 +111,8 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
     }
 
     private boolean shouldIgnoreAccountsWithoutContacts(PlayLaunchExportFilesGeneratorConfiguration config) {
-        return config.getDestinationSysType() == CDLExternalSystemType.MAP || channelConfigProcessor
-                .isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
+        return config.getDestinationSysType() == CDLExternalSystemType.MAP
+                || ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 
     private class JsonFileExporter extends ExportFileCallable {
