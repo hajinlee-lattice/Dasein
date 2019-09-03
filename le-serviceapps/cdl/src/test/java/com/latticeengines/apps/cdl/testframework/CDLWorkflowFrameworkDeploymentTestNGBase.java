@@ -2,7 +2,11 @@ package com.latticeengines.apps.cdl.testframework;
 
 import static org.testng.Assert.assertNotNull;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
+
+import org.apache.commons.collections4.MapUtils;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -33,6 +37,16 @@ public abstract class CDLWorkflowFrameworkDeploymentTestNGBase extends CDLWorkfl
     protected void setupYarnPlatform() {
         platformTestBase = new YarnFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
+    }
+
+    protected void setupEnd2EndTestEnvironment(Map<String, Boolean> featureFlagMap) throws Exception {
+        if (MapUtils.isEmpty(featureFlagMap)) {
+            setupTestEnvironment();
+        } else {
+            setupTestEnvironmentWithFeatureFlags(featureFlagMap);
+            mainTestTenant = testBed.getMainTestTenant();
+            mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        }
     }
 
 }
