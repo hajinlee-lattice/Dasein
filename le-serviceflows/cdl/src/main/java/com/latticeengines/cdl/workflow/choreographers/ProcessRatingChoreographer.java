@@ -111,7 +111,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean shouldProcessRuleBased = false;
 
     private int iteration = 0;
-    private int effectiveIterations = 1;
+    private int effectiveIterations = -1;
     private boolean iterationFinished = false;
 
     @Override
@@ -167,8 +167,6 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                     RatingModelContainer.class);
             List<String> inactiveEngines = step.getListObjectFromContext(INACTIVE_ENGINES,
                     String.class);
-            List<?> generations = step.getObjectFromContext(RATING_MODELS_BY_ITERATION, List.class);
-            effectiveIterations = Math.max(1, CollectionUtils.size(generations));
             boolean hasEngines = CollectionUtils.isNotEmpty(containers) || CollectionUtils.isNotEmpty(inactiveEngines);
             hasDataChange = hasDataChange();
             checkActionImpactedEngines(step);
@@ -194,7 +192,15 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         }
     }
 
+    private void checkEffectiveIterations(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (effectiveIterations < 0) {
+            List<?> generations = step.getObjectFromContext(RATING_MODELS_BY_ITERATION, List.class);
+            effectiveIterations = Math.max(1, CollectionUtils.size(generations));
+        }
+    }
+
     private void initializeIteration(AbstractStep<? extends BaseStepConfiguration> step) {
+        checkEffectiveIterations(step);
         if (shouldRebuildAll || shouldRebuildSome) {
             if (!iterationFinished) {
                 if (!step.hasKeyInContext(CURRENT_RATING_ITERATION)) {
