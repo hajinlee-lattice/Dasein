@@ -55,10 +55,19 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
 
     private Object[][] expectedData = new Object[][] {
             // "AccountId", "Name", "LatticeAccountId"
-            { "A004", "Chihuahua", null },
-            { "A005", "Labrador Retriever", "" },
-            { "A007", "Alaskan Cod", "" },
-            { "A008", "Japanese Tofu", null }
+            { "A004", "Chihuahua", null }, //
+            { "A005", "Labrador Retriever", "" }, //
+            { "A007", "Alaskan Cod", "" }, //
+            { "A008", "Japanese Tofu", null } //
+    };
+
+    private Object[][] expectedEMData = new Object[][] {
+            // "AccountId" (renamed from "CustomerAccountId"), "Name",
+            // "LatticeAccountId"
+            { "CA004", "Chihuahua", null }, //
+            { "CA005", "Labrador Retriever", "" }, //
+            { "CA007", "Alaskan Cod", "" }, //
+            { "CA008", "Japanese Tofu", null } //
     };
 
     @Test(groups = "functional")
@@ -72,7 +81,7 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
     public void testUnmatchedAccountEMExportFlow() {
         UnmatchedAccountExportParameters parameters = prepareInput(accountEMData, true);
         executeDataFlow(parameters);
-        verifyResult(expectedData);
+        verifyResult(expectedEMData);
     }
 
     @Override
@@ -104,8 +113,13 @@ public class UnmatchedAccountExportFlowTestNG extends ServiceFlowsDataFlowFuncti
         uploadAvro(accountData, prepareAccountData(entityMatchEnabled), getAccountTable(entityMatchEnabled),
                 getAccountDir(entityMatchEnabled));
         parameters.setAccountTable(getAccountTable(entityMatchEnabled));
-        parameters.setValidatedColumns(
-                Arrays.asList(AccountId.name(), Name.name(), LatticeAccountId.name(), CustomerAccountId.name()));
+        if (entityMatchEnabled) {
+            parameters
+                    .setValidatedColumns(Arrays.asList(Name.name(), LatticeAccountId.name(), CustomerAccountId.name()));
+        } else {
+            parameters.setValidatedColumns(
+                    Arrays.asList(AccountId.name(), Name.name(), LatticeAccountId.name(), CustomerAccountId.name()));
+        }
         return parameters;
     }
 

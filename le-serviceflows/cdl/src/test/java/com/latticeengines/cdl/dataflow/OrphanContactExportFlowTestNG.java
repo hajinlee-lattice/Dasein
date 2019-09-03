@@ -72,18 +72,25 @@ public class OrphanContactExportFlowTestNG extends ServiceFlowsDataFlowFunctiona
             { "C002", "contact_2", "A002", "CC002", "CA002" }, //
             { "C003", "contact_3", "A003", "CC003", "CA003" }, //
             { "C004", "contact_4", "A003", "CC004", "CA004" }, //
-            { "C005", "contact_5", "A004", "CC005", "CA005" }, //
-            { "C006", "contact_6", "A004", "CC006", "CA006" }, //
-            { "C007", "contact_7", "A001", "CC007", "CA007" }, //
-            { "C008", "contact_8", "A999", "CC008", "CA008" }, //
-            { "C009", "contact_9", "A001", "CC009", "CA009" }, //
-            { "C010", "contact_10", "A888", "CC010", "CA010" } //
+            { "C005", "contact_5", "A004", "CC005", "CA004" }, //
+            { "C006", "contact_6", "A004", "CC006", "CA004" }, //
+            { "C007", "contact_7", "A001", "CC007", "CA001" }, //
+            { "C008", "contact_8", "A999", "CC008", "CA999" }, //
+            { "C009", "contact_9", "A001", "CC009", "CA001" }, //
+            { "C010", "contact_10", "A888", "CC010", "CA888" } //
     };
 
     private Object[][] expectedData = new Object[][] {
             // "ContactId", "ContactName", "AccountId"
             { "C010", "contact_10", "A888" }, //
             { "C008", "contact_8", "A999" } //
+    };
+
+    private Object[][] expectedEMData = new Object[][] {
+            // "ContactId" (renamed from "CustomerContactId"), "ContactName",
+            // "AccountId" (renamed from "CustomerAccountId")
+            { "CC010", "contact_10", "CA888" }, //
+            { "CC008", "contact_8", "CA999" } //
     };
 
     private Object[][] expectNullData = new Object[][] {
@@ -118,7 +125,7 @@ public class OrphanContactExportFlowTestNG extends ServiceFlowsDataFlowFunctiona
     public void testOrphanContactsEM() {
         OrphanContactExportParameters parameters = prepareInput(accountEMData, contactEMData, true);
         executeDataFlow(parameters);
-        verifyResult(expectedData, 2);
+        verifyResult(expectedEMData, 2);
     }
 
     @Override
@@ -152,8 +159,8 @@ public class OrphanContactExportFlowTestNG extends ServiceFlowsDataFlowFunctiona
         columns.add(Pair.of(ContactName.name(), String.class));
         columns.add(Pair.of(AccountId.name(), String.class));
         if (entityMatchEnabled) {
-            columns.add(Pair.of(CustomerAccountId.name(), String.class));
             columns.add(Pair.of(CustomerContactId.name(), String.class));
+            columns.add(Pair.of(CustomerAccountId.name(), String.class));
         }
         return columns;
     }
@@ -169,8 +176,13 @@ public class OrphanContactExportFlowTestNG extends ServiceFlowsDataFlowFunctiona
         uploadAvro(contactData, prepareContactData(entityMatchEnabled), getContactTable(entityMatchEnabled),
                 getContactDir(entityMatchEnabled));
         parameters.setContactTable(getContactTable(entityMatchEnabled));
-        parameters.setValidatedColumns(Arrays.asList(ContactId.name(), ContactName.name(), AccountId.name(),
-                CustomerContactId.name(), CustomerAccountId.name()));
+        if (entityMatchEnabled) {
+            parameters.setValidatedColumns(
+                    Arrays.asList(ContactName.name(), CustomerContactId.name(), CustomerAccountId.name()));
+        } else {
+            parameters.setValidatedColumns(Arrays.asList(ContactId.name(), ContactName.name(), AccountId.name(),
+                    CustomerContactId.name(), CustomerAccountId.name()));
+        }
         return parameters;
     }
 
