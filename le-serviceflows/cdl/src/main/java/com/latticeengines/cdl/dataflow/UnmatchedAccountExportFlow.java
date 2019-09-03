@@ -1,5 +1,10 @@
 package com.latticeengines.cdl.dataflow;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerContactId;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +27,18 @@ public class UnmatchedAccountExportFlow extends TypesafeDataFlowBuilder<Unmatche
         List<String> retainFields = srcAccount.getFieldNames().stream().filter(name -> validatedColumns.contains(name))
                 .collect(Collectors.toList());
         String lattceId = InterfaceName.LatticeAccountId.name();
-        return srcAccount.filter(String.format("%s == null || %s == \"\"", lattceId, lattceId),
+        srcAccount = srcAccount.filter(String.format("%s == null || %s == \"\"", lattceId, lattceId),
                 new FieldList(lattceId)).retain(new FieldList(retainFields));
+        return finalizeSchema(srcAccount);
+    }
+
+    private Node finalizeSchema(Node node) {
+        if (node.getSchema(AccountId.name()) == null && node.getSchema(CustomerAccountId.name()) != null) {
+            node = node.rename(new FieldList(CustomerAccountId.name()), new FieldList(AccountId.name()));
+        }
+        if (node.getSchema(ContactId.name()) == null && node.getSchema(CustomerContactId.name()) != null) {
+            node = node.rename(new FieldList(CustomerContactId.name()), new FieldList(ContactId.name()));
+        }
+        return node;
     }
 }
