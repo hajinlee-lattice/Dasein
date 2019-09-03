@@ -18,6 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataDefaultsEntityMgr;
+import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
@@ -30,6 +31,8 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
     @Inject
     private ExportFieldMetadataDefaultsEntityMgr defaultExportFieldMetadataEntityMgr;
+    @Inject
+    private ExportFieldMetadataDefaultsService exportService;
 
     List<ExportFieldMetadataDefaults> defaultMarketoExportFields;
     List<ExportFieldMetadataDefaults> defaultS3ExportFields;
@@ -99,9 +102,9 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultMarketoExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Marketo);
 
-        assertEquals(defaultMarketoExportFields.size(), 41);
+        assertEquals(defaultMarketoExportFields.size(), 42);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                35);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 24);
 
@@ -186,36 +189,7 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
         List<ExportFieldMetadataDefaults> defaultExportFields = JsonUtils
             .convertList(JsonUtils.deserialize(inputStream, List.class), ExportFieldMetadataDefaults.class);
-
-        List<ExportFieldMetadataDefaults> listToSave = new ArrayList<>();
-        List<ExportFieldMetadataDefaults> listToCreate = new ArrayList<>();
-        defaultExportFields.forEach( defaultField -> {
-            ExportFieldMetadataDefaults updated = oldDefaultExportFields.stream()
-                .filter( oldField -> defaultField.getAttrName().equals(oldField.getAttrName()) && defaultField.getExternalSystemName().equals((oldField.getExternalSystemName())))
-                .findAny()
-                .orElse(null);
-            if(updated != null){
-                defaultField.setPid(updated.getPid());
-                log.info(defaultField.getAttrName() + "  " + defaultField.getStandardField());
-                listToSave.add(defaultField);
-            }else {
-                listToCreate.add(defaultField);
-            }
-        });
-        List<ExportFieldMetadataDefaults> listCreated = addNewFields(systemName, listToCreate);
-        List<ExportFieldMetadataDefaults> finalList = Stream.of(listCreated, listToSave)
-            .flatMap(x -> x.stream())
-            .collect(Collectors.toList());
-        return defaultExportFieldMetadataEntityMgr.updateDefaultFields(systemName, finalList);
+        return exportService.updateDefaultFields(systemName, defaultExportFields);
     }
-
-    private List<ExportFieldMetadataDefaults> addNewFields(CDLExternalSystemName systemName, List<ExportFieldMetadataDefaults> newFields){
-        if(!newFields.isEmpty()) {
-            return defaultExportFieldMetadataEntityMgr.createAll(newFields);
-        } else {
-            return newFields;
-        }
-    }
-
 
 }
