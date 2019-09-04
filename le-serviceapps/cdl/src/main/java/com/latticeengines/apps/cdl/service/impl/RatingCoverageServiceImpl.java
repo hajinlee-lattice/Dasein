@@ -998,7 +998,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
 
         if (StringUtils.isBlank(request.getLookupId())) {
-            request.setRestrictNullLookupId(false);
+            throw new LedpException(LedpCode.LEDP_40070);
         }
 
         if (request.getRatingEngineIds().size() < thresholdForParallelProcessing) {
