@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -93,7 +94,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
      */
     @Test(groups = { "end2end", "precheckin" })
     public void end2endCDLStyleCustomEventModelTest() throws Exception {
-        setupEnd2EndTestEnvironment();
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        setupEnd2EndTestEnvironment(featureFlagMap);
         resumeCheckpoint(LOADING_CHECKPOINT);
         bootstrap(testType);
         runCustomEventModel(testType);
@@ -152,7 +155,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymen
             mainTestTenant = testBed.getMainTestTenant();
             mainCustomerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         } else {
-            setupEnd2EndTestEnvironment();
+            Map<String, Boolean> featureFlagMap = new HashMap<>();
+            featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+            setupEnd2EndTestEnvironment(featureFlagMap);
             resumeCheckpoint(LOADING_CHECKPOINT);
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
