@@ -782,16 +782,13 @@ public class CheckpointService {
     }
 
     /**
-     * For entity match enabled PA, when saving checkpoint for match lookup/seed
-     * table, need to publish all the preceding checkpoints' staging lookup/seed
-     * table instead of only current tenant.
-     * 
-     * Reason is in current tenant's staging table, only entries which are
-     * touched in match job exist, which means the staging table doesn't have
-     * complete entity universe for the tenant. Although serving table has
-     * complete entity universe, serving table doesn't support scan due to
-     * lookup performance concern.
-     * 
+     * For entity match enabled PA, when saving checkpoint for match lookup/seed table, need to publish all the
+     * preceding checkpoints' staging lookup/seed table instead of only current tenant.
+     *
+     * Reason is in current tenant's staging table, only entries which are touched in match job exist, which means the
+     * staging table doesn't have complete entity universe for the tenant. Although serving table has complete entity
+     * universe, serving table doesn't support scan due to lookup performance concern.
+     *
      * @param checkpointName
      * @param checkpointVersion
      */
@@ -816,7 +813,7 @@ public class CheckpointService {
 
             msg.append(
                     "Following APIs might take 5+ mins to respond -- Could track publish progress in tomcat console\n");
-            for (BusinessEntity businessEntity: Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
+            for (BusinessEntity businessEntity : Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)) {
                 msg.append("POST " + matchapiHostPort + "/match/matches/entity/publish/list\n");
                 msg.append("Body:\n");
 
@@ -864,8 +861,7 @@ public class CheckpointService {
         ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("entity-match-copy", 2);
         ThreadPoolUtils.runRunnablesInParallel(tp, Arrays.asList( //
                 copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Account.name()),
-                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Contact.name())
-        ), 10, 1);
+                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Contact.name())), 10, 1);
         tp.shutdown();
     }
 
@@ -880,10 +876,11 @@ public class CheckpointService {
         request.setDestTTLEnabled(true);
         request.setBumpupVersion(false);
         return () -> {
-            log.info("Start copying entity match table for " + entity);
+            log.info("Start copying entity match table for " + entity + " using request: "
+                    + JsonUtils.serialize(request));
             EntityPublishStatistics stats = matchProxy.publishEntity(request);
-            log.info("Copied {} {} seeds and {} {} lookup entries from tenant {} to tenant {}",
-                    stats.getSeedCount(), entity, //
+            log.info("Copied {} {} seeds and {} {} lookup entries from tenant {} to tenant {}", stats.getSeedCount(),
+                    entity, //
                     stats.getLookupCount(), entity, //
                     CustomerSpace.shortenCustomerSpace(srcTenant.getId()), //
                     CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
