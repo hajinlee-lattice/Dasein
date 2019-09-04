@@ -105,12 +105,12 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
     public void testScoringCountInSpark() {
         EventFrontEndQuery frontEndQuery = loadEventFrontEndQueryFromResource("prior.json");
         frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
-        String sql = eventQueryServiceSparkSql.getQueryStr(frontEndQuery.getDeepCopy(), EventType.Scoring, //
+        String sql = eventQueryServiceSparkSql.getQueryStr(frontEndQuery, EventType.Scoring, //
                 DataCollection.Version.Blue);
         System.out.println(sql);
-        long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery.getDeepCopy(),
-                DataCollection.Version.Blue);
+        long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery,DataCollection.Version.Blue);
         Assert.assertEquals(count, 5692L);
-        long count2 = eventQueryService.getScoringCount(frontEndQuery.getDeepCopy(), DataCollection.Version.Blue);
+        long count2 = eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertEquals(count2, count);
     }
 }

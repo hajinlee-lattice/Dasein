@@ -840,6 +840,7 @@ public enum LedpCode {
     LEDP_40067("Cannot update Export Field Metadata Mapping as LookupMap is empty"),
     LEDP_40068("Cannot find Export Field Metadata Service for CDL External System Name {0}."),
     LEDP_40069("Cannot find attribute name {0} in Export Field Metadata Defaults for {1} or in serving store."),
+    LEDP_40070("Cannot restrict by account ID if no account ID is selected for this Connection"),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."),

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,20 +52,23 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
     public BooleanExpression resolve(ConcreteRestriction restriction) {
         Lookup lhs = restriction.getLhs();
         Lookup rhs = restriction.getRhs();
+        ComparisonType operator = restriction.getRelation();
+        boolean negate = Boolean.TRUE.equals(restriction.getNegate());
 
-        boolean isBitEncoded = isBitEncoded(restriction);
+        boolean isBitEncoded = isBitEncoded(lhs, operator, rhs);
         boolean isBitEncodedNullQuery = false;
 
         if (isBitEncoded) {
+            // process bit encoded restrictions
             AttributeLookup attrLookup = (AttributeLookup) lhs;
-            if (ComparisonType.IS_NULL.equals(restriction.getRelation())) {
+            if (ComparisonType.IS_NULL.equals(operator)) {
                 // is null means bktId = 0
-                restriction.setRelation(ComparisonType.EQUAL);
+                operator = ComparisonType.EQUAL;
                 rhs = new ValueLookup(0);
                 isBitEncodedNullQuery = true;
-            } else if (ComparisonType.IS_NOT_NULL.equals(restriction.getRelation())) {
+            } else if (ComparisonType.IS_NOT_NULL.equals(operator)) {
                 // is not null means bktId != 0
-                restriction.setRelation(ComparisonType.NOT_EQUAL);
+                operator = ComparisonType.NOT_EQUAL;
                 rhs = new ValueLookup(0);
                 isBitEncodedNullQuery = true;
             } else if (rhs instanceof CollectionLookup) {
@@ -76,13 +80,17 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 ValueLookup valueLookup = (ValueLookup) rhs;
                 AttributeStats stats = findAttributeStats(attrLookup);
                 Buckets bkts = stats.getBuckets();
-                if (restriction.getRelation().isLikeTypeOfComparison()) {
-                    rhs = convertValueLookup(restriction, bkts, (String) valueLookup.getValue());
+                if (operator.isLikeTypeOfComparison()) {
+                    Pair<ComparisonType, Lookup> pair = //
+                            convertBitEncodedValueLookup(operator, bkts, (String) valueLookup.getValue());
+                    operator = pair.getLeft();
+                    rhs = pair.getRight();
                 } else {
-                    rhs = convertValueLookup(bkts, (String) valueLookup.getValue());
+                    rhs = convertBitEncodedValueLookup(bkts, (String) valueLookup.getValue());
                 }
             }
         } else if (lhs instanceof AttributeLookup) {
+            // if not bit encoded, need to cast the type of operands
             AttributeLookup attrLookup = (AttributeLookup) lhs;
             ColumnMetadata cm = getAttrRepo().getColumnMetadata(attrLookup);
             Class<?> javaClz = parseNumericalJavaClass(cm.getJavaClass());
@@ -102,71 +110,60 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             }
         }
 
-        if (Boolean.TRUE.equals(restriction.getNegate())) {
-            if (restriction.getRelation().equals(ComparisonType.NOT_EQUAL)) {
+        // simplify some negative restrictions
+        if (negate) {
+            if (ComparisonType.NOT_EQUAL.equals(operator)) {
                 log.info("Converting [Not NOT_EQUAL] to [EQUAL]");
-                restriction.setRelation(ComparisonType.EQUAL);
-                restriction.setNegate(false);
+                operator = ComparisonType.EQUAL;
+                negate = false;
             }
-            if (restriction.getRelation().equals(ComparisonType.NOT_CONTAINS)) {
+            if (ComparisonType.NOT_CONTAINS.equals(operator)) {
                 log.info("Converting [Not NOT_CONTAINS] to [CONTAINS]");
-                restriction.setRelation(ComparisonType.CONTAINS);
-                restriction.setNegate(false);
+                operator = ComparisonType.CONTAINS;
+                negate = false;
             }
-            if (restriction.getRelation().equals(ComparisonType.NOT_IN_COLLECTION)) {
+            if (ComparisonType.NOT_IN_COLLECTION.equals(operator)) {
                 log.info("Converting [Not NOT_IN_COLLECTION] to [IN_COLLECTION]");
-                restriction.setRelation(ComparisonType.IN_COLLECTION);
-                restriction.setNegate(false);
+                operator = ComparisonType.IN_COLLECTION;
+                negate = false;
             }
-            if (restriction.getRelation().equals(ComparisonType.IS_NOT_NULL)) {
+            if (ComparisonType.IS_NOT_NULL.equals(operator)) {
                 log.info("Converting [Not IS_NOT_NULL] to [IS_NULL]");
-                restriction.setRelation(ComparisonType.IS_NULL);
-                restriction.setNegate(false);
+                operator = ComparisonType.IS_NULL;
+                negate = false;
+
             }
         }
 
+        if (ComparisonType.EQUAL.equals(operator) && isNullValueLookup(rhs)) {
+            if (negate) {
+                log.info("Converting [Not EQUAL null] to [IS_NOT_NULL]");
+                operator = ComparisonType.IS_NOT_NULL;
+                negate = false;
+            } else {
+                log.info("Converting [EQUAL null] to [IS_NULL]");
+                operator = ComparisonType.IS_NULL;
+            }
+        }
+
+        // resolve lhs
         LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
         List<ComparableExpression> lhsPaths = lhsResolver.resolveForCompare(lhs);
         ComparableExpression lhsPath = lhsPaths.get(0);
 
-        if (restriction.getRelation().equals(ComparisonType.EQUAL) && isNullValueLookup(rhs)) {
-            if (restriction.getNegate()) {
-                restriction.setRelation(ComparisonType.IS_NOT_NULL);
-                restriction.setNegate(false);
-            } else {
-                restriction.setRelation(ComparisonType.IS_NULL);
-            }
-        }
-
-        if (restriction.getRelation().equals(ComparisonType.IS_NULL)) {
+        // resolve the whole boolean expression
+        if (ComparisonType.IS_NULL.equals(operator)) {
             return lhsPath.isNull();
-        } else if (restriction.getRelation().equals(ComparisonType.IS_NOT_NULL)) {
+        } else if (ComparisonType.IS_NOT_NULL.equals(operator)) {
             return lhsPath.isNotNull();
         } else {
             LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
             List<ComparableExpression> rhsPaths = rhsResolver.resolveForCompare(rhs);
 
-            BooleanExpression booleanExpression;
-
-            switch (restriction.getRelation()) {
+            BooleanExpression booleanExpression = null;
+            switch (operator) {
                 case EQUAL:
-                    if (rhs instanceof SubQueryAttrLookup) {
-                        SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
-                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                            booleanExpression = lhsPaths.get(0).eq((SQLQuery<?>) subQueryAttrLookup
-                                    .getSubQuery().getSubQueryExpression());
-                        } else {
-                            ComparableExpression<String> subselect = rhsResolver
-                                    .resolveForSubselect(rhs);
-                            booleanExpression = lhsPath.eq(subselect);
-                        }
-                    } else {
-                        if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
-                            booleanExpression = Expressions.asString(lhsPath).equalsIgnoreCase(rhsPaths.get(0));
-                        } else {
-                            booleanExpression = lhsPath.eq(rhsPaths.get(0));
-                        }
-                    }
+
                     break;
                 case NOT_EQUAL:
                     if (rhs instanceof SubQueryAttrLookup) {
@@ -273,7 +270,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         break;
                     } else {
                         throw new LedpException(LedpCode.LEDP_37006,
-                                new String[] { restriction.getRelation().toString() });
+                                new String[] { operator.toString() });
                     }
                 case STARTS_WITH:
                     if (lhsPath instanceof StringExpression) {
@@ -281,7 +278,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         break;
                     } else {
                         throw new LedpException(LedpCode.LEDP_37006,
-                                new String[] { restriction.getRelation().toString() });
+                                new String[] { operator.toString() });
                     }
                 case ENDS_WITH:
                     if (lhsPath instanceof StringExpression) {
@@ -289,24 +286,25 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                         break;
                     } else {
                         throw new LedpException(LedpCode.LEDP_37006,
-                                new String[] { restriction.getRelation().toString() });
+                                new String[] { operator.toString() });
                     }
-                case NOT_CONTAINS:
                 default:
                     throw new LedpException(LedpCode.LEDP_37006,
-                            new String[] { restriction.getRelation().toString() });
+                            new String[] { operator.toString() });
             }
 
-            if (restriction.getNegate()) {
-                booleanExpression = booleanExpression.not();
-            }
+            if (booleanExpression != null) {
+                if (negate) {
+                    booleanExpression = booleanExpression.not();
+                }
 
-            if (isBitEncoded && !isBitEncodedNullQuery && isNegativeBitEncodedLookup(restriction)) {
-                // for bit encoded, make sure not equal or not in collection
-                // won't return null
-                Restriction notNull = Restriction.builder().let(lhs).isNotNull().build();
-                BooleanExpression notNullExpn = resolve((ConcreteRestriction) notNull);
-                booleanExpression = booleanExpression.and(notNullExpn);
+                if (isBitEncoded && !isBitEncodedNullQuery && isNegativeBitEncodedLookup(operator, negate)) {
+                    // for bit encoded, make sure not equal or not in collection
+                    // won't return null
+                    Restriction notNull = Restriction.builder().let(lhs).isNotNull().build();
+                    BooleanExpression notNullExpn = resolve((ConcreteRestriction) notNull);
+                    booleanExpression = booleanExpression.and(notNullExpn);
+                }
             }
 
             return booleanExpression;
@@ -342,8 +340,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         return lookup instanceof ValueLookup && ((ValueLookup) lookup).getValue() == null;
     }
 
-    private boolean isBitEncoded(ConcreteRestriction restriction) {
-        Lookup lhs = restriction.getLhs();
+    private boolean isBitEncoded(Lookup lhs, ComparisonType operator, Lookup rhs) {
         if (lhs instanceof AttributeLookup) {
             AttributeLookup attrLookup = (AttributeLookup) lhs;
             if (attrLookup.getEntity() == null) {
@@ -357,10 +354,9 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             if (cm.getBitOffset() != null) {
                 // lhs is bit encoded
                 if (Arrays.asList(ComparisonType.IS_NULL, ComparisonType.IS_NOT_NULL)
-                        .contains(restriction.getRelation())) {
+                        .contains(operator)) {
                     return true;
                 }
-                Lookup rhs = restriction.getRhs();
                 if (rhs instanceof ValueLookup) {
                     ValueLookup valueLookup = (ValueLookup) rhs;
                     Object val = valueLookup.getValue();
@@ -391,23 +387,24 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         return false;
     }
 
-    private boolean isNegativeBitEncodedLookup(ConcreteRestriction restriction) {
-        boolean negativeOperator = !Boolean.TRUE.equals(restriction.getNegate()) && ( //
-        Arrays.asList( //
-                ComparisonType.NOT_EQUAL, //
-                ComparisonType.NOT_CONTAINS, //
-                ComparisonType.NOT_IN_COLLECTION //
-        ).contains(restriction.getRelation()));
-        boolean positiveOperator = Boolean.TRUE.equals(restriction.getNegate()) && ( //
-        Arrays.asList( //
-                ComparisonType.EQUAL, //
-                ComparisonType.CONTAINS, //
-                ComparisonType.IN_COLLECTION //
-        ).contains(restriction.getRelation()));
+    // these bit encoded restrictions imply encoded attr is not null
+    private boolean isNegativeBitEncodedLookup(ComparisonType operator, boolean negate) {
+        boolean negativeOperator = !negate && ( //
+                Arrays.asList( //
+                        ComparisonType.NOT_EQUAL, //
+                        ComparisonType.NOT_CONTAINS, //
+                        ComparisonType.NOT_IN_COLLECTION //
+                ).contains(operator));
+        boolean positiveOperator = negate && ( //
+                Arrays.asList( //
+                        ComparisonType.EQUAL, //
+                        ComparisonType.CONTAINS, //
+                        ComparisonType.IN_COLLECTION //
+                ).contains(operator));
         return negativeOperator || positiveOperator;
     }
 
-    private ValueLookup convertValueLookup(Buckets buckets, String val) {
+    private ValueLookup convertBitEncodedValueLookup(Buckets buckets, String val) {
         int value = 0;
         if (val != null) {
             Bucket bkt = buckets.getBucketList().stream() //
@@ -424,27 +421,24 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         return new ValueLookup(value);
     }
 
-    private Lookup convertValueLookup(ConcreteRestriction restriction, Buckets buckets,
-                                    String bktLbl) {
+    private Pair<ComparisonType, Lookup> convertBitEncodedValueLookup(ComparisonType operator, Buckets buckets,
+                                                                      String bktLbl) {
         List<Object> ids = new ArrayList<>();
         if (bktLbl != null) {
             ids = buckets.getBucketList().stream() //
-                    .filter(b -> restriction.getRelation().filter(getBktVal(b), bktLbl)) //
+                    .filter(b -> operator.filter(getBktVal(b), bktLbl)) //
                     .map(Bucket::getIdAsInt) //
                     .collect(Collectors.toList());
         }
         if (ids.isEmpty()) {
-            log.warn("Cannot find corresponding label for " + restriction.getRelation() + " " //
+            log.warn("Cannot find corresponding label for " + operator + " " //
                     + bktLbl + " in statistics, use -1 bkt id instead.");
-            restriction.setRelation(ComparisonType.EQUAL);
-            return new ValueLookup(-1);
+            return Pair.of(ComparisonType.EQUAL, new ValueLookup(-1));
         }
         if (ids.size() > 1) {
-            restriction.setRelation(ComparisonType.IN_COLLECTION);
-            return new CollectionLookup(ids);
+            return Pair.of(ComparisonType.IN_COLLECTION, new CollectionLookup(ids));
         } else {
-            restriction.setRelation(ComparisonType.EQUAL);
-            return new ValueLookup(ids.get(0));
+            return Pair.of(ComparisonType.EQUAL, new ValueLookup(ids.get(0)));
         }
     }
 

@@ -145,7 +145,7 @@ abstract class QueryTranslator {
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return null;
         }
-        Restriction restriction = translateBucketRestriction(frontEndRestriction.getRestriction(), //
+        Restriction restriction = translateBucketRestriction(frontEndRestriction.getRestriction().getDeepCopy(), //
                 translatePriorOnly, useDepivotedPhTable);
         return RestrictionOptimizer.optimize(restriction);
     }
@@ -175,8 +175,6 @@ abstract class QueryTranslator {
             if (!Boolean.TRUE.equals(bucket.getIgnored())) {
                 RestrictionUtils.inspectBucketRestriction(bucket, map, timeTranslator);
             }
-        } else {
-            return;
         }
     }
 

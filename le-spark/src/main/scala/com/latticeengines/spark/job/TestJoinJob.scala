@@ -19,6 +19,8 @@ class TestJoinJob extends AbstractSparkJob[TestJoinJobConfig] {
     val out1 = df.count().withColumnRenamed("count", "Cnt")
     val out2 = df.agg(max(table1(aggKey)).as("Max1"), max(table2(aggKey)).as("Max2"))
 
+    logSpark("Here is my log")
+
     // finish
     lattice.output = out1::out2::Nil
     lattice.outputStr = "This is my output!"
