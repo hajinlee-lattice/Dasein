@@ -18,27 +18,27 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
 
     private static final List<String> loggingForUris = //
             Arrays.asList( //
-                    "/customerspace/(.*)/entity/count", //
-                    "/customerspace/(.*)/entity/data", //
-                    "/customerspace/(.*)/entity/query", //
-                    "/customerspace/(.*)/entity/ratingcount", //
-                    "/customerspace/(.*)/event/count/scoring", //
-                    "/customerspace/(.*)/event/count/training", //
-                    "/customerspace/(.*)/event/count/event", //
-                    "/customerspace/(.*)/event/data/scoring", //
-                    "/customerspace/(.*)/event/data/training", //
-                    "/customerspace/(.*)/event/data/event", //
-                    "/customerspace/(.*)/event/query", //
-                    "/customerspace/(.*)/periodtransactions/accountid/(.*)", //
-                    "/customerspace/(.*)/periodtransactions/spendanalyticssegments", //
-                    "/customerspace/(.*)/periodtransactions/spendanalyticssegment/(.*)", //
-                    "/customerspace/(.*)/periodtransactions/producthierarchy", //
-                    "/customerspace/(.*)/periodtransactions/transaction/maxmindate", //
-                    "/customerspace/(.*)/rating/count", //
-                    "/customerspace/(.*)/rating/data", //
-                    "/customerspace/(.*)/rating/query", //
-                    "/customerspace/(.*)/rating/coverage", //
-                    "/customerspace/(.*)/transactions/maxtransactiondate");
+                    "/objectapi/customerspace/(.*)/entity/count", //
+                    "/objectapi/customerspace/(.*)/entity/data", //
+                    "/objectapi/customerspace/(.*)/entity/query", //
+                    "/objectapi/customerspace/(.*)/entity/ratingcount", //
+                    "/objectapi/customerspace/(.*)/event/count/scoring", //
+                    "/objectapi/customerspace/(.*)/event/count/training", //
+                    "/objectapi/customerspace/(.*)/event/count/event", //
+                    "/objectapi/customerspace/(.*)/event/data/scoring", //
+                    "/objectapi/customerspace/(.*)/event/data/training", //
+                    "/objectapi/customerspace/(.*)/event/data/event", //
+                    "/objectapi/customerspace/(.*)/event/query", //
+                    "/objectapi/customerspace/(.*)/periodtransactions/accountid/(.*)", //
+                    "/objectapi/customerspace/(.*)/periodtransactions/spendanalyticssegments", //
+                    "/objectapi/customerspace/(.*)/periodtransactions/spendanalyticssegment/(.*)", //
+                    "/objectapi/customerspace/(.*)/periodtransactions/producthierarchy", //
+                    "/objectapi/customerspace/(.*)/periodtransactions/transaction/maxmindate", //
+                    "/objectapi/customerspace/(.*)/rating/count", //
+                    "/objectapi/customerspace/(.*)/rating/data", //
+                    "/objectapi/customerspace/(.*)/rating/query", //
+                    "/objectapi/customerspace/(.*)/rating/coverage", //
+                    "/objectapi/customerspace/(.*)/transactions/maxtransactiondate");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
