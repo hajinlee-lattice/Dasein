@@ -69,7 +69,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     @JsonProperty("external_id")
     private String recommendationId;
 
-    @Column(name = "ACCOUNT_ID", nullable = false)
+    @Column(name = "ACCOUNT_ID", nullable = true)
     @JsonProperty("accountId")
     private String accountId;
 
@@ -202,9 +202,11 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
         Map<String, Object> recMap = null;
         if (rec != null) {
             Long launchTimestamp = rec.getLaunchDate() == null //
-                    ? null : rec.getLaunchDate().getTime();
+                    ? null
+                    : rec.getLaunchDate().getTime();
             Long lastUpdatedTimestamp = rec.getLastUpdatedTimestamp() == null //
-                    ? launchTimestamp : rec.getLastUpdatedTimestamp().getTime();
+                    ? launchTimestamp
+                    : rec.getLastUpdatedTimestamp().getTime();
 
             recMap = new HashMap<>();
             recMap.put("PID", rec.getPid());
@@ -244,10 +246,12 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
         schema.add(index, attr);
     }
 
+    @Override
     public Long getPid() {
         return pid;
     }
 
+    @Override
     public void setPid(Long pid) {
         this.pid = pid;
     }
