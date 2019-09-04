@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow.steps.play;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -249,9 +248,10 @@ public class CampaignLaunchProcessor {
                 fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
                         playLaunchChannel.getId());
                 playLaunch.setDestinationOrgName(playLaunchChannel.getLookupIdMap().getOrgName());
-                log.info("For tenant= " + tenant.getName() + ", playLaunchId= " + playLaunchChannel.getId()
-                        + ", the list of columnmetadata is:");
-                log.info(Arrays.toString(fieldMappingMetadata.toArray()));
+                if (fieldMappingMetadata != null) {
+                    log.info("For tenant= " + tenant.getName() + ", playChannelId= " + playLaunchChannel.getId()
+                            + ", the columnmetadata size is=" + fieldMappingMetadata.size());
+                }
             }
         }
         long launchTimestampMillis = playLaunch.getCreated().getTime();

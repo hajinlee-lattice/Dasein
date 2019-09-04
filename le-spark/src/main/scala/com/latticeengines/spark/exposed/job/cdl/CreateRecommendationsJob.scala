@@ -185,13 +185,16 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val playLaunchContext: PlayLaunchSparkContext = config.getPlayLaunchSparkContext
     val topNCount = playLaunchContext.getTopNCount
     val joinKey: String = playLaunchContext.getJoinKey
+    val playId: String = playLaunchContext.getPlayName
+    val playLaunchId: String = playLaunchContext.getPlayLaunchId
+    val tenantId: Long = playLaunchContext.getTenantPid
     val accountColsRecIncluded: Seq[String] = if (playLaunchContext.getAccountColsRecIncluded != null ) playLaunchContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
     val accountColsRecNotIncludedStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedStd != null) playLaunchContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
     val accountColsRecNotIncludedNonStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedNonStd != null) playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
     val contactCols: Seq[String] = if (playLaunchContext.getContactCols != null) playLaunchContext.getContactCols.asScala else Seq.empty[String]
 
     println("----- BEGIN SCRIPT OUTPUT -----")
-	  println(s"joinKey is: $joinKey")
+	  println(f"playId=$playId%s, playLaunchId=$playLaunchId%s")
 	  println("----- END SCRIPT OUTPUT -----")
 
     // Read Input
@@ -235,8 +238,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
     var limitedAccountTable = derivedAccounts
     if (topNCount != null) {
+      println(s"topNCount is: $topNCount")
       limitedAccountTable = derivedAccounts.limit(topNCount.toString.toInt)
     }
+    val limitedAccountTableSize = limitedAccountTable.count()
+    println(s"limitedAccountTableSize is: $limitedAccountTableSize")
 
     // Manipulate Contact Table
     var finalRecommendations: DataFrame = null
