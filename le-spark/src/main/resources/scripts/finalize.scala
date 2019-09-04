@@ -45,6 +45,12 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
   json
 }
 
+lattice.orphanViews.map { view => spark.catalog.dropTempView(view) }
+
+val result = mapper.createObjectNode()
+result.put("OutputStr", lattice.outputStr)
+result.set("Output", mapper.valueToTree(finalTargets))
+
 println("----- BEGIN SCRIPT OUTPUT -----")
-println(mapper.writeValueAsString(finalTargets))
+println(mapper.writeValueAsString(result))
 

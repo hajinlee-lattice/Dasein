@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,10 +28,14 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.ActivityMetricsDecoratorFac;
+import com.latticeengines.apps.cdl.service.ActivityMetricsService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -46,13 +51,12 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.ProductUtils;
-import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -75,13 +79,16 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
     private String s3Bucket;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private ActivityMetricsProxy metricsProxy;
+    private ActivityMetricsService activityMetricsService;
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @Override
     public Decorator getDecorator(Namespace1<String> namespace) {
@@ -98,35 +105,38 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
                 @Override
                 public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
                     CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-                    Map<String, List<Product>> productMap = loadProductMap(customerSpace);
-                    List<ActivityMetrics> metrics = getActivityMetrics(customerSpace.toString());
-                    return metadata.map(m -> {
-                        return staticFilter(customerSpace.toString(), m, productMap, metrics);
-                    });
+                    Pair<Map<String, List<Product>>, List<ActivityMetrics>> result = getProductMapAndMetrics(customerSpace);
+                    return metadata.map(m -> staticFilter(customerSpace.toString(), m, result.getLeft(), result.getRight()));
                 }
 
                 @Override
                 public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
                     CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-                    Map<String, List<Product>> productMap = loadProductMap(customerSpace);
-                    List<ActivityMetrics> metrics = getActivityMetrics(customerSpace.toString());
-                    return metadata.map(m -> {
-                        return staticFilter(customerSpace.toString(), m, productMap, metrics);
-                    });
+                    Pair<Map<String, List<Product>>, List<ActivityMetrics>> result = getProductMapAndMetrics(customerSpace);
+                    return metadata.map(m -> staticFilter(customerSpace.toString(), m, result.getLeft(), result.getRight()));
                 }
             };
         } else {
             return new DummyDecorator();
         }
+    }
 
+    private Pair<Map<String, List<Product>>, List<ActivityMetrics>> getProductMapAndMetrics(CustomerSpace customerSpace) {
+        Map<String, List<Product>> productMap = loadProductMap(customerSpace);
+        List<ActivityMetrics> metrics = activityMetricsService.findWithType(ActivityType.PurchaseHistory);
+        if (metrics == null) {
+            metrics = Collections.emptyList();
+        }
+        Pair<Map<String, List<Product>>, List<ActivityMetrics>> result = Pair.of(productMap, metrics);
+        return result;
     }
 
     /**
      * Static logic applied to all tenants
      */
     private static ColumnMetadata staticFilter(String customerSpace, ColumnMetadata cm,
-            Map<String, List<Product>> productMap,
-            List<ActivityMetrics> metrics) {
+                                               Map<String, List<Product>> productMap,
+                                               List<ActivityMetrics> metrics) {
         String attrName = cm.getAttrName();
         cm.setCategory(Category.PRODUCT_SPEND);
         // initial values
@@ -155,8 +165,10 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
      */
     private Map<String, List<Product>> loadProductMap(CustomerSpace customerSpace) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                    TableRoleInCollection.ConsolidatedProduct);
+            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
+            MultiTenantContext.setTenant(tenant);
+            Table productTable = dataCollectionService.getTable(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedProduct, null);
             if (productTable == null) {
                 log.warn(
                         "Active product table with table role {} for tenant {} doesn't exist. "
@@ -164,7 +176,6 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
                         TableRoleInCollection.ConsolidatedProduct, customerSpace.toString());
                 return Collections.emptyMap();
             }
-
             HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             List<Product> productList = retry.execute(ctx -> {
@@ -190,17 +201,9 @@ public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecorator
 
     }
 
-    private List<ActivityMetrics> getActivityMetrics(String customerSpace) {
-        List<ActivityMetrics> metrics = metricsProxy.getActivityMetrics(customerSpace, ActivityType.PurchaseHistory);
-        if (metrics == null) {
-            return Collections.emptyList();
-        }
-        return metrics;
-    }
-
     private static ColumnMetadata checkDeprecate(String customerSpace, ColumnMetadata cm,
-            Map<String, List<Product>> productMap,
-            List<ActivityMetrics> metrics) {
+                                                 Map<String, List<Product>> productMap,
+                                                 List<ActivityMetrics> metrics) {
         if (!ActivityMetricsUtils.isActivityMetricsAttr(cm.getAttrName())) {
             return cm;
         }

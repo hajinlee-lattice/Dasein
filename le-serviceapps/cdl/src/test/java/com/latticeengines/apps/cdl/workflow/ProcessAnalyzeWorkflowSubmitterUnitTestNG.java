@@ -18,19 +18,19 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "systemIdMaps")
     private void testGetSystemIdMaps(List<S3ImportSystem> systems, String defaultAcctSysId, String defaultContSysId,
-            List<String> acctSysIds, List<String> contSysIds) {
+                                     List<String> acctSysIds, List<String> contSysIds) {
         // prepare mocked submitter
-        CDLProxy cdlProxy = Mockito.mock(CDLProxy.class);
-        when(cdlProxy.getS3ImportSystemList(any(String.class))).thenReturn(systems);
-        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(cdlProxy);
+        S3ImportSystemService s3ImportSystemService = Mockito.mock(S3ImportSystemService.class);
+        when(s3ImportSystemService.getAllS3ImportSystem(any(String.class))).thenReturn(systems);
+        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(s3ImportSystemService);
 
         Pair<Map<String, String>, Map<String, List<String>>> res = submitter.getSystemIdMaps("test_tenant", true);
         Assert.assertNotNull(res);
@@ -71,7 +71,7 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
                         fakeS3ImportSystem(null, null, "CID2", false, 1, null, null), //
                         fakeS3ImportSystem("AID3", false, "CID3", false, 2, null, null), //
                         null // Theoretical not expect to get null
-                // S3ImportSystem input
+                        // S3ImportSystem input
                 ), null, null, asList("AID1", "AID3"), asList("CID2", "CID3") }, //
                 // Has system mapping to LatticeAccount, no mapping to
                 // LatticeContact
@@ -124,12 +124,13 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
         };
     }
 
-    private ProcessAnalyzeWorkflowSubmitter mockSubmitter(CDLProxy cdlProxy) {
-        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, null, null, null, null, null, cdlProxy);
+    private ProcessAnalyzeWorkflowSubmitter mockSubmitter(S3ImportSystemService s3ImportSystemService) {
+        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, null, null, null, null, null,
+                s3ImportSystemService);
     }
 
     private S3ImportSystem fakeS3ImportSystem(String acctSysId, Boolean mapToLAcct, String contSysId,
-            Boolean mapToLCont, int priority, String secondaryAcctSysId, String secondaryContSysId) {
+                                              Boolean mapToLCont, int priority, String secondaryAcctSysId, String secondaryContSysId) {
         S3ImportSystem sys = new S3ImportSystem();
         sys.setAccountSystemId(acctSysId);
         sys.setMapToLatticeAccount(mapToLAcct);

@@ -20,10 +20,10 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.TalkingPointEntityMgr;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.apps.cdl.util.OAuthAccessTokenCache;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.DanteTalkingPointValue;
 import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("talkingPointService")
 public class TalkingPointServiceImpl implements TalkingPointService {
@@ -51,7 +50,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     private String internalResourceHostPort;
 
     @Inject
-    private PlayProxy playProxy;
+    private PlayService playService;
 
     @Inject
     private PublishedTalkingPointEntityMgr publishedTalkingPointEntityMgr;
@@ -63,8 +62,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     private OAuthAccessTokenCache oAuthAccessTokenCache;
 
     @VisibleForTesting
-    void setPlayProxy(PlayProxy playProxy) {
-        this.playProxy = playProxy;
+    void setPlayService(PlayService playService) {
+        this.playService = playService;
     }
 
     @Override
@@ -85,9 +84,9 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
         Play play;
         try {
-            play = playProxy.getPlay(CustomerSpace.parse(customerSpace).toString(), tps.get(0).getPlayName());
+            play = playService.getFullPlayByName(tps.get(0).getPlayName(), false);
             if (play == null) {
-                throw new LedpException(LedpCode.LEDP_38012, new String[] { tps.get(0).getPlayName() });
+                throw new LedpException(LedpCode.LEDP_38012, new String[]{tps.get(0).getPlayName()});
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38013, e);
@@ -205,7 +204,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                 talkingPointEntityMgr.delete(tp);
             }
 
-            Play play = playProxy.getPlay(CustomerSpace.parse(customerSpace).toString(), playName);
+            Play play = playService.getFullPlayByName(playName, false);
 
             for (PublishedTalkingPoint ptp : publishedTalkingPointEntityMgr.findAllByPlayName(playName)) {
                 talkingPointEntityMgr.create(convertFromPublished(ptp, play));

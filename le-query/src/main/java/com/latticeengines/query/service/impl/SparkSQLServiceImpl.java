@@ -6,7 +6,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +18,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,30 +157,34 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     @Override
-    public String createView(CustomerSpace customerSpace, LivySession livySession, String sql, String viewName) {
-        if (StringUtils.isBlank(viewName)) {
-            viewName = RandomStringUtils.randomAlphanumeric(8).toLowerCase();
-        }
+    public List<String> createViews(CustomerSpace customerSpace, LivySession livySession, //
+                                    List<Pair<String, String>> views) {
         InputStreamSparkScript sparkScript = getQueryScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(0);
         Map<String, Object> params = new HashMap<>();
-        setSQLParam(sql, params);
-        params.put("OUTPUT_MODE", "view");
-        params.put("VIEW_NAME", viewName);
+        List<List<String>> sqls = new ArrayList<>();
+        for (Pair<String, String> pair: views) {
+            String viewName = pair.getLeft();
+            String sql = pair.getRight();
+            sqls.addAll(splitSql(sql, viewName));
+        }
+        params.put("SQLS", compressSql(JsonUtils.serialize(sqls)));
+        params.put("OUTPUT_MODE", "views");
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
-        return result.getOutput();
+        return Arrays.asList(result.getOutput().split(","));
     }
 
     @Override
     public HdfsDataUnit mergeRules(CustomerSpace customerSpace, LivySession livySession, //
-                                   List<String> viewList, String defaultBucketName) {
+                                   List<String> bktViewList, List<String> tempViewList, String defaultBucketName) {
         InputStreamSparkScript sparkScript = getMergeRulesScript();
         ScriptJobConfig jobConfig = new ScriptJobConfig();
         jobConfig.setNumTargets(1);
         Map<String, Object> params = new HashMap<>();
-        params.put("VIEW_LIST", viewList);
+        params.put("BKT_VIEWS", bktViewList);
+        params.put("TEMP_VIEWS", tempViewList);
         params.put("DEFAULT_BUCKET", defaultBucketName);
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
@@ -187,14 +194,21 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     private void setSQLParam(String sql, Map<String, Object> params) {
-        if (sql.startsWith("with")) {
-            List<List<String>> sqls = SparkSQLQueryUtils.detachSubQueries(sql);
-            params.put("SQLS", compressSql(JsonUtils.serialize(sqls)));
-        } else if (sql.contains("AccountId in") || sql.contains("AccountId not in")) {
-            List<List<String>> sqls = SparkSQLQueryUtils.extractSubQueries(sql, FINAL);
+        List<List<String>> sqls = splitSql(sql, FINAL);
+        if (CollectionUtils.size(sqls) > 1) {
             params.put("SQLS", compressSql(JsonUtils.serialize(sqls)));
         } else {
-            params.put("SQL", compressSql(sql));
+            params.put("SQL", compressSql(sqls.get(0).get(1)));
+        }
+    }
+
+    private List<List<String>> splitSql(String sql, String alias) {
+        if (sql.startsWith("with")) {
+            return SparkSQLQueryUtils.detachSubQueries(sql);
+        } else if (sql.contains("AccountId in") || sql.contains("AccountId not in")) {
+            return SparkSQLQueryUtils.extractSubQueries(sql, alias);
+        } else {
+            return Collections.singletonList(Arrays.asList(alias, sql));
         }
     }
 

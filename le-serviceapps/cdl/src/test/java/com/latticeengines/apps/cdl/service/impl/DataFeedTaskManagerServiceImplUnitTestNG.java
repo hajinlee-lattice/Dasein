@@ -24,8 +24,8 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 public class DataFeedTaskManagerServiceImplUnitTestNG {
 
     private static final String illegalHeader = "bi0mpJJNxiYpEka5C6JO4mjopVGId/Tyrac80t5CKI/9bs74cuMaGOMSp8SBgBkE";
-    private DataFeedTaskManagerServiceImpl dataFeedTaskManagerServiceImpl = new DataFeedTaskManagerServiceImpl(null,
-            null, null, null, null, null, null, null, null, null);
+    private DataFeedTaskManagerServiceImpl dataFeedTaskManagerServiceImpl = new DataFeedTaskManagerServiceImpl(null, null,
+            null, null, null, null, null, null, null);
 
     @Test(groups = "unit")
     public void testUpdateTableAttrName() {

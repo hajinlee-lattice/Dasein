@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
@@ -72,30 +71,6 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/startexecution",
                 shortenCustomerSpace(customerSpace), jobType);
         return post("startExecution", url, jobId, DataFeedExecution.class);
-    }
-
-    public Long restartExecution(String customerSpace, DataFeedExecutionJobType jobType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/restartexecution",
-                shortenCustomerSpace(customerSpace), jobType);
-        return post("restartExecution", url, null, Long.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    public Long lockExecution(String customerSpace, DataFeedExecutionJobType jobType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/lockexecution",
-                shortenCustomerSpace(customerSpace), jobType);
-        ResponseDocument<?> responseDoc = post("lockExecution", url, null, ResponseDocument.class);
-        if (responseDoc == null || !responseDoc.isSuccess() || responseDoc.getResult() == null) {
-            return null;
-        }
-        log.info("execution id is :" + responseDoc.getResult().toString());
-        return Long.valueOf(responseDoc.getResult().toString());
-    }
-
-    public DataFeedExecution getLatestExecution(String customerSpace, DataFeedExecutionJobType jobType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/latestexecution",
-                shortenCustomerSpace(customerSpace), jobType);
-        return get("getLatestExecution", url, DataFeedExecution.class);
     }
 
     public DataFeedExecution finishExecution(String customerSpace, String initialDataFeedStatus) {

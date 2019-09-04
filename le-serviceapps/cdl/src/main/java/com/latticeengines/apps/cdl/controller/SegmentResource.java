@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -92,23 +91,9 @@ public class SegmentResource {
             @RequestBody MetadataSegment segment,
             @RequestParam(value = "user", required = false, defaultValue = "DEFAULT_USER") String user) {
         MetadataSegment res = segmentService.createOrUpdateSegment(segment);
-        registerAction(ActionContext.getAction(), user);
+        actionService.registerAction(ActionContext.getAction(), user);
         return res;
     }
-
-    private void registerAction(com.latticeengines.domain.exposed.pls.Action action, String user) {
-        if (action != null) {
-            action.setTenant(MultiTenantContext.getTenant());
-            action.setActionInitiator(user);
-            log.info(String.format("Registering action %s", action));
-            ActionConfiguration actionConfig = action.getActionConfiguration();
-            if (actionConfig != null) {
-                action.setDescription(actionConfig.serialize());
-            }
-            actionService.create(action);
-        }
-    }
-
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ApiOperation(value = "Delete a segment by name")

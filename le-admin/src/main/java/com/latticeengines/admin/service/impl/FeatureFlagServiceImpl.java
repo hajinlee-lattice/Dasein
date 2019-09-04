@@ -139,7 +139,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CDL, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, cg);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, cg);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.SCORE_EXTERNAL_FILE, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_FILE_IMPORT, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CROSS_SELL_MODELING, cg).setDefaultValue(true);
@@ -151,7 +151,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.IMPORT_WITHOUT_ID, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_APS_IMPUTATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, cg).setDefaultValue(false);
@@ -165,7 +165,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL, cg).setDefaultValue(false);
 
         // multi-product flags

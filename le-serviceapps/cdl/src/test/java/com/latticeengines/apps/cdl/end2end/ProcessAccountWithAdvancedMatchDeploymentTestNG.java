@@ -44,7 +44,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAccountDeploymentTestNG {
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountWithAdvancedMatchDeploymentTestNG.class);
 
-    static final String CHECK_POINT = "entitymatch_process1";
+    public static final String CHECK_POINT = "entitymatch_process1";
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;

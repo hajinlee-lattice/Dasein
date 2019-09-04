@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -125,24 +124,6 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
                         DEFAULT_SYSTEM + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName(), ENTITY_TRANSACTION);
                 break;
         }
-    }
-
-    protected List<FieldValidation>  getFieldValidation(String csvFileName, String entity) {
-        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(entity), entity, csvFileName,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
-
-        String feedType = getFeedTypeByEntity(DEFAULT_SYSTEM, entity);
-        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(sourceFile.getName(), entity, SOURCE, feedType);
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                fieldMapping.setMappedField(fieldMapping.getUserField());
-                fieldMapping.setMappedToLatticeField(false);
-            }
-        }
-        return modelingFileMetadataService
-                .validateFieldMappings(sourceFile.getName(), fieldMappingDocument, entity, SOURCE, feedType);
     }
 
     protected SourceFile uploadSourceFile(String csvFileName, String entity) {

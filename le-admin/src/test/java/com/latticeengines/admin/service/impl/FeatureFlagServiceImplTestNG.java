@@ -101,12 +101,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
                 LatticeFeatureFlag.ENABLE_ENTITY_MATCH, //
-                LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, //
                 LatticeFeatureFlag.ENABLE_APS_IMPUTATION, //
                 LatticeFeatureFlag.VDB_MIGRATION, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
-                LatticeFeatureFlag.ENABLE_DATA_CLOUD_REFRESH_ACTIVITY, //
                 LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE,
                 LatticeFeatureFlag.IMPORT_WITHOUT_ID,
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //

@@ -833,4 +833,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         return DiagnoseTable.diagnostic(customerSpaceStr, table, null, batonService);
     }
 
+    @Override
+    public Table getTable(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
+        List<Table> tables = getTables(customerSpace, null, role, version);
+        if (tables == null || tables.isEmpty()) {
+            return null;
+        } else {
+            return tables.get(0);
+        }
+    }
+
 }

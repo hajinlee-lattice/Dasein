@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,12 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -36,9 +32,6 @@ public class ServingStoreResource {
 
     @Inject
     private ServingStoreService servingStoreService;
-
-    @Inject
-    private DataCollectionService dataCollectionService;
 
     @GetMapping(value = "/{entity}/decoratedmetadata")
     @ResponseBody
@@ -71,16 +64,7 @@ public class ServingStoreResource {
         if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
             throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
         }
-        Flux<ColumnMetadata> flux = servingStoreService.getDecoratedMetadata(customerSpace, entity, version,
-                Collections.singletonList(ColumnSelection.Predefined.Model));
-        flux = flux.map(cm -> {
-            cm.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS));
-            if (cm.getTagList() == null || (cm.getTagList() != null && !cm.getTagList().contains(Tag.EXTERNAL))) {
-                cm.setTagList(Collections.singletonList(Tag.INTERNAL));
-            }
-            return cm;
-        });
-        return flux;
+        return servingStoreService.getNewModelingAttrs(customerSpace, entity, version);
     }
 
     @GetMapping(value = "/allow-modeling")
