@@ -21,7 +21,7 @@
     <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
     
     <mvc:interceptors>
-        <bean class="com.latticeengines.ulysses.utils.LoggerInterceptor"/>
+        <bean class="com.latticeengines.objectapi.util.LoggerInterceptor"/>
     </mvc:interceptors>
 
 </beans>
