@@ -29,34 +29,36 @@ def parseSql(): String = {
     Charset.forName("UTF-8"))
 }
 
-if (lattice.params.hasNonNull("SQLS")) {
-  val pairs: List[List[String]] = parseSqls()
-  pairs map {pair => {
-    val name = pair.head
-    val statement = pair(1)
-    println("----- BEGIN SCRIPT OUTPUT -----")
-    println(s"\nSQL Statement for $name:")
-    println(statement)
-    println("----- END SCRIPT OUTPUT -----")
-    name
-  }}
-} else {
-  val sql = parseSql()
-  println("----- BEGIN SCRIPT OUTPUT -----")
-  if (lattice.params.hasNonNull("VIEW_NAME")) {
-    println("SQL Statement for " + lattice.params.get("VIEW_NAME").asText() + ":")
+val tempViews:List[String] =
+  if (lattice.params.hasNonNull("SQLS")) {
+    val pairs: List[List[String]] = parseSqls()
+    pairs map {pair => {
+      val name = pair.head
+      val statement = pair(1)
+      println("----- BEGIN SCRIPT OUTPUT -----")
+      println(s"\nSQL Statement for $name:")
+      println(statement)
+      println("----- END SCRIPT OUTPUT -----")
+      name
+    }}
   } else {
-    println("SQL Statement:")
+    val sql = parseSql()
+    println("----- BEGIN SCRIPT OUTPUT -----")
+    if (lattice.params.hasNonNull("VIEW_NAME")) {
+      println("SQL Statement for " + lattice.params.get("VIEW_NAME").asText() + ":")
+    } else {
+      println("SQL Statement:")
+    }
+    println(sql)
+    println("----- END SCRIPT OUTPUT -----")
+    List()
   }
-  println(sql)
-  println("----- END SCRIPT OUTPUT -----")
-}
 // -----CELL BREAKER----
 
 val sqlDF: DataFrame =
   if (lattice.params.hasNonNull("SQLS")) {
     val pairs: List[List[String]] = parseSqls()
-    val finalStatment = pairs.foldLeft("")((_, pair) => {
+    val finalStmt = pairs.foldLeft("")((_, pair) => {
       val name = pair.head
       val statement = pair(1)
       if (name != "final") {
@@ -64,7 +66,7 @@ val sqlDF: DataFrame =
       }
       statement
     })
-    spark.sql(finalStatment)
+    spark.sql(finalStmt)
   } else {
     val sql = parseSql()
     spark.sql(sql)
@@ -84,11 +86,13 @@ def decode(df: DataFrame, decodeMapping: Map[String, Map[String, String]]): Data
 }
 
 outputMode match {
-  case "count" => lattice.outputStr = sqlDF.count().toString
-  case "save" => lattice.output = decode(sqlDF, decodeMapping) :: Nil
-  case "view" => {
-    val viewName = lattice.params.get("VIEW_NAME").asText()
-    sqlDF.createOrReplaceTempView(viewName)
-    lattice.outputStr = viewName
+  case "count" => {
+    lattice.outputStr = sqlDF.count().toString
+    lattice.orphanViews = tempViews
   }
+  case "save" => {
+    lattice.output = decode(sqlDF, decodeMapping) :: Nil
+    lattice.orphanViews = tempViews
+  }
+  case "views" => lattice.outputStr = tempViews.mkString(",")
 }

@@ -13,12 +13,12 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.retry.support.RetryTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -44,6 +44,8 @@ import com.latticeengines.query.factory.SparkQueryProvider;
 
 @Service("ratingQueryServiceSparkSQL")
 public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl implements RatingQuerySparkSQLService {
+
+    private static final Logger log = LoggerFactory.getLogger(RatingQueryServiceSparkSQLImpl.class);
 
 
     @Inject
@@ -90,18 +92,19 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
         RuleBasedModel model = (RuleBasedModel) models.get(0);
         String defaultBkt = model.getRatingRule().getDefaultBucketName();
         List<Pair<String, String>> ruleSqls = getRuleQueries(frontEndQuery, model, version);
+        List<Pair<String, String>> nonEmptyRuleSqls = new ArrayList<>();
         List<String> viewList = new ArrayList<>();
         for (Pair<String, String> pair: ruleSqls) {
             String alias = pair.getLeft();
             String sql = pair.getRight();
             if (StringUtils.isNotBlank(sql)) {
-                RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-                retry.execute(ctx -> //
-                        ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).createView(customerSpace, sql, alias));
+                nonEmptyRuleSqls.add(pair);
                 viewList.add(alias);
             }
         }
-        return ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).mergeRules(customerSpace, viewList, defaultBkt);
+        QueryEvaluatorServiceSparkSQL serviceSparkSQL = (QueryEvaluatorServiceSparkSQL) queryEvaluatorService;
+        List<String> tempViews = serviceSparkSQL.createViews(customerSpace, nonEmptyRuleSqls);
+        return serviceSparkSQL.mergeRules(customerSpace, viewList, tempViews, defaultBkt);
     }
 
     private List<Pair<String, String>> getRuleQueries(FrontEndQuery frontEndQuery, RuleBasedModel model, //
@@ -141,6 +144,12 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
                     RestrictionOptimizer.optimize(rules.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
             Restriction ctcRestInRule = //
                     RestrictionOptimizer.optimize(rules.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
+            if (accRestInRule != null) {
+                accRestInRule = accRestInRule.getDeepCopy();
+            }
+            if (ctcRestInRule != null) {
+                ctcRestInRule = ctcRestInRule.getDeepCopy();
+            }
             if (accRestInRule != null || ctcRestInRule != null) {
                 mergedQuery = query.getDeepCopy();
                 Restriction accRestInQuery = mergedQuery.getAccountRestriction() == null ? //

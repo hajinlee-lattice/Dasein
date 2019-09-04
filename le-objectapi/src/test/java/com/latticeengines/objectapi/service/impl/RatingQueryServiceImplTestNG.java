@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,6 +44,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     private static final String ATTR_ACCOUNT_NAME = "CompanyName";
     private static final String ATTR_ACCOUNT_NUM_FAM_MEMBERS = "NUMBER_OF_FAMILY_MEMBERS";
+    private static final String ATTR_ACCOUNT_INTENT = "BmbrSurge_AccountOverdrafts_Intent";
     private static final String ATTR_CONTACT_TITLE = "Occupation";
     private static final String VALUE_CONTACT_TITLE = "Analyst";
 
@@ -61,8 +63,10 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
-        frontEndRestriction.setRestriction(restriction);
+        Restriction bkt = new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, //
+                Bucket.rangeBkt("D", null, true, false));
+        Restriction accountRestriction = Restriction.builder().and(bkt).build();
+        frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList(VALUE_CONTACT_TITLE));
         Restriction contactRestriction = new BucketRestriction(
@@ -102,12 +106,14 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
             Assert.assertTrue(
                     Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
+        String qry = JsonUtils.serialize(frontEndQuery);
+        Assert.assertFalse(StringUtils.isNotBlank(qry) && qry.contains("concreteRestriction"), qry);
 
         // only get scores for A, B and FStatsCubeUtils
         Restriction selectedScores = Restriction.builder().let(BusinessEntity.Rating, model.getId()).inCollection(
                 Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.B.getName(), RatingBucketName.F.getName()))
                 .build();
-        Restriction restriction2 = Restriction.builder().and(restriction, selectedScores).build();
+        Restriction restriction2 = Restriction.builder().and(accountRestriction, selectedScores).build();
         frontEndRestriction.setRestriction(restriction2);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
@@ -129,8 +135,9 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
-                .build();
+        Restriction bkt = new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, //
+                Bucket.rangeBkt("A", null, true, false));
+        Restriction accountRestriction = Restriction.builder().and(bkt).build();
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
@@ -143,17 +150,20 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
-
         Map<String, Long> ratingCounts = ratingQueryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals(count, Long.valueOf(1687));
+                Assert.assertEquals(count, Long.valueOf(1286));
             } else if (RatingBucketName.C.getName().equals(score)) {
                 Assert.assertEquals(count, Long.valueOf(371));
+            } else if (RatingBucketName.D.getName().equals(score)) {
+                Assert.assertEquals(count, Long.valueOf(401));
             }
         });
+        String qry = JsonUtils.serialize(frontEndQuery);
+        Assert.assertFalse(StringUtils.isNotBlank(qry) && qry.contains("concreteRestriction"), qry);
     }
 
     @Test(groups = "functional")
@@ -165,8 +175,9 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
 
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
-                .build();
+        Restriction bkt = new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, //
+                Bucket.rangeBkt("A", null, true, false));
+        Restriction accountRestriction = Restriction.builder().and(bkt).build();
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
@@ -185,6 +196,9 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         Assert.assertEquals(sum, totalCount,
                 String.format("Sum of rating coverage %d does not equals to the segment count %d", sum, totalCount));
+
+        String qry = JsonUtils.serialize(frontEndQuery);
+        Assert.assertFalse(StringUtils.isNotBlank(qry) && qry.contains("concreteRestriction"), qry);
     }
 
     @Test(groups = "functional")
@@ -263,6 +277,13 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         ruleC.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.rangeBkt("A", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
+
+        Map<String, Restriction> ruleD = new HashMap<>();
+        ruleD.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_INTENT, Bucket.nullBkt()));
+        ruleD.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
+                new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.notNullBkt()));
+        rule.getBucketToRuleMap().put(RatingBucketName.D.getName(), ruleD);
 
         rule.setDefaultBucketName(RatingBucketName.A.getName());
 

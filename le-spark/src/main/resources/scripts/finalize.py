@@ -14,5 +14,13 @@ for tgt, df in zip(lattice.targets, lattice.output):
     tgt['StorageType'] = 'Hdfs'
     tgt['Count'] = df2.count()
 
+for view in lattice.orphan_views:
+    spark.catalog.dropTempView(view)
+
+result = {
+    "OutputStr": lattice.output_str,
+    "Output": lattice.targets
+}
+
 print("----- BEGIN SCRIPT OUTPUT -----")
-print(json.dumps(lattice.targets))
+print(json.dumps(result))

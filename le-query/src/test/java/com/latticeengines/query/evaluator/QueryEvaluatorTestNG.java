@@ -43,6 +43,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
         sqlContains(sqlQuery, String.format("select distinct %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
+        // test idempotent
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+        sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
+        sqlContains(sqlQuery, String.format("select distinct %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
 
         // entity lookup
         query = Query.builder() //
@@ -52,12 +56,20 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         sqlContains(sqlQuery, "select distinct ?");
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
+        // test idempotent
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+        sqlContains(sqlQuery, "select distinct ?");
+        sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
 
         // bucketed attribute
         query = Query.builder() //
                 .select(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR) //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                 .build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+        sqlContains(sqlQuery, String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
+                BUCKETED_NOMINAL_ATTR));
+        // test idempotent
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         sqlContains(sqlQuery, String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
                 BUCKETED_NOMINAL_ATTR));
@@ -276,6 +288,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Restriction restriction = builder.build();
         Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+        sqlContains(sqlQuery, expectedPattern);
+
+        // test idempotent
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
         sqlContains(sqlQuery, expectedPattern);
     }
 

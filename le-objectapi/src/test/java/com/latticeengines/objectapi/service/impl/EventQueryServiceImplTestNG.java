@@ -211,7 +211,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
         frontEndQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         frontEndQuery.setPeriodName("Month");
-        System.out.println(eventQueryService.getQueryStr(frontEndQuery.getDeepCopy(), //
+        System.out.println(eventQueryService.getQueryStr(frontEndQuery, //
                 EventType.Scoring, DataCollection.Version.Blue));
         return getEventQueryService(sqlUser).getScoringCount(frontEndQuery, DataCollection.Version.Blue);
     }
@@ -228,7 +228,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         eventQuery.setPageFilter(new PageFilter(0, 0));
         eventQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         eventQuery.setPeriodName("Month");
-        System.out.println(eventQueryService.getQueryStr(eventQuery.getDeepCopy(), //
+        System.out.println(eventQueryService.getQueryStr(eventQuery, //
                 EventType.Scoring, DataCollection.Version.Blue));
         return getEventQueryService(sqlUser).getScoringCount(eventQuery, DataCollection.Version.Blue);
     }

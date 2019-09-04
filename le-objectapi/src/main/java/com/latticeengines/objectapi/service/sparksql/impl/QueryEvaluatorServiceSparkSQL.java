@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,12 +101,13 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
         return resultData;
     }
 
-    String createView(CustomerSpace customerSpace, String sql, String viewName) {
-        return sparkSQLService.createView(customerSpace, livySession, sql, viewName);
+    List<String> createViews(CustomerSpace customerSpace, List<Pair<String, String>> views) {
+        return sparkSQLService.createViews(customerSpace, livySession, views);
     }
 
-    HdfsDataUnit mergeRules(CustomerSpace customerSpace, List<String> views, String defaultBucket) {
-        return sparkSQLService.mergeRules(customerSpace, livySession, views, defaultBucket);
+    HdfsDataUnit mergeRules(CustomerSpace customerSpace, List<String> bucketViews, List<String> tempViews, //
+                            String defaultBucket) {
+        return sparkSQLService.mergeRules(customerSpace, livySession, bucketViews, tempViews, defaultBucket);
     }
 
     Configuration getYarnConfiguration() {

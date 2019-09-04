@@ -116,6 +116,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected long testGetCountAndAssert(String sqlUser, Query query, long expectedCount) {
         long count = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         Assert.assertEquals(count, expectedCount);
+        // test idempotent
+        count = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
+        Assert.assertEquals(count, expectedCount);
         return count;
     }
 

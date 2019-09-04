@@ -9,6 +9,7 @@ import scala.collection.JavaConverters._
 class LatticeContext(val input: List[DataFrame], val params: JsonNode, val targets: List[ObjectNode]) {
   var output: List[DataFrame] = List[DataFrame]()
   var outputStr: String = ""
+  var orphanViews: List[String] = List()
 }
 
 val mapper = new ObjectMapper() with ScalaObjectMapper
