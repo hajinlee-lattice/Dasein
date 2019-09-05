@@ -73,7 +73,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId, SoftD
     @JsonProperty("accountId")
     private String accountId;
 
-    @Column(name = "LE_ACCOUNT_EXTERNAL_ID", nullable = false)
+    @Column(name = "LE_ACCOUNT_EXTERNAL_ID", nullable = true)
     @JsonProperty("leAccountExternalID")
     private String leAccountExternalID;
 
