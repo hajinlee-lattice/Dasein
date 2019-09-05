@@ -59,6 +59,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -471,11 +472,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected void setupEnd2EndTestEnvironment(Map<String, Boolean> featureFlagMap) throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
 
-        if (MapUtils.isEmpty(featureFlagMap)) {
-            setupTestEnvironment();
-        } else {
-            setupTestEnvironmentWithFeatureFlags(featureFlagMap);
+        if (featureFlagMap == null) {
+            featureFlagMap = new HashMap<>();
         }
+        // use non entity match path by default unless its overwritten explicitly
+        featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        setupTestEnvironmentWithFeatureFlags(featureFlagMap);
         mainTestTenant = testBed.getMainTestTenant();
 
         log.info("Test environment setup finished.");

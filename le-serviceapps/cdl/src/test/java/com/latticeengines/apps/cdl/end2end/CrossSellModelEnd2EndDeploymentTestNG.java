@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -39,8 +40,7 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 
 public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLMTest1548550277029"; // LETest1528844192916-14
 
@@ -66,8 +66,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     // Target Products are shared with RefreshRatingDeploymentTestNG
     private static final ImmutableList<String> repeatTargetProducts = ImmutableList.of(
-            "1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", "wvgdBuktiOzn3Vb5NMjEV9PnM1CZwluO",
-            "f5v635l5ry87S2sJlinOMBey6YwjKzb", "AdbFXykhUy2A4FPiqP2lEXGbBhd8xuTf");
+            "1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", "wvgdBuktiOzn3Vb5NMjEV9PnM1CZwluO", "f5v635l5ry87S2sJlinOMBey6YwjKzb",
+            "AdbFXykhUy2A4FPiqP2lEXGbBhd8xuTf");
     private static final ImmutableList<String> firstTargetProducts = ImmutableList
             .of("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o");
 
@@ -92,7 +92,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     @Test(groups = { "precheckin" })
     public void testFirstPurchase() throws Exception {
         log.info("Running testFirstPurchase");
-        setupEnd2EndTestEnvironment();
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        setupEnd2EndTestEnvironment(featureFlagMap);
         resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
@@ -105,7 +107,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     @Test(groups = "end2end")
     public void testRepeatedPurchase() throws Exception {
         log.info("Running testRepeatedPurchase");
-        setupEnd2EndTestEnvironment();
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        setupEnd2EndTestEnvironment(featureFlagMap);
         resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
@@ -124,15 +128,16 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
         } else {
-            setupEnd2EndTestEnvironment();
+            Map<String, Boolean> featureFlagMap = new HashMap<>();
+            featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+            setupEnd2EndTestEnvironment(featureFlagMap);
             resumeCrossSellCheckpoint(LOADING_CHECKPOINT);
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         setupTestSegment();
         setupAndRunModel(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE, PredictionType.PROPENSITY, false);
-        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE,
-                PredictionType.EXPECTED_VALUE, false);
+        setupAndRunModel(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE, PredictionType.EXPECTED_VALUE, false);
     }
 
     private void setupAndRunModel(ModelingStrategy strategy, PredictionType predictionType, boolean testInvalidEngine) {
@@ -140,19 +145,17 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         verifyCounts(strategy);
         log.info("Start Cross Sell modeling ...");
         verifyBucketMetadataNotGenerated();
-        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(
-                mainTestTenant.getId(), testModel.getId(), testIteration1.getId(), null,
-                "ga_dev@lattice-engines.com");
+        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
+                testModel.getId(), testIteration1.getId(), null, "ga_dev@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         testModel = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
-        testIteration1 = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(),
-                testModel.getId(), testIteration1.getId());
+        testIteration1 = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(), testModel.getId(),
+                testIteration1.getId());
         Assert.assertEquals(testIteration1.getModelingJobStatus(), completedStatus);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         verifyBucketMetadataGenerated(predictionType);
-        Assert.assertEquals(ratingEngineProxy
-                .getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
+        Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
         verifyModelSummary(testIteration1.getModelSummaryId(), predictionType);
     }
@@ -179,30 +182,27 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         testIteration2.setAdvancedModelingConfig(testIteration1.getAdvancedModelingConfig());
         testIteration2.setDerivedFromRatingModel(testIteration1.getId());
         testIteration2.setPredictionType(predictionType);
-        testIteration2 = (AIModel) ratingEngineProxy.createModelIteration(mainTestTenant.getId(),
-                testModel.getId(), testIteration2);
+        testIteration2 = (AIModel) ratingEngineProxy.createModelIteration(mainTestTenant.getId(), testModel.getId(),
+                testIteration2);
 
         testModel = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId());
         Assert.assertEquals(testModel.getLatestIteration().getId(), testIteration2.getId());
 
-        List<ColumnMetadata> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(),
-                testModel.getId(), testIteration1.getId(), null);
+        List<ColumnMetadata> attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testModel.getId(),
+                testIteration1.getId(), null);
         Assert.assertNotNull(attrs);
 
         verifyBucketMetadataGenerated(predictionType);
 
-        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(
-                mainTestTenant.getId(), testModel.getId(), testIteration2.getId(),
-                refineAttributes(attrs), "some@email.com");
-        log.info(String.format("Remodel workflow application id is %s",
-                modelingWorkflowApplicationId));
+        String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
+                testModel.getId(), testIteration2.getId(), refineAttributes(attrs), "some@email.com");
+        log.info(String.format("Remodel workflow application id is %s", modelingWorkflowApplicationId));
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        testIteration2 = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(),
-                testModel.getId(), testIteration2.getId());
+        testIteration2 = (AIModel) ratingEngineProxy.getRatingModel(mainTestTenant.getId(), testModel.getId(),
+                testIteration2.getId());
         Assert.assertEquals(testIteration2.getModelingJobStatus(), completedStatus);
-        Assert.assertEquals(ratingEngineProxy
-                .getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
+        Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
 
         attrs = ratingEngineProxy.getIterationMetadata(mainTestTenant.getId(), testModel.getId(),
@@ -224,10 +224,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Assert.assertNotNull(bucketMetadataHistory);
         Assert.assertEquals(bucketMetadataHistory.size(), 1);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
-        List<BucketMetadata> latestBucketedMetadata = bucketMetadataHistory.values().iterator()
-                .next();
-        Assert.assertEquals(targetCount,
-                latestBucketedMetadata.stream().mapToLong(BucketMetadata::getNumLeads).sum(),
+        List<BucketMetadata> latestBucketedMetadata = bucketMetadataHistory.values().iterator().next();
+        Assert.assertEquals(targetCount, latestBucketedMetadata.stream().mapToLong(BucketMetadata::getNumLeads).sum(),
                 "Sum of leads in BucketMetadata is not equal to the target count");
         log.info("bucket metadata is " + JsonUtils.serialize(latestBucketedMetadata));
         latestBucketedMetadata.stream().forEach(bucket -> {
@@ -247,15 +245,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
     }
 
     private void setupTestRatingEngine(ModelingStrategy strategy, PredictionType predictionType, //
-                                       boolean testInvalidEngine) {
-        log.info("Set up test artifacts for a " + strategy + " model in tenant "
-                + mainTestTenant.getId());
-        RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL,
-                targetSegment);
+            boolean testInvalidEngine) {
+        log.info("Set up test artifacts for a " + strategy + " model in tenant " + mainTestTenant.getId());
+        RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, targetSegment);
         CrossSellRatingConfig ratingConfig = new CrossSellRatingConfig(strategy);
         ratingEngine.setAdvancedRatingConfig(ratingConfig);
-        testModel = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(),
-                ratingEngine);
+        testModel = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         log.info("Created rating engine " + testModel.getId());
         testIteration1 = (AIModel) testModel.getLatestIteration();
 
@@ -271,14 +266,13 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         List<String> trainingProducts = ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE.equals(strategy)
                 ? repeatTrainingProducts
                 : firstTrainingProducts;
-        configureCrossSellModel(testIteration1, predictionType, strategy, targetProducts,
-                trainingProducts);
+        configureCrossSellModel(testIteration1, predictionType, strategy, targetProducts, trainingProducts);
 
-        testIteration1 = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(),
-                testModel.getId(), testIteration1.getId(), testIteration1);
+        testIteration1 = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testModel.getId(),
+                testIteration1.getId(), testIteration1);
 
-        Assert.assertTrue(ratingEngineProxy.validateForModelingByRatingEngineId(
-                mainTestTenant.getId(), testModel.getId(), testIteration1.getId()));
+        Assert.assertTrue(ratingEngineProxy.validateForModelingByRatingEngineId(mainTestTenant.getId(),
+                testModel.getId(), testIteration1.getId()));
 
         log.info("Updated rating model " + testIteration1.getId());
         log.info("/ratingengines/" + testModel.getId() + "/ratingmodels/" + testIteration1.getId());
@@ -286,13 +280,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private void verifyCounts(ModelingStrategy strategy) {
         log.info("Verifying counts ...");
-        targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
-                testModel.getId(), testIteration1.getId(), ModelingQueryType.TARGET);
-        long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(
-                mainTestTenant.getId(), testModel.getId(), testIteration1.getId(),
-                ModelingQueryType.TRAINING);
-        long eventCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
-                testModel.getId(), testIteration1.getId(), ModelingQueryType.EVENT);
+        targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), testModel.getId(),
+                testIteration1.getId(), ModelingQueryType.TARGET);
+        long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
+                testModel.getId(), testIteration1.getId(), ModelingQueryType.TRAINING);
+        long eventCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), testModel.getId(),
+                testIteration1.getId(), ModelingQueryType.EVENT);
         String errorMsg = "targetCount=" + targetCount //
                 + " trainingCount=" + trainingCount //
                 + " eventCount=" + eventCount;
@@ -309,8 +302,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     private void verifyRefinedAttributes(List<ColumnMetadata> attrs) {
         for (String refinedAttribute : refinedAttributes.keySet()) {
-            ColumnMetadata cm = attrs.stream()
-                    .filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst().get();
+            ColumnMetadata cm = attrs.stream().filter(attr -> attr.getAttrName().equals(refinedAttribute)).findFirst()
+                    .get();
             Assert.assertEquals(cm.getApprovedUsageList().size(), 1);
             Assert.assertEquals(cm.getApprovedUsageList().get(0), ApprovedUsage.NONE);
         }

@@ -160,10 +160,26 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
             List<ComparableExpression> rhsPaths = rhsResolver.resolveForCompare(rhs);
 
-            BooleanExpression booleanExpression = null;
+            BooleanExpression booleanExpression;
             switch (operator) {
                 case EQUAL:
-
+                    if (rhs instanceof SubQueryAttrLookup) {
+                        SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                            booleanExpression = lhsPaths.get(0).eq((SQLQuery<?>) subQueryAttrLookup
+                                    .getSubQuery().getSubQueryExpression());
+                        } else {
+                            ComparableExpression<String> subselect = rhsResolver
+                                    .resolveForSubselect(rhs);
+                            booleanExpression = lhsPath.eq(subselect);
+                        }
+                    } else {
+                        if (applyEqualIgnoreCase(isBitEncoded, lhs, rhs, lhsPath)) {
+                            booleanExpression = Expressions.asString(lhsPath).equalsIgnoreCase(rhsPaths.get(0));
+                        } else {
+                            booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                        }
+                    }
                     break;
                 case NOT_EQUAL:
                     if (rhs instanceof SubQueryAttrLookup) {
