@@ -1,11 +1,14 @@
 package com.latticeengines.workflowapi.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,11 +20,20 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.GreedyWorkflowScheduler;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowJobSchedulingObject;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowScheduler;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConfiguration;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.NotExceedingEnvQuota;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.NotExceedingStackQuota;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.NotExceedingTenantQuota;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.WorkflowThrottlingConstraint;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingSystemStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -105,7 +117,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
 
         try {
             MultiTenantContext.clearTenant();
-            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByStatusesAndClusterId(emrCacheService.getClusterId(), Collections.singletonList(JobStatus.RUNNING.name()));
+            List<WorkflowJob> workflowJobs = new ArrayList<>(workflowJobEntityMgr.findByStatusesAndClusterId(emrCacheService.getClusterId(), Collections.singletonList(JobStatus.RUNNING.name())));
             workflowJobs.addAll(workflowJobEntityMgr.findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name())));
             addCurrentSystemState(status, workflowJobs, podid, division);
         } finally {
@@ -113,6 +125,36 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         }
 
         return status;
+    }
+
+    @Override
+    public ThrottlingResult getThrottlingResult(String podid, String division) {
+        // drain workflowJobs enqueued in db
+        try {
+            lockEnvironment(podid);
+            WorkflowThrottlingSystemStatus status = constructSystemStatus(podid, division);
+            List<WorkflowThrottlingConstraint> constraintList = Arrays.asList(new NotExceedingEnvQuota(), new NotExceedingStackQuota(), new NotExceedingTenantQuota());
+            List<WorkflowJobSchedulingObject> enqueuedWorkflowSchedulingObjects = status.getEnqueuedWorkflowJobs().stream().map(o -> new WorkflowJobSchedulingObject(o, constraintList)).collect(Collectors.toList());
+            WorkflowScheduler scheduler = new GreedyWorkflowScheduler();
+            return scheduler.schedule(status, enqueuedWorkflowSchedulingObjects, podid, division);
+        } catch (Exception e) {
+            log.error("Failed to get workflow throttling result.", e);
+            throw e;
+        } finally {
+            unlockEnvironment(podid);
+        }
+    }
+
+    private void lockEnvironment(String podid) {
+        String lockName = "WORKFLOWTHROTTLING_LOCK_" + podid;
+        LockManager.registerCrossDivisionLock(lockName);
+        LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
+    }
+
+    private void unlockEnvironment(String podid) {
+        String lockName = "WORKFLOWTHROTTLING_LOCK_" + podid;
+        LockManager.releaseWriteLock(lockName);
+        LockManager.deregisterCrossDivisionLock(lockName);
     }
 
     @Override
@@ -200,6 +242,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         Map<String, Map<String, Integer>> tenantRunningWorkflow = new HashMap<>();
         Map<String, Map<String, Integer>> tenantEnqueuedWorkflow = new HashMap<>();
         Set<String> tenantIds = new HashSet<>();
+        List<WorkflowJob> enqueuedWorkflowJobs = new ArrayList<>();
 
 
         for (WorkflowJob workflow : workflowJobs) {
@@ -223,6 +266,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
 
                 if (division.equals(workflow.getStack())) {
                     addWorkflowToMap(enqueuedWorkflowInStack, workflow);
+                    enqueuedWorkflowJobs.add(workflow);
                 }
             }
         }
@@ -233,6 +277,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         status.setTenantRunningWorkflow(tenantRunningWorkflow);
         status.setTenantEnqueuedWorkflow(tenantEnqueuedWorkflow);
         status.setConfig(getThrottlingConfig(podid, division, tenantIds));
+        status.setEnqueuedWorkflowJobs(enqueuedWorkflowJobs);
     }
 
     private void addWorkflowToMap(Map<String, Integer> map, WorkflowJob workflow) {

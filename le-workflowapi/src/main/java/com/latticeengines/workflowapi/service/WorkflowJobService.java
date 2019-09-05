@@ -80,6 +80,8 @@ public interface WorkflowJobService {
 
     EnqueueSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid);
 
+    List<ApplicationId> drainWorkflowQueue(String podid, String division);
+
     String submitAwsWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration);
 
     Long createWorkflowJob(String customerSpace);

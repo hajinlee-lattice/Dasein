@@ -4,10 +4,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -30,6 +32,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConfiguration;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingSystemStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -55,14 +58,16 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
     private static List<WorkflowJob> FAKE_WORKFLOW_DIV1;
     private static List<WorkflowJob> FAKE_WORKFLOW_DIV2;
-
     private static List<WorkflowJob> FAKE_WORKFLOW_FOR_BP;
+    private static List<WorkflowJob> FAKE_WORKFLOW_FOR_RESULT;
 
     private static String TEST_TENANT_ID;
 
     private static final String GLOBAL = "global";
 
     private static WorkflowThrottlingConfiguration populated;
+
+    private static Long WORKFLOW_PID = 0L;
 
     @Inject
     @InjectMocks
@@ -120,8 +125,9 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
     @Test(groups = "functional", dependsOnMethods = "testGetConfig", dataProvider = "testGetStatusProvider")
     public void testGetStatus(String podid, String div, List<WorkflowJob> fakedWorkflowJobs) {
-        when(workflowJobEntityMgr.findByStatusesAndClusterId(any(), any())).thenReturn(fakedWorkflowJobs);
         when(emrCacheService.getClusterId()).thenReturn(EMR_CLUSTER_ID);
+        when(workflowJobEntityMgr.findByStatusesAndClusterId(emrCacheService.getClusterId(), Collections.singletonList(JobStatus.RUNNING.name()))).thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.RUNNING.name().equals(o.getStatus())).collect(Collectors.toList()));
+        when(workflowJobEntityMgr.findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name()))).thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus())).collect(Collectors.toList()));
         WorkflowThrottlingSystemStatus status = workflowThrottlingService.constructSystemStatus(podid, div);
         Assert.assertNotNull(status);
 
@@ -142,6 +148,29 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
     @Test(groups = "functional", dataProvider = "flagProvider")
     public void testGetFlag(String podid, String division, Boolean expectedFlag) {
         Assert.assertEquals(workflowThrottlingService.isWorkflowThrottlingEnabled(podid, division), (boolean) expectedFlag);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testGetStatus", dataProvider = "throttlingResultProvider")
+    public void testGetThrottlingResult(String podid, String division, List<WorkflowJob> fakedWorkflowJobs, int submittedCount, int enqueuedCount) {
+        when(emrCacheService.getClusterId()).thenReturn(EMR_CLUSTER_ID);
+        when(workflowJobEntityMgr.findByStatusesAndClusterId(emrCacheService.getClusterId(), Collections.singletonList(JobStatus.RUNNING.name()))).thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.RUNNING.name().equals(o.getStatus())).collect(Collectors.toList()));
+        when(workflowJobEntityMgr.findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name()))).thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus())).collect(Collectors.toList()));
+
+        ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, division);
+
+        Assert.assertEquals(result.getCanSubmitWorkflowJobIds().size(), submittedCount);
+        Assert.assertEquals(result.getStillEnqueuedWorkflowJobIds().size(), enqueuedCount);
+        Assert.assertEquals(result.getCanSubmitTenantIds().size(), submittedCount > 0 ? 1 : 0);
+        Assert.assertEquals(result.getStillEnqueuedTenantIds().size(), enqueuedCount > 0 ? 1 : 0);
+    }
+
+    @DataProvider(name = "throttlingResultProvider")
+    public Object[][] throttlingResultProvider() {
+        // podid, division, faked workflowJobs, expect submittedCount, expect enqueuedCount
+        return new Object[][]{
+                {TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_FOR_RESULT, 2, 0},
+                {TEST_PODID, TEST_DIV2, FAKE_WORKFLOW_FOR_RESULT, 5, 7}
+        };
     }
 
     @DataProvider(name = "flagProvider")
@@ -203,10 +232,28 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
             add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, TEST_WF_TYPE, null, tenant));
             add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
         }};
+
+        FAKE_WORKFLOW_FOR_RESULT = new ArrayList<WorkflowJob>() {{
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, TEST_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, TEST_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+        }};
     }
 
     private WorkflowJob workflowJobBuilder(JobStatus jobStatus, String division, String type, String emrClusterId, Tenant tenant) {
         WorkflowJob wfj = new WorkflowJob();
+        wfj.setPid(WORKFLOW_PID++);
         wfj.setStatus(jobStatus.name());
         wfj.setStack(division);
         wfj.setType(type);
@@ -224,7 +271,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                 put(JobStatus.ENQUEUED, 10);
             }});
             put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {{
-                put(JobStatus.RUNNING, 1);
+                put(JobStatus.RUNNING, 2);
                 put(JobStatus.ENQUEUED, 7);
             }});
         }});
@@ -236,13 +283,13 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                     put(JobStatus.ENQUEUED, 6);
                 }});
                 put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {{
-                    put(JobStatus.RUNNING, 1);
+                    put(JobStatus.RUNNING, 2);
                     put(JobStatus.ENQUEUED, 3);
                 }});
             }});
             put(TEST_DIV2, new HashMap<String, Map<JobStatus, Integer>>() {{
                 put(GLOBAL, new HashMap<JobStatus, Integer>() {{
-                    put(JobStatus.RUNNING, 2);
+                    put(JobStatus.RUNNING, 10);
                     put(JobStatus.ENQUEUED, 2);
                 }});
                 put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {{
@@ -255,11 +302,11 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         config.setTenantConfig(new HashMap<String, Map<String, Map<JobStatus, Integer>>>() {{
             put(GLOBAL, new HashMap<String, Map<JobStatus, Integer>>() {{
                 put(GLOBAL, new HashMap<JobStatus, Integer>() {{
-                    put(JobStatus.RUNNING, 2);
+                    put(JobStatus.RUNNING, 5);
                     put(JobStatus.ENQUEUED, 1);
                 }});
                 put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {{
-                    put(JobStatus.RUNNING, 1);
+                    put(JobStatus.RUNNING, 2);
                     put(JobStatus.ENQUEUED, 2);
                 }});
             }});

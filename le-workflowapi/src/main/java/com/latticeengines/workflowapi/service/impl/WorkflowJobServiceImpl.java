@@ -1,5 +1,6 @@
 package com.latticeengines.workflowapi.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -29,6 +30,7 @@ import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.api.EnqueueSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -59,8 +61,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private static final List<String> NON_TERMINAL_JOB_STATUSES = Job.NON_TERMINAL_JOB_STATUS.stream()
             .map(JobStatus::getName).collect(Collectors.toList());
-
-    private static final String PA_WORKFLOW = "processAnalyzeWorkflow";
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String atimelineServiceUrl;
@@ -251,14 +251,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
-            Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+                                          Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         return getJobsByWorkflowIds(customerSpace, workflowIds, types, null, includeDetails, hasParentId, parentJobId);
     }
 
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
-            List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+                                          List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowIds = Optional.ofNullable(workflowIds);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
 
@@ -295,7 +295,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIdsFromCache(String customerSpace, @NotNull List<Long> workflowIds,
-            boolean includeDetails) {
+                                                   boolean includeDetails) {
         if (disableCache) {
             return getJobsByWorkflowIds(customerSpace, workflowIds, null, includeDetails, false, -1L);
         }
@@ -307,7 +307,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowPids, List<String> types,
-            Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+                                           Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowPids = Optional.ofNullable(workflowPids);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         List<WorkflowJob> workflowJobs;
@@ -347,7 +347,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId,
-         List<String> workflowTypes, List<String> statuses) {
+                                                                 List<String> workflowTypes, List<String> statuses) {
         return workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
     }
 
@@ -504,7 +504,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration,
-            Long workflowPid) {
+                                        Long workflowPid) {
         return workflowContainerService.submitWorkflow(workflowConfiguration, workflowPid);
     }
 
@@ -519,6 +519,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         return new EnqueueSubmission(enqueueWorkflowJob(workflowConfiguration, division, workflowJobPid));
+    }
+
+    @Override
+    public List<ApplicationId> drainWorkflowQueue(String podid, String division) {
+        ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, division);
+        List<ApplicationId> submitted = new ArrayList<>();
+        List<WorkflowJob> canSubmit = workflowJobEntityMgr.findByWorkflowIds(new ArrayList<>(result.getCanSubmitWorkflowJobIds()));
+        for (WorkflowJob o : canSubmit) {
+            try {
+                ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
+                submitted.add(appId);
+                o.setStatus(JobStatus.PENDING.name());
+                workflowJobEntityMgr.update(o);
+                log.info("Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
+            } catch (Exception e) {
+                log.error("Failed to submit workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId(), e);
+            }
+        }
+        return submitted;
     }
 
     private Long enqueueWorkflowJob(WorkflowConfiguration workflowConfig, String division, Long workflowJobPid) {
@@ -648,9 +667,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = workflowJobs.stream().filter(workflowJob -> //
-        workflowJob.getType().equalsIgnoreCase(type.toLowerCase())
-                && workflowJob.getStartTimeInMillis() >= startTime
-                && workflowJob.getStartTimeInMillis() <= endTime) //
+                workflowJob.getType().equalsIgnoreCase(type.toLowerCase())
+                        && workflowJob.getStartTimeInMillis() >= startTime
+                        && workflowJob.getStartTimeInMillis() <= endTime) //
                 .collect(Collectors.toList());
         List<Long> workflowIds = workflowJobs.stream().map(WorkflowJob::getWorkflowId).collect(Collectors.toList());
         workflowJobs.forEach(workflowJob -> {
