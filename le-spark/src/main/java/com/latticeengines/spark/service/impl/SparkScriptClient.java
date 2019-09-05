@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -130,8 +131,13 @@ class SparkScriptClient {
             } while(!LivyStatement.State.TERMINAL_STATES.contains(statement.state));
             if (LivyStatement.State.available.equals(statement.state)) {
                 if ("error".equals(statement.output.status)) {
-                    throw new RuntimeException("Statement " + id + " failed with " + statement.output.ename //
-                            + " : " + statement.output.evalue);
+                    log.warn("Failed statement {} was:\n{}", id, statement.code);
+                    String msg = statement.output.ename + " : " + statement.output.evalue;
+                    List<String> trace = statement.output.traceback;
+                    if (CollectionUtils.isNotEmpty(trace)) {
+                        msg += "\nTraceback: " + StringUtils.join(trace, "\n");
+                    }
+                    throw new RuntimeException("Statement " + id + " failed: " + msg);
                 } else {
                     JsonNode json = statement.output.data;
                     String output = json.get("text/plain").asText();

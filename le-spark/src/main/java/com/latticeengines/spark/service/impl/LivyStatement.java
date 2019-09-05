@@ -1,6 +1,7 @@
 package com.latticeengines.spark.service.impl;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,6 +14,9 @@ class LivyStatement {
 
     @JsonProperty
     Integer id;
+
+    @JsonProperty
+    String code;
 
     @JsonProperty
     State state;
@@ -52,6 +56,9 @@ class LivyStatement {
 
         @JsonProperty
         String evalue;
+
+        @JsonProperty
+        List<String> traceback;
 
     }
 
