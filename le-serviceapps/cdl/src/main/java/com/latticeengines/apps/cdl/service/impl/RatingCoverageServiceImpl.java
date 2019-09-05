@@ -997,7 +997,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             throw new LedpException(LedpCode.LEDP_40045, new String[] { segmentName });
         }
 
-        if (StringUtils.isBlank(request.getLookupId())) {
+        if (request.isRestrictNullLookupId() && StringUtils.isBlank(request.getLookupId())) {
             throw new LedpException(LedpCode.LEDP_40070);
         }
 
