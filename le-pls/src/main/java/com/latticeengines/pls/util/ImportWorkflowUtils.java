@@ -143,7 +143,7 @@ public class ImportWorkflowUtils {
     }
 
     public static void validateFieldDefinitionRequestParameters(
-            String systemName, String systemType, String systemObject, String importFile, String requestType)
+            String requestType, String systemName, String systemType, String systemObject, String importFile)
             throws LedpException {
         log.info("Field Definition Request Parameters:\n   systemName: " + systemName + "\n   systemType: " +
                  systemType + "\n   systemObject: " + systemObject + "\n   importFile: " + importFile);
@@ -152,17 +152,17 @@ public class ImportWorkflowUtils {
 
         if (StringUtils.isBlank(systemName)) {
             log.error("systemName is null or blank");
-            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemName" });
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemName is null/blank" });
         }
 
         if (StringUtils.isBlank(systemType)) {
             log.error("systemType is null or blank");
-            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemType" });
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemType is null/blank" });
         }
 
         if (StringUtils.isBlank(systemObject)) {
             log.error("systemObject is null or blank");
-            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemObject" });
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemObject is null/blank" });
         }
 
         // Make sure systemObject maps to EntityType displayName.
@@ -170,20 +170,22 @@ public class ImportWorkflowUtils {
             EntityType.fromDisplayNameToEntityType(systemObject);
         } catch (IllegalArgumentException e) {
             log.error("systemObject is not valid EntityType displayName");
-            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "systemObject" });
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType,
+                    "systemObject value " + systemObject + " is not a valid EntityType" });
         }
 
         if (StringUtils.isBlank(importFile)) {
             log.error("importFile is null or blank");
-            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "importFile" });
+            throw new LedpException(LedpCode.LEDP_18229, new String[] { requestType, "importFile is null/blank" });
         }
     }
 
-    public static void validateFieldDefinitionRecord(FieldDefinitionsRecord record, String requestType) {
-        // Make sure that the commit request has field definition records section.
+    public static void validateFieldDefinitionsRequestBody(String requestType, FieldDefinitionsRecord record) {
+        // Make sure that the field definitions request has FieldDefinitionsRecord section.
         if (record == null || MapUtils.isEmpty(record.getFieldDefinitionsRecordsMap())) {
-            log.error("FieldDefinitionsRecord is null or missing FieldDefinitions map");
-            throw new LedpException(LedpCode.LEDP_18229, new String[]{requestType, "FieldDefintionsRecord"});
+            log.error("{} FieldDefinitionsRecord request is null or missing FieldDefinitionsRecord map", requestType);
+            throw new LedpException(LedpCode.LEDP_18230, new String[]{requestType,
+                    "FieldDefinitionsRecord null or FieldDefinitionsRecordsMap null or empty"});
         }
     }
 
@@ -334,6 +336,7 @@ public class ImportWorkflowUtils {
         }
 
         // Iteration through all the sections in the Spec.
+        log.info("Processing Spec for SystemType {} and SystemObject {}", spec.getSystemType(), spec.getSystemObject());
         for (Map.Entry<String, List<FieldDefinition>> section : spec.getFieldDefinitionsRecordsMap().entrySet()) {
             if (CollectionUtils.isEmpty(section.getValue())) {
                 fieldDefinitionsRecord.addFieldDefinitionsRecords(section.getKey(), new ArrayList<>(), false);
@@ -489,7 +492,8 @@ public class ImportWorkflowUtils {
             throw new IllegalArgumentException("Could not add FieldDefinition with fieldName " +
                     definition.getFieldName()  + " to section " + section + " because of existing record");
         }
-        log.info("    Successfully added Spec fieldName " + definition.getFieldName() + " to section " + section);
+        log.info("    Successfully added FieldDefinition with fieldName {} and columnName {} to section {}",
+                definition.getFieldName(), definition.getColumnName(), section);
     }
 
     private static FieldDefinition createNewCustomFieldDefinition(MetadataResolver resolver, String columnName,
@@ -517,6 +521,12 @@ public class ImportWorkflowUtils {
         return definition;
     }
 
+    // Generate a table from a FieldDefinitionsRecord.  The writeAllDefinitions flag defines whether FieldDefinitions
+    // that haven't ever matched an import file column should be written back.  The typical usage of this flag is to
+    // set it true when converting a Spec to a Table, since in that case all Spec fields should be written to the
+    // Table.  It should be set false when converting a FieldDefinitionsRecord to a Table that will be written to
+    // DataFeedTask template because Spec fields that were never matched to input columns should not be in the
+    // Metadata Attributes table.
     public static Table getTableFromFieldDefinitionsRecord(FieldDefinitionsRecord record, boolean writeAllDefinitions) {
         Table table = new Table();
 
@@ -541,11 +551,15 @@ public class ImportWorkflowUtils {
                 // If writeAllDefinitions is false, only write back FieldDefinitions with columnName set back to the
                 // table as this indicates that they have a current mapping column or had in the a previous import.
                 // In this case, skip FieldDefinitions that don't have columnName set as these are Spec fields that
-                // do not current or did not previously match a import file column.
+                // do not currently or did not previously match a import file column.
                 if (writeAllDefinitions || StringUtils.isNotBlank(definition.getColumnName())) {
                     Attribute attribute = getAttributeFromFieldDefinition(definition);
                     table.addAttribute(attribute);
-                    log.info("   SectionName: " + entry.getKey() + " FieldName: " + definition.getFieldName());
+                    log.info("   SectionName: {}  FieldName: {}  ColumnName: {}", entry.getKey(),
+                            definition.getFieldName(), definition.getColumnName());
+                } else {
+                    log.info("   Skipped Field: SectionName: {}  FieldName: {}", entry.getKey(),
+                            definition.getFieldName());
                 }
             }
         }
