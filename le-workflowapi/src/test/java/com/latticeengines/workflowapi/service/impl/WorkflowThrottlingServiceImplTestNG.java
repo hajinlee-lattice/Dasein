@@ -62,6 +62,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
     private static List<WorkflowJob> FAKE_WORKFLOW_FOR_RESULT;
 
     private static String TEST_TENANT_ID;
+    private static final String TENANT_ID_EMPTY_CONFIG = "abcde.abcde.Production";
 
     private static final String GLOBAL = "global";
 
@@ -118,6 +119,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         populated = populateTestConfig();
         WorkflowThrottlingConfiguration retrieved = workflowThrottlingService.getThrottlingConfig(TEST_PODID, TEST_DIV1, new HashSet<String>() {{
             add(TEST_TENANT_ID);
+            add("abcde");
         }});
 
         assertConfigMatch(populated, retrieved);
@@ -316,6 +318,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                     put(JobStatus.ENQUEUED, 20);
                 }});
             }});
+            put(TENANT_ID_EMPTY_CONFIG, new HashMap<>());
         }});
         saveConfigToZK(config);
 
