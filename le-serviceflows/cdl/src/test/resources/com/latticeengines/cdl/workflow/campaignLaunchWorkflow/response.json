@@ -1,0 +1,2193 @@
+[
+  {
+    "AttrName": "SalesforceAccountID",
+    "DisplayName": "SFDC Account ID",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "SalesforceAccountID"
+  },
+  {
+    "AttrName": "RATING_MODEL_ID",
+    "DisplayName": "Model ID",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "RATING_MODEL_ID"
+  },
+  {
+    "AttrName": "RATING_MODEL_NAME",
+    "DisplayName": "Model Name",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "RATING_MODEL_NAME"
+  },
+  {
+    "AttrName": "AccountId",
+    "DisplayName": "Account ID",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "AccountId"
+  },
+  {
+    "AttrName": "Email",
+    "DisplayName": "Contact Email",
+    "Subcategory": "Other",
+    "Entity": "Contact",
+    "State": "Active",
+    "JavaClass": "String",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "CanModel": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "Contact Attributes",
+    "ColumnId": "Email",
+    "FundamentalType": "email",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "Website",
+    "Description": "",
+    "DisplayName": "Account Domain",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "Website",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "PostalCode",
+    "Description": "",
+    "DisplayName": "Contact ZipCode",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "PostalCode",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "LAST_UPDATED_TIMESTAMP",
+    "DisplayName": "Campaign Launch Time",
+    "Entity": "Account",
+    "JavaClass": "Long",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "LAST_UPDATED_TIMESTAMP"
+  },
+  {
+    "AttrName": "SEGMENT_NAME",
+    "DisplayName": "Segment Name",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "SEGMENT_NAME"
+  },
+  {
+    "AttrName": "SalesforceContactID",
+    "DisplayName": "Contact SFDC ID",
+    "Entity": "Contact",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "SalesforceContactID"
+  },
+  {
+    "AttrName": "PRIORITY_ID",
+    "DisplayName": "Lattice Rating",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "PRIORITY_ID"
+  },
+  {
+    "AttrName": "DESTINATION_SYS_NAME",
+    "DisplayName": "Campaign Launch System Name",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "DESTINATION_SYS_NAME"
+  },
+  {
+    "AttrName": "CompanyName",
+    "DisplayName": "Account Name",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "CompanyName",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "DESCRIPTION",
+    "DisplayName": "Campaign Description",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "DESCRIPTION"
+  },
+  {
+    "AttrName": "DESTINATION_ORG_ID",
+    "DisplayName": "Campaign Launch System",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "DESTINATION_ORG_ID"
+  },
+  {
+    "AttrName": "EXTERNAL_ID",
+    "DisplayName": "Recommendation ID",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "EXTERNAL_ID"
+  },
+  {
+    "AttrName": "PLAY_NAME",
+    "DisplayName": "Campaign Name",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "PLAY_NAME"
+  },
+  {
+    "AttrName": "MONETARY_VALUE",
+    "DisplayName": "Expected Revenue",
+    "Entity": "Account",
+    "JavaClass": "Double",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "MONETARY_VALUE"
+  },
+  {
+    "AttrName": "PRIORITY_DISPLAY_NAME",
+    "DisplayName": "Lattice Rating",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "PRIORITY_DISPLAY_NAME"
+  },
+  {
+    "AttrName": "LIKELIHOOD",
+    "DisplayName": "Lattice Score",
+    "Entity": "Account",
+    "JavaClass": "Double",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "LIKELIHOOD"
+  },
+  {
+    "AttrName": "LAUNCH_DATE",
+    "DisplayName": "Campaign Launch Date",
+    "Entity": "Account",
+    "JavaClass": "Long",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "LAUNCH_DATE"
+  },
+  {
+    "AttrName": "PLAY_ID",
+    "DisplayName": "Campaign ID",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "PLAY_ID"
+  },
+  {
+    "AttrName": "FirstName",
+    "DisplayName": "Contact First Name",
+    "Entity": "Contact",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "FirstName"
+  },
+  {
+    "AttrName": "LIFT",
+    "DisplayName": "Lift",
+    "Entity": "Account",
+    "JavaClass": "Double",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "LIFT"
+  },
+  {
+    "AttrName": "Address_Street_1",
+    "Description": "",
+    "DisplayName": "Contact Address",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "Address_Street_1",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "City",
+    "Description": "",
+    "DisplayName": "Contact City",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "City",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "ContactID",
+    "DisplayName": "Contact ID",
+    "Entity": "Contact",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "ContactID"
+  },
+  {
+    "AttrName": "State",
+    "Description": "",
+    "DisplayName": "Contact State",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "State",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "DESTINATION_SYS_TYPE",
+    "DisplayName": "Campaign Launch System Type",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "DESTINATION_SYS_TYPE"
+  },
+  {
+    "AttrName": "PhoneNumber",
+    "DisplayName": "Contact Phone No.",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "PhoneNumber",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "Country",
+    "Description": "",
+    "DisplayName": "Contact Country",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "Country",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "LastName",
+    "DisplayName": "Contact Last Name",
+    "Entity": "Contact",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "LastName"
+  },
+  {
+    "AttrName": "LAUNCH_ID",
+    "DisplayName": "Campaign Launch ID",
+    "Entity": "Account",
+    "JavaClass": "String",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": true,
+    "ColumnId": "LAUNCH_ID"
+  },
+  {
+    "AttrName": "ContactName",
+    "Description": "",
+    "DisplayName": "Contact Name",
+    "Subcategory": "Other",
+    "Entity": "Contact",
+    "State": "Active",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "CanModel": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "Contact Attributes",
+    "ColumnId": "ContactName",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "US_1987_SIC_5",
+    "Description": "The Standard Industrial Classification code for the fifth line of business operations as ranked by percent of salesevenue.",
+    "DisplayName": "SIC Code 5",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "US_1987_SIC_5",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "US_1987_SIC_5",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "US_1987_SIC_6",
+    "Description": "The Standard Industrial Classification code for the sixth line of business operations as ranked by percent of salesevenue. Available globally.Blank-filled when not available.",
+    "DisplayName": "SIC Code 6",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "US_1987_SIC_6",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "US_1987_SIC_6",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LDC_Street",
+    "Description": "The first street address line where a business is physically located, generally, in the local language. Available globally. Blank-filled when not available.",
+    "DisplayName": "Street Address",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_Street",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_Street",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "US_1987_SIC_1",
+    "Description": "The US 1987 Standard Industrial Classification (SIC) code system categorizes business establishments based upon the type of activity done by that business at that location. A business can have up to six SIC codes. The first-listed SIC code represents the primary operations of the business. Then, SIC codes are assigned in descending order according to the percentage of the revenue contributed by each function of the business. If countries collect other industry classifications (Primary Local Activity Code-position 859-866), local classifications are converted to the standard 1987 US SIC Code. The SIC code of a parent/ultimate may include the activities of its subsidiaries. Available globally. Contains '9999', when not available",
+    "DisplayName": "US 1987 SIC 1",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "US_1987_SIC_1",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "US_1987_SIC_1",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "US_1987_SIC_2",
+    "Description": "The Standard Industrial Classification code for the second line of business operations as ranked by percent of salesevenue. Blank-filled when not available.",
+    "DisplayName": "SIC Code 2",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "US_1987_SIC_2",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "US_1987_SIC_2",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "US_1987_SIC_3",
+    "Description": "The Standard Industrial Classification code for the third line of business operations as ranked by percent of salesevenue. Available globally.Blank-filled when not available.",
+    "DisplayName": "SIC Code 3",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "US_1987_SIC_3",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "US_1987_SIC_3",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "US_1987_SIC_4",
+    "Description": "The Standard Industrial Classification code for the fourth line of business operations as ranked by percent of salesevenue.Available globally.Blank-filled when not available.",
+    "DisplayName": "SIC Code 4",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "US_1987_SIC_4",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "US_1987_SIC_4",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LE_IS_PRIMARY_LOCATION",
+    "Description": "Indicates whether the business address (street, city, state & country) is the HQ business address. Available globally.",
+    "DisplayName": "Is Primary Location",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_IS_PRIMARY_LOCATION",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_IS_PRIMARY_LOCATION",
+    "FundamentalType": "boolean",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "TELEPHONE_NUMBER",
+    "Description": "The primary voice telephone number for the business with no formatting or punctuation. This string contains all telecommunication number components (area code, exchange, number). Available globally. Blank-filled when not available.",
+    "DisplayName": "Site Telephone Number",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "TELEPHONE_NUMBER",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "TELEPHONE_NUMBER",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "STATE_PROVINCE_ABBR",
+    "Description": "The abbreviation of the state/province where the business is physically located. Available globally. Blank-filled when not available.",
+    "DisplayName": "State/Province Abbreviation",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "STATE_PROVINCE_ABBR",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "STATE_PROVINCE_ABBR",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "Last_Funding_Round_Year",
+    "Description": "Date of the latest funding round of the company.",
+    "DisplayName": "Latest Funding Date",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "INT",
+    "JavaClass": "Integer",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "Last_Funding_Round_Year",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "Last_Funding_Round_Year",
+    "FundamentalType": "date",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "BmbrSurge_AccountOverdrafts_Intent",
+    "Description": "The intensity of intent of the business shown in the topic - Account Overdrafts during last week compared to 13 weeks prior. The different levels of intent intensity are High, Moderate, Normal. High intensity means the business has consumed very large amounts of information on the topic compared to its history. Moderate intensity means the business showed an increase in consumption than average and normal intensity means the consumption did not show any increase. Account Overdrafts - Occurrence where money is withdrawn from a bank account and the available balance goes below zero.",
+    "DisplayName": "Account Overdrafts",
+    "Subcategory": "Accounting",
+    "Entity": "Account",
+    "State": "Active",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": true,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "DataLicense": "Bombora",
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "BmbrSurge_AccountOverdrafts_Intent",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Intent",
+    "ColumnId": "BmbrSurge_AccountOverdrafts_Intent",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "TRADESTYLE_NAME",
+    "Description": "A trading style name used by the business. It is an additional name used by the company. Also referred to as \"\"Doing Business As\"\" (DBA) and \"\"Also Known As\"\" (AKA). Available globally. Blank-filled when not available.",
+    "DisplayName": "Tradestyle Name",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "TRADESTYLE_NAME",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "TRADESTYLE_NAME",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "SALES_VOLUME_LOCAL_CURRENCY",
+    "Description": "The total annual revenue for this business in local currency.  Not available on branch locations.  Available globally.Zero-filled when not available.",
+    "DisplayName": "Site Sales Volume (local currency)",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "BIGINT",
+    "JavaClass": "Long",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "SALES_VOLUME_LOCAL_CURRENCY",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "SALES_VOLUME_LOCAL_CURRENCY",
+    "FundamentalType": "numeric",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LE_COMPANY_DESCRIPTION",
+    "Description": "Description of a business. Available for US Only. Blank-filled when not available.",
+    "DisplayName": "Description",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": false,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_COMPANY_DESCRIPTION",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_COMPANY_DESCRIPTION",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "DnB_CITY_CODE",
+    "Description": "Geographical code which identifies the city where the business is physically located. For US records, the code is unique within COUNTY. For non-US records, the code is unique within COUNTRY. Geographical codes provide one unique code value for various languages and/or spellings of the geographical data. Blank-filled when not available.",
+    "DisplayName": "City Code",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "DnB_CITY_CODE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "DnB_CITY_CODE",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "TechnologiesMonthlySpend",
+    "Description": "Total dollar amount spent by the business on web technologies last month.",
+    "DisplayName": "Monthly Web Technologies Spend",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "INT",
+    "JavaClass": "Integer",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "TechnologiesMonthlySpend",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "TechnologiesMonthlySpend",
+    "FundamentalType": "currency",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LDC_PrimaryIndustry",
+    "Description": "The primary industry the business operates in.",
+    "DisplayName": "Industry",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_PrimaryIndustry",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_PrimaryIndustry",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "LDC_Name",
+    "Description": "The Primary or Registered name of the business. Available globally",
+    "DisplayName": "Company Name",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_Name",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_Name",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "IsPublicDomain",
+    "Description": "Identifies if the input business has a public domain such as gmail.com, yahoo.com, etc.",
+    "DisplayName": "Is Public Domain",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "BIT",
+    "JavaClass": "Boolean",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "IsPublicDomain",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "IsPublicDomain",
+    "FundamentalType": "boolean",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "LE_INDUSTRY",
+    "Description": "Primary SIC Description of domestic ultimate business. Available Globally.",
+    "DisplayName": "Secondary Industry",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_INDUSTRY",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_INDUSTRY",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "LDC_Country",
+    "Description": "The name of the country where the business is located. In English. Available globally",
+    "DisplayName": "Country",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_Country",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_Country",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LEASE_BALANCE_RANKING_1_TO_10",
+    "Description": "Provides a rank (1-10) based on the likelihood of the business to have an outstanding lease balance. 1 denoting low likelihood of lease balance to 10 high likelihood. Available only for US.",
+    "DisplayName": "Lease Balance Rank",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "{\"unified\": {}}",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LEASE_BALANCE_RANKING_1_TO_10",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LEASE_BALANCE_RANKING_1_TO_10",
+    "FundamentalType": "numeric",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LDC_State",
+    "Description": "The name of the state/province where the business is physically located, generally, in the local language. Available globally. Blank-filled when not available..",
+    "DisplayName": "State",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_State",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_State",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "DnB_COUNTY_CODE",
+    "Description": "Geographical code which identifies the county where the business is physically located. Code is unique within state/province. Available globally. Zero-filled when not available.",
+    "DisplayName": "County Code",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "DnB_COUNTY_CODE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "DnB_COUNTY_CODE",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "Test_Date",
+    "Description": "",
+    "DisplayName": "Test Date",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "Long",
+    "LogicalDataType": "Date",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": true
+    },
+    "CanModel": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "Test_Date",
+    "FundamentalType": "year",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "DnB_CONTINENT_CODE",
+    "Description": "Geographical code which identifies the region where the business is physically located. Available globally. 1 = Africa 2 = Australia/Asia 3 = Europe 4 = Middle East 5 = South & Central America 6 = North America",
+    "DisplayName": "Continent Code",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "DnB_CONTINENT_CODE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "DnB_CONTINENT_CODE",
+    "FundamentalType": "enum",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LE_EMPLOYEE_RANGE_LABEL",
+    "Description": "Employee Range of domestic ultimate business in a Excel Friendly format, which is the highest level parent for the corporate within the country. Available ranges are 1-10, 11-50, 51-100, 101-200, 201-500,501-1000, 1001-2500, 2501-5000, 5001-10,000, >10,000, . Available Globally.",
+    "DisplayName": "Employee Range for MSFT Excel",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_EMPLOYEE_RANGE_LABEL",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_EMPLOYEE_RANGE_LABEL",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "STREET_ADDRESS_2",
+    "Description": "The second street address line where a business is physically located, generally, in the local language. Available on non-US records only. Blank-filled when not available.",
+    "DisplayName": "Street Address 2",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "STREET_ADDRESS_2",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "STREET_ADDRESS_2",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "NATIONAL_IDENTIFICATION_NUMBER",
+    "Description": "The business identification number used in some countries for business registration and tax collection. Examples include CRO numbers in the U.K. and the French Siren numbers. Available in certain countries, not including US.Blank-filled when not available.",
+    "DisplayName": "National Identification Number",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "NATIONAL_IDENTIFICATION_NUMBER",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "NATIONAL_IDENTIFICATION_NUMBER",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "SALES_VOLUME_US_DOLLARS",
+    "Description": "The total annual revenue for this business, expressed in US dollars as a signed, decimal field.  If the salesevenue figure is collected in local currency, the local value is converted to US dollars. Note: Data is converted to US dollars based on the date of the financial figures/statement of the record.  If the salesevenue figure is from Jun-2009, the conversion rate is as of Jun-2009.  Available globally. Zero-filled when not available",
+    "DisplayName": "Site Sales Volume (US Dollars)",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "BIGINT",
+    "JavaClass": "Long",
+    "DiscretizationStrategy": "{\"unified\": {}}",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "SALES_VOLUME_US_DOLLARS",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "SALES_VOLUME_US_DOLLARS",
+    "FundamentalType": "currency",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "Last_Funding_Round_Amount",
+    "Description": "Total dollar amount raised by company in its latest round.",
+    "DisplayName": "Latest Funding Amount",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "INT",
+    "JavaClass": "Integer",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "Last_Funding_Round_Amount",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "Last_Funding_Round_Amount",
+    "FundamentalType": "currency",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "CHIEF_EXECUTIVE_OFFICER_NAME",
+    "Description": "The full name of the individual who has the highest ranking authority of the business at this location.Available globally.Blank-filled when not available.",
+    "DisplayName": "CEO Name",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": false,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "CHIEF_EXECUTIVE_OFFICER_NAME",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "CHIEF_EXECUTIVE_OFFICER_NAME",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LDC_City",
+    "Description": "The name of the city where the business is physically located, generally, in the local language. Available globally. Blank-filled when not available.",
+    "DisplayName": "City",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_City",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_City",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "DnB_STATE_PROVINCE_CODE",
+    "Description": "Geographical code which identifies the state/province where the business is physically located. Available globally. Zero-filled when not available.",
+    "DisplayName": "State/Province Code",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "DnB_STATE_PROVINCE_CODE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "DnB_STATE_PROVINCE_CODE",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "Total_Amount_Raised",
+    "Description": "Total dollar amount raised by company via VC funding",
+    "DisplayName": "Total VC Funding",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "INT",
+    "JavaClass": "Integer",
+    "Groups": {
+      "Model": true,
+      "RTS": true,
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "Total_Amount_Raised",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "Total_Amount_Raised",
+    "FundamentalType": "currency",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "LINE_OF_BUSINESS",
+    "Description": "A narrative description of the operations or activities of the business. Relates to the primary four-digit 1987 US SIC. In English. Available globally.",
+    "DisplayName": "Line of Business",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LINE_OF_BUSINESS",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LINE_OF_BUSINESS",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LDC_ZipCode",
+    "Description": "The postal code where the business is physically located. Available globally. Blank-filled when not available.",
+    "DisplayName": "Postal Code",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_ZipCode",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_ZipCode",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "DnB_COUNTRY_CODE",
+    "Description": "Geographical code which identifies the country where the business is physically located. Available globally. Zero-filled when not available.",
+    "DisplayName": "Country Code",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "DnB_COUNTRY_CODE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "DnB_COUNTRY_CODE",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "CHIEF_EXECUTIVE_OFFICER_TITLE",
+    "Description": "The title of the individual with the highest ranking authority at this location.  May be abbreviated.  In English.Available globally.Blank-filled when not available.",
+    "DisplayName": "CEO Title",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": false,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "CHIEF_EXECUTIVE_OFFICER_TITLE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "CHIEF_EXECUTIVE_OFFICER_TITLE",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "YEAR_STARTED",
+    "Description": "The year when current ownership or management assumed control of the business or the year established if no control change has taken place.  This  is not provided for branch records.Available globally.",
+    "DisplayName": "Year Started",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "DiscretizationStrategy": "{\"linear\": { \"minValue\":1900,\"stepSize\":10,\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "YEAR_STARTED",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "YEAR_STARTED",
+    "FundamentalType": "year",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LE_COMPANY_PHONE",
+    "Description": "The primary voice telephone number for the Domestic Ultimate business with no formatting or punctuation. This string contains all telecommunication number components (area code, exchange, number). Available globally. Blank-filled when not available.",
+    "DisplayName": "Country Headquarter Phone",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": false,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_COMPANY_PHONE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_COMPANY_PHONE",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LE_EMPLOYEE_RANGE",
+    "Description": "Employee Range of domestic ultimate business, which is the highest level parent for the corporate within the country. Available ranges are 1-10, 11-50, 51-100, 101-200, 201-500,501-1000, 1001-2500, 2501-5000, 5001-10,000, >10,000, . Available Globally.",
+    "DisplayName": "Employee Range",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_EMPLOYEE_RANGE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_EMPLOYEE_RANGE",
+    "FundamentalType": "enum",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "LDC_Domain",
+    "Description": "Website of a business. Available globally. Blank-filled when not available.",
+    "DisplayName": "Website",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LDC_Domain",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LDC_Domain",
+    "FundamentalType": "uri",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LE_REVENUE_RANGE",
+    "Description": "Revenue Range of domestic ultimate business, which is the highest level parent for the corporate within the country. Available ranges are 0-1M, 1-10M, 11-50M, 51-100M, 101-250M, 251-500M, 501M-1B, 1-5B, 5B-10B, >10B. Available Globally.",
+    "DisplayName": "Revenue Range",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Model": true,
+      "Segment": true,
+      "TalkingPoint": true,
+      "RTS": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": true,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_REVENUE_RANGE",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_REVENUE_RANGE",
+    "FundamentalType": "enum",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "IsMatched",
+    "Description": "Identifies if the input business found a match in Lattice Data Cloud",
+    "DisplayName": "Matched to Data Cloud",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "BIT",
+    "JavaClass": "Boolean",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "IsMatched",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "IsMatched",
+    "FundamentalType": "boolean",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "LE_IS_PRIMARY_DOMAIN",
+    "Description": "Indicates whether the website is the primary website. Available globally.",
+    "DisplayName": "Is Primary Website",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "DataType": "NVARCHAR(MAX)",
+    "JavaClass": "String",
+    "Groups": {
+      "Enrichment": true,
+      "Segment": true,
+      "TalkingPoint": true
+    },
+    "IsPremium": false,
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "CanInternalEnrich": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "IsCampaignDerivedField": false,
+    "ColumnName": "LE_IS_PRIMARY_DOMAIN",
+    "Tags": [
+      "EXTERNAL"
+    ],
+    "Category": "Firmographics",
+    "ColumnId": "LE_IS_PRIMARY_DOMAIN",
+    "FundamentalType": "boolean",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "Test_Date_2",
+    "Description": "",
+    "DisplayName": "Test Date 2",
+    "Subcategory": "Other",
+    "Entity": "Account",
+    "State": "Active",
+    "JavaClass": "Long",
+    "LogicalDataType": "Date",
+    "DiscretizationStrategy": "",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": true
+    },
+    "CanModel": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "My Attributes",
+    "ColumnId": "Test_Date_2",
+    "FundamentalType": "year",
+    "ApprovedUsage": [
+      "ModelAndAllInsights"
+    ]
+  },
+  {
+    "AttrName": "PhoneNumber",
+    "DisplayName": "Phone",
+    "Subcategory": "Other",
+    "Entity": "Contact",
+    "State": "Active",
+    "JavaClass": "String",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "CanModel": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "Contact Attributes",
+    "ColumnId": "PhoneNumber",
+    "FundamentalType": "alpha",
+    "ApprovedUsage": [
+      "None"
+    ]
+  },
+  {
+    "AttrName": "engine_drapmhqds9acmrwduowhtq",
+    "DisplayName": "Rules segment1532 - 2018/07/30 18:38:59 Rating",
+    "Subcategory": "segment1532",
+    "Entity": "Rating",
+    "JavaClass": "String",
+    "Groups": {
+      "Segment": true,
+      "TalkingPoint": true,
+      "Enrichment": true,
+      "Model": false,
+      "CompanyProfile": false
+    },
+    "CanEnrich": true,
+    "CanSegment": true,
+    "CanModel": false,
+    "IsHiddenForRemodelingUI": false,
+    "IsCoveredByOptionalRule": false,
+    "IsCoveredByMandatoryRule": false,
+    "AssociatedDataRules": [],
+    "IsCampaignDerivedField": false,
+    "Category": "Lattice Ratings",
+    "ColumnId": "engine_drapmhqds9acmrwduowhtq",
+    "FundamentalType": "alpha"
+  }
+]
