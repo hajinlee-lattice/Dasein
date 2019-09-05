@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
@@ -39,4 +41,12 @@ public interface ModelingFileMetadataService {
 
     List<FieldValidation> validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
                                                 String entity, String source, String feedType);
+
+    FieldDefinitionsRecord fetchFieldDefinitions(String systemName, String systemType, String systemObject,
+                                                 String importFile) throws Exception;
+
+    FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
+                                                          String importFile, boolean runImport,
+                                                          FieldDefinitionsRecord commitRequest)
+            throws LedpException, IllegalArgumentException ;
 }

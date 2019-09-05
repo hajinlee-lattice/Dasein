@@ -11,6 +11,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.ImportWorkflowSpecService;
 import com.latticeengines.pls.util.ImportWorkflowUtilsTestNG;
 
 public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase {
@@ -24,7 +25,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
 
 
     @Autowired
-    private ImportWorkflowSpecServiceImpl importWorkflowSpecService;
+    private ImportWorkflowSpecService importWorkflowSpecService;
 
     @Override
     @BeforeClass(groups = "functional")
