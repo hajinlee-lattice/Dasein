@@ -85,7 +85,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             recalculateExpectedRevenue.setCustomerSpace(customerSpace);
             calculatePredictedRevenuePercentile.setCustomerSpace(customerSpace);
             calculateExpectedRevenuePercentile.setCustomerSpace(customerSpace);
-            scoreAgg.setCustomerSpace(customerSpace);
+            scoreAgg.setCustomer(customerSpace.toString());
             combineInputWithScores.setCustomerSpace(customerSpace);
             computeLift.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
@@ -102,7 +102,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             recalculateExpectedRevenue.setMicroServiceHostPort(microServiceHostPort);
             calculatePredictedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
             calculateExpectedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
-            scoreAgg.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
@@ -112,6 +111,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
+            scoreAgg.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
