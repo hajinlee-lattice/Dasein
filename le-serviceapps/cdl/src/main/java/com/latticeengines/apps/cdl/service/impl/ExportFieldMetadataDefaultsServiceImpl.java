@@ -2,8 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -71,17 +69,15 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
                 .orElse(null);
             if(updated != null){
                 defaultField.setPid(updated.getPid());
-                log.info(defaultField.getAttrName() + "  " + defaultField.getStandardField());
                 listToSave.add(defaultField);
             }else {
                 listToCreate.add(defaultField);
             }
         });
         List<ExportFieldMetadataDefaults> listCreated = addNewFields(systemName, listToCreate);
-        List<ExportFieldMetadataDefaults> finalList = Stream.of(listCreated, listToSave)
-            .flatMap(x -> x.stream())
-            .collect(Collectors.toList());
-        return exportFieldMetadataDefaultsEntityMgr.updateDefaultFields(systemName, finalList);
+        List<ExportFieldMetadataDefaults> saved = exportFieldMetadataDefaultsEntityMgr.updateDefaultFields(systemName, listToSave);
+        saved.addAll(listCreated);
+        return saved;
     }
 
     private List<ExportFieldMetadataDefaults> addNewFields(CDLExternalSystemName systemName, List<ExportFieldMetadataDefaults> newFields){
