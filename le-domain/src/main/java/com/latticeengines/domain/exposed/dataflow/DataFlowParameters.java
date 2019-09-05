@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlMerge
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlSplitParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanContactExportParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.OrphanTransactionExportParameters;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.UnmatchedAccountExportParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
@@ -47,7 +46,6 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Recalcula
         @JsonSubTypes.Type(value = CombineFilterTableParameters.class, name = "combineFilterTableParameters"), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreParameters.class, name = "combineInputTableWithScoreParameters"), //
         @JsonSubTypes.Type(value = CombineMatchDebugWithScoreParameters.class, name = "combineMatchDebugWithScoreParameters"), //
-        @JsonSubTypes.Type(value = ScoreAggregateParameters.class, name = "scoreAggregateParameters"), //
         @JsonSubTypes.Type(value = DedupEventTableParameters.class, name = "dedupEventTableParameters"), //
         @JsonSubTypes.Type(value = AddStandardAttributesParameters.class, name = "addStandardAttributesParameters"), //
         @JsonSubTypes.Type(value = CreateCdlEventTableParameters.class, name = "createCdlEventTableParameters"), //
