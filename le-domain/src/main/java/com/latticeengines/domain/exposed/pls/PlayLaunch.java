@@ -20,7 +20,6 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -244,28 +243,20 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private String channelConfig;
 
     @JsonProperty("addAccountsTable")
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_ADD_ACCOUNTS_TABLE")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private com.latticeengines.domain.exposed.metadata.Table addAccountsTable;
+    @Column(name = "ADD_ACCOUNTS_TABLE_NAME")
+    private String addAccountsTable;
 
     @JsonProperty("addContactsTable")
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_ADD_CONTACTS_TABLE")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private com.latticeengines.domain.exposed.metadata.Table addContactsTable;
+    @Column(name = "ADD_CONTACTS_TABLE_NAME")
+    private String addContactsTable;
 
     @JsonProperty("removeAccountsTable")
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_REMOVE_ACCOUNTS_TABLE")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private com.latticeengines.domain.exposed.metadata.Table removeAccountsTable;
+    @Column(name = "REMOVE_ACCOUNTS_TABLE_NAME")
+    private String removeAccountsTable;
 
     @JsonProperty("removeContactsTable")
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_REMOVE_CONTACTS_TABLE")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private com.latticeengines.domain.exposed.metadata.Table removeContactsTable;
+    @Column(name = "REMOVE_CONTACTS_TABLE_NAME")
+    private String removeContactsTable;
 
     public PlayLaunch() {
     }
@@ -635,35 +626,35 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.channelConfig = JsonUtils.serialize(channelConfig);
     }
 
-    public com.latticeengines.domain.exposed.metadata.Table getAddAccountsTable() {
+    public String getAddAccountsTable() {
         return addAccountsTable;
     }
 
-    public void setAddAccountsTable(com.latticeengines.domain.exposed.metadata.Table addAccountsTable) {
+    public void setAddAccountsTable(String addAccountsTable) {
         this.addAccountsTable = addAccountsTable;
     }
 
-    public com.latticeengines.domain.exposed.metadata.Table getAddContactsTable() {
+    public String getAddContactsTable() {
         return addContactsTable;
     }
 
-    public void setAddContactsTable(com.latticeengines.domain.exposed.metadata.Table addContactsTable) {
+    public void setAddContactsTable(String addContactsTable) {
         this.addContactsTable = addContactsTable;
     }
 
-    public com.latticeengines.domain.exposed.metadata.Table getRemoveAccountsTable() {
+    public String getRemoveAccountsTable() {
         return removeAccountsTable;
     }
 
-    public void setRemoveAccountsTable(com.latticeengines.domain.exposed.metadata.Table removeAccountsTable) {
+    public void setRemoveAccountsTable(String removeAccountsTable) {
         this.removeAccountsTable = removeAccountsTable;
     }
 
-    public com.latticeengines.domain.exposed.metadata.Table getRemoveContactsTable() {
+    public String getRemoveContactsTable() {
         return removeContactsTable;
     }
 
-    public void setRemoveContactsTable(com.latticeengines.domain.exposed.metadata.Table removeContactsTable) {
+    public void setRemoveContactsTable(String removeContactsTable) {
         this.removeContactsTable = removeContactsTable;
     }
 
