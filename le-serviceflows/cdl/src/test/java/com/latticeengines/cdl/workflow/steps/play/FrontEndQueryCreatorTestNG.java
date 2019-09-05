@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -25,7 +26,11 @@ import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchCo
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
 public class FrontEndQueryCreatorTestNG {
@@ -74,9 +79,25 @@ public class FrontEndQueryCreatorTestNG {
         ProcessedFieldMappingMetadata result = frontEndQueryCreator.prepareLookupsForFrontEndQueries(playLaunchContext,
                 true);
         Assert.assertNotNull(result);
-        Assert.assertEquals(17, result.getAccountColsRecIncluded().size());
-        Assert.assertEquals(4, result.getAccountColsRecNotIncludedNonStd().size());
-        Assert.assertEquals(7, result.getContactCols().size());
-        Assert.assertEquals(56, result.getAccountColsRecNotIncludedStd().size());
+        int accountColsRecIncluded = result.getAccountColsRecIncluded().size();
+        int accountColsRecNotIncludedNonStd = result.getAccountColsRecNotIncludedNonStd().size();
+        int contactCols = result.getContactCols().size();
+        int accountColsRecNotIncludedStd = result.getAccountColsRecNotIncludedStd().size();
+        Assert.assertEquals(17, accountColsRecIncluded);
+        Assert.assertEquals(4, accountColsRecNotIncludedNonStd);
+        Assert.assertEquals(7, contactCols);
+        Assert.assertEquals(56, accountColsRecNotIncludedStd);
+        Assert.assertEquals(fieldMappingMetadata.size(),
+                accountColsRecIncluded + accountColsRecNotIncludedNonStd + contactCols + accountColsRecNotIncludedStd);
+        List<Lookup> accountLookups = playLaunchContext.getAccountFrontEndQuery().getLookups();
+        List<Lookup> contactLookups = playLaunchContext.getContactFrontEndQuery().getLookups();
+        log.info(Arrays.toString(accountLookups.toArray()));
+        log.info(Arrays.toString(contactLookups.toArray()));
+        Assert.assertEquals(60, accountLookups.size());
+        Assert.assertTrue(accountLookups
+                .contains(new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())));
+        Assert.assertEquals(15, contactLookups.size());
+        Assert.assertTrue(contactLookups
+                .contains(new AttributeLookup(BusinessEntity.Contact, InterfaceName.CustomerContactId.name())));
     }
 }
