@@ -136,31 +136,6 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
 
     }
 
-//    @Test(groups = "functional")
-//    public void testUpdateFieldsS3() {
-//        List<ExportFieldMetadataDefaults> originalMarketoExportFields = exportService.getAllAttributes(CDLExternalSystemName.AWS_S3);
-//        long count1 = originalMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getStandardField).count();
-//        assertEquals(count1, 14);
-//        ExportFieldMetadataDefaults firstField = originalMarketoExportFields.get(0);
-//        firstField.setStandardField(!firstField.getStandardField());
-//        List<ExportFieldMetadataDefaults> toSave = new ArrayList<>();
-//        toSave.add(firstField);
-//        exportService.updateDefaultFields(CDLExternalSystemName.Marketo, toSave);
-//
-//        originalMarketoExportFields = exportService.getAllAttributes(CDLExternalSystemName.Marketo);
-//        long count2 = originalMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getStandardField).count();
-//        assertEquals(count2, 15);
-//
-//
-//        firstField.setStandardField(!firstField.getStandardField());
-//        toSave = new ArrayList<>();
-//        toSave.add(firstField);
-//        toSave.add(firstField);
-//        exportService.updateDefaultFields(CDLExternalSystemName.Marketo, toSave);
-//        originalMarketoExportFields = exportService.getAllAttributes(CDLExternalSystemName.Marketo);
-//        long count3 = originalMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getStandardField).count();
-//        assertEquals(count3, 14);
-//    }
 
     @Test(groups = "functional")
     public void testLinkedIn() {
