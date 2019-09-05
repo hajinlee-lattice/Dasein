@@ -46,7 +46,7 @@ public interface ModelingFileMetadataService {
                                                  String importFile) throws Exception;
 
     FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
-                                                          String importFile,
+                                                          String importFile, boolean runImport,
                                                           FieldDefinitionsRecord commitRequest)
             throws LedpException, IllegalArgumentException ;
 }

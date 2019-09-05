@@ -34,7 +34,6 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -71,7 +70,6 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
@@ -342,7 +340,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         // compare field mapping document after being modified with field mapping best effort
-        for(FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
+        for (FieldMapping bestEffortMapping : documentBestEffort.getFieldMappings()) {
             String userField = bestEffortMapping.getUserField();
             // skip user field mapped to standard attribute or user ignored fields
             if (StringUtils.isNotBlank(userField) && !ignored.contains(userField)) {
@@ -982,7 +980,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public FieldDefinitionsRecord fetchFieldDefinitions(String systemName, String systemType,
-                                                               String systemObject, String importFile)
+                                                        String systemObject, String importFile)
             throws Exception {
 
         log.info("JAW ------ BEGIN Real Fetch Field Definition -----");
@@ -1024,8 +1022,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // 2f. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
 
-        //log.info(String.format("Parameter Values:\nsystemName: %s\nsystemType: %s\nsystemObject: %s" +
-        //                "\nimportFile: %s", systemName, systemType, systemObject, importFile));
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
                 "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(), feedType,
                 source, sourceFile.getName(), customerSpace.toString()));
@@ -1088,9 +1084,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
 
     @Override
-    public FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType,
-                                                                 String systemObject, String importFile,
-                                                                 FieldDefinitionsRecord commitRequest)
+    public FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
+                                                         String importFile, boolean runImport,
+                                                         FieldDefinitionsRecord commitRequest)
         throws LedpException, IllegalArgumentException {
 
         log.info("JAW ------ BEGIN Real Commit Field Definition -----");
@@ -1135,20 +1131,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // 2f. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
 
-        // 2g. Add tenant to MultiTenantContext.
-        // TODO(jwinter): Do we need this?
-        Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
-        if (tenant == null) {
-            throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
-        }
-        MultiTenantContext.setTenant(tenant);
-
-        //log.info(String.format("Parameter Values:\nsystemName: %s\nsystemType: %s\nsystemObject: %s" +
-        //        "\nimportFile: %s", systemName, systemType, systemObject, importFile));
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
-                        "   Source File: %s\n   Customer Space: %s\n   Tenant: %s", entityType.getEntity(),
-                entityType.getSubType(), feedType, source, sourceFile.getName(), customerSpace.toString(),
-                tenant.getId()));
+                        "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
+                feedType, source, sourceFile.getName(), customerSpace.toString()));
 
         // 3. Generate new table from FieldDefinitionsRecord,
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
@@ -1164,19 +1149,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         newTable.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
         // TODO(jwinter): Figure out how to properly set the Table display name.
         newTable.setDisplayName(newTable.getName());
-        log.info("New table name/display name is: " + newTable.getName());
-        if (newTable.getTenant() == null) {
-            newTable.setTenant(MultiTenantContext.getTenant());
-            log.info("Setting new table tenant to: "+ newTable.getTenant().getName());
-        }
-        if (newTable.getTenantId() == null) {
-            newTable.setTenantId(MultiTenantContext.getTenant().getPid());
-            log.info("Setting new table tenant PID to: "+ newTable.getTenant().getPid());
-        }
         printTableAttributes("New Table", newTable);
-        log.info("New Table is:\n" + JsonUtils.pprint(newTable));
-
-
         metadataProxy.createTable(customerSpace.toString(), newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
@@ -1189,25 +1162,53 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             setCDLExternalSystem(resolver.getExternalSystem(), entityType.getEntity());
         }
 
-        // TODO(jwinter): Can we skip checking for an existing table, checking if the tables are identical, and
-        // copying the changes into the existing table and just write the new table back?  The question is whether there
-        // are fields and properties bucket values that are not related to import that have been stored in the
-        // existing table's attributes?
-
         // 7. Create or Update the DataFeedTask
-        // a. If there is an existing DataFeedTask template table.
-        //   i. If the tables are identical with respect to data updated during import workflow template setup (name,
-        //      displayName, physicalDataType, data/time formats, and timezone), there is no more steps to do.
-        //   ii. Merge the new table and current DataFeedTask template table, adding new attributes and updating
-        //       display name and data formats of old attributes.
-        //   iii. Update the DataFeedTask with the new table.
-        // b. If there is no existing DataFeedTask template table.
-        //   i. Create a new DataFeedTask containing the new table.
-        //   ii. Update the DataFeed status.
-        // c. Update Attribute Configs.
-        // d. Send email about S3 update.
+        String taskId = createOrUpdateDataFeedTask(newTable, customerSpace, source, feedType, entityType);
+
+        // 8. Additional Steps
+        // a. Update Attribute Configs.
+        // b. Send email about S3 update.
+        // TODO(jwinter): Do we need to add code to update the Attr Configs?
+        // TODO(jwinter): Add code to send email about S3 Template change.
 
 
+        // TODO(jwinter): Add flag to indicate a workflow job should be submitted and the code for submitting
+        // workflow jobs.
+        // 9. If requested, submit a workflow import job for this new template.
+        if (runImport) {
+            log.info("Running import workflow job for CustomerSpace {} and task ID {} on file {}",
+                    customerSpace.toString(), taskId, importFile);
+            cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, importFile);
+        }
+
+        // 10. Setup the Commit Response for this request.
+        // TODO(jwinter): Figure out what is the best commitResponse to provide.
+        // Should the FieldDefinitionsRecord reflect any changes when new table is merged with
+        // existing table?
+        FieldDefinitionsRecord commitResponse = new FieldDefinitionsRecord();
+        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
+        log.info("JAW ------ END Real Commit Field Definition -----");
+
+        return commitResponse;
+    }
+
+    // Create or Update DataFeedTask with new table.
+    // a. If there is an existing DataFeedTask template table.
+    //   i. If the tables are identical with respect to data updated during import workflow template setup (name,
+    //      displayName, physicalDataType, data/time formats, and timezone), there is no more steps to do.
+    //   ii. Merge the new table and current DataFeedTask template table, adding new attributes and updating
+    //       display name and data formats of old attributes.
+    //   iii. Update the DataFeedTask with the new table.
+    // b. If there is no existing DataFeedTask template table.
+    //   i. Create a new DataFeedTask containing the new table.
+    //   ii. Update the DataFeed status.
+
+    // TODO(jwinter): Can we skip checking for an existing table, checking if the tables are identical, and
+    // copying the changes into the existing table and just write the new table back?  The question is whether there
+    // are fields and properties bucket values that are not related to import that have been stored in the
+    // existing table's attributes?
+    private String createOrUpdateDataFeedTask(Table newTable, CustomerSpace customerSpace, String source,
+                                            String feedType, EntityType entityType) {
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
                 entityType.getEntity().name());
         if (dataFeedTask != null) {
@@ -1245,22 +1246,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Initialized.getName());
             }
         }
-        // TODO(jwinter): Do we need to add code to update the Attr Configs?
-
-        // TODO(jwinter): Add code to send email about S3 Template change.
-
-
-        // TODO(jwinter): Add flag to indicate a workflow job should be submitted and the code for submitting
-        // workflow jobs.
-        // 8. If requested, submit a workflow import job for this new template.
-
-        FieldDefinitionsRecord commitResponse = new FieldDefinitionsRecord();
-        // TODO(jwinter): FieldDefinitionsRecord should reflect any changes when new table is merged with
-        // existing table.
-        commitResponse.setFieldDefinitionsRecordsMap(commitRequest.getFieldDefinitionsRecordsMap());
-        log.info("JAW ------ END Real Commit Field Definition -----");
-
-        return commitResponse;
+        return dataFeedTask.getUniqueId();
     }
 
     private LatticeSchemaField getLatticeFieldFromTableAttribute(Attribute attribute) {

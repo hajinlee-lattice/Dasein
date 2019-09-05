@@ -284,6 +284,11 @@ public class ModelingFileUploadResource {
     }
 
     // Mock API for Import Workflow 2.0 Fetch Field Definitions.
+    // Parameters:
+    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
+    //   systemType: The type of system for which a template is being created, eg. Salesforce
+    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
+    //   importFile: The name of the CSV file this template is being generated for.
     @RequestMapping(value = "fielddefinition/mockfetch", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
@@ -348,6 +353,15 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(fetchResponse);
     }
 
+    // Mock API for Import Workflow 2.0 Validate Field Definitions.
+    // Parameters:
+    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
+    //   systemType: The type of system for which a template is being created, eg. Salesforce
+    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
+    //   importFile: The name of the CSV file this template is being generated for.
+    // Body:
+    //    The ValidationFieldDefinitionsRequest representing the current field mappings for this template and the
+    //    requested changes.
     @RequestMapping(value = "fielddefinition/mockvalidate", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
@@ -428,6 +442,15 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(validateResponse);
     }
 
+    // Mock API for Import Workflow 2.0 Commit Field Definitions.
+    // Parameters:
+    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
+    //   systemType: The type of system for which a template is being created, eg. Salesforce
+    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
+    //   importFile: The name of the CSV file this template is being generated for.
+    //   runImport: Boolean representing if a import workflow job should be initiated upon committing this template.
+    // Body:
+    //    The FieldDefinitionsRecord representing the field mappings for this template.
     @RequestMapping(value = "fielddefinition/mockcommit", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
@@ -436,6 +459,7 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "systemType", required = true) String systemType, //
             @RequestParam(value = "systemObject", required = true) String systemObject, //
             @RequestParam(value = "importFile", required = true) String importFile, //
+            @RequestParam(value = "runImport", required = false, defaultValue = "false") boolean runImport, //
             @RequestBody(required = true) FieldDefinitionsRecord commitRequest) {
         //log.error("JAW ------ BEGIN Mock Commit Field Definition -----");
         //log.error("commitRequest is: " + commitRequest.toString());
@@ -456,6 +480,11 @@ public class ModelingFileUploadResource {
     }
 
     // Real API for Import Workflow 2.0 Fetch Field Definitions.
+    // Parameters:
+    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
+    //   systemType: The type of system for which a template is being created, eg. Salesforce
+    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
+    //   importFile: The name of the CSV file this template is being generated for.
     @RequestMapping(value = "fielddefinition/fetch", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
@@ -476,6 +505,14 @@ public class ModelingFileUploadResource {
     }
 
     // Real API for Import Workflow 2.0 Commit Field Definitions.
+    // Parameters:
+    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
+    //   systemType: The type of system for which a template is being created, eg. Salesforce
+    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
+    //   importFile: The name of the CSV file this template is being generated for.
+    //   runImport: Boolean representing if a import workflow job should be initiated upon committing this template.
+    // Body:
+    //    The FieldDefinitionsRecord representing the field mappings for this template.
     @RequestMapping(value = "fielddefinition/commit", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
@@ -484,13 +521,14 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "systemType", required = true) String systemType, //
             @RequestParam(value = "systemObject", required = true) String systemObject, //
             @RequestParam(value = "importFile", required = true) String importFile, //
+            @RequestParam(value = "runImport", required = false, defaultValue = "false") boolean runImport, //
             @RequestBody(required = true) FieldDefinitionsRecord commitRequest) {
         ///log.error("JAW ------ BEGIN Real Commit Field Definition -----");
         //log.error("commitRequest is: " + commitRequest.toString());
 
         try {
             FieldDefinitionsRecord commitResponse = modelingFileMetadataService.commitFieldDefinitions(
-                    systemName, systemType, systemObject, importFile, commitRequest);
+                    systemName, systemType, systemObject, importFile, runImport, commitRequest);
             // TODO(jwinter): Determine if we need to handle a null fetchResponse.
             return ResponseDocument.successResponse(commitResponse);
         } catch (Exception e) {

@@ -555,7 +555,11 @@ public class ImportWorkflowUtils {
                 if (writeAllDefinitions || StringUtils.isNotBlank(definition.getColumnName())) {
                     Attribute attribute = getAttributeFromFieldDefinition(definition);
                     table.addAttribute(attribute);
-                    log.info("   SectionName: " + entry.getKey() + " FieldName: " + definition.getFieldName());
+                    log.info("   SectionName: {}  FieldName: {}  ColumnName: {}", entry.getKey(),
+                            definition.getFieldName(), definition.getColumnName());
+                } else {
+                    log.info("   Skipped Field: SectionName: {}  FieldName: {}", entry.getKey(),
+                            definition.getFieldName());
                 }
             }
         }
