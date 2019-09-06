@@ -1,15 +1,24 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import static com.latticeengines.domain.exposed.pls.ActionType.ACTIVITY_METRICS_CHANGE;
+import static com.latticeengines.domain.exposed.pls.ActionType.CDL_OPERATION_WORKFLOW;
+import static com.latticeengines.domain.exposed.pls.ActionType.DATA_CLOUD_CHANGE;
+import static com.latticeengines.domain.exposed.pls.ActionType.INTENT_CHANGE;
+import static com.latticeengines.domain.exposed.pls.ActionType.RATING_ENGINE_CHANGE;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.testng.collections.Sets.newHashSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,9 +27,18 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
 
@@ -30,7 +48,7 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
         // prepare mocked submitter
         S3ImportSystemService s3ImportSystemService = Mockito.mock(S3ImportSystemService.class);
         when(s3ImportSystemService.getAllS3ImportSystem(any(String.class))).thenReturn(systems);
-        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(s3ImportSystemService);
+        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(s3ImportSystemService, null);
 
         Pair<Map<String, String>, Map<String, List<String>>> res = submitter.getSystemIdMaps("test_tenant", true);
         Assert.assertNotNull(res);
@@ -53,6 +71,97 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
         List<String> resContIds = systemIdsMap.get(Contact.name());
         Assert.assertEquals(resAcctIds, acctSysIds);
         Assert.assertEquals(resContIds, contSysIds);
+    }
+
+    @Test(groups = "unit", dataProvider = "getCatalogImports")
+    private void testGetCatalogImports(List<Catalog> catalogs, List<Action> actions,
+            Map<String, Set<String>> expectedResult) {
+        CatalogEntityMgr mgr = Mockito.mock(CatalogEntityMgr.class);
+        when(mgr.findByTenant(any())).thenReturn(catalogs);
+
+        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(null, mgr);
+        Map<String, List<CatalogImport>> result = submitter.getCatalogImports(new Tenant(getClass().getSimpleName()),
+                actions);
+        Assert.assertNotNull(result);
+
+        Map<String, Set<String>> tableNames = result.entrySet().stream().map(entry -> {
+            String catalogName = entry.getKey();
+            Set<String> tables = entry.getValue().stream().map(CatalogImport::getTableName).collect(Collectors.toSet());
+            return Pair.of(catalogName, tables);
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        Assert.assertEquals(tableNames, expectedResult,
+                String.format(
+                        "Catalog table names for input (catalogs=%s, actions=%s) does not match the expected result",
+                        catalogs, actions));
+    }
+
+    /**
+     * @return [ Input catalogs, Input actions, Expected catalog tablenames ]
+     */
+    @DataProvider(name = "getCatalogImports")
+    private Object[][] getCatalogImportsTestData() {
+        return new Object[][] { //
+                /*-
+                 * empty/null catalogs/actions
+                 */
+                { null, emptyList(), emptyMap() }, //
+                { emptyList(), emptyList(), emptyMap() }, //
+                /*-
+                 * one import per catalog
+                 */
+                { //
+                        asList(catalog("c1", "t1"), catalog("c2", "t2"), catalog("c3", "t3")), //
+                        asList(action(ACTIVITY_METRICS_CHANGE), importAction("t1", asList("table1", "table2")),
+                                importAction("t2", singletonList("table3"))), //
+                        ImmutableMap.<String, Set<String>> builder().put("c1", newHashSet(asList("table1", "table2")))
+                                .put("c2", newHashSet(singletonList("table3"))).build(), //
+                }, //
+                /*-
+                 * multiple imports per catalog
+                 */
+                { //
+                        asList(catalog("c1", "t1"), catalog("c2", "t2"), catalog("c3", "t3")), //
+                        asList(importAction("t1", asList("table1", "table2")),
+                                importAction("t1", asList("table3", "table4"))), //
+                        ImmutableMap.<String, Set<String>> builder()
+                                .put("c1", newHashSet(asList("table1", "table2", "table3", "table4"))).build(), //
+                }, //
+                { //
+                        asList(catalog("c1", "t1"), catalog("c2", "t2"), catalog("c3", "t3")), //
+                        asList(importAction("t1", asList("table1", "table2")),
+                                importAction("t1", asList("table3", "table4")), action(CDL_OPERATION_WORKFLOW),
+                                importAction("t3", asList("table5", "table6", "table7")), action(RATING_ENGINE_CHANGE)), //
+                        ImmutableMap.<String, Set<String>> builder()
+                                .put("c1", newHashSet(asList("table1", "table2", "table3", "table4")))
+                                .put("c3", newHashSet(asList("table5", "table6", "table7"))).build(), //
+                }, //
+                /*-
+                 * one import does not have corresponding catalog
+                 */
+                { //
+                        asList(catalog("c1", "t1"), catalog("c3", "t3")), //
+                        asList(action(ACTIVITY_METRICS_CHANGE), importAction("t1", asList("table1", "table2")),
+                                importAction("t2", singletonList("table3"))), //
+                        ImmutableMap.<String, Set<String>> builder().put("c1", newHashSet(asList("table1", "table2")))
+                                .build(), //
+                }, //
+                /*-
+                 * all imports are either (a) not import or (b) does not have catalog
+                 */
+                { //
+                        emptyList(), //
+                        asList(importAction("t1", asList("table1", "table2")),
+                                importAction("t1", asList("table3", "table4")), action(CDL_OPERATION_WORKFLOW),
+                                importAction("t3", asList("table5", "table6", "table7")), action(RATING_ENGINE_CHANGE)), //
+                        emptyMap(), //
+                }, //
+                { //
+                        asList(catalog("c1", "t1"), catalog("c2", "t2"), catalog("c3", "t3")), //
+                        asList(action(CDL_OPERATION_WORKFLOW), importAction("t100", asList("table1", "table2")),
+                                action(RATING_ENGINE_CHANGE), action(DATA_CLOUD_CHANGE), action(INTENT_CHANGE)), //
+                        emptyMap(), //
+                },//
+        };
     }
 
     /**
@@ -124,9 +233,35 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
         };
     }
 
-    private ProcessAnalyzeWorkflowSubmitter mockSubmitter(S3ImportSystemService s3ImportSystemService) {
-        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, null, null, null, null, null,
+    private ProcessAnalyzeWorkflowSubmitter mockSubmitter(S3ImportSystemService s3ImportSystemService,
+            CatalogEntityMgr catalogEntityMgr) {
+        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, catalogEntityMgr, null, null, null, null, null,
                 s3ImportSystemService);
+    }
+
+    private Catalog catalog(String catalogName, String dataFeedTaskUniqueId) {
+        Catalog catalog = new Catalog();
+        catalog.setName(catalogName);
+        DataFeedTask task = new DataFeedTask();
+        task.setUniqueId(dataFeedTaskUniqueId);
+        catalog.setDataFeedTask(task);
+        return catalog;
+    }
+
+    private Action importAction(String dataFeedTaskUniqueId, List<String> tableNames) {
+        Action action = new Action();
+        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        ImportActionConfiguration config = new ImportActionConfiguration();
+        config.setDataFeedTaskId(dataFeedTaskUniqueId);
+        config.setRegisteredTables(tableNames);
+        action.setActionConfiguration(config);
+        return action;
+    }
+
+    private Action action(ActionType type) {
+        Action action = new Action();
+        action.setType(type);
+        return action;
     }
 
     private S3ImportSystem fakeS3ImportSystem(String acctSysId, Boolean mapToLAcct, String contSysId,
