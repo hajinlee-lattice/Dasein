@@ -120,23 +120,23 @@
       "historyEnabled":true
    },
    {
-      "attrName":"SalesforceAccountID",
+      "attrName":"SFDC_ACCOUNT_ID",
       "displayName":"SFDC Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Marketo",
-      "standardField":true,
+      "standardField":false,
       "exportEnabled":false,
       "historyEnabled":true
    },
    {
       "attrName":"PRIORITY_ID",
-      "displayName":"Lattice Rating",
+      "displayName":"Lattice Identifier",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Marketo",
       "standardField":false,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "historyEnabled":true
    },
    {
@@ -151,7 +151,7 @@
    },
    {
       "attrName":"MONETARY_VALUE_ISO4217_ID",
-      "displayName":"MONETARY_VALUE_ISO4217_ID",
+      "displayName":"Expected_Revenue",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Marketo",
@@ -350,12 +350,12 @@
       "historyEnabled":true
    },
    {
-      "attrName":"SalesforceContactID",
+      "attrName":"SFDC_CONTACT_ID",
       "displayName":"Contact SFDC ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Marketo",
-      "standardField":true,
+      "standardField":false,
       "exportEnabled":false,
       "historyEnabled":true
    },
@@ -370,7 +370,7 @@
       "historyEnabled":true
    },
    {
-      "attrName":"ContactID",
+      "attrName":"ContactId",
       "displayName":"Contact ID",
       "entity":"Contact",
       "javaClass":"String",
