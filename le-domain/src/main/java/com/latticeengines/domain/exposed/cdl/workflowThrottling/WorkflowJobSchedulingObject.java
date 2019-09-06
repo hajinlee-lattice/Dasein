@@ -12,9 +12,7 @@ public class WorkflowJobSchedulingObject {
 
     public WorkflowJobSchedulingObject(WorkflowJob workflowJob, List<WorkflowThrottlingConstraint> constraints) {
         this.workflowJob = workflowJob;
-        this.constraints = new ArrayList<WorkflowThrottlingConstraint>() {{
-            addAll(constraints);
-        }};
+        this.constraints = new ArrayList<>(constraints);
     }
 
     public WorkflowJob getWorkflowJob() {

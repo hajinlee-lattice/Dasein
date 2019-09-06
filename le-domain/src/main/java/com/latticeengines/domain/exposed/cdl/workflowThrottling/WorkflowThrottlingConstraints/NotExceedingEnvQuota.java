@@ -17,7 +17,8 @@ public class NotExceedingEnvQuota implements WorkflowThrottlingConstraint {
         if (envGlobalQuota.get(JobStatus.RUNNING) <= status.getTotalRunningWorkflowInEnv()) {
             return false;
         }
-        if (envTypeQuota != null && envTypeQuota.get(JobStatus.RUNNING) <= status.getRunningWorkflowInEnv().getOrDefault(workflowType, 0)) {
+        if (envTypeQuota != null && envTypeQuota.get(JobStatus.RUNNING) <= status.getRunningWorkflowInEnv()
+                .getOrDefault(workflowType, 0)) {
             return false;
         }
         return true;

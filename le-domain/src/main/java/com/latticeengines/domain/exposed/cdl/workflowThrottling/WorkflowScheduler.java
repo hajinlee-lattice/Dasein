@@ -6,5 +6,6 @@ public interface WorkflowScheduler {
 
     String GLOBAL = "global";
 
+    // WorkflowJob must be enqueued to input division (stack)
     ThrottlingResult schedule(WorkflowThrottlingSystemStatus status, List<WorkflowJobSchedulingObject> workflowJobSchedulingObjects, String podid, String division);
 }

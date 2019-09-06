@@ -3,6 +3,7 @@ package com.latticeengines.workflowapi.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
@@ -523,21 +525,46 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<ApplicationId> drainWorkflowQueue(String podid, String division) {
-        ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, division);
-        List<ApplicationId> submitted = new ArrayList<>();
-        List<WorkflowJob> canSubmit = workflowJobEntityMgr.findByWorkflowIds(new ArrayList<>(result.getCanSubmitWorkflowJobIds()));
-        for (WorkflowJob o : canSubmit) {
-            try {
-                ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
-                submitted.add(appId);
-                o.setStatus(JobStatus.PENDING.name());
-                workflowJobEntityMgr.update(o);
-                log.info("Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
-            } catch (Exception e) {
-                log.error("Failed to submit workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId(), e);
+        try {
+            lockEnvironment(podid);
+            ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, division);
+            List<ApplicationId> submitted = new ArrayList<>();
+            List<WorkflowJob> canSubmit = getWorkflowObjects(result.getCanSubmit());
+            for (WorkflowJob o : canSubmit) {
+                try {
+                    ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
+                    submitted.add(appId);
+                    o.setStatus(JobStatus.PENDING.name());
+                    workflowJobEntityMgr.update(o);
+                    log.info("Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
+                } catch (Exception e) {
+                    log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);
+                }
             }
+            return submitted;
+        } finally {
+            unlockEnvironment(podid);
         }
-        return submitted;
+    }
+
+    private List<WorkflowJob> getWorkflowObjects(Map<String, List<Long>> map) {
+        List<Long> pids = new ArrayList<>();
+        map.forEach((k, v) -> {
+            pids.addAll(v);
+        });
+        return workflowJobEntityMgr.findByWorkflowPids(pids);
+    }
+
+    private void lockEnvironment(String podid) {
+        String lockName = "WORKFLOWTHROTTLING_LOCK_" + podid;
+        LockManager.registerCrossDivisionLock(lockName);
+        LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
+    }
+
+    private void unlockEnvironment(String podid) {
+        String lockName = "WORKFLOWTHROTTLING_LOCK_" + podid;
+        LockManager.releaseWriteLock(lockName);
+        LockManager.deregisterCrossDivisionLock(lockName);
     }
 
     private Long enqueueWorkflowJob(WorkflowConfiguration workflowConfig, String division, Long workflowJobPid) {
@@ -548,7 +575,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         WorkflowJob workflowJob = workflowJobPid == null ? new WorkflowJob() : workflowJobEntityMgr.findByWorkflowPid(workflowJobPid);
         if (workflowJob == null) {
             log.error("Failed to create or update workflowJob. WorkflowPid=" + workflowJobPid);
-            return null;
+            throw new IllegalStateException("Failed to create or update workflowJob. WorkflowPid=" + workflowJobPid);
         }
         workflowJob.setTenant(tenant);
         workflowJob.setUserId(user);
@@ -797,6 +824,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 log.debug(String.format(
                         "WorkflowJob is in terminated status: %s. Skip checking lastUpdatedTime. WorkflowId=%s",
                         workflowJob.getStatus(), workflowJob.getWorkflowId()));
+                continue;
+            }
+
+            if (JobStatus.ENQUEUED.name().equals(workflowJob.getStatus())) {
                 continue;
             }
 

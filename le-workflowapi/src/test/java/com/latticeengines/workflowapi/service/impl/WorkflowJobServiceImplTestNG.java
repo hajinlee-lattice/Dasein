@@ -181,8 +181,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
             Assert.assertThrows(IllegalStateException.class, () -> workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null));
         } else {
             EnqueueSubmission enqueueSubmission = workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null);
-            Assert.assertNotNull(enqueueSubmission.getWorkflowJobId());
-            shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(enqueueSubmission.getWorkflowJobId());
+            Assert.assertNotNull(enqueueSubmission.getWorkflowJobPId());
+            shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(enqueueSubmission.getWorkflowJobPId());
             Assert.assertNotNull(shouldEnqueuedWorkflowJob);
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getType(), shouldEnqueuedWorkflowConfig.getWorkflowName());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getWorkflowConfiguration().getCustomerSpace(), shouldEnqueuedWorkflowConfig.getCustomerSpace());

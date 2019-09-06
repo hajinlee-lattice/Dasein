@@ -14,9 +14,7 @@ public class NotExceedingTenantQuota implements WorkflowThrottlingConstraint {
         Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig = status.getConfig().getTenantConfig();
         String workflowType = workflowJob.getType();
         String customerSpace = workflowJob.getTenant().getId();
-        Map<String, Map<JobStatus, Integer>> workflowMap = new HashMap<String, Map<JobStatus, Integer>>() {{
-            putAll(tenantConfig.get(GLOBAL));
-        }};
+        Map<String, Map<JobStatus, Integer>> workflowMap = new HashMap<>(tenantConfig.get(GLOBAL));
         if (tenantConfig.get(customerSpace) != null) {
             workflowMap.putAll(tenantConfig.get(customerSpace));
         }
@@ -27,8 +25,8 @@ public class NotExceedingTenantQuota implements WorkflowThrottlingConstraint {
 
         Integer typedQuota = workflowMap.get(workflowType) == null ? null : workflowMap.get(workflowType).get(JobStatus.RUNNING);
 
-        if (typedQuota != null && typedQuota > tenantRunningTypedCount) {
-            return true;
+        if (typedQuota != null && typedQuota <= tenantRunningTypedCount) {
+            return false;
         }
 
         Integer defaultQuota = workflowMap.get(GLOBAL).get(JobStatus.RUNNING);

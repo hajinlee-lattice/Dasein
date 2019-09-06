@@ -5,22 +5,22 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class EnqueueSubmission {
 
-    private Long workflowJobId;
+    private Long workflowJobPId;
 
     public EnqueueSubmission() {
     }
 
-    public EnqueueSubmission(Long workflowJobId) {
-        setWorkflowJobId(workflowJobId);
+    public EnqueueSubmission(Long workflowJobPId) {
+        setWorkflowJobPId(workflowJobPId);
     }
 
-    @JsonProperty("workflowJobId")
-    public Long getWorkflowJobId() {
-        return workflowJobId;
+    @JsonProperty("workflowJobPId")
+    public Long getWorkflowJobPId() {
+        return workflowJobPId;
     }
 
     @JsonIgnore
-    public void setWorkflowJobId(Long workflowJobId) {
-        this.workflowJobId = workflowJobId;
+    public void setWorkflowJobPId(Long workflowJobPId) {
+        this.workflowJobPId = workflowJobPId;
     }
 }

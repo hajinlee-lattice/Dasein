@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.cdl.workflowThrottling;
 
 import java.util.Map;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public class WorkflowThrottlingConfiguration {
@@ -10,7 +11,7 @@ public class WorkflowThrottlingConfiguration {
      * Stack (A/B/C) -> workflowType (or global) -> RUNNING/ENQUEUED
      * CustomerSpace (or global) -> workflowType (or global) -> RUNNING/ENQUEUED
      */
-    private  Map<String, Map<JobStatus, Integer>> envConfig;
+    private Map<String, Map<JobStatus, Integer>> envConfig;
 
     private Map<String, Map<String, Map<JobStatus, Integer>>> stackConfig;
 
@@ -38,5 +39,10 @@ public class WorkflowThrottlingConfiguration {
 
     public void setTenantConfig(Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig) {
         this.tenantConfig = tenantConfig;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }
