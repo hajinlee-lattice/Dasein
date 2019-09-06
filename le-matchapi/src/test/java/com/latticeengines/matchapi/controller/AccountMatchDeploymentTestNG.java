@@ -125,7 +125,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String[] FIELDS_PREFERRED_ID = { //
             TEST_ID, //
             InterfaceName.CustomerAccountId.name(), //
-            MatchKey.PreferredEntityId.name(), //
+            InterfaceName.AccountId.name(), //
     };
 
     private static final List<Class<?>> SCHEMA = new ArrayList<>(Collections.nCopies(FIELDS.length, String.class));
@@ -403,8 +403,6 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private String googleEntityId = null;
 
-    // FIXME: Disable all the deployment tests related to Entity Match to tune
-    // Decision Graph in QA with PM
     @BeforeClass(groups = "deployment")
     public void init() {
         HdfsPodContext.changeHdfsPodId(this.getClass().getSimpleName());
@@ -599,7 +597,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
         MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
         map.addMatchKey(MatchKey.SystemId, InterfaceName.CustomerAccountId.name());
-        map.addMatchKey(MatchKey.PreferredEntityId, MatchKey.PreferredEntityId.name());
+        map.addMatchKey(MatchKey.PreferredEntityId, InterfaceName.AccountId.name());
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_PREFERRED_ID));
         return input;
