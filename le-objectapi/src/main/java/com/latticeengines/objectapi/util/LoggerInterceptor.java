@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.security.Tenant;
+
 public class LoggerInterceptor extends HandlerInterceptorAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(LoggerInterceptor.class);
@@ -45,7 +48,9 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
         if (loggingForUris.stream().anyMatch(str -> request.getRequestURI().matches(str))) {
 
             long startTime = System.currentTimeMillis();
-            log.info("ObjectAPI Request URL:" + request.getRequestURL().toString() + " Start Time=" + startTime);
+            Tenant tenant = MultiTenantContext.getTenant();
+            log.info("ObjectAPI Request URL:" + request.getRequestURL().toString() + " Start Time=" + startTime
+                    + " Tenant=" + tenant.getName());
             request.setAttribute(START_TIME, startTime);
         }
         return true;
@@ -56,9 +61,9 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
             Exception ex) {
         if (loggingForUris.stream().anyMatch(str -> request.getRequestURI().matches(str))) {
             long startTime = (Long) request.getAttribute(START_TIME);
-
+            Tenant tenant = MultiTenantContext.getTenant();
             log.info("ObjectAPI Request URL:" + request.getRequestURL().toString() + " Time Taken="
-                    + (System.currentTimeMillis() - startTime) + "ms");
+                    + (System.currentTimeMillis() - startTime) + "ms" + " Tenant=" + tenant.getName());
         }
     }
 }
