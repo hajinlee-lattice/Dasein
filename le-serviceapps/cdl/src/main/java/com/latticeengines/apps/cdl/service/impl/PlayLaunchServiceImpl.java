@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -146,32 +147,32 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     private void handleTablesInLaunch(PlayLaunch playLaunch) {
-        if (playLaunch.getAddAccountsTable() != null && playLaunch.getAddAccountsTable().getPid() == null) {
+        if (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())) {
             playLaunch.setAddAccountsTable(
                     handleTable(playLaunch.getAddAccountsTable(), playLaunch.getLaunchId(), "AddAccounts"));
         }
-        if (playLaunch.getRemoveAccountsTable() != null && playLaunch.getRemoveAccountsTable().getPid() == null) {
+        if (StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable())) {
             playLaunch.setRemoveAccountsTable(
                     handleTable(playLaunch.getRemoveAccountsTable(), playLaunch.getLaunchId(), "RemoveAccounts"));
         }
-        if (playLaunch.getAddContactsTable() != null && playLaunch.getAddContactsTable().getPid() == null) {
+        if (StringUtils.isNotBlank(playLaunch.getAddContactsTable())) {
             playLaunch.setAddContactsTable(
                     handleTable(playLaunch.getAddContactsTable(), playLaunch.getLaunchId(), "AddContacts"));
         }
-        if (playLaunch.getRemoveContactsTable() != null && playLaunch.getRemoveContactsTable().getPid() == null) {
+        if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
             playLaunch.setRemoveContactsTable(
                     handleTable(playLaunch.getRemoveContactsTable(), playLaunch.getLaunchId(), "RemoveContacts"));
         }
 
     }
 
-    private Table handleTable(Table table, String launchId, String tag) {
-        table = tableEntityMgr.findByName(table.getName());
+    private String handleTable(String tableName, String launchId, String tag) {
+        Table table = tableEntityMgr.findByName(tableName, true, true);
         if (table != null) {
-            return table;
+            return table.getName();
         } else {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Failed to update Launch: " + launchId
-                    + " since no " + tag + " table found by Id: " + table.getName() });
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Failed to update Launch: " + launchId + " since no " + tag + " table found by Id: " + tableName });
         }
     }
 
@@ -191,8 +192,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
         Map<String, List<LookupIdMap>> uniqueLookupIdMaps = calculateUniqueLookupIdMapping(playId, launchStates,
                 startTimestamp, endTimestamp, orgId, externalSysType, skipLoadingAllLookupIdMapping);
-        Map<String, LookupIdMap> lookupIdMaps = uniqueLookupIdMaps.values().stream()
-                .flatMap(Collection::stream)
+        Map<String, LookupIdMap> lookupIdMaps = uniqueLookupIdMaps.values().stream().flatMap(Collection::stream)
                 .collect(Collectors.toMap(LookupIdMap::getOrgId, Function.identity()));
 
         addDataIntegrationStatusFor(launchSummaries, lookupIdMaps);
@@ -228,8 +228,8 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                         .setS3Bucket(lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null
                                 && !StringUtils
                                         .isBlank(lookupIdMap.getExternalAuthentication().getTrayAuthenticationId())
-                                        ? s3CustomerExportBucket
-                                        : s3CustomerBucket);
+                                                ? s3CustomerExportBucket
+                                                : s3CustomerBucket);
             }
         });
     }
@@ -298,7 +298,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                         CDLExternalSystemType externalSystemTypeEnum;
 
                         if (StringUtils.isBlank(externalSysType)
-                                || CDLExternalSystemType.valueOf(externalSysType) == null) {
+                                || EnumUtils.isValidEnum(CDLExternalSystemType.class, externalSysType)) {
                             key = NULL_KEY;
                             externalSystemTypeEnum = null;
                         } else {

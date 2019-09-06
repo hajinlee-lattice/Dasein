@@ -10,7 +10,9 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeBuilder;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 
 public class SchemaRepository {
     private static SchemaRepository instance;
@@ -1578,5 +1581,140 @@ public class SchemaRepository {
         if (entity == BusinessEntity.Account)
             return getMatchingAttributes(SchemaInterpretation.Account);
         return Collections.emptyList();
+    }
+
+    public Table getSchema(S3ImportSystem.SystemType systemType, EntityType entityType, boolean enableEntityMatch) {
+        Preconditions.checkNotNull(entityType);
+        Preconditions.checkNotNull(systemType);
+        Table schemaTable = null;
+        List<Attribute> attrs;
+        //TODO(JHE): 1. systemType support. 2. Split Product & Contact with subType.
+        switch (entityType) {
+            case Accounts:
+                schemaTable = getAccountSchema(true, false, enableEntityMatch);
+                schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.Account));
+                break;
+            case Contacts:
+            case Leads:
+                schemaTable = getContactSchema(true, enableEntityMatch);
+                if (enableEntityMatch) {
+                    schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.ContactEntityMatch));
+                } else {
+                    schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.Contact));
+                }
+                break;
+            case ProductPurchases:
+                schemaTable = getTransactionSchema(enableEntityMatch);
+                break;
+            case ProductBundles:
+            case ProductHierarchy:
+                schemaTable = getProductSchema();
+                break;
+            case WebVisit:
+                attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrUserId(), attrCompanyName(), attrCity(), attrState(),
+                        attrCountry(), attrDUNS()));
+                schemaTable = createTable(SchemaInterpretation.WebVisit);
+                schemaTable.addAttributes(attrs);
+                break;
+            case WebVisitPathPattern:
+                attrs = new ArrayList<>(Arrays.asList(attrPathPatternName(), attrPathPattern()));
+                schemaTable = createTable(SchemaInterpretation.WebVisitPathPattern);
+                schemaTable.addAttributes(attrs);
+                break;
+        }
+        return schemaTable;
+    }
+
+    private Attribute attrPageUrl() {
+        return attr(InterfaceName.WebVisitPageUrl.name())
+                .allowedDisplayNames(Arrays.asList("PAGE_URL", "PAGEURL", "WEB_VISIT_PAGE_URL"))
+                .required()
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.WebVisitPageUrl) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrUserId() {
+        return attr(InterfaceName.UserId.name())
+                .allowedDisplayNames(Arrays.asList("ID", "USER_ID"))
+                .required()
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.UserId) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrCompanyName() {
+        return attr(InterfaceName.CompanyName.name()) //
+                .allowedDisplayNames(Arrays.asList("COMPANY_NAME", "COMPANY")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build();
+    }
+
+    private Attribute attrCity() {
+        return attr(InterfaceName.City.name()) //
+                .allowedDisplayNames(Arrays.asList("CITY", "BILLING_CITY")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.City) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrState() {
+        return attr(InterfaceName.State.name()) //
+                .allowedDisplayNames(Arrays.asList("STATE", "STATE PROVINCE", "STATE_PROVINCE", "BILLING_STATE",
+                        "BILLING_PROVINCE")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.State) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrCountry() {
+        return attr(InterfaceName.Country.name()) //
+                .allowedDisplayNames(Arrays.asList("COUNTRY", "BILLING_COUNTRY")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Country) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrDUNS() {
+        return attr(InterfaceName.DUNS.name()) //
+                .allowedDisplayNames(Arrays.asList("DUNS", "DUNS_NUMBER")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.DUNS) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrPathPattern() {
+        return attr(InterfaceName.PathPattern.name()) //
+                .allowedDisplayNames(Arrays.asList("PATTERN", "PATH_PATTERN")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PathPattern) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrPathPatternName() {
+        return attr(InterfaceName.PathPatternName.name()) //
+                .allowedDisplayNames(Arrays.asList("NAME", "PATH_PATTERN_NAME")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PathPatternName) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
     }
 }

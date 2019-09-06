@@ -1,14 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
-import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
-public class ScoreAggregateFlowConfiguration extends BaseCDLDataFlowStepConfiguration {
+public class ScoreAggregateFlowConfiguration extends SparkJobStepConfiguration {
 
     private Boolean expectedValue;
 
     public ScoreAggregateFlowConfiguration() {
-        setBeanName("scoreAggregate");
-        setTargetTableName(NamingUtils.timestampWithRandom("ScoreAggregateFlow"));
     }
 
     public Boolean getExpectedValue() {

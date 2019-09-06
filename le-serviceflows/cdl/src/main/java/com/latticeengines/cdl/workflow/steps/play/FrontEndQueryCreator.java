@@ -321,15 +321,27 @@ public class FrontEndQueryCreator {
             accountFrontEndQuery.setRatingModels(ratingModels);
 
             List<Lookup> lookups = accountFrontEndQuery.getLookups();
-            Lookup lookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
-            lookups.add(lookup);
+            Set<Lookup> lookupSet = new HashSet<>(lookups);
+            Lookup ratingLookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
+            if (!lookupSet.contains(ratingLookup)) {
+                lookups.add(ratingLookup);
+                lookupSet.add(ratingLookup);
+            }
             if (playLaunchContext.getRatingEngine().getType() != RatingEngineType.RULE_BASED) {
-                lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_score"));
+                Lookup ratingScoreLookup = new AttributeLookup(BusinessEntity.Rating, ratingId + "_score");
+                if (!lookupSet.contains(ratingScoreLookup)) {
+                    lookups.add(ratingScoreLookup);
+                    lookupSet.add(ratingScoreLookup);
+                }
             }
             if (playLaunchContext.getRatingEngine().getType() == RatingEngineType.CROSS_SELL
                     && ((AIModel) playLaunchContext.getPublishedIteration())
                             .getPredictionType() == PredictionType.EXPECTED_VALUE) {
-                lookups.add(new AttributeLookup(BusinessEntity.Rating, ratingId + "_ev"));
+                Lookup revenueLookup = new AttributeLookup(BusinessEntity.Rating, ratingId + "_ev");
+                if (!lookupSet.contains(revenueLookup)) {
+                    lookups.add(revenueLookup);
+                    lookupSet.add(revenueLookup);
+                }
             }
         }
     }

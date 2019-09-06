@@ -314,7 +314,7 @@
     "IsHiddenForRemodelingUI": false,
     "IsCoveredByOptionalRule": false,
     "IsCoveredByMandatoryRule": false,
-    "IsCampaignDerivedField": true,
+    "IsCampaignDerivedField": false,
     "ColumnId": "FirstName"
   },
   {
@@ -385,15 +385,15 @@
     ]
   },
   {
-    "AttrName": "ContactID",
+    "AttrName": "ContactId",
     "DisplayName": "Contact ID",
     "Entity": "Contact",
     "JavaClass": "String",
     "IsHiddenForRemodelingUI": false,
     "IsCoveredByOptionalRule": false,
     "IsCoveredByMandatoryRule": false,
-    "IsCampaignDerivedField": true,
-    "ColumnId": "ContactID"
+    "IsCampaignDerivedField": false,
+    "ColumnId": "ContactId"
   },
   {
     "AttrName": "State",
@@ -496,7 +496,7 @@
     "IsHiddenForRemodelingUI": false,
     "IsCoveredByOptionalRule": false,
     "IsCoveredByMandatoryRule": false,
-    "IsCampaignDerivedField": true,
+    "IsCampaignDerivedField": false,
     "ColumnId": "LastName"
   },
   {
