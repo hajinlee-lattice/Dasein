@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -55,12 +56,14 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
 
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), configuration.getPlayId(),
                 configuration.getChannelId());
-        if (channel.getCurrentLaunchedContactUniverseTable() != null) {
-            addTableToRequestForImport(channel.getCurrentLaunchedAccountUniverseTable(), requests);
+        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
+            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
+                    channel.getCurrentLaunchedAccountUniverseTable()), requests);
         }
 
-        if (channel.getCurrentLaunchedContactUniverseTable() != null) {
-            addTableToRequestForImport(channel.getCurrentLaunchedContactUniverseTable(), requests);
+        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
+            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
+                    channel.getCurrentLaunchedContactUniverseTable()), requests);
         }
     }
 

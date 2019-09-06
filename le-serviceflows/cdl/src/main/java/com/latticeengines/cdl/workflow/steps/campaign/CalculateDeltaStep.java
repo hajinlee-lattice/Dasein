@@ -119,10 +119,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         processDeltaCalculationResult(deltaCalculationResult, config);
 
         // 4) Record the new launch universe for the next delta calculation
-        channel.setCurrentLaunchedAccountUniverseTable(metadataProxy.getTable(customerSpace.getTenantId(),
-                getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class)));
-        channel.setCurrentLaunchedContactUniverseTable(metadataProxy.getTable(customerSpace.getTenantId(),
-                getObjectFromContext(FULL_CONTACTS_UNIVERSE, String.class)));
+        channel.setCurrentLaunchedAccountUniverseTable(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class));
+        channel.setCurrentLaunchedContactUniverseTable(getObjectFromContext(FULL_CONTACTS_UNIVERSE, String.class));
         playProxy.updatePlayLaunchChannel(customerSpace.getTenantId(), config.getPlayId(), config.getChannelId(),
                 channel, false);
     }
@@ -185,17 +183,24 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     private SparkJobResult executeSparkJob(FrontEndQuery accountQuery, FrontEndQuery contactQuery,
             PlayLaunchChannel channel) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(1); // todo: make it 3 later
+        Table previousAccountUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
+                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                        channel.getCurrentLaunchedAccountUniverseTable())
+                : null;
 
         HdfsDataUnit previousAccountUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
-                && channel.getCurrentLaunchedAccountUniverseTable() != null)
-                        ? HdfsDataUnit.fromPath(
-                                channel.getCurrentLaunchedAccountUniverseTable().getExtracts().get(0).getPath())
+                && previousAccountUniverseTable != null)
+                        ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
                         : null;
 
+        Table previousContactUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
+                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                        channel.getCurrentLaunchedContactUniverseTable())
+                : null;
+
         HdfsDataUnit previousContactUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
-                && channel.getCurrentLaunchedContactUniverseTable() != null)
-                        ? HdfsDataUnit.fromPath(
-                                channel.getCurrentLaunchedContactUniverseTable().getExtracts().get(0).getPath())
+                && previousContactUniverseTable != null)
+                        ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
                         : null;
 
         return retry.execute(ctx -> {

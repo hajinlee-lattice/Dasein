@@ -30,23 +30,19 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
                 configuration.getPlayId(), configuration.getChannelId());
 
         if (StringUtils.isNotBlank(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class))) {
-            launch.setAddAccountsTable(metadataProxy.getTable(customerSpace,
-                    getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class)));
+            launch.setAddAccountsTable(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class));
         }
 
         if (StringUtils.isNotBlank(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class))) {
-            launch.setRemoveAccountsTable(metadataProxy.getTable(customerSpace,
-                    getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class)));
+            launch.setRemoveAccountsTable(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class));
         }
 
         if (StringUtils.isNotBlank(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))) {
-            launch.setAddContactsTable(metadataProxy.getTable(customerSpace,
-                    getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class)));
+            launch.setAddContactsTable(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class));
         }
 
         if (StringUtils.isNotBlank(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))) {
-            launch.setRemoveContactsTable(metadataProxy.getTable(customerSpace,
-                    getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class)));
+            launch.setRemoveContactsTable(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
         }
 
         playProxy.updatePlayLaunch(configuration.getCustomerSpace().getTenantId(), configuration.getPlayId(),
