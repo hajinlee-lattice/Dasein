@@ -70,6 +70,7 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
@@ -689,7 +690,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private void setSystemIdMapping(CustomerSpace customerSpace, String feedType,
                                     List<FieldMapping> customerLatticeIdList, FieldMapping fieldMapping) {
         String systemName = cdlService.getSystemNameFromFeedType(feedType);
-        EntityType entityType = EntityType.matchFeedType(feedType);
+        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
         if (StringUtils.isNotEmpty(systemName)) {
             if (StringUtils.isEmpty(fieldMapping.getSystemName()) || systemName.equals(fieldMapping.getSystemName())) { // Set field as current system id
                 fieldMapping.setFieldType(UserDefinedType.TEXT);

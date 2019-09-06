@@ -33,6 +33,8 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Longitude;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfEmployees;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.OrderId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PostalCode;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
@@ -44,6 +46,8 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.Transacti
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Type;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UserId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Website;
 
 import java.util.Arrays;
@@ -57,10 +61,12 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 
 public class SchemaRepositoryUnitTestNG {
 
@@ -96,6 +102,10 @@ public class SchemaRepositoryUnitTestNG {
             .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr)) //
             .collect(Collectors.toList());
 
+    private static final List<InterfaceName> WEBVISIT_ATTRS = Arrays.asList(WebVisitPageUrl, UserId, CompanyName,
+            City, State, Country, DUNS);
+
+    private static final List<InterfaceName> WEBVISIT_PATHPATTERN_ATTRS = Arrays.asList(PathPatternName, PathPattern);
     /**
      * Currently only covers testing Account & Contact schema with
      * enableEntityMatch turned on and off
@@ -167,6 +177,32 @@ public class SchemaRepositoryUnitTestNG {
                 { SchemaInterpretation.Contact, false, CONTACT_ATTRS, ContactId }, //
                 { SchemaInterpretation.Transaction, true, TRANSACTION_ENTITY_MATCH_ATTRS, null }, //
                 { SchemaInterpretation.Transaction, false, TRANSACTION_ATTRS, null }, //
+        };
+    }
+
+    @Test(groups = "unit", dataProvider = "entityTypeProvider")
+    public void testGetSchemaByEntityType(S3ImportSystem.SystemType systemType, EntityType entityType,
+                                          boolean enableEntityMatch,
+                                          List<InterfaceName> expectedAttrs) {
+        Table table = SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch);
+        String[] attrArray = table.getAttributeNames();
+        Arrays.sort(attrArray);
+        String[] expectedAttrArray = expectedAttrs.stream().map(Enum::name).sorted().toArray(String[]::new);
+        Assert.assertEquals(attrArray, expectedAttrArray);
+    }
+
+
+    @DataProvider(name = "entityTypeProvider")
+    public Object[][] entityTypeProvider() {
+        return new Object[][] {
+                {S3ImportSystem.SystemType.Other, EntityType.Accounts, true, ACCOUNT_ENTITY_MATCH_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.Accounts, false, ACCOUNT_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.Contacts, true, CONTACT_ENTITY_MATCH_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.Contacts, false, CONTACT_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, true, TRANSACTION_ENTITY_MATCH_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, false, TRANSACTION_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.WebVisit, true, WEBVISIT_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.WebVisitPathPattern, true, WEBVISIT_PATHPATTERN_ATTRS }, //
         };
     }
 }
