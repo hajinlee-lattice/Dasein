@@ -73,10 +73,10 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder cleanupEntities(Set<BusinessEntity> entities) {
-            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Account)) {
-                processAccountStepConfiguration.setNeedCleanup(true);
-            }
+        public Builder setCleanup(Boolean needCleanup) {
+            processAccountStepConfiguration.setNeedCleanup(needCleanup);
+            updateAccountWorkflowBuilder.setCleanup(needCleanup);
+            rebuildAccountWorkflowBuilder.setCleanup(needCleanup);
             return this;
         }
 

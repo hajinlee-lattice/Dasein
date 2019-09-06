@@ -44,12 +44,10 @@ public class ProcessProductWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder cleanupEntities(Set<BusinessEntity> entities) {
-            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Product)) {
-                processProductStepConfiguration.setNeedCleanup(true);
-                updateProductWorkflowBuilder.cleanupEntities(entities);
-                rebuildProductWorkflowBuilder.cleanupEntities(entities);
-            }
+        public Builder setCleanup(Boolean needCleanup) {
+            processProductStepConfiguration.setNeedCleanup(needCleanup);
+            updateProductWorkflowBuilder.setCleanup(needCleanup);
+            rebuildProductWorkflowBuilder.setCleanup(needCleanup);
             return this;
         }
 

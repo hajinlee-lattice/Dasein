@@ -53,10 +53,8 @@ public class UpdateContactWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-        public Builder cleanupEntities(Set<BusinessEntity> entities) {
-            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Contact)) {
-                processContactStepConfiguration.setNeedCleanup(true);
-            }
+        public Builder setCleanup(Boolean needCleanup) {
+            processContactStepConfiguration.setNeedCleanup(needCleanup);
             return this;
         }
 

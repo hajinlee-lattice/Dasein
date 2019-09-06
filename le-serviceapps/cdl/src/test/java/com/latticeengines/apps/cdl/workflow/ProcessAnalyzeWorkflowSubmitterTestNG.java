@@ -204,8 +204,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional", dataProvider = "provideInheritableActionTestObjects")
     public void testGetInheritableActionsFromLastFailedPA(DataFeedExecution dataFeedExecution, Job workflowExection,
                                                           List<Action> actions, List<Long> inheritableActionIds) {
-        when(dataFeedService.getDefaultDataFeed(anyString())).thenReturn(new DataFeed());
-        when(dataFeedService.getLatestExecution(anyString(), any(), any())).thenReturn(dataFeedExecution);
+        when(dataFeedService.getLatestExecution(anyString(), any())).thenReturn(dataFeedExecution);
         when(workflowProxy.getWorkflowExecution(anyString(), anyBoolean())).thenReturn(workflowExection);
         when(actionService.findByOwnerId(workflowExection.getPid())).thenReturn(actions);
 

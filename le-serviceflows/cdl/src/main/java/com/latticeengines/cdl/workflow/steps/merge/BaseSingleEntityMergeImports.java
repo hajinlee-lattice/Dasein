@@ -172,7 +172,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
-            log.info("There has been no master table for this data collection. Creating a new one");
+            log.info("There has been no master table for this data collection. Creating a new one. entity is: {}",
+                    configuration.getMainEntity());
         } else {
             inputMasterTableName = masterTable.getName();
         }

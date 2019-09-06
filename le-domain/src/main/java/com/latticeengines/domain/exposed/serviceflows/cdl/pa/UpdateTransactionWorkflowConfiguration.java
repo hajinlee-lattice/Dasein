@@ -58,10 +58,8 @@ public class UpdateTransactionWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
-        public Builder cleanupEntities(Set<BusinessEntity> entities) {
-            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.Transaction)) {
-                processTransactionStepConfiguration.setNeedCleanup(true);
-            }
+        public Builder setCleanup(Boolean needCleanup) {
+            processTransactionStepConfiguration.setNeedCleanup(needCleanup);
             return this;
         }
 
