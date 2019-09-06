@@ -47,7 +47,7 @@ public final class PathConstants {
 
     public static final String SCHEDULING_PA_FLAG_FILE = "schedulingPAFlag.json";
 
-    public static final String WORKFLOW_THROTTLER_CONFIG_FILE = "workflowThrottlerConfig.json";
+    public static final String WORKFLOW_THROTTLER_CONFIG_FILE = "workflowThrottlerConfig";
 
     public static final String WORKFLOW_THROTTLING_FLAG = "workflowThrottlingFlag";
 
