@@ -284,9 +284,16 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         String customerSpaceStr = configuration.getCustomerSpace().toString();
         String targetPath = atlasExportProxy.getSystemExportPath(customerSpaceStr, false);
         String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
-        String fileName = exportEntity + "_" + exportRecord.getUuid() + suffix;
+        String fileName = exportEntity + "_" + getExportName(exportRecord) + suffix;
         copyToS3(targetPath, fileName, csvGzFilePath);
         atlasExportProxy.addFileToSystemPath(customerSpaceStr, exportRecord.getUuid(), fileName, getDeletePath());
+    }
+
+    private String getExportName(AtlasExport atlasExport) {
+        if (StringUtils.isEmpty(atlasExport.getSegmentName())) {
+            return atlasExport.getUuid();
+        }
+        return atlasExport.getSegmentName() + "_" + atlasExport.getUuid();
     }
 
     private void copyToS3(String targetPath, String fileName, String csvGzFilePath) {
@@ -317,7 +324,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         String targetPath = atlasExportProxy.getDropFolderExportPath(customerSpaceStr, exportRecord.getExportType(),
                 exportRecord.getDatePrefix(), false);
         String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
-        String fileName = exportEntity + suffix;
+        String fileName = exportEntity + "_" + exportRecord.getUuid() + suffix;
         copyToS3(targetPath, fileName, csvGzFilePath);
         atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName, getDeletePath());
     }
