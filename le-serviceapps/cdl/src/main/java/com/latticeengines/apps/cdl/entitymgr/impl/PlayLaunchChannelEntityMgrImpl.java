@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -169,28 +170,28 @@ public class PlayLaunchChannelEntityMgrImpl
                 existingPlayLaunchChannel.setChannelConfig(playLaunchChannel.getChannelConfig());
             }
         }
-        if (playLaunchChannel.getCurrentLaunchedAccountUniverseTable() != null) {
-            Table table = tableEntityMgr
-                    .findByName(playLaunchChannel.getCurrentLaunchedAccountUniverseTable().getName());
+        if (StringUtils.isNotBlank(playLaunchChannel.getCurrentLaunchedAccountUniverseTable())) {
+            Table table = tableEntityMgr.findByName(playLaunchChannel.getCurrentLaunchedAccountUniverseTable(), false,
+                    false);
             if (table != null) {
-                existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(table);
+                existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(table.getName());
             } else {
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Failed to update channel: " + playLaunchChannel.getId()
                                 + " since no account universe table found by Id: "
-                                + playLaunchChannel.getCurrentLaunchedAccountUniverseTable().getName() });
+                                + playLaunchChannel.getCurrentLaunchedAccountUniverseTable() });
             }
         }
-        if (playLaunchChannel.getCurrentLaunchedContactUniverseTable() != null) {
-            Table table = tableEntityMgr
-                    .findByName(playLaunchChannel.getCurrentLaunchedContactUniverseTable().getName());
+        if (StringUtils.isNotBlank(playLaunchChannel.getCurrentLaunchedContactUniverseTable())) {
+            Table table = tableEntityMgr.findByName(playLaunchChannel.getCurrentLaunchedContactUniverseTable(), false,
+                    false);
             if (table != null) {
-                existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(table);
+                existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(table.getName());
             } else {
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Failed to update channel: " + playLaunchChannel.getId()
                                 + " since no contact universe table found by Id: "
-                                + playLaunchChannel.getCurrentLaunchedAccountUniverseTable().getName() });
+                                + playLaunchChannel.getCurrentLaunchedAccountUniverseTable() });
             }
         }
         existingPlayLaunchChannel.setUpdatedBy(playLaunchChannel.getUpdatedBy());
