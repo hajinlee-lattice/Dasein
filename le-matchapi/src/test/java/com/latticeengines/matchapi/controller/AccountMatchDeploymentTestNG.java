@@ -420,7 +420,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     }
 
     // One record with all match key populated
-    @Test(groups = "deployment", priority = 1, enabled = false)
+    @Test(groups = "deployment", priority = 1)
     public void testAllKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_ALL_KEYS);
         runAndVerify(input, CASE_ALL_KEYS);
@@ -429,14 +429,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Records with partial match key (extracted from match key of #1)
     // populated, should all match to same EntityId in #1
-    @Test(groups = "deployment", priority = 2, enabled = false)
+    @Test(groups = "deployment", priority = 2)
     public void testPartialKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_PARTIAL_KEYS);
         runAndVerify(input, CASE_PARTIAL_KEYS);
     }
 
     // Use EntityId got from #1 to test fetch-only mode
-    @Test(groups = "deployment", priority = 3, enabled = false)
+    @Test(groups = "deployment", priority = 3)
     public void testFetchOnly() {
         MatchInput input = prepareBulkMatchInputFetchOnly();
         runAndVerify(input, null);
