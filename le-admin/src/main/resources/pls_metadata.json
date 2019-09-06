@@ -13,6 +13,7 @@
         { "Node": "Account", "Data": {"Type": "number", "Required": false}},
         { "Node": "Contact", "Data": {"Type": "number", "Required": false}}
       ]
-    }
+    },
+    { "Node": "workflowThrottlerConfig", "Data": {"Type": "string", "Required":  true}}
   ]
 }
