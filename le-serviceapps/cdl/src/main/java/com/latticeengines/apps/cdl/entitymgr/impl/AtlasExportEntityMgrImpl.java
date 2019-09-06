@@ -29,7 +29,7 @@ public class AtlasExportEntityMgrImpl
         extends BaseReadWriteRepoEntityMgrImpl<AtlasExportRepository, AtlasExport, Long>
         implements AtlasExportEntityMgr {
 
-    private static final String UUID_PREFIX = "AtlasExport_";
+    private static final String UUID_PREFIX = "AtlasExport";
 
     private static final SimpleDateFormat exportDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 

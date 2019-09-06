@@ -132,6 +132,12 @@ public enum InterfaceName {
     // Rating
     ModelId, Rating, Score, RawScore, ExpectedValue, Likelihood, Lift,
 
+    //WebVisit
+    WebVisitPageUrl, UserId,
+
+    //WebVisitTPathPattern
+    PathPatternName, PathPattern,
+
     // Internal
     __Composite_Key__; // primary key for internal use
 
