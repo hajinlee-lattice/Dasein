@@ -72,8 +72,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_PRODUCT_PURCHASE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_BUNDLE_IMPORT, //
                 LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, //
-                LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE,
-                LatticeFeatureFlag.IMPORT_WITHOUT_ID,
+                LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, //
+                LatticeFeatureFlag.IMPORT_WITHOUT_ID, //
                 LatticeFeatureFlag.PLAYBOOK_MODULE, //
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
                 LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, //
@@ -87,8 +87,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
-                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA,
-                LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
+                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA, LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
         Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //
@@ -105,8 +104,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.VDB_MIGRATION, //
                 LatticeFeatureFlag.SCORE_EXTERNAL_FILE, //
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, //
-                LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE,
-                LatticeFeatureFlag.IMPORT_WITHOUT_ID,
+                LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, //
+                LatticeFeatureFlag.IMPORT_WITHOUT_ID, //
                 LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, //
                 LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION, //
@@ -119,7 +118,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
-                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA,
                 LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
