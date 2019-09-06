@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -609,6 +610,12 @@ public class ProcessorContext {
             offendingFields.add(field.name().toUpperCase());
         }
         for (Schema.Field field : schema.getFields()) {
+            // If input attributes have reserved ID fields (AccountId, ContactId
+            // and EntityId) conflicting output attributes, drop the ones from
+            // input in the output instead of renaming
+            if (offendingFields.contains(field.name().toUpperCase()) && InterfaceName.isEntityId(field.name(), false)) {
+                continue;
+            }
             if (offendingFields.contains(field.name().toUpperCase())) {
                 // name conflict
                 fieldBuilder = fieldAssembler.name(prefix + field.name());

@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -117,9 +116,6 @@ public class MatchInputValidator {
         // Validate flags for entity match are set properly
         validateEntityMatchFlags(input);
 
-        // Validate naming conflict in match input fields
-        validateEntityMatchInputFields(input);
-
         if (OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
             // validate with legacy path when in attribute lookup
             validateNonEntityMatchColumnSelection(input);
@@ -189,32 +185,6 @@ public class MatchInputValidator {
         }
         if (input.isAllocateId() && OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
             throw new IllegalArgumentException("AllocateID mode cannot be enabled to attribute lookup");
-        }
-    }
-
-    /**
-     * TODO: For now, only validate Non-FetchOnly mode to avoid attribute conflict
-     * in match result (EntityId).
-     *
-     * FetchOnly mode validation will be more complicate because it could fetch any
-     * attribute from Seed table. Whether we should fail any attribute name conflict
-     * or overwrite existing attribute or do some attribute rename (hard to read
-     * renamed attributes as renaming logic is not exposed to outside of matcher),
-     * needs more thoughts
-     *
-     * @param input
-     */
-    private static void validateEntityMatchInputFields(MatchInput input) {
-        if (input.isFetchOnly() || OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(input.getOperationalMode())) {
-            return;
-        }
-        List<String> reservedFields = input.getFields().stream() //
-                .filter(MatchKeyUtils::isEntityReservedField) //
-                .collect(Collectors.toList());
-        if (!reservedFields.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Reserved fields are not allowed to show up in Non-FetchOnly and Non-AttributeLookup mode match input fields: "
-                            + String.join(",", reservedFields));
         }
     }
 

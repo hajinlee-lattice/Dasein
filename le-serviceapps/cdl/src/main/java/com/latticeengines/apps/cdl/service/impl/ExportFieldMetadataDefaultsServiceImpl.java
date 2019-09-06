@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -45,7 +46,7 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     @Override
     public List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
             List<ExportFieldMetadataDefaults> defaultExportFields) {
-        return exportFieldMetadataDefaultsEntityMgr.updateDefaultFields(systemName, defaultExportFields);
+        return this.updateFieldMetadataDefault(systemName, defaultExportFields, getAllAttributes(systemName));
     }
 
     @Override
@@ -56,5 +57,34 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     @Override
     public void deleteByAttrNames(CDLExternalSystemName systemName, List<String> attrNames) {
         exportFieldMetadataDefaultsEntityMgr.removeByAttrNames(systemName, attrNames);
+    }
+
+    private List<ExportFieldMetadataDefaults> updateFieldMetadataDefault(CDLExternalSystemName systemName, List<ExportFieldMetadataDefaults> newDefaultExportFields, List<ExportFieldMetadataDefaults> oldDefaultExportFields){
+        List<ExportFieldMetadataDefaults> listToSave = new ArrayList<>();
+        List<ExportFieldMetadataDefaults> listToCreate = new ArrayList<>();
+        newDefaultExportFields.forEach( defaultField -> {
+            ExportFieldMetadataDefaults updated = oldDefaultExportFields.stream()
+                .filter( oldField -> defaultField.getAttrName().equals(oldField.getAttrName()) && defaultField.getExternalSystemName().equals((oldField.getExternalSystemName())))
+                .findAny()
+                .orElse(null);
+            if(updated != null){
+                defaultField.setPid(updated.getPid());
+                listToSave.add(defaultField);
+            }else {
+                listToCreate.add(defaultField);
+            }
+        });
+        List<ExportFieldMetadataDefaults> listCreated = addNewFields(systemName, listToCreate);
+        List<ExportFieldMetadataDefaults> saved = exportFieldMetadataDefaultsEntityMgr.updateDefaultFields(systemName, listToSave);
+        saved.addAll(listCreated);
+        return saved;
+    }
+
+    private List<ExportFieldMetadataDefaults> addNewFields(CDLExternalSystemName systemName, List<ExportFieldMetadataDefaults> newFields){
+        if(!newFields.isEmpty()) {
+            return exportFieldMetadataDefaultsEntityMgr.createAll(newFields);
+        } else {
+            return newFields;
+        }
     }
 }

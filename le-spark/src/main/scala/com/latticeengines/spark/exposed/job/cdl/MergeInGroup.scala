@@ -28,7 +28,7 @@ class MergeInGroup(schema: StructType, overwriteByNull: Boolean) extends UserDef
     override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
         for (idx <- 0 to schema.length - 1) {
             breakable {
-                if (InterfaceName.isEntityId(schema.fieldNames(idx))) {
+                if (InterfaceName.isEntityId(schema.fieldNames(idx), true)) {
                     if (overwriteEntityId(buffer.getAs[String](idx), input.getAs[String](idx))) {
                         buffer(idx) = input.getAs[String](idx)
                     }
@@ -44,7 +44,7 @@ class MergeInGroup(schema: StructType, overwriteByNull: Boolean) extends UserDef
     override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
         for (idx <- 0 to schema.length - 1) {
             breakable {
-                if (InterfaceName.isEntityId(schema.fieldNames(idx))) {
+                if (InterfaceName.isEntityId(schema.fieldNames(idx), true)) {
                     if (overwriteEntityId(buffer1.getAs[String](idx), buffer2.getAs[String](idx))) {
                         buffer1(idx) = buffer2.getAs[String](idx)
                     }

@@ -147,13 +147,23 @@ public enum InterfaceName {
             InterfaceName.ContactId.name() //
     );
 
+    private static final Set<String> EntityIdsUC = ImmutableSet.of( //
+            InterfaceName.EntityId.name().toUpperCase(), //
+            InterfaceName.AccountId.name().toUpperCase(), //
+            InterfaceName.ContactId.name().toUpperCase() //
+    );
+
     /**
      * Whether it is reserved field for internal entity ID
      *
      * @param id
      * @return
      */
-    public static boolean isEntityId(String id) {
-        return EntityIds.contains(id);
+    public static boolean isEntityId(String id, boolean caseSensitive) {
+        if (caseSensitive) {
+            return EntityIds.contains(id);
+        } else {
+            return id != null && EntityIdsUC.contains(id.toUpperCase());
+        }
     }
 }
