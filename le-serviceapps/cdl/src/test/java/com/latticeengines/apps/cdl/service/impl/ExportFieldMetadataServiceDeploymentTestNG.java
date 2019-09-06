@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
@@ -187,10 +188,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), defaultS3ExportFields.size());
+        assertEquals(columnMetadata.size(), 34);
 
         long nonStandardFieldsCount = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFieldsCount, 30);
+        log.info("" + nonStandardFieldsCount);
+        assertEquals(nonStandardFieldsCount, 23);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
@@ -206,11 +208,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 88);
+        assertEquals(columnMetadata.size(), 80);
 
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
-        assertEquals(nonStandardFields.size(), 30);
+        assertEquals(nonStandardFields.size(), 23);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithExportAttributes")
@@ -249,6 +251,21 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
                 .collect(Collectors.toList());
         log.info(JsonUtils.serialize(nonStandardFields));
         assertEquals(nonStandardFields.size(), 3);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testFacebookLaunch")
+    public void testEloquaLaunch() {
+        registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Eloqua, "Eloqua");
+
+        createPlayLaunchChannel(new EloquaChannelConfig(), lookupIdMap);
+
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        assertEquals(columnMetadata.size(), 0);
+
     }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {

@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.MapUtils;
@@ -58,6 +60,10 @@ public class RecommendationAvroToCsvTransformerTestNG {
 
         List<String> fields = transformer.getFieldNames(schema);
         Assert.assertEquals(fields.size(), 34);
+
+        Set<String> fieldsSet = new HashSet<String>(fields);
+        Assert.assertEquals(fields.size(), fieldsSet.size());
+
     }
 
     private Map<String, String> readCsvIntoMap(String filePath) throws IOException {
