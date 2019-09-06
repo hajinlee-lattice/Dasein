@@ -125,7 +125,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String[] FIELDS_PREFERRED_ID = { //
             TEST_ID, //
             InterfaceName.CustomerAccountId.name(), //
-            MatchKey.PreferredEntityId.name(), //
+            InterfaceName.AccountId.name(), //
     };
 
     private static final List<Class<?>> SCHEMA = new ArrayList<>(Collections.nCopies(FIELDS.length, String.class));
@@ -403,8 +403,6 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private String googleEntityId = null;
 
-    // FIXME: Disable all the deployment tests related to Entity Match to tune
-    // Decision Graph in QA with PM
     @BeforeClass(groups = "deployment")
     public void init() {
         HdfsPodContext.changeHdfsPodId(this.getClass().getSimpleName());
@@ -422,7 +420,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     }
 
     // One record with all match key populated
-    @Test(groups = "deployment", priority = 1, enabled = false)
+    @Test(groups = "deployment", priority = 1)
     public void testAllKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_ALL_KEYS);
         runAndVerify(input, CASE_ALL_KEYS);
@@ -431,14 +429,14 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // Records with partial match key (extracted from match key of #1)
     // populated, should all match to same EntityId in #1
-    @Test(groups = "deployment", priority = 2, enabled = false)
+    @Test(groups = "deployment", priority = 2)
     public void testPartialKeys() {
         MatchInput input = prepareBulkMatchInput(CASE_PARTIAL_KEYS);
         runAndVerify(input, CASE_PARTIAL_KEYS);
     }
 
     // Use EntityId got from #1 to test fetch-only mode
-    @Test(groups = "deployment", priority = 3, enabled = false)
+    @Test(groups = "deployment", priority = 3)
     public void testFetchOnly() {
         MatchInput input = prepareBulkMatchInputFetchOnly();
         runAndVerify(input, null);
@@ -599,7 +597,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
         MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
         map.addMatchKey(MatchKey.SystemId, InterfaceName.CustomerAccountId.name());
-        map.addMatchKey(MatchKey.PreferredEntityId, MatchKey.PreferredEntityId.name());
+        map.addMatchKey(MatchKey.PreferredEntityId, InterfaceName.AccountId.name());
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_PREFERRED_ID));
         return input;
