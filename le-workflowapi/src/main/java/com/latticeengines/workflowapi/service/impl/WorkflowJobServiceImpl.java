@@ -94,6 +94,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
+    public WorkflowJob getWorkflowJobByPid(String customerSpace, Long workflowPid) {
+        return workflowJobEntityMgr.findByWorkflowPid(workflowPid);
+    }
+
+    @Override
+    @WithCustomerSpace
     public WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
         if (workflowJob == null) {
