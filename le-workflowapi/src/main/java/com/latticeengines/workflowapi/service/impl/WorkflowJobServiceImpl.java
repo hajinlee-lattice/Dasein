@@ -30,7 +30,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.api.EnqueueSubmission;
+import com.latticeengines.domain.exposed.api.WorkflowSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -511,7 +511,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public EnqueueSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid) {
+    public WorkflowSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         String podid = CamilleEnvironment.getPodId();
         String division = CamilleEnvironment.getDivision();
@@ -520,7 +520,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             throw new IllegalStateException(String.format("Unable to submit workflow for %s due to back pressure.", customerSpace));
         }
 
-        return new EnqueueSubmission(enqueueWorkflowJob(workflowConfiguration, division, workflowJobPid));
+        return new WorkflowSubmission(enqueueWorkflowJob(workflowConfiguration, division, workflowJobPid));
     }
 
     @Override

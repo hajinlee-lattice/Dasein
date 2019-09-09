@@ -3,14 +3,14 @@ package com.latticeengines.domain.exposed.api;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class EnqueueSubmission {
+public class WorkflowSubmission {
 
     private Long workflowJobPId;
 
-    public EnqueueSubmission() {
+    public WorkflowSubmission() {
     }
 
-    public EnqueueSubmission(Long workflowJobPId) {
+    public WorkflowSubmission(Long workflowJobPId) {
         setWorkflowJobPId(workflowJobPId);
     }
 

@@ -48,7 +48,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.api.EnqueueSubmission;
+import com.latticeengines.domain.exposed.api.WorkflowSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -180,9 +180,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         if (expectBackPressure) {
             Assert.assertThrows(IllegalStateException.class, () -> workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null));
         } else {
-            EnqueueSubmission enqueueSubmission = workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null);
-            Assert.assertNotNull(enqueueSubmission.getWorkflowJobPId());
-            shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(enqueueSubmission.getWorkflowJobPId());
+            WorkflowSubmission workflowSubmission = workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null);
+            Assert.assertNotNull(workflowSubmission.getWorkflowJobPId());
+            shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowSubmission.getWorkflowJobPId());
             Assert.assertNotNull(shouldEnqueuedWorkflowJob);
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getType(), shouldEnqueuedWorkflowConfig.getWorkflowName());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getWorkflowConfiguration().getCustomerSpace(), shouldEnqueuedWorkflowConfig.getCustomerSpace());
