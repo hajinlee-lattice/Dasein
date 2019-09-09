@@ -70,7 +70,7 @@ public class SplitRatingEngines extends BaseWorkflowStep<ProcessRatingStepConfig
         List<List<RatingModelContainer>> iterations = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(containers)) {
             int maxIteration = configuration.getMaxIteration();
-            if (maxIteration == 0) {
+            if (maxIteration <= 0) {
                 maxIteration = defaultMaxIteration;
             }
             log.info("Max iteration is " + maxIteration + ".");
