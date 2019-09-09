@@ -21,6 +21,8 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -58,6 +60,7 @@ import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
 
 @Component("workflowApiWorkflowJobService")
+@EnableScheduling
 public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
 
@@ -760,6 +763,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return microserviceUrl;
         } else {
             return internalAppUrl;
+        }
+    }
+
+    @Override
+    @Scheduled(fixedRate = 500000L)
+    public void scheduledDrainQueueWrapper() {
+        String podid = CamilleEnvironment.getPodId();
+        String division = CamilleEnvironment.getDivision();
+        if (workflowThrottlingService.isWorkflowThrottlingEnabled(podid, division)) {
+            log.info("Drain queue process launched at {}-{}.", podid, division);
+            drainWorkflowQueue(podid, division);
         }
     }
 

@@ -146,4 +146,6 @@ public interface WorkflowJobService {
      * @return number of job cache entries cleared
      */
     int clearAllJobCaches();
+
+    void scheduledDrainQueueWrapper();
 }

@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +24,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
@@ -317,5 +323,35 @@ public class WorkflowResource {
                                            @RequestParam(value = "type", required = false) List<String> workflowTypes,
                                            @RequestParam(value = "status", required = false) List<String> statuses) {
         return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+    }
+
+    @GetMapping(value = "/throttling/flag/{division}")
+    public boolean getThrottlingStackFlag(@PathVariable String division) {
+        String podid = CamilleEnvironment.getPodId();
+        Camille c = CamilleEnvironment.getCamille();
+        try {
+            return Boolean.valueOf(c.get(PathBuilder.buildWorkflowThrottlingFlagPath(podid, division)).getData());
+        } catch (Exception e) {
+            log.error("Unable to read flag value from zk {}-{}. The flag value is considered false.", podid, division);
+            return false;
+        }
+    }
+
+    @PostMapping(value = "/throttling/flag/{division}")
+    public boolean setThrottlingStackFlag(@PathVariable String division, @RequestBody(required = true) boolean flag) {
+        String podid = CamilleEnvironment.getPodId();
+        Camille c = CamilleEnvironment.getCamille();
+        Path flagPath = PathBuilder.buildWorkflowThrottlingFlagPath(podid, division);
+        try {
+            if (c.exists(flagPath)) {
+                c.set(flagPath, new Document(Boolean.toString(flag)));
+            } else {
+                c.create(flagPath, new Document(Boolean.toString(flag)), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("Unable to set flag value for {} - {}.", podid, division);
+            return false;
+        }
     }
 }
