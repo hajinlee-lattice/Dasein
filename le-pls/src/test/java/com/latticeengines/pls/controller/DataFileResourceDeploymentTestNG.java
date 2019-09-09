@@ -34,6 +34,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -78,12 +79,15 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 newDir + "/postMatchEventTable_allTraining-r-00000.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(),
                 newDir + "/postMatchEventTable_allTest-r-00000.csv");
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, Thread.currentThread().getContextClassLoader().getResourceAsStream(
+                "com/latticeengines/pls/functionalframework/trainingfile.csv"), newDir + "/trainingfile.csv");
 
         String content = FileUtils.readFileToString(new File(modelSummaryUrl.getFile()));
         content = content.replace("{uuid}", UUID);
         content = content.replace("{tenantId}", mainTestTenant.getId());
         ModelSummary summary = modelSummaryParser.parse(dir + "/enhancements/modelsummary.json", content);
         summary.setId("ms__" + UUID + "-model");
+        summary.getModelSummaryConfiguration().setProvenanceProperty(ProvenancePropertyName.TrainingFilePath, newDir + "/trainingfile.csv");
 
         restTemplate.postForEntity(getRestAPIHostPort() + "/pls/modelsummaries", summary, ModelSummary.class);
         HdfsUtils.writeToFile(yarnConfiguration, dir + "/enhancements/modelsummary.json", JsonUtils.serialize(summary));
@@ -116,7 +120,12 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                         Assert.assertTrue(headers.containsKey("Content-Disposition"));
                         Assert.assertTrue(headers.containsKey("Content-Type"));
                         Assert.assertEquals(headers.getFirst("Content-Type"), mimeType);
-                        Assert.assertTrue(IOUtils.readLines(response.getBody()).size() > 0);
+                        List<String> lines = IOUtils.readLines(response.getBody());
+                        Assert.assertTrue(lines.size() > 0);
+                        /*
+                        if (fileType.equals("trainingfilecsv")) {
+                            Assert.assertTrue(lines.get(0).contains("Event"));
+                        }*/
                         response.close();
                         return Collections.emptyMap();
                     }
@@ -125,7 +134,8 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvider() {
-        return new Object[][] { { "modeljson", MediaType.APPLICATION_JSON }, //
+        return new Object[][] {
+                { "modeljson", MediaType.APPLICATION_JSON }, //
                 { "diagnosticsjson", MediaType.APPLICATION_JSON }, //
                 { "metadataavsc", MediaType.APPLICATION_JSON }, //
                 { "predictorcsv", "application/csv" }, //
@@ -134,6 +144,8 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 { "explorercsv", "application/csv" }, //
                 { "rfmodelcsv", "application/csv" }, //
                 { "postmatcheventtablecsv/training", MediaType.APPLICATION_OCTET_STREAM }, //
-                { "postmatcheventtablecsv/test", MediaType.APPLICATION_OCTET_STREAM } };
+                { "postmatcheventtablecsv/test", MediaType.APPLICATION_OCTET_STREAM },
+                { "trainingfilecsv", MediaType.APPLICATION_OCTET_STREAM }
+        };
     }
 }
