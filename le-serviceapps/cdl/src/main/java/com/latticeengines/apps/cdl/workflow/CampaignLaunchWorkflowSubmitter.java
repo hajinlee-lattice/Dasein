@@ -21,6 +21,7 @@ import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -66,24 +67,36 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 .lookupIdMap(lookupIdMap) //
                 .dataCollectionVersion(version) //
                 .playLaunchDestination(playLaunch.getDestinationSysType()) //
-                .accountAttributeExportDiplayNames(getAccountDisplayNameMap(playLaunch.getDestinationSysType())) //
-                .contactAttributeExportDiplayNames(getContactDisplayNameMap(playLaunch.getDestinationSysType())) //
+                .accountAttributeExportDiplayNames(
+                        getAccountDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
+                .contactAttributeExportDiplayNames(
+                        getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
                 .exportPublishPlayLaunch(playLaunch, canBeLaunchedToExternal).build();
         return workflowJobService.submit(configuration);
     }
 
-    private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType) {
-        if (destinationSysType != CDLExternalSystemType.FILE_SYSTEM) {
+    private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType,
+            LookupIdMap lookupIdMap) {
+        if (destinationSysType != CDLExternalSystemType.FILE_SYSTEM && (lookupIdMap.getExternalAuthentication() == null
+                || lookupIdMap.getExternalAuthentication().getTrayAuthenticationId() == null)) {
             return null;
         }
-        return readCsvIntoMap("com/latticeengines/cdl/play/launch/s3/contact_display_names.csv");
+        String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
+                ? "com/latticeengines/cdl/play/launch/s3/contact_display_names.csv"
+                : "com/latticeengines/cdl/play/launch/default/contact_display_names.csv";
+        return readCsvIntoMap(filePath);
     }
 
-    private Map<String, String> getAccountDisplayNameMap(CDLExternalSystemType destinationSysType) {
-        if (destinationSysType != CDLExternalSystemType.FILE_SYSTEM) {
+    private Map<String, String> getAccountDisplayNameMap(CDLExternalSystemType destinationSysType,
+            LookupIdMap lookupIdMap) {
+        if (destinationSysType != CDLExternalSystemType.FILE_SYSTEM && (lookupIdMap.getExternalAuthentication() == null
+                || lookupIdMap.getExternalAuthentication().getTrayAuthenticationId() == null)) {
             return null;
         }
-        return readCsvIntoMap("com/latticeengines/cdl/play/launch/s3/account_display_names.csv");
+        String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
+                ? "com/latticeengines/cdl/play/launch/s3/account_display_names.csv"
+                : "com/latticeengines/cdl/play/launch/default/account_display_names.csv";
+        return readCsvIntoMap(filePath);
     }
 
     private Map<String, String> readCsvIntoMap(String filePath) {
