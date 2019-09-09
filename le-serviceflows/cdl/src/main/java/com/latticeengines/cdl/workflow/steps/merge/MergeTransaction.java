@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
@@ -23,6 +24,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodCollectorConfig;
@@ -52,7 +54,10 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
+import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
+import com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 
@@ -72,6 +77,12 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     @Inject
     private EMREnvService emrEnvService;
+
+    @Inject
+    private LivySessionService sessionService;
+
+    @Inject
+    private SparkJobService sparkJobService;
 
     private List<String> stringFields;
     private List<String> longFields;
@@ -163,6 +174,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
         Table diffTable = metadataProxy.getTable(
                 customerSpace.toString(), diffTableName);
+        isDataQuotaLimit();
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         generateDiffReport();
@@ -456,5 +468,54 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), tableRole, inactive);
         }
     }
+
+    private void isDataQuotaLimit() {
+        if (rawTable == null) {
+            return;
+        }
+        List<Extract> extracts = rawTable.getExtracts();
+        if (!CollectionUtils.isEmpty(extracts)) {
+            Long dataCount = countRawTransactionInHdfs();
+            DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
+            Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
+            if (transactionDataQuotaLimit < dataCount) {
+                throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is " + transactionDataQuotaLimit +
+                        ", The data you uploaded has exceeded the limit.");
+            }
+            log.info("stored data is {}, the {} data limit is {}.",
+                    dataCount, configuration.getMainEntity(),
+                    transactionDataQuotaLimit);
+        }
+    }
+
+    private long countRawTransactionInHdfs() {
+        try {
+            Long result = 0L;
+            List<Extract> extracts = rawTable.getExtracts();
+            if (CollectionUtils.isEmpty(extracts)) {
+                return 0L;
+            }
+            for (Extract extract : extracts) {
+                String hdfsPath = extract.getPath();
+                if (!hdfsPath.endsWith("*.avro")) {
+                    if (hdfsPath.endsWith("/")) {
+                        hdfsPath += "*.avro";
+                    } else {
+                        hdfsPath += "/*.avro";
+                    }
+                }
+                log.info("Count records in HDFS {}.", hdfsPath);
+                result += SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
+                log.info("Table role {} has {} entities, hdfs path is {}.",
+                        TableRoleInCollection.ConsolidatedRawTransaction,
+                        result, extract.getPath());
+            }
+            return result;
+        } catch (Exception ex) {
+            log.error("Fail to count raw entities in table.", ex);
+            return 0L;
+        }
+    }
+
 
 }
