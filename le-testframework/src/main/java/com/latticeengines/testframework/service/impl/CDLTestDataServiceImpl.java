@@ -184,7 +184,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Override
     public void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
-                                                List<BucketMetadata> coverage) {
+            List<BucketMetadata> coverage) {
         if (CollectionUtils.isNotEmpty(coverage)) {
             mockRatingTable(tenantId, Collections.singletonList(engineId), ImmutableMap.of(engineId, coverage));
         } else {
@@ -215,10 +215,8 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         String msg = String.format("Mocking the rating table %s for engineIds %s using coverage %s", ratingTableName,
                 engineIds, JsonUtils.serialize(modelRatingBuckets));
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
-            maxCount = modelRatingBuckets.values().stream()
-                    .map(m -> m.stream() //
-                            .map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b))
-                    .max(Integer::compare).orElse(null);
+            maxCount = modelRatingBuckets.values().stream().map(m -> m.stream() //
+                    .map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b)).max(Integer::compare).orElse(null);
             log.info("Maximum count cross all engines is " + maxCount);
             String selectAccountIds = "SELECT AccountId FROM " + accountTblName + " LIMIT " + maxCount + ";";
             RetryTemplate retry = getRedshiftRetryTemplate();
@@ -452,8 +450,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         StatisticsContainer container;
         try {
-            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version,
-                    "stats_container.json.gz");
+            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version, "stats_container.json.gz");
             GZIPInputStream gis = new GZIPInputStream(is);
             String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
             ObjectMapper om = new ObjectMapper();
@@ -488,10 +485,12 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     private void populateServingStore(String tenantId, BusinessEntity entity, String s3Version, //
-                                      ConcurrentMap<String, Long> entityCounts) {
-        Long count = populateTableRole(tenantId, entity.getServingStore(), s3Version);
-        if (count != null) {
-            entityCounts.put(entity.name(), count);
+            ConcurrentMap<String, Long> entityCounts) {
+        if (entity.getServingStore() != null) {
+            Long count = populateTableRole(tenantId, entity.getServingStore(), s3Version);
+            if (count != null) {
+                entityCounts.put(entity.name(), count);
+            }
         }
     }
 
@@ -519,25 +518,30 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     private Table readTableFromS3(TableRoleInCollection role, String version, boolean entityMatchEnabled) {
-        String tableName = role.name() + ".json.gz";
-        if (entityMatchEnabled
-                && testArtifactService.testArtifactExists(S3_DIR, version, role.name() + "_EM.json.gz")) {
-            tableName = role.name() + "_EM.json.gz";
-        }
-        if (testArtifactService.testArtifactExists(S3_DIR, version, tableName)) {
-            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version, tableName);
-            Table table;
-            try {
-                GZIPInputStream gis = new GZIPInputStream(is);
-                String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
-                ObjectMapper om = new ObjectMapper();
-                table = om.readValue(content, Table.class);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to parse the table json", e);
+        try {
+            String tableName = role.name() + ".json.gz";
+            if (entityMatchEnabled
+                    && testArtifactService.testArtifactExists(S3_DIR, version, role.name() + "_EM.json.gz")) {
+                tableName = role.name() + "_EM.json.gz";
             }
-            table.setTableType(TableType.DATATABLE);
-            return table;
-        } else {
+            if (testArtifactService.testArtifactExists(S3_DIR, version, tableName)) {
+                InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, version, tableName);
+                Table table;
+                try {
+                    GZIPInputStream gis = new GZIPInputStream(is);
+                    String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
+                    ObjectMapper om = new ObjectMapper();
+                    table = om.readValue(content, Table.class);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to parse the table json", e);
+                }
+                table.setTableType(TableType.DATATABLE);
+                return table;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            log.error(String.format("Role: %s, version:%s", role.name(), version));
             return null;
         }
     }
