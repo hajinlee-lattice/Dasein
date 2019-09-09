@@ -325,9 +325,10 @@ public class WorkflowResource {
         return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
     }
 
-    @GetMapping(value = "/throttling/flag/{division}")
-    public boolean getThrottlingStackFlag(@PathVariable String division) {
+    @GetMapping(value = "/throttling/flag")
+    public boolean getThrottlingStackFlag() {
         String podid = CamilleEnvironment.getPodId();
+        String division = CamilleEnvironment.getDivision();
         Camille c = CamilleEnvironment.getCamille();
         try {
             return Boolean.valueOf(c.get(PathBuilder.buildWorkflowThrottlingFlagPath(podid, division)).getData());
@@ -337,9 +338,10 @@ public class WorkflowResource {
         }
     }
 
-    @PostMapping(value = "/throttling/flag/{division}")
-    public boolean setThrottlingStackFlag(@PathVariable String division, @RequestBody(required = true) boolean flag) {
+    @PostMapping(value = "/throttling/flag")
+    public boolean setThrottlingStackFlag(@RequestBody boolean flag) {
         String podid = CamilleEnvironment.getPodId();
+        String division = CamilleEnvironment.getDivision();
         Camille c = CamilleEnvironment.getCamille();
         Path flagPath = PathBuilder.buildWorkflowThrottlingFlagPath(podid, division);
         try {
