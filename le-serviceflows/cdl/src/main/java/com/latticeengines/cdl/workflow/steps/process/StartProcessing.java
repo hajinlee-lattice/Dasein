@@ -444,7 +444,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private List<Action> getTransactionDeleteActions() {
         List<Action> actionList = getActions();
         List<Action> deleteActions =
-                actionList.stream().filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())).collect(Collectors.toList());
+                actionList.stream().filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()) || ActionType.DATA_REPLACE.equals(action.getType())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(deleteActions)) {
             return deleteActions;
         }
