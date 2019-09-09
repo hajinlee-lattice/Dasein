@@ -359,21 +359,22 @@ public class AccountMasterRebuildRefreshTestNG
                     444555666L }, //
             { 4L, null, "DUNS3", "Name3", null, null, null, null, null, null, null, null, null, null, null,
                     777888999L }, //
-            { 5L, "dom3.com", null, "Name3", 1000000, null, "ABC", null, null, 789, 987, "ASDF", null, 100000000L, null,
+            { 5L, "dom3.com", null, "Name3", 1000000, null, null, null, null, 789, 987, "ASDF", null, 100000000L, null,
                     null }, //
     };
 
     private Object[][] amRefreshData = { //
-            { 1L, "dom1.com", "DUNS1", "Name1", 10000, null, "ABC", 50, "12345", 123, 321, null, null, null, 112233,
+            { 1L, "dom1.com", "DUNS1", "Name1", 10000, null, null, 50, "12345", 123, 321, null, null, null, 112233,
                     111222333L }, //
-            { 2L, "dom2.com", "DUNS2", "Name2", null, 50241, "DEF", null, "67890", 456, null, "QWER", "google.com",
+            { 2L, "dom2.com", "DUNS2", "Name2", null, 50241, null, null, "67890", 456, null, "QWER", "google.com",
                     null,
                     null, 444555666L }, //
-            { 3L, "dom1.com", "DUNS2", "Name2", 10000, null, "ABC", 50, "12345", 123, 321, null, null, null, 112233,
+            { 3L, "dom1.com", "DUNS2", "Name2", 10000, null, null, 50, "12345", 123, 321, null, null, null, 112233,
                     444555666L }, //
             { 4L, null, "DUNS3", "Name3", null, null, null, null, null, null, null, null, null, null, null,
                     777888999L }, //
-            { 5L, "dom3.com", null, "Name3", 1000000, null, "GHI", null, null, 789, 987, "ASDF", null, 100000000L, null,
+            { 5L, "dom3.com", null, "Name3", 1000000, null, null, null, null, 789, 987, "ASDF",
+                    null, 100000000L, null,
                     null }, //
     };
 
