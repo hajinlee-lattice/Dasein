@@ -250,7 +250,7 @@ CREATE PROCEDURE `UpdatePLSTables`()
             ADD COLUMN `ADD_ACCOUNTS_TABLE_NAME` varchar(255),
             ADD COLUMN `ADD_CONTACTS_TABLE_NAME` varchar(255),
             ADD COLUMN `REMOVE_ACCOUNTS_TABLE_NAME` varchar(255),
-            ADD COLUMN `REMOVE_CONTACTS_TABLE_NAME` varchar(255)
+            ADD COLUMN `REMOVE_CONTACTS_TABLE_NAME` varchar(255),
             ADD COLUMN `AUDIENCE_SIZE` bigint,
             ADD COLUMN `MATCHED_COUNT` bigint;
 
