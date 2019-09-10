@@ -102,6 +102,10 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "STACK")
     private String stack;
 
+    @Type(type = "json")
+    @Column(name = "CONFIGURATION", columnDefinition = "'JSON'")
+    private WorkflowConfiguration workflowConfiguration;
+
     @Override
     public Long getPid() {
         return pid;
@@ -357,5 +361,13 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     public void setStack(String stack) {
         this.stack = stack;
+    }
+
+    public WorkflowConfiguration getWorkflowConfiguration() {
+        return workflowConfiguration;
+    }
+
+    public void setWorkflowConfiguration(WorkflowConfiguration workflowConfiguration) {
+        this.workflowConfiguration = workflowConfiguration;
     }
 }
