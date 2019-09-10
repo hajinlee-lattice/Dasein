@@ -14,6 +14,7 @@
         { "Node": "Contact", "Data": {"Type": "number", "Required": false}}
       ]
     },
-    { "Node": "workflowThrottlerConfig", "Data": {"Type": "string", "Required":  true}}
+    { "Node": "workflowThrottlerConfig", "Data": {"Type": "string", "Required":  true}},
+    { "Node": "ModelQuotaLimit", "Data":  {"Type": "number", "Required":  true}}
   ]
 }

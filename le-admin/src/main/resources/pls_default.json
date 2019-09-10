@@ -6,6 +6,7 @@
     { "Node": "LatticeAdminEmails", "Data": [ "ysong@lattice-engines.com" ] },
     { "Node": "SuperAdminEmails", "Data": [ "ga_dev@lattice-engines.com" ] },
     { "Node": "EnrichAttributesMaxNumber", "Data": 32},
+    { "Node": "ModelQuotaLimit", "Data":  50},
     { "Node": "DataCloudLicense",
       "Children" : [
         { "Node": "MaxEnrichAttributes", "Data": 1000},
