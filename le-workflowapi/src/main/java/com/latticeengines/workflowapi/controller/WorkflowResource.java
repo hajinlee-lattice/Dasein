@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -333,6 +332,18 @@ public class WorkflowResource {
             throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowPid.toString() });
         }
         return workflowJob;
+    }
+
+    @GetMapping(value = "/jobs/{customerSpace}/{workflowPid}", headers = "Accept=application/json")
+    @ApiOperation("Get workflowJob object by PID")
+    public Job getJobByWorkflowJobPid(@PathVariable String customerSpace, @PathVariable Long workflowPid,
+                                              @RequestParam(value = "includeDetails", required = false) Boolean includeDetails) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        WorkflowJob workflowJob = workflowJobService.getWorkflowJobByPid(customerSpace, workflowPid);
+        if (workflowJob == null) {
+            throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowPid.toString() });
+        }
+        return workflowJobService.getJobByWorkflowPid(customerSpace, workflowPid, includeDetails);
     }
 
     @GetMapping(value = "/workflowJobs/{customerSpace}/{workflowPid}/jobStatus", headers = "Accept=application/json")
