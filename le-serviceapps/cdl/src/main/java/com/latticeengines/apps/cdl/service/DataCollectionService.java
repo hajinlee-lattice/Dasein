@@ -1,8 +1,10 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
 import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -35,6 +37,25 @@ public interface DataCollectionService {
     void upsertTables(String customerSpace, String collectionName, String[] tableNames, TableRoleInCollection tableRole,
             DataCollection.Version version);
 
+    /**
+     * Create or update all table links with specified signature/tableName and
+     * delete any orphaned tables due to the update. Links without signature will
+     * not be touched.
+     *
+     * @param customerSpace
+     *            target tenant
+     * @param collectionName
+     *            target collection name, use default if not provided
+     * @param signatureTableMap
+     *            map of signature -> tableName.
+     * @param tableRole
+     *            target role
+     * @param version
+     *            target version
+     */
+    void upsertTables(@NotNull String customerSpace, String collectionName, Map<String, String> signatureTableMap,
+            @NotNull TableRoleInCollection tableRole, @NotNull DataCollection.Version version);
+
     void removeTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole,
                      DataCollection.Version version);
 
@@ -48,6 +69,20 @@ public interface DataCollectionService {
 
     List<String> getTableNames(String customerSpace, String collectionName, TableRoleInCollection tableRole,
                                DataCollection.Version version);
+
+    /*-
+     * Retrieve a map of signature -> table with target signature list,
+     * only link with non-null signature will be included
+     */
+    Map<String, Table> getTablesWithSignatures(@NotNull String customerSpace, String collectionName,
+            TableRoleInCollection tableRole, DataCollection.Version version, Collection<String> signatures);
+
+    /*-
+     * Retrieve a map of signature -> table name with target signature list,
+     * only link with non-null signature will be included
+     */
+    Map<String, String> getTableNamesWithSignatures(@NotNull String customerSpace, String collectionName,
+            TableRoleInCollection tableRole, DataCollection.Version version, Collection<String> signatures);
 
     List<String> getAllTableNames();
 

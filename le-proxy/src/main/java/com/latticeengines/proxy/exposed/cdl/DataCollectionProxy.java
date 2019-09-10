@@ -4,6 +4,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -197,6 +198,32 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, String.class);
     }
 
+    public Map<String, String> getTableNamesWithSignatures(String customerSpace, TableRoleInCollection role,
+            DataCollection.Version version, List<String> signatures) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames/signatures";
+        List<Object> args = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        if (role != null) {
+            conditions.add("role={role}");
+            args.add(role);
+        }
+        if (version != null) {
+            conditions.add("version={version}");
+            args.add(version);
+        }
+        if (signatures != null) {
+            conditions.add("signatures={signatures}");
+            args.add(String.join(",", signatures));
+        }
+        if (CollectionUtils.isNotEmpty(conditions)) {
+            urlPattern += "?" + StringUtils.join(conditions, "&");
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
+        Map<?, ?> map = get("getTableNamesWithSignatures", url, Map.class);
+        return JsonUtils.convertMap(map, String.class, String.class);
+    }
+
     @SuppressWarnings("rawtypes")
     public List<MetadataSegment> getSegments(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/segments",
@@ -240,6 +267,20 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTables", url, null, null);
+    }
+
+    public void upsertTablesWithSignatures(String customerSpace, Map<String, String> signatureTableNames,
+            TableRoleInCollection role, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/signatures?role={role}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(role);
+        if (version != null) {
+            urlPattern += "&version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[0]));
+        postKryo("upsertTablesWithSignatures", url, signatureTableNames, null);
     }
 
     public void unlinkTable(String customerSpace, String tableName, TableRoleInCollection role,

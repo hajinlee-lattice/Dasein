@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
@@ -25,7 +26,8 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_DATA_COLLECTION_TABLE")
+@javax.persistence.Table(name = "METADATA_DATA_COLLECTION_TABLE", uniqueConstraints = @UniqueConstraint(columnNames = {
+        "FK_COLLECTION_ID", "ROLE", "VERSION", "SIGNATURE" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 public class DataCollectionTable implements HasPid, HasTenant, HasTenantId {
 
@@ -56,6 +58,9 @@ public class DataCollectionTable implements HasPid, HasTenant, HasTenantId {
     @Column(name = "ROLE", nullable = false)
     @Enumerated(EnumType.STRING)
     private TableRoleInCollection role;
+
+    @Column(name = "SIGNATURE")
+    private String signature;
 
     @JsonProperty("version")
     @Enumerated(EnumType.STRING)
@@ -117,6 +122,14 @@ public class DataCollectionTable implements HasPid, HasTenant, HasTenantId {
 
     public void setRole(TableRoleInCollection role) {
         this.role = role;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
     public DataCollection.Version getVersion() {

@@ -1,7 +1,9 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
@@ -161,6 +163,18 @@ public class DataCollectionResource {
         return dataCollectionService.getTableNames(customerSpace, null, role, version);
     }
 
+    @GetMapping(value = "/tablenames/signatures")
+    @ResponseBody
+    @ApiOperation(value = "Get a map of signature to tableName via table role, version and list of signatures")
+    public Map<String, String> getTableNames(@PathVariable String customerSpace,
+            @RequestParam(value = "signatures") List<String> signatures,
+            @RequestParam(value = "role", required = false) TableRoleInCollection role,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataCollectionService.getTableNamesWithSignatures(customerSpace, null, role, version,
+                signatures == null ? null : new HashSet<>(signatures));
+    }
+
     @GetMapping(value = "/segments")
     @ResponseBody
     @ApiOperation(value = "Get the all segments in the default collection.")
@@ -208,6 +222,18 @@ public class DataCollectionResource {
             @RequestParam(value = "version") DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataCollectionService.upsertTables(customerSpace, null, tableNames, role, version);
+        return SimpleBooleanResponse.successResponse();
+    }
+
+    @PostMapping(value = "/tables/signatures")
+    @ResponseBody
+    @ApiOperation(value = "Create or insert tables with signatures into the collection")
+    public SimpleBooleanResponse upsertTablesWithSignatures(@PathVariable String customerSpace, //
+            @RequestBody Map<String, String> signatureTableMap, // signature -> tableName
+            @RequestParam(value = "role") TableRoleInCollection role, //
+            @RequestParam(value = "version") DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.upsertTables(customerSpace, null, signatureTableMap, role, version);
         return SimpleBooleanResponse.successResponse();
     }
 
