@@ -441,6 +441,26 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 .collect(Collectors.toList());
     }
 
+    private List<Action> getTransactionDeleteActions() {
+        List<Action> actionList = getActions();
+        List<Action> deleteActions =
+                actionList.stream().filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(deleteActions)) {
+            return deleteActions;
+        }
+        List<Action> deleteTransactionActions = new ArrayList<>();
+        for (Action action : deleteActions) {
+            if (!(action.getActionConfiguration() instanceof CleanupActionConfiguration)) {
+                continue;
+            }
+            CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+            if (cleanupActionConfiguration.getImpactEntities().contains(BusinessEntity.Transaction)) {
+                deleteTransactionActions.add(action);
+            }
+        }
+        return deleteTransactionActions;
+    }
+
     private void determineVersions() {
         activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
         inactiveVersion = activeVersion.complement();
@@ -508,23 +528,31 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
     }
 
-
+    /**
+     * check transaction limit has two step:
+     * this is first step, if there is no delete transaction action in this PA
+     * we will check transaction quota limit. otherwise, we will check quota in merge step
+     */
     private void reachTransactionLimit() {
-        Long dataCount;
-        DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
-        Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
-        DataCollectionStatus dataCollectionStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        dataCount = this.newTransactionCount;
-        if (dataCollectionStatus != null && dataCollectionStatus.getDetail() != null && dataCollectionStatus.getTransactionCount() != null) {
-            DataCollectionStatusDetail detail = dataCollectionStatus.getDetail();
-            dataCount = dataCount + detail.getTransactionCount();
-        }
+        List<Action> deleteTransactionActions = getTransactionDeleteActions();
+        if (CollectionUtils.isEmpty(deleteTransactionActions)) {
+            Long dataCount = this.newTransactionCount;
+            DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
+            Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
+            DataCollectionStatus dataCollectionStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+            if (dataCollectionStatus != null && dataCollectionStatus.getDetail() != null && dataCollectionStatus.getTransactionCount() != null) {
+                DataCollectionStatusDetail detail = dataCollectionStatus.getDetail();
+                dataCount = dataCount + detail.getTransactionCount();
+            }
 
-        log.info("stored Transaction data is " + dataCount);
-        if (transactionDataQuotaLimit < dataCount)
-            throw new IllegalStateException("the Transaction data quota limit is " + transactionDataQuotaLimit +
-                    ", The data you uploaded has exceeded the limit.");
-        log.info("stored data is " + dataCount + ", the Transaction data limit is " + transactionDataQuotaLimit);
+            log.info("stored Transaction data is {}.", dataCount);
+            if (transactionDataQuotaLimit < dataCount) {
+                throw new IllegalStateException("the Transaction data quota limit is " + transactionDataQuotaLimit +
+                        ", The data you uploaded has exceeded the limit.");
+            }
+            log.info("stored data is {}, the Transaction data limit is {}.", dataCount,
+                    transactionDataQuotaLimit);
+        }
     }
 
     private void createReportJson() {

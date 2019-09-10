@@ -1,7 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -104,11 +106,29 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Override
     public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId,
             String mimeType) {
+
+        //model
         ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
         validateModelSummary(summary, modelId);
+
+        //event column and transform
+        String customer = MultiTenantContext.getTenant().getId();
+        String eventColumn = getEventColumn(customer, summary.getEventTableName());
+        Map<String, String> headerTransform = null;
+        log.info("event column name = " + eventColumn);
+        if (!eventColumn.equals("Event")) {
+            headerTransform = new HashMap<>();
+            headerTransform.put(eventColumn, "Event");
+        }
+
+        //file path
         String trainingFilePath = summary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
-        downloadFileByPath(request, response, mimeType, trainingFilePath);
+        log.info("downloading training file csv: " + trainingFilePath);
+
+        //download
+        CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType, trainingFilePath, null);
+        downloader.downloadCsvWithTransform(request, response, headerTransform);
     }
 
     @Override
