@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -459,6 +461,24 @@ public class CDLResource {
         } catch (RuntimeException e) {
             log.error("Download template csv Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
+        }
+    }
+
+    @PostMapping(value = "/s3import/template/create/webvisit")
+    @ResponseBody
+    @ApiOperation("Create WebVist template")
+    public boolean createWebVisitTemplate(@RequestParam(value = "entityType") EntityType entityType,
+                                          @RequestParam("file") MultipartFile file) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+
+        try {
+            return cdlService.createWebVisitTemplate(customerSpace.toString(), entityType, file.getInputStream());
+        } catch (IOException e) {
+            log.error("Cannot open csv file as stream! {}", e.getMessage());
+            return false;
         }
     }
 }

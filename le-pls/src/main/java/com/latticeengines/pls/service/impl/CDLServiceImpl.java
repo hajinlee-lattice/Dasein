@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,14 +14,18 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -39,25 +44,30 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
+import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("cdlService")
@@ -70,6 +80,8 @@ public class CDLServiceImpl implements CDLService {
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
     private static final String DELETE_FAIL_TITLE = "Validation Error";
     private static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
+
+    private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
 
     @Inject
     protected SourceFileService sourceFileService;
@@ -87,7 +99,16 @@ public class CDLServiceImpl implements CDLService {
     private WorkflowProxy workflowProxy;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private MetadataProxy metadataProxy;
+
+    @Inject
+    private FileUploadService fileUploadService;
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
@@ -565,6 +586,55 @@ public class CDLServiceImpl implements CDLService {
             systemList.get(i).setPriority(i + 1);
         }
         cdlProxy.updateAllS3ImportSystemPriority(customerSpace, systemList);
+    }
+
+    @Override
+    public boolean createWebVisitTemplate(String customerSpace, EntityType entityType, InputStream inputStream) {
+        if (!EntityType.WebVisit.equals(entityType) && !EntityType.WebVisitPathPattern.equals(entityType)) {
+            throw new RuntimeException("Cannot create template for: " + entityType.getDisplayName());
+        }
+        S3ImportSystem websiteSystem = getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
+        if (websiteSystem != null) {
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, "File",
+                    EntityTypeUtils.generateFullFeedType(DEFAULT_WEBSITE_SYSTEM, entityType));
+            if (dataFeedTask != null) {
+                throw new RuntimeException("Already created template for: " + entityType.getDisplayName());
+            }
+        } else {
+            createS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM,
+                    S3ImportSystem.SystemType.Website,false);
+            websiteSystem = getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
+        }
+        SourceFile templateFile;
+        templateFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                entityType.getDefaultFeedTypeName() + "TemplateFile", inputStream);
+        Table templateTable = SchemaRepository.instance().getSchema(websiteSystem.getSystemType(), entityType,
+                batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
+        MetadataResolver resolver = new MetadataResolver(templateFile.getPath(), yarnConfiguration, null, true, null);
+        FieldMappingDocument document = resolver.getFieldMappingsDocumentBestEffort(templateTable);
+        if (document != null && CollectionUtils.isNotEmpty(document.getFieldMappings())) {
+            document.getFieldMappings().forEach(this::applyUserPrefix);
+        }
+        resolver = new MetadataResolver(templateFile.getPath(), yarnConfiguration, document, true, templateTable);
+        resolver.calculateBasedOnFieldMappingDocument(templateTable);
+        Table newTable = resolver.getMetadata();
+        newTable.setName("SourceFile_" + templateFile.getName().replace(".", "_"));
+        metadataProxy.createTable(customerSpace, newTable.getName(), newTable);
+        templateFile.setTableName(newTable.getName());
+        sourceFileService.update(templateFile);
+        String feedType = EntityTypeUtils.generateFullFeedType(websiteSystem.getName(), entityType);
+        String subType = entityType.getSubType() == null ? "" : entityType.getSubType().name();
+        createS3Template(customerSpace, templateFile.getName(), "File", entityType.getEntity().name(),
+                feedType, subType, feedType);
+        return true;
+    }
+
+    private void applyUserPrefix(FieldMapping fieldMapping) {
+        if (fieldMapping != null && StringUtils.isEmpty(fieldMapping.getMappedField())) {
+            if (!fieldMapping.getUserField().startsWith(MetadataResolver.USER_PREFIX)) {
+                fieldMapping.setMappedField(MetadataResolver.USER_PREFIX + fieldMapping.getUserField());
+            }
+        }
     }
 
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {

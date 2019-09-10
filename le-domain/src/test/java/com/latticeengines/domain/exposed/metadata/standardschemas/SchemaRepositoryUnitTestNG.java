@@ -47,6 +47,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.Transacti
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Type;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.UserId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Website;
 
@@ -102,8 +103,8 @@ public class SchemaRepositoryUnitTestNG {
             .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr)) //
             .collect(Collectors.toList());
 
-    private static final List<InterfaceName> WEBVISIT_ATTRS = Arrays.asList(WebVisitPageUrl, UserId, CompanyName,
-            City, State, Country, DUNS);
+    private static final List<InterfaceName> WEBVISIT_ATTRS = Arrays.asList(WebVisitPageUrl, WebVisitDate, UserId,
+            CompanyName, City, State, Country, DUNS);
 
     private static final List<InterfaceName> WEBVISIT_PATHPATTERN_ATTRS = Arrays.asList(PathPatternName, PathPattern);
     /**

@@ -50,7 +50,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 public class MetadataResolver {
     private static Logger log = LoggerFactory.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "yes", "no");
-    private static final String USER_PREFIX = "user_";
+    public static final String USER_PREFIX = "user_";
 
     private String csvPath;
     private FieldMappingDocument fieldMappingDocument;
