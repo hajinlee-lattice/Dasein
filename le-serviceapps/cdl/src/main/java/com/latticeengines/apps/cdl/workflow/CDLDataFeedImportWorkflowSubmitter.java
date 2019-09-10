@@ -81,6 +81,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         Action action = new Action();
         ImportActionConfiguration config = new ImportActionConfiguration();
         config.setDataFeedTaskId(dataFeedTask.getUniqueId());
+        config.setOriginalFilename(csvImportFileInfo.getReportFileName());
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         action.setTrackingPid(workflowPid);
         action.setActionInitiator(csvImportFileInfo.getFileUploadInitiator());

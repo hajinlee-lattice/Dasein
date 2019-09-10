@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BuildCatalogStepConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -175,7 +176,17 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
             inputCatalogTables.put(catalogName, tableName);
             inputCatalogFiles.put(catalogName, origFileName);
         });
-        // TODO record input catalog files
+        saveCatalogFilenames(inputCatalogFiles);
+    }
+
+    private void saveCatalogFilenames(Map<String, String> catalogFilenames) {
+        if (MapUtils.isEmpty(catalogFilenames)) {
+            return;
+        }
+        log.info("Saving original catalog file map to DataCollectionStatus. CatalogFileMap={}", catalogFilenames);
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        status.setOrigCatalogFileMap(catalogFilenames);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 
     private void buildInputTableIdxMap() {

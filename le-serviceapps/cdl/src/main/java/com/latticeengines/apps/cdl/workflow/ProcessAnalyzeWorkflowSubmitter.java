@@ -303,10 +303,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 String catalogName = taskCatalogName.get(config.getDataFeedTaskId());
                 catalogTableNames.putIfAbsent(catalogName, new ArrayList<>());
                 if (CollectionUtils.isNotEmpty(config.getRegisteredTables())) {
+                    String filename = config.getOriginalFilename();
                     // TODO add original file name
                     List<CatalogImport> imports = config.getRegisteredTables() //
                             .stream() //
-                            .map(tableName -> new CatalogImport(catalogName, tableName, "")) //
+                            .map(tableName -> new CatalogImport(catalogName, tableName,
+                                    filename == null ? "" : filename)) //
                             .collect(Collectors.toList());
                     catalogTableNames.get(catalogName).addAll(imports);
                 }

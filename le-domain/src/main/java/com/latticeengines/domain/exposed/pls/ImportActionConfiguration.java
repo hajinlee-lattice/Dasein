@@ -15,6 +15,8 @@ public class ImportActionConfiguration extends ActionConfiguration {
     private Long workflowId;
     @JsonProperty("data_feed_task_id")
     private String dataFeedTaskId;
+    @JsonProperty("original_filename")
+    private String originalFilename;
     @JsonProperty("import_count")
     private Long importCount;
     @JsonProperty("registered_tables")
@@ -40,6 +42,14 @@ public class ImportActionConfiguration extends ActionConfiguration {
 
     public void setDataFeedTaskId(String dataFeedTaskId) {
         this.dataFeedTaskId = dataFeedTaskId;
+    }
+
+    public String getOriginalFilename() {
+        return originalFilename;
+    }
+
+    public void setOriginalFilename(String originalFilename) {
+        this.originalFilename = originalFilename;
     }
 
     public Long getImportCount() {
