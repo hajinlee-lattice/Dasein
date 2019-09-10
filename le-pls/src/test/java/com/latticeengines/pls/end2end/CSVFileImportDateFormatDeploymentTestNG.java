@@ -153,6 +153,10 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                     Assert.assertEquals(fields[0], CUSTOM);
                     Assert.assertEquals(fields[1], "ID");
                     Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
+                } else if (fields[2].equals("CustomerContactId")) {
+                    Assert.assertEquals(fields[0], STANDARD);
+                    Assert.assertEquals(fields[1], "ID");
+                    Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
                 } else if (fields[2].equals("ContactName")) {
                     Assert.assertEquals(fields[0], STANDARD);
                     Assert.assertEquals(fields[1], "Name");
@@ -249,7 +253,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
 
         Assert.assertEquals(dfId, dfIdExtra);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType);
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, false);
+        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true);
         String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
 
         Assert.assertNotNull(fileContent);
@@ -307,6 +311,10 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
 
     private void verifyAccountMapping(String field0, String field1, String field2, String field3) {
         if (field2.equals("AccountId")) {
+            Assert.assertEquals(field0, STANDARD);
+            Assert.assertEquals(field1, "ID");
+            Assert.assertEquals(field3, UserDefinedType.TEXT.name());
+        } else if (field2.equals("CustomerAccountId")) {
             Assert.assertEquals(field0, STANDARD);
             Assert.assertEquals(field1, "ID");
             Assert.assertEquals(field3, UserDefinedType.TEXT.name());
