@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +42,7 @@ import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -103,10 +106,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
         return dataCollectionEntityMgr.getDataCollection(collectionName);
     }
 
@@ -136,10 +136,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role,
             DataCollection.Version version) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
 
         Table table = tableEntityMgr.findByName(tableName);
         if (table == null) {
@@ -147,27 +144,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                     "Cannot find table named " + tableName + " for customer " + customerSpace);
         }
 
-        if (version == null) {
-            throw new IllegalArgumentException("Must specify data collection version.");
-        }
+        checkVersion(version);
 
         List<String> existingTableNames = dataCollectionEntityMgr.findTableNamesOfRole(collectionName, role, version);
-        for (String existingTableName : existingTableNames) {
-            log.info("There are already table(s) of role " + role + " in data collection " + collectionName);
-            if (!existingTableName.equals(tableName)) {
-                int numLinks = dataCollectionEntityMgr.findTablesFromCollection(collectionName, existingTableName)
-                        .size();
-                removeTable(customerSpace, collectionName, existingTableName, role, version);
-                Tenant currentTenant = MultiTenantContext.getTenant();
-                if (numLinks == 1) {
-                    new Thread(() -> {
-                        MultiTenantContext.setTenant(currentTenant);
-                        log.info(existingTableName + " is an orphan table, delete it completely.");
-                        tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
-                    }).start();
-                }
-            }
-        }
+        removeLinksAndCleanupOrphanTables(customerSpace, collectionName, role, version, existingTableNames,
+                Collections.singleton(tableName));
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role, version);
     }
@@ -175,30 +156,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public void upsertTables(String customerSpace, String collectionName, String[] tableNames,
             TableRoleInCollection role, DataCollection.Version version) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
-        if (version == null) {
-            throw new IllegalArgumentException("Must specify data collection version.");
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        checkVersion(version);
 
         Set<String> tableNameSet = new HashSet<>(Arrays.asList(tableNames));
         List<String> existingTableNames = dataCollectionEntityMgr.findTableNamesOfRole(collectionName, role, version);
-        for (String existingTableName : existingTableNames) {
-            log.info("There are already table(s) of role " + role + " in data collection " + collectionName);
-            if (!tableNameSet.contains(existingTableName)) {
-                int numLinks = dataCollectionEntityMgr.findTablesFromCollection(collectionName, existingTableName)
-                        .size();
-                removeTable(customerSpace, collectionName, existingTableName, role, version);
-                if (numLinks == 1) {
-                    new Thread(() -> {
-                        log.info(existingTableName + " is an orphan table, delete it completely.");
-                        tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
-                    }).start();
-                }
-            }
-        }
+        removeLinksAndCleanupOrphanTables(customerSpace, collectionName, role, version, existingTableNames,
+                tableNameSet);
 
         for (String tableName : tableNames) {
             Table table = tableEntityMgr.findByName(tableName);
@@ -213,12 +177,48 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public void upsertTables(@NotNull String customerSpace, String collectionName,
+            Map<String, String> signatureTableMap, @NotNull TableRoleInCollection role, @NotNull Version version) {
+        if (MapUtils.isEmpty(signatureTableMap)) {
+            return;
+        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        checkVersion(version);
+
+        List<String> existingTableNames = dataCollectionEntityMgr
+                .findTableNamesOfOfRoleAndSignatures(collectionName, role, version, signatureTableMap.keySet()) //
+                .values() //
+                .stream() //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toList());
+
+        // cleanup tables that have no link to it after upsert
+        removeLinksAndCleanupOrphanTables(customerSpace, collectionName, role, version, existingTableNames,
+                new HashSet<>(signatureTableMap.values()));
+
+        String collName = collectionName;
+        signatureTableMap.forEach((signature, tableName) -> {
+            if (StringUtils.isBlank(signature) || StringUtils.isBlank(tableName)) {
+                log.warn("Blank signature/tableName found in signatureTableMap. Signature={}, TableName={}", signature,
+                        tableName);
+                return;
+            }
+
+            log.info("Add table {} to collection {} as {} with signature {}", tableName, collName, role, signature);
+            DataCollectionTable result = dataCollectionEntityMgr.upsertTableToCollection(collName, tableName, role,
+                    signature, version);
+            // TODO probably should check before cleanup/upsert
+            if (result == null) {
+                throw new IllegalArgumentException(
+                        String.format("Cannot find table named %s for customer %s", tableName, customerSpace));
+            }
+        });
+    }
+
+    @Override
     public void removeTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role,
             DataCollection.Version version) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
 
         Table table = tableEntityMgr.findByName(tableName);
         if (table == null) {
@@ -226,9 +226,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                     "Cannot find table named " + tableName + " for customer " + customerSpace);
         }
 
-        if (version == null) {
-            throw new IllegalArgumentException("Must specify data collection version.");
-        }
+        checkVersion(version);
 
         List<String> existingTableNames = dataCollectionEntityMgr.findTableNamesOfRole(collectionName, role, version);
         for (String existingTableName : existingTableNames) {
@@ -244,13 +242,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
      */
     @Override
     public void unlinkTables(String customerSpace, String collectionName, TableRoleInCollection role, Version version) {
-        if (version == null) {
-            throw new IllegalArgumentException("Must specify data collection version.");
-        }
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        checkVersion(version);
         List<String> tableNames = dataCollectionEntityMgr.findTableNamesOfRole(collectionName, role, version);
         for (String tableName : tableNames) {
             log.info("Removing " + tableName + " as " + role + " in " + version + " from collection.");
@@ -263,18 +256,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
      */
     @Override
     public void unlinkTables(String customerSpace, Version version) {
-        if (version == null) {
-            throw new IllegalArgumentException("Must specify data collection version.");
-        }
+        checkVersion(version);
         dataCollectionEntityMgr.removeAllTablesFromCollection(customerSpace, version);
     }
 
     @Override
     public void resetTable(String customerSpace, String collectionName, TableRoleInCollection role) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
 
         List<String> existingTableNames = dataCollectionEntityMgr.findTableNamesOfRole(collectionName, role, null);
         for (String existingTableName : existingTableNames) {
@@ -287,10 +275,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public void addStats(String customerSpace, String collectionName, StatisticsContainer container) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
         DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
         if (dataCollection == null) {
             throw new IllegalArgumentException(
@@ -310,28 +295,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public StatisticsContainer getStats(String customerSpace, String collectionName, DataCollection.Version version) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
-        if (version == null) {
-            // by default get active version
-            version = dataCollectionEntityMgr.findActiveVersion();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        version = getOrDefaultVersion(version);
         return statisticsContainerEntityMgr.findInMasterSegment(collectionName, version);
     }
 
     @Override
     public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
             DataCollection.Version version) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
-        if (version == null) {
-            // by default get active version
-            version = dataCollectionEntityMgr.findActiveVersion();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        version = getOrDefaultVersion(version);
         log.info("Getting all tables of role " + tableRole + " in collection " + collectionName);
         return dataCollectionEntityMgr.findTablesOfRole(collectionName, tableRole, version);
     }
@@ -339,15 +312,27 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Override
     public List<String> getTableNames(String customerSpace, String collectionName, TableRoleInCollection tableRole,
             DataCollection.Version version) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
-        if (version == null) {
-            // by default get active version
-            version = dataCollectionEntityMgr.findActiveVersion();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        version = getOrDefaultVersion(version);
         return dataCollectionEntityMgr.findTableNamesOfRole(collectionName, tableRole, version);
+    }
+
+    @Override
+    public Map<String, Table> getTablesWithSignatures(@NotNull String customerSpace, String collectionName,
+            TableRoleInCollection tableRole, Version version, Collection<String> signatures) {
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        version = getOrDefaultVersion(version);
+        return dataCollectionEntityMgr.findTablesOfRoleAndSignatures(collectionName, tableRole, version,
+                signatures == null ? null : new HashSet<>(signatures));
+    }
+
+    @Override
+    public Map<String, String> getTableNamesWithSignatures(@NotNull String customerSpace, String collectionName,
+            TableRoleInCollection tableRole, Version version, Collection<String> signatures) {
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
+        version = getOrDefaultVersion(version);
+        return dataCollectionEntityMgr.findTableNamesOfOfRoleAndSignatures(collectionName, tableRole, version,
+                signatures == null ? null : new HashSet<>(signatures));
     }
 
     @Override
@@ -357,10 +342,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public Map<TableRoleInCollection, Map<Version, List<Table>>> getTableRoleMap(String customerSpace, String collectionName){
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
         Map<TableRoleInCollection, Map<Version, List<String>>> tableRoleNames = dataCollectionEntityMgr.findTableNamesOfAllRole(collectionName, null, null);
         Map<String,Table> tableMap = new HashMap<>();
         for(Version version:Version.values()) {
@@ -393,10 +375,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     public AttributeRepository getAttrRepo(String customerSpace, String collectionName,
             DataCollection.Version version) {
-        if (StringUtils.isBlank(collectionName)) {
-            DataCollection collection = getDefaultCollection(customerSpace);
-            collectionName = collection.getName();
-        }
+        collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
         final String notNullCollectionName = collectionName;
         StatisticsContainer statisticsContainer = getStats(customerSpace, notNullCollectionName, version);
         if (statisticsContainer == null) {
@@ -843,4 +822,54 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
     }
 
+    /*
+     * Remove link for tables that are in tableNames and not in tablesToIgnore.
+     * Delete actual table if there is no link to it after removal.
+     */
+    private void removeLinksAndCleanupOrphanTables(String customerSpace, String collectionName,
+            TableRoleInCollection role, Version version, List<String> tableNames, Set<String> tablesToIgnore) {
+        if (tablesToIgnore == null) {
+            tablesToIgnore = new HashSet<>();
+        }
+        for (String name : tableNames) {
+            log.info("There are already table(s) of role {} in data collection {}", role, collectionName);
+            if (!tablesToIgnore.contains(name)) {
+                int numLinks = dataCollectionEntityMgr.findTablesFromCollection(collectionName, name).size();
+                removeTable(customerSpace, collectionName, name, role, version);
+                Tenant currentTenant = MultiTenantContext.getTenant();
+                if (numLinks == 1) {
+                    new Thread(() -> {
+                        MultiTenantContext.setTenant(currentTenant);
+                        log.info("{} is an orphan table, delete it completely.", name);
+                        tableEntityMgr.deleteTableAndCleanupByName(name);
+                    }).start();
+                }
+            }
+        }
+    }
+
+    private Version getOrDefaultVersion(Version version) {
+        if (version == null) {
+            // by default get active version
+            version = dataCollectionEntityMgr.findActiveVersion();
+        }
+        return version;
+    }
+
+    /*
+     * use default collection if no collection name given
+     */
+    private String getOrDefaultCollectionName(@NotNull String customerSpace, String collectionName) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+        return collectionName;
+    }
+
+    private void checkVersion(Version version) {
+        if (version == null) {
+            throw new IllegalArgumentException("Must specify data collection version.");
+        }
+    }
 }

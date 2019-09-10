@@ -2,24 +2,29 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import static com.latticeengines.domain.exposed.metadata.DataCollection.Version.Blue;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.persistence.Tuple;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.dao.DataCollectionDao;
 import com.latticeengines.apps.cdl.dao.DataCollectionTableDao;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
@@ -27,6 +32,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.repository.reader.DataCollectionTableReaderRepository;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -126,6 +132,42 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
+    public Map<String, String> findTableNamesOfOfRoleAndSignatures(String collectionName,
+            TableRoleInCollection tableRole, DataCollection.Version version, Set<String> signatures) {
+        if (CollectionUtils.isEmpty(signatures)) {
+            return Collections.emptyMap();
+        }
+        // [ signature, tableName ]
+        List<Tuple> result = dataCollectionTableReaderRepository.findTablesInRole(collectionName, tableRole, version,
+                new ArrayList<>(signatures));
+        if (CollectionUtils.isEmpty(result)) {
+            return Collections.emptyMap();
+        }
+
+        return result.stream().filter(Objects::nonNull) //
+                .filter(tuple -> tuple.get(0) instanceof String && tuple.get(1) instanceof String) //
+                .map(tuple -> Pair.of((String) tuple.get(0), (String) tuple.get(1))) //
+                .filter(pair -> StringUtils.isNotBlank(pair.getRight())) //
+                /*-
+                 * non-null signature should not have duplicate in role/collection, but just in case
+                 */
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (v1, v2) -> v1));
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public Map<String, Table> findTablesOfRoleAndSignatures(@NotNull String collectionName,
+            @NotNull TableRoleInCollection tableRole, @NotNull DataCollection.Version version, Set<String> signatures) {
+        Map<String, String> tableNames = findTableNamesOfOfRoleAndSignatures(collectionName, tableRole, version,
+                signatures);
+        return tableNames.entrySet().stream() //
+                .map(e -> Pair.of(e.getKey(), tableEntityMgr.findByName(e.getValue()))) // get table
+                .filter(pair -> pair.getRight() != null) //
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
     public List<String> getAllTableName() {
         List<String> tableNames = dataCollectionTableReaderRepository.findAllTableName();
         if (tableNames == null) {
@@ -144,22 +186,43 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
+    public DataCollectionTable addTableToCollection(@NotNull String collectionName, @NotNull String tableName,
+            @NotNull TableRoleInCollection role, String signature, @NotNull DataCollection.Version version) {
+        Table table = tableEntityMgr.findByName(tableName);
+        if (table == null) {
+            return null;
+        }
+
+        DataCollection collection = getDataCollection(collectionName);
+        return upsertDataCollectionTable(null, collection, table, role, version, signature);
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
     public DataCollectionTable upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
                                                        DataCollection.Version version) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
             DataCollection collection = getDataCollection(collectionName);
             removeTableFromCollection(collectionName, tableName, version);
-            DataCollectionTable dataCollectionTable = new DataCollectionTable();
-            dataCollectionTable.setTenant(MultiTenantContext.getTenant());
-            dataCollectionTable.setDataCollection(collection);
-            dataCollectionTable.setTable(table);
-            dataCollectionTable.setRole(role);
-            dataCollectionTable.setVersion(version);
-            dataCollectionTableDao.create(dataCollectionTable);
-            return dataCollectionTable;
+            return upsertDataCollectionTable(null, collection, table, role, version, null);
         }
         return null;
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    @Override
+    public DataCollectionTable upsertTableToCollection(@NotNull String collectionName, @NotNull String tableName,
+            @NotNull TableRoleInCollection role, @NotNull String signature, @NotNull DataCollection.Version version) {
+        Preconditions.checkNotNull(signature, "Signature should not be null");
+        Table table = tableEntityMgr.findByName(tableName);
+        if (table == null) {
+            return null;
+        }
+        DataCollection collection = getDataCollection(collectionName);
+        DataCollectionTable dcTable = dataCollectionTableReaderRepository.findFirstBySignature(collectionName, role,
+                version, signature);
+        return upsertDataCollectionTable(dcTable, collection, table, role, version, signature);
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
@@ -285,4 +348,30 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return dataCollectionTable;
     }
 
+    /*
+     * Create or update input DataCollectionTable (can be null)
+     */
+    private DataCollectionTable upsertDataCollectionTable(DataCollectionTable dcTable,
+            @NotNull DataCollection collection, @NotNull Table table, @NotNull TableRoleInCollection role,
+            @NotNull DataCollection.Version version, String signature) {
+        boolean createOnly = dcTable == null;
+        if (dcTable == null) {
+            dcTable = new DataCollectionTable();
+        }
+        dcTable.setTenant(MultiTenantContext.getTenant());
+        dcTable.setDataCollection(collection);
+        dcTable.setTable(table);
+        dcTable.setRole(role);
+        dcTable.setVersion(version);
+        if (StringUtils.isNotEmpty(signature)) {
+            dcTable.setSignature(signature);
+        }
+
+        if (createOnly) {
+            dataCollectionTableDao.create(dcTable);
+        } else {
+            dataCollectionTableDao.createOrUpdate(dcTable);
+        }
+        return dcTable;
+    }
 }

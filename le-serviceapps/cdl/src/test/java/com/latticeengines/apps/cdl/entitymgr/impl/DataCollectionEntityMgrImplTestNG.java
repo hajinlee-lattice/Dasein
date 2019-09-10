@@ -1,12 +1,22 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedDailyTransaction;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedProduct;
 import static org.testng.Assert.assertEquals;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -15,16 +25,23 @@ import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
+import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
+@Listeners({ SimpleRetryListener.class })
 public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DataCollectionEntityMgrImplTestNG.class);
 
     @Autowired
     private DataCollectionEntityMgr dataCollectionEntityMgr;
@@ -47,12 +64,72 @@ public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironmentWithDataCollection();
         tableEntityMgr.deleteByName(tableName1);
         tableEntityMgr.deleteByName(tableName2);
+
     }
 
     @Test(groups = "functional")
     public void create() {
         DataCollection collection = dataCollectionEntityMgr.getDataCollection(collectionName);
         Assert.assertEquals(collection.getName(), collectionName);
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testUpsertDataCollectionTable() {
+        DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
+        TableRoleInCollection role = ConsolidatedProduct;
+        String signature = NamingUtils.randomSuffix("sig", 5);
+        Table table1 = testTable();
+        Table table2 = testTable();
+        log.info("Version={}, Role={}, Signature={}, Table1={}, Table2={}", version, role, signature, table1.getName(),
+                table2.getName());
+
+        DataCollectionTable dcTable = dataCollectionEntityMgr.upsertTableToCollection(collectionName, table1.getName(),
+                role, signature, version);
+        validateDataCollectionTable(dcTable, null, table1.getName(), version, role, signature);
+        // get pid of created table
+        Long pid = dcTable.getPid();
+        // validate with getByPid
+        dcTable = dataCollectionEntityMgr.findDataCollectionTableByPid(pid);
+        validateDataCollectionTable(dcTable, pid, table1.getName(), version, role, signature);
+
+        // update with another table
+        dcTable = dataCollectionEntityMgr.upsertTableToCollection(collectionName, table2.getName(), role, signature,
+                version);
+        validateDataCollectionTable(dcTable, pid, table2.getName(), version, role, signature);
+        dcTable = dataCollectionEntityMgr.findDataCollectionTableByPid(pid);
+        validateDataCollectionTable(dcTable, pid, table2.getName(), version, role, signature);
+
+        // test find by [ collection, role, version, signature ]
+        Map<String, Table> tables = dataCollectionEntityMgr.findTablesOfRoleAndSignatures(collectionName, role, version,
+                Collections.singleton(signature));
+        Assert.assertNotNull(tables);
+        Assert.assertEquals(tables.size(), 1);
+        Assert.assertTrue(tables.containsKey(signature),
+                String.format("Query result should contains signature %s", signature));
+        Assert.assertNotNull(tables.get(signature));
+        Assert.assertEquals(tables.get(signature).getName(), table2.getName());
+    }
+
+    /*-
+     * [ collection, role, version, signature ] needs to be unique if all not null
+     */
+    @Test(groups = "functional", dependsOnMethods = "create", expectedExceptions = { PersistenceException.class })
+    private void testSignatureConflict() {
+        DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
+        createTwoCollectionTables(ConsolidatedProduct, version, NamingUtils.randomSuffix("sig", 5));
+    }
+
+    /*
+     * null signature won't cause unique constraint violation
+     */
+    @Test(groups = "functional", dependsOnMethods = "create")
+    private void testNullSignature() {
+        DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
+        Pair<DataCollectionTable, DataCollectionTable> result = createTwoCollectionTables(ConsolidatedDailyTransaction,
+                version, null);
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getLeft());
+        Assert.assertNotNull(result.getRight());
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
@@ -134,6 +211,53 @@ public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         retrieved.setName(collectionName);
         dataCollectionEntityMgr.createOrUpdate(retrieved);
+    }
+
+    private Pair<DataCollectionTable, DataCollectionTable> createTwoCollectionTables(
+            @NotNull TableRoleInCollection role, @NotNull DataCollection.Version version, String signature) {
+        Table table1 = testTable();
+        Table table2 = testTable();
+
+        DataCollectionTable link1;
+        DataCollectionTable link2;
+        // create two links to test unique constraint
+        try {
+            link1 = dataCollectionEntityMgr.addTableToCollection(collectionName, table1.getName(), role, signature,
+                    version);
+            link2 = dataCollectionEntityMgr.addTableToCollection(collectionName, table2.getName(), role, signature,
+                    version);
+        } finally {
+            // cleanup afterwards
+            dataCollectionEntityMgr.removeTableFromCollection(collectionName, table1.getName(), version);
+            dataCollectionEntityMgr.removeTableFromCollection(collectionName, table2.getName(), version);
+        }
+        return Pair.of(link1, link2);
+    }
+
+    private void validateDataCollectionTable(DataCollectionTable table, Long expectedPid,
+            @NotNull String expectedTableName, @NotNull DataCollection.Version expectedVersion,
+            @NotNull TableRoleInCollection expectedRole, String expectedSignature) {
+        Assert.assertNotNull(table);
+        if (expectedPid == null) {
+            Assert.assertNotNull(table.getPid());
+        } else {
+            Assert.assertEquals(table.getPid(), expectedPid);
+        }
+        Assert.assertEquals(table.getVersion(), expectedVersion);
+        Assert.assertEquals(table.getRole(), expectedRole);
+        Assert.assertEquals(table.getSignature(), expectedSignature);
+        Assert.assertNotNull(table.getTable());
+        Assert.assertEquals(table.getTable().getName(), expectedTableName);
+    }
+
+    private Table testTable() {
+        String tableName = NamingUtils.uuid(getClass().getSimpleName());
+        Table table = new Table();
+        table.setName(tableName);
+        table.setDisplayName(tableName);
+        table.setTableType(TableType.DATATABLE);
+        tableEntityMgr.create(table);
+        return table;
     }
 
 }
