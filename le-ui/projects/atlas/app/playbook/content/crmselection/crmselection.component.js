@@ -30,11 +30,7 @@ angular.module('lp.playbook.wizard.crmselection', [])
             vm.nullCount = null;
             vm.loadingCoverageCounts = false;
 
-            vm.excludeItemsWithoutSalesforceId = (PlaybookWizardStore.getCurrentPlay() &&
-                                                PlaybookWizardStore.getCurrentPlay().launchHistory &&
-                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch &&
-                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId ?
-                                                PlaybookWizardStore.getCurrentPlay().launchHistory.mostRecentLaunch.excludeItemsWithoutSalesforceId : false);
+            vm.excludeItemsWithoutSalesforceId = false;
             vm.setExcludeItems(vm.excludeItemsWithoutSalesforceId);
 
             PlaybookWizardStore.setValidation('crmselection', false);
