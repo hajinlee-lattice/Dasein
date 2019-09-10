@@ -24,6 +24,9 @@ public interface PlayLaunchChannelService {
 
     PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play);
 
+    PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play, String addAccountTable,
+            String removeAccountsTable, String addContactsTable, String removeContactsTable);
+
     PlayLaunchChannel updatePlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel, Boolean launchNow);
 
     PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel, Boolean launchNow);

@@ -102,10 +102,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
         playLaunchChannel.setPlay(play);
+        playLaunchChannel.setLastLaunch(launchNow ? createPlayLaunchFromChannel(playLaunchChannel, play) : null);
+
         playLaunchChannel = update(playLaunchChannel);
-        if (launchNow) {
-            playLaunchChannel.setLastLaunch(createPlayLaunchFromChannel(playLaunchChannel, play));
-        }
         return playLaunchChannel;
     }
 
@@ -164,9 +163,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchEntityMgr.deleteByLaunchId(channelId, hardDelete);
     }
 
-    @SuppressWarnings("checkstyle:methodlength")
     @Override
-    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play) {
+    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play,
+            String addAccountTable, String removeAccountsTable, String addContactsTable, String removeContactsTable) {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
 
         PlayLaunch playLaunch = new PlayLaunch();
@@ -218,8 +217,19 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setContactsSuppressed(0L);
         playLaunch.setContactsErrored(0L);
 
+        playLaunch.setAddAccountsTable(addAccountTable);
+        playLaunch.setRemoveAccountsTable(removeAccountsTable);
+        playLaunch.setAddContactsTable(addContactsTable);
+        playLaunch.setRemoveContactsTable(removeContactsTable);
+
         playLaunchEntityMgr.create(playLaunch);
         return playLaunch;
+
+    }
+
+    @Override
+    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play) {
+        return createPlayLaunchFromChannel(playLaunchChannel, play, null, null, null, null);
     }
 
     private void runValidations(String customerSpace, Play play, PlayLaunchChannel playLaunchChannel) {

@@ -117,12 +117,6 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
         // 3) save current launch universe and delta as files
         processDeltaCalculationResult(deltaCalculationResult, config);
-
-        // 4) Record the new launch universe for the next delta calculation
-        channel.setCurrentLaunchedAccountUniverseTable(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class));
-        channel.setCurrentLaunchedContactUniverseTable(getObjectFromContext(FULL_CONTACTS_UNIVERSE, String.class));
-        playProxy.updatePlayLaunchChannel(customerSpace.getTenantId(), config.getPlayId(), config.getChannelId(),
-                channel, false);
     }
 
     private void processDeltaCalculationResult(SparkJobResult deltaCalculationResult,
