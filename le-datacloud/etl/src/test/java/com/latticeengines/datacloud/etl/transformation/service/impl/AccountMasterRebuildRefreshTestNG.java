@@ -240,7 +240,7 @@ public class AccountMasterRebuildRefreshTestNG
     private void prepareBomboraSurge() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("Domain", String.class));
-        columns.add(Pair.of("BmbrSurge_BucketCode", String.class));
+        columns.add(Pair.of("BmbrSurge_Intent", String.class));
         Object[][] data = new Object[][] { //
                 { "dom3.com", "ABC" }, //
         };
@@ -353,29 +353,28 @@ public class AccountMasterRebuildRefreshTestNG
     private Object[][] amRebuildData = { //
             { 1L, "dom1.com", "DUNS1", "Name1", 10000, null, null, 50, "12345", 123, 321, null, null, null, 112233,
                     111222333L }, //
-            { 2L, "dom2.com", "DUNS2", "Name2", null, 50241, null, null, "67890", 456, null, "QWER", "google.com", null,
+            { 2L, "dom2.com", "DUNS2", "Name2", null, 50241, null, null, "67890", 456, null, "QWER",
+                    "google.com", null,
                     null, 444555666L }, //
             { 3L, "dom1.com", "DUNS2", "Name2", 10000, null, null, 50, "12345", 123, 321, null, null, null, 112233,
                     444555666L }, //
             { 4L, null, "DUNS3", "Name3", null, null, null, null, null, null, null, null, null, null, null,
                     777888999L }, //
-            { 5L, "dom3.com", null, "Name3", 1000000, null, null, null, null, 789, 987, "ASDF", null, 100000000L, null,
-                    null }, //
+            { 5L, "dom3.com", null, "Name3", 1000000, null, "ABC", null, null, 789, 987, "ASDF",
+                    null, 100000000L, null, null }, //
     };
 
     private Object[][] amRefreshData = { //
-            { 1L, "dom1.com", "DUNS1", "Name1", 10000, null, null, 50, "12345", 123, 321, null, null, null, 112233,
+            { 1L, "dom1.com", "DUNS1", "Name1", 10000, null, "ABC", 50, "12345", 123, 321, null, null, null, 112233,
                     111222333L }, //
-            { 2L, "dom2.com", "DUNS2", "Name2", null, 50241, null, null, "67890", 456, null, "QWER", "google.com",
-                    null,
-                    null, 444555666L }, //
-            { 3L, "dom1.com", "DUNS2", "Name2", 10000, null, null, 50, "12345", 123, 321, null, null, null, 112233,
+            { 2L, "dom2.com", "DUNS2", "Name2", null, 50241, "DEF", null, "67890", 456, null, "QWER", "google.com",
+                    null, null, 444555666L }, //
+            { 3L, "dom1.com", "DUNS2", "Name2", 10000, null, "ABC", 50, "12345", 123, 321, null, null, null, 112233,
                     444555666L }, //
             { 4L, null, "DUNS3", "Name3", null, null, null, null, null, null, null, null, null, null, null,
                     777888999L }, //
-            { 5L, "dom3.com", null, "Name3", 1000000, null, null, null, null, 789, 987, "ASDF",
-                    null, 100000000L, null,
-                    null }, //
+            { 5L, "dom3.com", null, "Name3", 1000000, null, "GHI", null, null, 789, 987, "ASDF",
+                    null, 100000000L, null, null }, //
     };
 
     @Override
@@ -406,7 +405,7 @@ public class AccountMasterRebuildRefreshTestNG
             Assert.assertTrue(isObjEquals(record.get("LDC_Name"), expected[3]));
             Assert.assertTrue(isObjEquals(record.get("AlexaRank"), expected[4]));
             Assert.assertTrue(isObjEquals(record.get("Bmbr30_Healthcare_Total"), expected[5]));
-            Assert.assertTrue(isObjEquals(record.get("BmbrSurge_BucketCode"), expected[6]));
+            Assert.assertTrue(isObjEquals(record.get("BmbrSurge_Intent"), expected[6]));
             Assert.assertTrue(isObjEquals(record.get("BusinessTechnologiesAds"), expected[7]));
             Assert.assertTrue(isObjEquals(record.get("BuiltWith_TechIndicators"), expected[8]));
             Assert.assertTrue(isObjEquals(record.get("FeatureTermAddItem"), expected[9]));
