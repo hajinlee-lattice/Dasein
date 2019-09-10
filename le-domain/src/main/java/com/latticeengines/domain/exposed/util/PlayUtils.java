@@ -17,6 +17,11 @@ import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 
 public class PlayUtils {
 
+    public static final String ADDED_ACCOUNTS_DELTA_TABLE = "added-accounts-delta-table";
+    public static final String REMOVED_ACCOUNTS_DELTA_TABLE = "removed-accounts-delta-table";
+    public static final String ADDED_CONTACTS_DELTA_TABLE = "added-contacts-delta-table";
+    public static final String REMOVED_CONTACTS_DELTA_TABLE = "removed-contacts-delta-table";
+
     public static void validatePlay(Play play) {
         if (play.getRatingEngine() != null && play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
             throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });

@@ -266,7 +266,11 @@ public class PlayResource {
     @ApiOperation(value = "Queue a new Play launch for a given play and channel")
     public PlayLaunch queueNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
-            @PathVariable("channelId") String channelId) {
+            @PathVariable("channelId") String channelId, //
+            @RequestParam(value = PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE, required = false) String addAccountsTable, //
+            @RequestParam(value = PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE, required = false) String removeAccountsTable, //
+            @RequestParam(value = PlayUtils.ADDED_CONTACTS_DELTA_TABLE, required = false) String addContactsTable, //
+            @RequestParam(value = PlayUtils.REMOVED_CONTACTS_DELTA_TABLE, required = false) String removeContactsTable) {
         if (StringUtils.isEmpty(playName)) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Play Id" });
         }
@@ -284,7 +288,8 @@ public class PlayResource {
         channel.setPlay(play);
         channel.setTenant(MultiTenantContext.getTenant());
         channel.setTenantId(MultiTenantContext.getTenant().getPid());
-        return playLaunchChannelService.createPlayLaunchFromChannel(channel, play);
+        return playLaunchChannelService.createPlayLaunchFromChannel(channel, play, addAccountsTable,
+                removeAccountsTable, addContactsTable, removeContactsTable);
     }
 
     @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-workflow", headers = "Accept=application/json")
@@ -293,7 +298,8 @@ public class PlayResource {
     public String kickOffWorkflowFromChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
-        PlayLaunch playLaunch = queueNewLaunchByPlayAndChannel(customerSpace, playName, channelId);
+        PlayLaunch playLaunch = queueNewLaunchByPlayAndChannel(customerSpace, playName, channelId, null, null, null,
+                null);
         return kickOffLaunch(customerSpace, playName, playLaunch.getId());
     }
 
