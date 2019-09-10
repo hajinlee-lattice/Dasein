@@ -119,23 +119,37 @@ public class DataFileResource {
     public void getPostMatchTrainingEventTableCsvFile(@RequestParam(value = "modelId") String modelId,
             @PathVariable String eventTableType, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+
         response.setHeader("Content-Encoding", "gzip");
+
+        //event table type => determine filter to use
+        boolean fallback = false;
+        String filter = null, fallbackFilter = null;
         if (eventTableType.equalsIgnoreCase("training")) {
-            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                    "postMatchEventTable.*allTraining.*.csv");
+            filter = "postMatchEventTable.*allTraining.*.csv";
         } else if (eventTableType.equalsIgnoreCase("exportrftrain")) {
+            fallback = true;
+            filter = ".*exportrftrain.csv";
+            fallbackFilter = "postMatchEventTable.*allTraining.*.csv";
+        } else if (eventTableType.equalsIgnoreCase("test")) {
+            filter = "postMatchEventTable.*allTest.*.csv";
+        } else {
+            log.warn("invalid event table type: " + eventTableType);
+            return;
+        }
+
+        //download
+        if (!fallback) {
+            dataFileProviderService.downloadPostMatchFile(request, response, modelId, filter);
+        } else {
             try {
-                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                        ".*exportrftrain.csv");
+                dataFileProviderService.downloadPostMatchFile(request, response, modelId, filter);
             } catch (Exception e) {
                 log.warn("Final modeling file does not exist, fall back to previous modeling file!");
-                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                        "postMatchEventTable.*allTraining.*.csv");
+                dataFileProviderService.downloadPostMatchFile(request, response, modelId, fallbackFilter);
             }
-        } else if (eventTableType.equalsIgnoreCase("test")) {
-            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                    "postMatchEventTable.*allTest.*.csv");
         }
+
     }
 
     @RequestMapping(value = "/scoredeventtablecsv/{scoredfiletype}", method = RequestMethod.GET)
@@ -168,7 +182,7 @@ public class DataFileResource {
     public void getTrainingSetCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         response.setHeader("Content-Encoding", "gzip");
-        dataFileProviderService.downloadTrainingSet(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
+        dataFileProviderService.downloadTrainingSet(request, response, modelId);
     }
 
     @RequestMapping(value = "/modelprofileavro", method = RequestMethod.GET, headers = "Accept=application/json")

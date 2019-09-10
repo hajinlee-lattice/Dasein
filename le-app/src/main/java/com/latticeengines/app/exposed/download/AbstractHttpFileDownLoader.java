@@ -551,11 +551,14 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
         List<String> tmpFiles = new ArrayList<>(2);
         List<InputStream> tmpStreams = new ArrayList<>(2);
 
-        //only support octet_stream
         try {
 
-            response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", getFileName()));
+            //parse file path
+            String fileName = getFileName();
+            log.info("target file path parsed, file name = " + fileName );
+
+            response.setContentType(mimeType);
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", fileName));
 
             try (InputStream is = getFileInputStream()) {
                 try (OutputStream os = response.getOutputStream()) {
@@ -600,7 +603,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                     log.info("send content...");
                     GzipUtils.copyAndCompressStream(curIs, os);
 
-                    log.info("downloading training csv file is done");
+                    log.info("downloading csv file done");
                 }
             }
 
