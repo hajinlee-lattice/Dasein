@@ -178,6 +178,17 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
          } else {
         	 $scope.components = $scope.componentsWithGA_Dev;
          }
+         if ($scope.tenantInfo.properties.tenantType === "POC") {
+             _.each($scope.components, function (component) {
+                if (component.Component === "CDL") {
+                    _.each(component.Nodes, function(node) {
+                        if (node.Node === "AccountQuotaLimit") {
+                        node.Data = 1000000;
+                        }
+                    });
+                }
+             });
+         }
          console.log($scope.components);
     }
     function setAutoSchedulingFlagValue() {
