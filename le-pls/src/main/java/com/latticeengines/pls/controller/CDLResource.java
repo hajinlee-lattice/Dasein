@@ -444,7 +444,7 @@ public class CDLResource {
         }
         try {
             DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
-            boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+            boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             Table standardTable = SchemaRepository.instance().getSchema(
                     BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
             String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
