@@ -28,7 +28,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
@@ -48,7 +47,7 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
         // prepare mocked submitter
         S3ImportSystemService s3ImportSystemService = Mockito.mock(S3ImportSystemService.class);
         when(s3ImportSystemService.getAllS3ImportSystem(any(String.class))).thenReturn(systems);
-        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(s3ImportSystemService, null);
+        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(s3ImportSystemService);
 
         Pair<Map<String, String>, Map<String, List<String>>> res = submitter.getSystemIdMaps("test_tenant", true);
         Assert.assertNotNull(res);
@@ -76,12 +75,9 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
     @Test(groups = "unit", dataProvider = "getCatalogImports")
     private void testGetCatalogImports(List<Catalog> catalogs, List<Action> actions,
             Map<String, Set<String>> expectedResult) {
-        CatalogEntityMgr mgr = Mockito.mock(CatalogEntityMgr.class);
-        when(mgr.findByTenant(any())).thenReturn(catalogs);
-
-        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(null, mgr);
+        ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(null);
         Map<String, List<CatalogImport>> result = submitter.getCatalogImports(new Tenant(getClass().getSimpleName()),
-                actions);
+                actions, catalogs);
         Assert.assertNotNull(result);
 
         Map<String, Set<String>> tableNames = result.entrySet().stream().map(entry -> {
@@ -233,9 +229,8 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
         };
     }
 
-    private ProcessAnalyzeWorkflowSubmitter mockSubmitter(S3ImportSystemService s3ImportSystemService,
-            CatalogEntityMgr catalogEntityMgr) {
-        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, catalogEntityMgr, null, null, null, null, null,
+    private ProcessAnalyzeWorkflowSubmitter mockSubmitter(S3ImportSystemService s3ImportSystemService) {
+        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, null, null, null, null, null, null,
                 s3ImportSystemService);
     }
 

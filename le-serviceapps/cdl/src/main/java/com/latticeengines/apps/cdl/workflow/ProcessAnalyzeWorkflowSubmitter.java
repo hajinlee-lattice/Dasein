@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedCatalog;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -260,6 +262,31 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     /**
+     * Retrieve table names for all catalogs in current active version
+     *
+     * @param customerSpace
+     *            target tenant
+     * @param catalogs
+     *            list of catalogs in current tenant
+     * @return a map of catalogName -> tableName, will not be {@code null}
+     */
+    private Map<String, String> getActiveCatalogTables(@NotNull String customerSpace, List<Catalog> catalogs) {
+        if (CollectionUtils.isEmpty(catalogs)) {
+            return Collections.emptyMap();
+        }
+
+        List<String> catalogNames = catalogs.stream() //
+                .filter(Objects::nonNull) //
+                .map(Catalog::getName) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toList());
+        Map<String, String> tables = dataCollectionService.getTableNamesWithSignatures(customerSpace, null,
+                ConsolidatedCatalog, null, catalogNames);
+        log.info("Current catalog tables for tenant {} are {}. CatalogsNames={}", customerSpace, tables, catalogNames);
+        return tables;
+    }
+
+    /**
      * Return import information (table names and original file names) for all
      * catalogs in target tenant.
      *
@@ -267,11 +294,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
      *            target tenant
      * @param completedActions
      *            list of completed actions
+     * @param catalogs
+     *            list of catalogs in current tenant
      * @return map of CatalogName -> List({@link CatalogImport}), will not be
      *         {@code null}
      */
     @VisibleForTesting
-    Map<String, List<CatalogImport>> getCatalogImports(@NotNull Tenant tenant, @NotNull List<Action> completedActions) {
+    Map<String, List<CatalogImport>> getCatalogImports(@NotNull Tenant tenant, List<Action> completedActions,
+            List<Catalog> catalogs) {
         if (CollectionUtils.isEmpty(completedActions)) {
             return Collections.emptyMap();
         }
@@ -279,8 +309,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Action> completedImportActions = completedActions.stream() //
                 .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW) //
                 .collect(Collectors.toList());
-        List<Catalog> catalogs = catalogEntityMgr.findByTenant(tenant);
-        log.info("Catalogs for tenant {} are {}", tenant.getId(), catalogs);
         if (CollectionUtils.isEmpty(catalogs) || CollectionUtils.isEmpty(completedImportActions)) {
             return Collections.emptyMap();
         }
@@ -304,7 +332,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 catalogTableNames.putIfAbsent(catalogName, new ArrayList<>());
                 if (CollectionUtils.isNotEmpty(config.getRegisteredTables())) {
                     String filename = config.getOriginalFilename();
-                    // TODO add original file name
                     List<CatalogImport> imports = config.getRegisteredTables() //
                             .stream() //
                             .map(tableName -> new CatalogImport(catalogName, tableName,
@@ -560,6 +587,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.ALWAYS_ON_CAMPAIGNS, String.valueOf(alwaysOnCampain));
         inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIds));
 
+        List<Catalog> catalogs = catalogEntityMgr.findByTenant(tenant);
+        log.info("Catalogs for tenant {} are {}", customerSpace, catalogs);
+
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
@@ -584,7 +614,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .apsImputationEnabled(apsImputationEnabled) //
-                .catalogImports(getCatalogImports(tenant, completedActions))
+                .catalogTables(getActiveCatalogTables(customerSpace, catalogs)) //
+                .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
                 .systemIdMap(systemIdMaps.getRight()) //
                 .defaultSystemIdMap(systemIdMaps.getLeft()) //
                 .entityMatchEnabled(entityMatchEnabled) //

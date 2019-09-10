@@ -9,7 +9,13 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class BuildCatalogStepConfiguration extends BaseProcessEntityStepConfiguration {
 
+    /*-
+     * catalogName -> tableName in current active version
+     */
     @JsonProperty("catalog_tables")
+    private Map<String, String> catalogTables;
+
+    @JsonProperty("catalog_imports")
     private Map<String, List<CatalogImport>> catalogImports;
 
     @JsonProperty("entity_match_enabled")
@@ -18,6 +24,14 @@ public class BuildCatalogStepConfiguration extends BaseProcessEntityStepConfigur
     @Override
     public BusinessEntity getMainEntity() {
         return BusinessEntity.Catalog;
+    }
+
+    public Map<String, String> getCatalogTables() {
+        return catalogTables;
+    }
+
+    public void setCatalogTables(Map<String, String> catalogTables) {
+        this.catalogTables = catalogTables;
     }
 
     public Map<String, List<CatalogImport>> getCatalogImports() {

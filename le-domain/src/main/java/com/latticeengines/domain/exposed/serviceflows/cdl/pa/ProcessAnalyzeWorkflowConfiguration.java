@@ -232,6 +232,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder catalogTables(Map<String, String> catalogTables) {
+            processCatalogWorkflowBuilder.catalogTables(catalogTables);
+            return this;
+        }
+
         public Builder catalogImports(Map<String, List<CatalogImport>> catalogImports) {
             processCatalogWorkflowBuilder.catalogImports(catalogImports);
             return this;

@@ -32,6 +32,11 @@ public class ProcessCatalogWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder catalogTables(Map<String, String> catalogTables) {
+            buildCatalogConfig.setCatalogTables(catalogTables);
+            return this;
+        }
+
         public Builder catalogImports(Map<String, List<CatalogImport>> catalogImports) {
             buildCatalogConfig.setCatalogImports(catalogImports);
             return this;

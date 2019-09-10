@@ -75,23 +75,22 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
      * Otherwise use the existing table (link from active version)
      */
     private List<String> buildCatalogBatchStore() {
-        List<Table> activeTables = dataCollectionProxy.getTables(customerSpace.toString(), batchStore, active);
+        Map<String, String> activeTables = configuration.getCatalogTables();
 
         // clone and rename catalog import tables
         Map<String, String> finalCatalogTables = new HashMap<>(cloneCatalogImports());
-        if (CollectionUtils.isNotEmpty(activeTables)) {
-            // TODO use signature/subrole instead of naming convention to find out the catalog name
-            activeTables.forEach(table -> {
-                String catalogName = catalogName(table.getName());
-                finalCatalogTables.putIfAbsent(catalogName, table.getName());
-            });
+        if (MapUtils.isNotEmpty(activeTables)) {
+            // only add current table if there is no import for specific catalog
+            activeTables.forEach(finalCatalogTables::putIfAbsent);
         }
-        log.info("ConsolidatedCatalog tables = {}", finalCatalogTables);
+        log.info("ConsolidatedCatalog tables = {}, Current active catalog tables = {}", finalCatalogTables,
+                activeTables);
 
         // link all tables
         if (MapUtils.isNotEmpty(finalCatalogTables)) {
-            dataCollectionProxy.upsertTables(customerSpace.toString(), new ArrayList<>(finalCatalogTables.values()),
-                    batchStore, inactive);
+            // use catalogName as signature
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), finalCatalogTables, batchStore,
+                    inactive);
         }
         return new ArrayList<>(finalCatalogTables.values());
     }
@@ -121,14 +120,6 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         }
 
         return catalogTables;
-    }
-
-    /*
-     * FIXME remove this tmp fn to parse catalog name from table name
-     */
-    private String catalogName(@NotNull String tableName) {
-        String[] tokens = tableName.split("_");
-        return tokens[1];
     }
 
     /*-
