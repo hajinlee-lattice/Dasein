@@ -767,7 +767,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    @Scheduled(fixedRate = 500000L)
+    @Scheduled(fixedRate = 300000L)
     public void scheduledDrainQueueWrapper() {
         String podid = CamilleEnvironment.getPodId();
         String division = CamilleEnvironment.getDivision();
