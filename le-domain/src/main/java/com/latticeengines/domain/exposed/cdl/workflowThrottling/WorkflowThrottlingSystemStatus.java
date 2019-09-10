@@ -1,12 +1,15 @@
 package com.latticeengines.domain.exposed.cdl.workflowThrottling;
 
+import java.util.List;
 import java.util.Map;
+
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public class WorkflowThrottlingSystemStatus {
 
     private final String GLOBAL_KEY = "global";
 
-    private WorkflowThrottlerConfiguration config;
+    private WorkflowThrottlingConfiguration config;
 
     // workflowType(or global) -> count
     private Map<String, Integer> runningWorkflowInEnv; //
@@ -18,6 +21,8 @@ public class WorkflowThrottlingSystemStatus {
     // customerSpace -> type (or global) -> count
     private Map<String, Map<String, Integer>> tenantRunningWorkflow; //
     private Map<String, Map<String, Integer>> tenantEnqueuedWorkflow; //
+
+    private List<WorkflowJob> enqueuedWorkflowJobs;
 
     public Map<String, Integer> getRunningWorkflowInEnv() {
         return runningWorkflowInEnv;
@@ -67,12 +72,20 @@ public class WorkflowThrottlingSystemStatus {
         this.tenantEnqueuedWorkflow = tenantEnqueuedWorkflow;
     }
 
-    public WorkflowThrottlerConfiguration getConfig() {
+    public WorkflowThrottlingConfiguration getConfig() {
         return config;
     }
 
-    public void setConfig(WorkflowThrottlerConfiguration config) {
+    public void setConfig(WorkflowThrottlingConfiguration config) {
         this.config = config;
+    }
+
+    public List<WorkflowJob> getEnqueuedWorkflowJobs() {
+        return enqueuedWorkflowJobs;
+    }
+
+    public void setEnqueuedWorkflowJobs(List<WorkflowJob> enqueuedWorkflowJobs) {
+        this.enqueuedWorkflowJobs = enqueuedWorkflowJobs;
     }
 
     public int getTotalRunningWorkflowInEnv() {

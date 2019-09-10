@@ -1,7 +1,9 @@
 package com.latticeengines.workflowapi.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -19,13 +21,20 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.api.WorkflowSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -41,13 +50,17 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
+import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
+import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
 
 @Component("workflowApiWorkflowJobService")
+@EnableScheduling
 public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
 
@@ -86,6 +99,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private WorkflowContainerService workflowContainerService;
+
+    @Inject
+    private WorkflowThrottlingService workflowThrottlingService;
+
+    @Inject
+    private WorkflowTenantService workflowTenantService;
 
     private static final long HEARTBEAT_FAILURE_THRESHOLD = TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES);
     private static final long ALLOWED_PENDING_THRESHOLD = TimeUnit.MILLISECONDS.convert(30L, TimeUnit.MINUTES);
@@ -237,14 +256,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
-            Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+                                          Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         return getJobsByWorkflowIds(customerSpace, workflowIds, types, null, includeDetails, hasParentId, parentJobId);
     }
 
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
-            List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+                                          List<String> jobStatuses, Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowIds = Optional.ofNullable(workflowIds);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
 
@@ -281,7 +300,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowIdsFromCache(String customerSpace, @NotNull List<Long> workflowIds,
-            boolean includeDetails) {
+                                                   boolean includeDetails) {
         if (disableCache) {
             return getJobsByWorkflowIds(customerSpace, workflowIds, null, includeDetails, false, -1L);
         }
@@ -293,7 +312,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowPids, List<String> types,
-            Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
+                                           Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
         Optional<List<Long>> optionalWorkflowPids = Optional.ofNullable(workflowPids);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         List<WorkflowJob> workflowJobs;
@@ -333,7 +352,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<WorkflowJob> queryByClusterIDAndTypesAndStatuses(String clusterId,
-         List<String> workflowTypes, List<String> statuses) {
+                                                                 List<String> workflowTypes, List<String> statuses) {
         return workflowJobEntityMgr.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
     }
 
@@ -490,8 +509,102 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration,
-            Long workflowPid) {
+                                        Long workflowPid) {
         return workflowContainerService.submitWorkflow(workflowConfiguration, workflowPid);
+    }
+
+    @Override
+    public WorkflowSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        String podid = CamilleEnvironment.getPodId();
+        String division = CamilleEnvironment.getDivision();
+        if (workflowThrottlingService.queueLimitReached(customerSpace, workflowConfiguration.getWorkflowName(), podid, division)) {
+            log.error("Unable to enqueue {} workflow to {} - {} for {} due to back pressure.", workflowConfiguration.getWorkflowName(), podid, division, customerSpace);
+            throw new IllegalStateException(String.format("Unable to submit workflow for %s due to back pressure.", customerSpace));
+        }
+
+        return new WorkflowSubmission(enqueueWorkflowJob(workflowConfiguration, division, workflowJobPid));
+    }
+
+    @Override
+    public List<ApplicationId> drainWorkflowQueue(String podid, String division) {
+        try {
+            lockEnvironment(podid);
+            ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, division);
+            List<ApplicationId> submitted = new ArrayList<>();
+            List<WorkflowJob> canSubmit = getWorkflowObjects(result.getCanSubmit());
+            for (WorkflowJob o : canSubmit) {
+                try {
+                    ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
+                    submitted.add(appId);
+                    o.setStatus(JobStatus.PENDING.name());
+                    workflowJobEntityMgr.update(o);
+                    log.info("Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
+                } catch (Exception e) {
+                    log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);
+                }
+            }
+            return submitted;
+        } finally {
+            unlockEnvironment(podid);
+        }
+    }
+
+    private List<WorkflowJob> getWorkflowObjects(Map<String, List<Long>> map) {
+        List<Long> pids = new ArrayList<>();
+        map.forEach((k, v) -> {
+            pids.addAll(v);
+        });
+        return workflowJobEntityMgr.findByWorkflowPids(pids);
+    }
+
+    private void lockEnvironment(String podid) {
+        String lockName = "WORKFLOWTHROTTLING_LOCK_" + podid;
+        LockManager.registerCrossDivisionLock(lockName);
+        LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
+    }
+
+    private void unlockEnvironment(String podid) {
+        String lockName = "WORKFLOWTHROTTLING_LOCK_" + podid;
+        LockManager.releaseWriteLock(lockName);
+        LockManager.deregisterCrossDivisionLock(lockName);
+    }
+
+    private Long enqueueWorkflowJob(WorkflowConfiguration workflowConfig, String division, Long workflowJobPid) {
+        Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfig);
+        String user = workflowConfig.getUserId();
+        user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
+
+        WorkflowJob workflowJob = workflowJobPid == null ? new WorkflowJob() : workflowJobEntityMgr.findByWorkflowPid(workflowJobPid);
+        if (workflowJob == null) {
+            log.error("Failed to create or update workflowJob. WorkflowPid=" + workflowJobPid);
+            throw new IllegalStateException("Failed to create or update workflowJob. WorkflowPid=" + workflowJobPid);
+        }
+        workflowJob.setTenant(tenant);
+        workflowJob.setUserId(user);
+        workflowJob.setInputContext(workflowConfig.getInputProperties());
+        workflowJob.setStatus(JobStatus.ENQUEUED.name());
+        workflowJob.setType(workflowConfig.getWorkflowName());
+        workflowJob.setStack(division);
+        workflowJob.setWorkflowConfiguration(workflowConfig);
+
+        workflowJobEntityMgr.createOrUpdate(workflowJob);
+
+        Long currentTime = System.currentTimeMillis();
+        if (workflowJobPid == null) {
+            Long pid = workflowJob.getPid();
+            WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
+            jobUpdate.setWorkflowPid(pid);
+            jobUpdate.setCreateTime(currentTime);
+            jobUpdate.setLastUpdateTime(currentTime);
+            workflowJobUpdateEntityMgr.create(jobUpdate);
+        } else {
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJobPid);
+            jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+            workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+        }
+
+        return workflowJob.getPid();
     }
 
     @Override
@@ -584,9 +697,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = workflowJobs.stream().filter(workflowJob -> //
-        workflowJob.getType().equalsIgnoreCase(type.toLowerCase())
-                && workflowJob.getStartTimeInMillis() >= startTime
-                && workflowJob.getStartTimeInMillis() <= endTime) //
+                workflowJob.getType().equalsIgnoreCase(type.toLowerCase())
+                        && workflowJob.getStartTimeInMillis() >= startTime
+                        && workflowJob.getStartTimeInMillis() <= endTime) //
                 .collect(Collectors.toList());
         List<Long> workflowIds = workflowJobs.stream().map(WorkflowJob::getWorkflowId).collect(Collectors.toList());
         workflowJobs.forEach(workflowJob -> {
@@ -653,6 +766,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
     }
 
+    @Override
+    @Scheduled(fixedRate = 300000L)
+    public void scheduledDrainQueueWrapper() {
+        String podid = CamilleEnvironment.getPodId();
+        String division = CamilleEnvironment.getDivision();
+        if (workflowThrottlingService.isWorkflowThrottlingEnabled(podid, division)) {
+            log.info("Drain queue process launched at {}-{}.", podid, division);
+            drainWorkflowQueue(podid, division);
+        }
+    }
+
     private List<WorkflowJob> checkExecutionId(List<WorkflowJob> workflowJobs) {
         if (workflowJobs == null) {
             return null;
@@ -665,6 +789,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
 
             if (JobStatus.fromString(workflowJob.getStatus()).isTerminated()) {
+                continue;
+            }
+
+            if (JobStatus.ENQUEUED.name().equals(workflowJob.getStatus())) {
                 continue;
             }
 
@@ -710,6 +838,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 log.debug(String.format(
                         "WorkflowJob is in terminated status: %s. Skip checking lastUpdatedTime. WorkflowId=%s",
                         workflowJob.getStatus(), workflowJob.getWorkflowId()));
+                continue;
+            }
+
+            if (JobStatus.ENQUEUED.name().equals(workflowJob.getStatus())) {
                 continue;
             }
 

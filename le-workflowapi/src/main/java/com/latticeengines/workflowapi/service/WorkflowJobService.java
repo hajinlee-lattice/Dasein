@@ -7,6 +7,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.api.WorkflowSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -77,6 +78,10 @@ public interface WorkflowJobService {
 
     ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowPid);
 
+    WorkflowSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid);
+
+    List<ApplicationId> drainWorkflowQueue(String podid, String division);
+
     String submitAwsWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration);
 
     Long createWorkflowJob(String customerSpace);
@@ -141,4 +146,6 @@ public interface WorkflowJobService {
      * @return number of job cache entries cleared
      */
     int clearAllJobCaches();
+
+    void scheduledDrainQueueWrapper();
 }

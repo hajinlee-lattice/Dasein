@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -61,6 +62,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
     private Tenant tenant2;
 
     private static final String TEST_CLUSTER_ID = "TestClusterId1";
+    private static final String TEST_WF_NAME = "TestWorkflowName";
+    private static WorkflowConfiguration TEST_WF_CONFIG;
 
     @BeforeClass(groups = "functional")
     @Override
@@ -85,6 +88,9 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         tenant2.setId(tenantId2);
         tenant2.setName(tenantId2);
         tenantEntityMgr.create(tenant2);
+
+        TEST_WF_CONFIG = new WorkflowConfiguration();
+        TEST_WF_CONFIG.setWorkflowName(TEST_WF_NAME);
     }
 
     @AfterClass(groups = "functional")
@@ -311,6 +317,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob1.setStack(leStack);
         workflowJob1.setEmrClusterId(TEST_CLUSTER_ID);
         workflowJob1.setStatus(com.latticeengines.domain.exposed.workflow.JobStatus.RUNNING.name());
+        workflowJob1.setWorkflowConfiguration(TEST_WF_CONFIG);
         workflowJobEntityMgr.create(workflowJob1);
 
         WorkflowJob workflowJob2 = new WorkflowJob();
@@ -338,6 +345,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(workflowJobs.get(0).getUserId(), WorkflowUser.DEFAULT_USER.name());
         assertEquals(workflowJobs.get(0).getInputContext().get("filename"), "abc");
         assertEquals(workflowJobs.get(0).getStack(), leStack);
+        assertEquals(workflowJobs.get(0).getWorkflowConfiguration().getWorkflowName(), TEST_WF_NAME);
         assertEquals(workflowJobs.get(1).getApplicationId(), "application_00003");
         assertEquals(workflowJobs.get(1).getUserId(), "user3");
         assertEquals(workflowJobs.get(1).getStack(), leStack);
