@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
+import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -414,6 +415,30 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
                 shortenCustomerSpace(customerSpace), playName, channelId);
+        log.info("url is " + url);
+        return post("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunch.class);
+    }
+
+    public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId,
+            String addAccountTable, String removeAccountsTable, String addContactsTable, String removeContactsTable) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
+                shortenCustomerSpace(customerSpace), playName, channelId);
+        List<String> params = new ArrayList<>();
+        if (StringUtils.isNotBlank(addAccountTable)) {
+            params.add(PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE + "=" + addAccountTable);
+        }
+        if (StringUtils.isNotBlank(removeAccountsTable)) {
+            params.add(PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE + "=" + removeAccountsTable);
+        }
+        if (StringUtils.isNotBlank(addContactsTable)) {
+            params.add(PlayUtils.ADDED_CONTACTS_DELTA_TABLE + "=" + addContactsTable);
+        }
+        if (StringUtils.isNotBlank(removeContactsTable)) {
+            params.add(PlayUtils.REMOVED_CONTACTS_DELTA_TABLE + "=" + removeContactsTable);
+        }
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
         log.info("url is " + url);
         return post("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunch.class);
     }
