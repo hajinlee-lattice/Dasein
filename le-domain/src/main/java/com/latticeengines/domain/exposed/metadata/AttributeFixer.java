@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -37,6 +40,9 @@ public class AttributeFixer {
 
     @JsonProperty("timezone")
     private String timezone;
+
+    @JsonProperty("validatorWrappers")
+    private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -110,6 +116,14 @@ public class AttributeFixer {
         this.timezone = timezone;
     }
 
+    public List<InputValidatorWrapper> getValidatorWrappers() {
+        return validatorWrappers;
+    }
+
+    public void setValidatorWrappers(List<InputValidatorWrapper> validatorWrappers) {
+        this.validatorWrappers = validatorWrappers;
+    }
+
     @JsonIgnore
     public void copyToAttribute(Attribute attribute) {
         if (attribute == null) {
@@ -142,6 +156,10 @@ public class AttributeFixer {
             } else {
                 attribute.setRequired(false);
             }
+        }
+        // here just need to check validatorWrappers is null as probably set empty back
+        if (validatorWrappers != null) {
+            attribute.setValidatorWrappers(validatorWrappers);
         }
     }
 }
