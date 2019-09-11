@@ -10,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -48,6 +49,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ProcessContactWorkflowConfiguration.Builder processContactWorkflowBuilder = new ProcessContactWorkflowConfiguration.Builder();
         private ProcessProductWorkflowConfiguration.Builder processProductWorkflowBuilder = new ProcessProductWorkflowConfiguration.Builder();
         private ProcessTransactionWorkflowConfiguration.Builder processTransactionWorkflowBuilder = new ProcessTransactionWorkflowConfiguration.Builder();
+        private ProcessCatalogWorkflowConfiguration.Builder processCatalogWorkflowBuilder = new ProcessCatalogWorkflowConfiguration.Builder();
         private CuratedAttributesWorkflowConfiguration.Builder curatedAttributesWorkflowBuilder = new CuratedAttributesWorkflowConfiguration.Builder();
         private ProcessRatingWorkflowConfiguration.Builder processRatingWorkflowBuilder = new ProcessRatingWorkflowConfiguration.Builder();
         private CommitEntityMatchWorkflowConfiguration.Builder commitEntityWorkflowBuilder = new CommitEntityMatchWorkflowConfiguration.Builder();
@@ -72,6 +74,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.customer(customerSpace);
             processProductWorkflowBuilder.customer(customerSpace);
             processTransactionWorkflowBuilder.customer(customerSpace);
+            processCatalogWorkflowBuilder.customer(customerSpace);
             curatedAttributesWorkflowBuilder.customer(customerSpace);
             processRatingWorkflowBuilder.customer(customerSpace);
             commitEntityWorkflowBuilder.customer(customerSpace);
@@ -103,6 +106,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processProductWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            processCatalogWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             curatedAttributesWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             commitEntityWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -228,6 +232,16 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder catalogTables(Map<String, String> catalogTables) {
+            processCatalogWorkflowBuilder.catalogTables(catalogTables);
+            return this;
+        }
+
+        public Builder catalogImports(Map<String, List<CatalogImport>> catalogImports) {
+            processCatalogWorkflowBuilder.catalogImports(catalogImports);
+            return this;
+        }
+
         public Builder systemIdMap(Map<String, List<String>> systemIds) {
             matchEntityWorkflowBuilder.systemIdMap(systemIds);
             return this;
@@ -244,6 +258,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processAccountWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            processCatalogWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
@@ -291,6 +306,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processContactWorkflowBuilder.build());
             configuration.add(processProductWorkflowBuilder.build());
             configuration.add(processTransactionWorkflowBuilder.build());
+            configuration.add(processCatalogWorkflowBuilder.build());
             configuration.add(curatedAttributesWorkflowBuilder.build());
             configuration.add(processRatingWorkflowBuilder.build());
             configuration.add(commitEntityWorkflowBuilder.build());

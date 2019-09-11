@@ -264,6 +264,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         this.detail.setDateMap(dateMap);
     }
 
+    @JsonProperty("OrigCatalogFileMap")
+    public Map<String, String> getOrigCatalogFileMap() {
+        return this.detail.getOrigCatalogFileMap();
+    }
+
+    @JsonProperty("OrigCatalogFileMap")
+    public void setOrigCatalogFileMap(Map<String, String> origCatalogFileMap) {
+        this.detail.setOrigCatalogFileMap(origCatalogFileMap);
+    }
+
     @Override
     @JsonProperty("CreationTime")
     @Temporal(TemporalType.TIMESTAMP)

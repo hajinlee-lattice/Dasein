@@ -81,6 +81,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String batchStorePrimaryKey;
     protected List<String> batchStoreSortKeys;
 
+    protected List<Table> inputTables = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
 
@@ -117,19 +118,20 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
         if (CollectionUtils.isNotEmpty(imports)) {
-            List<Table> inputTables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
-            if (CollectionUtils.isEmpty(inputTables)) {
+            List<Table> tables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(tables)) {
                 throw new RuntimeException("There is no input tables to consolidate.");
             }
-            Collections.reverse(inputTables);
-            inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
+            Collections.reverse(tables);
+            tables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
                     : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
                             : t.getLastModifiedKey().getLastModifiedTimestamp())
                     .reversed());
-            for (Table table : inputTables) {
+            for (Table table : tables) {
+                inputTables.add(table);
                 inputTableNames.add(table.getName());
             }
-            setScalingMultiplier(inputTables);
+            setScalingMultiplier(tables);
         }
     }
 

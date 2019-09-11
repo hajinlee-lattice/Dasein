@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedCatalog;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
@@ -50,6 +53,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -65,6 +70,7 @@ import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -114,6 +120,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final WorkflowProxy workflowProxy;
 
+    private final CatalogEntityMgr catalogEntityMgr;
+
     private final ColumnMetadataProxy columnMetadataProxy;
 
     private final ActionService actionService;
@@ -130,12 +138,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService, DataCollectionService dataCollectionService,
-                                           WorkflowProxy workflowProxy,
+            WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy, S3ImportSystemService s3ImportSystemService) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
+        this.catalogEntityMgr = catalogEntityMgr;
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
         this.batonService = batonService;
@@ -150,7 +159,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
-        boolean tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenantEntityMgr.findByTenantId(customerSpace));
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        boolean tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenant);
         if (!request.skipMigrationCheck && tenantInMigration) {
             log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
             throw new IllegalStateException(String.format("Tenant %s is in migration.", customerSpace));
@@ -183,7 +193,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
         if (tenantInMigration) {
             try {
-                return submitWithOnlyImportActions(customerSpace, request, datafeed, pidWrapper);
+                return submitWithOnlyImportActions(customerSpace, tenant, request, datafeed, pidWrapper);
             } catch (Exception e) {
                 log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                         + ExceptionUtils.getStackTrace(e));
@@ -202,7 +212,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
         try {
-            List<Long> actionIds = getActionIds(customerSpace);
+            List<Action> actions = actionService.findByOwnerId(null);
+            List<Action> completedActions = getCompletedActions(customerSpace, actions);
+            List<Long> actionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
                 List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid)
                         .collect(Collectors.toList());
@@ -223,12 +235,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 actionIds.addAll(0, copiedActionIds);
             }
             updateActions(actionIds, pidWrapper.getPid());
-            List<Long> canceledActionPids = getCanceledActionIds(customerSpace);
+            List<Long> canceledActionPids = getCanceledActionIds(customerSpace, actions);
             updateActions(canceledActionPids, pidWrapper.getPid());
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
-            ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, actionIds,
-                    initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
+            ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
+                    completedActions, actionIds, initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
             configuration.setFailingStep(request.getFailingStep());
 
@@ -249,9 +261,95 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
+    /**
+     * Retrieve table names for all catalogs in current active version
+     *
+     * @param customerSpace
+     *            target tenant
+     * @param catalogs
+     *            list of catalogs in current tenant
+     * @return a map of catalogName -> tableName, will not be {@code null}
+     */
+    private Map<String, String> getActiveCatalogTables(@NotNull String customerSpace, List<Catalog> catalogs) {
+        if (CollectionUtils.isEmpty(catalogs)) {
+            return Collections.emptyMap();
+        }
+
+        List<String> catalogNames = catalogs.stream() //
+                .filter(Objects::nonNull) //
+                .map(Catalog::getName) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toList());
+        Map<String, String> tables = dataCollectionService.getTableNamesWithSignatures(customerSpace, null,
+                ConsolidatedCatalog, null, catalogNames);
+        log.info("Current catalog tables for tenant {} are {}. CatalogsNames={}", customerSpace, tables, catalogNames);
+        return tables;
+    }
+
+    /**
+     * Return import information (table names and original file names) for all
+     * catalogs in target tenant.
+     *
+     * @param tenant
+     *            target tenant
+     * @param completedActions
+     *            list of completed actions
+     * @param catalogs
+     *            list of catalogs in current tenant
+     * @return map of CatalogName -> List({@link CatalogImport}), will not be
+     *         {@code null}
+     */
     @VisibleForTesting
-    List<Long> getActionIds(String customerSpace) {
-        List<Action> actions = actionService.findByOwnerId(null);
+    Map<String, List<CatalogImport>> getCatalogImports(@NotNull Tenant tenant, List<Action> completedActions,
+            List<Catalog> catalogs) {
+        if (CollectionUtils.isEmpty(completedActions)) {
+            return Collections.emptyMap();
+        }
+
+        List<Action> completedImportActions = completedActions.stream() //
+                .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(catalogs) || CollectionUtils.isEmpty(completedImportActions)) {
+            return Collections.emptyMap();
+        }
+
+        // DataFeedTask unique id -> catalogName
+        Map<String, String> taskCatalogName = catalogs.stream() //
+                .map(catalog -> Pair.of(catalog.getDataFeedTask().getUniqueId(), catalog.getName())) //
+                .filter(pair -> StringUtils.isNotBlank(pair.getLeft())) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+
+        Map<String, List<CatalogImport>> catalogTableNames = new HashMap<>();
+        for (Action action : completedImportActions) {
+            if (!(action.getActionConfiguration() instanceof ImportActionConfiguration)) {
+                continue;
+            }
+
+            ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
+            if (taskCatalogName.containsKey(config.getDataFeedTaskId())) {
+                // this action is for catalog import
+                String catalogName = taskCatalogName.get(config.getDataFeedTaskId());
+                catalogTableNames.putIfAbsent(catalogName, new ArrayList<>());
+                if (CollectionUtils.isNotEmpty(config.getRegisteredTables())) {
+                    String filename = config.getOriginalFilename();
+                    List<CatalogImport> imports = config.getRegisteredTables() //
+                            .stream() //
+                            .map(tableName -> new CatalogImport(catalogName, tableName,
+                                    filename == null ? "" : filename)) //
+                            .collect(Collectors.toList());
+                    catalogTableNames.get(catalogName).addAll(imports);
+                }
+            }
+        }
+        log.info("CatalogTableNames for tenant {} are {}", tenant.getId(), catalogTableNames);
+        return catalogTableNames;
+    }
+
+    @VisibleForTesting
+    List<Action> getCompletedActions(String customerSpace, List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return Collections.emptyList();
+        }
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         Set<ActionType> importAndDeleteTypes = Sets.newHashSet( //
                 ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
@@ -268,23 +366,27 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Long> completedImportAndDeleteJobPids = CollectionUtils.isEmpty(importAndDeleteJobs)
                 ? Collections.emptyList()
                 : importAndDeleteJobs.stream().filter(
-                job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
+                        job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING
+                                && job.getJobStatus() != JobStatus.ENQUEUED)
                 .map(Job::getPid).collect(Collectors.toList());
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
 
         Set<Long> importActionIds = new HashSet<>();
-        List<Long> completedActionIds = actions.stream()
+        List<Action> completedActionIds = actions.stream()
                 .filter(action -> isCompleteAction(action, completedImportAndDeleteJobPids, importActionIds))
-                .map(Action::getPid).collect(Collectors.toList());
-        log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
+                .collect(Collectors.toList());
+        log.info(String.format("Actions that associated with the current consolidate job are: %s",
+                completedActionIds.stream().map(Action::getPid).collect(Collectors.toList())));
 
         return completedActionIds;
     }
 
     @VisibleForTesting
-    List<Long> getCanceledActionIds(String customerSpace) {
-        List<Action> actions = actionService.findByOwnerId(null);
+    List<Long> getCanceledActionIds(String customerSpace, List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return Collections.emptyList();
+        }
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         List<Long> canceledActionPids = actions.stream()
                 .filter(action -> action.getType() == ActionType.CDL_DATAFEED_IMPORT_WORKFLOW
@@ -452,9 +554,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return isComplete;
     }
 
-    private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
-                                                                      ProcessAnalyzeRequest request, List<Long> actionIds, Status status, String currentDataCloudBuildNumber,
-                                                                      long workflowPid) {
+    private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, Tenant tenant,
+            ProcessAnalyzeRequest request, List<Action> completedActions, List<Long> actionIds, Status status,
+            String currentDataCloudBuildNumber, long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
 
@@ -485,6 +587,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.ALWAYS_ON_CAMPAIGNS, String.valueOf(alwaysOnCampain));
         inputProperties.put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionIds));
 
+        List<Catalog> catalogs = catalogEntityMgr.findByTenant(tenant);
+        log.info("Catalogs for tenant {} are {}", customerSpace, catalogs);
+
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
@@ -509,6 +614,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .apsImputationEnabled(apsImputationEnabled) //
+                .catalogTables(getActiveCatalogTables(customerSpace, catalogs)) //
+                .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
                 .systemIdMap(systemIdMaps.getRight()) //
                 .defaultSystemIdMap(systemIdMaps.getLeft()) //
                 .entityMatchEnabled(entityMatchEnabled) //
@@ -690,11 +797,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private ApplicationId submitWithOnlyImportActions(String customerSpace, ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
+    private ApplicationId submitWithOnlyImportActions(String customerSpace, Tenant tenant,
+            ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
         checkImportTrackingLinked(customerSpace);
         List<Long> importActionIds = getImportActionIds(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
-       lockExecution(customerSpace, datafeedStatus);
+        lockExecution(customerSpace, datafeedStatus);
 
         Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
 
@@ -706,7 +814,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         updateActions(importActionIds, pidWrapper.getPid());
 
         String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
-        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request, importActionIds,
+        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
+                Collections.emptyList(), importActionIds,
                 initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
         configuration.setFailingStep(request.getFailingStep());
