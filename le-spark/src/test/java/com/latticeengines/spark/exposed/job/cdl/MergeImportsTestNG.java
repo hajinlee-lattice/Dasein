@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -40,14 +43,10 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("merge-imports-test", 2);
 
         List<Runnable> runnables = new ArrayList<>();
-        Runnable runnable1 = () -> test1();
-        runnables.add(runnable1);
-        Runnable runnable2 = () -> test2();
-        runnables.add(runnable2);
-        Runnable runnable3 = () -> test3();
-        runnables.add(runnable3);
-        Runnable runnable4 = () -> test4();
-        runnables.add(runnable4);
+//        runnables.add(this::test1);
+        runnables.add(this::test2);
+//        runnables.add(this::test3);
+//        runnables.add(this::test4);
 
         ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
 
@@ -99,7 +98,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
                 { "4", "A3" }, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
-                .collect(Collectors.toMap(arr -> (String) arr[0], arr -> Arrays.asList(arr)));
+                .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
@@ -118,6 +117,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setDedupSrc(true);
         config.setJoinKey(InterfaceName.Id.name());
         config.setAddTimestamps(true);
+        config.setRequiredColumns(ImmutableMap.of("Id1", "string", "Id2", "long"));
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace2());
         verify(result, Collections.singletonList(this::verifyTarget2));
     }
@@ -148,22 +148,32 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyTarget2(HdfsDataUnit tgt) {
         Object[][] expectedResult = new String[][] { //
-                { "1", "A1" }, //
-                { "2", "A2" }, //
-                { "3", "A3" }, //
+                { "1", "A1"}, //
+                { "2", "A2"}, //
+                { "3", "A3"}, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
-                .collect(Collectors.toMap(arr -> (String) arr[0], arr -> Arrays.asList(arr)));
+                .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
             verifyTargetData(FIELDS1, expectedMap, record);
+            Schema schema = record.getSchema();
+            verifyFieldOfType(schema, "Id1", String.class);
+            verifyFieldOfType(schema, "Id2", Long.class);
             Assert.assertNotNull(record.get(InterfaceName.CDLCreatedTime.name()));
             Assert.assertNotNull(record.get(InterfaceName.CDLUpdatedTime.name()));
             rows++;
         }
         Assert.assertEquals(rows, expectedResult.length);
         return true;
+    }
+
+    private void verifyFieldOfType(Schema schema, String field, Class<?> type) {
+        Schema.Field avroField = schema.getField(field);
+        Assert.assertNotNull(avroField);
+        Class<?> javaClz = AvroUtils.getJavaType(AvroUtils.getType(avroField));
+        Assert.assertEquals(javaClz, type);
     }
 
     // Test concat imports -- with column rename and clone
@@ -224,7 +234,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
                 { "4", "A3", "A3", "B3" }, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
-                .collect(Collectors.toMap(arr -> (String) arr[0], arr -> Arrays.asList(arr)));
+                .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
@@ -318,7 +328,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
                 { "8", DataCloudConstants.ENTITY_ANONYMOUS_ID, null, null }, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
-                .collect(Collectors.toMap(arr -> (String) arr[0], arr -> Arrays.asList(arr)));
+                .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
