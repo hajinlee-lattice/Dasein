@@ -17,6 +17,10 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("DateMap")
     private Map<String, Long> dateMap;
 
+    // catalogName -> original file name used to build catalog store
+    @JsonProperty("OrigCatalogFileMap")
+    private Map<String, String> origCatalogFileMap;
+
     @JsonProperty("MinTxnDate")
     private Integer minTxnDate = 0;
 
@@ -157,4 +161,11 @@ public class DataCollectionStatusDetail implements Serializable {
         this.dateMap = dateMap;
     }
 
+    public Map<String, String> getOrigCatalogFileMap() {
+        return origCatalogFileMap;
+    }
+
+    public void setOrigCatalogFileMap(Map<String, String> origCatalogFileMap) {
+        this.origCatalogFileMap = origCatalogFileMap;
+    }
 }

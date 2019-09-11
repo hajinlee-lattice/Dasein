@@ -194,6 +194,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String DAILY_TRXN_TABLE_NAME = "DAILY_TRXN_TABLE_NAME";
     protected static final String AGG_DAILY_TRXN_TABLE_NAME = "AGG_DAILY_TRXN_TABLE_NAME";
     protected static final String PERIOD_TRXN_TABLE_NAME = "PERIOD_TRXN_TABLE_NAME";
+    protected static final String CATALOG_TABLE_NAME = "CATALOG_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
@@ -262,7 +263,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PH_STATS_TABLE_NAME, //
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME);
-    protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Collections.singleton(PERIOD_TRXN_TABLE_NAME);
+    protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME,
+            CATALOG_TABLE_NAME);
 
     // extra context keys to be carried over in restarted PA, beyond table names
     // above
