@@ -1,7 +1,9 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
 
+import java.util.ConcurrentModificationException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -15,6 +17,7 @@ import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.UpdateItemExpressionSpec;
@@ -38,6 +41,7 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     private static final String PREFIX = DataCloudConstants.ENTITY_PREFIX_VERSION;
     private static final String ATTR_PARTITION_KEY = DataCloudConstants.ENTITY_ATTR_PID;
     private static final String ATTR_VERSION = DataCloudConstants.ENTITY_ATTR_VERSION;
+    private static final String ATTR_NEXT_VERSION = DataCloudConstants.ENTITY_ATTR_NEXT_VERSION;
     private static final String DELIMITER = DataCloudConstants.ENTITY_DELIMITER;
     // treat null item as version 0 because dynamo treat it this way (ADD on null item will result in 1)
     private static final int DEFAULT_VERSION = 0;
@@ -78,23 +82,45 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     }
 
     @Override
+    public int getNextVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        tenant = EntityMatchUtils.newStandardizedTenant(tenant);
+        initCache();
+
+        PrimaryKey key = buildKey(environment, tenant);
+        return getNextVersion(dynamoItemService.getItem(tableName, key));
+    }
+
+    @Override
     public int bumpVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
         tenant = EntityMatchUtils.newStandardizedTenant(tenant);
         initCache();
         PrimaryKey key = buildKey(environment, tenant);
-        UpdateItemExpressionSpec expressionSpec = new ExpressionSpecBuilder()
-                .addUpdate(N(ATTR_VERSION).add(1)) // increase by one
+        Item item = dynamoItemService.getItem(tableName, key);
+        int nextVersion = getNextVersion(item);
+        UpdateItemExpressionSpec updateSpec = optimisticLocking(new ExpressionSpecBuilder(), item) //
+                .addUpdate(N(ATTR_VERSION).set(nextVersion)) //
+                .addUpdate(N(ATTR_NEXT_VERSION).set(nextVersion + 1)) //
                 .buildForUpdate();
-        UpdateItemSpec spec = new UpdateItemSpec()
-                .withPrimaryKey(key)
-                .withExpressionSpec(expressionSpec)
-                .withReturnValues(ReturnValue.UPDATED_NEW); // get the updated version back
-        UpdateItemOutcome result = dynamoItemService.update(tableName, spec);
-        Preconditions.checkNotNull(result);
-        Preconditions.checkNotNull(result.getItem());
-        // clear cache
-        versionCache.invalidate(Pair.of(tenant.getId(), environment));
-        return result.getItem().getInt(ATTR_VERSION);
+
+        return updateWithSpec(updateSpec, key, tenant, environment);
+    }
+
+    @Override
+    public void setVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant, int version) {
+        tenant = EntityMatchUtils.newStandardizedTenant(tenant);
+        initCache();
+        PrimaryKey key = buildKey(environment, tenant);
+        Item item = dynamoItemService.getItem(tableName, key);
+        int nextVersion = getNextVersion(item);
+        if (version < DEFAULT_VERSION || version >= nextVersion) {
+            throw new IllegalArgumentException(
+                    String.format("Version must be within [%d,%d)", DEFAULT_VERSION, nextVersion));
+        }
+
+        UpdateItemExpressionSpec updateSpec = optimisticLocking(new ExpressionSpecBuilder(), item) //
+                .addUpdate(N(ATTR_VERSION).set(version)) //
+                .buildForUpdate();
+        updateWithSpec(updateSpec, key, tenant, environment);
     }
 
     @Override
@@ -136,6 +162,41 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
                         .build();
             }
         }
+    }
+
+    private int updateWithSpec(@NotNull UpdateItemExpressionSpec updateSpec, @NotNull PrimaryKey key,
+            @NotNull Tenant tenant, @NotNull EntityMatchEnvironment environment) {
+        try {
+            UpdateItemSpec spec = new UpdateItemSpec().withPrimaryKey(key) //
+                    .withExpressionSpec(updateSpec) //
+                    .withReturnValues(ReturnValue.UPDATED_NEW); // get the updated version back
+            UpdateItemOutcome result = dynamoItemService.update(tableName, spec);
+            Preconditions.checkNotNull(result);
+            Preconditions.checkNotNull(result.getItem());
+            // clear cache
+            versionCache.invalidate(Pair.of(tenant.getId(), environment));
+            return result.getItem().getInt(ATTR_VERSION);
+        } catch (ConditionalCheckFailedException e) {
+            throw new ConcurrentModificationException(e);
+        }
+    }
+
+    private ExpressionSpecBuilder optimisticLocking(@NotNull ExpressionSpecBuilder builder, Item item) {
+        // optimistic locking
+        if (item == null) {
+            builder.withCondition(attribute_not_exists(ATTR_VERSION));
+        } else {
+            builder.withCondition(N(ATTR_VERSION).eq(item.getInt(ATTR_VERSION)));
+        }
+        return builder;
+    }
+
+    private int getNextVersion(Item item) {
+        // for backward compatibility, need to check whether next version attr exist
+        if (item == null || !item.hasAttribute(ATTR_NEXT_VERSION)) {
+            return DEFAULT_VERSION + 1;
+        }
+        return item.getInt(ATTR_NEXT_VERSION);
     }
 
     /*
