@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +81,6 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-
-import javafx.util.Pair;
 
 @Component("cdlJobService")
 public class CDLJobServiceImpl implements CDLJobService {
@@ -714,7 +713,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                     if (triggered) {
                         List<AtlasExportType> atlasExportTypes = Arrays.asList(AtlasExportType.ACCOUNT, AtlasExportType.CONTACT);
                         for (AtlasExportType atlasExportType : atlasExportTypes) {
-                            Pair<String, AtlasExportType> pair = new Pair<>(customerSpace, atlasExportType);
+                            Pair<String, AtlasExportType> pair = Pair.of(customerSpace, atlasExportType);
                             if (EXPORT_APPID_MAP.containsValue(pair)) {
                                 continue;
                             }
@@ -751,7 +750,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             ApplicationId tempApplicationId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
             applicationId = tempApplicationId.toString();
             if (!retry) {
-                Pair<String, AtlasExportType> value = new Pair<>(customerSpace, atlasExportType);
+                Pair<String, AtlasExportType> value = Pair.of(customerSpace, atlasExportType);
                 EXPORT_APPID_MAP.put(applicationId, value);
             }
             log.info("export applicationId map is " + JsonUtils.serialize(EXPORT_APPID_MAP));

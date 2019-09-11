@@ -62,7 +62,7 @@ public abstract class RunSparkScript <S extends SparkScriptStepConfiguration> ex
             ScriptJobConfig scriptConfig = getScriptConfig();
             scriptConfig.setInput(getInputUnits());
 
-            computeScalingMultiplier(scriptConfig.getInput());
+            computeScalingMultiplier(scriptConfig.getInput(), scriptConfig.getNumTargets());
 
             String tenantId = customerSpace.getTenantId();
             String workspace = PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();

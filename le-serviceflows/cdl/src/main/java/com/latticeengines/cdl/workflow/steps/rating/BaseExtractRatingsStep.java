@@ -196,7 +196,7 @@ public abstract class BaseExtractRatingsStep<T extends GenerateRatingStepConfigu
         jobConfig.setContainers(containers);
         jobConfig.setWorkspace(getRandomWorkspace());
         jobConfig.setRuleBased(isRuleBased());
-        computeScalingMultiplier(input);
+        computeScalingMultiplier(input, 1);
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         SparkJobResult result = retry.execute(ctx -> {

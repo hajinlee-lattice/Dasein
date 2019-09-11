@@ -49,7 +49,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
             String tenantId = customerSpace.getTenantId();
             jobConfig.setWorkspace(getRandomWorkspace());
             log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
-            computeScalingMultiplier(jobConfig.getInput());
+            computeScalingMultiplier(jobConfig.getInput(), jobConfig.getNumTargets());
             try {
                 RetryTemplate retry = RetryUtils.getRetryTemplate(3);
                 SparkJobResult result = retry.execute(context -> {
