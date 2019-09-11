@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -104,8 +105,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     }
 
     @Override
-    public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId,
-            String mimeType) {
+    public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId) {
 
         //model
         ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
@@ -127,7 +127,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         log.info("downloading training file csv: " + trainingFilePath);
 
         //download
-        CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType, trainingFilePath, null);
+        CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(MediaType.APPLICATION_OCTET_STREAM, trainingFilePath, null);
         downloader.downloadCsvWithTransform(request, response, headerTransform);
     }
 
@@ -289,5 +289,26 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         BundleFileHttpDownloader downloader = new BundleFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
 
+    }
+
+    @Override
+    public void downloadPostMatchFile(HttpServletRequest request, HttpServletResponse response, String modelId, String filter) {
+        //model
+        ModelSummary summary = modelSummaryProxy.findValidByModelId(MultiTenantContext.getTenant().getId(), modelId);
+        validateModelSummary(summary, modelId);
+
+        //event column and transform
+        String customer = MultiTenantContext.getTenant().getId();
+        String eventColumn = getEventColumn(customer, summary.getEventTableName());
+        Map<String, String> headerTransform = null;
+        log.info("event column name = " + eventColumn);
+        if (!eventColumn.equals("Event")) {
+            headerTransform = new HashMap<>();
+            headerTransform.put(eventColumn, "Event");
+        }
+
+        //download
+        HdfsFileHttpDownloader downloader = getDownloader(modelId, MediaType.APPLICATION_OCTET_STREAM, filter);
+        downloader.downloadCsvWithTransform(request, response, headerTransform);
     }
 }

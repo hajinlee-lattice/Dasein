@@ -18,7 +18,7 @@ public interface DataFileProviderService {
     void downloadPivotFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType)
             throws IOException;
 
-    void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType)
+    void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId)
             throws IOException;
 
     void downloadModelProfile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType)
@@ -40,4 +40,6 @@ public interface DataFileProviderService {
 
     void downloadCurrentBundleFile(HttpServletRequest request, HttpServletResponse response, String mimeType);
 
+    void downloadPostMatchFile(HttpServletRequest request, HttpServletResponse response, String modelId,
+                               String filter) throws IOException;
 }
