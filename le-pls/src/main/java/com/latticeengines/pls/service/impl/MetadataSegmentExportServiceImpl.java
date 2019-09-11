@@ -81,7 +81,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
 
-    @Override
+    @Value("${pls.spark.export.max}")
+    private long maxSparkSQLLimitationForExport;
+
+   @Override
     public List<MetadataSegmentExport> getSegmentExports() {
         List<AtlasExport> atlasExports = atlasExportProxy.findAll(getCustomerSpace().toString());
         List<MetadataSegmentExport> metadataSegmentExports =
@@ -112,8 +115,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     @Override
     public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob,
                                                         Boolean useSparkFromRestApi) {
-        checkExportSize(metadataSegmentExportJob);
-        setCreatedBy(metadataSegmentExportJob);
         boolean useSpark;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (useSparkFromRestApi != null) {
@@ -121,6 +122,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         } else {
             useSpark = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         }
+        checkExportSize(metadataSegmentExportJob, useSpark);
+        setCreatedBy(metadataSegmentExportJob);
         if (useSpark) {
             if (customerSpace == null) {
                 throw new LedpException(LedpCode.LEDP_18217);
@@ -152,19 +155,23 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         }
     }
 
-    private void checkExportSize(MetadataSegmentExport metadataSegmentExportJob) {
+    private void checkExportSize(MetadataSegmentExport metadataSegmentExportJob, boolean useSpark) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(metadataSegmentExportJob.getAccountFrontEndRestriction());
         frontEndQuery.setContactRestriction(metadataSegmentExportJob.getContactFrontEndRestriction());
         frontEndQuery.setMainEntity(metadataSegmentExportJob.getType() == AtlasExportType.ACCOUNT
                 ? BusinessEntity.Account : BusinessEntity.Contact);
-
         Tenant tenant = MultiTenantContext.getTenant();
-
         Long entriesCount = entityProxy.getCount(tenant.getId(), frontEndQuery);
         log.info("Total entries for export = " + entriesCount);
-        if (entriesCount > maxEntryLimitForExport) {
-            throw new LedpException(LedpCode.LEDP_18169, new String[] { maxEntryLimitForExport.toString() });
+        if (useSpark) {
+            if (entriesCount > maxSparkSQLLimitationForExport) {
+                throw new LedpException(LedpCode.LEDP_18169, new String[]{maxEntryLimitForExport.toString()});
+            }
+        } else {
+            if (entriesCount > maxEntryLimitForExport) {
+                throw new LedpException(LedpCode.LEDP_18169, new String[]{maxEntryLimitForExport.toString()});
+            }
         }
     }
 
