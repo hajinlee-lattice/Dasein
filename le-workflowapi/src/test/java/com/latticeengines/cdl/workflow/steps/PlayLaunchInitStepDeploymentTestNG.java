@@ -1,8 +1,10 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -146,6 +149,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         topNCount = 1500L;
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
 
         TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder()
                 .addChannel(new TestPlayChannelConfig.Builder().excludeItemsWithoutSalesforceId(true)
@@ -154,7 +159,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                         .destinationSystemName(CDLExternalSystemName.Marketo)
                         .destinationSystemId("Marketo_" + System.currentTimeMillis())
                         .trayAuthenticationId(UUID.randomUUID().toString()).topNCount(topNCount).build())
-                .playLaunchDryRun(true).build();
+                .featureFlags(featureFlagMap).playLaunchDryRun(true).build();
 
         testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
         testPlayCreationHelper.createPlayLaunch(testPlaySetupConfig);
