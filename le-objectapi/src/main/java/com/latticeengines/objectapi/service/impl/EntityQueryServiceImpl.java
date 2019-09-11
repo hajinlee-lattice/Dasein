@@ -117,6 +117,9 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 attrRepo);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
+        if (timeTranslator == null) {
+            log.warn("for tenant " + MultiTenantContext.getShortTenantId() + ", timeTranslator is null");
+        }
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, isCountQuery, timeTranslator, sqlUser);
