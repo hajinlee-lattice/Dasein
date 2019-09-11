@@ -182,7 +182,7 @@ public class DataFileResource {
     public void getTrainingSetCsvFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         response.setHeader("Content-Encoding", "gzip");
-        dataFileProviderService.downloadTrainingSet(request, response, modelId);
+        dataFileProviderService.downloadTrainingSet(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
     }
 
     @RequestMapping(value = "/modelprofileavro", method = RequestMethod.GET, headers = "Accept=application/json")
