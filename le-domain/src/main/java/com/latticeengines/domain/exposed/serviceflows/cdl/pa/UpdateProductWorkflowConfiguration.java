@@ -48,8 +48,8 @@ public class UpdateProductWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-        public Builder setCleanup(Boolean needCleanup) {
-            processProductStepConfiguration.setNeedCleanup(needCleanup);
+        public Builder setReplace(boolean needReplace) {
+            processProductStepConfiguration.setNeedReplace(needReplace);
             return this;
         }
 

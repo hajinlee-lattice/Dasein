@@ -53,7 +53,7 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     }
 
     @Override
-    public void createCleanupAction(String customerSpace, CleanupOperationConfiguration configuration) {
+    public void createReplaceAction(String customerSpace, CleanupOperationConfiguration configuration) {
         //create delete action do not run workflow, waiting for PA to delete
         log.info("customerSpace: {}, CleanupOperationConfiguration: {}", customerSpace, configuration);
         log.info("Registering an operation action for tenant={}", customerSpace);
@@ -64,13 +64,13 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         }
         BusinessEntity businessEntity = configuration.getEntity();
         if (businessEntity == null) {
-            createCleanupAction(tenant, configuration.getOperationInitiator(), BusinessEntity.Account);
-            createCleanupAction(tenant, configuration.getOperationInitiator(),
+            createReplaceAction(tenant, configuration.getOperationInitiator(), BusinessEntity.Account);
+            createReplaceAction(tenant, configuration.getOperationInitiator(),
                     BusinessEntity.Contact);
-            createCleanupAction(tenant, configuration.getOperationInitiator(), BusinessEntity.Product);
-            createCleanupAction(tenant, configuration.getOperationInitiator(), BusinessEntity.Transaction);
+            createReplaceAction(tenant, configuration.getOperationInitiator(), BusinessEntity.Product);
+            createReplaceAction(tenant, configuration.getOperationInitiator(), BusinessEntity.Transaction);
         } else {
-            createCleanupAction(tenant, configuration.getOperationInitiator(), businessEntity);
+            createReplaceAction(tenant, configuration.getOperationInitiator(), businessEntity);
         }
     }
 
@@ -87,7 +87,7 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         }
     }
 
-    private void createCleanupAction(Tenant tenant, String operationInitiator, BusinessEntity businessEntity) {
+    private void createReplaceAction(Tenant tenant, String operationInitiator, BusinessEntity businessEntity) {
         Action action = new Action();
         action.setType(ActionType.DATA_REPLACE);
         action.setActionInitiator(operationInitiator);

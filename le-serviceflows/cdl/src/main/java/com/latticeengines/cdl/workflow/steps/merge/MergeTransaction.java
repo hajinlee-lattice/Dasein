@@ -370,7 +370,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private void initOrCloneRawStore(TableRoleInCollection role, SchemaInterpretation schema) {
         String activeTableName = "";
-        if (!Boolean.TRUE.equals(configuration.getNeedCleanup())) {
+        if (!Boolean.TRUE.equals(configuration.getNeedReplace())) {
             activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
         }
         if (StringUtils.isNotBlank(activeTableName)) {

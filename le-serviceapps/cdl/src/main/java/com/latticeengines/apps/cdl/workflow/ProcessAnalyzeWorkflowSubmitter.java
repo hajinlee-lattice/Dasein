@@ -490,7 +490,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .ownerId(workflowPid) //
                 .rebuildEntities(request.getRebuildEntities()) //
                 .rebuildSteps(request.getRebuildSteps()) //
-                .cleanupEntities(needDeletedEntities) //
+                .replaceEntities(needDeletedEntities) //
                 .ignoreDataCloudChange(request.getIgnoreDataCloudChange()) //
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //

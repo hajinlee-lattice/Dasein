@@ -27,8 +27,8 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
     @JsonProperty("rebuild")
     private Boolean rebuild;
 
-    @JsonProperty("need_cleanup")
-    private Boolean needCleanup;
+    @JsonProperty("need_replace")
+    private boolean needReplace;
 
     @JsonProperty("system_ids")
     private Map<String, List<String>> systemIdMap; // entity -> List<ID> used for matching
@@ -62,11 +62,11 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
         this.defaultSystemIdMap = defaultSystemIdMap;
     }
 
-    public Boolean getNeedCleanup() {
-        return needCleanup;
+    public boolean getNeedReplace() {
+        return needReplace;
     }
 
-    public void setNeedCleanup(Boolean needCleanup) {
-        this.needCleanup = needCleanup;
+    public void setNeedReplace(boolean needReplace) {
+        this.needReplace = needReplace;
     }
 }

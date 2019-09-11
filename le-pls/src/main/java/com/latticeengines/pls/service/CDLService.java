@@ -38,7 +38,7 @@ public interface CDLService {
 
     ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation);
 
-    void cleanupAllByAction(String customerSpace, SchemaInterpretation schemaInterpretation);
+    void replaceData(String customerSpace, SchemaInterpretation schemaInterpretation);
 
     List<S3ImportTemplateDisplay> getS3ImportTemplate(String string, String sortBy);
 

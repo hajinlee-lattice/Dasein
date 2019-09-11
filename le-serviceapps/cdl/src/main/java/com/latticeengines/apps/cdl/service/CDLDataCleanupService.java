@@ -8,5 +8,5 @@ public interface CDLDataCleanupService {
 
     ApplicationId cleanupData(String customerSpace, CleanupOperationConfiguration configuration);
 
-    void createCleanupAction(String customerSpace, CleanupOperationConfiguration configuration);
+    void createReplaceAction(String customerSpace, CleanupOperationConfiguration configuration);
 }

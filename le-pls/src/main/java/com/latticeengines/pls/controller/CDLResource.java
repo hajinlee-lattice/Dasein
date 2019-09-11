@@ -300,11 +300,24 @@ public class CDLResource {
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            cdlService.cleanupAllByAction(customerSpace.toString(), schemaInterpretation);
+            cdlService.replaceData(customerSpace.toString(), schemaInterpretation);
             return ResponseDocument.successResponse("");
         } catch (RuntimeException e) {
             log.error(String.format("Failed to submit cleanup all job: %s", e.getMessage()));
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"Cleanup", e.getMessage()});
+        }
+    }
+
+    @RequestMapping(value = "/replaceData", method = RequestMethod.POST)
+    @ApiOperation(value = "create Replace Action to replace data")
+    public ResponseDocument<String> replaceData(@RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            cdlService.replaceData(customerSpace.toString(), schemaInterpretation);
+            return ResponseDocument.successResponse("");
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to create replace action: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[]{"Replace", e.getMessage()});
         }
     }
 

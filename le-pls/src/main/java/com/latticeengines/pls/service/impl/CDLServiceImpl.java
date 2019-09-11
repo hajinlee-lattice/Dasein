@@ -274,7 +274,7 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public void cleanupAllByAction(String customerSpace, SchemaInterpretation schemaInterpretation) {
+    public void replaceData(String customerSpace, SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
             case Account:

@@ -42,8 +42,8 @@ public class UpdateAccountWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-        public Builder setCleanup(Boolean needCleanup) {
-            processAccountStepConfiguration.setNeedCleanup(needCleanup);
+        public Builder setReplace(boolean needReplace) {
+            processAccountStepConfiguration.setNeedReplace(needReplace);
             return this;
         }
 

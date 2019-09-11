@@ -53,8 +53,8 @@ public class RebuildContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder setCleanup(Boolean needCleanup) {
-            processContactStepConfiguration.setNeedCleanup(needCleanup);
+        public Builder setReplace(boolean needReplace) {
+            processContactStepConfiguration.setNeedReplace(needReplace);
             return this;
         }
 

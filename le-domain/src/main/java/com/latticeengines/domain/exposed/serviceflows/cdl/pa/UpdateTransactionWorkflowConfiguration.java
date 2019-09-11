@@ -58,8 +58,8 @@ public class UpdateTransactionWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
-        public Builder setCleanup(Boolean needCleanup) {
-            processTransactionStepConfiguration.setNeedCleanup(needCleanup);
+        public Builder setReplace(boolean needReplace) {
+            processTransactionStepConfiguration.setNeedReplace(needReplace);
             return this;
         }
 

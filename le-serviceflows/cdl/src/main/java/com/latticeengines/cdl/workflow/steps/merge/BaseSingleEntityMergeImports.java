@@ -168,7 +168,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        if (!Boolean.TRUE.equals(configuration.getNeedCleanup())) {
+        if (!Boolean.TRUE.equals(configuration.getNeedReplace())) {
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
