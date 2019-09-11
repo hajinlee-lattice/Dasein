@@ -36,7 +36,12 @@ public class MatchCdlWithoutAccountIdStartStep extends BaseWorkflowStep<MatchCdl
             return;
         }
         String path = inputTable.getExtracts().get(0).getPath();
-        long count = AvroUtils.count(yarnConfiguration, path + "/" + "*.avro");
+        long count = 0;
+        if (path.endsWith("*.avro")) {
+            count = AvroUtils.count(yarnConfiguration, path);
+        } else {
+            count = AvroUtils.count(yarnConfiguration, path + "/" + "*.avro");
+        }
         if (count == 0) {
             log.info("There's no data without account Id, skip the workflow.");
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), inputTable.getName());

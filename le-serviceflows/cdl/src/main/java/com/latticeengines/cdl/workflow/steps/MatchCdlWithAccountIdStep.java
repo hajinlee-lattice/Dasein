@@ -19,8 +19,10 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlAccountParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlSplitConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
@@ -33,6 +35,8 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
 
     @Inject
     private BatonService batonService;
+
+    private boolean hasCustomerAccountId = true;
 
     private static Logger log = LoggerFactory.getLogger(MatchCdlWithAccountIdStep.class);
 
@@ -61,6 +65,8 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         if (batonService.isEntityMatchEnabled(getConfiguration().getCustomerSpace())) {
             if (accountTable.getAttribute(InterfaceName.CustomerAccountId) != null) {
                 customerAccountId = InterfaceName.CustomerAccountId.name();
+            } else {
+                hasCustomerAccountId = false;
             }
         }
         parameters.setAccountMatchFields(Arrays.asList(customerAccountId));
@@ -71,6 +77,13 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         inputSkippedAttributeList.removeAll(accountAttributeList);
         putObjectInContext(INPUT_SKIPPED_ATTRIBUTES_KEY, inputSkippedAttributeList);
         return parameters;
+    }
+
+    @Override
+    public void execute() {
+        if (hasCustomerAccountId) {
+            super.execute();
+        }
     }
 
     private Table getAccountTable() {
@@ -92,10 +105,19 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
 
     @Override
     public void onExecutionCompleted() {
-        Table targetTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getTargetTableName());
-        putObjectInContext(CUSTOM_EVENT_MATCH_ACCOUNT, targetTable);
-        putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, targetTable);
+        if (hasCustomerAccountId) {
+            Table targetTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                    configuration.getTargetTableName());
+            putObjectInContext(CUSTOM_EVENT_MATCH_ACCOUNT, targetTable);
+            putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, targetTable);
+        } else {
+            Table targetTable = getInputTable();
+            putObjectInContext(CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID, targetTable);
+            String ns = getParentNamespace();
+            ns = ns.lastIndexOf(".") == -1 ? "" : ns.substring(0, ns.lastIndexOf("."));
+            skipEmbeddedWorkflowSteps(ns, "customEventMatchWorkflow", CustomEventMatchWorkflowConfiguration.class,
+                    Arrays.asList(MatchCdlSplitConfiguration.class.getSimpleName()));
+        }
     }
 
 }

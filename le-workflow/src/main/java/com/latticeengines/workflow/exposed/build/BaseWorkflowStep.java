@@ -441,6 +441,19 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         });
     }
 
+    protected void skipEmbeddedWorkflowSteps(String parentNamespace, String workflowName,
+            Class<? extends WorkflowConfiguration> workflowClass, List<String> stepNames) {
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowName,
+                workflowClass);
+        String newParentNamespace = StringUtils.isEmpty(parentNamespace) ? "" : parentNamespace + ".";
+        stepNames.forEach(s -> {
+            String key = newParentNamespace + workflowName + "." + s;
+            BaseStepConfiguration step = stepConfigMap.get(key);
+            step.setSkipStep(true);
+            putObjectInContext(key, step);
+        });
+    }
+
     protected void enableEmbeddedWorkflow(String parentNamespace, String workflowName,
             Class<? extends WorkflowConfiguration> workflowClass) {
         Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowName,
