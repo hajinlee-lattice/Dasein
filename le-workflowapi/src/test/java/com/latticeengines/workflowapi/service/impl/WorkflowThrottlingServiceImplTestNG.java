@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -57,17 +58,24 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
     private static final String GENERIC_WF_TYPE = "genericWorkflowType";
     private static final String EMR_CLUSTER_ID = "fakedId";
 
-    private static List<WorkflowJob> FAKE_WORKFLOW_DIV1;
-    private static List<WorkflowJob> FAKE_WORKFLOW_DIV2;
-    private static List<WorkflowJob> FAKE_WORKFLOW_FOR_BP;
-    private static List<WorkflowJob> FAKE_WORKFLOW_FOR_RESULT;
+    private static List<WorkflowJob> FAKE_WF_FOR_STATUS1;
+    private static List<WorkflowJob> FAKE_WF_FOR_STATUS2;
+    private static List<WorkflowJob> REACHED_QUEUE_LIMIT;
+    private static List<WorkflowJob> NOT_REACHED_QUEUE_LIMIT;
+    private static List<WorkflowJob> FAKE_WORKFLOW_FOR_RESULT1;
+    private static List<WorkflowJob> FAKE_WORKFLOW_FOR_RESULT2;
 
     private static String TEST_TENANT_ID;
     private static final String TENANT_ID_EMPTY_CONFIG = "abcde.abcde.Production";
 
     private static final String GLOBAL = "global";
+    private static final String DEFAULT = "default";
+    private static final String GLOBALCONFIG = "globalConfig";
+    private static final String TENANTCONFIG = "tenantConfig";
 
     private static WorkflowThrottlingConfiguration populated;
+
+    private static String originMasterConfigStr;
 
     private static Long WORKFLOW_PID = 0L;
 
@@ -98,11 +106,18 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
             c.create(flagPath2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             c.set(flagPath1, new Document("false"));
             c.set(flagPath2, new Document("true"));
+
+            Path masterConfigPath = PathBuilder.buildWorkflowThrottlingMasterConfigPath();
+            if (c.exists(masterConfigPath)) {
+                originMasterConfigStr = c.get(masterConfigPath).getData();
+                c.delete(masterConfigPath);
+            }
         } catch (Exception e) {
             log.error("Error encountered while setting up zk data.", e);
         }
         TEST_TENANT_ID = CustomerSpace.parse(tenant.getId()).toString();
         populateFakeWorkflows();
+        populateTestConfigToZK();
     }
 
     @AfterClass(groups = "functional")
@@ -110,6 +125,11 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         Camille c = CamilleEnvironment.getCamille();
         try {
             c.delete(PathBuilder.buildPodPath(TEST_PODID));
+            Path masterConfigPath = PathBuilder.buildWorkflowThrottlingMasterConfigPath();
+            c.delete(masterConfigPath);
+            if (StringUtils.isNotEmpty(originMasterConfigStr)) {
+                c.create(masterConfigPath, new Document(originMasterConfigStr), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
         } catch (Exception e) {
             log.error("Error encountered while tearing down zk data.", e);
         }
@@ -117,7 +137,6 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
     @Test(groups = "functional")
     public void testGetConfig() {
-        populated = populateTestConfig();
         WorkflowThrottlingConfiguration retrieved = workflowThrottlingService.getThrottlingConfig(TEST_PODID, TEST_DIV1,
                 new HashSet<String>() {
                     {
@@ -126,8 +145,13 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                     }
                 });
 
-        System.out.println(retrieved);
-        assertConfigMatch(populated, retrieved);
+        Assert.assertNotNull(retrieved);
+        Assert.assertNotNull(retrieved.getGlobalLimit());
+        Assert.assertNotNull(retrieved.getTenantLimit());
+        Assert.assertNotNull(retrieved.getTenantLimit().get(GLOBAL));
+        Assert.assertNotNull(retrieved.getTenantLimit().get(GLOBAL).get(DEFAULT));
+        Assert.assertNotNull(retrieved.getTenantLimit().get(GLOBAL).get(TEST_WF_TYPE));
+        Assert.assertNotNull(retrieved.getTenantLimit().get(TEST_TENANT_ID));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetConfig", dataProvider = "testGetStatusProvider")
@@ -138,8 +162,11 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                         fakedWorkflowJobs.stream().filter(o -> JobStatus.RUNNING.name().equals(o.getStatus()))
                                 .collect(Collectors.toList()));
         when(workflowJobEntityMgr.findByStatuses(Arrays.asList(JobStatus.ENQUEUED.name(), JobStatus.PENDING.name())))
-                .thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus()) || JobStatus.PENDING.name().equals(o.getStatus()))
-                        .collect(Collectors.toList()));
+                .thenReturn(
+                        fakedWorkflowJobs.stream()
+                                .filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus())
+                                        || JobStatus.PENDING.name().equals(o.getStatus()))
+                                .collect(Collectors.toList()));
         WorkflowThrottlingSystemStatus status = workflowThrottlingService.constructSystemStatus(podid, div);
         Assert.assertNotNull(status);
 
@@ -174,12 +201,14 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                         fakedWorkflowJobs.stream().filter(o -> JobStatus.RUNNING.name().equals(o.getStatus()))
                                 .collect(Collectors.toList()));
         when(workflowJobEntityMgr.findByStatuses(Arrays.asList(JobStatus.ENQUEUED.name(), JobStatus.PENDING.name())))
-                .thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus()) || JobStatus.PENDING.name().equals(o.getStatus()))
-                        .collect(Collectors.toList()));
+                .thenReturn(
+                        fakedWorkflowJobs.stream()
+                                .filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus())
+                                        || JobStatus.PENDING.name().equals(o.getStatus()))
+                                .collect(Collectors.toList()));
 
         ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, division);
 
-        System.out.println(result);
         // count canSubmit
         Assert.assertEquals(result.getCanSubmit().getOrDefault(TEST_TENANT_ID, Collections.emptyList()).size(),
                 submittedCount);
@@ -189,9 +218,10 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
     @DataProvider(name = "throttlingResultProvider")
     public Object[][] throttlingResultProvider() {
-        // podid, division, faked workflowJobs, expect submittedCount, expect enqueuedCount
-        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_FOR_RESULT, 2, 0 },
-                { TEST_PODID, TEST_DIV2, FAKE_WORKFLOW_FOR_RESULT, 5, 7 } };
+        // podid, division, faked workflowJobs, expect submittedCount, expect
+        // enqueuedCount
+        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_FOR_RESULT1, 4,  10},
+                { TEST_PODID, TEST_DIV2, FAKE_WORKFLOW_FOR_RESULT2, 0, 6 } };
     }
 
     @DataProvider(name = "flagProvider")
@@ -204,19 +234,19 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
     @DataProvider(name = "testGetStatusProvider")
     public Object[][] testGetStatusProvider() {
         // podId, divId, fake wfj
-        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_DIV1 },
-                { TEST_PODID, TEST_DIV2, FAKE_WORKFLOW_DIV2 } };
+        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WF_FOR_STATUS1},
+                { TEST_PODID, TEST_DIV2, FAKE_WF_FOR_STATUS2} };
     }
 
     @DataProvider(name = "testBackPressureProvider")
     public Object[][] testBackPressureProvider() {
         // podid, divId, customerSpace workflowConfig, faked wfj, expectBackPressure
-        return new Object[][] { { TEST_PODID, TEST_DIV1, TEST_TENANT_ID, TEST_WF_TYPE, FAKE_WORKFLOW_FOR_BP, false },
-                { TEST_PODID, TEST_DIV2, TEST_TENANT_ID, GENERIC_WF_TYPE, FAKE_WORKFLOW_FOR_BP, true } };
+        return new Object[][] { { TEST_PODID, TEST_DIV1, TEST_TENANT_ID, GENERIC_WF_TYPE, REACHED_QUEUE_LIMIT, true },
+                { TEST_PODID, TEST_DIV2, TEST_TENANT_ID, TEST_WF_TYPE, NOT_REACHED_QUEUE_LIMIT, false } };
     }
 
     private void populateFakeWorkflows() {
-        FAKE_WORKFLOW_DIV1 = new ArrayList<WorkflowJob>() {
+        FAKE_WF_FOR_STATUS1 = new ArrayList<WorkflowJob>() {
             {
                 add(workflowJobBuilder(JobStatus.RUNNING, TEST_DIV1, GENERIC_WF_TYPE, EMR_CLUSTER_ID, tenant));
                 add(workflowJobBuilder(JobStatus.RUNNING, TEST_DIV1, TEST_WF_TYPE, EMR_CLUSTER_ID, tenant));
@@ -229,7 +259,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
             }
         };
 
-        FAKE_WORKFLOW_DIV2 = new ArrayList<WorkflowJob>() {
+        FAKE_WF_FOR_STATUS2 = new ArrayList<WorkflowJob>() {
             {
                 add(workflowJobBuilder(JobStatus.RUNNING, TEST_DIV2, GENERIC_WF_TYPE, EMR_CLUSTER_ID, tenant));
                 add(workflowJobBuilder(JobStatus.RUNNING, TEST_DIV2, GENERIC_WF_TYPE, EMR_CLUSTER_ID, tenant));
@@ -242,22 +272,31 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
             }
         };
 
-        FAKE_WORKFLOW_FOR_BP = new ArrayList<WorkflowJob>() {
+        REACHED_QUEUE_LIMIT = new ArrayList<WorkflowJob>() {
             {
-                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
-                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
-                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, TEST_WF_TYPE, null, tenant));
-                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, TEST_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
             }
         };
 
-        FAKE_WORKFLOW_FOR_RESULT = new ArrayList<WorkflowJob>() {
+        NOT_REACHED_QUEUE_LIMIT = new ArrayList<WorkflowJob>() {
+            {
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            }
+        };
+
+        FAKE_WORKFLOW_FOR_RESULT1 = new ArrayList<WorkflowJob>() {
             {
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, TEST_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, TEST_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
@@ -266,8 +305,16 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
-                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
-                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+            }
+        };
+        FAKE_WORKFLOW_FOR_RESULT2 = new ArrayList<WorkflowJob>() {
+            {
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, TEST_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
             }
         };
     }
@@ -284,149 +331,67 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         return wfj;
     }
 
-    private WorkflowThrottlingConfiguration populateTestConfig() {
-        WorkflowThrottlingConfiguration config = new WorkflowThrottlingConfiguration();
+    private void populateTestConfigToZK() {
+        Camille c = CamilleEnvironment.getCamille();
 
-        config.setEnvConfig(new HashMap<String, Map<JobStatus, Integer>>() {
+        Map<String, Map<String, Map<JobStatus, Integer>>> masterPropertyFile = new HashMap<String, Map<String, Map<JobStatus, Integer>>>() {
             {
-                put(GLOBAL, new HashMap<JobStatus, Integer>() {
+                put(GLOBALCONFIG, new HashMap<String, Map<JobStatus, Integer>>() {
                     {
-                        put(JobStatus.RUNNING, 6);
-                        put(JobStatus.ENQUEUED, 10);
-                    }
-                });
-                put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {
-                    {
-                        put(JobStatus.RUNNING, 2);
-                        put(JobStatus.ENQUEUED, 7);
-                    }
-                });
-            }
-        });
-
-        config.setStackConfig(new HashMap<String, Map<String, Map<JobStatus, Integer>>>() {
-            {
-                put(TEST_DIV1, new HashMap<String, Map<JobStatus, Integer>>() {
-                    {
-                        put(GLOBAL, new HashMap<JobStatus, Integer>() {
+                        put(DEFAULT, new HashMap<JobStatus, Integer>() {
                             {
-                                put(JobStatus.RUNNING, 5);
-                                put(JobStatus.ENQUEUED, 6);
+                                put(JobStatus.RUNNING, 3);
+                                put(JobStatus.ENQUEUED, 5);
                             }
                         });
                         put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {
+                            {
+                                put(JobStatus.RUNNING, 2);
+                                put(JobStatus.ENQUEUED, 10);
+                            }
+                        });
+                    }
+                });
+                put(TENANTCONFIG, new HashMap<String, Map<JobStatus, Integer>>() {
+                    {
+                        put(DEFAULT, new HashMap<JobStatus, Integer>() {
                             {
                                 put(JobStatus.RUNNING, 2);
                                 put(JobStatus.ENQUEUED, 3);
                             }
                         });
-                    }
-                });
-                put(TEST_DIV2, new HashMap<String, Map<JobStatus, Integer>>() {
-                    {
-                        put(GLOBAL, new HashMap<JobStatus, Integer>() {
-                            {
-                                put(JobStatus.RUNNING, 10);
-                                put(JobStatus.ENQUEUED, 2);
-                            }
-                        });
                         put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {
                             {
-                                put(JobStatus.RUNNING, 5);
-                                put(JobStatus.ENQUEUED, 4);
+                                put(JobStatus.RUNNING, 1);
+                                put(JobStatus.ENQUEUED, 2);
                             }
                         });
                     }
                 });
             }
-        });
-
-        config.setTenantConfig(new HashMap<String, Map<String, Map<JobStatus, Integer>>>() {
+        };
+        Map<String, Map<JobStatus, Integer>> tenantOverwrite = new HashMap<String, Map<JobStatus, Integer>>() {
             {
-                put(GLOBAL, new HashMap<String, Map<JobStatus, Integer>>() {
+                put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {
                     {
-                        put(GLOBAL, new HashMap<JobStatus, Integer>() {
-                            {
-                                put(JobStatus.RUNNING, 5);
-                                put(JobStatus.ENQUEUED, 6);
-                            }
-                        });
-                        put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {
-                            {
-                                put(JobStatus.RUNNING, 2);
-                                put(JobStatus.ENQUEUED, 2);
-                            }
-                        });
+                        put(JobStatus.RUNNING, 20);
+                        put(JobStatus.ENQUEUED, 30);
                     }
                 });
-                put(TEST_TENANT_ID, new HashMap<String, Map<JobStatus, Integer>>() {
-                    {
-                        put(TEST_WF_TYPE, new HashMap<JobStatus, Integer>() {
-                            {
-                                put(JobStatus.RUNNING, 10);
-                                put(JobStatus.ENQUEUED, 20);
-                            }
-                        });
-                    }
-                });
-                put(TENANT_ID_EMPTY_CONFIG, new HashMap<>());
             }
-        });
-        saveConfigToZK(config);
-
-        return config;
-    }
-
-    private void saveConfigToZK(WorkflowThrottlingConfiguration config) {
-        Camille c = CamilleEnvironment.getCamille();
+        };
         try {
-            String envConfigStr = JsonUtils.serialize(config.getEnvConfig());
-            c.create(PathBuilder.buildWorkflowThrottlerPodsConfigPath(TEST_PODID), new Document(envConfigStr),
+            String masterPropertyFileStr = JsonUtils.serialize(masterPropertyFile);
+            c.create(PathBuilder.buildWorkflowThrottlingMasterConfigPath(), new Document(masterPropertyFileStr),
                     ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            String divConfigStr = JsonUtils.serialize(config.getStackConfig());
-            c.create(PathBuilder.buildWorkflowThrottlerDivisionConfigPath(TEST_PODID), new Document(divConfigStr),
-                    ZooDefs.Ids.OPEN_ACL_UNSAFE);
-
-            Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig = config.getTenantConfig();
-            tenantConfig.forEach((tenantId, workflowMap) -> {
-                try {
-                    if (tenantId.equals(GLOBAL)) {
-                        String globalTenantConfigStr = JsonUtils.serialize(tenantConfig.get(GLOBAL));
-                        c.create(PathBuilder.buildWorkflowThrottlerGlobalTenantConfigPath(TEST_PODID),
-                                new Document(globalTenantConfigStr), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                    } else {
-                        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-                        String workflowMapStr = JsonUtils.serialize(tenantConfig.get(tenantId));
-                        c.create(PathBuilder.buildWorkflowThrottlerTenantConfigPath(TEST_PODID, customerSpace),
-                                new Document(workflowMapStr), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                    }
-                } catch (Exception e) {
-                    log.error("Error populating tenant config", e);
-                }
-            });
+            String tenantOverwriteStr = JsonUtils.serialize(tenantOverwrite);
+            c.create(
+                    PathBuilder.buildWorkflowThrottlingTenantConfigPath(TEST_PODID,
+                            CustomerSpace.parse(TEST_TENANT_ID)),
+                    new Document(tenantOverwriteStr), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         } catch (Exception e) {
-            log.error("Error populating config.", e);
+            log.error("Failed to create test config in zk", e);
         }
-    }
-
-    private void assertConfigMatch(WorkflowThrottlingConfiguration populated,
-            WorkflowThrottlingConfiguration retrieved) {
-        assertWorkflowMapMatch(populated.getEnvConfig(), retrieved.getEnvConfig());
-        assertConfigMapMatch(populated.getStackConfig(), retrieved.getStackConfig());
-        assertConfigMapMatch(populated.getTenantConfig(), retrieved.getTenantConfig());
-    }
-
-    private void assertConfigMapMatch(Map<String, Map<String, Map<JobStatus, Integer>>> c1,
-            Map<String, Map<String, Map<JobStatus, Integer>>> c2) {
-        c1.forEach((podId, populatedWorkflowMap) -> {
-            assertWorkflowMapMatch(populatedWorkflowMap, c2.getOrDefault(podId, null));
-        });
-    }
-
-    private void assertWorkflowMapMatch(Map<String, Map<JobStatus, Integer>> m1,
-            Map<String, Map<JobStatus, Integer>> m2) {
-        Assert.assertNotNull(m2);
-        Assert.assertEquals(m1.keySet(), m2.keySet());
     }
 
     private void assertTotalExistingMatch(WorkflowThrottlingSystemStatus status, List<WorkflowJob> fakeWorkflows,

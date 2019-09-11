@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 public interface WorkflowThrottlingConstraint {
 
     String GLOBAL = "global";
+    String DEFAULT = "default";
 
     /**
      * return true if the constraint is satisfied

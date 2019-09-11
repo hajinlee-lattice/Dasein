@@ -6,19 +6,21 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public class WorkflowThrottlingSystemStatus {
+    // global (cross-type count) entries are not taken into consideration while draining queue
+    // kept just in case of logging or monitoring
 
-    private final String GLOBAL_KEY = "global";
+    private final String GLOBAL = "global";
 
     private WorkflowThrottlingConfiguration config;
 
-    // workflowType(or global) -> count
+    // workflowType(or global = total count including all types) -> count
     private Map<String, Integer> runningWorkflowInEnv; //
     private Map<String, Integer> runningWorkflowInStack; //
 
     private Map<String, Integer> enqueuedWorkflowInEnv; //
     private Map<String, Integer> enqueuedWorkflowInStack; //
 
-    // customerSpace -> type (or global) -> count
+    // customerSpace -> type (or global = total count including all types) -> count
     private Map<String, Map<String, Integer>> tenantRunningWorkflow; //
     private Map<String, Map<String, Integer>> tenantEnqueuedWorkflow; //
 
@@ -89,18 +91,18 @@ public class WorkflowThrottlingSystemStatus {
     }
 
     public int getTotalRunningWorkflowInEnv() {
-        return runningWorkflowInEnv.get(GLOBAL_KEY);
+        return runningWorkflowInEnv.get(GLOBAL);
     }
 
     public int getTotalEnqueuedWorkflowInEnv() {
-        return enqueuedWorkflowInEnv.get(GLOBAL_KEY);
+        return enqueuedWorkflowInEnv.get(GLOBAL);
     }
 
     public int getTotalRunningWorkflowInStack() {
-        return runningWorkflowInStack.get(GLOBAL_KEY);
+        return runningWorkflowInStack.get(GLOBAL);
     }
 
     public int getTotalEnqueuedWorkflowInStack() {
-        return enqueuedWorkflowInStack.get(GLOBAL_KEY);
+        return enqueuedWorkflowInStack.get(GLOBAL);
     }
 }

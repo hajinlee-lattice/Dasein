@@ -537,8 +537,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 try {
                     ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
                     submitted.add(appId);
-                    o.setStatus(JobStatus.PENDING.name());
-                    workflowJobEntityMgr.update(o);
                     log.info("Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
                 } catch (Exception e) {
                     log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);

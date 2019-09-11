@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingSystemStatus;
@@ -9,27 +8,26 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public class NotExceedingTenantQuota implements WorkflowThrottlingConstraint {
     @Override
-    public boolean satisfied(WorkflowThrottlingSystemStatus status, WorkflowJob workflowJob, String podid, String division) {
-        // construct tenant specific config
-        Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig = status.getConfig().getTenantConfig();
-        String workflowType = workflowJob.getType();
+    public boolean satisfied(WorkflowThrottlingSystemStatus status, WorkflowJob workflowJob, String podid,
+            String division) {
         String customerSpace = workflowJob.getTenant().getId();
-        Map<String, Map<JobStatus, Integer>> workflowMap = new HashMap<>(tenantConfig.get(GLOBAL));
-        if (tenantConfig.get(customerSpace) != null) {
-            workflowMap.putAll(tenantConfig.get(customerSpace));
+        String workflowType = workflowJob.getType();
+        Map<JobStatus, Integer> tenantMap = getTenantMap(status.getConfig().getTenantLimit(), customerSpace,
+                workflowType);
+        Integer running = 0;
+        if (status.getTenantRunningWorkflow().get(customerSpace) != null) {
+            running = status.getTenantRunningWorkflow().get(customerSpace).getOrDefault(workflowType, 0);
         }
+        return running < tenantMap.get(JobStatus.RUNNING);
+    }
 
-        Map<String, Integer> tenantRunningWorkflowMap = status.getTenantRunningWorkflow().get(customerSpace);
-        Integer tenantRunningGlobalCount = tenantRunningWorkflowMap == null ? 0 : tenantRunningWorkflowMap.get(GLOBAL);
-        Integer tenantRunningTypedCount = tenantRunningWorkflowMap == null ? 0 : tenantRunningWorkflowMap.getOrDefault(workflowType, 0);
-
-        Integer typedQuota = workflowMap.get(workflowType) == null ? null : workflowMap.get(workflowType).get(JobStatus.RUNNING);
-
-        if (typedQuota != null && typedQuota <= tenantRunningTypedCount) {
-            return false;
+    private Map<JobStatus, Integer> getTenantMap(Map<String, Map<String, Map<JobStatus, Integer>>> tenantLimit,
+            String customerSpace, String workflowType) {
+        Map<String, Map<JobStatus, Integer>> tenantMap = tenantLimit.get(customerSpace);
+        if (tenantMap == null) {
+            return tenantLimit.get(GLOBAL).getOrDefault(workflowType, tenantLimit.get(GLOBAL).get(DEFAULT));
         }
-
-        Integer defaultQuota = workflowMap.get(GLOBAL).get(JobStatus.RUNNING);
-        return defaultQuota > tenantRunningGlobalCount;
+        return tenantMap.getOrDefault(workflowType, tenantMap.getOrDefault(DEFAULT,
+                tenantLimit.get(GLOBAL).getOrDefault(workflowType, tenantLimit.get(GLOBAL).get(DEFAULT))));
     }
 }
