@@ -307,9 +307,11 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         List<AttrValidation> validations = saveResponse.getDetails().getValidations();
         Map<ValidationErrors.Type, Integer> errorMap = new HashMap<>();
         validations.stream().forEach(validation -> {
-            Map<ValidationErrors.Type, List<String>> errors = validation.getValidationErrors().getErrors();
-            for (ValidationErrors.Type type : errors.keySet()) {
-                errorMap.put(type, errorMap.getOrDefault(type, 0) + 1);
+            if (validation.getValidationErrors() != null) {
+                Map<ValidationErrors.Type, List<String>> errors = validation.getValidationErrors().getErrors();
+                for (ValidationErrors.Type type : errors.keySet()) {
+                    errorMap.put(type, errorMap.getOrDefault(type, 0) + 1);
+                }
             }
         });
         StringBuilder html = new StringBuilder();
