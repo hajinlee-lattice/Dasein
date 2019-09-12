@@ -319,7 +319,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 List<Pair<EntityLookupEntry, String>> pairs = new ArrayList<>();
                 for (EntityRawSeed seed : scanSeeds) {
                     List<String> seedIds = entityLookupEntryService.get(sourceEnv, sourceTenant,
-                            seed.getLookupEntries());
+                            seed.getLookupEntries(), getMatchVersion(sourceEnv, sourceTenant, null));
                     for (int i = 0; i < seedIds.size(); i++) {
                         if (seedIds.get(i) == null) {
                             nNotInStaging++;
@@ -333,7 +333,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 }
                 entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled,
                         getMatchVersion(destEnv, destTenant, null));
-                entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled);
+                entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled,
+                        getMatchVersion(destEnv, destTenant, null));
                 seedCount += scanSeeds.size();
                 lookupCount += pairs.size();
             }
@@ -473,7 +474,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         return Pair.of(entry, false);
                     }
                     boolean setSucceeded = entityLookupEntryService.setIfEquals(env, tenant, entry, seed.getId(),
-                            shouldSetTTL(env));
+                            shouldSetTTL(env), getMatchVersion(env, tenant, null));
                     // NOTE for debugging concurrency issue.
                     log.debug("Map lookup entry {} to seed(ID={}), success={}", entry, seed.getId(), setSucceeded);
                     return Pair.of(entry, setSucceeded);
@@ -560,7 +561,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             @NotNull Tenant tenant, @NotNull EntityMatchEnvironment env, @NotNull Set<EntityLookupEntry> uniqueEntries) {
         List<EntityLookupEntry> entries = new ArrayList<>(uniqueEntries);
         List<String> seedIds = entityLookupEntryService
-                .get(env, tenant, entries);
+                .get(env, tenant, entries, getMatchVersion(env, tenant, null));
         return listToMap(entries, seedIds);
     }
 
@@ -943,7 +944,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         .map(triple -> Pair.of(triple.getMiddle(), triple.getRight()))
                         .collect(Collectors.toList());
                 Tenant tenant = list.get(0).getLeft(); // tenant in the list should all be the same
-                entityLookupEntryService.set(env, tenant, pairs, shouldSetTTL(env));
+                entityLookupEntryService.set(env, tenant, pairs, shouldSetTTL(env), getMatchVersion(env, tenant, null));
             });
         }
     }

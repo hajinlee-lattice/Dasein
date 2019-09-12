@@ -23,6 +23,7 @@ import org.testng.Assert;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -61,6 +62,7 @@ public class AdvancedAccountMatchTestResultVerifier {
     private final String entity;
     private final EntityRawSeedService entityRawSeedService;
     private final EntityLookupEntryService entityLookupEntryService;
+    private final EntityMatchVersionService entityMatchVersionService;
 
     // temp states
     private Map<Pair<String, String>, String> entityIdMap = new HashMap<>(); // [ grpId, recordId ] => entityId
@@ -71,7 +73,8 @@ public class AdvancedAccountMatchTestResultVerifier {
 
     public AdvancedAccountMatchTestResultVerifier(@NotNull Tenant tenant, @NotNull String entity,
             @NotNull EntityRawSeedService entityRawSeedService,
-            @NotNull EntityLookupEntryService entityLookupEntryService) {
+            @NotNull EntityLookupEntryService entityLookupEntryService,
+            @NotNull EntityMatchVersionService entityMatchVersionService) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(entityLookupEntryService);
@@ -80,6 +83,7 @@ public class AdvancedAccountMatchTestResultVerifier {
         this.entity = entity;
         this.entityRawSeedService = entityRawSeedService;
         this.entityLookupEntryService = entityLookupEntryService;
+        this.entityMatchVersionService = entityMatchVersionService;
     }
 
     /*
@@ -138,7 +142,8 @@ public class AdvancedAccountMatchTestResultVerifier {
             }
 
             if (!records.hasNext() || entityIdBuf.size() >= BATCH_SIZE) {
-                List<EntityRawSeed> result = entityRawSeedService.get(STAGING, tenant, entity, entityIdBuf);
+                List<EntityRawSeed> result = entityRawSeedService.get(STAGING, tenant, entity, entityIdBuf,
+                        entityMatchVersionService.getCurrentVersion(STAGING, tenant));
                 for (int i = 0; i < entityIdBuf.size(); i++) {
                     EntityRawSeed seed = result.get(i);
                     if (seed == null) {
@@ -155,7 +160,8 @@ public class AdvancedAccountMatchTestResultVerifier {
             }
 
             if (!records.hasNext() || lookupEntryBuf.size() >= BATCH_SIZE) {
-                List<String> result = entityLookupEntryService.get(STAGING, tenant, lookupEntryBuf);
+                List<String> result = entityLookupEntryService.get(STAGING, tenant, lookupEntryBuf,
+                        entityMatchVersionService.getCurrentVersion(STAGING, tenant));
                 for (int i = 0; i < lookupEntryBuf.size(); i++) {
                     lookupEntries.put(lookupEntryBuf.get(i), result.get(i));
                     if (StringUtils.isBlank(result.get(i))) {

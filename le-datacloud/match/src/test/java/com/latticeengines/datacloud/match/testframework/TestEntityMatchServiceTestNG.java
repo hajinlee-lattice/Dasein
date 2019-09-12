@@ -77,7 +77,8 @@ public class TestEntityMatchServiceTestNG extends DataCloudMatchFunctionalTestNG
                     fromSystemId(TEST_ENTITY, "SFDC", "sfdc_1"),
                     fromSystemId(TEST_ENTITY, "SFDC", "s1"));
             List<String> expectedEntityIds = Arrays.asList("adhfhhfhf", "adhfhhfhf", "abbbcc");
-            List<String> entityIds = entityLookupEntryService.get(env, TEST_TENANT, entries);
+            List<String> entityIds = entityLookupEntryService.get(env, TEST_TENANT, entries,
+                    entityMatchVersionService.getCurrentVersion(env, TEST_TENANT));
             Assert.assertEquals(entityIds, expectedEntityIds);
         } catch (Exception e) {
             Assert.fail("Failed to prepare lookup test data in env = " + env, e);

@@ -248,7 +248,8 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
                 entityMatchVersionService.getCurrentVersion(STAGING, tenant));
         List<Pair<EntityLookupEntry, String>> lookupList = LOOKUP_MAP.entrySet().stream()
                 .map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-        entityLookupEntryService.set(STAGING, tenant, lookupList, true);
+        entityLookupEntryService.set(STAGING, tenant, lookupList, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
     }
 
     /*

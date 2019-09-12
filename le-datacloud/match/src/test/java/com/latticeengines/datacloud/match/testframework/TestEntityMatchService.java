@@ -85,7 +85,8 @@ public class TestEntityMatchService {
             // create lookup entries
             List<Pair<EntityLookupEntry, String>> entries = getLookupEntryPairs(entity, req.matchKeyIdx,
                     req.entityIdIdx, req.systemIdx, lookupData);
-            entityLookupEntryService.set(env, tenant, entries, setTTL);
+            entityLookupEntryService.set(env, tenant, entries, setTTL,
+                    entityMatchVersionService.getCurrentVersion(env, tenant));
             return entries;
         }, setTTL);
     }

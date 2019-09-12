@@ -221,7 +221,8 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                         continue;
                     }
 
-                    List<String> mappedSeedIds = entityLookupEntryService.get(STAGING, tenant, entries);
+                    List<String> mappedSeedIds = entityLookupEntryService.get(STAGING, tenant, entries,
+                            entityMatchVersionService.getCurrentVersion(STAGING, tenant));
                     Map<String, List<EntityLookupEntry>> entryMap = new HashMap<>();
                     for (int j = 0; j < mappedSeedIds.size(); j++) {
                         if (mappedSeedIds.get(j) == null) {
@@ -301,7 +302,8 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
 
                     entityRawSeedService.batchCreate(SERVING, tenant, seeds, useTTL,
                             entityMatchVersionService.getCurrentVersion(SERVING, tenant));
-                    entityLookupEntryService.set(SERVING, tenant, lookupEntryPairs, useTTL);
+                    entityLookupEntryService.set(SERVING, tenant, lookupEntryPairs, useTTL,
+                            entityMatchVersionService.getCurrentVersion(SERVING, tenant));
                     nSeeds.addAndGet(seeds.size());
                     nLookups.addAndGet(lookupEntryPairs.size());
                 } catch (InterruptedException e) {

@@ -91,7 +91,8 @@ public class EntityMatchCommitterTestNG extends DataCloudMatchFunctionalTestNGBa
 
         entityRawSeedService.batchCreate(STAGING, tenant, seeds, true,
                 entityMatchVersionService.getCurrentVersion(STAGING, tenant));
-        entityLookupEntryService.set(STAGING, tenant, entries, true);
+        entityLookupEntryService.set(STAGING, tenant, entries, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
         return Pair.of(seeds.size(), entries.size());
     }
 }

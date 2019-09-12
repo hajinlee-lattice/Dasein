@@ -302,7 +302,8 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         entityRawSeedService.setIfNotExists(SERVING, tenant, seed, true,
                 entityMatchVersionService.getCurrentVersion(SERVING, tenant));
 
-        entityLookupEntryService.createIfNotExists(SERVING, tenant, entry, ACCOUNT_ID, true);
+        entityLookupEntryService.createIfNotExists(SERVING, tenant, entry, ACCOUNT_ID, true,
+                entityMatchVersionService.getCurrentVersion(SERVING, tenant));
     }
 
     private void loadAccountSchema() {

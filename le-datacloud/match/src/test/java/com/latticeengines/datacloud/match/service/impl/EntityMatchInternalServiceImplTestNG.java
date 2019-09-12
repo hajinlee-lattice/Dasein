@@ -197,7 +197,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // check staging (async update)
         waitForAllLookupEntriesPopulated();
         List<String> seedIdsInStaging = entityLookupEntryService.get(
-                STAGING, tenant, TEST_ENTRIES);
+                STAGING, tenant, TEST_ENTRIES, entityMatchVersionService.getCurrentVersion(STAGING, tenant));
         if (isAllocateMode) {
             // only entry 1 & 3 are set to staging
             Assert.assertEquals(seedIdsInStaging, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
@@ -410,7 +410,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
             entityRawSeedService.setIfNotExists(env, tenant, currSeed, true,
                     entityMatchVersionService.getCurrentVersion(env, tenant));
         }
-        entityLookupEntryService.set(env, tenant, currLookupMappings, true);
+        entityLookupEntryService.set(env, tenant, currLookupMappings, true,
+                entityMatchVersionService.getCurrentVersion(env, tenant));
 
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
                 entityMatchInternalService.associate(tenant, seedToAssociate, false, null);
@@ -436,7 +437,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 .filter(entry -> entry.getType().mapping != EntityLookupEntry.Mapping.MANY_TO_MANY)
                 .collect(Collectors.toList());
         List<String> seedIdsForEntriesInSeed = entityLookupEntryService
-                .get(env, tenant, manyToXEntries);
+                .get(env, tenant, manyToXEntries, entityMatchVersionService.getCurrentVersion(env, tenant));
         Assert.assertNotNull(seedIdsForEntriesInSeed);
         Assert.assertEquals(seedIdsForEntriesInSeed.size(), manyToXEntries.size());
         // make sure the mapped seed ID is correct
@@ -444,7 +445,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         // check lookup entries failed to set lookup
         List<String> seedIdsForEntriesFailedToSetLookup = entityLookupEntryService
-                .get(env, tenant, new ArrayList<>(result.getRight()));
+                .get(env, tenant, new ArrayList<>(result.getRight()),
+                        entityMatchVersionService.getCurrentVersion(env, tenant));
         Assert.assertNotNull(seedIdsForEntriesFailedToSetLookup);
         Assert.assertEquals(seedIdsForEntriesFailedToSetLookup.size(), entriesFailedToSetLookup.size());
         // should not mapped to the seed we try to associate
@@ -453,8 +455,10 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // cleanup both seed & entries
         entityRawSeedService.delete(env, tenant, entity, seedId,
                 entityMatchVersionService.getCurrentVersion(env, tenant));
-        seedToAssociate.getLookupEntries().forEach(entry -> entityLookupEntryService.delete(env, tenant, entry));
-        currLookupMappings.forEach(pair -> entityLookupEntryService.delete(env, tenant, pair.getKey()));
+        seedToAssociate.getLookupEntries().forEach(entry -> entityLookupEntryService.delete(env, tenant, entry,
+                entityMatchVersionService.getCurrentVersion(env, tenant)));
+        currLookupMappings.forEach(pair -> entityLookupEntryService.delete(env, tenant, pair.getKey(),
+                entityMatchVersionService.getCurrentVersion(env, tenant)));
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, priority = 9)
@@ -553,7 +557,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         seeds.forEach(seed -> {
             List<String> matchedSeedIds = entityLookupEntryService.get(STAGING, tenant3,
-                    seed.getLookupEntries());
+                    seed.getLookupEntries(), entityMatchVersionService.getCurrentVersion(STAGING, tenant3));
             matchedSeedIds.forEach(seedId -> {
                 Assert.assertEquals(seedId, seed.getId());
             });
@@ -574,7 +578,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         seeds.forEach(seed -> {
             List<String> matchedSeedIds = entityLookupEntryService.get(SERVING, tenant1,
-                    seed.getLookupEntries());
+                    seed.getLookupEntries(), entityMatchVersionService.getCurrentVersion(SERVING, tenant1));
             matchedSeedIds.forEach(seedId -> {
                 Assert.assertEquals(seedId, seed.getId());
             });
@@ -595,7 +599,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         noiseSeeds.forEach(seed -> {
             if (CollectionUtils.isNotEmpty(seed.getLookupEntries())) {
                 List<String> matchedSeedIds = entityLookupEntryService.get(SERVING, tenant2,
-                        seed.getLookupEntries());
+                        seed.getLookupEntries(), entityMatchVersionService.getCurrentVersion(SERVING, tenant2));
                 matchedSeedIds.forEach(seedId -> {
                     Assert.assertEquals(seedId, SEED_ID_2);
                 });
@@ -839,7 +843,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     // Setup lookup entries in specified env
     private void setupLookupTable(EntityMatchEnvironment env, Tenant tenant,
             List<Pair<EntityLookupEntry, String>> pairs) {
-        entityLookupEntryService.set(env, tenant, pairs, true);
+        entityLookupEntryService.set(env, tenant, pairs, true,
+                entityMatchVersionService.getCurrentVersion(env, tenant));
     }
 
     // Setup seeds in specified env
@@ -854,7 +859,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 Arrays.stream(entries) //
                         .map(entry -> Pair.of(entry, SEED_ID_FOR_LOOKUP)) //
                         .collect(Collectors.toList()),
-                true);
+                true, entityMatchVersionService.getCurrentVersion(SERVING, tenant));
     }
 
     // Setup seeds in serving env

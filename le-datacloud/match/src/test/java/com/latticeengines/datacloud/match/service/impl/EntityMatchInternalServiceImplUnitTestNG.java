@@ -22,6 +22,7 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.util.HashMap;
 import java.util.List;
@@ -257,7 +258,7 @@ public class EntityMatchInternalServiceImplUnitTestNG {
         EntityLookupEntryService lookupEntryService = Mockito.mock(EntityLookupEntryService.class);
         EntityMatchVersionService entityMatchVersionService = Mockito.mock(EntityMatchVersionService.class);
         Mockito.when(entityMatchVersionService.getCurrentVersion(any(), any())).thenReturn(0);
-        Mockito.when(lookupEntryService.setIfEquals(any(), any(), any(), any(), anyBoolean()))
+        Mockito.when(lookupEntryService.setIfEquals(any(), any(), any(), any(), anyBoolean(), anyInt()))
                 .thenAnswer(invocation -> {
                     EntityLookupEntry entry = invocation.getArgument(2);
                     String seedId = invocation.getArgument(3);
