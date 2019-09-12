@@ -6,6 +6,8 @@ import static org.testng.Assert.assertNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,15 +20,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
@@ -35,9 +36,6 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final int ACCOUNT_IMPORT_SIZE_1 = 900;
 
     private String customerSpace;
-
-    @Inject
-    private MetadataProxy metadataProxy;
 
     @Inject
     private RedshiftService redshiftService;
@@ -53,31 +51,36 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         verifyCleanupAllAttrConfig();
         verifyCleanup();
-        processAnalyze();
+        if (isLocalEnvironment()) {
+            processAnalyzeSkipPublishToS3();
+        } else {
+            processAnalyze();
+        }
+        Assert.assertEquals(1, verifyAction());
         verifyProcess();
         verifyCleanupAll();
     }
 
     private void verifyCleanup() {
-        ApplicationId contact_appId = verifyCleanup(BusinessEntity.Contact);
-        ApplicationId transaction_appId = verifyCleanup(BusinessEntity.Transaction);
-        verifyLock();
-        verifyStatus(contact_appId);
-        verifyStatus(transaction_appId);
-        ApplicationId contactTable_appId = verifyDeleteTable(BusinessEntity.Contact);
-        ApplicationId transactionTable_appId = verifyDeleteTable(BusinessEntity.Transaction);
-        verifyAction(contactTable_appId, BusinessEntity.Contact);
-        verifyAction(transactionTable_appId, BusinessEntity.Transaction);
+        verifyCleanup(BusinessEntity.Contact);
+        verifyCleanup(BusinessEntity.Transaction);
+        Assert.assertEquals(2, verifyAction());
+        importData();
     }
 
-    private ApplicationId verifyCleanup(BusinessEntity entity) {
+    void processAnalyzeSkipPublishToS3() {
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        request.setSkipPublishToS3(true);
+        request.setSkipDynamoExport(true);
+        processAnalyze(request);
+    }
+
+    private void verifyCleanup(BusinessEntity entity) {
         log.info(String.format("clean up all data for entity %s, current action number is %d", entity.toString(),
                 actionsNumber));
         log.info("cleaning up all data of " + entity + " ... ");
         tablename.put(entity, dataCollectionProxy.getTableName(customerSpace, entity.getBatchStore()));
-        ApplicationId appId = cdlProxy.cleanupAllData(customerSpace, entity, MultiTenantContext.getEmailAddress());
-        return appId;
-
+        cdlProxy.cleanupAllByAction(customerSpace, entity, MultiTenantContext.getEmailAddress());
     }
 
     private void verifyCleanupAllAttrConfig() {
@@ -101,27 +104,12 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         assertEquals(status, JobStatus.COMPLETED);
     }
 
-    private ApplicationId verifyDeleteTable(BusinessEntity entity) {
-        log.info("assert the DataCollectionTable and MetadataTable is deleted.");
-        Table table = dataCollectionProxy.getTable(customerSpace, entity.getBatchStore());
-        assertNull(table);
-        log.info("delete tablename is :" + tablename.get(entity));
-        table = metadataProxy.getTable(customerSpace, tablename.get(entity));
-        assertNull(table);
-
-        log.info("cleaning up all metadata of " + entity + " ... ");
-        ApplicationId appId = cdlProxy.cleanupAll(CustomerSpace.parse(mainTestTenant.getId()).toString(), entity,
-                MultiTenantContext.getEmailAddress());
-        return appId;
-    }
-
-    private void verifyAction(ApplicationId appId, BusinessEntity entity) {
-        verifyStatus(appId);
-        List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, entity.name());
-        if (dfTasks != null) {
-            assertEquals(dfTasks.size(), 0);
-        }
-        verifyActionRegistration();
+    private int verifyAction() {
+        List<Action> actions = actionProxy.getActionsByOwnerId(customerSpace, null);
+        List<Long> cleanupActions =
+                actions.stream().filter(action -> ActionType.DATA_REPLACE.equals(action.getType())).map(Action::getPid).filter(Objects::nonNull) //
+                        .collect(Collectors.toList());
+        return cleanupActions.size();
     }
 
     private void verifyCleanupAll() {
@@ -129,7 +117,6 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
         log.info("cleaning up all for all entities...");
         ApplicationId appId = cdlProxy.cleanupAll(customerSpace, null, MultiTenantContext.getEmailAddress());
-        Assert.expectThrows(RuntimeException.class, () -> verifyCleanup(BusinessEntity.Contact));
         verifyStatus(appId);
 
         log.info("assert the DataCollectionTable is deleted.");
@@ -148,42 +135,21 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
-//        Assert.assertEquals(countTableRole(BusinessEntity.Product.getBatchStore()), (long) PRODUCT_IMPORT_SIZE_1);
-        verifyFailedToCountTableRole(BusinessEntity.Contact.getBatchStore());
-        verifyFailedToCountTableRole(TableRoleInCollection.ConsolidatedRawTransaction);
-
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-        Assert.assertNull(getTableName(BusinessEntity.Contact.getBatchStore()));
-
+        Assert.assertNotNull(getTableName(BusinessEntity.Contact.getBatchStore()));
         verifyStatsCubes();
-    }
-
-    private void verifyFailedToCountTableRole(TableRoleInCollection role) {
-        boolean hasError = false;
-        try {
-            countTableRole(role);
-        } catch (AssertionError e) {
-            hasError = e.getMessage().contains("Cannot find table");
-        }
-        Assert.assertTrue(hasError, "Should throw error when counting batch store of " + role);
     }
 
     private void verifyStatsCubes() {
         StatisticsContainer container = dataCollectionProxy.getStats(mainTestTenant.getId());
-        Assert.assertFalse(container.getStatsCubes().containsKey(BusinessEntity.Contact.name()),
-                "Should not have contact's stats cube.");
-        Assert.assertFalse(container.getStatsCubes().containsKey(BusinessEntity.PurchaseHistory.name()),
-                "Should not have purchase history's stats cube.");
+        Assert.assertTrue(container.getStatsCubes().containsKey(BusinessEntity.Contact.name()),
+                "Should have contact's stats cube.");
+        Assert.assertTrue(container.getStatsCubes().containsKey(BusinessEntity.PurchaseHistory.name()),
+                "Should have purchase history's stats cube.");
     }
 
-    private void verifyLock() {
-        boolean hasError = false;
-        try {
-            processAnalyze();
-        } catch (RuntimeException e) {
-            hasError = e.getMessage().contains("can't start processAnalyze workflow");
-        }
-        Assert.assertTrue(hasError);
+    private void importData() {
+        mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
     }
 
 }

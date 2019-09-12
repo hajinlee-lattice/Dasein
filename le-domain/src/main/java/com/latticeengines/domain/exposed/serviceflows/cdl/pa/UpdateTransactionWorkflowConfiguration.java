@@ -58,6 +58,11 @@ public class UpdateTransactionWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder setReplace(boolean needReplace) {
+            processTransactionStepConfiguration.setNeedReplace(needReplace);
+            return this;
+        }
+
         public Builder apsRollingPeriod(String apsRollingPeriod) {
             return this;
         }

@@ -20,12 +20,13 @@ public enum ActionType {
     ATTRIBUTE_MANAGEMENT_DEACTIVATION("attributeManagementDeactivation", "Attributes Deactivated"),
     // Datacloud related types
     DATA_CLOUD_CHANGE("datacloudChange", "Data Cloud Refresh"), //
+    DATA_REPLACE("dataReplace", "Replace"),
     INTENT_CHANGE("intentChange", "Intent Data Refresh");
 
     private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
             Arrays.asList(METADATA_CHANGE, RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE,
                     ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION,
-                    ACTIVITY_METRICS_CHANGE, BUSINESS_CALENDAR_CHANGE));
+                    ACTIVITY_METRICS_CHANGE, BUSINESS_CALENDAR_CHANGE, DATA_REPLACE));
     private static final Set<ActionType> ATTR_MANAGEMENT_TYPES = new HashSet<>(
             Arrays.asList(ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION));
     private static final Set<ActionType> RATING_RELATED_TYPES = new HashSet<>(

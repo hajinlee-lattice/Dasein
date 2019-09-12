@@ -35,6 +35,7 @@ import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.service.ActionService;
@@ -63,9 +64,11 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -118,6 +121,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final DataCollectionService dataCollectionService;
 
+    private final DataFeedService dataFeedService;
+
     private final WorkflowProxy workflowProxy;
 
     private final CatalogEntityMgr catalogEntityMgr;
@@ -134,11 +139,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final S3ImportSystemService s3ImportSystemService;
 
-    private final DataFeedService dataFeedService;
+    private final DataFeedTaskService dataFeedTaskService;
 
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService, DataCollectionService dataCollectionService,
-            WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
+    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
+                                           DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
+                                           WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy, S3ImportSystemService s3ImportSystemService) {
         this.dataFeedService = dataFeedService;
@@ -151,6 +157,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.zkConfigService = zkConfigService;
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
         this.s3ImportSystemService = s3ImportSystemService;
+        this.dataFeedTaskService = dataFeedTaskService;
     }
 
     @WithWorkflowJobPid
@@ -212,8 +219,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
         try {
+            Set<BusinessEntity> needDeletedEntity = new HashSet<>();
             List<Action> actions = actionService.findByOwnerId(null);
-            List<Action> completedActions = getCompletedActions(customerSpace, actions);
+            List<Action> completedActions = getCompletedActions(customerSpace, actions, needDeletedEntity);
             List<Long> actionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
                 List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid)
@@ -240,7 +248,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
-                    completedActions, actionIds, initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
+                    completedActions, actionIds, needDeletedEntity, initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
             configuration.setFailingStep(request.getFailingStep());
 
@@ -346,7 +354,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     @VisibleForTesting
-    List<Action> getCompletedActions(String customerSpace, List<Action> actions) {
+    List<Action> getCompletedActions(String customerSpace, List<Action> actions, Set<BusinessEntity> needDeletedEntity) {
         if (CollectionUtils.isEmpty(actions)) {
             return Collections.emptyList();
         }
@@ -373,13 +381,25 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 completedImportAndDeleteJobPids));
 
         Set<Long> importActionIds = new HashSet<>();
-        List<Action> completedActionIds = actions.stream()
-                .filter(action -> isCompleteAction(action, completedImportAndDeleteJobPids, importActionIds))
-                .collect(Collectors.toList());
-        log.info(String.format("Actions that associated with the current consolidate job are: %s",
-                completedActionIds.stream().map(Action::getPid).collect(Collectors.toList())));
+        List<Action> completedActions = actions.stream()
+                .filter(action -> isCompleteAction(action, completedImportAndDeleteJobPids, importActionIds)).collect(Collectors.toList());
+        List<Action> replaceActions =
+                actions.stream().filter(action -> action.getTrackingPid() == null && action.getType() == ActionType.DATA_REPLACE).collect(Collectors.toList());
+        Set<BusinessEntity> importedEntities = getImportEntities(customerSpace, completedActions);
+        //in old logic, delete operation done by cdlOperationWorkflow, so we don't need pick it at pa to delete again
+        // in new logic, delete operation done by pa step, so we need pick the entity we need deleted,
+        // waiting compare with import entity to judge if we can delete or not
+        Set<BusinessEntity> totalNeedDeletedEntities = getDeletedEntities(replaceActions);
+        needDeletedEntity.addAll(getCurrentDeletedEntities(importedEntities, totalNeedDeletedEntities,
+                importActionIds.size()));
+        Set<Action> currentDeletedEntityActions = getCurrentDeletedEntityActions(needDeletedEntity,
+                replaceActions);
+        if (CollectionUtils.isNotEmpty(currentDeletedEntityActions)) {
+            completedActions.addAll(currentDeletedEntityActions);
+        }
+        log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActions));
 
-        return completedActionIds;
+        return completedActions;
     }
 
     @VisibleForTesting
@@ -521,41 +541,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids,
-                                     Set<Long> importActionIds) {
-        boolean isComplete = true; // by default every action is valid
-        if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
-            // special check if is selected type
-            isComplete = false;
-            if (importActionCount > 0 && importActionIds.size() >= importActionCount) {
-                return false;
-            }
-            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                importActionIds.add(action.getPid());
-                isComplete = true;
-            } else {
-                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
-                        .getActionConfiguration();
-                if (importActionConfiguration == null) {
-                    log.error("Import action configuration is null!");
-                    return false;
-                }
-                if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
-                    importActionIds.add(action.getPid());
-                    isComplete = true;
-                }
-            }
-        } else if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
-            isComplete = false;
-            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
-                isComplete = true;
-            }
-        }
-        return isComplete;
-    }
-
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, Tenant tenant,
-            ProcessAnalyzeRequest request, List<Action> completedActions, List<Long> actionIds, Status status,
+            ProcessAnalyzeRequest request, List<Action> completedActions, List<Long> actionIds, Set<BusinessEntity> needDeletedEntities, Status status,
             String currentDataCloudBuildNumber, long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
@@ -601,6 +588,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .ownerId(workflowPid) //
                 .rebuildEntities(request.getRebuildEntities()) //
                 .rebuildSteps(request.getRebuildSteps()) //
+                .replaceEntities(needDeletedEntities) //
                 .ignoreDataCloudChange(request.getIgnoreDataCloudChange()) //
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
@@ -815,7 +803,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
-                Collections.emptyList(), importActionIds,
+                Collections.emptyList(), importActionIds, new HashSet<>(),
                 initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
         configuration.setFailingStep(request.getFailingStep());
@@ -832,5 +820,116 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private List<Long> getImportActionIds(String customerSpace) {
         Long importMigrateTrackingPid = migrationTrackEntityMgr.findByTenant(tenantEntityMgr.findByTenantId(customerSpace)).getImportMigrateTracking().getPid();
         return importMigrateTrackingService.getAllRegisteredActionIds(customerSpace, importMigrateTrackingPid);
+    }
+
+    private boolean isCompleteAction(Action action, List<Long> completedImportAndDeleteJobPids,
+                                     Set<Long> importActionIds) {
+        boolean isComplete = true; // by default every action is valid
+        if (ActionType.DATA_REPLACE.equals(action.getType())) {
+            isComplete = false;
+        } else if (ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+            // special check if is selected type
+            isComplete = false;
+            if (importActionCount > 0 && importActionIds.size() >= importActionCount) {
+                return false;
+            }
+            if (completedImportAndDeleteJobPids.contains(action.getTrackingPid())) {
+                importActionIds.add(action.getPid());
+                isComplete = true;
+            } else {
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
+                        .getActionConfiguration();
+                if (importActionConfiguration == null) {
+                    log.error("Import action configuration is null!");
+                    return false;
+                }
+                if (Boolean.TRUE.equals(importActionConfiguration.getMockCompleted())) {
+                    importActionIds.add(action.getPid());
+                    isComplete = true;
+                }
+            }
+        } else if (ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())) {
+            isComplete = completedImportAndDeleteJobPids.contains(action.getTrackingPid());
+        }
+        return isComplete;
+    }
+
+    private Set<BusinessEntity> getImportEntities(String customerSpace, List<Action> actions) {
+        Set<BusinessEntity> importedEntity = new HashSet<>();
+        if (CollectionUtils.isEmpty(actions)) {
+            return importedEntity;
+        }
+        for (Action action : actions) {
+            if (!ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
+                continue;
+            }
+            if (importedEntity.size() >= 4) {
+                break;
+            }
+            //if entity list isn't completed, do this logic to check import entity
+            if (action.getActionConfiguration() instanceof ImportActionConfiguration) {
+                ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+                DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace,
+                        importActionConfiguration.getDataFeedTaskId());
+                importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
+            }
+        }
+        return importedEntity;
+    }
+
+    private Set<BusinessEntity> getDeletedEntities(List<Action> actions) {
+        Set<BusinessEntity> needDeletedEntity = new HashSet<>();
+        if (CollectionUtils.isEmpty(actions)) {
+            return needDeletedEntity;
+        }
+        for (Action action : actions) {
+            if (needDeletedEntity.size() >= 4) {
+                break;
+            }
+            if (!ActionType.DATA_REPLACE.equals(action.getType())) {
+                continue;
+            }
+            if (action.getActionConfiguration() instanceof CleanupActionConfiguration && needDeletedEntity.size() < 4) {
+                CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+                //configuration just has one entity.
+                needDeletedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
+            }
+        }
+        return needDeletedEntity;
+    }
+
+    private Set<Action> getCurrentDeletedEntityActions(Set<BusinessEntity> currentDeteledEntity,
+                                                       List<Action> replaceActions) {
+        Set<Action> currentDeletedEntityActions = new HashSet<>();
+        if (CollectionUtils.isEmpty(currentDeteledEntity)) {
+            return currentDeletedEntityActions;
+        }
+        for (Action action : replaceActions) {
+            if (!ActionType.DATA_REPLACE.equals(action.getType())) {
+                continue;
+            }
+            if (!(action.getActionConfiguration() instanceof CleanupActionConfiguration)) {
+                continue;
+            }
+            CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+            //in this action, entity only one not a list.
+            if(currentDeteledEntity.containsAll(cleanupActionConfiguration.getImpactEntities())) {
+                currentDeletedEntityActions.add(action);
+            }
+        }
+        return currentDeletedEntityActions;
+    }
+
+    private Set<BusinessEntity> getCurrentDeletedEntities(Set<BusinessEntity> importedEntity,
+                                                          Set<BusinessEntity> needDeletedEntity,
+                                                          int importActionNum) {
+        if (needDeletedEntity.size() != importedEntity.size() && needDeletedEntity.size() != 0 && importActionNum < importActionCount) {
+            log.warn("deleteEntity {} isn't match importEntity {}",
+                    JsonUtils.serialize(needDeletedEntity), JsonUtils.serialize(importedEntity));
+        }
+        Set<BusinessEntity> currentNeedDeletedEntity = new HashSet<>(needDeletedEntity);
+        currentNeedDeletedEntity.retainAll(importedEntity);
+        log.info("currentNeedDeletedEntity: {}.", JsonUtils.serialize(currentNeedDeletedEntity));
+        return currentNeedDeletedEntity;
     }
 }
