@@ -116,7 +116,8 @@ public class TestEntityMatchService {
             // create seeds
             List<EntityRawSeed> seeds = getSeeds(entity, req.matchKeyIdx, req.entityIdIdx, req.latticeAccountIdIdx,
                     req.systemIdx, seedData);
-            boolean created = entityRawSeedService.batchCreate(env, tenant, seeds, setTTL);
+            boolean created = entityRawSeedService.batchCreate(env, tenant, seeds, setTTL,
+                    entityMatchVersionService.getCurrentVersion(env, tenant));
             Preconditions.checkArgument(created);
             return seeds;
         }, setTTL);

@@ -51,6 +51,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
@@ -92,6 +93,9 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
 
     @Inject
     private EntityMatchConfigurationService entityMatchConfigurationService;
+
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
 
     @BeforeClass(groups = "functional")
     private void setup() {
@@ -184,7 +188,8 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
 
         // get seed object to check attributes
         Map<String, String> finalAttributes = TestEntityMatchUtils.getUpdatedAttributes(currSeed, seedToUpdate);
-        EntityRawSeed seed = entityRawSeedService.get(STAGING, tenant, entity, entityId);
+        EntityRawSeed seed = entityRawSeedService.get(STAGING, tenant, entity, entityId,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
         Assert.assertNotNull(seed,
                 "Updated seed(ID=" + entityId + ",entity=" + entity + ") should exist in tenant=" + tenant.getId());
         Assert.assertEquals(seed.getAttributes(), finalAttributes, "Updated attributes do not match the expected ones");
@@ -237,8 +242,10 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
     }
 
     private void setupUniverse(@NotNull Tenant tenant) {
-        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_1, true);
-        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_2, true);
+        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_1, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
+        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_2, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
         List<Pair<EntityLookupEntry, String>> lookupList = LOOKUP_MAP.entrySet().stream()
                 .map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         entityLookupEntryService.set(STAGING, tenant, lookupList, true);

@@ -4,6 +4,7 @@ import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNul
 import static com.latticeengines.datacloud.match.util.EntityMatchUtils.shouldSetTTL;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -51,6 +52,7 @@ import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
@@ -83,6 +85,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private final EntityRawSeedService entityRawSeedService;
     private final EntityMatchConfigurationService entityMatchConfigurationService;
     private final EntityMatchMetricService entityMatchMetricService;
+    private final EntityMatchVersionService entityMatchVersionService;
 
     // flag to indicate whether background workers should keep running
     private volatile boolean shouldTerminate = false;
@@ -103,9 +106,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     public EntityMatchInternalServiceImpl(
             EntityLookupEntryService entityLookupEntryService, EntityRawSeedService entityRawSeedService,
             EntityMatchConfigurationService entityMatchConfigurationService,
+            EntityMatchVersionService entityMatchVersionService,
             @Lazy EntityMatchMetricService entityMatchMetricService) {
         this.entityLookupEntryService = entityLookupEntryService;
         this.entityRawSeedService = entityRawSeedService;
+        this.entityMatchVersionService = entityMatchVersionService;
         this.entityMatchConfigurationService = entityMatchConfigurationService;
         this.entityMatchMetricService = entityMatchMetricService;
     }
@@ -183,7 +188,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             seed = new EntityRawSeed(ENTITY_ANONYMOUS_ID, entity, false);
 
             // is considered new if we set the staging seed successfully
-            isNewSeed = entityRawSeedService.setIfNotExists(STAGING, tenant, seed, shouldSetTTL(STAGING));
+            isNewSeed = entityRawSeedService.setIfNotExists(STAGING, tenant, seed, shouldSetTTL(STAGING),
+                    getMatchVersion(STAGING, tenant, null));
         }
 
         // populate cache (isNewlyAllocated=false since it's already created for the
@@ -203,7 +209,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // try to allocate preferred ID
         if (StringUtils.isNotBlank(preferredId)) {
             boolean created = entityRawSeedService.createIfNotExists(env, tenant, entity, preferredId,
-                    shouldSetTTL(env));
+                    shouldSetTTL(env), getMatchVersion(env, tenant, null));
             if (created) {
                 // preferredId is not taken
                 return preferredId;
@@ -217,7 +223,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     String id = newId();
                     // use serving as the single source of truth
                     boolean created = entityRawSeedService
-                            .createIfNotExists(env, tenant, entity, id, shouldSetTTL(env));
+                            .createIfNotExists(env, tenant, entity, id, shouldSetTTL(env),
+                                    getMatchVersion(env, tenant, null));
                     return created ? Pair.of(idx, id) : null;
                 })
                 .findFirst();
@@ -245,7 +252,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         }
 
         // update seed & lookup table and get all entries that cannot update
-        EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, tenant, seed, shouldSetTTL(env));
+        EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, tenant, seed, shouldSetTTL(env),
+                getMatchVersion(env, tenant, null));
         Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs =
                 getExistingLookupPairs(seedBeforeUpdate);
         Set<EntityLookupEntry> entriesFailedToAssociate = getLookupEntriesFailedToAssociate(existingLookupPairs, seed);
@@ -261,7 +269,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(entriesToClear)) {
             EntityRawSeed seedToClear = new EntityRawSeed(seed.getId(), seed.getEntity(), entriesToClear, null);
-            entityRawSeedService.clear(env, tenant, seedToClear);
+            entityRawSeedService.clear(env, tenant, seedToClear, getMatchVersion(env, tenant, null));
         }
 
         return Triple.of(seedBeforeUpdate, new ArrayList<>(entriesFailedToAssociate), entriesFailedToSetLookup);
@@ -274,8 +282,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
         // cleanup staging first so the seed ID cannot be allocated before we cleanup
         // all environments
-        entityRawSeedService.delete(STAGING, tenant, entity, seedId);
-        entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, entity, seedId);
+        entityRawSeedService.delete(STAGING, tenant, entity, seedId, getMatchVersion(STAGING, tenant, null));
+        entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, entity, seedId,
+                getMatchVersion(SERVING, tenant, null));
     }
 
     @Override
@@ -300,7 +309,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         do {
             Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(sourceEnv, sourceTenant, entity,
-                    getSeedIds, 1000);
+                    getSeedIds, 1000, getMatchVersion(sourceEnv, sourceTenant, null));
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -322,7 +331,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     }
 
                 }
-                entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled);
+                entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled,
+                        getMatchVersion(destEnv, destTenant, null));
                 entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled);
                 seedCount += scanSeeds.size();
                 lookupCount += pairs.size();
@@ -611,7 +621,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         //      in the seed. therefore we need to make sure the same seed is in staging before we returns anything
         missingResults
                 .values()
-                .forEach(seed -> entityRawSeedService.setIfNotExists(env, tenant, seed, shouldSetTTL(env)));
+                .forEach(seed -> entityRawSeedService.setIfNotExists(env, tenant, seed, shouldSetTTL(env),
+                        getMatchVersion(env, tenant, null)));
 
         return results;
     }
@@ -631,7 +642,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             @NotNull Tenant tenant, @NotNull EntityMatchEnvironment env,
             @NotNull String entity, @NotNull Set<String> uniqueSeedIds) {
         List<String> seedIds = new ArrayList<>(uniqueSeedIds);
-        List<EntityRawSeed> seeds = entityRawSeedService.get(env, tenant, entity, seedIds);
+        List<EntityRawSeed> seeds = entityRawSeedService.get(env, tenant, entity, seedIds,
+                getMatchVersion(env, tenant, null));
         return listToMap(seedIds, seeds);
     }
 
@@ -693,6 +705,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      */
     private String newId() {
         return RandomStringUtils.random(ENTITY_ID_LENGTH, ENTITY_ID_CHARS);
+    }
+
+    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, Integer version) {
+        return version == null ? entityMatchVersionService.getCurrentVersion(env, tenant) : version;
     }
 
     /*

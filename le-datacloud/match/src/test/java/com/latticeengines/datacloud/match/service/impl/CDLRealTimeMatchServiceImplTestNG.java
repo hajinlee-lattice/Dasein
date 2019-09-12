@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.datacloud.core.service.impl.ZkConfigurationServiceImpl;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestCDLMatchUtils;
@@ -93,6 +94,9 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
 
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
+
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
 
     private Map<String, ColumnMetadata> accountSchema;
 
@@ -295,7 +299,8 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
                 InterfaceName.CustomerAccountId.name(), CUSTOMER_ACCOUNT_ID);
         List<EntityLookupEntry> entries = Collections.singletonList(entry);
         EntityRawSeed seed = new EntityRawSeed(ACCOUNT_ID, entity, entries, null);
-        entityRawSeedService.setIfNotExists(SERVING, tenant, seed, true);
+        entityRawSeedService.setIfNotExists(SERVING, tenant, seed, true,
+                entityMatchVersionService.getCurrentVersion(SERVING, tenant));
 
         entityLookupEntryService.createIfNotExists(SERVING, tenant, entry, ACCOUNT_ID, true);
     }

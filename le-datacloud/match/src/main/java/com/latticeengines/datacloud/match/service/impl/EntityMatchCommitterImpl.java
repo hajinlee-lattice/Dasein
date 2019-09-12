@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
@@ -68,6 +69,9 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
 
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
+
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
 
     @Override
     public EntityPublishStatistics commit(@NotNull String entity, @NotNull Tenant tenant, Boolean destTTLEnabled) {
@@ -118,7 +122,8 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
         // scanning seeds
         List<String> seedIds = new ArrayList<>();
         do {
-            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(STAGING, tenant, entity, seedIds, 1000);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(STAGING, tenant, entity, seedIds, 1000,
+                    entityMatchVersionService.getCurrentVersion(STAGING, tenant));
             seedIds.clear();
             if (MapUtils.isEmpty(seeds)) {
                 continue;
@@ -294,7 +299,8 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                         continue;
                     }
 
-                    entityRawSeedService.batchCreate(SERVING, tenant, seeds, useTTL);
+                    entityRawSeedService.batchCreate(SERVING, tenant, seeds, useTTL,
+                            entityMatchVersionService.getCurrentVersion(SERVING, tenant));
                     entityLookupEntryService.set(SERVING, tenant, lookupEntryPairs, useTTL);
                     nSeeds.addAndGet(seeds.size());
                     nLookups.addAndGet(lookupEntryPairs.size());

@@ -106,7 +106,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         int nNotInStaging = 0;
         do {
             Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(SOURCE_ENV, tenant, entity, getSeedIds,
-                    1000);
+                    1000, null);
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -127,7 +127,8 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                     }
 
                 }
-                entityRawSeedService.batchCreate(DEST_ENV, tenant, scanSeeds, EntityMatchUtils.shouldSetTTL(DEST_ENV));
+                entityRawSeedService.batchCreate(DEST_ENV, tenant, scanSeeds, EntityMatchUtils.shouldSetTTL(DEST_ENV),
+                        null);
                 entityLookupEntryService.set(DEST_ENV, tenant, pairs, EntityMatchUtils.shouldSetTTL(DEST_ENV));
                 nSeeds += scanSeeds.size();
                 nLookups += pairs.size();

@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,11 +18,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -38,6 +40,9 @@ public class EntityMatchCommitterTestNG extends DataCloudMatchFunctionalTestNGBa
 
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
+
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
 
     @Test(groups = "functional", dataProvider = "commit")
     private void testCommit(Integer nSeeds) {
@@ -84,8 +89,9 @@ public class EntityMatchCommitterTestNG extends DataCloudMatchFunctionalTestNGBa
             entries.add(Pair.of(id, entityId));
         }
 
-        entityRawSeedService.batchCreate(EntityMatchEnvironment.STAGING, tenant, seeds, true);
-        entityLookupEntryService.set(EntityMatchEnvironment.STAGING, tenant, entries, true);
+        entityRawSeedService.batchCreate(STAGING, tenant, seeds, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
+        entityLookupEntryService.set(STAGING, tenant, entries, true);
         return Pair.of(seeds.size(), entries.size());
     }
 }
