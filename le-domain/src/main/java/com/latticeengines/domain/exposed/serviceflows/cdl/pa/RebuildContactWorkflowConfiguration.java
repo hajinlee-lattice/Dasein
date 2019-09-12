@@ -53,6 +53,11 @@ public class RebuildContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder setReplace(boolean needReplace) {
+            processContactStepConfiguration.setNeedReplace(needReplace);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processContactStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;

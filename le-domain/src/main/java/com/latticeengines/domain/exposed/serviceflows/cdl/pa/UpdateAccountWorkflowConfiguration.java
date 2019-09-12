@@ -42,6 +42,11 @@ public class UpdateAccountWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder setReplace(boolean needReplace) {
+            processAccountStepConfiguration.setNeedReplace(needReplace);
+            return this;
+        }
+
         public UpdateAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("updateAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

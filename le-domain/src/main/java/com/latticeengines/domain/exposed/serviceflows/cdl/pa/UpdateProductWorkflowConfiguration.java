@@ -48,6 +48,11 @@ public class UpdateProductWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder setReplace(boolean needReplace) {
+            processProductStepConfiguration.setNeedReplace(needReplace);
+            return this;
+        }
+
         public UpdateProductWorkflowConfiguration build() {
             configuration.setContainerConfiguration("updateProductWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

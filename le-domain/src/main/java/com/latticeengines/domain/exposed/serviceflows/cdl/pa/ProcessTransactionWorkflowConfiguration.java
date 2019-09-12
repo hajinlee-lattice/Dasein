@@ -57,6 +57,13 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder setReplace(boolean needReplace) {
+            processTransactionStepConfiguration.setNeedReplace(needReplace);
+            updateTransactionWorkflowBuilder.setReplace(needReplace);
+            rebuildTransactionWorkflowBuilder.setReplace(needReplace);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             rebuildTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);

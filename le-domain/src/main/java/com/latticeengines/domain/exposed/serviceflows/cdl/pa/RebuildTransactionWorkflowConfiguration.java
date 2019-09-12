@@ -58,6 +58,11 @@ public class RebuildTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder setReplace(boolean needReplace) {
+            processTransactionStepConfiguration.setNeedReplace(needReplace);
+            return this;
+        }
+
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;
