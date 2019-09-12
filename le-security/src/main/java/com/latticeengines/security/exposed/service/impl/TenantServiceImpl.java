@@ -152,4 +152,9 @@ public class TenantServiceImpl implements TenantService {
         tenantEntityMgr.setNotificationStateByTenantId(tenantId, notificationLevel);
     }
 
+    @Override
+    public void setNotificationTypeByTenantId(String tenantId, String notificationType) {
+        tenantEntityMgr.setNotificationTypeByTenantId(tenantId, notificationType);
+    }
+
 }

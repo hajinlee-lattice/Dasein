@@ -92,6 +92,11 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private TenantEmailNotificationLevel notificationLevel = TenantEmailNotificationLevel.ERROR;
 
+    @JsonProperty("notification_type")
+    @Column(name = "NOTIFICATION_TYPE", length = 40)
+    @Enumerated(EnumType.STRING)
+    private TenantEmailNotificationType notificationType = TenantEmailNotificationType.SINGLE_USER;
+
     public Tenant() {
     }
 
@@ -224,5 +229,13 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
 
     public void setNotificationLevel(TenantEmailNotificationLevel notificationLevel) {
         this.notificationLevel = notificationLevel;
+    }
+
+    public TenantEmailNotificationType getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(TenantEmailNotificationType notificationType) {
+        this.notificationType = notificationType;
     }
 }

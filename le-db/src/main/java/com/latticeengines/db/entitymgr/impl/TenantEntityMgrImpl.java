@@ -21,6 +21,7 @@ import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.repository.TenantRepository;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 
@@ -99,6 +100,18 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void setNotificationTypeByTenantId(String tenantId, String notificationType) {
+        Tenant tenant1 = findByTenantId(tenantId);
+        if (tenant1 == null) {
+            log.error("can not find the tenant using tenantId " + tenantId);
+        } else {
+            tenant1.setNotificationType(TenantEmailNotificationType.getByName(notificationType));
+            super.update(tenant1);
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
             tenant.setRegisteredTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -111,6 +124,9 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
         }
         if(tenant.getNotificationLevel() == null) {
             tenant.setNotificationLevel(TenantEmailNotificationLevel.ERROR);
+        }
+        if (tenant.getNotificationType() == null) {
+            tenant.setNotificationType(TenantEmailNotificationType.SINGLE_USER);
         }
         super.create(tenant);
     }
