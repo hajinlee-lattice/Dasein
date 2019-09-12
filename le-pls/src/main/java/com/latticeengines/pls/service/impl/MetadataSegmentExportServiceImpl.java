@@ -81,9 +81,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
 
-    @Value("${pls.spark.export.max}")
-    private long maxSparkSQLLimitationForExport;
-
    @Override
     public List<MetadataSegmentExport> getSegmentExports() {
         List<AtlasExport> atlasExports = atlasExportProxy.findAll(getCustomerSpace().toString());
@@ -122,7 +119,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         } else {
             useSpark = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         }
-        checkExportSize(metadataSegmentExportJob, useSpark);
+        if (!useSpark) {
+            // check size limitation for old segment export logic
+            checkExportSize(metadataSegmentExportJob);
+        }
         setCreatedBy(metadataSegmentExportJob);
         if (useSpark) {
             if (customerSpace == null) {
@@ -155,7 +155,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         }
     }
 
-    private void checkExportSize(MetadataSegmentExport metadataSegmentExportJob, boolean useSpark) {
+    private void checkExportSize(MetadataSegmentExport metadataSegmentExportJob) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(metadataSegmentExportJob.getAccountFrontEndRestriction());
         frontEndQuery.setContactRestriction(metadataSegmentExportJob.getContactFrontEndRestriction());
@@ -164,14 +164,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         Tenant tenant = MultiTenantContext.getTenant();
         Long entriesCount = entityProxy.getCount(tenant.getId(), frontEndQuery);
         log.info("Total entries for export = " + entriesCount);
-        if (useSpark) {
-            if (entriesCount > maxSparkSQLLimitationForExport) {
-                throw new LedpException(LedpCode.LEDP_18169, new String[]{maxEntryLimitForExport.toString()});
-            }
-        } else {
-            if (entriesCount > maxEntryLimitForExport) {
-                throw new LedpException(LedpCode.LEDP_18169, new String[]{maxEntryLimitForExport.toString()});
-            }
+        if (entriesCount > maxEntryLimitForExport) {
+            throw new LedpException(LedpCode.LEDP_18169, new String[]{maxEntryLimitForExport.toString()});
         }
     }
 
