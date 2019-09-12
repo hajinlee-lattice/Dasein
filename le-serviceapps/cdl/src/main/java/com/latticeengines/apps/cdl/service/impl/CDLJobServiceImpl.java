@@ -853,6 +853,12 @@ public class CDLJobServiceImpl implements CDLJobService {
     private boolean retryValidation(String tenantId) {
         try {
             DataFeedExecution execution = getLastFailedPAExecution(tenantId);
+            if (execution.getWorkflowId() == null) {
+                execution.setRetryCount(execution.getRetryCount() + 1);
+                dataFeedExecutionEntityMgr.updateRetryCount(execution);
+                log.warn("cannot find workflowId, tenant {} cannot be retry.", tenantId);
+                return false;
+            }
             Job job = getFailedPAJob(execution, tenantId);
             if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
                 execution.setRetryCount(execution.getRetryCount() + 1);
