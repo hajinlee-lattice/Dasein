@@ -187,7 +187,9 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         when(dataFeedTaskService.getDataFeedTask(anyString(), nullable(String.class))).thenReturn(generateImportDataFeedTask());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
         Set<BusinessEntity> needDeletedEntities = new HashSet<>();
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, needDeletedEntities);
+        List<Long> list = toActionPids(
+                processAnalyzeWorkflowSubmitter.getCompletedActions(customerSpace, actionService.findByOwnerId(null),
+                        needDeletedEntities));
         Assert.assertNotNull(list);
         Assert.assertNotNull(needDeletedEntities);
         log.info("actionIds={}", list);

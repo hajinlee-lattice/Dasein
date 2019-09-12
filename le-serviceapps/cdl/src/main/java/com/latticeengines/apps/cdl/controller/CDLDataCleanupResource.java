@@ -44,7 +44,7 @@ public class CDLDataCleanupResource {
         }
     }
 
-    @RequestMapping(value = "/createReplaceAction", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/replaceAction", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "create clean up data action")
     public void createReplaceAction(@PathVariable String customerSpace,

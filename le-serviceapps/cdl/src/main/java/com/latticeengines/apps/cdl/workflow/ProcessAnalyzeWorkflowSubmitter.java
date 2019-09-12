@@ -247,9 +247,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             updateActions(canceledActionPids, pidWrapper.getPid());
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
-            ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
-                    actionIds, needDeletedEntity,
-                    initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
                     completedActions, actionIds, needDeletedEntity, initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
@@ -386,8 +383,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Set<Long> importActionIds = new HashSet<>();
         List<Action> completedActions = actions.stream()
                 .filter(action -> isCompleteAction(action, completedImportAndDeleteJobPids, importActionIds)).collect(Collectors.toList());
-        log.info(String.format("Actions that associated with the current consolidate job are: %s",
-                completedActionIds.stream().map(Action::getPid).collect(Collectors.toList())));
         List<Action> replaceActions =
                 actions.stream().filter(action -> action.getTrackingPid() == null && action.getType() == ActionType.DATA_REPLACE).collect(Collectors.toList());
         Set<BusinessEntity> importedEntities = getImportEntities(customerSpace, completedActions);
@@ -397,7 +392,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Set<BusinessEntity> totalNeedDeletedEntities = getDeletedEntities(replaceActions);
         needDeletedEntity.addAll(getCurrentDeletedEntities(importedEntities, totalNeedDeletedEntities,
                 importActionIds.size()));
-        Set<Long> currentDeletedEntityActions = getCurrentDeletedEntityActions(needDeletedEntity,
+        Set<Action> currentDeletedEntityActions = getCurrentDeletedEntityActions(needDeletedEntity,
                 replaceActions);
         if (CollectionUtils.isNotEmpty(currentDeletedEntityActions)) {
             completedActions.addAll(currentDeletedEntityActions);

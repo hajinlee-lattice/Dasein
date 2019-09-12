@@ -230,7 +230,7 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
     }
 
     private ProcessAnalyzeWorkflowSubmitter mockSubmitter(S3ImportSystemService s3ImportSystemService) {
-        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, null, null, null, null, null, null,
+        return new ProcessAnalyzeWorkflowSubmitter(null, null, null, null, null, null, null, null, null, null,
                 s3ImportSystemService);
     }
 
