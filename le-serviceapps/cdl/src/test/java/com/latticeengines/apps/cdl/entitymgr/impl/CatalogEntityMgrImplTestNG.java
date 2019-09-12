@@ -54,7 +54,8 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
      * test objects
      */
     private DataFeed feed;
-    private DataFeedTask task;
+    // catalog name -> datafeed task
+    private Map<String, DataFeedTask> taskMap = new HashMap<>();
     private Table importTemplate;
     // catalog name -> catalog
     private Map<String, Catalog> catalogs = new HashMap<>();
@@ -71,7 +72,7 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         for (String name : CATALOG_NAMES) {
             Catalog catalog = new Catalog();
             catalog.setTenant(mainTestTenant);
-            catalog.setDataFeedTask(task);
+            catalog.setDataFeedTask(taskMap.get(name));
             catalog.setName(name);
             catalogEntityMgr.create(catalog);
 
@@ -93,7 +94,7 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         String name = CATALOG_NAMES.get(RandomUtils.nextInt(0, CATALOG_NAMES.size()));
         Catalog catalog = new Catalog();
         catalog.setTenant(mainTestTenant);
-        catalog.setDataFeedTask(task);
+        catalog.setDataFeedTask(taskMap.get(name));
         catalog.setName(name);
         catalogEntityMgr.create(catalog);
     }
@@ -150,7 +151,7 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // datafeed task verification
         Assert.assertNotNull(catalog.getDataFeedTask());
         DataFeedTask dataFeedTask = catalog.getDataFeedTask();
-        Assert.assertEquals(dataFeedTask.getPid(), task.getPid());
+        Assert.assertEquals(dataFeedTask.getPid(), taskMap.get(catalog.getName()).getPid());
         // datafeed verification
         Assert.assertNotNull(dataFeedTask.getDataFeed(), "Datafeed should not be null");
         Assert.assertEquals(dataFeedTask.getDataFeed().getPid(), feed.getPid());
@@ -176,12 +177,14 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private void prepareDataFeed() {
         feed = testDataFeed();
-        task = testFeedTask();
         importTemplate = testImportTemplate();
-        task.setDataFeed(feed);
-        feed.addTask(task);
-        task.setImportTemplate(importTemplate);
-
+        for (String name : CATALOG_NAMES) {
+            DataFeedTask task = testFeedTask();
+            task.setDataFeed(feed);
+            feed.addTask(task);
+            task.setImportTemplate(importTemplate);
+            taskMap.put(name, task);
+        }
         datafeedEntityMgr.create(feed);
     }
 
@@ -221,6 +224,6 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private String name() {
-        return NamingUtils.timestamp(getClass().getSimpleName());
+        return NamingUtils.uuid(getClass().getSimpleName());
     }
 }

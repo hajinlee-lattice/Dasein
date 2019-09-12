@@ -56,11 +56,11 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         Tenant tenant = MultiTenantContext.getTenant();
         String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
                 BusinessEntity.PeriodTransaction);
-
-        log.info(String.format(
-                "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s",
-                periodTransactionTableName, tenant.getId(), accountId, periodName, productType));
-
+        if (log.isDebugEnabled()) {
+            log.debug(String.format(
+                    "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s",
+                    periodTransactionTableName, tenant.getId(), accountId, periodName, productType));
+        }
         // For BIS use case, the product type is ProductType.Spending
         String baseQuery = "SELECT t.{0}, t.{1}, t.{2}, t.{3}, t.{4} FROM {5} t "
                 + "where t.{6} = ? and t.{7} = ? and t.{8} = ''{9}''";
@@ -75,8 +75,9 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 InterfaceName.PeriodName, // 7
                 InterfaceName.ProductType, // 8
                 productType.toString()); // 9
-
-        log.info("Query for getPeriodTransactionsByAccountId " + query);
+        if (log.isDebugEnabled()) {
+            log.debug("Query for getPeriodTransactionsByAccountId " + query);
+        }
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, accountId, periodName);
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
@@ -88,7 +89,6 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             periodTransaction.setPeriodId((int) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
         }
-        log.info("resultList for account is " + resultList);
         return resultList;
     }
 
@@ -101,10 +101,12 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
                 BusinessEntity.PeriodTransaction);
         String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
+        if (log.isDebugEnabled()) {
+            log.debug(String.format(
+                    "Get Period Transaction Table %s, Account Table %s for %s with segment %s and periodName %s, productType %s",
+                    periodTransactionTableName, accountTableName, tenant.getId(), segment, periodName, productType));
+        }
 
-        log.info(String.format(
-                "Get Period Transaction Table %s, Account Table %s for %s with segment %s and periodName %s, productType %s",
-                periodTransactionTableName, accountTableName, tenant.getId(), segment, periodName, productType));
         String baseQuery = "SELECT count(pt.{0}), pt.{1}, pt.{2}, sum(pt.{3}) as {11}, sum(pt.{4}) as {12}, sum(pt.{5}) as {13} FROM {6} as pt "
                 + "inner join {7} as ac on  pt.{0} = ac.{0} " //
                 + "where pt.{8} = ? and ac.{9} = ? and pt.{10} = ? " //
@@ -126,8 +128,9 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 InterfaceName.TotalAmount, // 11
                 InterfaceName.TotalQuantity, // 12
                 InterfaceName.TransactionCount); // 13
-
-        log.info("Query for getPeriodTransactionForSegmentAccount " + query);
+        if (log.isDebugEnabled()) {
+            log.debug("Query for getPeriodTransactionForSegmentAccount " + query);
+        }
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, periodName, segment,
                 productType.toString());
         for (Map row : retList) {
@@ -140,7 +143,6 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             periodTransaction.setPeriodId((int) row.get(InterfaceName.PeriodId.toString().toLowerCase()));
             resultList.add(periodTransaction);
         }
-        log.info("resultList for segment is " + resultList);
         return resultList;
     }
 
@@ -150,12 +152,16 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         List<ProductHierarchy> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
         String tableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.ProductHierarchy);
-        log.info(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
+        }
         String query = String.format(
                 "SELECT %s, %s, %s, coalesce(" + InterfaceName.ProductLineId + ", " + InterfaceName.ProductFamilyId
                         + ", " + InterfaceName.ProductCategoryId + ") as productid FROM %s",
                 InterfaceName.ProductLine, InterfaceName.ProductFamily, InterfaceName.ProductCategory, tableName);
-        log.info("query for getProductHierarchy " + query);
+        if (log.isDebugEnabled()) {
+            log.debug("query for getProductHierarchy " + query);
+        }
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
         for (Map row : retList) {
             ProductHierarchy productHierarchy = new ProductHierarchy();
@@ -166,7 +172,6 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             productHierarchy.setProductId((String) row.get("productid"));
             resultList.add(productHierarchy);
         }
-        log.info("resultList is " + resultList);
         return resultList;
     }
 
@@ -184,9 +189,10 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
                         BusinessEntity.PeriodTransaction);
                 String accountTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Account);
-                log.info(String.format("Get Period Transaction Table %s, Account Table %s for %s ",
-                        periodTransactionTableName, accountTableName, tenant.getId()));
-
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Get Period Transaction Table %s, Account Table %s for %s ",
+                            periodTransactionTableName, accountTableName, tenant.getId()));
+                }
                 String query = MessageFormat.format(
                         "SELECT distinct ac.{0}, count(ac.{1}) as {2}, True as IsSegment, ac.{0} as AccountId " //
                                 + "FROM {3} as ac " //
@@ -200,7 +206,9 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                         accountTableName, // 3
                         periodTransactionTableName, // 4
                         InterfaceName.ProductType); // 5
-                log.info("query for getAllSpendAnalyticsSegments " + query);
+                if (log.isDebugEnabled()) {
+                    log.debug("query for getAllSpendAnalyticsSegments " + query);
+                }
                 List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query,
                         ProductType.Spending.name());
                 return new DataPage(retList);
@@ -234,10 +242,14 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     public List<String> getFinalAndFirstTransactionDate() {
         Tenant tenant = MultiTenantContext.getTenant();
         String transactionTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Transaction);
-        log.info(String.format("Get Transaction Table %s for %s", transactionTableName, tenant.getId()));
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Get Transaction Table %s for %s", transactionTableName, tenant.getId()));
+        }
         String query = MessageFormat.format("SELECT max ({0}) as max, min ({0}) as min FROM {1}",
                 InterfaceName.TransactionDate, transactionTableName);
-        log.info("query for getFinalTransactionDate " + query);
+        if (log.isDebugEnabled()) {
+            log.debug("query for getFinalTransactionDate " + query);
+        }
         List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
         return Arrays.asList((String) retList.get(0).get("max"), (String) retList.get(0).get("min"));
     }

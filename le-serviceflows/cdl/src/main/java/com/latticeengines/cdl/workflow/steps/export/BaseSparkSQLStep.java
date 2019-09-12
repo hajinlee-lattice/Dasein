@@ -127,7 +127,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
 
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
         frontEndQuery.setPageFilter(null);
-
+        log.info("frontend query is " + frontEndQuery);
         AttributeRepository attrRepo = parseAttrRepo(configuration);
         Map<String, Map<Long, String>> decodeMapping = entityQueryService.getDecodeMapping(attrRepo,
                 frontEndQuery.getLookups());

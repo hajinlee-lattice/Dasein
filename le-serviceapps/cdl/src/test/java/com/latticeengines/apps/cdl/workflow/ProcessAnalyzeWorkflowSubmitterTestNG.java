@@ -33,6 +33,7 @@ import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -104,16 +105,17 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGetEmptyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateEmptyActions());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
+        List<Long> list = toActionPids(
+                processAnalyzeWorkflowSubmitter.getCompletedActions(customerSpace, generateEmptyActions(), new HashSet<>()));
         Assert.assertNotNull(list);
         Assert.assertTrue(CollectionUtils.isEmpty(list));
     }
 
     @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
     public void testGetNoCancelActionAndJobIds() {
-        when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
+        List<Long> list = toActionPids(
+                processAnalyzeWorkflowSubmitter.getCompletedActions(customerSpace, generateCancelActions(), new HashSet<>()));
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
 
@@ -124,9 +126,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
     public void testGetCancelActionAndJobIds() {
-        when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateCancelActions());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getCanceledActionIds(customerSpace);
+        List<Long> list = processAnalyzeWorkflowSubmitter.getCanceledActionIds(customerSpace, generateCancelActions());
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
 
@@ -137,7 +138,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGetMetadataOnlyActionAndJobIds() {
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateMetadataChangeActions());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
+        List<Long> list = toActionPids(
+                processAnalyzeWorkflowSubmitter.getCompletedActions(customerSpace, generateMetadataChangeActions(), new HashSet<>()));
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
@@ -150,7 +152,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateFullActions());
         when(dataFeedTaskService.getDataFeedTask(anyString(), nullable(String.class))).thenReturn(generateImportDataFeedTask());
         when(workflowProxy.getWorkflowExecutionsByJobPids(anyList(), anyString())).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
+        List<Long> list = toActionPids(
+                processAnalyzeWorkflowSubmitter.getCompletedActions(customerSpace, actionService.findByOwnerId(null), new HashSet<>()));
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
 
@@ -163,12 +166,12 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @Test(groups = "functional", dependsOnMethods = {"testGetFullActionAndJobIds"})
     public void testGetProblematicActionWithoutTrackingId() {
-        when(actionService.findByOwnerId(nullable(Long.class))).thenReturn(generateActionWithTrackingPid());
         List<String> workflowIdStr = Stream.of(RUNNING_ACTION_1_TRACKING_PID, RUNNING_ACTION_2_TRACKING_PID,
                 COMPLETE_ACTION_1_TRACKING_PID, COMPLETE_ACTION_2_TRACKING_PID).map(Object::toString)
                 .collect(Collectors.toList());
         when(workflowProxy.getWorkflowExecutionsByJobPids(workflowIdStr)).thenReturn(generateJobs());
-        List<Long> list = processAnalyzeWorkflowSubmitter.getActionIds(customerSpace, new HashSet<>());
+        List<Long> list = toActionPids(
+                processAnalyzeWorkflowSubmitter.getCompletedActions(customerSpace, generateActionWithTrackingPid(), new HashSet<>()));
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
@@ -248,6 +251,10 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     @DataProvider(name = "testTenantLockDataProvider")
     private Object[][] testTenantLockDataProvider() {
         return new Object[][]{{generateLockedTenant()}, {generateUnlockedTenant()}};
+    }
+
+    private List<Long> toActionPids(@NotNull List<Action> actions) {
+        return actions.stream().map(Action::getPid).collect(Collectors.toList());
     }
 
     private List<Action> newTypedActions(ActionType... types) {

@@ -8,6 +8,7 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.C
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedDepivotedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedCatalog;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedDailyTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedPeriodTransaction;
@@ -87,6 +88,8 @@ public enum BusinessEntity implements GraphNode {
 
         Transaction.setBatchStore(ConsolidatedDailyTransaction);
         Transaction.setServingStore(AggregatedTransaction);
+
+        Catalog.setBatchStore(ConsolidatedCatalog);
 
         PeriodTransaction.setBatchStore(ConsolidatedPeriodTransaction);
         PeriodTransaction.setServingStore(AggregatedPeriodTransaction);

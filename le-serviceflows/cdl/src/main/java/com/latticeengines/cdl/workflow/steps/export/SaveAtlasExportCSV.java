@@ -211,9 +211,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     private List<ColumnMetadata> getExportSchema(ExportEntity exportEntity) {
         Map<BusinessEntity, List> schemaMap =
                 WorkflowStaticContext.getMapObject(EXPORT_SCHEMA_MAP, BusinessEntity.class, List.class);
-        if (MapUtils.isEmpty(schemaMap)) {
-            throw new RuntimeException("Cannot find schema map from worklow static context.");
-        }
         List<ColumnMetadata> schema = new ArrayList<>();
         if (ExportEntity.Account.equals(exportEntity)) {
             setAccountSchema(schemaMap, schema);
