@@ -75,8 +75,6 @@ public class CSVImportReducer extends Reducer<NullWritable, NullWritable, NullWr
                     }
                 }
             }
-        } catch (Exception e) {
-            log.error("ssssss", e);
         }
     }
 
