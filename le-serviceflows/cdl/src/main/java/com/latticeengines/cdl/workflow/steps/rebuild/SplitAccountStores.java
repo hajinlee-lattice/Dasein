@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,6 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
 
     private boolean shortCutMode = false;
     private DataCollection.Version inactive;
-    private Table fullAccountTable;
 
     @Override
     protected Class<MultiCopyJob> getJobClz() {
@@ -104,7 +104,7 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
             if (StringUtils.isBlank(fullAccountTableName)) {
                 throw new IllegalStateException("Cannot find the fully enriched account table");
             }
-            fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
+            Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
             if (fullAccountTable == null) {
                 throw new IllegalStateException("Cannot find the fully enriched account table in default collection");
             }
@@ -135,7 +135,7 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
         if (retainAttrNames == null) {
             retainAttrNames = new ArrayList<>();
         }
-        log.info(String.format("retainAttrNames from servingStore: %d", retainAttrNames.size()));
+        log.info("retainAttrNames from servingStore: {}", CollectionUtils.size(retainAttrNames));
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
             retainAttrNames.add(InterfaceName.AccountId.name());
         }
