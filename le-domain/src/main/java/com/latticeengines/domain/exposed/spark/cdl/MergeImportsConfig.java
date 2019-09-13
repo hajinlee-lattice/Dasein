@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
@@ -21,6 +23,15 @@ public class MergeImportsConfig extends SparkJobConfig {
 
     @JsonProperty("AddTimestamps")
     private boolean addTimestamps; // add cdl timestamp cols
+
+    /**
+     * Map(ColName->SqlType)
+     * columns must exists in the result
+     * if not add new column with all nulls
+     * SqlType use the strings understood by spark sql casting
+     */
+    @JsonProperty("RequiredColumns")
+    private Map<String, String> requiredColumns;
 
     /*****************************************************************
      * Following operations apply to every source input before merge.
@@ -80,6 +91,14 @@ public class MergeImportsConfig extends SparkJobConfig {
 
     public void setAddTimestamps(boolean addTimestamps) {
         this.addTimestamps = addTimestamps;
+    }
+
+    public Map<String, String> getRequiredColumns() {
+        return requiredColumns;
+    }
+
+    public void setRequiredColumns(Map<String, String> requiredColumns) {
+        this.requiredColumns = requiredColumns;
     }
 
     public String[][] getRenameSrcFields() {

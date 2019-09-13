@@ -500,7 +500,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         compare(accountSourceTable, accountHeaders);
         Assert.assertEquals(accountTemplate.getAttributes().size(), accountSourceTable.getAttributes().size());
         Assert.assertNotNull(contactTemplate.getAttribute(InterfaceName.PhoneNumber));
-        Assert.assertNotNull(transactionTemplate.getAttribute(InterfaceName.ContactId));
+        boolean containsContact =
+                transactionTemplate.getAttribute(InterfaceName.ContactId) != null ^ transactionTemplate.getAttribute(InterfaceName.CustomerContactId) != null;
+        Assert.assertTrue(containsContact);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "verifyBase")

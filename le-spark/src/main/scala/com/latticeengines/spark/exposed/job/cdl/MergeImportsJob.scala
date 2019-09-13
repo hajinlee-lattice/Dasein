@@ -4,10 +4,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
-import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{col, lit, row_number, when}
+import org.apache.spark.sql.functions.{col, lit, when}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
+
+import scala.collection.JavaConverters._
 
 class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
@@ -42,14 +43,23 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
       }
     })._1
 
+    val requiredCols: Map[String, String] =
+      if (config.getRequiredColumns == null) Map() else config.getRequiredColumns.asScala.toMap
+    val withRequiredCols =
+      if (requiredCols.isEmpty) {
+        merged
+      } else {
+        requiredCols.toList.foldLeft(merged)((df, p) => addAllNullsIfMissing(df, p._1, p._2))
+      }
+
     val result =
       if (config.isAddTimestamps) {
         val currentTime = System.currentTimeMillis()
         addOrFill(
-          addOrFill(merged, InterfaceName.CDLCreatedTime.name(), currentTime),
+          addOrFill(withRequiredCols, InterfaceName.CDLCreatedTime.name(), currentTime),
           InterfaceName.CDLUpdatedTime.name(), currentTime)
       } else {
-        merged
+        withRequiredCols
       }
 
     // finish
@@ -126,6 +136,14 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
       df.withColumn(tsCol, when(col(tsCol).isNull, lit(ts)).otherwise(col(tsCol)))
     } else {
       df.withColumn(tsCol, lit(ts))
+    }
+  }
+
+  private def addAllNullsIfMissing(df: DataFrame, requiredCol: String, colType: String): DataFrame = {
+    if (df.columns.contains(requiredCol)) {
+      df
+    } else {
+      df.withColumn(requiredCol, lit(null).cast(colType))
     }
   }
 

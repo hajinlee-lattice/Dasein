@@ -1611,8 +1611,8 @@ public class SchemaRepository {
                 schemaTable = getProductSchema();
                 break;
             case WebVisit:
-                attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrUserId(), attrCompanyName(), attrCity(), attrState(),
-                        attrCountry(), attrDUNS()));
+                attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrWebVisitDate(), attrUserId(), attrCompanyName(),
+                        attrCity(), attrState(), attrCountry(), attrDUNS()));
                 schemaTable = createTable(SchemaInterpretation.WebVisit);
                 schemaTable.addAttributes(attrs);
                 break;
@@ -1623,6 +1623,18 @@ public class SchemaRepository {
                 break;
         }
         return schemaTable;
+    }
+
+    private Attribute attrWebVisitDate() {
+        return attr(InterfaceName.WebVisitDate.name())
+                .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE", "WEBVISITDATE", "WEB_VISIT_DATE")) //
+                .required()
+                .physicalDataType(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.WebVisitDate) //
+                .logicalDataType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_YEAR) //
+                .build();
     }
 
     private Attribute attrPageUrl() {

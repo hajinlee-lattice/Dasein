@@ -133,7 +133,7 @@ public enum InterfaceName {
     ModelId, Rating, Score, RawScore, ExpectedValue, Likelihood, Lift,
 
     //WebVisit
-    WebVisitPageUrl, UserId,
+    WebVisitPageUrl, UserId, WebVisitDate,
 
     //WebVisitTPathPattern
     PathPatternName, PathPattern,

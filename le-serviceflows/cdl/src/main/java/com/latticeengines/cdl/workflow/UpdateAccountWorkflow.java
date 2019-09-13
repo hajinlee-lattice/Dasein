@@ -8,12 +8,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
-import com.latticeengines.cdl.workflow.steps.update.FilterAccountExportDiff;
-import com.latticeengines.cdl.workflow.steps.update.FilterAccountFeatureDiff;
 import com.latticeengines.cdl.workflow.steps.update.MergeAccountDiff;
 import com.latticeengines.cdl.workflow.steps.update.MergeAccountExportDiff;
 import com.latticeengines.cdl.workflow.steps.update.MergeAccountFeatureDiff;
 import com.latticeengines.cdl.workflow.steps.update.ProcessAccountDiffWrapper;
+import com.latticeengines.cdl.workflow.steps.update.SplitAccountStoresDiff;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateAccountWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -34,13 +33,10 @@ public class UpdateAccountWorkflow extends AbstractWorkflow<UpdateAccountWorkflo
     private MergeAccountDiff mergeAccountDiff;
 
     @Inject
-    private FilterAccountFeatureDiff filterAccountFeatureDiff;
-
-    @Inject
     private MergeAccountFeatureDiff mergeAccountFeatureDiff;
 
     @Inject
-    private FilterAccountExportDiff filterAccountExportDiff;
+    private SplitAccountStoresDiff splitAccountStoresDiff;
 
     @Inject
     private MergeAccountExportDiff mergeAccountExportDiff;
@@ -51,9 +47,8 @@ public class UpdateAccountWorkflow extends AbstractWorkflow<UpdateAccountWorkflo
                 .next(cloneAccount) //
                 .next(processAccountDiff) //
                 .next(mergeAccountDiff) //
-                .next(filterAccountExportDiff) //
+                .next(splitAccountStoresDiff) //
                 .next(mergeAccountExportDiff) //
-                .next(filterAccountFeatureDiff) //
                 .next(mergeAccountFeatureDiff) //
                 .build();
     }

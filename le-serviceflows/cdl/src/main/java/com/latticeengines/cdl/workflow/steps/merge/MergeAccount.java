@@ -125,7 +125,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         int mergeStep = extractSteps.size();
         TransformationStepConfig merge = dedupAndMerge(InterfaceName.EntityId.name(), //
                 CollectionUtils.isEmpty(extractSteps) ? null : extractSteps, //
-                StringUtils.isBlank(matchedAccountTable) ? null : Collections.singletonList(matchedAccountTable));
+                StringUtils.isBlank(matchedAccountTable) ? null : Collections.singletonList(matchedAccountTable), //
+                Collections.singletonList(InterfaceName.CustomerAccountId.name()));
         steps.add(merge);
 
         upsertStep = mergeStep + 1;

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service;
 
+import java.io.InputStream;
 import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -13,6 +14,7 @@ import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.query.EntityType;
 
 public interface CDLService {
 
@@ -62,4 +64,6 @@ public interface CDLService {
     void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem);
 
     void updateS3ImportSystemPriorityBasedOnSequence(String customerSpace, List<S3ImportSystem> systemList);
+
+    boolean createWebVisitTemplate(String customerSpace, EntityType entityType, InputStream inputStream);
 }
