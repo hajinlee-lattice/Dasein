@@ -73,8 +73,8 @@ public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(collection.getName(), collectionName);
     }
 
-    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
-    private void testUpsertDataCollectionTable() {
+    @Test(groups = "functional", dependsOnMethods = "create", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testUpsertDataCollectionTable() throws Exception {
         DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
         TableRoleInCollection role = ConsolidatedProduct;
         String signature = NamingUtils.randomSuffix("sig", 5);
@@ -85,9 +85,12 @@ public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         DataCollectionTable dcTable = dataCollectionEntityMgr.upsertTableToCollection(collectionName, table1.getName(),
                 role, signature, version);
+        Thread.sleep(1000L); // deal with replication lag
         validateDataCollectionTable(dcTable, null, table1.getName(), version, role, signature);
         // get pid of created table
         Long pid = dcTable.getPid();
+        Assert.assertNotNull(pid);
+        log.info("DataCollectionTable PID = {}", pid);
         // validate with getByPid
         dcTable = dataCollectionEntityMgr.findDataCollectionTableByPid(pid);
         validateDataCollectionTable(dcTable, pid, table1.getName(), version, role, signature);
@@ -95,6 +98,7 @@ public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // update with another table
         dcTable = dataCollectionEntityMgr.upsertTableToCollection(collectionName, table2.getName(), role, signature,
                 version);
+        Thread.sleep(1000L); // deal with replication lag
         validateDataCollectionTable(dcTable, pid, table2.getName(), version, role, signature);
         dcTable = dataCollectionEntityMgr.findDataCollectionTableByPid(pid);
         validateDataCollectionTable(dcTable, pid, table2.getName(), version, role, signature);
