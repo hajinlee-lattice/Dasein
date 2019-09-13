@@ -68,7 +68,8 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             upsertMasterStep = 1;
             diffStep = 2;
             TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
-                    Collections.singletonList(matchedTable));
+                    Collections.singletonList(matchedTable), //
+                    Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
             upsert = upsertMaster(true, dedupStep);
             diff = diff(dedupStep, upsertMasterStep);
             steps.add(dedup);

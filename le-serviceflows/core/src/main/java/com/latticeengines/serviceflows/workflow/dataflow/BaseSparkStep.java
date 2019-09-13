@@ -73,7 +73,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         livySessionManager.killSession();
     }
 
-    protected void computeScalingMultiplier(List<DataUnit> inputs) {
+    protected void computeScalingMultiplier(List<DataUnit> inputs, int numberOfTargets) {
         double totalSizeInGb = inputs.stream().mapToDouble(du -> {
             if (du instanceof HdfsDataUnit) {
                 String path = ((HdfsDataUnit) du).getPath();
@@ -82,8 +82,9 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
                 return 0.0;
             }
         }).sum();
-        scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb);
-        log.info("Set scalingMultiplier=" + scalingMultiplier + " based on totalSize=" + totalSizeInGb + " gb.");
+        scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb * Math.max(1, numberOfTargets));
+        log.info("Set scalingMultiplier=" + scalingMultiplier + " based on totalSize=" + totalSizeInGb //
+                + " gb and numberOfTargets=" + numberOfTargets);
     }
 
     protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //

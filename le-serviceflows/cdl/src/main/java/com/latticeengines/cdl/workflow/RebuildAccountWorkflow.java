@@ -8,10 +8,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.EnrichAccountWrapper;
-import com.latticeengines.cdl.workflow.steps.rebuild.FilterAccountExport;
-import com.latticeengines.cdl.workflow.steps.rebuild.FilterAccountFeature;
 import com.latticeengines.cdl.workflow.steps.rebuild.GenerateBucketedAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccountWrapper;
+import com.latticeengines.cdl.workflow.steps.rebuild.SplitAccountStores;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildAccountWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -29,10 +28,7 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
     private ProfileAccountWrapper profileAccount;
 
     @Inject
-    private FilterAccountFeature filterAccountFeature;
-
-    @Inject
-    private FilterAccountExport filterAccountExport;
+    private SplitAccountStores splitAccountStores;
 
     @Inject
     private GenerateBucketedAccountWrapper generateBucketedAccount;
@@ -42,8 +38,7 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
         return new WorkflowBuilder(name(), config) //
                 .next(enrichAccount) //
                 .next(profileAccount) //
-                .next(filterAccountFeature) //
-                .next(filterAccountExport) //
+                .next(splitAccountStores) //
                 .next(generateBucketedAccount) //
                 .build();
     }

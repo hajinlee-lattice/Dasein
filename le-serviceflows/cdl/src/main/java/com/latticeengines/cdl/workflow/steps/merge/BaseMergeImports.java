@@ -195,7 +195,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    TransformationStepConfig dedupAndMerge(String joinKey, List<Integer> inputSteps, List<String> inputTables) {
+    TransformationStepConfig dedupAndMerge(String joinKey, List<Integer> inputSteps, List<String> inputTables,
+                                           List<String> requiredIdCols) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         if (CollectionUtils.isEmpty(inputSteps) && CollectionUtils.isEmpty(inputTables)) {
@@ -211,6 +212,14 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setDedupSrc(true);
         config.setJoinKey(joinKey);
         config.setAddTimestamps(true);
+
+        // those Id columns must exist in the output
+        if (CollectionUtils.isNotEmpty(requiredIdCols)) {
+            Map<String, String> requiredCols = new HashMap<>();
+            requiredIdCols.forEach(col -> requiredCols.put(col, "string"));
+            config.setRequiredColumns(requiredCols);
+        }
+
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }

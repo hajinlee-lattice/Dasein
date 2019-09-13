@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
+import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 
 import reactor.core.publisher.Flux;
@@ -48,6 +49,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = MergeScoringTargetsConfig.class, name = MergeScoringTargetsConfig.NAME), //
         @JsonSubTypes.Type(value = UpsertConfig.class, name = UpsertConfig.NAME), //
         @JsonSubTypes.Type(value = CopyConfig.class, name = CopyConfig.NAME), //
+        @JsonSubTypes.Type(value = MultiCopyConfig.class, name = MultiCopyConfig.NAME), //
         @JsonSubTypes.Type(value = ConvertToCSVConfig.class, name = ConvertToCSVConfig.NAME), //
         @JsonSubTypes.Type(value = PivotRatingsConfig.class, name = PivotRatingsConfig.NAME), //
         @JsonSubTypes.Type(value = TestJoinJobConfig.class, name = TestJoinJobConfig.NAME), //
