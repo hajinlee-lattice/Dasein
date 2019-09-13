@@ -33,60 +33,77 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "ExternalColumn")
+@Table(name = ExternalColumn.TABLE_NAME)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
 
     private static final long serialVersionUID = 6232580467581472718L;
 
+    public static final String TABLE_NAME = "ExternalColumn";
+    public static final String PID = "PID";
+    public static final String EXTERNAL_COLUMN_ID = "ExternalColumnID";
+    public static final String DEFAULT_COLUMN_NAME = "DefaultColumnName";
+    public static final String TABLE_PARTITION = "TablePartition";
+    public static final String DESCRIPTION = "Description";
+    public static final String DATA_TYPE = "DataType";
+    public static final String DISPLAY_NAME = "DisplayName";
+    public static final String CATEGORY = "Category";
+    public static final String SUBCATEGORY = "SubCategory";
+    public static final String STATISTICAL_TYPE = "StatisticalType";
+    public static final String FUNDAMENTAL_TYPE = "FundamentalType";
+    public static final String APPROVED_USAGE = "ApprovedUsage";
+    public static final String TAGS = "Tags";
+    public static final String MATCH_DESTINATION = "MatchDestination";
+    public static final String DISPLAY_DISCRETIZATION_STRATEGY = "DisplayDiscretizationStrategy";
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PID", unique = true, nullable = false)
+    @Column(name = PID, unique = true, nullable = false)
     private Long pid;
 
     @Id
-    @Column(name = "ExternalColumnID", nullable = false, length = 100)
+    @Column(name = EXTERNAL_COLUMN_ID, nullable = false, length = 100)
     private String externalColumnID;
 
-    @Column(name = "DefaultColumnName", nullable = false, length = 100)
+    @Column(name = DEFAULT_COLUMN_NAME, nullable = false, length = 100)
     private String defaultColumnName;
 
-    @Column(name = "TablePartition", nullable = false, length = 200)
+    @Column(name = TABLE_PARTITION, nullable = false, length = 200)
     private String tablePartition;
 
-    @Column(name = "Description", nullable = true, length = 1000)
+    @Column(name = DESCRIPTION, nullable = true, length = 1000)
     private String description;
 
-    @Column(name = "DataType", nullable = false, length = 50)
+    @Column(name = DATA_TYPE, nullable = false, length = 50)
     private String dataType;
 
-    @Column(name = "DisplayName", nullable = true)
+    @Column(name = DISPLAY_NAME, nullable = true)
     private String displayName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Category", nullable = false, length = 50)
+    @Column(name = CATEGORY, nullable = false, length = 50)
     private Category category;
 
-    @Column(name = "SubCategory", nullable = true, length = 200)
+    @Column(name = SUBCATEGORY, nullable = true, length = 200)
     private String subCategory;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "StatisticalType", nullable = true, length = 50)
+    @Column(name = STATISTICAL_TYPE, nullable = true, length = 50)
     private StatisticalType statisticalType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "FundamentalType", nullable = false, length = 50)
+    @Column(name = FUNDAMENTAL_TYPE, nullable = false, length = 50)
     private FundamentalType fundamentalType;
 
-    @Column(name = "ApprovedUsage", nullable = true)
+    @Column(name = APPROVED_USAGE, nullable = true)
     private String approvedUsage;
 
-    @Column(name = "Tags", nullable = true, length = 500)
+    @Column(name = TAGS, nullable = true, length = 500)
     private String tags;
 
-    @Column(name = "MatchDestination", nullable = true, length = 200)
+    @Column(name = MATCH_DESTINATION, nullable = true, length = 200)
     private String matchDestination;
 
-    @Column(name = "DisplayDiscretizationStrategy", nullable = true, length = 1000)
+    @Column(name = DISPLAY_DISCRETIZATION_STRATEGY, nullable = true, length = 1000)
     private String discretizationStrategy;
 
     @Override
@@ -111,6 +128,7 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         this.externalColumnID = externalColumnID;
     }
 
+    @Override
     @Transient
     public String getColumnId() {
         return externalColumnID;
@@ -207,23 +225,27 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         this.fundamentalType = fundamentalType;
     }
 
+    // Return comma separated approved usages. Don't recommend for external use.
+    // Should use getApprovedUsageList() instead
     @JsonIgnore
-    private String getApprovedUsage() {
+    public String getApprovedUsage() {
         return approvedUsage;
     }
 
     @JsonIgnore
-    private void setApprovedUsage(String approvedUsage) {
+    public void setApprovedUsage(String approvedUsage) {
         this.approvedUsage = approvedUsage;
     }
 
+    // Return comma separated tags. Don't recommend for external use.
+    // Should use getTagList() instead
     @JsonIgnore
-    private String getTags() {
+    public String getTags() {
         return tags;
     }
 
     @JsonIgnore
-    private void setTags(String tags) {
+    public void setTags(String tags) {
         this.tags = tags;
     }
 
@@ -367,4 +389,9 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         return metadata;
     }
 
+    @Override
+    public boolean containsTag(String tag) {
+        List<String> tagList = getTagList();
+        return tagList != null && tagList.contains(tag);
+    }
 }

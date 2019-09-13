@@ -30,6 +30,11 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
 
     private static final Logger log = LoggerFactory.getLogger(BaseColumnMetadataServiceImpl.class);
 
+    /*
+     * Loaded from base cache of metadata in BaseMetadataColumnServiceImpl. Have
+     * refresh dependency on watcher node AMReleaseBaseCache
+     */
+    // (datacloud version, predefined column selection) -> [column metadatas]
     private WatcherCache<ImmutablePair<String, Predefined>, List<ColumnMetadata>> predefinedMetaDataCache;
 
     protected abstract String getLatestVersion();
@@ -179,7 +184,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
                     return fromMetadataColumnService(pair.getRight(), pair.getLeft());
                 }) //
                 .initKeys(initKeys) //
-                .waitBeforeRefreshInSec((int) (Math.random() * 30))
+                // .waitBeforeRefreshInSec((int) (Math.random() * 30))
                 .build();
     }
 

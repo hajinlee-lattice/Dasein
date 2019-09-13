@@ -82,7 +82,7 @@ public class ExternalColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ext
     @Override
     public Flux<ExternalColumn> findByPage(String dataCloudVersion, int page, int pageSize) {
         return Mono.fromCallable(() -> {
-            PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("amColumnId"));
+            PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("externalColumnID"));
             return repository.findAll(pageRequest);
         }).flatMapMany(Flux::fromIterable);
     }

@@ -43,8 +43,15 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
 
-    // version -> (column->encodedCol, encodedCol -> codebook)
+    /*
+     * Both of following caches are loaded from base cache of metadata in
+     * BaseMetadataColumnServiceImpl Have refresh dependency on watcher node
+     * AMReleaseBaseCache
+     */
+
+    // DataCloudVersion -> (<ColumnName -> EncodedColumnName>, <EncodedColumnName -> BitCodeBook>)
     private WatcherCache<String, Pair<Map<String, String>, Map<String, BitCodeBook>>> codeBookCache;
+    // (DataCloudVersion, Predefined) -> ColumnSelection (consisted by a list of Column)
     private WatcherCache<ImmutablePair<String, Predefined>, ColumnSelection> predefinedSelectionCache;
 
     @Autowired
@@ -135,8 +142,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         Map<String, BitCodeBook.DecodeStrategy> decodeStrategyMap = new HashMap<>();
         Map<String, Map<String, Object>> valueDictRevMap = new HashMap<>();
         Map<String, Integer> bitUnitMap = new HashMap<>();
-        List<AccountMasterColumn> columns = accountMasterColumnService.scan(dataCloudVersion, null, null) //
-                .sequential().collectList().block();
+        List<AccountMasterColumn> columns = accountMasterColumnService.getMetadataColumns(dataCloudVersion);
         if (CollectionUtils.isNotEmpty(columns)) {
             for (AccountMasterColumn column : columns) {
                 String decodeStrategyStr = column.getDecodeStrategy();
@@ -210,7 +216,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         }
     }
 
-    private ColumnSelection getPredefinedColumnSelectionFromDb(Predefined selection, String dataCloudVersion) {
+    private ColumnSelection getPredefinedColumnSelection(Predefined selection, String dataCloudVersion) {
         List<AccountMasterColumn> externalColumns = accountMasterColumnService.findByColumnSelection(selection,
                 dataCloudVersion);
         ColumnSelection cs = new ColumnSelection();
@@ -231,10 +237,10 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                 .maximum(100) //
                 .load(key -> {
                     ImmutablePair<String, Predefined> pair = (ImmutablePair<String, Predefined>) key;
-                    return getPredefinedColumnSelectionFromDb(pair.getRight(), pair.getLeft());
+                    return getPredefinedColumnSelection(pair.getRight(), pair.getLeft());
                 }) //
                 .initKeys(initKeys) //
-                .waitBeforeRefreshInSec((int) (Math.random() * 30)) //
+                // .waitBeforeRefreshInSec((int) (Math.random() * 30)) //
                 .build();
         codeBookCache = WatcherCache.builder() //
                 .name("CodeBookCache") //
@@ -247,7 +253,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                     return ImmutablePair.of(codeBookLookup, codeBookMap);
                 }) //
                 .initKeys(new String[] { currentApproved }) //
-                .waitBeforeRefreshInSec((int) (Math.random() * 30)) //
+                // .waitBeforeRefreshInSec((int) (Math.random() * 30)) //
                 .build();
     }
 

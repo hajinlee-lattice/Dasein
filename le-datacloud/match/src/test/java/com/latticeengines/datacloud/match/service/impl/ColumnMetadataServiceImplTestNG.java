@@ -30,9 +30,9 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
     public void testAvroSchemaForDerivedColumnsCache() {
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService("1.0.0");
         for (Predefined predefined : Predefined.values()) {
-            Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), null);
+            Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), "1.0.0");
             Assert.assertEquals(schema.getFields().size(),
-                    columnMetadataService.fromPredefinedSelection(predefined, null).size());
+                    columnMetadataService.fromPredefinedSelection(predefined, "1.0.0").size());
         }
     }
 

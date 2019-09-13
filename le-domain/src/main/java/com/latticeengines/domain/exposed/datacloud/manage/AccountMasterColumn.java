@@ -40,75 +40,97 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "AccountMasterColumn", indexes = { //
-        @Index(name = "IX_VERSION", columnList = "DataCloudVersion"), //
-        @Index(name = "IX_GROUPS", columnList = "Groups") //
-}, uniqueConstraints = { @UniqueConstraint(columnNames = { "AMColumnID", "DataCloudVersion" }) })
+@Table(name = AccountMasterColumn.TABLE_NAME, indexes = { //
+        @Index(name = "IX_VERSION", columnList = AccountMasterColumn.DATACLOUD_VERSION), //
+        @Index(name = "IX_GROUPS", columnList = AccountMasterColumn.GROUPS) //
+}, uniqueConstraints = {
+        @UniqueConstraint(columnNames = { AccountMasterColumn.AMCOLUMN_ID, AccountMasterColumn.DATACLOUD_VERSION }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn {
 
     private static final long serialVersionUID = -7516382374246940122L;
 
+    public static final String TABLE_NAME = "AccountMasterColumn";
+    public static final String PID = "PID";
+    public static final String AMCOLUMN_ID = "AMColumnID";
+    public static final String DATACLOUD_VERSION = "DataCloudVersion";
+    public static final String DISPLAY_NAME = "DisplayName";
+    public static final String DESCRIPTION = "Description";
+    public static final String JAVA_CLASS = "JavaClass";
+    public static final String CATEGORY = "Category";
+    public static final String SUBCATEGORY = "Subcategory";
+    public static final String STATISTICAL_TYPE = "StatisticalType";
+    public static final String FUNDAMENTAL_TYPE = "FundamentalType";
+    public static final String APPROVED_USAGE = "ApprovedUsage";
+    public static final String GROUPS = "Groups";
+    public static final String IS_INTERNAL_ENRICHMENT = "IsInternalEnrichment";
+    public static final String IS_PREMIUM = "IsPremium";
+    public static final String DISPLAY_DISCRETIZATION_STRATEGY = "DisplayDiscretizationStrategy";
+    public static final String DECODE_STRATEGY = "DecodeStrategy";
+    public static final String IS_EOL = "IsEOL";
+    public static final String DATA_LICENSE = "DataLicense";
+    public static final String EOL_VERSION = "EOLVersion";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PID", unique = true, nullable = false)
+    @Column(name = PID, unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "AMColumnID", nullable = false, length = 64)
+    @Column(name = AMCOLUMN_ID, nullable = false, length = 64)
     private String amColumnId;
 
-    @Column(name = "DataCloudVersion", nullable = false, length = 50)
+    @Column(name = DATACLOUD_VERSION, nullable = false, length = 50)
     private String dataCloudVersion;
 
-    @Column(name = "DisplayName", nullable = false)
+    @Column(name = DISPLAY_NAME, nullable = false)
     private String displayName;
 
-    @Column(name = "Description", length = 1000)
+    @Column(name = DESCRIPTION, length = 1000)
     private String description;
 
-    @Column(name = "JavaClass", nullable = false, length = 50)
+    @Column(name = JAVA_CLASS, nullable = false, length = 50)
     private String javaClass;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Category", nullable = false, length = 50)
+    @Column(name = CATEGORY, nullable = false, length = 50)
     private Category category;
 
-    @Column(name = "Subcategory", length = 200)
+    @Column(name = SUBCATEGORY, length = 200)
     private String subcategory;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "StatisticalType", length = 50)
+    @Column(name = STATISTICAL_TYPE, length = 50)
     private StatisticalType statisticalType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "FundamentalType", length = 50)
+    @Column(name = FUNDAMENTAL_TYPE, length = 50)
     private FundamentalType fundamentalType;
 
-    @Column(name = "ApprovedUsage")
+    @Column(name = APPROVED_USAGE)
     private String approvedUsage;
 
-    @Column(name = "Groups", nullable = false, length = 250)
+    @Column(name = GROUPS, nullable = false, length = 250)
     private String groups;
 
-    @Column(name = "IsInternalEnrichment", nullable = false)
+    @Column(name = IS_INTERNAL_ENRICHMENT, nullable = false)
     private boolean internalEnrichment;
 
-    @Column(name = "IsPremium", nullable = false)
+    @Column(name = IS_PREMIUM, nullable = false)
     private boolean premium;
 
-    @Column(name = "DisplayDiscretizationStrategy", length = 1000)
+    @Column(name = DISPLAY_DISCRETIZATION_STRATEGY, length = 1000)
     private String discretizationStrategy;
 
-    @Column(name = "DecodeStrategy", length = 1000)
+    @Column(name = DECODE_STRATEGY, length = 1000)
     private String decodeStrategy;
 
-    @Column(name = "IsEOL", nullable = false)
+    @Column(name = IS_EOL, nullable = false)
     private boolean eol;
 
-    @Column(name = "DataLicense", length = 100)
+    @Column(name = DATA_LICENSE, length = 100)
     private String dataLicense;
 
-    @Column(name = "EOLVersion", length = 50)
+    @Column(name = EOL_VERSION, length = 50)
     private String eolVersion;
 
     @Override
@@ -123,12 +145,12 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         this.pid = pid;
     }
 
-    @JsonProperty("AMColumnID")
+    @JsonProperty(AMCOLUMN_ID)
     public String getAmColumnId() {
         return amColumnId;
     }
 
-    @JsonProperty("AMColumnID")
+    @JsonProperty(AMCOLUMN_ID)
     public void setAmColumnId(String amColumnId) {
         this.amColumnId = amColumnId;
     }
@@ -170,12 +192,12 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @Override
-    @JsonProperty("DisplayName")
+    @JsonProperty(DISPLAY_NAME)
     public String getDisplayName() {
         return displayName;
     }
 
-    @JsonProperty("DisplayName")
+    @JsonProperty(DISPLAY_NAME)
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -486,4 +508,8 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
 
     }
 
+    @Override
+    public boolean containsTag(String tag) {
+        return groups != null && groups.contains(tag);
+    }
 }
