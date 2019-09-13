@@ -257,7 +257,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
                     return loadFromS3(dataCloudVersion);
                 }
             });
-            log.info("Read " + columns.size() + " columns from DB for version " + dataCloudVersion);
+            log.info("Read " + columns.size() + " columns for version " + dataCloudVersion);
             ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
             for (E column : columns) {
                 whiteColumnCache.put(column.getColumnId(), column);
