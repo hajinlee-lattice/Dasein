@@ -213,8 +213,10 @@ public class MatchResource {
             if (request.isBumpupVersion()) {
                 entityMatchVersionService.bumpVersion(request.getDestEnv(), request.getDestTenant());
             }
+            // TODO add version support
             EntityPublishStatistics statistics = entityInternalMatchService.publishEntity(request.getEntity(),
-                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), request.getDestTTLEnabled());
+                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), request.getDestTTLEnabled(),
+                    null);
             statistics.setRequest(request);
             return statistics;
         } catch (Exception e) {

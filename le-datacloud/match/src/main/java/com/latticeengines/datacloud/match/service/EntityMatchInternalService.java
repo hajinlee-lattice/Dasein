@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Triple;
@@ -21,43 +22,77 @@ public interface EntityMatchInternalService {
     /**
      * Retrieve the seed ID with the input lookup entry.
      *
-     * @param tenant target tenant
-     * @param lookupEntry entry used to lookup the seed
-     * @return seed ID mapped by the lookup entry, {@literal null} if no seed mapped by the entry
+     * @param tenant
+     *            target tenant
+     * @param lookupEntry
+     *            entry used to lookup the seed
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
+     * @return seed ID mapped by the lookup entry, {@literal null} if no seed mapped
+     *         by the entry
      */
-    String getId(@NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry);
+    String getId(@NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Retrieve a list of seed IDs with the input list of lookup entries.
      *
-     * @param tenant target tenant
-     * @param lookupEntries a list of entries used to lookup seeds
-     * @return a list of seed IDs. the list will not be {@literal null} and will have the same size as the input
-     * list of seed IDs. If no seed mapped by specific lookup entry, {@literal null} will
-     * be inserted in the respective index.
+     * @param tenant
+     *            target tenant
+     * @param lookupEntries
+     *            a list of entries used to lookup seeds
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
+     * @return a list of seed IDs. the list will not be {@literal null} and will
+     *         have the same size as the input list of seed IDs. If no seed mapped
+     *         by specific lookup entry, {@literal null} will be inserted in the
+     *         respective index.
      */
-    List<String> getIds(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries);
+    List<String> getIds(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Retrieve {@link EntityRawSeed} with the given ID under the target tenant.
      *
-     * @param tenant target tenant
-     * @param entity target entity
-     * @param seedId seed ID
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            target entity
+     * @param seedId
+     *            seed ID
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
      * @return seed object, {@literal null} if no seed with the specified ID exists
      */
-    EntityRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId);
+    EntityRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Retrieve a list of {@link EntityRawSeed} with a list of seed IDs.
      *
-     * @param tenant target tenant
-     * @param entity target entity
-     * @param seedIds list of seed IDs
-     * @return a list of seed IDs. the list will not be {@literal null} and will have the same size as the input
-     * list of seed IDs. If no seed with a specific ID exists, {@literal null} will be inserted in the respective index.
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            target entity
+     * @param seedIds
+     *            list of seed IDs
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
+     * @return a list of seed IDs. the list will not be {@literal null} and will
+     *         have the same size as the input list of seed IDs. If no seed with a
+     *         specific ID exists, {@literal null} will be inserted in the
+     *         respective index.
      */
-    List<EntityRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds);
+    List<EntityRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Retrieve anonymoous seed for target tenant/entity. Create if it does not
@@ -67,9 +102,14 @@ public interface EntityMatchInternalService {
      *            target tenant
      * @param entity
      *            target entity
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
      * @return anonymous seed object, will not be {@literal null}
      */
-    EntityRawSeed getOrCreateAnonymousSeed(@NotNull Tenant tenant, @NotNull String entity);
+    EntityRawSeed getOrCreateAnonymousSeed(@NotNull Tenant tenant, @NotNull String entity,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Allocate a new ID for given entity in the specified tenant.
@@ -81,9 +121,14 @@ public interface EntityMatchInternalService {
      * @param preferredId
      *            use this ID if not already taken, use {@literal null} or blank
      *            string if no preference
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
      * @return the allocated ID, will not be {@literal null}
      */
-    String allocateId(@NotNull Tenant tenant, @NotNull String entity, String preferredId);
+    String allocateId(@NotNull Tenant tenant, @NotNull String entity, String preferredId,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Associate all lookup entries and attributes in the input
@@ -105,12 +150,16 @@ public interface EntityMatchInternalService {
      *         middle list contains all lookup entries that cannot be associated to
      *         the current seed. the right list contains all lookup entries that
      *         already mapped to another seed
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
      * @throws UnsupportedOperationException
      *             if allocating new accounts are not supported
      */
     Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
             @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
-            Set<EntityLookupEntry> entriesMapToOtherSeed);
+            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Cleanup entity seed that is supposed to be orphan (not mapped by any of its
@@ -122,8 +171,13 @@ public interface EntityMatchInternalService {
      *            entity
      * @param seedId
      *            seed ID to cleanup
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
      */
-    void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId);
+    void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Publish seed/lookup data from source tenant (staging env) to dest tenant
@@ -131,8 +185,8 @@ public interface EntityMatchInternalService {
      *
      * Current use case:
      *
-     * STAGING -> SERVING env with same tenant in PA publish
-     * STAGING -> STAGING env with different tenant in checkpoint save/restore
+     * STAGING -> SERVING env with same tenant in PA publish STAGING -> STAGING env
+     * with different tenant in checkpoint save/restore
      *
      * @param entity
      * @param sourceTenant
@@ -141,8 +195,12 @@ public interface EntityMatchInternalService {
      * @param destTTLEnabled:
      *            If null, by default, true if destEnv is STAGING and false if
      *            destEnv is SERVING
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
      */
     EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
-            @NotNull Tenant destTenant,
-            @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled);
+            @NotNull Tenant destTenant, @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 }

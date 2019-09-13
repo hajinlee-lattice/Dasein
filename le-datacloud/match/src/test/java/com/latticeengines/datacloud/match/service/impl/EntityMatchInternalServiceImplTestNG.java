@@ -178,17 +178,21 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         setupServing(tenant, TEST_ENTRY_1, TEST_ENTRY_3);
         Thread.sleep(500L);
 
-        List<String> seedIds = entityMatchInternalService.getIds(tenant, TEST_ENTRIES);
+        List<String> seedIds = entityMatchInternalService.getIds(tenant, TEST_ENTRIES, null);
         Assert.assertNotNull(seedIds);
         Assert.assertEquals(seedIds.size(), TEST_ENTRIES.size());
         // only entry 1 & 3 are set to serving
         Assert.assertEquals(seedIds, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
 
         // check in-memory cache
-        Cache<Pair<String, EntityLookupEntry>, String> lookupCache = entityMatchInternalService.getLookupCache();
+        Cache<Triple<String, Integer, EntityLookupEntry>, String> lookupCache = entityMatchInternalService
+                .getLookupCache();
+        int servingVersion = entityMatchVersionService.getCurrentVersion(SERVING, tenant);
         Assert.assertNotNull(lookupCache);
-        Assert.assertEquals(lookupCache.getIfPresent(Pair.of(tenant.getId(), TEST_ENTRY_1)), SEED_ID_FOR_LOOKUP);
-        Assert.assertEquals(lookupCache.getIfPresent(Pair.of(tenant.getId(), TEST_ENTRY_3)), SEED_ID_FOR_LOOKUP);
+        Assert.assertEquals(lookupCache.getIfPresent(Triple.of(tenant.getId(), servingVersion, TEST_ENTRY_1)),
+                SEED_ID_FOR_LOOKUP);
+        Assert.assertEquals(lookupCache.getIfPresent(Triple.of(tenant.getId(), servingVersion, TEST_ENTRY_3)),
+                SEED_ID_FOR_LOOKUP);
         Assert.assertNull(lookupCache.getIfPresent(TEST_ENTRY_2));
         Assert.assertNull(lookupCache.getIfPresent(TEST_ENTRY_4));
         // clean cache
@@ -215,15 +219,16 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         setupServing(tenant, TEST_SEED_1, TEST_SEED_2, TEST_SEED_3);
         Thread.sleep(500L);
 
-        List<EntityRawSeed> results = entityMatchInternalService.get(tenant, TEST_ENTITY, SEED_IDS);
+        List<EntityRawSeed> results = entityMatchInternalService.get(tenant, TEST_ENTITY, SEED_IDS, null);
         Assert.assertNotNull(results);
         Assert.assertEquals(results.size(), SEED_IDS.size());
         // only test seed 1, 2 & 3 exists
         verifyEntityRawSeeds(results, SEED_ID_1, SEED_ID_2, SEED_ID_3, null, null);
 
         // check in-memory cache (should not use cache in bulk mode for seed)
-        Pair<String, String> prefix = Pair.of(tenant.getId(), TEST_ENTITY);
-        Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService
+        int servingVersion = entityMatchVersionService.getCurrentVersion(SERVING, tenant);
+        Triple<String, Integer, String> prefix = Triple.of(tenant.getId(), servingVersion, TEST_ENTITY);
+        Cache<Triple<Pair<String, String>, Integer, String>, EntityRawSeed> seedCache = entityMatchInternalService
                 .getSeedCache();
         Assert.assertNotNull(seedCache);
         SEED_IDS.stream().map(id -> seedCache.getIfPresent(Pair.of(prefix, id))).forEach(Assert::assertNull);
@@ -244,19 +249,20 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         setupServing(tenant, TEST_SEED_1, TEST_SEED_2);
         Thread.sleep(500L);
 
-        List<EntityRawSeed> results = entityMatchInternalService.get(tenant, TEST_ENTITY, SEED_IDS);
+        List<EntityRawSeed> results = entityMatchInternalService.get(tenant, TEST_ENTITY, SEED_IDS, null);
         Assert.assertNotNull(results);
         Assert.assertEquals(results.size(), SEED_IDS.size());
         // only test seed 1, 2 & 3 exists
         verifyEntityRawSeeds(results, SEED_ID_1, SEED_ID_2, null, null, null);
 
         // check in-memory cache
+        int servingVersion = entityMatchVersionService.getCurrentVersion(SERVING, tenant);
         Pair<String, String> prefix = Pair.of(tenant.getId(), TEST_ENTITY);
-        Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService
+        Cache<Triple<Pair<String, String>, Integer, String>, EntityRawSeed> seedCache = entityMatchInternalService
                 .getSeedCache();
         Assert.assertNotNull(seedCache);
         Stream.of(SEED_ID_1, SEED_ID_2)
-                .map(id -> seedCache.getIfPresent(Pair.of(prefix, id)))
+                .map(id -> seedCache.getIfPresent(Triple.of(prefix, servingVersion, id)))
                 .forEach(Assert::assertNotNull);
         // clean cache
         seedCache.invalidateAll();
@@ -281,7 +287,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         setupServing(tenant, DUNS_1, SFDC_2);
         Thread.sleep(500L);
 
-        List<String> seedIds = entityMatchInternalService.getIds(tenant, Arrays.asList(lookupEntries));
+        List<String> seedIds = entityMatchInternalService.getIds(tenant, Arrays.asList(lookupEntries), null);
         Assert.assertEquals(seedIds, expectedSeedIds);
     }
 
@@ -298,7 +304,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         Thread.sleep(500L);
 
         List<String> expectedSeedIds = Arrays.asList(null, null, seedId1, null, seedId2);
-        List<EntityRawSeed> seeds = entityMatchInternalService.get(tenant, TEST_ENTITY, expectedSeedIds);
+        List<EntityRawSeed> seeds = entityMatchInternalService.get(tenant, TEST_ENTITY, expectedSeedIds, null);
         Assert.assertNotNull(seeds);
         List<String> seedIds = seeds.stream().map(seed -> seed == null ? null : seed.getId())
                 .collect(Collectors.toList());
@@ -316,7 +322,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         List<Future<String>> futures = IntStream
                 .range(0, nAllocations)
                 .mapToObj(idx -> service.submit(() ->
-                entityMatchInternalService.allocateId(tenant, TEST_ENTITY, null)))
+                entityMatchInternalService.allocateId(tenant, TEST_ENTITY, null, null)))
                 .collect(Collectors.toList());
         List<String> entityIds = futures.stream().map(future -> {
             try {
@@ -350,7 +356,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         EntityRawSeed seedToUpdate1 = newSeed(seedId, "sfdc_1", "google.com");
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result1 = entityMatchInternalService
-                .associate(tenant, seedToUpdate1, false, null);
+                .associate(tenant, seedToUpdate1, false, null, null);
         Assert.assertNotNull(result1);
         // check state before update has no lookup entries
         Assert.assertTrue(equalsDisregardPriority(result1.getLeft(), newSeed(seedId, null)));
@@ -359,7 +365,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         EntityRawSeed seedToUpdate2 = newSeed(seedId, "sfdc_2", "facebook.com", "netflix.com");
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result2 = entityMatchInternalService
-                .associate(tenant, seedToUpdate2, false, null);
+                .associate(tenant, seedToUpdate2, false, null, null);
         Assert.assertNotNull(result2);
         // check state before update
         Assert.assertTrue(equalsDisregardPriority(result2.getLeft(), seedToUpdate1));
@@ -373,7 +379,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         // update domain again and make sure it does not get reported in failure
         result2 = entityMatchInternalService.associate(tenant,
-                newSeed(seedId, null, "facebook.com", "netflix.com"), false, null);
+                newSeed(seedId, null, "facebook.com", "netflix.com"), false, null, null);
         Assert.assertNotNull(result2);
         verifyNoAssociationFailure(result2);
     }
@@ -414,7 +420,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 entityMatchVersionService.getCurrentVersion(env, tenant));
 
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
-                entityMatchInternalService.associate(tenant, seedToAssociate, false, null);
+                entityMatchInternalService.associate(tenant, seedToAssociate, false, null, null);
         Assert.assertNotNull(result);
         // currently, we only return updated old attribute, so no equals current seed
         Assert.assertNotNull(result.getLeft());
@@ -469,7 +475,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         Thread.sleep(500L);
 
         // make sure we still can retrieve everything even if the cache limit exceeded
-        List<String> seedIds = entityMatchInternalService.getIds(tenant, TEST_ENTRIES);
+        List<String> seedIds = entityMatchInternalService.getIds(tenant, TEST_ENTRIES, null);
         Assert.assertNotNull(seedIds);
         Assert.assertEquals(seedIds.size(), TEST_ENTRIES.size());
         seedIds.forEach(id -> Assert.assertEquals(id, SEED_ID_FOR_LOOKUP));
@@ -486,7 +492,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         setupServing(tenant, TEST_SEED_1, TEST_SEED_2, TEST_SEED_3);
         Thread.sleep(500L);
 
-        List<EntityRawSeed> results = entityMatchInternalService.get(tenant, TEST_ENTITY, SEED_IDS);
+        List<EntityRawSeed> results = entityMatchInternalService.get(tenant, TEST_ENTITY, SEED_IDS, null);
         Assert.assertNotNull(results);
         Assert.assertEquals(results.size(), SEED_IDS.size());
         // only test seed 1, 2 & 3 exists
@@ -506,7 +512,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         // Test publish without data, expect to finish without exception
         entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant1, STAGING,
-                Boolean.TRUE);
+                Boolean.TRUE, null);
 
         // Prepare data:
         // tenant 1 with seed & lookup entries to publish, no same lookup
@@ -549,7 +555,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // Prepared data for tenant 1 & 2 in staging, and select tenant1's data
         // to publish to tenant3 in staging
         EntityPublishStatistics stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant3,
-                STAGING, Boolean.TRUE);
+                STAGING, Boolean.TRUE, null);
         Assert.assertEquals(stats.getSeedCount(), seeds.size());
         // There are 5 possible lookup options in seeds
         Assert.assertEquals(stats.getLookupCount(), 5);
@@ -570,7 +576,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // Prepared data for tenant 1 & 2 in staging and select tenant1's data
         // to publish to tenant1 in serving
         stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant1, SERVING,
-                Boolean.TRUE);
+                Boolean.TRUE, null);
         Assert.assertEquals(stats.getSeedCount(), seeds.size());
         // There are 5 possible lookup options in seeds
         Assert.assertEquals(stats.getLookupCount(), 5);
@@ -590,7 +596,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // Test seeds having same lookup entries but only lookup entries which
         // actually point to seed are published
         stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant2, tenant2, SERVING,
-                Boolean.TRUE);
+                Boolean.TRUE, null);
         Assert.assertEquals(stats.getSeedCount(), noiseSeeds.size());
         // There are 3 possible lookup options in noiseSeeds
         Assert.assertEquals(stats.getLookupCount(), 3);
@@ -624,7 +630,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         Queue<EntityRawSeed> seeds = new ConcurrentLinkedQueue<>();
         for (int i = 0; i < numCalls; i++) {
             service.submit(() -> {
-                seeds.add(entityMatchInternalService.getOrCreateAnonymousSeed(t1, BusinessEntity.Account.name()));
+                seeds.add(entityMatchInternalService.getOrCreateAnonymousSeed(t1, BusinessEntity.Account.name(), null));
                 latch.countDown();
             });
         }
@@ -647,14 +653,15 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 .format("Should only have one new anonymous seed. New anonymous seed indexes = %s", newlyAllocatedIdx));
 
         // should create anonmymous contact for the same tenant
-        EntityRawSeed seed = entityMatchInternalService.getOrCreateAnonymousSeed(t1, BusinessEntity.Contact.name());
+        EntityRawSeed seed = entityMatchInternalService.getOrCreateAnonymousSeed(t1, BusinessEntity.Contact.name(),
+                null);
         Assert.assertNotNull(seed);
         Assert.assertEquals(seed.getId(), ENTITY_ANONYMOUS_ID);
         Assert.assertTrue(seed.isNewlyAllocated(), "Anonymous contact should be newly allocated");
 
         // create anonymous account for another tenant
         Tenant t2 = newTestTenant();
-        seed = entityMatchInternalService.getOrCreateAnonymousSeed(t2, BusinessEntity.Account.name());
+        seed = entityMatchInternalService.getOrCreateAnonymousSeed(t2, BusinessEntity.Account.name(), null);
         Assert.assertNotNull(seed);
         Assert.assertEquals(seed.getId(), ENTITY_ANONYMOUS_ID);
         Assert.assertTrue(seed.isNewlyAllocated(), "Anonymous account for another tenant should be newly allocated");
@@ -666,14 +673,14 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         entityMatchConfigurationService.setIsAllocateMode(true);
         String preferredId = "entity_match_preferred_id";
 
-        String id = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), preferredId);
+        String id = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), preferredId, null);
         Assert.assertEquals(id, preferredId, "Should be able to allocate preferred ID when it's not taken yet");
 
-        id = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), preferredId);
+        id = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), preferredId, null);
         Assert.assertNotEquals(id, preferredId, "Should not be able to allocate preferred ID when it's already taken");
 
         // no preference, let system create ID at will
-        String randomId = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), null);
+        String randomId = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), null, null);
         Assert.assertNotEquals(randomId, id);
         Assert.assertNotEquals(randomId, preferredId);
     }

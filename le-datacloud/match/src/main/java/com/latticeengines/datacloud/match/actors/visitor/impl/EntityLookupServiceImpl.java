@@ -59,7 +59,8 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
         EntityLookupRequest lookupRequest = (EntityLookupRequest) request.getInputData();
         List<EntityLookupEntry> entries = EntityLookupEntryConverter.fromMatchKeyTuple(
                 lookupRequest.getEntity(), lookupRequest.getTuple());
-        List<String> entityIds = entityMatchInternalService.getIds(lookupRequest.getTenant(), entries);
+        // TODO add version support
+        List<String> entityIds = entityMatchInternalService.getIds(lookupRequest.getTenant(), entries, null);
         return new EntityLookupResponse(
                 lookupRequest.getTenant(), lookupRequest.getEntity(), lookupRequest.getTuple(), entityIds);
     }
@@ -115,7 +116,8 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
                     .filter(entry -> StringUtils.isNotBlank(entry.getSerializedValues())) //
                     .distinct()
                     .collect(Collectors.toList());
-            List<String> seedIds = entityMatchInternalService.getIds(tenant, entries);
+            // TODO add version support
+            List<String> seedIds = entityMatchInternalService.getIds(tenant, entries, null);
             Map<EntityLookupEntry, String> lookupResults = IntStream
                     .range(0, entries.size())
                     .mapToObj(idx -> Pair.of(entries.get(idx), seedIds.get(idx)))

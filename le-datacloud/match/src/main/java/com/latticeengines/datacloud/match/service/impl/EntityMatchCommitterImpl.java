@@ -73,6 +73,8 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
 
+    // TODO add version support
+
     @Override
     public EntityPublishStatistics commit(@NotNull String entity, @NotNull Tenant tenant, Boolean destTTLEnabled) {
         check(entity, tenant);

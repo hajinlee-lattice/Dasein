@@ -242,8 +242,9 @@ public class FuzzyMatchHelper implements DbHelper {
                 .collect(Collectors.toList());
         long startTime = System.currentTimeMillis();
         Tenant tenant = new Tenant(CustomerSpace.parse(context.getInput().getTenant().getId()).getTenantId());
+        // TODO add version support
         List<EntityRawSeed> seeds = entityMatchInternalService.get(tenant, context.getInput().getTargetEntity(),
-                seedIds);
+                seedIds, null);
         int unmatch = 0;
         for (int i = 0; i < context.getInternalResults().size(); i++) {
             InternalOutputRecord record = context.getInternalResults().get(i);

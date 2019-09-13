@@ -43,8 +43,9 @@ public class PublishEntity extends BaseWorkflowStep<PublishEntityConfiguration> 
         EntityMatchEnvironment destEnv = request.getDestEnv();
         Boolean enableDestTTL = request.getDestTTLEnabled();
 
+        // TODO add version support
         EntityPublishStatistics result = entityMatchInternalService.publishEntity(entity, srcTenant, destTenant,
-                destEnv, enableDestTTL);
+                destEnv, enableDestTTL, null);
         Preconditions.checkNotNull(result);
 
         log.info("Publish entity={} from srcTenant={} to destTenant={},destEnv={},ttl={} successfully", entity,

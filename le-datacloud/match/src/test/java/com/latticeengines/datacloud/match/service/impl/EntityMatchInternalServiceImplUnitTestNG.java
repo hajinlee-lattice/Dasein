@@ -20,10 +20,12 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_4;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +78,7 @@ public class EntityMatchInternalServiceImplUnitTestNG {
                 service.getExistingLookupPairs(currentState);
         Assert.assertNotNull(existingLookupPairs);
         List<EntityLookupEntry> result = service.mapLookupEntriesToSeed(
-                null, null, existingLookupPairs, seedToAssociate, false, null);
+                STAGING, null, existingLookupPairs, seedToAssociate, false, null, Collections.singletonMap(STAGING, 0));
         Assert.assertNotNull(result);
         Map<EntityLookupEntry, String> expectedMap = expectedLookupEntriesToUpdate
                 .stream()

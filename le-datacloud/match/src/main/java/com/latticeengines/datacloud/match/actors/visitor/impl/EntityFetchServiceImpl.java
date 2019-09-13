@@ -68,8 +68,9 @@ public class EntityFetchServiceImpl extends DataSourceMicroBatchLookupServiceBas
     protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         EntityFetchRequest fetchRequest = (EntityFetchRequest) request.getInputData();
         log.info("Fetching seed for request={}", fetchRequest);
+        // TODO add version support
         return entityMatchInternalService.get(fetchRequest.getTenant(), fetchRequest.getEntity(),
-                fetchRequest.getEntityId());
+                fetchRequest.getEntityId(), null);
     }
 
     /*
@@ -96,8 +97,8 @@ public class EntityFetchServiceImpl extends DataSourceMicroBatchLookupServiceBas
                         .collect(toList());
                 log.info("Fetching seeds for tenant(ID={}), entity={}, unique IDs={}", tenantId, entity,
                         entityIds.size());
-                // entityId -> seed
-                Map<String, EntityRawSeed> seedMap = entityMatchInternalService.get(tenant, entity, entityIds) //
+                // entityId -> seed TODO add version support
+                Map<String, EntityRawSeed> seedMap = entityMatchInternalService.get(tenant, entity, entityIds, null) //
                         .stream() //
                         .collect(Collectors.toMap(EntityRawSeed::getId, seed -> seed, (s1, s2) -> s1));
                 // send response for each request
