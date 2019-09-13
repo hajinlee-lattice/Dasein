@@ -84,12 +84,12 @@ public class FeatureFlagUtils {
 
     public static boolean isApsImputationEnabled(FeatureFlagValueMap flags) {
         try {
-            return flags.containsKey(LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName())
-                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName()));
+            return !flags.containsKey(LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName())
+                    || Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName()));
         } catch (Exception e) {
             log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_APS_IMPUTATION.getName() + " feature flag!",
                     e);
-            return false;
+            return true;
         }
     }
 
