@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -358,6 +359,38 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
         url = constructUrl(url, tenantPid);
         delete("deleteByTenantPid", url);
+    }
+
+    public Job getJobByWorkflowJobPid(String customerSpace, Long workflowPid) {
+        checkCustomerSpace(customerSpace);
+
+        String baseUrl = "/jobs/{customerSpace}/{workflowPid}";
+        String url = constructUrl(baseUrl, customerSpace, workflowPid);
+        return get("getJobByWorkflowJobPid", url, Job.class);
+    }
+
+    public WorkflowJob getWorkflowJobByWorkflowJobPid(String customerSpace, Long workflowPid) {
+        checkCustomerSpace(customerSpace);
+
+        String baseUrl = "/workflowJobs/{customerSpace}/{workflowPid}";
+        String url = constructUrl(baseUrl, customerSpace, workflowPid);
+        return get("getWorkflowJobByWorkflowJobPid", url, WorkflowJob.class);
+    }
+
+    public JobStatus getJobStatusByWorkflowJobPid(String customerSpace, Long workflowPid) {
+        checkCustomerSpace(customerSpace);
+
+        String baseUrl = "/workflowJobs/{customerSpace}/{workflowPid}/jobStatus";
+        String url = constructUrl(baseUrl, customerSpace, workflowPid);
+        return JobStatus.fromString(get("getJobStatusByWorkflowJobPid", url, String.class));
+    }
+
+    public String getApplicationIdByWorkflowJobPid(String customerSpace, Long workflowPid) {
+        checkCustomerSpace(customerSpace);
+
+        String baseUrl = "/workflowJobs/{customerSpace}/{workflowPid}/applicationId";
+        String url = constructUrl(baseUrl, customerSpace, workflowPid);
+        return get("getAppIdByWorkflowJobPid", url, String.class);
     }
 
     private void checkCustomerSpace(String customerSpace) {
