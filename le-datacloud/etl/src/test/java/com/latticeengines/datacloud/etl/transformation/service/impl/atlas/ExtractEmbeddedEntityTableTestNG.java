@@ -112,7 +112,7 @@ public class ExtractEmbeddedEntityTableTestNG extends PipelineTransformationTest
         ExtractEmbeddedEntityTableConfig config = new ExtractEmbeddedEntityTableConfig();
         config.setEntity(Account.name());
         config.setEntityIdFld(AccountId.name());
-        config.setSystemIdFlds(Arrays.asList(CustomerAccountId.name()));
+        config.setSystemIdFlds(Arrays.asList(CustomerAccountId.name(), "NonExistedId"));
         return JsonUtils.serialize(config);
     }
 
