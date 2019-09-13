@@ -1,35 +1,117 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.common.exposed.bean.BeanFactoryEnvironment.Environment.WebApp;
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMReleaseBaseCache;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.aws.s3.S3KeyFilter;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseMetadataColumnServiceImpl.class);
+
+    private static final String LOCAL_CACHE = "dc_mds";
+    private static final int MDS_SPLITS = 4;
+
+    @Value("${datacloud.collection.s3bucket}")
+    private String s3Bucket;
+
+    @Value("${datacloud.match.metadata.from.db}")
+    private boolean mdsFromDB;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Inject
+    private HdfsPathBuilder hdfsPathBuilder;
+
+    protected abstract MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();
+
+    // This is base cache which has all the metadatas for datacloud versions.
+    // Upper-layer metadata related cache loads metadata from this base cache
+    // instead of all loading from S3
+    // datacloud version -> <column ID -> MetadataColumn>
+    protected abstract ConcurrentMap<String, ConcurrentMap<String, E>> getWhiteColumnCache();
+
+    // datacloud version -> [requested column IDs]
+    protected abstract ConcurrentMap<String, ConcurrentSkipListSet<String>> getBlackColumnCache();
+
+    protected abstract String getLatestVersion();
+
+    /**
+     * Get avro schema for MetadataColumn
+     *
+     * @return
+     */
+    protected abstract Schema getSchema();
+
+    /**
+     * Convert list of MetadataColumn to list of GenericRecord
+     *
+     * @param schema:
+     *            avro schema for MetadataColumn
+     * @param columns:
+     *            MetadataColumns
+     * @return
+     */
+    protected abstract List<GenericRecord> toGenericRecords(Schema schema, Flux<E> columns);
+
+    /**
+     * Convert GenericRecord back to MetadataColumn
+     *
+     * @param record:
+     *            GenericRecord
+     * @return MetadataColumn
+     */
+    protected abstract E toMetadataColumn(GenericRecord record);
+
+    /**
+     * Get table name of MetadataColumn
+     *
+     * @return
+     */
+    protected abstract String getMDSTableName();
 
     @PostConstruct
     private void postConstruct() {
@@ -38,7 +120,10 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
 
     @Override
     public List<E> findByColumnSelection(Predefined selectName, String dataCloudVersion) {
-        return getMetadataColumnEntityMgr().findByTag(selectName.getName(), dataCloudVersion);
+        List<E> columns = getMetadataColumns(dataCloudVersion);
+        return columns.stream() //
+                .filter(column -> column.containsTag(selectName.getName())) //
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -159,16 +244,20 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
 
     private void refreshCacheForVersion(String dataCloudVersion) {
         new Thread(() -> {
-            log.info("Start loading black and white column caches for version " + dataCloudVersion);
+            log.info("Start loading white column caches for version " + dataCloudVersion);
             RetryTemplate retry = RetryUtils.getRetryTemplate(10);
             List<E> columns = retry.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
                     log.info("Attempt=" + (ctx.getRetryCount() + 1) //
                             + " get all columns for version " + dataCloudVersion);
                 }
-                return getMetadataColumnEntityMgr().findAll(dataCloudVersion).sequential().collectList().block();
+                if (mdsFromDB) {
+                    return getMetadataColumnEntityMgr().findAll(dataCloudVersion).sequential().collectList().block();
+                } else {
+                    return loadFromS3(dataCloudVersion);
+                }
             });
-            log.info("Read " + columns.size() + " columns from DB for version " + dataCloudVersion);
+            log.info("Read " + columns.size() + " columns for version " + dataCloudVersion);
             ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
             for (E column : columns) {
                 whiteColumnCache.put(column.getColumnId(), column);
@@ -183,15 +272,15 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     private void initWatcher() {
         BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
         if (WebApp.equals(currentEnv)) {
-            NodeWatcher.registerWatcher(AMRelease.name());
-            NodeWatcher.registerListener(AMRelease.name(), () -> {
+            NodeWatcher.registerWatcher(AMReleaseBaseCache.name());
+            NodeWatcher.registerListener(AMReleaseBaseCache.name(), () -> {
                 int waitInSec = (int) (Math.random() * 30);
                 log.info(String.format(
                         "ZK watcher %s is changed. To avoid refresh congestion, wait for %d seconds before start.",
-                        AMRelease.name(), waitInSec));
+                        AMReleaseBaseCache.name(), waitInSec));
                 Thread.sleep(waitInSec * 1000);
                 log.info(String.format("For changed ZK watcher %s, updating white and black columns caches ...",
-                        AMRelease.name()));
+                        AMReleaseBaseCache.name()));
                 refreshCaches();
             });
         }
@@ -199,12 +288,116 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         refreshCaches();
     }
 
-    protected abstract MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();
+    @Override
+    public synchronized long s3Publish(@NotNull String dataCloudVersion) {
+        Preconditions.checkNotNull(dataCloudVersion);
+        long total = getMetadataColumnEntityMgr().count(dataCloudVersion);
+        if (total == 0) {
+            return total;
+        }
 
-    protected abstract ConcurrentMap<String, ConcurrentMap<String, E>> getWhiteColumnCache();
+        Schema schema = getSchema();
+        // Prepare clean S3 prefix and clean local directory to cache metadata
+        String s3Prefix = getMDSS3Prefix(dataCloudVersion);
+        s3Service.cleanupPrefix(s3Bucket, s3Prefix);
+        String localDir = LOCAL_CACHE + "/" + dataCloudVersion.replace(DataCloudVersion.SEPARATOR, "");
+        try {
+            FileUtils.deleteDirectory(new File(localDir));
+            FileUtils.forceMkdir(new File(localDir));
+        } catch (IOException e1) {
+            throw new RuntimeException("Fail to re-create local directory to cache metadata: " + localDir);
+        }
+        // Dump metadata to local file
+        int pageSize = (int) Math.ceil((double) total / MDS_SPLITS);
+        total = 0;
+        for (int page = 0; page < MDS_SPLITS; page++) {
+            String localFile = localDir + "/" + "part-" + page + ".avro";
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    String.format("Dump metadata page-%d to local file %s", page, localFile))) {
+                Flux<E> mds = getMetadataColumnEntityMgr().findByPage(dataCloudVersion, page, pageSize);
+                List<GenericRecord> records = toGenericRecords(schema, mds);
+                try {
+                    AvroUtils.writeToLocalFile(schema, records, localFile, true);
+                } catch (IOException e) {
+                    throw new RuntimeException(
+                            String.format("Fail to write %d metadata for version %s to local file %s", records.size(),
+                                    dataCloudVersion, localFile),
+                            e);
+                }
+                total += records.size();
+            }
+        }
+        // Copy local files to S3
+        try (PerformanceTimer timer = new PerformanceTimer(
+                String.format("Copy metadata file %s to S3 prefix %s", localDir, s3Prefix))) {
+            s3Service.uploadLocalDirectory(s3Bucket, s3Prefix, localDir, true);
+        }
 
-    protected abstract ConcurrentMap<String, ConcurrentSkipListSet<String>> getBlackColumnCache();
+        // Delete local directory to cache metadata
+        try {
+            FileUtils.deleteDirectory(new File(localDir));
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to delete local metadata directory: " + localDir);
+        }
 
-    protected abstract String getLatestVersion();
+        return total;
+    }
 
+    private List<E> loadFromS3(String dataCloudVersion) {
+        String s3Prefix = getMDSS3Prefix(dataCloudVersion);
+        List<E> list = new ArrayList<>();
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            timer.setThreshold(0);
+            Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(s3Bucket, s3Prefix, new S3KeyFilter() {
+            });
+            try (AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter)) {
+                for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
+                    list.add(toMetadataColumn(record));
+                }
+            }
+            timer.setTimerMessage(String.format("Load %d metadata for version %s from S3 prefix %s", list.size(),
+                    dataCloudVersion, s3Prefix));
+        }
+        return list;
+    }
+
+    /**
+     * Get S3 prefix of metadata location
+     *
+     * Metadata is saved in S3 DataCoud source folder with snapshot version
+     * derived from datacloud version instead of utc timestamp
+     *
+     * @param dataCloudVersion
+     * @return
+     */
+    private String getMDSS3Prefix(String dataCloudVersion) {
+        // Use the same path as hdfs, but remove the first /
+        String path = hdfsPathBuilder
+                .constructSnapshotDir(getMDSTableName(), dataCloudVersion.replace(DataCloudVersion.SEPARATOR, ""))
+                .toString();
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return path;
+    }
+
+    @Override
+    public List<E> getMetadataColumns(String dataCloudVersion) {
+        List<E> toReturn = new ArrayList<>();
+        ConcurrentMap<String, ConcurrentMap<String, E>> whiteColumnCaches = getWhiteColumnCache();
+
+        // Application only requests latest datacloud version which is
+        // guaranteed to exist in cache. Old datacloud version could be
+        // requested only when matchapi is manually called.
+        if (!whiteColumnCaches.containsKey(dataCloudVersion)) {
+            log.warn("Missed metadata cache for version " + dataCloudVersion + ", loading now.");
+            refreshCacheForVersion(dataCloudVersion);
+        }
+        if (!whiteColumnCaches.containsKey(dataCloudVersion)) {
+            throw new RuntimeException("Still cannot find " + dataCloudVersion + " in white column cache.");
+        } else {
+            toReturn.addAll(whiteColumnCaches.get(dataCloudVersion).values());
+        }
+        return toReturn;
+    }
 }

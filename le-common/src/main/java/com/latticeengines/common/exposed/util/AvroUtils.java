@@ -1574,4 +1574,12 @@ public class AvroUtils {
         }
         return column.matches("^[A-Za-z\\d][A-Za-z\\d\\_]*$");
     }
+
+    public static String getString(GenericRecord record, String field) {
+        if (record.get(field) == null) {
+            return null;
+        } else {
+            return record.get(field).toString();
+        }
+    }
 }

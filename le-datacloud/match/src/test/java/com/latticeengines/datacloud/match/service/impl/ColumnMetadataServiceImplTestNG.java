@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -30,9 +31,9 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
     public void testAvroSchemaForDerivedColumnsCache() {
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService("1.0.0");
         for (Predefined predefined : Predefined.values()) {
-            Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), null);
+            Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), "1.0.0");
             Assert.assertEquals(schema.getFields().size(),
-                    columnMetadataService.fromPredefinedSelection(predefined, null).size());
+                    columnMetadataService.fromPredefinedSelection(predefined, "1.0.0").size());
         }
     }
 
@@ -50,6 +51,12 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
                 }
                 if (columnMeta.getCategory().equals(Category.INTENT)) {
                     Assert.assertEquals(columnMeta.getDataLicense(), BOMBORA);
+                }
+                if (columnMeta.getCategory().equals(Category.INTENT)
+                        && !Boolean.TRUE.equals(columnMeta.getShouldDeprecate())) {
+                    Assert.assertEquals(columnMeta.getRefreshFrequency(), RefreshFrequency.WEEK);
+                } else {
+                    Assert.assertEquals(columnMeta.getRefreshFrequency(), RefreshFrequency.RELEASE);
                 }
             }
             Assert.assertEquals(schema.getFields().size(), columnMetadatas.size());

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.KryoUtils;
+import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
@@ -116,6 +117,9 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     @JsonProperty("IsCampaignDerivedField")
     private Boolean isCampaignDerivedField = false;
+
+    @JsonProperty("RefreshFrequency")
+    private RefreshFrequency refreshFrequency;
 
     // TODO: Attribute Customization should be migrated to new metadata
     // framework
@@ -683,6 +687,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         return FundamentalType.DATE.equals(this.getFundamentalType())
                 || LogicalDataType.Date.equals(this.getLogicalDataType())
                 || LogicalDataType.Timestamp.equals(this.getLogicalDataType());
+    }
+
+    public RefreshFrequency getRefreshFrequency() {
+        return refreshFrequency;
+    }
+
+    public void setRefreshFrequency(RefreshFrequency refreshFrequency) {
+        this.refreshFrequency = refreshFrequency;
     }
 
     @Override
