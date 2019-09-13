@@ -77,8 +77,7 @@ public class WorkflowResource {
     @PostMapping(value = "/job/{workflowId}/restart", headers = "Accept=application/json")
     @ApiOperation(value = "Restart a previous workflow execution")
     public AppSubmission restartWorkflowExecution(@PathVariable String workflowId, @RequestParam String customerSpace,
-            @ApiParam(value = "Memory in MB", required = false)
-            @RequestParam(value = "memory", required = false) String memoryStr,
+            @ApiParam(value = "Memory in MB", required = false) @RequestParam(value = "memory", required = false) String memoryStr,
             @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry) {
         long wfId = Long.valueOf(workflowId);
 
@@ -147,9 +146,8 @@ public class WorkflowResource {
 
     @GetMapping(value = "/job/{workflowPid}/setErrorCategory", headers = "Accept=application/json")
     @ApiOperation(value = "set error_category")
-    public void setErrorCategoryByJobId(@PathVariable String workflowPid,
-                                    @RequestParam String customerSpace,
-                                    @RequestParam String errorCategory) {
+    public void setErrorCategoryByJobId(@PathVariable String workflowPid, @RequestParam String customerSpace,
+            @RequestParam String errorCategory) {
         try {
             workflowJobService.setErrorCategoryByJobPid(customerSpace, Long.valueOf(workflowPid),
                     URLDecoder.decode(errorCategory, "utf-8"));
@@ -176,12 +174,14 @@ public class WorkflowResource {
         }
         if (CollectionUtils.isNotEmpty(workflowIds) && !optionalTypes.isPresent() && !optionalStatuses.isPresent()) {
             // from cache
-            return workflowJobService.getJobsByWorkflowIdsFromCache(customerSpace, workflowIds, optionalIncludeDetails.orElse(true));
+            return workflowJobService.getJobsByWorkflowIdsFromCache(customerSpace, workflowIds,
+                    optionalIncludeDetails.orElse(true));
         } else if (optionalTypes.isPresent() || optionalStatuses.isPresent()) {
             return workflowJobService.getJobsByWorkflowIds(customerSpace, workflowIds, optionalTypes.orElse(null),
                     optionalStatuses.orElse(null), optionalIncludeDetails.orElse(true), false, -1L);
         } else {
-            return workflowJobService.getJobsByCustomerSpaceFromCache(customerSpace, optionalIncludeDetails.orElse(true));
+            return workflowJobService.getJobsByCustomerSpaceFromCache(customerSpace,
+                    optionalIncludeDetails.orElse(true));
         }
     }
 
@@ -203,11 +203,10 @@ public class WorkflowResource {
         if (optionalJobIds.isPresent()) {
             List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
             return workflowJobService.getJobsByWorkflowPids(request.getCustomerSpace(), workflowIds,
-                    optionalTypes.orElse(null),
-                    optionalIncludeDetails.orElse(true), false, -1L);
+                    optionalTypes.orElse(null), optionalIncludeDetails.orElse(true), false, -1L);
         } else if (optionalTypes.isPresent()) {
-            return workflowJobService.getJobsByWorkflowPids(request.getCustomerSpace(), null,
-                    optionalTypes.get(), optionalIncludeDetails.orElse(true), false, -1L);
+            return workflowJobService.getJobsByWorkflowPids(request.getCustomerSpace(), null, optionalTypes.get(),
+                    optionalIncludeDetails.orElse(true), false, -1L);
         } else {
             return workflowJobService.getJobsByCustomerSpace(request.getCustomerSpace(),
                     optionalIncludeDetails.orElse(true));
@@ -256,7 +255,6 @@ public class WorkflowResource {
         return workflowJobService.createFailedWorkflowJob(customerSpace, failedJob);
     }
 
-
     @GetMapping(value = "/yarnapps/id/{applicationId}", headers = "Accept=application/json")
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
     public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId,
@@ -274,7 +272,7 @@ public class WorkflowResource {
     @DeleteMapping(value = "/yarnapps/job/{applicationId}", headers = "Accept=application/json")
     @ApiOperation(value = "Delete a workflow from YARN applicationId")
     public WorkflowJob deleteWorkflowJobFromApplicationId(@PathVariable String applicationId,
-                                                          @RequestParam(required = false) String customerSpace) {
+            @RequestParam(required = false) String customerSpace) {
         return workflowJobService.deleteWorkflowJobByApplicationId(customerSpace, applicationId);
     }
 
@@ -307,7 +305,7 @@ public class WorkflowResource {
     @DeleteMapping(value = "/yarnapps/jobs", headers = "Accept=application/json")
     @ApiOperation(value = "Delete a workflow by tenant, job type and timestamps range")
     public List<WorkflowJob> deleteWorkflowJobs(@RequestParam String customerSpace, @RequestParam String type,
-                                                @RequestParam Long startTime, @RequestParam Long endTime) {
+            @RequestParam Long startTime, @RequestParam Long endTime) {
         return workflowJobService.deleteWorkflowJobs(customerSpace, type, startTime, endTime);
     }
 
@@ -320,9 +318,55 @@ public class WorkflowResource {
     @GetMapping(value = "/jobsbycluster", headers = "Accept=application/json")
     @ApiOperation(value = "Get list of workflow jobs by given clusterId or list of job types or job statuses.")
     public List<WorkflowJob> jobsByCluster(@RequestParam(required = false) String clusterId,
-                                           @RequestParam(value = "type", required = false) List<String> workflowTypes,
-                                           @RequestParam(value = "status", required = false) List<String> statuses) {
+            @RequestParam(value = "type", required = false) List<String> workflowTypes,
+            @RequestParam(value = "status", required = false) List<String> statuses) {
         return workflowJobService.queryByClusterIDAndTypesAndStatuses(clusterId, workflowTypes, statuses);
+    }
+
+    @GetMapping(value = "/jobs/{customerSpace}/{workflowPid}", headers = "Accept=application/json")
+    @ApiOperation("Get workflowJob object by PID")
+    public Job getJobByWorkflowJobPid(@PathVariable String customerSpace, @PathVariable Long workflowPid,
+            @RequestParam(value = "includeDetails", required = false) Boolean includeDetails) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        Job job = workflowJobService.getJobByWorkflowPid(customerSpace, workflowPid, includeDetails);
+        if (job == null) {
+            throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowPid.toString() });
+        }
+        return job;
+    }
+
+    @GetMapping(value = "/workflowJobs/{customerSpace}/{workflowPid}", headers = "Accept=application/json")
+    @ApiOperation("Get workflowJob object by PID")
+    public WorkflowJob getWorkflowJobByWorkflowJobPid(@PathVariable String customerSpace,
+            @PathVariable Long workflowPid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        WorkflowJob workflowJob = workflowJobService.getWorkflowJobByPid(customerSpace, workflowPid);
+        if (workflowJob == null) {
+            throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowPid.toString() });
+        }
+        return workflowJob;
+    }
+
+    @GetMapping(value = "/workflowJobs/{customerSpace}/{workflowPid}/jobStatus", headers = "Accept=application/json")
+    @ApiOperation("Get workflow JobStatus by PID")
+    public String getJobStatusByWorkflowJobPid(@PathVariable String customerSpace, @PathVariable Long workflowPid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        WorkflowJob workflowJob = workflowJobService.getWorkflowJobByPid(customerSpace, workflowPid);
+        if (workflowJob == null) {
+            throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowPid.toString() });
+        }
+        return workflowJob.getStatus();
+    }
+
+    @GetMapping(value = "/workflowJobs/{customerSpace}/{workflowPid}/applicationId", headers = "Accept=application/json")
+    @ApiOperation("Get applicationId by PID")
+    public String getApplicationIdByWorkflowJobPid(@PathVariable String customerSpace, @PathVariable Long workflowPid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        WorkflowJob workflowJob = workflowJobService.getWorkflowJobByPid(customerSpace, workflowPid);
+        if (workflowJob == null) {
+            throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowPid.toString() });
+        }
+        return workflowJob.getApplicationId();
     }
 
     @GetMapping(value = "/throttling/flag")

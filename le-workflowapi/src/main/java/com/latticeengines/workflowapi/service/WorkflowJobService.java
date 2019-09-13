@@ -15,6 +15,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public interface WorkflowJobService {
+    WorkflowJob getWorkflowJobByPid(String customerSpace, Long workflowPid);
+
     WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId);
 
     JobStatus getJobStatusByWorkflowId(String customerSpace, Long workflowId);
