@@ -130,8 +130,11 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         // In current impl, the flag is per stack
         Camille camille = CamilleEnvironment.getCamille();
         try {
-            return Boolean.TRUE.equals(JsonUtils.convertValue(
-                    camille.get(PathBuilder.buildWorkflowThrottlingFlagPath(podid, division)).getData(), Boolean.class));
+            Path flagPath = PathBuilder.buildWorkflowThrottlingFlagPath(podid, division);
+            if (camille.exists(flagPath)) {
+                return Boolean.TRUE.equals(JsonUtils.convertValue(camille.get(flagPath).getData(), Boolean.class));
+            }
+            return false;
         } catch (Exception e) {
             log.warn("Unable to retrieve division {}-{} throttling flag from zk.", podid, division, e);
             return false;
@@ -142,9 +145,11 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     public boolean isWorkflowThrottlingRolledOut(String podid, String division, String workflowType) {
         Camille camille = CamilleEnvironment.getCamille();
         try {
-            return Boolean.TRUE.equals(JsonUtils.convertValue(
-                    camille.get(PathBuilder.buildSingleWorkflowThrottlingFlagPath(podid, division, workflowType)).getData(),
-                    Boolean.class));
+            Path flagPath = PathBuilder.buildSingleWorkflowThrottlingFlagPath(podid, division, workflowType);
+            if (camille.exists(flagPath)) {
+                return Boolean.TRUE.equals(JsonUtils.convertValue(camille.get(flagPath).getData(), Boolean.class));
+            }
+            return false;
         } catch (Exception e) {
             log.warn("Workflow {} is not enabled for throttling on division {}-{}.", workflowType, podid, division);
             return false;
@@ -208,11 +213,11 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             Map<JobStatus, Integer> tenantLimitMap = WorkflowThrottlingUtils.getTenantMap(config.getTenantLimit(),
                     customerSpace, workflowType);
             if (enqueuedWorkflowJobs.size() >= globalLimitMap.get(JobStatus.ENQUEUED)) {
-                log.error("Global queue limit reached. WorkflowType: {}, tenant: {}", workflowType, customerSpace);
+                log.error("Global queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType, customerSpace, globalLimitMap.get(JobStatus.ENQUEUED));
                 return true;
             }
             if (tenantEnqueuedWorkflowJobs.size() >= tenantLimitMap.get(JobStatus.ENQUEUED)) {
-                log.error("Tenant queue limit reached. WorkflowType: {}, tenant: {}", workflowType, customerSpace);
+                log.error("Tenant queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType, customerSpace, tenantLimitMap.get(JobStatus.ENQUEUED));
                 return true;
             }
             return false;

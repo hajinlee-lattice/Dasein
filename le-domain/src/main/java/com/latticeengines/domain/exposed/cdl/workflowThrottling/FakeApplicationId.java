@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.cdl.workflowThrottling;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 public class FakeApplicationId extends ApplicationId {
-    public static final String fakedAppIdPrefix = "enqueuedWorkflow_";
-    public static final int workflowJobPidIndex = 17;
+    public static final String fakedAppIdPrefix = "application_enqueued_";
+    public static final int workflowJobPidIndex = 21;
     private String appId;
 
     public FakeApplicationId(String workflowJobPid) {
