@@ -51,7 +51,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
@@ -61,6 +60,8 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.ExtraFieldMappingInfo;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -980,8 +981,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public FieldDefinitionsRecord fetchFieldDefinitions(String systemName, String systemType,
-                                                        String systemObject, String importFile)
+    public FetchFieldDefinitionsResponse fetchFieldDefinitions(String systemName, String systemType,
+                                                               String systemObject, String importFile)
             throws Exception {
 
         log.info("JAW ------ BEGIN Real Fetch Field Definition -----");
@@ -1033,15 +1034,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
 
-        // TODO(jwinter): Need to incorporate Batch Store into initial generation of FieldDefinitionsRecord.
+        // TODO(jwinter): Need to incorporate Batch Store into initial generation of FetchFieldDefinitionsResponse.
         // 4. Generate FetchFieldMappingResponse by combining:
         //    a. Spec for this system.
         //    b. Existing field definitions from DataFeedTask.
-        //    c. Columns from the sourceFile.
-        //    d. Batch Store (TODO)
+        //    c. Columns and autodetection results from the sourceFile.
+        //    d. Other System Templates matching this System Object.
+        //    e. Batch Store (TODO)
+        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
 
         // 4a. Retrieve Spec for given systemType and systemObject.
-        ImportWorkflowSpec importWorkflowSpec = importWorkflowSpecService.loadSpecFromS3(systemType, systemObject);
+        fetchFieldDefinitionsResponse.setImportWorkflowSpec(
+                importWorkflowSpecService.loadSpecFromS3(systemType, systemObject));
 
         // 4b. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
         // exists.
@@ -1049,24 +1053,33 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 entityType.getEntity().name());
         printDataFeedTask("Existing DataFeedTask Template", dataFeedTask);
         Table existingTable = null;
+        Map<String, FieldDefinition> existingFieldDefinitionsMap = null;
         if (dataFeedTask != null) {
             existingTable = dataFeedTask.getImportTemplate();
+            fetchFieldDefinitionsResponse.setExistingFieldDefinitionsMap(
+                    ImportWorkflowUtils.getFieldDefinitionsMapFromTable(existingTable));
         }
 
         // 4c. Create a MetadataResolver using the sourceFile.
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
+        fetchFieldDefinitionsResponse.setAutodetectionResultsMap(
+                ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
 
-        // TODO(jwinter):  Understand exactly what is needed from batch store...
+        // 4d. Fetch all other DataFeedTask templates for Other Systems that are the same System Object and extract
+        // the fieldTypes used for each field.
+        // TODO(jwinter): Add Other System processing.
 
-        // 4d. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
-        FieldDefinitionsRecord fieldDefinitionsRecord =
-                ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(importWorkflowSpec, existingTable,
-                        resolver);
+        // 4e. Get the Metadata Attribute data from the Batch Store and get the fieldTypes set there.
+        // TODO(jwinter):  Implement Batch Store extractions.
 
+        // 4f. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
+
+        //ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(importWorkflowSpec, existingTable, resolver);
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
 
         log.info("JAW ------ END Real Fetch Field Definition -----");
 
-        return fieldDefinitionsRecord;
+        return fetchFieldDefinitionsResponse;
     }
 
     // TODO(jwinter): Steps being left for validation:

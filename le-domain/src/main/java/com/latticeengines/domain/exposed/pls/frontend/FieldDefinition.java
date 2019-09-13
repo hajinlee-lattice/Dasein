@@ -28,44 +28,48 @@ public class FieldDefinition {
     // Internal name of the schema field that columns are mapped to.  Must be unique in each template and unique
     // across all templates representing the same business entity.
     @JsonProperty
-    private String fieldName;
+    protected String fieldName;
 
     // Defined in Spec
     // The data format of this schema field.
     @JsonProperty
-    private UserDefinedType fieldType;
+    protected UserDefinedType fieldType;
 
     // Defined in Spec
     // The name to display on the UI for this field.  Only used for Lattice Fields and Match Fields.
     @JsonProperty
-    private String screenName;
+    protected String screenName;
 
-    // The name of the mapped column in the imported files for this schema field.  Also know as display name.  This
-    // is the header name of each CSV column and can be configured by the user.
+    // Defined by autodetection on import CSV or an existing template.
+    // The name of the mapped column in the imported files for this schema field.  Also know as display name in the
+    // Attribute class.  This is the header name of each CSV column and can be configured by the user.
     @JsonProperty
-    private String columnName;
+    protected String columnName;
 
+    // Defined by autodetection on import CSV.
     // True if this field is mapped to a column in the current import process.  Only provided in API request and
     // response bodies.
     @JsonProperty
-    private Boolean inCurrentImport;
+    protected Boolean inCurrentImport;
 
 
     //
-    // Properties that only apply for fields with fieldType "DATE", ie. Date Attributes.
+    // Properties that are part of the API with the UI, but only apply for fields with fieldType "DATE".
+    // ie. Date Attributes.
+    // These fields are defined by autodetection on import CSV or an existing template.
     //
 
     // Represents the date format string provided by the user.  Eg. "MM/DD/YYYY"
     @JsonProperty
-    private String dateFormat;
+    protected String dateFormat;
 
     // Represents the time format string provided by the user.  Eg. "00:00:00 24H"
     @JsonProperty
-    private String timeFormat;
+    protected String timeFormat;
 
     // Represents the time zone for date/time values provided by the user.  Eg. America/New_York.
     @JsonProperty
-    private String timeZone;
+    protected String timeZone;
 
 
     //
@@ -77,46 +81,46 @@ public class FieldDefinition {
     // Defined in Spec
     // A priority ordered list of column names that should be autodetected to match to this field.
     @JsonProperty
-    private List<String> matchingColumnNames;
+    protected List<String> matchingColumnNames;
 
     // Defined in Spec
     // True if this field is required for this template.  Use for validation.
     @JsonProperty
-    private Boolean required;
+    protected Boolean required;
 
     // TODO(jwinter): Figure out where there is an enum (ApprovedUsage) and a class (ModelingMetadata) with similar
     //     defined values for this field.
     // Defined in Spec
     // Defines the allowed modeling usage of this property.
     @JsonProperty
-    private List<String> approvedUsage;
+    protected List<String> approvedUsage;
 
     // TODO(jwinter): Can we somehow do away with this partially redundant data type?
     // Defined in Spec
     // The logical meaning of the data type format, used in modeling.
     @JsonProperty
-    private LogicalDataType logicalDataType;
+    protected LogicalDataType logicalDataType;
 
     // TODO(jwinter): Can we somehow do away with this mostly redundant data type?
     // Defined in Spec
     // Yet another field describing the data type format, used in the P&A pipeline and modeling, and VisiDB and LPI.
     @JsonProperty
-    private FundamentalType fundamentalType;
+    protected FundamentalType fundamentalType;
 
     // Yet another field describing the data type format, used possibly only in VisiDB and LPI.
     // Defined in Spec
     @JsonProperty
-    private String statisticalType;
+    protected String statisticalType;
 
     // Field category for modeling.
     // Defined in Spec
     @JsonProperty
-    private String category;
+    protected String category;
 
     // Field subcategory for modeling.
     // Defined in Spec
     @JsonProperty
-    private String subcategory;
+    protected String subcategory;
 
 
     //
@@ -129,7 +133,7 @@ public class FieldDefinition {
     // Indicates whether this field should be treated as the global ID for this entity type, which represents the
     // backwards compatible "Entity Id", such as Account ID or Contact ID.
     @JsonProperty
-    private Boolean mappedToLatticeId;
+    protected Boolean mappedToLatticeId;
 
     public enum IdEntityType {
         Account,
@@ -139,17 +143,17 @@ public class FieldDefinition {
     // When this field represents an ID, this enumeration represents the entity type of the ID.  Currently, the only
     // supported values are Account and Contact.
     @JsonProperty
-    private IdEntityType idEntityType;
+    protected IdEntityType idEntityType;
 
     // When this field represents an external system ID (as set on the Other IDs page), eg. a Salesforce Contact ID,
     // this property indicates the type of external system the ID is from.
     @JsonProperty
-    private CDLExternalSystemType externalSystemType = null;
+    protected CDLExternalSystemType externalSystemType = null;
 
     // When this field represents an external system ID, this property represents that name of that system.
     // eg. Salesforce Contacts.
     @JsonProperty
-    private String externalSystemName;
+    protected String externalSystemName;
 
 
     //

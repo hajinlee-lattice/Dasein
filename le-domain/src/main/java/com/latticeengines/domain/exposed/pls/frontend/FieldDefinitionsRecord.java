@@ -124,14 +124,17 @@ public class FieldDefinitionsRecord {
                 List<FieldDefinition> definitionList1 = entry.getValue();
                 List<FieldDefinition> definitionList2 = map2.get(entry.getKey());
                 if (definitionList1 == null || definitionList2 == null) {
-                    return definitionList1 == definitionList2;
-                }
-                if (definitionList1.size() != definitionList2.size()) {
-                    return false;
-                }
-                for (int i = 0; i < definitionList1.size(); i++) {
-                    if (!definitionList1.get(i).equals(definitionList2.get(i))) {
+                    if (definitionList1 != definitionList2) {
                         return false;
+                    }
+                } else {
+                    if (definitionList1.size() != definitionList2.size()) {
+                        return false;
+                    }
+                    for (int i = 0; i < definitionList1.size(); i++) {
+                        if (!definitionList1.get(i).equals(definitionList2.get(i))) {
+                            return false;
+                        }
                     }
                 }
             }
