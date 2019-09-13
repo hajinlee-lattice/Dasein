@@ -9,4 +9,6 @@ public interface MetadataColumn {
     String getDisplayName();
 
     String getColumnId();
+
+    boolean containsTag(String tag);
 }

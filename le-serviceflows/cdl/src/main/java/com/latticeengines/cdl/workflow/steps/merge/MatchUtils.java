@@ -87,8 +87,7 @@ public final class MatchUtils {
                 .fromKeyMap(getContactMatchKeys(columnNames, contactSystemIds));
         baseMatchInput.setEntityKeyMaps(new HashMap<>(ImmutableMap.of( //
                 Account.name(), accountKeyMap, //
-                Contact.name(), contactKeyMap
-        )));
+                Contact.name(), contactKeyMap)));
         config.setMatchInput(baseMatchInput);
         return JsonUtils.serialize(config);
     }
@@ -136,8 +135,8 @@ public final class MatchUtils {
     }
 
     /*
-     * Add CustomerAccountId for account or CustomerContactId for contact to system
-     * ID list. TODO remove when CustomerXXXId field is retired)
+     * Add CustomerAccountId for account or CustomerContactId for contact to
+     * system ID list. TODO remove when CustomerXXXId field is retired)
      */
     private static void addLegacyCustomerId(Set<String> cols, Map<MatchKey, List<String>> keyMap,
             List<String> systemIds, BusinessEntity entity) {
@@ -164,12 +163,12 @@ public final class MatchUtils {
     }
 
     /*
-     * if columnName exists in cols (columns of import file), add columnName to the
-     * list in the keyMap (for the specified match key). a new list will be created
-     * if not exist.
+     * if columnName exists in cols (columns of import file), add columnName to
+     * the list in the keyMap (for the specified match key). a new list will be
+     * created if not exist.
      */
-    private static void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap,
-                                            MatchKey key, String columnName) {
+    private static void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key,
+            String columnName) {
         if (cols.contains(columnName)) {
             keyMap.putIfAbsent(key, new ArrayList<>());
             keyMap.get(key).add(columnName);

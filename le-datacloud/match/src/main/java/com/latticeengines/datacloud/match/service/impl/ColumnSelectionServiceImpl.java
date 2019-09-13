@@ -33,6 +33,16 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Resource(name = "externalColumnService")
     private MetadataColumnService<ExternalColumn> externalColumnService;
 
+    /*
+     * Loaded from base cache of metadata in BaseMetadataColumnServiceImpl.
+     *
+     * Watching on zk node AMRelease which has dependency on AMReleaseBaseCache.
+     * To trigger cache reload, first change zk node AMReleaseBaseCache, wait
+     * for a short silent period after base cache finishes loading, then change
+     * zk node AMRelease
+     */
+    // predefined column selection name -> column selection (consisted of a list
+    // of columns)
     private WatcherCache<Predefined, ColumnSelection> predefinedSelectionCache;
 
     @Value("${datacloud.match.latest.rts.cache.version:1.0.0}")
@@ -100,7 +110,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
                     return cs;
                 }) //
                 .initKeys(Predefined.supportedSelections.toArray(new Predefined[Predefined.supportedSelections.size()])) //
-                .waitBeforeRefreshInSec((int) (Math.random() * 30))
+                // .waitBeforeRefreshInSec((int) (Math.random() * 30))
                 .build();
     }
 

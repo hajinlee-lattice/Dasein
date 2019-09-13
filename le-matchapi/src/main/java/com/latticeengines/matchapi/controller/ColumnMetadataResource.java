@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,6 +23,7 @@ import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.MetadataPublishResponse;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -138,6 +140,19 @@ public class ColumnMetadataResource {
     public void refreshCache() {
         localCacheService.refreshKeysByPattern(DataCloudConstants.SERVICE_TENANT,
                 CacheName.getDataCloudLocalCacheGroup());
+    }
+
+    @ApiIgnore
+    @PutMapping(value = "/publish")
+    @ApiOperation(value = "Publish DataCloud metadata to serving store(S3)")
+    public MetadataPublishResponse publish(
+            @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
+        if (StringUtils.isBlank(dataCloudVersion)) {
+            dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        }
+        MetadataColumnService<?> service = beanDispatcher.getMetadataColumnService(dataCloudVersion);
+        long count = service.s3Publish(dataCloudVersion);
+        return new MetadataPublishResponse(dataCloudVersion, count);
     }
 
 }

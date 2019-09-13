@@ -30,6 +30,15 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
 
     private static final Logger log = LoggerFactory.getLogger(BaseColumnMetadataServiceImpl.class);
 
+    /*
+     * Loaded from base cache of metadata in BaseMetadataColumnServiceImpl.
+     *
+     * Watching on zk node AMRelease which has dependency on AMReleaseBaseCache.
+     * To trigger cache reload, first change zk node AMReleaseBaseCache, wait
+     * for a short silent period after base cache finishes loading, then change
+     * zk node AMRelease
+     */
+    // (datacloud version, predefined column selection) -> [column metadatas]
     private WatcherCache<ImmutablePair<String, Predefined>, List<ColumnMetadata>> predefinedMetaDataCache;
 
     protected abstract String getLatestVersion();
@@ -132,6 +141,9 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
                 fieldBuilder = fieldBuilder.prop("DiscretizationStrategy",
                         columnMetadata.getDiscretizationStrategy());
             }
+            if (columnMetadata.getRefreshFrequency() != null) {
+                fieldBuilder = fieldBuilder.prop("RefreshFrequency", columnMetadata.getRefreshFrequency().getName());
+            }
             fieldBuilder = fieldBuilder.prop("Nullable", "true");
             Schema.Type type = getAvroTypeDataType(columnMetadata);
             AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, type);
@@ -179,7 +191,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
                     return fromMetadataColumnService(pair.getRight(), pair.getLeft());
                 }) //
                 .initKeys(initKeys) //
-                .waitBeforeRefreshInSec((int) (Math.random() * 30))
+                // .waitBeforeRefreshInSec((int) (Math.random() * 30))
                 .build();
     }
 

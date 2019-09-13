@@ -36,6 +36,10 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 public class DataCloudVersion implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6472245305360293747L;
+
+    public static final String SEPARATOR = ".";
+    private static final String ESCAPE_SEPARATOR = "\\.";
+
     public static Comparator<DataCloudVersion> versionComparator = new Comparator<DataCloudVersion>() {
 
         @Override
@@ -100,15 +104,15 @@ public class DataCloudVersion implements HasPid, Serializable {
     private Date metadataRefreshDate;
 
     public static String parseMajorVersion(String version) {
-        String[] tokens = version.split("\\.");
+        String[] tokens = version.split(ESCAPE_SEPARATOR);
         if (tokens.length < 2) {
             throw new RuntimeException("Cannot parse a major version from " + version);
         }
-        return tokens[0] + "." + tokens[1];
+        return tokens[0] + SEPARATOR + tokens[1];
     }
 
     public static String parseMinorVersion(String version) {
-        String[] tokens = version.split("\\.");
+        String[] tokens = version.split(ESCAPE_SEPARATOR);
         if (tokens.length < 3) {
             throw new RuntimeException("Cannot parse a minor version from " + version);
         }
@@ -266,7 +270,7 @@ public class DataCloudVersion implements HasPid, Serializable {
         if (StringUtils.isBlank(refreshVersion)) {
             return version;
         } else {
-            return version + "." + refreshVersion;
+            return version + SEPARATOR + refreshVersion;
         }
     }
 
