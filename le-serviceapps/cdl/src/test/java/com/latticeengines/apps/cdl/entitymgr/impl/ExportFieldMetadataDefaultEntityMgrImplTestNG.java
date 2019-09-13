@@ -85,7 +85,7 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultMarketoExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Marketo);
 
-        assertEquals(defaultMarketoExportFields.size(), 42);
+        assertEquals(defaultMarketoExportFields.size(), 41);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
                 35);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
@@ -146,7 +146,7 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         defaultOutreachExportFields = defaultExportFieldMetadataEntityMgr
             .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
 
-        assertEquals(defaultOutreachExportFields.size(), 42);
+        assertEquals(defaultOutreachExportFields.size(), 41);
         assertEquals(
             defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
             34);
