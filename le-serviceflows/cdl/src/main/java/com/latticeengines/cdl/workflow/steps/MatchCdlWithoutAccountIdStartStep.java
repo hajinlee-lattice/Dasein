@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.MatchCdlWithoutAccountIdWorkflow;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.MatchCdlAccountWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
@@ -36,7 +37,9 @@ public class MatchCdlWithoutAccountIdStartStep extends BaseWorkflowStep<MatchCdl
             return;
         }
         String path = inputTable.getExtracts().get(0).getPath();
-        long count = AvroUtils.count(yarnConfiguration, path + "/" + "*.avro");
+        long count = 0;
+        path = PathUtils.toAvroGlob(path);
+        count = AvroUtils.count(yarnConfiguration, path);
         if (count == 0) {
             log.info("There's no data without account Id, skip the workflow.");
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), inputTable.getName());
