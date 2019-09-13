@@ -216,7 +216,7 @@
             <id>central</id>
             <name>LE Maven REPOSITORY</name>
             <layout>default</layout>
-            <url>http://10.141.1.202:8081/repository/maven-public/</url>
+            <url>http://10.141.1.107:8081/repository/maven-public/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -235,7 +235,7 @@
         <pluginRepository>
             <id>central</id>
             <name>LE Maven Plugin Repository</name>
-            <url>http://10.141.1.202:8081/repository/maven-public/</url>
+            <url>http://10.141.1.107:8081/repository/maven-public/</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>true</enabled>
