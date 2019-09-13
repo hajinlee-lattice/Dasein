@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.spark.common;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -23,13 +22,6 @@ public class UpsertConfig extends SparkJobConfig {
 
     @JsonProperty("NotOverwriteByNull")
     private Boolean notOverwriteByNull; // if new data is null, it won't overwrite old data
-
-    // Map(ColName->SqlType)
-    // columns must exists in the result
-    // if not add new column with all nulls
-    // SqlType use the strings understood by spark sql casting
-    @JsonProperty("RequiredColumns")
-    private Map<String, String> requiredColumns;
 
     @Override
     @JsonProperty("Name")
@@ -73,13 +65,5 @@ public class UpsertConfig extends SparkJobConfig {
 
     public void setNotOverwriteByNull(Boolean notOverwriteByNull) {
         this.notOverwriteByNull = notOverwriteByNull;
-    }
-
-    public Map<String, String> getRequiredColumns() {
-        return requiredColumns;
-    }
-
-    public void setRequiredColumns(Map<String, String> requiredColumns) {
-        this.requiredColumns = requiredColumns;
     }
 }
