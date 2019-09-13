@@ -34,8 +34,12 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private MetadataColumnService<ExternalColumn> externalColumnService;
 
     /*
-     * Loaded from base cache of metadata in BaseMetadataColumnServiceImpl. Have
-     * refresh dependency on watcher node AMReleaseBaseCache
+     * Loaded from base cache of metadata in BaseMetadataColumnServiceImpl.
+     *
+     * Watching on zk node AMRelease which has dependency on AMReleaseBaseCache.
+     * To trigger cache reload, first change zk node AMReleaseBaseCache, wait
+     * for a short silent period after base cache finishes loading, then change
+     * zk node AMRelease
      */
     // predefined column selection name -> column selection (consisted of a list
     // of columns)
