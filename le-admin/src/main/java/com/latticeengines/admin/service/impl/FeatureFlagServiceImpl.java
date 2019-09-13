@@ -153,7 +153,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, cg).setDefaultValue(true);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_APS_IMPUTATION, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_APS_IMPUTATION, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, cg).setDefaultValue(false);
