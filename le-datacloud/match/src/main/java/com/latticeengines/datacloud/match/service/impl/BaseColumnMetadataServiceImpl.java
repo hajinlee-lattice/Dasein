@@ -141,6 +141,9 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
                 fieldBuilder = fieldBuilder.prop("DiscretizationStrategy",
                         columnMetadata.getDiscretizationStrategy());
             }
+            if (columnMetadata.getRefreshFrequency() != null) {
+                fieldBuilder = fieldBuilder.prop("RefreshFrequency", columnMetadata.getRefreshFrequency().getName());
+            }
             fieldBuilder = fieldBuilder.prop("Nullable", "true");
             Schema.Type type = getAvroTypeDataType(columnMetadata);
             AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, type);

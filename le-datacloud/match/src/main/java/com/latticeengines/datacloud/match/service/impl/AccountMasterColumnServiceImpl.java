@@ -17,6 +17,7 @@ import static com.latticeengines.domain.exposed.datacloud.manage.AccountMasterCo
 import static com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn.IS_PREMIUM;
 import static com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn.JAVA_CLASS;
 import static com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn.PID;
+import static com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn.REFRESH_FREQ;
 import static com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn.STATISTICAL_TYPE;
 import static com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn.SUBCATEGORY;
 
@@ -42,6 +43,7 @@ import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
+import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -122,6 +124,7 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
         schema.add(Pair.of(IS_EOL, Boolean.class));
         schema.add(Pair.of(DATA_LICENSE, String.class));
         schema.add(Pair.of(EOL_VERSION, String.class));
+        schema.add(Pair.of(REFRESH_FREQ, String.class));
         return AvroUtils.constructSchema(AccountMasterColumn.TABLE_NAME, schema);
     }
 
@@ -150,10 +153,13 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
             builder.set(IS_EOL, column.isEol());
             builder.set(DATA_LICENSE, column.getDataLicense());
             builder.set(EOL_VERSION, column.getEolVersion());
+            builder.set(REFRESH_FREQ,
+                    column.getRefreshFrequency() == null ? null : column.getRefreshFrequency().getName());
             return (GenericRecord) builder.build();
         }).collectList().block();
     }
 
+    @Override
     protected AccountMasterColumn toMetadataColumn(GenericRecord record) {
         AccountMasterColumn column = new AccountMasterColumn();
         column.setPid((Long) record.get(PID));
@@ -175,6 +181,7 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
         column.setEol(Boolean.TRUE.equals(record.get(IS_EOL)));
         column.setDataLicense(AvroUtils.getString(record, DATA_LICENSE));
         column.setEolVersion(AvroUtils.getString(record, EOL_VERSION));
+        column.setRefreshFrequency(RefreshFrequency.fromName(AvroUtils.getString(record, REFRESH_FREQ)));
         return column;
     }
 

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -385,6 +386,10 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         if (metadata.getDataType() != null && metadata.getDataType().contains("VARCHAR")) {
             metadata.setJavaClass(String.class.getSimpleName());
         }
+        // DataCloud 1.0.0 has been retired which will never be refreshed.
+        // Hardcode the RefreshFrequency to be RELEASE for safe-guard. Should be
+        // of no use.
+        metadata.setRefreshFrequency(RefreshFrequency.RELEASE);
 
         return metadata;
     }

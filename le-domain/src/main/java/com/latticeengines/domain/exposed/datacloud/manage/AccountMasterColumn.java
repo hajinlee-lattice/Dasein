@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -70,6 +71,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     public static final String IS_EOL = "IsEOL";
     public static final String DATA_LICENSE = "DataLicense";
     public static final String EOL_VERSION = "EOLVersion";
+    public static final String REFRESH_FREQ = "RefreshFrequency";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -132,6 +134,10 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
 
     @Column(name = EOL_VERSION, length = 50)
     private String eolVersion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = REFRESH_FREQ, length = 50)
+    private RefreshFrequency refreshFrequency;
 
     @Override
     @JsonIgnore
@@ -313,6 +319,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @JsonIgnore
+    public RefreshFrequency getRefreshFrequency() {
+        return refreshFrequency;
+    }
+
+    @JsonIgnore
+    public void setRefreshFrequency(RefreshFrequency refreshFrequency) {
+        this.refreshFrequency = refreshFrequency;
+    }
+
+    @JsonIgnore
     public String getDiscretizationStrategy() {
         return discretizationStrategy;
     }
@@ -441,6 +457,8 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         // remove this type conversion once codescience has started using
         // JavaType instead of SQLServer data types
         metadata.setDataType(JavaToSQLServerDataTypeConverter.convert(getJavaClass()));
+
+        metadata.setRefreshFrequency(getRefreshFrequency());
 
         return metadata;
     }

@@ -30,7 +30,6 @@ public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTe
     @Inject
     private DataCloudVersionService datacloudVersionService;
 
-    @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" })
     public void testPredefined() {
         for (Predefined predefined: Predefined.values()) {

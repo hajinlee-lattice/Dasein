@@ -102,6 +102,8 @@ public class MetadataColumnServiceTestNG extends DataCloudMatchFunctionalTestNGB
         Assert.assertEquals(actual.isEol(), expected.isEol());
         Assert.assertEquals(actual.getDataLicense(), expected.getDataLicense());
         Assert.assertEquals(actual.getEolVersion(), expected.getEolVersion());
+        Assert.assertNotNull(actual.getRefreshFrequency());
+        Assert.assertEquals(actual.getRefreshFrequency(), expected.getRefreshFrequency());
     }
 
 }
