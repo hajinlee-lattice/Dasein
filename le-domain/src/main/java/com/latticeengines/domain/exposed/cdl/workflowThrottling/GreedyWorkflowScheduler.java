@@ -52,10 +52,6 @@ public class GreedyWorkflowScheduler implements WorkflowScheduler {
         status.getRunningWorkflowInEnv().put(workflowType,
                 status.getRunningWorkflowInEnv().getOrDefault(workflowType, 0) + 1);
 
-        status.getRunningWorkflowInStack().put(GLOBAL, status.getRunningWorkflowInStack().get(GLOBAL) + 1);
-        status.getRunningWorkflowInStack().put(workflowType,
-                status.getRunningWorkflowInStack().getOrDefault(workflowType, 0) + 1);
-
         status.getTenantRunningWorkflow().putIfAbsent(customerSpace, new HashMap<>());
         Map<String, Integer> tenantWorkflowMap = status.getTenantRunningWorkflow().get(customerSpace);
         tenantWorkflowMap.put(GLOBAL, tenantWorkflowMap.getOrDefault(GLOBAL, 0) + 1);

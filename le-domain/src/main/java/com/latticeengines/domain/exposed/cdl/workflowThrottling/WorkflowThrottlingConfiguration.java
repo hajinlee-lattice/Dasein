@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 public class WorkflowThrottlingConfiguration {
     /**
      * workflowType (or default = default config for each type) -> count
-     * CustomerSpace (or global = config shared by all tenant) -> workflowType (or default) -> RUNNING/ENQUEUED
+     * CustomerSpace (or default = config shared by all tenant) -> workflowType (or default) -> RUNNING/ENQUEUED
      */
     private Map<String, Map<JobStatus, Integer>> globalLimit;
     private Map<String, Map<String, Map<JobStatus, Integer>>> tenantLimit;

@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.mockito.Mock;
@@ -48,8 +49,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.api.WorkflowSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -177,20 +178,26 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @Test(groups = "functional", dataProvider = "enqueueWorkflowDataProvider")
     public void testEnqueueWorkflow(boolean expectBackPressure) {
         when(workflowThrottlingService.queueLimitReached(any(), any(), any(), any())).thenReturn(expectBackPressure);
+        when(workflowThrottlingService.isWorkflowThrottlingEnabled(any(), any())).thenReturn(true);
+        when(workflowThrottlingService.isWorkflowThrottlingRolledOut(any(), any(), any())).thenReturn(true);
         if (expectBackPressure) {
             Assert.assertThrows(IllegalStateException.class, () -> workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null));
         } else {
-            WorkflowSubmission workflowSubmission = workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null);
-            Assert.assertNotNull(workflowSubmission.getWorkflowJobPId());
-            shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowSubmission.getWorkflowJobPId());
+            ApplicationId workflowSubmission = workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null);
+            Assert.assertNotNull(workflowSubmission);
+            long workflowJobPid = Long.parseLong(workflowSubmission.toString().substring(FakeApplicationId.workflowJobPidIndex));
+            shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowJobPid);
             Assert.assertNotNull(shouldEnqueuedWorkflowJob);
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getType(), shouldEnqueuedWorkflowConfig.getWorkflowName());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getWorkflowConfiguration().getCustomerSpace(), shouldEnqueuedWorkflowConfig.getCustomerSpace());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getStatus(), JobStatus.ENQUEUED.name());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getStack(), CamilleEnvironment.getDivision());
+            Assert.assertEquals(shouldEnqueuedWorkflowJob.getApplicationId(), new FakeApplicationId(workflowJobPid).toString());
             Assert.assertNull(shouldEnqueuedWorkflowJob.getEmrClusterId());
             workflowJobEntityMgr.delete(shouldEnqueuedWorkflowJob);
         }
+        when(workflowThrottlingService.isWorkflowThrottlingEnabled(any(), any())).thenReturn(false);
+        when(workflowThrottlingService.isWorkflowThrottlingRolledOut(any(), any(), any())).thenReturn(false);
     }
 
     @DataProvider(name = "enqueueWorkflowDataProvider")

@@ -12,9 +12,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.camille.exposed.Camille;
@@ -23,6 +25,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.GreedyWorkflowScheduler;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowJobSchedulingObject;
@@ -33,6 +36,7 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottli
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.NotExceedingTenantQuota;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.WorkflowThrottlingConstraint;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingSystemStatus;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -45,10 +49,10 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowThrottlingServiceImpl.class);
 
-    private static final String GLOBAL = "global";
-    private static final String DEFAULT = "default";
-    private static final String GLOBALCONFIG = "globalConfig";
-    private static final String TENANTCONFIG = "tenantConfig";
+    private static final String GLOBAL = WorkflowThrottlingUtils.GLOBAL;
+    private static final String DEFAULT = WorkflowThrottlingUtils.DEFAULT;
+    private static final String GLOBALCONFIG = WorkflowThrottlingUtils.GLOBALCONFIG;
+    private static final String TENANTCONFIG = WorkflowThrottlingUtils.TENANTCONFIG;
 
     private static TypeReference<Map<String, Map<String, Map<JobStatus, Integer>>>> clusterPropertyFileRef = new TypeReference<Map<String, Map<String, Map<JobStatus, Integer>>>>() {
     };
@@ -64,42 +68,55 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     @Override
     public WorkflowThrottlingConfiguration getThrottlingConfig(String podid, String division,
             Set<String> customerSpaces) {
-        Camille c = CamilleEnvironment.getCamille();
+        Camille camille = CamilleEnvironment.getCamille();
         WorkflowThrottlingConfiguration config = new WorkflowThrottlingConfiguration();
         try {
             Map<String, Map<String, Map<JobStatus, Integer>>> props = JsonUtils.deserializeByTypeRef(
-                    c.get(PathBuilder.buildWorkflowThrottlingMasterConfigPath()).getData(), clusterPropertyFileRef);
+                    camille.get(PathBuilder.buildWorkflowThrottlingMasterConfigPath()).getData(),
+                    clusterPropertyFileRef);
             config.setGlobalLimit(props.get(GLOBALCONFIG));
             Map<String, Map<String, Map<JobStatus, Integer>>> tenantLimit = new HashMap<>();
-            tenantLimit.put(GLOBAL, props.get(TENANTCONFIG));
+            tenantLimit.put(DEFAULT, props.get(TENANTCONFIG));
             config.setTenantLimit(tenantLimit);
         } catch (Exception e) {
             log.error("Unable to retrieve master property file.", e);
             return null;
         }
         try { // check pod overwrite
-            Map<String, Map<String, Map<JobStatus, Integer>>> props = JsonUtils.deserializeByTypeRef(
-                    c.get(PathBuilder.buildWorkflowThrottlingPodsConfigPath(podid)).getData(), clusterPropertyFileRef);
-            overwriteConfig(config, props);
+            Path path = PathBuilder.buildWorkflowThrottlingPodsConfigPath(podid);
+            if (camille.exists(path)) {
+                Map<String, Map<String, Map<JobStatus, Integer>>> props = JsonUtils
+                        .deserializeByTypeRef(camille.get(path).getData(), clusterPropertyFileRef);
+                WorkflowThrottlingUtils.overwriteConfig(config, props, "pod");
+            }
         } catch (Exception e) {
             log.warn("Unable to retrieve pod {} property file. {}", podid, e);
         }
         try { // check division overwrite
-            Map<String, Map<String, Map<JobStatus, Integer>>> props = JsonUtils.deserializeByTypeRef(
-                    c.get(PathBuilder.buildWorkflowThrottlingDivisionConfigPath(podid, division)).getData(),
-                    clusterPropertyFileRef);
-            overwriteConfig(config, props);
+            Path path = PathBuilder.buildWorkflowThrottlingDivisionConfigPath(podid, division);
+            if (camille.exists(path)) {
+                Map<String, Map<String, Map<JobStatus, Integer>>> props = JsonUtils
+                        .deserializeByTypeRef(camille.get(path).getData(), clusterPropertyFileRef);
+                WorkflowThrottlingUtils.overwriteConfig(config, props, "stack");
+            }
         } catch (Exception e) {
             log.warn("Unable to retrieve division {} property file. {}", podid, e);
         }
         // add tenant specific map
         for (String customerSpace : customerSpaces) {
             try {
-                Map<String, Map<JobStatus, Integer>> tenantWorkflowMap = JsonUtils.deserializeByTypeRef(c.get(
-                        PathBuilder.buildWorkflowThrottlingTenantConfigPath(podid, CustomerSpace.parse(customerSpace)))
-                        .getData(), tenantPropertyFileRef);
-                if (tenantWorkflowMap.keySet().size() > 0) {
-                    config.getTenantLimit().put(customerSpace, tenantWorkflowMap);
+                Path path = PathBuilder.buildWorkflowThrottlingTenantConfigPath(podid,
+                        CustomerSpace.parse(customerSpace));
+                if (camille.exists(path)) {
+                    String tenantConfigStr = camille.get(path).getData();
+                    if (StringUtils.isEmpty(tenantConfigStr)) {
+                        continue;
+                    }
+                    Map<String, Map<JobStatus, Integer>> tenantWorkflowMap = JsonUtils
+                            .deserializeByTypeRef(tenantConfigStr, tenantPropertyFileRef);
+                    if (MapUtils.isNotEmpty(tenantWorkflowMap)) {
+                        config.getTenantLimit().put(customerSpace, tenantWorkflowMap);
+                    }
                 }
             } catch (Exception e) {
                 log.warn("Unable to retrieve tenant {} property file. {}", customerSpace, e);
@@ -108,28 +125,28 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         return config;
     }
 
-    private void overwriteConfig(WorkflowThrottlingConfiguration config,
-            Map<String, Map<String, Map<JobStatus, Integer>>> props) {
-        Map<String, Map<JobStatus, Integer>> globalLimit = props.get(GLOBALCONFIG);
-        Map<String, Map<JobStatus, Integer>> tenantLimit = props.get(TENANTCONFIG);
-
-        if (globalLimit != null) {
-            config.getGlobalLimit().putAll(globalLimit);
-        }
-        if (tenantLimit != null) {
-            config.getTenantLimit().get(GLOBAL).putAll(tenantLimit);
+    @Override
+    public boolean isWorkflowThrottlingEnabled(String podid, String division) {
+        // In current impl, the flag is per stack
+        Camille camille = CamilleEnvironment.getCamille();
+        try {
+            return Boolean.TRUE.equals(JsonUtils.convertValue(
+                    camille.get(PathBuilder.buildWorkflowThrottlingFlagPath(podid, division)).getData(), Boolean.class));
+        } catch (Exception e) {
+            log.warn("Unable to retrieve division {}-{} throttling flag from zk.", podid, division, e);
+            return false;
         }
     }
 
     @Override
-    public boolean isWorkflowThrottlingEnabled(String podid, String division) {
-        // In current impl, the flag is per stack
-        Camille c = CamilleEnvironment.getCamille();
+    public boolean isWorkflowThrottlingRolledOut(String podid, String division, String workflowType) {
+        Camille camille = CamilleEnvironment.getCamille();
         try {
             return Boolean.TRUE.equals(JsonUtils.convertValue(
-                    c.get(PathBuilder.buildWorkflowThrottlingFlagPath(podid, division)).getData(), Boolean.class));
+                    camille.get(PathBuilder.buildSingleWorkflowThrottlingFlagPath(podid, division, workflowType)).getData(),
+                    Boolean.class));
         } catch (Exception e) {
-            log.warn("Unable to retrieve division {}-{} throttling flag from zk.", podid, division, e);
+            log.warn("Workflow {} is not enabled for throttling on division {}-{}.", workflowType, podid, division);
             return false;
         }
     }
@@ -188,7 +205,8 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
                     .filter(o -> customerSpace.equals(o.getTenant().getId())).collect(Collectors.toList());
             Map<JobStatus, Integer> globalLimitMap = config.getGlobalLimit().getOrDefault(workflowType,
                     config.getGlobalLimit().get(DEFAULT));
-            Map<JobStatus, Integer> tenantLimitMap = getTenantMap(config.getTenantLimit(), customerSpace, workflowType);
+            Map<JobStatus, Integer> tenantLimitMap = WorkflowThrottlingUtils.getTenantMap(config.getTenantLimit(),
+                    customerSpace, workflowType);
             if (enqueuedWorkflowJobs.size() >= globalLimitMap.get(JobStatus.ENQUEUED)) {
                 log.error("Global queue limit reached. WorkflowType: {}, tenant: {}", workflowType, customerSpace);
                 return true;
@@ -201,16 +219,6 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         } finally {
             MultiTenantContext.setTenant(originTenant);
         }
-    }
-
-    private Map<JobStatus, Integer> getTenantMap(Map<String, Map<String, Map<JobStatus, Integer>>> tenantLimit,
-            String customerSpace, String workflowType) {
-        Map<String, Map<JobStatus, Integer>> tenantMap = tenantLimit.get(customerSpace);
-        if (tenantMap == null) {
-            return tenantLimit.get(GLOBAL).getOrDefault(workflowType, tenantLimit.get(GLOBAL).get(DEFAULT));
-        }
-        return tenantMap.getOrDefault(workflowType,
-                tenantLimit.get(GLOBAL).getOrDefault(workflowType, tenantLimit.get(GLOBAL).get(DEFAULT)));
     }
 
     private void addCurrentSystemState(WorkflowThrottlingSystemStatus status, List<WorkflowJob> workflowJobs,
@@ -267,9 +275,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             }
         }
         status.setRunningWorkflowInEnv(runningWorkflowInEnv);
-        status.setRunningWorkflowInStack(runningWorkflowInStack);
         status.setEnqueuedWorkflowInEnv(enqueuedWorkflowInEnv);
-        status.setEnqueuedWorkflowInStack(enqueuedWorkflowInStack);
         status.setTenantRunningWorkflow(tenantRunningWorkflow);
         status.setTenantEnqueuedWorkflow(tenantEnqueuedWorkflow);
         status.setConfig(getThrottlingConfig(podid, division, tenantIds));

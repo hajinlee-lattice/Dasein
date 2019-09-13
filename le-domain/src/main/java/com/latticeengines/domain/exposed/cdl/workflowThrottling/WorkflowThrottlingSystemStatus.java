@@ -6,19 +6,17 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public class WorkflowThrottlingSystemStatus {
-    // global (cross-type count) entries are not taken into consideration while draining queue
+    // global (cross-type count) entries are not taken into consideration for enqueue/dequeue
     // kept just in case of logging or monitoring
 
-    private final String GLOBAL = "global";
+    private final String GLOBAL = WorkflowThrottlingUtils.GLOBAL;
 
     private WorkflowThrottlingConfiguration config;
 
     // workflowType(or global = total count including all types) -> count
     private Map<String, Integer> runningWorkflowInEnv; //
-    private Map<String, Integer> runningWorkflowInStack; //
 
     private Map<String, Integer> enqueuedWorkflowInEnv; //
-    private Map<String, Integer> enqueuedWorkflowInStack; //
 
     // customerSpace -> type (or global = total count including all types) -> count
     private Map<String, Map<String, Integer>> tenantRunningWorkflow; //
@@ -33,29 +31,12 @@ public class WorkflowThrottlingSystemStatus {
     public void setRunningWorkflowInEnv(Map<String, Integer> runningWorkflowInEnv) {
         this.runningWorkflowInEnv = runningWorkflowInEnv;
     }
-
-    public Map<String, Integer> getRunningWorkflowInStack() {
-        return runningWorkflowInStack;
-    }
-
-    public void setRunningWorkflowInStack(Map<String, Integer> runningWorkflowInStack) {
-        this.runningWorkflowInStack = runningWorkflowInStack;
-    }
-
     public Map<String, Integer> getEnqueuedWorkflowInEnv() {
         return enqueuedWorkflowInEnv;
     }
 
     public void setEnqueuedWorkflowInEnv(Map<String, Integer> enqueuedWorkflowInEnv) {
         this.enqueuedWorkflowInEnv = enqueuedWorkflowInEnv;
-    }
-
-    public Map<String, Integer> getEnqueuedWorkflowInStack() {
-        return enqueuedWorkflowInStack;
-    }
-
-    public void setEnqueuedWorkflowInStack(Map<String, Integer> enqueuedWorkflowInStack) {
-        this.enqueuedWorkflowInStack = enqueuedWorkflowInStack;
     }
 
     public Map<String, Map<String, Integer>> getTenantRunningWorkflow() {
@@ -96,13 +77,5 @@ public class WorkflowThrottlingSystemStatus {
 
     public int getTotalEnqueuedWorkflowInEnv() {
         return enqueuedWorkflowInEnv.get(GLOBAL);
-    }
-
-    public int getTotalRunningWorkflowInStack() {
-        return runningWorkflowInStack.get(GLOBAL);
-    }
-
-    public int getTotalEnqueuedWorkflowInStack() {
-        return enqueuedWorkflowInStack.get(GLOBAL);
     }
 }

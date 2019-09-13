@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConfiguration;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingSystemStatus;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -48,6 +49,11 @@ import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
 public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowThrottlingServiceImplTestNG.class);
+
+    private static final String GLOBAL = WorkflowThrottlingUtils.GLOBAL;
+    private static final String DEFAULT = WorkflowThrottlingUtils.DEFAULT;
+    private static final String GLOBALCONFIG = WorkflowThrottlingUtils.GLOBALCONFIG;
+    private static final String TENANTCONFIG = WorkflowThrottlingUtils.TENANTCONFIG;
 
     private static String TEST_PODID = "ThrottlingTestPod";
     private static final Path TEST_POD_PATH = PathBuilder.buildPodPath(TEST_PODID);
@@ -67,11 +73,6 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
     private static String TEST_TENANT_ID;
     private static final String TENANT_ID_EMPTY_CONFIG = "abcde.abcde.Production";
-
-    private static final String GLOBAL = "global";
-    private static final String DEFAULT = "default";
-    private static final String GLOBALCONFIG = "globalConfig";
-    private static final String TENANTCONFIG = "tenantConfig";
 
     private static WorkflowThrottlingConfiguration populated;
 
@@ -98,14 +99,17 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         // setup flags
         Path flagPath1 = PathBuilder.buildWorkflowThrottlingFlagPath(TEST_PODID, TEST_DIV1);
         Path flagPath2 = PathBuilder.buildWorkflowThrottlingFlagPath(TEST_PODID, TEST_DIV2);
+        Path workflowFlagPath = PathBuilder.buildSingleWorkflowThrottlingFlagPath(TEST_PODID, TEST_DIV1, TEST_WF_TYPE);
         try {
             if (c.exists(TEST_POD_PATH)) {
                 c.delete(TEST_POD_PATH);
             }
             c.create(flagPath1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             c.create(flagPath2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            c.create(workflowFlagPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             c.set(flagPath1, new Document("false"));
             c.set(flagPath2, new Document("true"));
+            c.set(workflowFlagPath, new Document("true"));
 
             Path masterConfigPath = PathBuilder.buildWorkflowThrottlingMasterConfigPath();
             if (c.exists(masterConfigPath)) {
@@ -148,10 +152,12 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         Assert.assertNotNull(retrieved);
         Assert.assertNotNull(retrieved.getGlobalLimit());
         Assert.assertNotNull(retrieved.getTenantLimit());
-        Assert.assertNotNull(retrieved.getTenantLimit().get(GLOBAL));
-        Assert.assertNotNull(retrieved.getTenantLimit().get(GLOBAL).get(DEFAULT));
-        Assert.assertNotNull(retrieved.getTenantLimit().get(GLOBAL).get(TEST_WF_TYPE));
+        Assert.assertNotNull(retrieved.getTenantLimit().get(DEFAULT));
+        Assert.assertNotNull(retrieved.getTenantLimit().get(DEFAULT).get(DEFAULT));
+        Assert.assertNotNull(retrieved.getTenantLimit().get(DEFAULT).get(TEST_WF_TYPE));
         Assert.assertNotNull(retrieved.getTenantLimit().get(TEST_TENANT_ID));
+        Assert.assertNotNull(retrieved.getTenantLimit().get(TEST_TENANT_ID).get(TEST_WF_TYPE));
+        Assert.assertNull(retrieved.getTenantLimit().get(TEST_TENANT_ID).get(GENERIC_WF_TYPE));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetConfig", dataProvider = "testGetStatusProvider")
@@ -192,6 +198,11 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                 (boolean) expectedFlag);
     }
 
+    @Test(groups = "functional", dataProvider = "singleWorkflowFlagProvider")
+    public void testSingleWorkflowFlag(String podid, String division, String workflowType, boolean rolledout) {
+        Assert.assertEquals(workflowThrottlingService.isWorkflowThrottlingRolledOut(podid, division, workflowType), rolledout);
+    }
+
     @Test(groups = "functional", dependsOnMethods = "testGetStatus", dataProvider = "throttlingResultProvider")
     public void testGetThrottlingResult(String podid, String division, List<WorkflowJob> fakedWorkflowJobs,
             int submittedCount, int enqueuedCount) {
@@ -220,7 +231,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
     public Object[][] throttlingResultProvider() {
         // podid, division, faked workflowJobs, expect submittedCount, expect
         // enqueuedCount
-        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_FOR_RESULT1, 4,  10},
+        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_FOR_RESULT1, 4, 10 },
                 { TEST_PODID, TEST_DIV2, FAKE_WORKFLOW_FOR_RESULT2, 0, 6 } };
     }
 
@@ -231,11 +242,19 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                 { TEST_PODID, "unknownDivision", false }, { "unknownPod", TEST_DIV1, false } };
     }
 
+    @DataProvider(name = "singleWorkflowFlagProvider")
+    public Object[][] singleWorkflowflagProvider() {
+        // podId, divId, expectedFlag
+        return new Object[][] { { TEST_PODID, TEST_DIV1, TEST_WF_TYPE, true },
+                { TEST_PODID, TEST_DIV1, GENERIC_WF_TYPE, false }, { TEST_PODID, TEST_DIV2, TEST_WF_TYPE, false },
+                { TEST_PODID, TEST_DIV2, GENERIC_WF_TYPE, false } };
+    }
+
     @DataProvider(name = "testGetStatusProvider")
     public Object[][] testGetStatusProvider() {
         // podId, divId, fake wfj
-        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WF_FOR_STATUS1},
-                { TEST_PODID, TEST_DIV2, FAKE_WF_FOR_STATUS2} };
+        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WF_FOR_STATUS1 },
+                { TEST_PODID, TEST_DIV2, FAKE_WF_FOR_STATUS2 } };
     }
 
     @DataProvider(name = "testBackPressureProvider")
@@ -405,25 +424,11 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
                 fakeWorkflows.stream()
                         .filter(workflowJob -> desiredStatus.contains(JobStatus.fromString(workflowJob.getStatus())))
                         .count());
-        Assert.assertEquals(
-                jobStatus.equals(JobStatus.RUNNING) ? status.getTotalRunningWorkflowInStack()
-                        : status.getTotalEnqueuedWorkflowInStack(),
-                fakeWorkflows.stream()
-                        .filter(workflowJob -> desiredStatus.contains(JobStatus.fromString(workflowJob.getStatus()))
-                                && workflowJob.getStack().equals(division))
-                        .count());
         Map<String, Integer> map = jobStatus.equals(JobStatus.RUNNING) ? status.getRunningWorkflowInEnv()
                 : status.getEnqueuedWorkflowInEnv();
         Assert.assertEquals((int) map.getOrDefault(TEST_WF_TYPE, 0), fakeWorkflows.stream().filter(
                 wf -> desiredStatus.contains(JobStatus.fromString(wf.getStatus())) && wf.getType().equals(TEST_WF_TYPE))
                 .count());
-        map = jobStatus.equals(JobStatus.RUNNING) ? status.getRunningWorkflowInStack()
-                : status.getEnqueuedWorkflowInStack();
-        Assert.assertEquals(
-                (int) map.getOrDefault(TEST_WF_TYPE,
-                        0),
-                fakeWorkflows.stream().filter(wf -> desiredStatus.contains(JobStatus.fromString(wf.getStatus()))
-                        && wf.getType().equals(TEST_WF_TYPE) && wf.getStack().equals(division)).count());
     }
 
     private void assertTenantExistingMatch(Map<String, Map<String, Integer>> existingWorkflows,
