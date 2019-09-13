@@ -6,11 +6,15 @@ import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -30,10 +34,15 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -42,6 +51,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
@@ -55,6 +65,8 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final String FILE_DISPLAY_NAME = "cdlImportCSV_data.csv";
 
     private static final String TEMPLATE_NAME = "cdlImportCSV_template.csv";
+
+    private static final String WEBVISIT_NAME = "cdlImportWebVisit.csv";
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -71,6 +83,9 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private WorkflowProxy workflowProxy;
 
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
     private SourceFile template;
 
     private SourceFile data;
@@ -82,7 +97,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         tenant = testBed.getMainTestTenant();
         testBed.loginAndAttach(TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN),
                 TestFrameworkUtils.GENERAL_PASSWORD, tenant);
@@ -120,15 +135,15 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         for (S3ImportSystem system : allSystem) {
             if (system.getName().equals("SYSTEM1")) {
                 Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Salesforce);
-                Assert.assertTrue(system.isPrimarySystem());
-            } else {
-                Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Other);
                 Assert.assertEquals(system.getPriority(), 2);
+            } else if (system.getName().equals("SYSTEM2")) {
+                Assert.assertEquals(system.getSystemType(), S3ImportSystem.SystemType.Other);
+                Assert.assertEquals(system.getPriority(), 3);
             }
         }
         cdlService.createS3ImportSystem(customerSpace, "PRIMARY SYSTEM", S3ImportSystem.SystemType.Other, true);
         allSystem = cdlService.getAllS3ImportSystem(customerSpace);
-        Assert.assertEquals(allSystem.size(), 3);
+        Assert.assertEquals(allSystem.size(), 4);
         boolean hasPrimary = false;
         for (S3ImportSystem system : allSystem) {
             if (system.getDisplayName().equals("PRIMARY SYSTEM")) {
@@ -142,7 +157,33 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                         false));
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "testS3ImportSystem")
+    public void testWebVisitTemplate() throws FileNotFoundException {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getName());
+        File templateFile = new File(
+                ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/" + WEBVISIT_NAME).getPath());
+        boolean result = cdlService.createWebVisitTemplate(customerSpace.toString(), EntityType.WebVisit,
+                new FileInputStream(templateFile));
+        Assert.assertTrue(result);
+        List<S3ImportTemplateDisplay> s3Templates = cdlService.getS3ImportTemplate(customerSpace.toString(), "");
+        Assert.assertNotNull(s3Templates);
+        Assert.assertTrue(s3Templates.size() > 1);
+        Optional<S3ImportTemplateDisplay> display =
+                s3Templates.stream().filter(s3Template -> s3Template.getFeedType().equals(
+                "Default_Website_System_WebVisitData")).findAny();
+        Assert.assertTrue(display.isPresent());
+
+
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "File",
+                display.get().getFeedType());
+        Assert.assertNotNull(dataFeedTask);
+        Table template = dataFeedTask.getImportTemplate();
+        Assert.assertNotNull(template);
+        Assert.assertNotNull(template.getAttribute(InterfaceName.WebVisitPageUrl));
+        Assert.assertNotNull(template.getAttribute(InterfaceName.WebVisitDate));
+    }
+
+    @Test(groups = "manual")
     public void testImportJob() throws Exception {
         long startMillis = System.currentTimeMillis();
         ApplicationId appId = cdlService.submitCSVImport(CustomerSpace.parse(tenant.getName()).toString(),

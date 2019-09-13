@@ -33,11 +33,11 @@ import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.cdl.util.DiagnoseTable;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -66,6 +67,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -95,8 +97,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private final AttrConfigEntityMgr attrConfigEntityMgr;
 
-    private final S3Service s3Service;
-
     private final S3ImportFolderService s3ImportFolderService;
 
     @Inject
@@ -115,6 +115,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private S3ImportService s3ImportService;
 
     @Inject
+    private S3ImportSystemService s3ImportSystemService;
+
+    @Inject
     private BatonService batonService;
 
     @Inject
@@ -127,7 +130,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter, TenantService tenantService,
                                           DLTenantMappingService dlTenantMappingService, CDLExternalSystemService cdlExternalSystemService,
                                           ActionService actionService, MetadataProxy metadataProxy, AttrConfigEntityMgr attrConfigEntityMgr,
-                                          S3Service s3Service, S3ImportFolderService s3ImportFolderService) {
+                                          S3ImportFolderService s3ImportFolderService) {
         this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
         this.tenantService = tenantService;
         this.dlTenantMappingService = dlTenantMappingService;
@@ -135,7 +138,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         this.actionService = actionService;
         this.metadataProxy = metadataProxy;
         this.attrConfigEntityMgr = attrConfigEntityMgr;
-        this.s3Service = s3Service;
         this.s3ImportFolderService = s3ImportFolderService;
     }
 
@@ -170,11 +172,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         Table newMeta = metadataPair.getLeft();
         List<AttrConfig> attrConfigs = metadataPair.getRight();
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
-        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId,
+        Table schemaTable = getSchemaTable(customerSpace, feedType, entity, withoutId,
                 batonService.isEntityMatchEnabled(customerSpace));
-
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
         DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
@@ -188,7 +187,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 Table finalTemplate = mergeTable(originMeta, newMeta);
-                if (!finalSchemaCheck(finalTemplate, entity, withoutId, batonService.isEntityMatchEnabled(customerSpace))) {
+                if (!finalSchemaCheck(customerSpace, finalTemplate, feedType, entity, withoutId,
+                        batonService.isEntityMatchEnabled(customerSpace))) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
@@ -205,7 +205,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
                     schemaTable, null);
             crosscheckDataType(customerSpace, entity, source, newMeta, "");
-            if (!finalSchemaCheck(newMeta, entity, withoutId, batonService.isEntityMatchEnabled(customerSpace))) {
+            if (!finalSchemaCheck(customerSpace, newMeta, feedType, entity, withoutId,
+                    batonService.isEntityMatchEnabled(customerSpace))) {
                 throw new RuntimeException("The final import template is invalid, please check import settings!");
             }
             dataFeedTask = new DataFeedTask();
@@ -245,6 +246,27 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     customerSpace.toString());
             return dataFeedTask.getUniqueId();
         }
+    }
+
+    private Table getSchemaTable(CustomerSpace customerSpace, String feedType, String entity, boolean withoutId,
+                                 boolean enableEntityMatch) {
+        Table schemaTable;
+        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
+        if (entityType != null) {
+            String systemName = EntityTypeUtils.getSystemName(feedType);
+            S3ImportSystem.SystemType systemType;
+            if (StringUtils.isEmpty(systemName)) {
+                systemType = S3ImportSystem.SystemType.Other;
+            } else {
+                S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace.toString(), systemName);
+                systemType = importSystem == null ? S3ImportSystem.SystemType.Other : importSystem.getSystemType();
+            }
+            schemaTable = SchemaRepository.instance().getSchema(systemType, entityType, enableEntityMatch);
+        } else {
+            schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity), true, withoutId,
+                    enableEntityMatch);
+        }
+        return schemaTable;
     }
 
     private void setCategoryForTable(Table table, String entity) {
@@ -574,7 +596,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     }
 
     @VisibleForTesting
-    boolean finalSchemaCheck(Table finalTemplate, String entity, boolean withoutId, boolean enableEntityMatch) {
+    boolean finalSchemaCheck(CustomerSpace customerSpace, Table finalTemplate, String feedType, String entity,
+                             boolean withoutId, boolean enableEntityMatch) {
         if (finalTemplate == null) {
             log.error("Template cannot be null!");
             return false;
@@ -584,8 +607,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return false;
         }
         Map<String, Attribute> standardAttrs = new HashMap<>();
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId
-                , enableEntityMatch);
+        Table standardTable = getSchemaTable(customerSpace, feedType, entity, withoutId, enableEntityMatch);
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
@@ -711,5 +733,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
         return DiagnoseTable.diagnostic(customerSpaceStr, dataFeedTask.getImportTemplate(), entity, batonService);
     }
+
 
 }
