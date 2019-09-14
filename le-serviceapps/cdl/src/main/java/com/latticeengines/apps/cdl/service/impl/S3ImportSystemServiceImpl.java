@@ -195,11 +195,11 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
 
     @Override
     public boolean hasSystemMapToLatticeAccount(String customerSpace) {
-        return CollectionUtils.isNotEmpty(s3ImportSystemEntityMgr.findByMapToLatticeAccount());
+        return CollectionUtils.isNotEmpty(s3ImportSystemEntityMgr.findByMapToLatticeAccount(Boolean.TRUE));
     }
 
     @Override
     public boolean hasSystemMapToLatticeContact(String customerSpace) {
-        return CollectionUtils.isNotEmpty(s3ImportSystemEntityMgr.findByMapToLatticeContact());
+        return CollectionUtils.isNotEmpty(s3ImportSystemEntityMgr.findByMapToLatticeContact(Boolean.TRUE));
     }
 }

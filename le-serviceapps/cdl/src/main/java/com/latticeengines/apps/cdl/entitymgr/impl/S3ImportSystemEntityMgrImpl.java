@@ -72,21 +72,21 @@ public class S3ImportSystemEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<S3ImportSystem> findByMapToLatticeAccount() {
+    public List<S3ImportSystem> findByMapToLatticeAccount(Boolean mapToLatticeAccount) {
         if (isReaderConnection()) {
-            return readerRepository.findByMapToLatticeAccount(Boolean.TRUE);
+            return readerRepository.findByMapToLatticeAccount(mapToLatticeAccount);
         } else {
-            return writerRepository.findByMapToLatticeAccount(Boolean.TRUE);
+            return writerRepository.findByMapToLatticeAccount(mapToLatticeAccount);
         }
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<S3ImportSystem> findByMapToLatticeContact() {
+    public List<S3ImportSystem> findByMapToLatticeContact(Boolean mapToLatticeContact) {
         if (isReaderConnection()) {
-            return readerRepository.findByMapToLatticeContact(Boolean.TRUE);
+            return readerRepository.findByMapToLatticeContact(mapToLatticeContact);
         } else {
-            return writerRepository.findByMapToLatticeContact(Boolean.TRUE);
+            return writerRepository.findByMapToLatticeContact(mapToLatticeContact);
         }
     }
 }

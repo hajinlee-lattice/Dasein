@@ -11,7 +11,7 @@ public interface S3ImportSystemEntityMgr extends BaseEntityMgrRepository<S3Impor
 
     S3ImportSystem findS3ImportSystem(String name);
 
-    List<S3ImportSystem> findByMapToLatticeAccount();
+    List<S3ImportSystem> findByMapToLatticeAccount(Boolean mapToLatticeAccount);
 
-    List<S3ImportSystem> findByMapToLatticeContact();
+    List<S3ImportSystem> findByMapToLatticeContact(Boolean mapToLatticeContact);
 }
