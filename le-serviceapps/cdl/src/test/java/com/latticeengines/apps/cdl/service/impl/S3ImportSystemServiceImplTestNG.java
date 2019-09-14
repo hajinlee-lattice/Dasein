@@ -99,6 +99,8 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
                 importSystem.setPriority(3);
             }
         }
+        Assert.assertTrue(s3ImportSystemService.hasSystemMapToLatticeAccount(mainCustomerSpace));
+        Assert.assertFalse(s3ImportSystemService.hasSystemMapToLatticeContact(mainCustomerSpace));
         List<S3ImportSystem> finalAllSystems = allSystems;
         Assert.expectThrows(RuntimeException.class,
                 () -> s3ImportSystemService.updateAllS3ImportSystemPriority(mainCustomerSpace, finalAllSystems));

@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -62,9 +64,29 @@ public class S3ImportSystemEntityMgrImpl
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public S3ImportSystem findS3ImportSystem(String name) {
         if (isReaderConnection()) {
-            return  readerRepository.findByName(name);
+            return readerRepository.findByName(name);
         } else {
             return writerRepository.findByName(name);
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<S3ImportSystem> findByMapToLatticeAccount() {
+        if (isReaderConnection()) {
+            return readerRepository.findByMapToLatticeAccount(Boolean.TRUE);
+        } else {
+            return writerRepository.findByMapToLatticeAccount(Boolean.TRUE);
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<S3ImportSystem> findByMapToLatticeContact() {
+        if (isReaderConnection()) {
+            return readerRepository.findByMapToLatticeContact(Boolean.TRUE);
+        } else {
+            return writerRepository.findByMapToLatticeContact(Boolean.TRUE);
         }
     }
 }

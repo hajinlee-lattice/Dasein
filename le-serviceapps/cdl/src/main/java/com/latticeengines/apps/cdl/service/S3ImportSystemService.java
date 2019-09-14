@@ -17,4 +17,8 @@ public interface S3ImportSystemService {
     List<S3ImportSystem> getAllS3ImportSystem(String customerSpace);
 
     void updateAllS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList);
+
+    boolean hasSystemMapToLatticeAccount(String customerSpace);
+
+    boolean hasSystemMapToLatticeContact(String customerSpace);
 }
