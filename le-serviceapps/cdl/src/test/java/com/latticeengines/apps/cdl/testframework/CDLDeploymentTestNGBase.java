@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -15,7 +16,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -33,6 +33,7 @@ import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -122,11 +123,12 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         if (!StringUtils.isEmpty(existingTenant)) {
             testBed.useExistingTenantAsMain(existingTenant);
         } else {
-            if (MapUtils.isEmpty(featureFlagMap)) {
-                testBed.bootstrapForProduct(LatticeProduct.CG);
-            } else {
-                testBed.bootstrapForProduct(LatticeProduct.CG, featureFlagMap);
+            if (featureFlagMap == null) {
+                featureFlagMap = new HashMap<>();
             }
+            // use non entity match path by default unless its overwritten explicitly
+            featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+            testBed.bootstrapForProduct(LatticeProduct.CG, featureFlagMap);
         }
         mainTestTenant = testBed.getMainTestTenant();
         mainCustomerSpace = mainTestTenant.getId();
