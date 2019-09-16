@@ -741,7 +741,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             Map<EntityMatchEnvironment, Integer> versionMap) {
-        if (versionMap == null || versionMap.get(env) != null) {
+        if (versionMap == null || versionMap.get(env) == null) {
             return entityMatchVersionService.getCurrentVersion(env, tenant);
         }
         return versionMap.get(env);

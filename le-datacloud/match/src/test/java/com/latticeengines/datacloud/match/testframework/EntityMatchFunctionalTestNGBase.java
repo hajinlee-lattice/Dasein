@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -42,6 +43,9 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
 
     @Inject
     protected TestEntityMatchService testEntityMatchService;
+
+    @Inject
+    protected EntityMatchVersionService entityMatchVersionService;
 
     @Inject
     protected EntityMatchInternalService entityMatchInternalService;
@@ -108,6 +112,11 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
      * should be the target entity ID (e.g., AccountId)
      */
     protected String verifyAndGetEntityId(@NotNull MatchOutput output, String targetEntityIdColumn) {
+        return verifyAndGetEntityId(output, targetEntityIdColumn, true);
+    }
+
+    protected String verifyAndGetEntityId(@NotNull MatchOutput output, String targetEntityIdColumn,
+            boolean hasAllocatedEntity) {
         Assert.assertNotNull(output);
         Assert.assertNotNull(output.getResult());
         Assert.assertEquals(output.getResult().size(), 1);
@@ -123,15 +132,17 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
             }
         }
         String entityId = getColumnValue(output, InterfaceName.EntityId.name());
-        Assert.assertNotNull(entityId);
-        if (targetEntityIdColumn != null) {
-            // EntityId and {TargetEntity}Id should have same value
-            Assert.assertEquals(getColumnValue(output, targetEntityIdColumn), entityId);
-        }
-        if (DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(entityId)) {
-            Assert.assertFalse(record.isMatched());
-        } else {
-            Assert.assertTrue(record.isMatched());
+        if (hasAllocatedEntity) {
+            Assert.assertNotNull(entityId);
+            if (targetEntityIdColumn != null) {
+                // EntityId and {TargetEntity}Id should have same value
+                Assert.assertEquals(getColumnValue(output, targetEntityIdColumn), entityId);
+            }
+            if (DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(entityId)) {
+                Assert.assertFalse(record.isMatched());
+            } else {
+                Assert.assertTrue(record.isMatched());
+            }
         }
         return entityId;
     }
@@ -163,7 +174,7 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
      * helper to prepare basic MatchInput for entity match
      */
     protected MatchInput prepareEntityMatchInput(@NotNull Tenant tenant, @NotNull String targetEntity,
-            @NotNull Map<String, MatchInput.EntityKeyMap> entityKeyMaps) {
+            @NotNull Map<String, MatchInput.EntityKeyMap> entityKeyMaps, Integer servingVersion) {
         MatchInput input = new MatchInput();
 
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
@@ -176,6 +187,7 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
         input.setSkipKeyResolution(true);
         input.setUseRemoteDnB(true);
         input.setUseDnBCache(true);
+        input.setServingVersion(servingVersion);
         input.setRootOperationUid(UUID.randomUUID().toString());
         // Enable debug logs for Match Traveler.
         input.setLogLevelEnum(Level.DEBUG);

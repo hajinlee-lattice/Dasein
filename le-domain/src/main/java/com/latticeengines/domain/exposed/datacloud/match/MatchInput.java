@@ -201,6 +201,11 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("AllocateId")
     private boolean allocateId;
 
+    // Version of entity match serving store that will be used in matching. Specify
+    // null to use current version.
+    @JsonProperty("ServingVersion")
+    private Integer servingVersion;
+
     // Target entity represents the ultimate Business Entity that this match request is trying to find an ID for.
     // Since some entity matches will require matching other entities, eg. Contact might require Account, and
     // Transaction requires Account, Contact, and Product, it won't necessarily be clear from the Entity Key Map
@@ -597,6 +602,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setAllocateId(boolean allocateId) {
         this.allocateId = allocateId;
+    }
+
+    public Integer getServingVersion() {
+        return servingVersion;
+    }
+
+    public void setServingVersion(Integer servingVersion) {
+        this.servingVersion = servingVersion;
     }
 
     public String getTargetEntity() {

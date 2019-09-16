@@ -63,7 +63,7 @@ public class EntityAssociateServiceImplUnitTestNG {
         Iterator<Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>>> it = results.iterator();
         EntityAssociateServiceImpl service = mock(params, it);
 
-        EntityAssociationResponse response = service.associate(TEST_REQUEST_ID, request, currentTargetSnapshot);
+        EntityAssociationResponse response = service.associate(TEST_REQUEST_ID, request, currentTargetSnapshot, null);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getEntity(), request.getEntity());
         Assert.assertNotNull(response.getTenant());
@@ -455,7 +455,7 @@ public class EntityAssociateServiceImplUnitTestNG {
                     MatchKeyTuple tuple = EntityLookupEntryConverter.toMatchKeyTuple(entry);
                     return Pair.of(tuple, seedId);
                 }).collect(Collectors.toList());
-        return new EntityAssociationRequest(TEST_TENANT, TEST_ENTITY, null, lookupResults, null);
+        return new EntityAssociationRequest(TEST_TENANT, TEST_ENTITY, null, null, lookupResults, null);
     }
 
     private EntityAssociateServiceImpl mock(
