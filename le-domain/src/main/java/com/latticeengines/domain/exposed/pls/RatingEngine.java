@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -87,6 +88,12 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             ScoreType.PredictedRevenue, Double.class, //
             ScoreType.Score, Integer.class //
     );
+
+    private static final List<String> ORDERED_ATTR_SUFFIX = SCORE_ATTR_SUFFIX.values().stream() //
+            .sorted((o1, o2) -> o2.length() - o1.length()) //
+            .map(str -> "_" + str) //
+            .collect(Collectors.toList());
+
     private static final Logger log = LoggerFactory.getLogger(RatingEngine.class);
     private static final String RULES_BASED_NAME_PATTERN = "Rules %s - %s";
     private static final String CROSS_SELL_NAME_PATTERN = "%s Purchase - %s";
@@ -136,7 +143,10 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private RatingModel publishedIteration;
 
     public static String generateIdStr() {
-        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        String uuid;
+        do {
+            uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        } while (hasInvalidPrefixOrSuffix(uuid));
         return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
     }
 
@@ -157,9 +167,20 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     public static String toEngineId(String attrName) {
-        String uuid = attrName.replace(RATING_ENGINE_PREFIX + "_", "");
-        uuid = uuid.substring(0, 22);
-        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
+        if (attrName.startsWith(RATING_ENGINE_PREFIX)) {
+            String uuid = attrName.substring(RATING_ENGINE_PREFIX.length() + 1);
+            for (String suffix : ORDERED_ATTR_SUFFIX) {
+                if (attrName.endsWith(suffix)) {
+                    uuid = uuid.substring(0, uuid.indexOf(suffix));
+                }
+            }
+            return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, uuid);
+        } else {
+            // very old ids, should be cleaned up and regenerated
+            log.warn("Trying to parse an attribute {} not beginning with the desired prefix {}", //
+                    attrName, RATING_ENGINE_PREFIX);
+            return attrName;
+        }
     }
 
     @Override
@@ -513,5 +534,18 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     public enum ScoreType {
         Rating, Probability, Score, ExpectedRevenue, PredictedRevenue
+    }
+
+    private static boolean hasInvalidPrefixOrSuffix(String uuid) {
+        if (uuid.toLowerCase().startsWith(RATING_ENGINE_PREFIX)) {
+            return true;
+        }
+
+        for (String suffix: SCORE_ATTR_SUFFIX.values()) {
+            if (uuid.toLowerCase().endsWith(suffix)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

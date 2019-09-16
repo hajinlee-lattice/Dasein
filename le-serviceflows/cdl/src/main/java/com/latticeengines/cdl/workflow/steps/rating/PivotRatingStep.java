@@ -95,6 +95,7 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
         exportToDynamo(resultTableName, PathUtils.toParquetOrAvroDir(resultTable.getExtracts().get(0).getPath()));
 
         putStringValueInContext(PIVOTED_RATINGS_TABLE_NAME, resultTableName);
+        putStringValueInContext(RATING_ITERATION_RESULT_TABLE_NAME, resultTableName);
 
         updateAttrRepo(resultTable);
 

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -59,6 +60,10 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                     + CollectionUtils.size(generations) + ", skip iteration.");
         } else {
             String customerSpace = configuration.getCustomerSpace().toString();
+            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            log.info("Evict attr repo cache for inactive version " + inactive);
+            dataCollectionProxy.evictAttrRepoCache(customerSpace, inactive);
+
             @SuppressWarnings("rawtypes")
             List list = generations.get(iteration - 1);
             List<RatingModelContainer> containersInIteration = JsonUtils.convertList(list, RatingModelContainer.class);
@@ -76,18 +81,25 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                 }
             }
 
-            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
             if (CollectionUtils.isNotEmpty(inactiveEnginesInIteration)) {
                 Set<String> existingEngineIds = new HashSet<>();
-                Table table = dataCollectionProxy.getTable(customerSpace, //
-                        BusinessEntity.Rating.getServingStore(), inactive);
-                if (table != null) {
-                    table.getAttributes().forEach(attr -> {
+                Table existingRatingTable;
+                String previousIterationResultName = getStringValueFromContext(RATING_ITERATION_RESULT_TABLE_NAME);
+                if (StringUtils.isNotBlank(previousIterationResultName)) {
+                    existingRatingTable = metadataProxy.getTableSummary(customerSpace, previousIterationResultName);
+                } else {
+                    existingRatingTable = dataCollectionProxy.getTable(customerSpace, //
+                            BusinessEntity.Rating.getServingStore(), inactive);
+                }
+                if (existingRatingTable != null) {
+                    existingRatingTable.getAttributes().forEach(attr -> {
                         if (attr.getName().startsWith(RatingEngine.RATING_ENGINE_PREFIX)) {
                             String engineId = RatingEngine.toEngineId(attr.getName());
                             existingEngineIds.add(engineId);
                         }
                     });
+                } else {
+                    log.warn("There is no existing rating table, ignore all possible inactive engine ids.");
                 }
                 log.info("Existing engines in serving store for this iteration: " + existingEngineIds);
                 inactiveEnginesInIteration = inactiveEnginesInIteration.stream() //
@@ -100,9 +112,6 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
 
             putObjectInContext(ITERATION_RATING_MODELS, containersInIteration);
             putObjectInContext(ITERATION_INACTIVE_ENGINES, inactiveEnginesInIteration);
-
-            log.info("Evict attr repo cache for inactive version " + inactive);
-            dataCollectionProxy.evictAttrRepoCache(customerSpace, inactive);
         }
     }
 
