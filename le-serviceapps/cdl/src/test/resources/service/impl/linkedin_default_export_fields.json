@@ -151,7 +151,7 @@
   },
   {
     "attrName": "MONETARY_VALUE_ISO4217_ID",
-    "displayName": "Expected_Revenue",
+    "displayName": "Expected Revenue ISO",
     "entity": "Account",
     "javaClass": "String",
     "externalSystemName": "LinkedIn",
