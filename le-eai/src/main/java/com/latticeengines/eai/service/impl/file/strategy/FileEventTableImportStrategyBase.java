@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.eai.file.runtime.mapreduce.CSVFileImportProperty;
 import com.latticeengines.eai.file.runtime.mapreduce.CSVImportJob;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
@@ -68,6 +69,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Value("${cache.local.redis}")
     private boolean localRedis;
 
+    @Value("${eai.import.csv.num.mappers}")
+    private int csvImportNumMappers;
+
     @Inject
     private ElasticCacheService elastiCacheService;
 
@@ -86,7 +90,6 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         log.info(String.format("Importing data for table %s with filter %s", table, filter));
         Properties props = getProperties(ctx, table);
-
         ApplicationId appId = eaiYarnService.submitMRJob(CSVImportJob.CSV_IMPORT_JOB_TYPE, props);
         // ApplicationId appId = sparkImport.launch(props);
         ctx.setProperty(ImportProperty.APPID, appId);
@@ -106,6 +109,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     public Properties getProperties(ImportContext ctx, Table table) {
         Properties props = new Properties();
         props.put("errorLineNumber", errorLineNumber + "");
+        props.put(CSVFileImportProperty.CSV_FILE_NUM_MAPPERS.name(), csvImportNumMappers + "");
         props.put("yarn.mr.hdfs.class.path",
                 String.format("/app/%s/eai/lib", versionManager.getCurrentVersionInStack(stackName)));
         props.put(MapReduceProperty.CUSTOMER.name(), ctx.getProperty(ImportProperty.CUSTOMER, String.class));
@@ -172,7 +176,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             if (attrMetadata != null && attr.getSourceLogicalDataType() == null) {
                 attr.setSourceLogicalDataType(attrMetadata.getDataType());
             } else if (attrMetadata == null) {
-                throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
+                throw new LedpException(LedpCode.LEDP_17002, new String[]{attr.getName()});
             }
         }
         if (table.getAttribute(InterfaceName.InternalId.name()) == null) {
