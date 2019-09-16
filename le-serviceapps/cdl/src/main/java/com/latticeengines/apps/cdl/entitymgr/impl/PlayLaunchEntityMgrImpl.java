@@ -48,6 +48,14 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void update(PlayLaunch entity) {
+        PlayLaunch launch = findByLaunchId(entity.getId());
+        entity.setPlayLaunchChannel(launch.getPlayLaunchChannel());
+        playLaunchDao.update(entity);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunch> findAll() {
         return super.findAll();

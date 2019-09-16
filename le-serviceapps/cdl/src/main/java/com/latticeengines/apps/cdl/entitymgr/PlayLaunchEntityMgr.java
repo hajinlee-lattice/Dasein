@@ -18,6 +18,9 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
     @Override
     void create(PlayLaunch entity);
 
+    @Override
+    void update(PlayLaunch existingPlayLaunch);
+
     PlayLaunch findByLaunchId(String launchId);
 
     PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId);
