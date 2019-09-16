@@ -151,7 +151,7 @@
    },
    {
       "attrName":"MONETARY_VALUE_ISO4217_ID",
-      "displayName":"MONETARY_VALUE_ISO4217_ID",
+      "displayName":"Expected Revenue ISO",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Outreach",
