@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
@@ -30,8 +33,11 @@ import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -44,6 +50,7 @@ import com.latticeengines.pls.workflow.SegmentExportWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("metadataSegmentExportService")
@@ -78,6 +85,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
+
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
 
@@ -110,8 +120,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     }
 
     @Override
-    public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob,
-                                                        Boolean useSparkFromRestApi) {
+    public MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport metadataSegmentExportJob, Boolean useSparkFromRestApi) {
         boolean useSpark;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (useSparkFromRestApi != null) {
@@ -119,6 +128,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         } else {
             useSpark = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         }
+        String customerSpaceStr = customerSpace.toString();
+        DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpaceStr);
+        checkExportAttribute(metadataSegmentExportJob, customerSpaceStr, version);
         if (!useSpark) {
             // check size limitation for old segment export logic
             checkExportSize(metadataSegmentExportJob);
@@ -129,13 +141,12 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                 throw new LedpException(LedpCode.LEDP_18217);
             }
             EntityExportRequest request = new EntityExportRequest();
-            request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace.toString()));
-            AtlasExport atlasExport = atlasExportProxy.createAtlasExport(customerSpace.toString(),
-                    MetadataSegmentExportConverter.convertToAtlasExport(metadataSegmentExportJob));
+            request.setDataCollectionVersion(version);
+            AtlasExport atlasExport = atlasExportProxy.createAtlasExport(customerSpaceStr, MetadataSegmentExportConverter.convertToAtlasExport(metadataSegmentExportJob));
             request.setAtlasExportId(atlasExport.getUuid());
             request.setSaveToDropfolder(false);
-            cdlProxy.entityExport(customerSpace.toString(), request);
-            return MetadataSegmentExportConverter.convertToMetadataSegmentExport(atlasExportProxy.findAtlasExportById(customerSpace.toString(), atlasExport.getUuid()));
+            cdlProxy.entityExport(customerSpaceStr, request);
+            return MetadataSegmentExportConverter.convertToMetadataSegmentExport(atlasExportProxy.findAtlasExportById(customerSpaceStr, atlasExport.getUuid()));
         } else {
             String displayName = "";
             if (metadataSegmentExportJob.getSegment() != null) {
@@ -144,15 +155,38 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExportJob.getExportPrefix(),
                     displayName, metadataSegmentExportJob.getType());
             String tableName = "segment_export_" + UUID.randomUUID().toString().replaceAll("-", "_");
-
             metadataSegmentExportJob.setFileName(exportedFileName);
             metadataSegmentExportJob.setTableName(tableName);
-
             metadataSegmentExportEntityMgr.create(metadataSegmentExportJob);
-
             submitExportWorkflowJob(metadataSegmentExportJob);
             return metadataSegmentExportEntityMgr.findByExportId(metadataSegmentExportJob.getExportId());
         }
+    }
+
+    private void checkExportAttribute(MetadataSegmentExport metadataSegmentExport, String customerSpace,
+                                      DataCollection.Version version) {
+        List<ColumnSelection.Predefined> groups = Collections.singletonList(ColumnSelection.Predefined.Enrichment);
+        List<ColumnMetadata> cms = new ArrayList<>();
+        if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(metadataSegmentExport.getType())) {
+            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, ImmutableList.copyOf(BusinessEntity.EXPORT_ENTITIES), groups, version);
+        } else if (AtlasExportType.ACCOUNT.equals(metadataSegmentExport.getType())) {
+            List<BusinessEntity> businessEntities = BusinessEntity.EXPORT_ENTITIES.stream().collect(Collectors.toList());
+            businessEntities.remove(BusinessEntity.Contact);
+            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version);
+        } else if (AtlasExportType.CONTACT.equals(metadataSegmentExport.getType())) {
+            List<BusinessEntity> businessEntities = new ArrayList<>();
+            businessEntities.add(BusinessEntity.Contact);
+            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version);
+        }
+        log.info("Total attributes for export = " + cms.size());
+        if (cms.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_18231, new String[]{metadataSegmentExport.getType().name()});
+        }
+    }
+
+    public static void main(String[] args) {
+        List<BusinessEntity> businessEntities = BusinessEntity.EXPORT_ENTITIES.stream().collect(Collectors.toList());
+        businessEntities.remove(BusinessEntity.Contact);
     }
 
     private void checkExportSize(MetadataSegmentExport metadataSegmentExportJob) {

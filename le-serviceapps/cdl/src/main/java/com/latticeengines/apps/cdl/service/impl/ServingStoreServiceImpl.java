@@ -1,11 +1,14 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -29,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 import reactor.core.publisher.Flux;
@@ -105,6 +109,19 @@ public class ServingStoreServiceImpl implements ServingStoreService {
             flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
         }
         return flux;
+    }
+
+    @Override
+    public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities, DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+        List<ColumnMetadata> columnMetadataList = new ArrayList<>();
+        Tenant tenant = MultiTenantContext.getTenant();
+        Map<BusinessEntity, List<ColumnMetadata>> map = entities.stream().parallel().collect(Collectors.toMap(BusinessEntity -> BusinessEntity,
+                BusinessEntity -> {
+                    MultiTenantContext.setTenant(tenant);
+                    return getDecoratedMetadata(customerSpace, BusinessEntity, version, groups).collectList().block();
+                }));
+        map.values().forEach(list -> columnMetadataList.addAll(list));
+        return columnMetadataList;
     }
 
     @Override

@@ -43,4 +43,6 @@ public interface ServingStoreProxy {
 
     Set<String> getServingStoreColumnsFromCache(String customerSpace, BusinessEntity entity);
 
+    List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities,
+                                              List<ColumnSelection.Predefined> groups, DataCollection.Version version);
 }

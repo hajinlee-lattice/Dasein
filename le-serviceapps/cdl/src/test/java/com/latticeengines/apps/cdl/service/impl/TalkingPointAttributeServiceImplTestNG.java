@@ -67,6 +67,11 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
+            public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities, DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+                return null;
+            }
+
+            @Override
             public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version, Boolean allCustomerAttrs) {
                 return null;
             }
