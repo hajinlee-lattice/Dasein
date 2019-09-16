@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +42,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
-
 
 /**
  * This test is mainly focused on Account match with AllocateId mode
@@ -140,7 +142,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // State, DUNS, preferred ID
         // test allocate mode
         List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null, null);
-        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         String entityId = verifyAndGetEntityId(output);
 
         // publish for testing lookup
@@ -153,41 +155,89 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testSpecificServingVersion() {
+        Tenant tenant = newTestTenant();
+
+        List<Object> data = Arrays.asList("acct_1", null, null, null, null, null, null, null, null);
+        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
+        String entityId = verifyAndGetEntityId(output);
+
+        // publish for testing lookup
+        publishToServing(tenant, BusinessEntity.Account);
+
+        int currentVersion = entityMatchVersionService.getCurrentVersion(SERVING, tenant);
+        int nextVersion = entityMatchVersionService.getNextVersion(SERVING, tenant);
+        // can lookup the allocated account without specifying version or specify
+        // current version explicitly
+        Assert.assertEquals(lookupAccount(tenant, null, true, "acct_1", null, null, null, null, null, null, null),
+                entityId);
+        Assert.assertEquals(
+                lookupAccount(tenant, currentVersion, true, "acct_1", null, null, null, null, null, null, null),
+                entityId);
+        // should not be able to lookup account allocated with current version when
+        // specifying next version
+        Assert.assertNull(
+                lookupAccount(tenant, nextVersion, false, "acct_1", null, null, null, null, null, null, null));
+
+        // clear staging and allocate with next version (empty universe), should get
+        // another ID
+        testEntityMatchService.bumpVersion(tenant.getId(), STAGING);
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, nextVersion).getRight();
+        String entityIdInNextVersion = verifyAndGetEntityId(output);
+        Assert.assertNotEquals(entityIdInNextVersion, entityId,
+                String.format("EntityId in next version %d should not be the same as in current version %d",
+                        nextVersion, currentVersion));
+
+        // publish to next serving version
+        publishToServing(tenant, nextVersion, BusinessEntity.Account);
+        // lookup with current version still the same
+        Assert.assertEquals(lookupAccount(tenant, null, true, "acct_1", null, null, null, null, null, null, null),
+                entityId);
+        Assert.assertEquals(
+                lookupAccount(tenant, currentVersion, true, "acct_1", null, null, null, null, null, null, null),
+                entityId);
+        // lookup with next version will get new ID
+        Assert.assertEquals(
+                lookupAccount(tenant, nextVersion, true, "acct_1", null, null, null, null, null, null, null),
+                entityIdInNextVersion);
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testPreferredIdAllocate() {
         Tenant tenant = newTestTenant();
         String preferredId = "legacy_entity_id";
         String preferredId2 = "legacy_entity_id2";
 
         List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null, preferredId);
-        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         String entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, preferredId);
 
         // no need to allocate since this record match to preferredId
         data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null, "some_other_id");
-        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, preferredId);
 
         data = Arrays.asList("acct_2", "mkto_2", null, "GOOGLE", null, "USA", null, null, preferredId);
-        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         String entityId2 = verifyAndGetEntityId(output);
         Assert.assertNotEquals(entityId2, preferredId, "Preferred ID should already be taken by the first account");
 
         // new record with empty/null preferred ID (system will take over and random)
         data = Arrays.asList("acct_3", "mkto_3", null, "GOOGLE", null, "USA", null, null, "");
-        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         entityId = verifyAndGetEntityId(output);
         Assert.assertFalse(entityId.isEmpty());
         Assert.assertNotEquals(entityId, preferredId);
         Assert.assertNotNull(entityId, entityId2);
         data = Arrays.asList("acct_4", "mkto_4", null, "GOOGLE", null, "USA", null, null, null);
-        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         verifyAndGetEntityId(output);
 
         // record has conflict with existing account + unused preferred ID
         data = Arrays.asList("acct_5", "mkto_5", null, "GOOGLE", null, "USA", null, null, preferredId2);
-        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, preferredId2, "Should get the preferred ID since it's not taken yet");
     }
@@ -202,7 +252,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         String domain = "google.com";
 
         List<Object> data1 = Arrays.asList("acct_1", null, null, null, domain, "USA", null, null, null);
-        MatchOutput output = matchAccount(data1, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        MatchOutput output = matchAccount(data1, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         String entityId1 = verifyAndGetEntityId(output);
 
         publishToServing(tenant, BusinessEntity.Account);
@@ -215,7 +265,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // account ID have diff value in existing account, create new one.
         // domain already used by existing account, and should NOT be mapped to account2
         List<Object> data2 = Arrays.asList("acct_2", null, null, null, "google.com", "USA", null, null, null);
-        output = matchAccount(data2, true, tenant, getEntityKeyMap(), FIELDS).getRight();
+        output = matchAccount(data2, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         String entityId2 = verifyAndGetEntityId(output);
         // should get two accounts since account id are different
         Assert.assertNotEquals(entityId1, entityId2);
@@ -242,21 +292,21 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // preferred ID
         // public domain without DUNS/name, but in email format, treat as public domain
         List<Object> data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null, null);
-        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output,
                 Arrays.asList("All the domains are public domain: gmail.com"));
         Assert.assertEquals(verifyAndGetEntityId(output), DataCloudConstants.ENTITY_ANONYMOUS_ID);
 
         // public domain without DUNS/name, and not in email format, treat as normal domain
         data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, null, null);
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         String publicAsNormalDomainEntityId = verifyAndGetEntityId(output);
         Assert.assertNotNull(publicAsNormalDomainEntityId);
 
         // public domain with name, treat as public domain
         data = Arrays.asList(null, null, null, "public domain company name", "gmail.com", "USA", null, null, null);
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output,
                 Arrays.asList("All the domains are public domain: gmail.com"));
         String entityId = verifyAndGetEntityId(output);
@@ -267,7 +317,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
         // public domain with (invalid) DUNS, treat as public domain
         data = Arrays.asList(null, null, null, null, "gmail.com", "USA", null, "000000000", null);
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output,
                 Arrays.asList("All the domains are public domain: gmail.com"));
         entityId = verifyAndGetEntityId(output);
@@ -278,7 +328,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // public domain, in email format, with PublicDomainAsNormalDomain set
         // true, treat as normal domain
         data = Arrays.asList(null, null, null, null, "aaa@gmail.com", "USA", null, null, null);
-        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, true).getRight();
+        output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, true, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, publicAsNormalDomainEntityId);
@@ -295,7 +345,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
         List<Object> data = Arrays.asList(null, null, null, null, "lattice-engines.com", "USA", null, null, null);
-        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         String latticeEntityId = verifyAndGetEntityId(output);
         Assert.assertNotNull(latticeEntityId);
@@ -304,7 +354,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Data schema: ID_ACCT, ID_MKTO, ID_ELOQUA, Name, Domain, Country,
         // State, DUNS
         data = Arrays.asList(null, null, null, null, "marketo.com", "USA", null, null, null);
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS, data, output, null);
         String marketoEntityId = verifyAndGetEntityId(output);
         Assert.assertNotNull(marketoEntityId);
@@ -322,7 +372,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         EntityKeyMap entityKeyMap = getEntityKeyMap(FIELDS_WITH_EMAIL);
         // Fix the KeyMap for domain to include Email and Website, in that order.
         entityKeyMap.getKeyMap().put(MatchKey.Domain, Arrays.asList("Email", "Website"));
-        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_EMAIL).getRight();
+        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_EMAIL, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS_WITH_EMAIL, data, output, null);
         String entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, marketoEntityId);
@@ -330,14 +380,14 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Test that website is matched if email is a public domain.
         data = Arrays.asList(null, null, null, null, "http://www.lattice-engines.com", "USA", null, null,
                 "public@gmail.com");
-        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_EMAIL).getRight();
+        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_EMAIL, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS_WITH_EMAIL, data, output, null);
         entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, latticeEntityId);
 
         // Test that no match is found if both email and domain are public domains.
         data = Arrays.asList(null, null, null, null, "public@hotmail.com", "USA", null, null, "public@yahoo.com");
-        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_EMAIL).getRight();
+        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_EMAIL, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS_WITH_EMAIL, data, output,
                 Arrays.asList("All the domains are public domain: hotmail.com,yahoo.com"));
         entityId = verifyAndGetEntityId(output);
@@ -351,7 +401,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
         // Set up match request.  Fix the KeyMap for domain.
         entityKeyMap.getKeyMap().put(MatchKey.Domain, Arrays.asList("Email1", "Domain1", "Domain2", "Email2"));
-        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_FOUR_DOMAINS).getRight();
+        output = matchAccount(data, true, tenant, entityKeyMap, FIELDS_WITH_FOUR_DOMAINS, null).getRight();
         logAndVerifyMatchLogsAndErrors(FIELDS_WITH_FOUR_DOMAINS, data, output, null);
         entityId = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId, latticeEntityId);
@@ -379,7 +429,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Duns in input doesn't exist in LDC and there is no other match key,
         // return orphan EntityId
         List<Object> data = Arrays.asList(null, null, null, null, null, null, null, "000000000", null);
-        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         Assert.assertEquals(verifyAndGetEntityId(output), DataCloudConstants.ENTITY_ANONYMOUS_ID);
 
         // If customer provided DUNS doesn't exist in LDC, don't use it in
@@ -412,7 +462,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         );
         String expectedEntityId = null;
         for (List<Object> dataItem : dataList) {
-            output = matchAccount(dataItem, true, tenant, null, FIELDS).getRight();
+            output = matchAccount(dataItem, true, tenant, null, FIELDS, null).getRight();
             String entityId = verifyAndGetEntityId(output);
             Assert.assertNotNull(entityId);
             if (expectedEntityId == null) {
@@ -438,31 +488,31 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // Domain + Country
         // Country is mapped in match key without value
         List<Object> data = Arrays.asList(null, null, null, null, "google.com", "usa", null, null, null);
-        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        MatchOutput output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         String entityId1 = verifyAndGetEntityId(output);
         data = Arrays.asList(null, null, null, null, "google.com", null, null, null, null);
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         String entityId2 = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId1, entityId2);
         // Country is not mapped in match key
         List<String> keys = Arrays.asList(MatchKey.Domain.name());
         Pair<MatchInput, MatchOutput> inputOutput = matchAccount(data, true, tenant,
-                getEntityKeyMap(keys), FIELDS);
+                getEntityKeyMap(keys), FIELDS, null);
         String entityId3 = verifyAndGetEntityId(inputOutput.getRight());
         Assert.assertEquals(entityId1, entityId3);
 
         // Name + Country
         // Country is mapped in match key without value
         data = Arrays.asList(null, null, null, "google", null, "usa", null, null, null);
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         entityId1 = verifyAndGetEntityId(output);
         data = Arrays.asList(null, null, null, "google", null, null, null, null, null);
-        output = matchAccount(data, true, tenant, null, FIELDS).getRight();
+        output = matchAccount(data, true, tenant, null, FIELDS, null).getRight();
         entityId2 = verifyAndGetEntityId(output);
         Assert.assertEquals(entityId1, entityId2);
         // Country is not mapped in match key
         keys = Arrays.asList(MatchKey.Name.name());
-        inputOutput = matchAccount(data, true, tenant, getEntityKeyMap(keys), FIELDS);
+        inputOutput = matchAccount(data, true, tenant, getEntityKeyMap(keys), FIELDS, null);
         entityId3 = verifyAndGetEntityId(inputOutput.getRight());
         Assert.assertEquals(entityId1, entityId3);
     }
@@ -669,7 +719,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
             List<Object> data3 = new ArrayList<>(Collections.nCopies(baseData2.size(), null));
             data3.set(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(0)),
                     baseData2.get(ACCOUNT_KEYIDX_MAP.get(partialKeys.get(0))));
-            matchAccount(data3, true, tenant, getEntityKeyMap(partialKeys), FIELDS);
+            matchAccount(data3, true, tenant, getEntityKeyMap(partialKeys), FIELDS, null);
         }
         runAndVerifyMatchPair(tenant, fullKeys, data1, partialKeys, data2, false);
     }
@@ -773,7 +823,8 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = newTestTenant();
         List<Object> data = Arrays.asList("acct_id", "mkto_id", "eloqua_id", "google", "google.com", "usa", "ca",
                 "060902413", null);
-        Pair<MatchInput, MatchOutput> inputOutput = matchAccount(data, true, tenant, accountKeyMap, FIELDS, false);
+        Pair<MatchInput, MatchOutput> inputOutput = matchAccount(data, true, tenant, accountKeyMap, FIELDS, false,
+                null);
         String entityId = verifyAndGetEntityId(inputOutput.getRight());
         Assert.assertEquals(entityId, DataCloudConstants.ENTITY_ANONYMOUS_ID, String
                 .format("Should match to anonymous account with EntityKeyMap=%s", JsonUtils.serialize(accountKeyMap)));
@@ -790,12 +841,12 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // prepare existing data
         EntityKeyMap entityKeyMap = getEntityKeyMap();
         for (String[] data : testCase.existingData) {
-            matchAccount(Arrays.asList(data), true, tenant, entityKeyMap, FIELDS);
+            matchAccount(Arrays.asList(data), true, tenant, entityKeyMap, FIELDS, null);
         }
 
         // match with input data
         Pair<MatchInput, MatchOutput> result = matchAccount(Arrays.asList(testCase.inputData), true, tenant,
-                entityKeyMap, FIELDS);
+                entityKeyMap, FIELDS, null);
         Assert.assertNotNull(result.getRight(), "MatchOutput in result should not be null");
 
         MatchOutput output = result.getRight();
@@ -847,7 +898,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
     private String matchCustomerAccountId(@NotNull String customerAccountId, @NotNull Tenant tenant) {
         List<Object> data = Arrays.asList(customerAccountId, null, null, null, null, null, null, null, null);
-        Pair<MatchInput, MatchOutput> result = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS);
+        Pair<MatchInput, MatchOutput> result = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null);
         String entityId = verifyAndGetEntityId(result.getRight());
         // after verifyAndGetEntityId, all intermediate object should be non-null
         String outputCustomerAccountId = (String) result.getRight().getResult().get(0).getInput().get(0);
@@ -859,14 +910,14 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private void runAndVerifyMatchPair(Tenant tenant, List<String> keys1, List<Object> data1, List<String> keys2,
             List<Object> data2, boolean isMatched) {
         Pair<MatchInput, MatchOutput> inputOutput1 = matchAccount(data1, true, tenant,
-                getEntityKeyMap(keys1), FIELDS);
+                getEntityKeyMap(keys1), FIELDS, null);
         MatchOutput output1 = inputOutput1.getRight();
         String entityId1 = verifyAndGetEntityId(output1);
         Assert.assertNotNull(entityId1, String.format("EntityId got null for Keys=%s   MatchInput=%s",
                 String.join(",", keys1), JsonUtils.serialize(inputOutput1.getLeft())));
 
         Pair<MatchInput, MatchOutput> inputOutput2 = matchAccount(data2, true, tenant,
-                getEntityKeyMap(keys2), FIELDS);
+                getEntityKeyMap(keys2), FIELDS, null);
         MatchOutput output2 = inputOutput2.getRight();
         String entityId2 = verifyAndGetEntityId(output2);
         Assert.assertNotNull(entityId2, String.format("EntityId got null for Keys=%s   MatchInput=%s",
@@ -893,8 +944,16 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private String lookupAccount(Tenant tenant, String acctId, String mktoId, String eloquaId, String name,
             String domain, String country, String state, String duns) {
         List<Object> data = Arrays.asList(acctId, mktoId, eloquaId, name, domain, country, state, duns, null);
-        MatchOutput output = matchAccount(data, false, tenant, getEntityKeyMap(false), FIELDS).getRight();
+        MatchOutput output = matchAccount(data, false, tenant, getEntityKeyMap(false), FIELDS, null).getRight();
         return verifyAndGetEntityId(output);
+    }
+
+    private String lookupAccount(Tenant tenant, Integer servingVersion, boolean accountExists, String acctId,
+            String mktoId, String eloquaId, String name, String domain, String country, String state, String duns) {
+        List<Object> data = Arrays.asList(acctId, mktoId, eloquaId, name, domain, country, state, duns, null);
+        MatchOutput output = matchAccount(data, false, tenant, getEntityKeyMap(false), FIELDS, servingVersion)
+                .getRight();
+        return verifyAndGetEntityId(output, InterfaceName.AccountId.name(), accountExists);
     }
 
     /**
@@ -908,11 +967,12 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
      * @return
      */
     private Pair<MatchInput, MatchOutput> matchAccount(List<Object> data, boolean isAllocateMode,
-            Tenant tenant, EntityKeyMap entityKeyMap, List<String> fields, boolean publicDomainAsNormalDomain) {
+            Tenant tenant, EntityKeyMap entityKeyMap, List<String> fields, boolean publicDomainAsNormalDomain,
+            Integer servingVersion) {
         String entity = BusinessEntity.Account.name();
         Map<String, EntityKeyMap> maps = new HashMap<>();
         maps.put(entity, entityKeyMap);
-        MatchInput input = prepareEntityMatchInput(tenant, entity, maps);
+        MatchInput input = prepareEntityMatchInput(tenant, entity, maps, servingVersion);
         input.setAllocateId(isAllocateMode); // Not take effect in this test
         entityMatchConfigurationService.setIsAllocateMode(isAllocateMode);
         input.setFields(fields);
@@ -933,11 +993,11 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
      * @return
      */
     private Pair<MatchInput, MatchOutput> matchAccount(List<Object> data, boolean isAllocateMode,
-                                                       Tenant tenant, EntityKeyMap entityKeyMap, List<String> fields) {
+            Tenant tenant, EntityKeyMap entityKeyMap, List<String> fields, Integer servingVersion) {
         if (entityKeyMap == null) {
             entityKeyMap = getEntityKeyMap();
         }
-        return matchAccount(data, isAllocateMode, tenant, entityKeyMap, fields, false);
+        return matchAccount(data, isAllocateMode, tenant, entityKeyMap, fields, false, servingVersion);
     }
 
     private static EntityKeyMap getEntityKeyMap() {

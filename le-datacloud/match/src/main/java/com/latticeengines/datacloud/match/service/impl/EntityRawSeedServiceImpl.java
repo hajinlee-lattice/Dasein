@@ -52,7 +52,6 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
-import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -84,35 +83,33 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     /* services */
     private final DynamoItemService dynamoItemService;
-    private final EntityMatchVersionService entityMatchVersionService;
     private final EntityMatchConfigurationService entityMatchConfigurationService;
 
     private static final Scheduler scheduler = Schedulers.newParallel("entity-rawseed");
 
     @Inject
     public EntityRawSeedServiceImpl(
-            DynamoItemService dynamoItemService, EntityMatchVersionService entityMatchVersionService,
-            EntityMatchConfigurationService entityMatchConfigurationService) {
+            DynamoItemService dynamoItemService, EntityMatchConfigurationService entityMatchConfigurationService) {
         this.dynamoItemService = dynamoItemService;
-        this.entityMatchVersionService = entityMatchVersionService;
         this.entityMatchConfigurationService = entityMatchConfigurationService;
     }
 
     @Override
     public boolean createIfNotExists(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull String entity, @NotNull String seedId, boolean setTTL) {
+            @NotNull String entity, @NotNull String seedId, boolean setTTL, int version) {
         checkNotNull(env, tenant, entity, seedId);
-        Item item = getBaseItem(env, tenant, entity, seedId, setTTL);
+        Item item = getBaseItem(env, tenant, entity, seedId, setTTL, version);
         return getRetryTemplate(env).execute(ctx ->
                 conditionalSet(getTableName(env), item));
     }
 
     @Override
     public boolean setIfNotExists(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean setTTL) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean setTTL,
+            int version) {
         checkNotNull(env, tenant, seed);
-        Item item = getItemFromSeed(env, tenant, seed, setTTL);
+        Item item = getItemFromSeed(env, tenant, seed, setTTL, version);
         return getRetryTemplate(env).execute(ctx ->
                 conditionalSet(getTableName(env), item));
     }
@@ -120,10 +117,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     @Override
     public EntityRawSeed get(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull String entity, @NotNull String seedId) {
+            @NotNull String entity, @NotNull String seedId, int version) {
         checkNotNull(env, tenant, entity, seedId);
 
-        int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
 
         Item item = getRetryTemplate(env).execute(ctx ->
@@ -134,13 +130,12 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     @Override
     public List<EntityRawSeed> get(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull String entity, @NotNull List<String> seedIds) {
+            @NotNull String entity, @NotNull List<String> seedIds, int version) {
         checkNotNull(env, tenant, entity, seedIds);
         if (seedIds.isEmpty()) {
             return Collections.emptyList();
         }
 
-        int version = getMatchVersion(env, tenant);
         List<PrimaryKey> keys = seedIds
                 .stream()
                 .map(id -> buildKey(env, tenant, version, entity, id))
@@ -160,7 +155,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     @Override
     public Map<Integer, List<EntityRawSeed>> scan(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull String entity, List<String> seedIds, int maxResultSize) {
+            @NotNull String entity, List<String> seedIds, int maxResultSize, int version) {
         checkNotNull(env, tenant, entity);
         if (!EntityMatchEnvironment.STAGING.equals(env)) {
             throw new UnsupportedOperationException(String.format("Scanning for %s is not supported.", env.name()));
@@ -176,7 +171,10 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 seedMap.put(getShardId(seedId), seedId);
             });
         }
-        List<Pair<Integer, Item>> itemPairs = scanPartition(env, tenant, entity, seedMap, maxResultSize).sequential().collectList().block();
+        List<Pair<Integer, Item>> itemPairs = scanPartition(env, tenant, entity, seedMap, maxResultSize, version) //
+                .sequential() //
+                .collectList() //
+                .block();
         Map<Integer, List<EntityRawSeed>> result = new HashMap<>();
         if (CollectionUtils.isNotEmpty(itemPairs)) {
             itemPairs.forEach(itemPair -> {
@@ -190,17 +188,17 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     }
 
     private ParallelFlux<Pair<Integer, Item>> scanPartition(EntityMatchEnvironment env, Tenant tenant, String entity,
-                                                            Map<Integer, String> seedMap, int maxResultSize) {
+            Map<Integer, String> seedMap, int maxResultSize, int version) {
         Integer[] shardIds = new Integer[seedMap.keySet().size()];
         shardIds = seedMap.keySet().toArray(shardIds);
         return Flux.just(shardIds).parallel().runOn(scheduler)
                 .map(k -> {
                     PrimaryKey primaryKey = StringUtils.isEmpty(seedMap.get(k)) ? null : buildKey(env, tenant,
-                            getMatchVersion(env, tenant), entity, seedMap.get(k));
+                                    version, entity, seedMap.get(k));
                     QuerySpec querySpec = new QuerySpec() //
                             .withKeyConditionExpression(ATTR_PARTITION_KEY + " = :v_pk")
                             .withValueMap(new ValueMap().withString(":v_pk",
-                                    getShardPartitionKey(tenant, getMatchVersion(env, tenant), entity, k)))
+                                    getShardPartitionKey(tenant, version, entity, k)))
                             .withExclusiveStartKey(primaryKey) //
                             .withMaxResultSize(maxResultSize);
                     List<Pair<Integer, Item>> result = new ArrayList<>();
@@ -217,10 +215,10 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     @Override
     public EntityRawSeed updateIfNotSet(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull EntityRawSeed rawSeed, boolean setTTL) {
+            @NotNull EntityRawSeed rawSeed, boolean setTTL, int version) {
         checkNotNull(env, tenant, rawSeed);
 
-        PrimaryKey key = getPrimaryKey(env, tenant, rawSeed);
+        PrimaryKey key = getPrimaryKey(env, tenant, rawSeed, version);
         ExpressionSpecBuilder builder = new ExpressionSpecBuilder()
                 .addUpdate(S(ATTR_SEED_ID).set(rawSeed.getId()))
                 .addUpdate(S(ATTR_SEED_ENTITY).set(rawSeed.getEntity()))
@@ -253,35 +251,35 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
 
     @Override
     public EntityRawSeed clearIfEquals(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed) {
-        return clear(env, tenant, rawSeed, true);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed, int version) {
+        return clear(env, tenant, rawSeed, version, true);
     }
 
     @Override
-    public EntityRawSeed clear(EntityMatchEnvironment env, Tenant tenant, EntityRawSeed rawSeed) {
-        return clear(env, tenant, rawSeed, false);
+    public EntityRawSeed clear(EntityMatchEnvironment env, Tenant tenant, EntityRawSeed rawSeed, int version) {
+        return clear(env, tenant, rawSeed, version, false);
     }
 
     @Override
     public boolean delete(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull String entity, @NotNull String seedId) {
+            @NotNull String entity, @NotNull String seedId, int version) {
         checkNotNull(env, tenant, entity, seedId);
 
-        int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
         return getRetryTemplate(env).execute(ctx -> dynamoItemService.deleteItem(getTableName(env), key));
     }
 
     @Override
     public boolean batchCreate(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<EntityRawSeed> rawSeeds, boolean setTTL) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, List<EntityRawSeed> rawSeeds, boolean setTTL,
+            int version) {
         checkNotNull(env, tenant);
         if (CollectionUtils.isEmpty(rawSeeds)) {
             return false;
         }
         List<Item> batchItems = rawSeeds.stream() //
-                .map(seed -> getItemFromSeed(env, tenant, seed, setTTL)) //
+                .map(seed -> getItemFromSeed(env, tenant, seed, setTTL, version)) //
                 .collect(Collectors.toList());
         dynamoItemService.batchWrite(getTableName(env), batchItems);
         return true;
@@ -294,10 +292,10 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
      */
     private EntityRawSeed clear(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull EntityRawSeed rawSeed, boolean useOptimisticLocking) {
+            @NotNull EntityRawSeed rawSeed, Integer version, boolean useOptimisticLocking) {
         checkNotNull(env, tenant, rawSeed);
 
-        PrimaryKey key = getPrimaryKey(env, tenant, rawSeed);
+        PrimaryKey key = getPrimaryKey(env, tenant, rawSeed, version);
         // not setting ttl to honor the original setting
         ExpressionSpecBuilder builder = new ExpressionSpecBuilder();
 
@@ -462,8 +460,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     }
 
     private Item getBaseItem(
-            EntityMatchEnvironment env, Tenant tenant, String entity, String seedId, boolean shouldSetTTL) {
-        int version = getMatchVersion(env, tenant);
+            EntityMatchEnvironment env, Tenant tenant, String entity, String seedId, boolean shouldSetTTL,
+            int version) {
         PrimaryKey key = buildKey(env, tenant, version, entity, seedId);
         Item item =  new Item()
                 .withPrimaryKey(key)
@@ -476,8 +474,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         return item;
     }
 
-    private Item getItemFromSeed(EntityMatchEnvironment env, Tenant tenant, EntityRawSeed seed, boolean setTTL) {
-        Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId(), setTTL);
+    private Item getItemFromSeed(EntityMatchEnvironment env, Tenant tenant, EntityRawSeed seed, boolean setTTL,
+            int version) {
+        Item item = getBaseItem(env, tenant, seed.getEntity(), seed.getId(), setTTL, version);
         // set attributes
         getStringAttributes(seed).forEach(item::withString);
         getStringSetAttributes(seed).forEach(item::withStringSet);
@@ -485,8 +484,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     }
 
     private PrimaryKey getPrimaryKey(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed) {
-        int version = getMatchVersion(env, tenant);
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityRawSeed rawSeed,
+            Integer version) {
         return buildKey(env, tenant, version, rawSeed.getEntity(), rawSeed.getId());
     }
 
@@ -626,10 +625,6 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         return ATTR_SEED_ID.equals(attrName) || ATTR_SEED_ENTITY.equals(attrName)
             || ATTR_PARTITION_KEY.equals(attrName) || ATTR_RANGE_KEY.equals(attrName)
             || ATTR_SEED_VERSION.equals(attrName) || ATTR_EXPIRED_AT.equals(attrName);
-    }
-
-    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant) {
-        return entityMatchVersionService.getCurrentVersion(env, tenant);
     }
 
     private String getTableName(EntityMatchEnvironment environment) {

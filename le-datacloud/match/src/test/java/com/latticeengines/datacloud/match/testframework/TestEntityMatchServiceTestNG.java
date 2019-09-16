@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
@@ -35,6 +36,9 @@ public class TestEntityMatchServiceTestNG extends DataCloudMatchFunctionalTestNG
 
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
+
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
 
     @Inject
     private TestEntityMatchService testEntityMatchService;
@@ -73,7 +77,8 @@ public class TestEntityMatchServiceTestNG extends DataCloudMatchFunctionalTestNG
                     fromSystemId(TEST_ENTITY, "SFDC", "sfdc_1"),
                     fromSystemId(TEST_ENTITY, "SFDC", "s1"));
             List<String> expectedEntityIds = Arrays.asList("adhfhhfhf", "adhfhhfhf", "abbbcc");
-            List<String> entityIds = entityLookupEntryService.get(env, TEST_TENANT, entries);
+            List<String> entityIds = entityLookupEntryService.get(env, TEST_TENANT, entries,
+                    entityMatchVersionService.getCurrentVersion(env, TEST_TENANT));
             Assert.assertEquals(entityIds, expectedEntityIds);
         } catch (Exception e) {
             Assert.fail("Failed to prepare lookup test data in env = " + env, e);
@@ -98,8 +103,10 @@ public class TestEntityMatchServiceTestNG extends DataCloudMatchFunctionalTestNG
             Thread.sleep(2000L);
 
             // make sure the correct test data is populated
-            EntityRawSeed seed1 = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, "sdlkjfl");
-            EntityRawSeed seed2 = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, "aabbabc");
+            EntityRawSeed seed1 = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, "sdlkjfl",
+                    entityMatchVersionService.getCurrentVersion(env, TEST_TENANT));
+            EntityRawSeed seed2 = entityRawSeedService.get(env, TEST_TENANT, TEST_ENTITY, "aabbabc",
+                    entityMatchVersionService.getCurrentVersion(env, TEST_TENANT));
             List<EntityLookupEntry> entries1 = Arrays.asList(
                     fromDomainCountry(TEST_ENTITY, "fb.com", "USA"),
                     fromExternalSystem(TEST_ENTITY, "MKTO", "mkto_1"));

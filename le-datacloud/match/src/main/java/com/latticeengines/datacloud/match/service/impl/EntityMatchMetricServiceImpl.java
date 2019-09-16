@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Component;
@@ -181,7 +182,8 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     }
 
     @Override
-    public void registerLookupCache(Cache<Pair<String, EntityLookupEntry>, String> cache, boolean isAllocateMode) {
+    public void registerLookupCache(Cache<Triple<String, Integer, EntityLookupEntry>, String> cache,
+            boolean isAllocateMode) {
         if (cache == null) {
             return;
         }
@@ -190,7 +192,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     }
 
     @Override
-    public void registerSeedCache(Cache<Pair<Pair<String, String>, String>, EntityRawSeed> cache) {
+    public void registerSeedCache(Cache<Triple<Pair<String, String>, Integer, String>, EntityRawSeed> cache) {
         if (cache == null) {
             return;
         }

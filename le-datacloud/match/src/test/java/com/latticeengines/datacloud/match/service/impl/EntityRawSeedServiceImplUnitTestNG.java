@@ -78,7 +78,7 @@ public class EntityRawSeedServiceImplUnitTestNG {
         // instantiate required services
         EntityMatchConfigurationService configurationService = Mockito.mock(EntityMatchConfigurationService.class);
         Mockito.when(configurationService.getNumShards(Mockito.any())).thenReturn(NUM_SHARDS);
-        service = new EntityRawSeedServiceImpl(null, null, configurationService);
+        service = new EntityRawSeedServiceImpl(null, configurationService);
     }
 
     /*

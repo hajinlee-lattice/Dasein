@@ -31,14 +31,14 @@ public class AccountEntityServiceImpl implements AccountEntityService {
     public AccountSeed get(@NotNull Tenant tenant, @NotNull String accountId) {
         check(tenant);
         Preconditions.checkNotNull(accountId);
-        return toAccountSeed(entityMatchInternalService.get(tenant, ENTITY, accountId));
+        return toAccountSeed(entityMatchInternalService.get(tenant, ENTITY, accountId, null));
     }
 
     @Override
     public List<AccountSeed> get(@NotNull Tenant tenant, @NotNull List<String> accountIds) {
         check(tenant);
         Preconditions.checkNotNull(accountIds);
-        return entityMatchInternalService.get(tenant, ENTITY, accountIds)
+        return entityMatchInternalService.get(tenant, ENTITY, accountIds, null)
                 .stream()
                 .map(this::toAccountSeed)
                 .collect(Collectors.toList());

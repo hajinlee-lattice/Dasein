@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -59,6 +60,9 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
     private EntityLookupEntryService entityLookupEntryService;
 
     @Inject
+    private EntityMatchVersionService entityMatchVersionService;
+
+    @Inject
     @Lazy
     private EntityMatchCommitter entityMatchCommitter;
 
@@ -93,12 +97,15 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     private void commitWithCommitter(Tenant tenant, String entity) {
         log.info("Committing entity {}", entity);
-        EntityPublishStatistics stats = entityMatchCommitter.commit(entity, tenant, null);
+        EntityPublishStatistics stats = entityMatchCommitter.commit(entity, tenant, null, null);
         log.info("Entity {} committed. nSeeds={}, nLookups={}, nlookupNotInStaging={}", entity, stats.getSeedCount(),
                 stats.getLookupCount(), stats.getNotInStagingLookupCount());
         setStats(entity, stats.getSeedCount(), stats.getLookupCount());
     }
 
+    /*
+     * TODO retire this when parallel one is tested enough
+     */
     private void commitEntity(Tenant tenant, String entity) {
         List<String> getSeedIds = new ArrayList<>();
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
@@ -106,7 +113,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         int nNotInStaging = 0;
         do {
             Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(SOURCE_ENV, tenant, entity, getSeedIds,
-                    1000);
+                    1000, entityMatchVersionService.getCurrentVersion(SOURCE_ENV, tenant));
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -115,7 +122,8 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                 }
                 List<Pair<EntityLookupEntry, String>> pairs = new ArrayList<>();
                 for (EntityRawSeed seed : scanSeeds) {
-                    List<String> seedIds = entityLookupEntryService.get(SOURCE_ENV, tenant, seed.getLookupEntries());
+                    List<String> seedIds = entityLookupEntryService.get(SOURCE_ENV, tenant, seed.getLookupEntries(),
+                            entityMatchVersionService.getCurrentVersion(SOURCE_ENV, tenant));
                     for(int i = 0; i < seedIds.size(); i++) {
                         if (seedIds.get(i) == null) {
                             nNotInStaging++;
@@ -127,8 +135,10 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                     }
 
                 }
-                entityRawSeedService.batchCreate(DEST_ENV, tenant, scanSeeds, EntityMatchUtils.shouldSetTTL(DEST_ENV));
-                entityLookupEntryService.set(DEST_ENV, tenant, pairs, EntityMatchUtils.shouldSetTTL(DEST_ENV));
+                entityRawSeedService.batchCreate(DEST_ENV, tenant, scanSeeds, EntityMatchUtils.shouldSetTTL(DEST_ENV),
+                        entityMatchVersionService.getCurrentVersion(DEST_ENV, tenant));
+                entityLookupEntryService.set(DEST_ENV, tenant, pairs, EntityMatchUtils.shouldSetTTL(DEST_ENV),
+                        entityMatchVersionService.getCurrentVersion(DEST_ENV, tenant));
                 nSeeds += scanSeeds.size();
                 nLookups += pairs.size();
             }

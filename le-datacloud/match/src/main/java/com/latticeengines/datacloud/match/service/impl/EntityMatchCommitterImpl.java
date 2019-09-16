@@ -35,9 +35,11 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -69,25 +71,29 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
 
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
+
     @Override
-    public EntityPublishStatistics commit(@NotNull String entity, @NotNull Tenant tenant, Boolean destTTLEnabled) {
+    public EntityPublishStatistics commit(@NotNull String entity, @NotNull Tenant tenant, Boolean destTTLEnabled,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         check(entity, tenant);
-        return commitAsync(entity, newStandardizedTenant(tenant), useTTL(destTTLEnabled), defaultNumReaders,
+        return commitAsync(entity, newStandardizedTenant(tenant), useTTL(destTTLEnabled), versionMap, defaultNumReaders,
                 defaultNumWriters);
     }
 
     @Override
     public EntityPublishStatistics commit(@NotNull String entity, @NotNull Tenant tenant, Boolean destTTLEnabled,
-            int nReader, int nWriter) {
+            Map<EntityMatchEnvironment, Integer> versionMap, int nReader, int nWriter) {
         check(entity, tenant);
-        return commitAsync(entity, newStandardizedTenant(tenant), useTTL(destTTLEnabled), nReader, nWriter);
+        return commitAsync(entity, newStandardizedTenant(tenant), useTTL(destTTLEnabled), versionMap, nReader, nWriter);
     }
 
     /*
      * Spawn background workers to write seed & lookup entries, scan seed in main thread
      */
     private EntityPublishStatistics commitAsync(@NotNull String entity, @NotNull Tenant tenant, boolean useTTL,
-            int nReader, int nWriter) {
+            Map<EntityMatchEnvironment, Integer> versionMap, int nReader, int nWriter) {
         ExecutorService readService = ThreadPoolUtils.getCachedThreadPool(String.format("em-commit-r-%s", entity));
         ExecutorService writeService = ThreadPoolUtils.getCachedThreadPool(String.format("em-commit-w-%s", entity));
         AtomicBoolean readFinished = new AtomicBoolean(false);
@@ -109,16 +115,19 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
         // add r/w workers
         for (int i = 0; i < nReader; i++) {
             writeService.submit(
-                    new SeedLookupWriter(tenant, writeFinished, nWrittenSeeds, nWrittenLookups, writeQueue, useTTL));
+                    new SeedLookupWriter(tenant, versionMap, writeFinished, nWrittenSeeds, nWrittenLookups, writeQueue,
+                            useTTL));
         }
         for (int i = 0; i < nWriter; i++) {
-            readService.submit(new LookupEntryReader(tenant, readFinished, nLookupNotInStaging, writeQueue, readQueue));
+            readService.submit(new LookupEntryReader(tenant, versionMap, readFinished, nLookupNotInStaging, writeQueue,
+                    readQueue));
         }
 
         // scanning seeds
         List<String> seedIds = new ArrayList<>();
         do {
-            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(STAGING, tenant, entity, seedIds, 1000);
+            Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(STAGING, tenant, entity, seedIds, 1000,
+                    getMatchVersion(STAGING, tenant, versionMap));
             seedIds.clear();
             if (MapUtils.isEmpty(seeds)) {
                 continue;
@@ -182,14 +191,17 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
     private class LookupEntryReader implements Runnable {
 
         private final Tenant tenant;
+        private final Map<EntityMatchEnvironment, Integer> versionMap;
         private final AtomicBoolean finished;
         private final AtomicInteger nLookupNotInStaging;
         private final ArrayBlockingQueue<WriteSeedLookupRequest> writeQueue;
         private final ArrayBlockingQueue<EntityRawSeed> readQueue;
 
-        LookupEntryReader(Tenant tenant, AtomicBoolean finished, AtomicInteger nLookupNotInStaging,
+        LookupEntryReader(Tenant tenant, Map<EntityMatchEnvironment, Integer> versionMap, AtomicBoolean finished,
+                AtomicInteger nLookupNotInStaging,
                 ArrayBlockingQueue<WriteSeedLookupRequest> writeQueue, ArrayBlockingQueue<EntityRawSeed> readQueue) {
             this.tenant = tenant;
+            this.versionMap = versionMap;
             this.finished = finished;
             this.nLookupNotInStaging = nLookupNotInStaging;
             this.writeQueue = writeQueue;
@@ -216,7 +228,8 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                         continue;
                     }
 
-                    List<String> mappedSeedIds = entityLookupEntryService.get(STAGING, tenant, entries);
+                    List<String> mappedSeedIds = entityLookupEntryService.get(STAGING, tenant, entries,
+                            getMatchVersion(STAGING, tenant, versionMap));
                     Map<String, List<EntityLookupEntry>> entryMap = new HashMap<>();
                     for (int j = 0; j < mappedSeedIds.size(); j++) {
                         if (mappedSeedIds.get(j) == null) {
@@ -254,15 +267,18 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
      */
     private class SeedLookupWriter implements Runnable {
         private final Tenant tenant;
+        private final Map<EntityMatchEnvironment, Integer> versionMap;
         private final AtomicBoolean finished;
         private final AtomicInteger nSeeds;
         private final AtomicInteger nLookups;
         private final ArrayBlockingQueue<WriteSeedLookupRequest> writeQueue;
         private final boolean useTTL;
 
-        SeedLookupWriter(Tenant tenant, AtomicBoolean finished, AtomicInteger nSeeds, AtomicInteger nLookups,
+        SeedLookupWriter(Tenant tenant, Map<EntityMatchEnvironment, Integer> versionMap, AtomicBoolean finished,
+                AtomicInteger nSeeds, AtomicInteger nLookups,
                 ArrayBlockingQueue<WriteSeedLookupRequest> writeQueue, boolean useTTL) {
             this.tenant = tenant;
+            this.versionMap = versionMap;
             this.finished = finished;
             this.nSeeds = nSeeds;
             this.nLookups = nLookups;
@@ -294,8 +310,10 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                         continue;
                     }
 
-                    entityRawSeedService.batchCreate(SERVING, tenant, seeds, useTTL);
-                    entityLookupEntryService.set(SERVING, tenant, lookupEntryPairs, useTTL);
+                    entityRawSeedService.batchCreate(SERVING, tenant, seeds, useTTL,
+                            getMatchVersion(SERVING, tenant, versionMap));
+                    entityLookupEntryService.set(SERVING, tenant, lookupEntryPairs, useTTL,
+                            getMatchVersion(SERVING, tenant, versionMap));
                     nSeeds.addAndGet(seeds.size());
                     nLookups.addAndGet(lookupEntryPairs.size());
                 } catch (InterruptedException e) {
@@ -318,6 +336,14 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
             this.seed = seed;
             this.entries = entries == null ? Collections.emptyList() : entries;
         }
+    }
+
+    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
+        if (versionMap == null || versionMap.get(env) == null) {
+            return entityMatchVersionService.getCurrentVersion(env, tenant);
+        }
+        return versionMap.get(env);
     }
 
     private void check(String entity, Tenant tenant) {

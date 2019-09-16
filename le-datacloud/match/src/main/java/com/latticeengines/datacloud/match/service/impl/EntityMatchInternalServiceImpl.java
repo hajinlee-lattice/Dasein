@@ -4,6 +4,7 @@ import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNul
 import static com.latticeengines.datacloud.match.util.EntityMatchUtils.shouldSetTTL;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.TERMINATE_EXECUTOR_TIMEOUT_MS;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -51,6 +52,7 @@ import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
@@ -83,19 +85,25 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private final EntityRawSeedService entityRawSeedService;
     private final EntityMatchConfigurationService entityMatchConfigurationService;
     private final EntityMatchMetricService entityMatchMetricService;
+    private final EntityMatchVersionService entityMatchVersionService;
 
     // flag to indicate whether background workers should keep running
     private volatile boolean shouldTerminate = false;
 
-    // [ tenant ID, lookup entry ] => seed ID
-    private volatile Cache<Pair<String, EntityLookupEntry>, String> lookupCache;
-    // [ [ tenant ID, entity ], seed ID ] => raw seed
-    private volatile Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache;
+    /*-
+     * Use serving version across the board cuz
+     * (a) in lookup mode we use serving version
+     * (b) in allocate mode cache is used by single job and not shared, using serving is more consistent
+     */
+    // [ tenant ID, serving version, lookup entry ] => seed ID
+    private volatile Cache<Triple<String, Integer, EntityLookupEntry>, String> lookupCache;
+    // [ [ tenant ID, entity ], serving version, seed ID ] => raw seed
+    private volatile Cache<Triple<Pair<String, String>, Integer, String>, EntityRawSeed> seedCache;
     // cache for anonymous entities
-    // [ tenant ID, entity] => raw seed
-    private volatile Cache<Pair<String, String>, EntityRawSeed> anonymousSeedCache;
+    // [ tenant ID, entity, serving version ] => raw seed
+    private volatile Cache<Triple<String, String, Integer>, EntityRawSeed> anonymousSeedCache;
 
-    private BlockingQueue<Triple<Tenant, EntityLookupEntry, String>> lookupQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<StagingLookupPublishRequest> lookupQueue = new LinkedBlockingQueue<>();
     private AtomicLong nProcessingLookupEntries = new AtomicLong(0L);
     private volatile ExecutorService lookupExecutorService; // thread pool for populating lookup staging table
 
@@ -103,24 +111,28 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     public EntityMatchInternalServiceImpl(
             EntityLookupEntryService entityLookupEntryService, EntityRawSeedService entityRawSeedService,
             EntityMatchConfigurationService entityMatchConfigurationService,
+            EntityMatchVersionService entityMatchVersionService,
             @Lazy EntityMatchMetricService entityMatchMetricService) {
         this.entityLookupEntryService = entityLookupEntryService;
         this.entityRawSeedService = entityRawSeedService;
+        this.entityMatchVersionService = entityMatchVersionService;
         this.entityMatchConfigurationService = entityMatchConfigurationService;
         this.entityMatchMetricService = entityMatchMetricService;
     }
 
     @Override
-    public String getId(@NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry) {
+    public String getId(@NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, lookupEntry);
-        List<String> ids = getIds(tenant, Collections.singletonList(lookupEntry));
+        List<String> ids = getIds(tenant, Collections.singletonList(lookupEntry), versionMap);
         Preconditions.checkNotNull(ids);
         Preconditions.checkArgument(ids.size() == 1);
         return ids.get(0);
     }
 
     @Override
-    public List<String> getIds(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries) {
+    public List<String> getIds(@NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, lookupEntries);
         if (lookupEntries.isEmpty()) {
             return Collections.emptyList();
@@ -130,21 +142,23 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         lazyInitServices();
 
         Map<EntityLookupEntry, String> seedIdMap = getIdsInternal(tenant,
-                lookupEntries.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+                lookupEntries.stream().filter(Objects::nonNull).collect(Collectors.toList()), versionMap);
         return generateResult(lookupEntries, seedIdMap);
     }
 
     @Override
-    public EntityRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId) {
+    public EntityRawSeed get(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, entity, seedId);
-        List<EntityRawSeed> seeds = get(tenant, entity, Collections.singletonList(seedId));
+        List<EntityRawSeed> seeds = get(tenant, entity, Collections.singletonList(seedId), versionMap);
         Preconditions.checkNotNull(seeds);
         Preconditions.checkArgument(seeds.size() == 1);
         return seeds.get(0);
     }
 
     @Override
-    public List<EntityRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds) {
+    public List<EntityRawSeed> get(@NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, seedIds);
         checkNotNull(entity);
         if (seedIds.isEmpty()) {
@@ -155,12 +169,13 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         lazyInitServices();
 
         Map<String, EntityRawSeed> resultMap = getSeedsInternal(tenant, entity,
-                seedIds.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+                seedIds.stream().filter(Objects::nonNull).collect(Collectors.toList()), versionMap);
         return generateResult(seedIds, resultMap);
     }
 
     @Override
-    public EntityRawSeed getOrCreateAnonymousSeed(@NotNull Tenant tenant, @NotNull String entity) {
+    public EntityRawSeed getOrCreateAnonymousSeed(@NotNull Tenant tenant, @NotNull String entity,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, entity);
         if (!isAllocateMode()) {
             throw new UnsupportedOperationException("Not allowed to create anonymous seed in lookup mode");
@@ -169,21 +184,23 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // make sure required service are loaded properly
         lazyInitServices();
 
-        Pair<String, String> cacheKey = Pair.of(tenant.getId(), entity);
+        int servingVersion = getMatchVersion(SERVING, tenant, versionMap);
+        Triple<String, String, Integer> cacheKey = Triple.of(tenant.getId(), entity, servingVersion);
         EntityRawSeed seed = anonymousSeedCache.getIfPresent(cacheKey);
         if (seed != null) {
             // already have anonymous in cache
             return seed;
         }
 
-        seed = get(tenant, entity, ENTITY_ANONYMOUS_ID);
+        seed = get(tenant, entity, ENTITY_ANONYMOUS_ID, versionMap);
         boolean isNewSeed = false;
         if (seed == null) {
             // no anonymous entity in staging & serving, create one
             seed = new EntityRawSeed(ENTITY_ANONYMOUS_ID, entity, false);
 
             // is considered new if we set the staging seed successfully
-            isNewSeed = entityRawSeedService.setIfNotExists(STAGING, tenant, seed, shouldSetTTL(STAGING));
+            isNewSeed = entityRawSeedService.setIfNotExists(STAGING, tenant, seed, shouldSetTTL(STAGING),
+                    getMatchVersion(STAGING, tenant, versionMap));
         }
 
         // populate cache (isNewlyAllocated=false since it's already created for the
@@ -194,7 +211,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @Override
-    public String allocateId(@NotNull Tenant tenant, @NotNull String entity, String preferredId) {
+    public String allocateId(@NotNull Tenant tenant, @NotNull String entity, String preferredId,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, entity);
         if (!isAllocateMode()) {
             throw new UnsupportedOperationException("Not allowed to allocate ID in lookup mode");
@@ -203,7 +221,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // try to allocate preferred ID
         if (StringUtils.isNotBlank(preferredId)) {
             boolean created = entityRawSeedService.createIfNotExists(env, tenant, entity, preferredId,
-                    shouldSetTTL(env));
+                    shouldSetTTL(env), getMatchVersion(env, tenant, versionMap));
             if (created) {
                 // preferredId is not taken
                 return preferredId;
@@ -217,7 +235,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     String id = newId();
                     // use serving as the single source of truth
                     boolean created = entityRawSeedService
-                            .createIfNotExists(env, tenant, entity, id, shouldSetTTL(env));
+                            .createIfNotExists(env, tenant, entity, id, shouldSetTTL(env),
+                                    getMatchVersion(env, tenant, versionMap));
                     return created ? Pair.of(idx, id) : null;
                 })
                 .findFirst();
@@ -237,7 +256,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @Override
     public Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
             @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
-            Set<EntityLookupEntry> entriesMapToOtherSeed) {
+            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap) {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
         checkNotNull(tenant, seed);
         if (!isAllocateMode()) {
@@ -245,13 +264,14 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         }
 
         // update seed & lookup table and get all entries that cannot update
-        EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, tenant, seed, shouldSetTTL(env));
+        EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, tenant, seed, shouldSetTTL(env),
+                getMatchVersion(env, tenant, versionMap));
         Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs =
                 getExistingLookupPairs(seedBeforeUpdate);
         Set<EntityLookupEntry> entriesFailedToAssociate = getLookupEntriesFailedToAssociate(existingLookupPairs, seed);
         List<EntityLookupEntry> entriesFailedToSetLookup =
                 mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed, clearAllFailedLookupEntries,
-                        entriesMapToOtherSeed);
+                        entriesMapToOtherSeed, versionMap);
 
         // clear one to one entries in seed that we failed to set in the lookup table
         List<EntityLookupEntry> entriesToClear = entriesFailedToSetLookup
@@ -261,27 +281,29 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(entriesToClear)) {
             EntityRawSeed seedToClear = new EntityRawSeed(seed.getId(), seed.getEntity(), entriesToClear, null);
-            entityRawSeedService.clear(env, tenant, seedToClear);
+            entityRawSeedService.clear(env, tenant, seedToClear, getMatchVersion(env, tenant, versionMap));
         }
 
         return Triple.of(seedBeforeUpdate, new ArrayList<>(entriesFailedToAssociate), entriesFailedToSetLookup);
     }
 
     @Override
-    public void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId) {
+    public void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, entity, seedId);
         // TODO batch the seedIds and cleanup async
 
         // cleanup staging first so the seed ID cannot be allocated before we cleanup
         // all environments
-        entityRawSeedService.delete(STAGING, tenant, entity, seedId);
-        entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, entity, seedId);
+        entityRawSeedService.delete(STAGING, tenant, entity, seedId, getMatchVersion(STAGING, tenant, versionMap));
+        entityRawSeedService.delete(EntityMatchEnvironment.SERVING, tenant, entity, seedId,
+                getMatchVersion(SERVING, tenant, versionMap));
     }
 
     @Override
     public EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
-            @NotNull Tenant destTenant,
-            @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled) {
+            @NotNull Tenant destTenant, @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled,
+            Integer srcStagingVersion, Integer destEnvVersion) {
         sourceTenant = EntityMatchUtils.newStandardizedTenant(sourceTenant);
         destTenant = EntityMatchUtils.newStandardizedTenant(destTenant);
         EntityMatchEnvironment sourceEnv = STAGING;
@@ -300,7 +322,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         do {
             Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(sourceEnv, sourceTenant, entity,
-                    getSeedIds, 1000);
+                    getSeedIds, 1000, getMatchVersion(sourceEnv, sourceTenant, srcStagingVersion));
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -310,7 +332,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 List<Pair<EntityLookupEntry, String>> pairs = new ArrayList<>();
                 for (EntityRawSeed seed : scanSeeds) {
                     List<String> seedIds = entityLookupEntryService.get(sourceEnv, sourceTenant,
-                            seed.getLookupEntries());
+                            seed.getLookupEntries(), getMatchVersion(sourceEnv, sourceTenant, srcStagingVersion));
                     for (int i = 0; i < seedIds.size(); i++) {
                         if (seedIds.get(i) == null) {
                             nNotInStaging++;
@@ -322,8 +344,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                     }
 
                 }
-                entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled);
-                entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled);
+                entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled,
+                        getMatchVersion(destEnv, destTenant, destEnvVersion));
+                entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled,
+                        getMatchVersion(destEnv, destTenant, destEnvVersion));
                 seedCount += scanSeeds.size();
                 lookupCount += pairs.size();
             }
@@ -333,12 +357,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @VisibleForTesting
-    public Cache<Pair<String, EntityLookupEntry>, String> getLookupCache() {
+    public Cache<Triple<String, Integer, EntityLookupEntry>, String> getLookupCache() {
         return lookupCache;
     }
 
     @VisibleForTesting
-    public Cache<Pair<Pair<String, String>, String>, EntityRawSeed> getSeedCache() {
+    public Cache<Triple<Pair<String, String>, Integer, String>, EntityRawSeed> getSeedCache() {
         return seedCache;
     }
 
@@ -422,7 +446,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs,
             @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
-            Set<EntityLookupEntry> entriesMapToOtherSeed) {
+            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap) {
         return seed.getLookupEntries()
                 .stream()
                 .filter(entry -> {
@@ -463,7 +487,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         return Pair.of(entry, false);
                     }
                     boolean setSucceeded = entityLookupEntryService.setIfEquals(env, tenant, entry, seed.getId(),
-                            shouldSetTTL(env));
+                            shouldSetTTL(env), getMatchVersion(env, tenant, versionMap));
                     // NOTE for debugging concurrency issue.
                     log.debug("Map lookup entry {} to seed(ID={}), success={}", entry, seed.getId(), setSucceeded);
                     return Pair.of(entry, setSucceeded);
@@ -478,12 +502,16 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Start from local cache -> staging table -> serving table and perform synchronization between layers.
      */
     private Map<EntityLookupEntry, String> getIdsInternal(@NotNull Tenant tenant,
-            @NotNull List<EntityLookupEntry> lookupEntries) {
+            @NotNull List<EntityLookupEntry> lookupEntries, Map<EntityMatchEnvironment, Integer> versionMap) {
         String tenantId = tenant.getId();
         Set<EntityLookupEntry> uniqueEntries = new HashSet<>(lookupEntries);
+        // always use serving version for lookup entry, if it is allocate mode, cache
+        // will only exist in one match job and won't be shared. so no problem when
+        // staging data get discarded in rollback
+        int servingVersion = getMatchVersion(SERVING, tenant, versionMap);
         // retrieve seed IDs from cache
         Map<EntityLookupEntry, String> results =  getPresentCacheValues(
-                tenantId, lookupEntries, lookupCache);
+                tenantId, lookupEntries, lookupCache, servingVersion);
         if (results.size() == uniqueEntries.size()) {
             // have all the seed IDs
             return results;
@@ -491,12 +519,12 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
         // get lookup entries that are not present in local cache and try staging layer
         Set<EntityLookupEntry> missingEntries = getMissingKeys(uniqueEntries, results);
-        Map<EntityLookupEntry, String> missingResults = getIdsStaging(tenant, missingEntries);
+        Map<EntityLookupEntry, String> missingResults = getIdsStaging(tenant, missingEntries, versionMap);
 
         // add to results
         results.putAll(missingResults);
         // populate in-memory cache
-        putInCache(tenantId, missingResults, lookupCache);
+        putInCache(tenantId, missingResults, lookupCache, servingVersion);
 
         return results;
     }
@@ -504,20 +532,23 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     /*
      * Retrieve seed IDs, starting at staging layer.
      */
-    private Map<EntityLookupEntry, String> getIdsStaging(@NotNull Tenant tenant, @NotNull Set<EntityLookupEntry> keys) {
+    private Map<EntityLookupEntry, String> getIdsStaging(@NotNull Tenant tenant, @NotNull Set<EntityLookupEntry> keys,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         if (!isAllocateMode()) {
             // in lookup mode, skip staging layer
-            return getIdsServing(tenant, keys);
+            return getIdsServing(tenant, keys, versionMap);
         }
 
         // now in allocate mode
-        Map<EntityLookupEntry, String> results = getIdsInEnvironment(tenant, STAGING, keys);
+        int stagingVersion = getMatchVersion(STAGING, tenant, versionMap);
+        Map<EntityLookupEntry, String> results = getIdsInEnvironment(tenant, STAGING, keys, versionMap);
         if (results.size() == keys.size()) {
             return results;
         }
 
         // get lookup entries that are not present in staging table and try serving layer
-        Map<EntityLookupEntry, String> missingResults = getIdsServing(tenant, getMissingKeys(keys, results));
+        Map<EntityLookupEntry, String> missingResults = getIdsServing(tenant, getMissingKeys(keys, results),
+                versionMap);
         results.putAll(missingResults);
 
         // NOTE we can publish lookup entry asynchronously because we will not try to update
@@ -529,7 +560,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         missingResults
                 .entrySet()
                 .stream()
-                .map(entry -> Triple.of(tenant, entry.getKey(), entry.getValue()))
+                .map(entry -> new StagingLookupPublishRequest(tenant, entry.getKey(), entry.getValue(), stagingVersion))
                 .forEach(lookupQueue::offer);
 
         return results;
@@ -539,18 +570,20 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Retrieve seed IDs in serving layer
      */
     private Map<EntityLookupEntry, String> getIdsServing(
-            @NotNull Tenant tenant, @NotNull Set<EntityLookupEntry> uniqueEntries) {
-        return getIdsInEnvironment(tenant, EntityMatchEnvironment.SERVING, uniqueEntries);
+            @NotNull Tenant tenant, @NotNull Set<EntityLookupEntry> uniqueEntries,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
+        return getIdsInEnvironment(tenant, EntityMatchEnvironment.SERVING, uniqueEntries, versionMap);
     }
 
     /*
      * Retrieve seed IDs in the given environment and returns a map from lookup entry to seed ID
      */
     private Map<EntityLookupEntry, String> getIdsInEnvironment(
-            @NotNull Tenant tenant, @NotNull EntityMatchEnvironment env, @NotNull Set<EntityLookupEntry> uniqueEntries) {
+            @NotNull Tenant tenant, @NotNull EntityMatchEnvironment env, @NotNull Set<EntityLookupEntry> uniqueEntries,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         List<EntityLookupEntry> entries = new ArrayList<>(uniqueEntries);
         List<String> seedIds = entityLookupEntryService
-                .get(env, tenant, entries);
+                .get(env, tenant, entries, getMatchVersion(env, tenant, versionMap));
         return listToMap(entries, seedIds);
     }
 
@@ -559,30 +592,33 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Start from local cache -> staging table -> serving table and perform synchronization between layers.
      */
     private Map<String, EntityRawSeed> getSeedsInternal(
-            @NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds) {
+            @NotNull Tenant tenant, @NotNull String entity, @NotNull List<String> seedIds,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         // need entity here because seed ID does not contain this info (unlike lookup entry)
         String tenantId = tenant.getId();
         Pair<String, String> prefix = Pair.of(tenantId, entity);
         Set<String> uniqueSeedIds = new HashSet<>(seedIds);
+        // only allow to cache seed in serving
+        int servingVersion = getMatchVersion(SERVING, tenant, versionMap);
         if (isAllocateMode()) {
             // in allocate mode, does not cache seed in-memory because seed will be updated and invalidating cache
             // for multiple processes will be difficult to do.
-            return getSeedsStaging(tenant, entity, uniqueSeedIds);
+            return getSeedsStaging(tenant, entity, uniqueSeedIds, versionMap);
         }
 
         // NOTE in lookup mode
 
         // results from cache
-        Map<String, EntityRawSeed> results =  getPresentCacheValues(prefix, seedIds, seedCache);
+        Map<String, EntityRawSeed> results = getPresentCacheValues(prefix, seedIds, seedCache, servingVersion);
 
         Set<String> missingSeedIds = getMissingKeys(uniqueSeedIds, results);
         // lookup mode goes directly to serving table (skip staging)
-        Map<String, EntityRawSeed> missingResults = getSeedsServing(tenant, entity, missingSeedIds);
+        Map<String, EntityRawSeed> missingResults = getSeedsServing(tenant, entity, missingSeedIds, versionMap);
 
         // add to results
         results.putAll(missingResults);
         // populate in-memory cache
-        putInCache(prefix, missingResults, seedCache);
+        putInCache(prefix, missingResults, seedCache, servingVersion);
 
         return results;
     }
@@ -591,19 +627,21 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Retrieve raw seeds, starting from staging
      */
     private Map<String, EntityRawSeed> getSeedsStaging(
-            @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds) {
+            @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         if (!isAllocateMode()) {
             throw new IllegalStateException("Should not reach here in lookup mode.");
         }
 
         EntityMatchEnvironment env = STAGING;
         // allocate mode
-        Map<String, EntityRawSeed> results = getSeedsInEnvironment(tenant, env, entity, seedIds);
+        Map<String, EntityRawSeed> results = getSeedsInEnvironment(tenant, env, entity, seedIds, versionMap);
         if (results.size() == seedIds.size()) {
             return results;
         }
 
-        Map<String, EntityRawSeed> missingResults = getSeedsServing(tenant, entity, getMissingKeys(seedIds, results));
+        Map<String, EntityRawSeed> missingResults = getSeedsServing(tenant, entity, getMissingKeys(seedIds, results),
+                versionMap);
         results.putAll(missingResults);
 
         // populate staging table
@@ -611,7 +649,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         //      in the seed. therefore we need to make sure the same seed is in staging before we returns anything
         missingResults
                 .values()
-                .forEach(seed -> entityRawSeedService.setIfNotExists(env, tenant, seed, shouldSetTTL(env)));
+                .forEach(seed -> entityRawSeedService.setIfNotExists(env, tenant, seed, shouldSetTTL(env),
+                        getMatchVersion(env, tenant, versionMap)));
 
         return results;
     }
@@ -620,8 +659,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Retrieve raw seeds in serving table
      */
     private Map<String, EntityRawSeed> getSeedsServing(
-            @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds) {
-        return getSeedsInEnvironment(tenant, EntityMatchEnvironment.SERVING, entity, seedIds);
+            @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
+        return getSeedsInEnvironment(tenant, EntityMatchEnvironment.SERVING, entity, seedIds, versionMap);
     }
 
     /*
@@ -629,9 +669,11 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      */
     private Map<String, EntityRawSeed> getSeedsInEnvironment(
             @NotNull Tenant tenant, @NotNull EntityMatchEnvironment env,
-            @NotNull String entity, @NotNull Set<String> uniqueSeedIds) {
+            @NotNull String entity, @NotNull Set<String> uniqueSeedIds,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         List<String> seedIds = new ArrayList<>(uniqueSeedIds);
-        List<EntityRawSeed> seeds = entityRawSeedService.get(env, tenant, entity, seedIds);
+        List<EntityRawSeed> seeds = entityRawSeedService.get(env, tenant, entity, seedIds,
+                getMatchVersion(env, tenant, versionMap));
         return listToMap(seedIds, seeds);
     }
 
@@ -646,29 +688,31 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     /*
      * Populate given results into in-memory cache. Prefix will be added to the key of result as cache key.
      */
-    private <K, T, V> void putInCache(@NotNull T prefix, Map<K, V> results, Cache<Pair<T, K>, V> cache) {
+    private <K, T, V> void putInCache(@NotNull T prefix, Map<K, V> results, Cache<Triple<T, Integer, K>, V> cache,
+            int version) {
         cache.putAll(results
                 .entrySet()
                 .stream()
                 .map(entry -> Triple.of(prefix, entry.getKey(), entry.getValue()))
                 // [ prefix, result.key ] => result.value
-                .collect(Collectors.toMap(triple -> Pair.of(triple.getLeft(), triple.getMiddle()), Triple::getRight)));
+                .collect(Collectors.toMap(triple -> Triple.of(triple.getLeft(), version, triple.getMiddle()),
+                        Triple::getRight)));
     }
 
     /*
      * Build cache key from input list of keys and retrieve all cached values.
      */
     private <K, T, V> Map<K, V> getPresentCacheValues(
-            @NotNull T prefix, List<K> keys, Cache<Pair<T, K>, V> cache) {
-        Set<Pair<T, K>> keysForCache = keys
+            @NotNull T prefix, List<K> keys, Cache<Triple<T, Integer, K>, V> cache, int version) {
+        Set<Triple<T, Integer, K>> keysForCache = keys
                 .stream()
-                .map(entry -> Pair.of(prefix, entry))
+                .map(entry -> Triple.of(prefix, version, entry))
                 .collect(toSet());
         return cache
                 .getAllPresent(keysForCache)
                 .entrySet()
                 .stream()
-                .map(entry -> Pair.of(entry.getKey().getValue(), entry.getValue()))
+                .map(entry -> Pair.of(entry.getKey().getRight(), entry.getValue()))
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
@@ -693,6 +737,18 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      */
     private String newId() {
         return RandomStringUtils.random(ENTITY_ID_LENGTH, ENTITY_ID_CHARS);
+    }
+
+    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, Integer version) {
+        return version == null ? entityMatchVersionService.getCurrentVersion(env, tenant) : version;
+    }
+
+    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
+        if (versionMap == null || versionMap.get(env) == null) {
+            return entityMatchVersionService.getCurrentVersion(env, tenant);
+        }
+        return versionMap.get(env);
     }
 
     /*
@@ -785,7 +841,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Memory used by one raw seed cache and one lookup cache is pretty close.
      * Currently, to make things simpler, use 1 (seed) + # of lookup entries as weight
      */
-    private int getWeight(Pair<Pair<String, String>, String> key, EntityRawSeed val) {
+    private int getWeight(Triple<Pair<String, String>, Integer, String> key, EntityRawSeed val) {
         return 1 + (val == null ? 0 : val.getLookupEntries().size());
     }
 
@@ -878,19 +934,19 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             // TODO add info log for reporting total populated entries (report every X entries populated)
             // TODO tune the polling mechanism
             int total = 0;
-            Map<String, List<Triple<Tenant, EntityLookupEntry, String>>> batches = new HashMap<>();
+            Map<String, List<StagingLookupPublishRequest>> batches = new HashMap<>();
             while (!shouldTerminate) {
                 try {
-                    Triple<Tenant, EntityLookupEntry, String> triple = lookupQueue.poll(
+                    StagingLookupPublishRequest request = lookupQueue.poll(
                             lookupPopulatePollIntervalMillis, TimeUnit.MILLISECONDS);
-                    if (triple != null) {
-                        String tenantId = triple.getLeft().getId(); // should not be null
+                    if (request != null) {
+                        String tenantId = request.tenant.getId(); // should not be null
                         batches.putIfAbsent(tenantId, new ArrayList<>());
-                        batches.get(tenantId).add(triple); // add to local list
+                        batches.get(tenantId).add(request); // add to local list
                         total++;
                     }
                     // triple == null means timeout
-                    if (triple == null || total >= lookupPopulateBatchSize) {
+                    if (request == null || total >= lookupPopulateBatchSize) {
                         populate(batches);
                         // finishes total entries, decrease the same amount in processing entries counter
                         nProcessingLookupEntries.addAndGet(-total);
@@ -915,7 +971,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             }
         }
 
-        private void populate(Map<String, List<Triple<Tenant, EntityLookupEntry, String>>> batches) {
+        private void populate(Map<String, List<StagingLookupPublishRequest>> batches) {
             EntityMatchEnvironment env = STAGING;
             // since allocate mode should only have one tenant, map is probably not required, use map just in case
             batches.values().forEach(list -> {
@@ -924,11 +980,30 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 }
                 List<Pair<EntityLookupEntry, String>> pairs = list
                         .stream()
-                        .map(triple -> Pair.of(triple.getMiddle(), triple.getRight()))
+                        .map(req -> Pair.of(req.entry, req.entityId))
                         .collect(Collectors.toList());
-                Tenant tenant = list.get(0).getLeft(); // tenant in the list should all be the same
-                entityLookupEntryService.set(env, tenant, pairs, shouldSetTTL(env));
+                Tenant tenant = list.get(0).tenant; // tenant in the list should all be the same
+                /*-
+                 * we can assume staging version will also be the same since they are in a single job.
+                 * TODO extend to multiple version later if necessary
+                 */
+                int stagingVersion = list.get(0).stagingVersion;
+                entityLookupEntryService.set(env, tenant, pairs, shouldSetTTL(env), stagingVersion);
             });
+        }
+    }
+
+    private class StagingLookupPublishRequest {
+        final Tenant tenant;
+        final EntityLookupEntry entry;
+        final String entityId;
+        final int stagingVersion;
+
+        StagingLookupPublishRequest(Tenant tenant, EntityLookupEntry entry, String entityId, int stagingVersion) {
+            this.tenant = tenant;
+            this.entry = entry;
+            this.entityId = entityId;
+            this.stagingVersion = stagingVersion;
         }
     }
 }
