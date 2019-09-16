@@ -14,6 +14,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -56,6 +57,9 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
     @Inject
     protected MetadataProxy metadataProxy;
 
+    @Value("${cdl.aps.generation.partition.multiplier}")
+    private int apsPartitionMultiplier;
+
     private DataCollection.Version active;
     private DataCollection.Version inactive;
     private Table periodTable;
@@ -88,6 +92,8 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
         if (MapUtils.isEmpty(productMap)) {
             throw new RuntimeException("There's either no product table or no Analytic products");
         }
+
+        setPartitionMultiplier(apsPartitionMultiplier);
     }
 
     @Override
