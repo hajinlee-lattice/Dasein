@@ -218,7 +218,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         ExtractEmbeddedEntityTableConfig config = new ExtractEmbeddedEntityTableConfig();
         config.setEntity(BusinessEntity.Account.name());
         config.setEntityIdFld(InterfaceName.AccountId.name());
-        config.setSystemIdFlds(Collections.singletonList(InterfaceName.CustomerAccountId.name()));
+        List<String> systemIds = new ArrayList<>();
+        systemIds.add(InterfaceName.CustomerAccountId.name());
+        systemIds.addAll(getSystemIds(BusinessEntity.Account));
+        // SystemIds which don't exist in match target table are ignored in
+        // dataflow
+        config.setSystemIdFlds(systemIds);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
