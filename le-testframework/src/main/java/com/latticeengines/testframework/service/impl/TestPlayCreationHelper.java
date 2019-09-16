@@ -173,17 +173,17 @@ public class TestPlayCreationHelper {
             tenantIdentifier = tenant.getId();
             customerSpace = CustomerSpace.parse(tenantIdentifier).getTenantId();
             cdlTestDataService.populateData(tenantIdentifier, 3);
-            postInitializeTenantCreation(tenantIdentifier, plConfig);
+            postInitializeTenantCreation(tenantIdentifier);
         }
     }
 
     public void useExistingTenant(String tenantName) {
         log.info("Reusing Existing Tenant and Data from Redshift: " + tenantName);
         Tenant tenant = deploymentTestBed.useExistingTenantAsMain(tenantName);
-        postInitializeTenantCreation(tenant.getId(), null);
+        postInitializeTenantCreation(tenant.getId());
     }
 
-    private void postInitializeTenantCreation(String fullTenantId, TestPlaySetupConfig testConfig) {
+    private void postInitializeTenantCreation(String fullTenantId) {
         tenant = tenantEntityMgr.findByTenantId(fullTenantId);
         log.info("Tenant = " + tenant.getId());
         tenantIdentifier = tenant.getId();
