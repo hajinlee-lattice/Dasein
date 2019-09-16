@@ -199,9 +199,14 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
      * publish data for input list of entities from staging to serving
      */
     protected List<EntityPublishStatistics> publishToServing(@NotNull Tenant tenant, BusinessEntity... entities) {
+        return publishToServing(tenant, null, entities);
+    }
+
+    protected List<EntityPublishStatistics> publishToServing(@NotNull Tenant tenant, Integer servingVersion,
+            BusinessEntity... entities) {
         return Arrays.stream(entities) //
                 .map(entity -> entityMatchInternalService.publishEntity(entity.name(), tenant, tenant,
-                        EntityMatchEnvironment.SERVING, true, null)) //
+                        EntityMatchEnvironment.SERVING, true, null, servingVersion)) //
                 .collect(Collectors.toList());
     }
 

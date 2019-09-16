@@ -303,7 +303,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     @Override
     public EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
             @NotNull Tenant destTenant, @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled,
-            Map<EntityMatchEnvironment, Integer> versionMap) {
+            Integer srcStagingVersion, Integer destEnvVersion) {
         sourceTenant = EntityMatchUtils.newStandardizedTenant(sourceTenant);
         destTenant = EntityMatchUtils.newStandardizedTenant(destTenant);
         EntityMatchEnvironment sourceEnv = STAGING;
@@ -322,7 +322,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         do {
             Map<Integer, List<EntityRawSeed>> seeds = entityRawSeedService.scan(sourceEnv, sourceTenant, entity,
-                    getSeedIds, 1000, getMatchVersion(sourceEnv, sourceTenant, versionMap));
+                    getSeedIds, 1000, getMatchVersion(sourceEnv, sourceTenant, srcStagingVersion));
             getSeedIds.clear();
             if (MapUtils.isNotEmpty(seeds)) {
                 for (Map.Entry<Integer, List<EntityRawSeed>> entry : seeds.entrySet()) {
@@ -332,7 +332,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                 List<Pair<EntityLookupEntry, String>> pairs = new ArrayList<>();
                 for (EntityRawSeed seed : scanSeeds) {
                     List<String> seedIds = entityLookupEntryService.get(sourceEnv, sourceTenant,
-                            seed.getLookupEntries(), getMatchVersion(sourceEnv, sourceTenant, versionMap));
+                            seed.getLookupEntries(), getMatchVersion(sourceEnv, sourceTenant, srcStagingVersion));
                     for (int i = 0; i < seedIds.size(); i++) {
                         if (seedIds.get(i) == null) {
                             nNotInStaging++;
@@ -345,9 +345,9 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
                 }
                 entityRawSeedService.batchCreate(destEnv, destTenant, scanSeeds, destTTLEnabled,
-                        getMatchVersion(destEnv, destTenant, versionMap));
+                        getMatchVersion(destEnv, destTenant, destEnvVersion));
                 entityLookupEntryService.set(destEnv, destTenant, pairs, destTTLEnabled,
-                        getMatchVersion(destEnv, destTenant, versionMap));
+                        getMatchVersion(destEnv, destTenant, destEnvVersion));
                 seedCount += scanSeeds.size();
                 lookupCount += pairs.size();
             }
@@ -737,6 +737,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      */
     private String newId() {
         return RandomStringUtils.random(ENTITY_ID_LENGTH, ENTITY_ID_CHARS);
+    }
+
+    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, Integer version) {
+        return version == null ? entityMatchVersionService.getCurrentVersion(env, tenant) : version;
     }
 
     private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,

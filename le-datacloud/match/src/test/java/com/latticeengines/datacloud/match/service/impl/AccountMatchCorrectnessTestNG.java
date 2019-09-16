@@ -188,8 +188,8 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                 String.format("EntityId in next version %d should not be the same as in current version %d",
                         nextVersion, currentVersion));
 
-        // TODO publish to next serving version
-        // publishToServing(tenant, BusinessEntity.Account);
+        // publish to next serving version
+        publishToServing(tenant, nextVersion, BusinessEntity.Account);
         // lookup with current version still the same
         Assert.assertEquals(lookupAccount(tenant, null, true, "acct_1", null, null, null, null, null, null, null),
                 entityId);
@@ -197,12 +197,9 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                 lookupAccount(tenant, currentVersion, true, "acct_1", null, null, null, null, null, null, null),
                 entityId);
         // lookup with next version will get new ID
-        /*-
-         * TODO enable after publish with version is supported
         Assert.assertEquals(
                 lookupAccount(tenant, nextVersion, true, "acct_1", null, null, null, null, null, null, null),
                 entityIdInNextVersion);
-        */
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)

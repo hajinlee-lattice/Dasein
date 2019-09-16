@@ -97,12 +97,15 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     private void commitWithCommitter(Tenant tenant, String entity) {
         log.info("Committing entity {}", entity);
-        EntityPublishStatistics stats = entityMatchCommitter.commit(entity, tenant, null);
+        EntityPublishStatistics stats = entityMatchCommitter.commit(entity, tenant, null, null);
         log.info("Entity {} committed. nSeeds={}, nLookups={}, nlookupNotInStaging={}", entity, stats.getSeedCount(),
                 stats.getLookupCount(), stats.getNotInStagingLookupCount());
         setStats(entity, stats.getSeedCount(), stats.getLookupCount());
     }
 
+    /*
+     * TODO retire this when parallel one is tested enough
+     */
     private void commitEntity(Tenant tenant, String entity) {
         List<String> getSeedIds = new ArrayList<>();
         List<EntityRawSeed> scanSeeds = new ArrayList<>();

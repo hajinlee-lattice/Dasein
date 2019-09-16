@@ -512,7 +512,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         // Test publish without data, expect to finish without exception
         entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant1, STAGING,
-                Boolean.TRUE, null);
+                Boolean.TRUE, null, null);
 
         // Prepare data:
         // tenant 1 with seed & lookup entries to publish, no same lookup
@@ -555,7 +555,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // Prepared data for tenant 1 & 2 in staging, and select tenant1's data
         // to publish to tenant3 in staging
         EntityPublishStatistics stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant3,
-                STAGING, Boolean.TRUE, null);
+                STAGING, Boolean.TRUE, null, null);
         Assert.assertEquals(stats.getSeedCount(), seeds.size());
         // There are 5 possible lookup options in seeds
         Assert.assertEquals(stats.getLookupCount(), 5);
@@ -576,7 +576,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // Prepared data for tenant 1 & 2 in staging and select tenant1's data
         // to publish to tenant1 in serving
         stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant1, tenant1, SERVING,
-                Boolean.TRUE, null);
+                Boolean.TRUE, null, null);
         Assert.assertEquals(stats.getSeedCount(), seeds.size());
         // There are 5 possible lookup options in seeds
         Assert.assertEquals(stats.getLookupCount(), 5);
@@ -596,7 +596,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         // Test seeds having same lookup entries but only lookup entries which
         // actually point to seed are published
         stats = entityMatchInternalService.publishEntity(TEST_ENTITY, tenant2, tenant2, SERVING,
-                Boolean.TRUE, null);
+                Boolean.TRUE, null, null);
         Assert.assertEquals(stats.getSeedCount(), noiseSeeds.size());
         // There are 3 possible lookup options in noiseSeeds
         Assert.assertEquals(stats.getLookupCount(), 3);

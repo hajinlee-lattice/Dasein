@@ -45,7 +45,7 @@ public class PublishEntity extends BaseWorkflowStep<PublishEntityConfiguration> 
 
         // TODO add version support
         EntityPublishStatistics result = entityMatchInternalService.publishEntity(entity, srcTenant, destTenant,
-                destEnv, enableDestTTL, null);
+                destEnv, enableDestTTL, null, null);
         Preconditions.checkNotNull(result);
 
         log.info("Publish entity={} from srcTenant={} to destTenant={},destEnv={},ttl={} successfully", entity,

@@ -195,12 +195,14 @@ public interface EntityMatchInternalService {
      * @param destTTLEnabled:
      *            If null, by default, true if destEnv is STAGING and false if
      *            destEnv is SERVING
-     * @param versionMap
-     *            user specified match version for each
-     *            {@link EntityMatchEnvironment}, current version will be used if no
-     *            version is specified for certain environment
+     * @param srcStagingVersion
+     *            user specified match version for source staging environment. use
+     *            current version if {@code null} is given
+     * @param destEnvVersion
+     *            user specified match version for destination environment. use
+     *            current version if {@code null} is given
      */
     EntityPublishStatistics publishEntity(@NotNull String entity, @NotNull Tenant sourceTenant,
             @NotNull Tenant destTenant, @NotNull EntityMatchEnvironment destEnv, Boolean destTTLEnabled,
-            Map<EntityMatchEnvironment, Integer> versionMap);
+            Integer srcStagingVersion, Integer destEnvVersion);
 }

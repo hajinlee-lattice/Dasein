@@ -44,6 +44,7 @@ public class EntityMatchCommitterTestNG extends DataCloudMatchFunctionalTestNGBa
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
 
+    // TODO add tests on specific serving version
     @Test(groups = "functional", dataProvider = "commit")
     private void testCommit(Integer nSeeds) {
         Tenant tenant = newTestTenant();
@@ -53,7 +54,7 @@ public class EntityMatchCommitterTestNG extends DataCloudMatchFunctionalTestNGBa
         Pair<Integer, Integer> pair = prepareTestData(tenant, entity, nSeeds);
         log.info("Prepared {} seeds and {} lookup entries", pair.getLeft(), pair.getRight());
 
-        EntityPublishStatistics res = entityMatchCommitter.commit(entity, tenant, true);
+        EntityPublishStatistics res = entityMatchCommitter.commit(entity, tenant, true, null);
         Assert.assertNotNull(res);
         // make sure published counts are as expected
         Assert.assertEquals(res.getSeedCount(), (int) pair.getKey(), "Number of seeds should match");
