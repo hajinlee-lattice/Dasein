@@ -3,9 +3,12 @@ package com.latticeengines.cdl.workflow.steps;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.file.DataFileReader;
@@ -30,6 +33,7 @@ import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessor;
 import com.latticeengines.cdl.workflow.steps.export.SegmentExportProcessorFactory;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
@@ -40,8 +44,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
+import com.latticeengines.testframework.exposed.domain.TestPlaySetupConfig;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 @Listeners({GlobalAuthCleanupTestListener.class})
@@ -78,13 +84,19 @@ public class SegmentExportInitStepDeploymentTestNG extends AbstractTestNGSpringC
 
     private CustomerSpace customerSpace;
 
+    @Resource(name = "deploymentTestBed")
+    protected GlobalAuthDeploymentTestBed testBed;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        testPlayCreationHelper.setupTenantAndData();
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder().featureFlags(featureFlagMap).build();
+        testPlayCreationHelper.setupTenantAndData(testPlaySetupConfig);
         testPlayCreationHelper.setupTestSegment();
         testPlayCreationHelper.setupTestRulesBasedModel();
         tenant = testPlayCreationHelper.getTenant();
-
+        testBed = testPlayCreationHelper.getDeploymentTestBed();
         customerSpace = CustomerSpace.parse(tenant.getId());
         testPlayCreationHelper.getDeploymentTestBed().attachProtectedProxy(testMetadataSegmentProxy);
     }
