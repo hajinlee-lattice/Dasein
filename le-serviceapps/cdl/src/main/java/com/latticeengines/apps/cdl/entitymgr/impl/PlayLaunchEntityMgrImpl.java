@@ -49,10 +49,63 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void update(PlayLaunch entity) {
-        PlayLaunch launch = findByLaunchId(entity.getId());
-        entity.setPlayLaunchChannel(launch.getPlayLaunchChannel());
-        playLaunchDao.update(entity);
+    public void update(PlayLaunch playLaunch) {
+        PlayLaunch existingPlayLaunch = findByLaunchId(playLaunch.getId());
+        if (playLaunch.getLaunchState() != null) {
+            existingPlayLaunch.setLaunchState(playLaunch.getLaunchState());
+        }
+        if (playLaunch.getAccountsSelected() != null) {
+            existingPlayLaunch.setAccountsSelected(playLaunch.getAccountsSelected());
+        }
+        if (playLaunch.getAccountsLaunched() != null) {
+            existingPlayLaunch.setAccountsLaunched(playLaunch.getAccountsLaunched());
+        }
+        if (playLaunch.getContactsLaunched() != null) {
+            existingPlayLaunch.setContactsLaunched(playLaunch.getContactsLaunched());
+        }
+        if (playLaunch.getAccountsSuppressed() != null) {
+            existingPlayLaunch.setAccountsSuppressed(playLaunch.getAccountsSuppressed());
+        }
+        if (playLaunch.getAccountsErrored() != null) {
+            existingPlayLaunch.setAccountsErrored(playLaunch.getAccountsErrored());
+        }
+        if (playLaunch.getContactsSelected() != null) {
+            existingPlayLaunch.setContactsSelected(playLaunch.getContactsSelected());
+        }
+        if (playLaunch.getContactsSuppressed() != null) {
+            existingPlayLaunch.setContactsSuppressed(playLaunch.getContactsSuppressed());
+        }
+        if (playLaunch.getContactsErrored() != null) {
+            existingPlayLaunch.setContactsErrored(playLaunch.getContactsErrored());
+        }
+        if (playLaunch.getAccountsDuplicated() != null) {
+            existingPlayLaunch.setAccountsDuplicated(playLaunch.getAccountsDuplicated());
+        }
+        if (playLaunch.getContactsDuplicated() != null) {
+            existingPlayLaunch.setContactsDuplicated(playLaunch.getContactsDuplicated());
+        }
+        if (playLaunch.getAudienceId() != null) {
+            existingPlayLaunch.setAudienceId(playLaunch.getAudienceId());
+        }
+        if (playLaunch.getAudienceName() != null) {
+            existingPlayLaunch.setAudienceName(playLaunch.getAudienceName());
+        }
+        if (playLaunch.getFolderName() != null) {
+            existingPlayLaunch.setFolderName(playLaunch.getFolderName());
+        }
+        if (playLaunch.getExportFile() != null) {
+            existingPlayLaunch.setExportFile(playLaunch.getExportFile());
+        }
+        if (playLaunch.getAudienceSize() != null) {
+            existingPlayLaunch.setAudienceSize(playLaunch.getAudienceSize());
+        }
+        if (playLaunch.getMatchedCount() != null) {
+            existingPlayLaunch.setMatchedCount(playLaunch.getMatchedCount());
+        }
+        existingPlayLaunch.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
+        existingPlayLaunch.setUpdatedBy(playLaunch.getUpdatedBy());
+
+        playLaunchDao.update(existingPlayLaunch);
     }
 
     @Override
