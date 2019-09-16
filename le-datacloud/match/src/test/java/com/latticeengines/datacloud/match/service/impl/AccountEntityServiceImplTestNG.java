@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLoo
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromDuns;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromExternalSystem;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter.fromNameCountry;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 
 import java.util.Collections;
 
@@ -17,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.service.AccountEntityService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -41,6 +43,9 @@ public class AccountEntityServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Inject
     private EntityRawSeedService entityRawSeedService;
 
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
+
     @Test(groups = "functional", dataProvider = "getAccountSeed")
     private void testGetSeed(@NotNull EntityRawSeed currentSeed, @NotNull AccountSeed expectedSeed) throws Exception {
         Tenant tenant = TEST_GET_TENANT;
@@ -50,7 +55,8 @@ public class AccountEntityServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNull(accountEntityService.get(tenant, currentSeed.getId()));
 
         // set to serving and check we get the correct seed
-        entityRawSeedService.setIfNotExists(EntityMatchEnvironment.SERVING, tenant, currentSeed, true);
+        entityRawSeedService.setIfNotExists(SERVING, tenant, currentSeed, true,
+                entityMatchVersionService.getCurrentVersion(SERVING, tenant));
         Thread.sleep(2000L);
 
         AccountSeed seed = accountEntityService.get(tenant, currentSeed.getId());
@@ -62,7 +68,8 @@ public class AccountEntityServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     private void clear(@NotNull Tenant tenant, @NotNull EntityRawSeed seed) {
         for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
-            entityRawSeedService.delete(env, tenant, seed.getEntity(), seed.getId());
+            entityRawSeedService.delete(env, tenant, seed.getEntity(), seed.getId(),
+                    entityMatchVersionService.getCurrentVersion(env, tenant));
         }
     }
 

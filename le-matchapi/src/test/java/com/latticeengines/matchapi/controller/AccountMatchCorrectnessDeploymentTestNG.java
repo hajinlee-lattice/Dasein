@@ -32,6 +32,7 @@ import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -89,6 +90,9 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
     @Inject
     private EntityLookupEntryService entityLookupEntryService;
 
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
+
     // FIXME: Disable all the deployment tests related to Entity Match to tune
     // Decision Graph in QA with PM
     @BeforeClass(groups = "deployment", enabled = false)
@@ -113,7 +117,8 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
     public void test() {
         // instantiate test verifier
         AdvancedAccountMatchTestResultVerifier verifier = new AdvancedAccountMatchTestResultVerifier(tenant,
-                BusinessEntity.Account.name(), entityRawSeedService, entityLookupEntryService);
+                BusinessEntity.Account.name(), entityRawSeedService, entityLookupEntryService,
+                entityMatchVersionService);
 
         MatchInput input = prepareBulkMatchInput("accountmatchinput_builduniverse.avro");
         MatchCommand finalStatus = runAndVerifyBulkMatch(input, POD_ID);

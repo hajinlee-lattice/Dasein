@@ -214,7 +214,8 @@ public class MatchResource {
                 entityMatchVersionService.bumpVersion(request.getDestEnv(), request.getDestTenant());
             }
             EntityPublishStatistics statistics = entityInternalMatchService.publishEntity(request.getEntity(),
-                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), request.getDestTTLEnabled());
+                    request.getSrcTenant(), request.getDestTenant(), request.getDestEnv(), request.getDestTTLEnabled(),
+                    request.getSrcVersion(), request.getDestVersion());
             statistics.setRequest(request);
             return statistics;
         } catch (Exception e) {

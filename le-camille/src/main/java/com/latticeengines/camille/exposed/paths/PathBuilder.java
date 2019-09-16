@@ -241,23 +241,27 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_PA_FLAG_FILE);
     }
 
-    public static Path buildWorkflowThrottlerPodsConfigPath(String podId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    public static Path buildWorkflowThrottlingMasterConfigPath() { // for test only
+        return new Path(PathConstants.PODS, PathConstants.WORKFLOW_THROTTLING_CONFIG_FILE);
     }
 
-    public static Path buildWorkflowThrottlerDivisionConfigPath(String podId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    public static Path buildWorkflowThrottlingPodsConfigPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.WORKFLOW_THROTTLING_CONFIG_FILE);
     }
 
-    public static Path buildWorkflowThrottlerTenantConfigPath(String podId, CustomerSpace customerSpace) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, customerSpace.getContractId(), PathConstants.TENANTS, customerSpace.getTenantId(), PathConstants.SPACES, customerSpace.getSpaceId(), PathConstants.SERVICES, PathConstants.PLS, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    public static Path buildWorkflowThrottlingDivisionConfigPath(String podId, String division) {
+        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division, PathConstants.WORKFLOW_THROTTLING_CONFIG_FILE);
     }
 
-    public static Path buildWorkflowThrottlerGlobalTenantConfigPath(String podId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, PathConstants.WORKFLOW_THROTTLER_CONFIG_FILE);
+    public static Path buildWorkflowThrottlingTenantConfigPath(String podId, CustomerSpace customerSpace) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, customerSpace.getContractId(), PathConstants.TENANTS, customerSpace.getTenantId(), PathConstants.SPACES, customerSpace.getSpaceId(), PathConstants.SERVICES, PathConstants.PLS, PathConstants.WORKFLOW_THROTTLING_CONFIG_FILE);
     }
 
     public static Path buildWorkflowThrottlingFlagPath(String podId, String division) {
         return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division, PathConstants.WORKFLOW_THROTTLING_FLAG);
+    }
+
+    public static Path buildSingleWorkflowThrottlingFlagPath(String podId, String division, String workflowType) {
+        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division, workflowType);
     }
 }

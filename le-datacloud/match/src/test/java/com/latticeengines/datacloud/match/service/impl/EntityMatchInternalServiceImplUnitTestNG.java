@@ -20,9 +20,12 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_1;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_4;
 import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils.LookupEntry.SFDC_5;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +42,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
@@ -74,7 +78,7 @@ public class EntityMatchInternalServiceImplUnitTestNG {
                 service.getExistingLookupPairs(currentState);
         Assert.assertNotNull(existingLookupPairs);
         List<EntityLookupEntry> result = service.mapLookupEntriesToSeed(
-                null, null, existingLookupPairs, seedToAssociate, false, null);
+                STAGING, null, existingLookupPairs, seedToAssociate, false, null, Collections.singletonMap(STAGING, 0));
         Assert.assertNotNull(result);
         Map<EntityLookupEntry, String> expectedMap = expectedLookupEntriesToUpdate
                 .stream()
@@ -254,7 +258,9 @@ public class EntityMatchInternalServiceImplUnitTestNG {
 
     private EntityMatchInternalServiceImpl newService(@NotNull Map<EntityLookupEntry, String> paramMap) {
         EntityLookupEntryService lookupEntryService = Mockito.mock(EntityLookupEntryService.class);
-        Mockito.when(lookupEntryService.setIfEquals(any(), any(), any(), any(), anyBoolean()))
+        EntityMatchVersionService entityMatchVersionService = Mockito.mock(EntityMatchVersionService.class);
+        Mockito.when(entityMatchVersionService.getCurrentVersion(any(), any())).thenReturn(0);
+        Mockito.when(lookupEntryService.setIfEquals(any(), any(), any(), any(), anyBoolean(), anyInt()))
                 .thenAnswer(invocation -> {
                     EntityLookupEntry entry = invocation.getArgument(2);
                     String seedId = invocation.getArgument(3);
@@ -263,13 +269,13 @@ public class EntityMatchInternalServiceImplUnitTestNG {
                     return true;
                 });
         EntityMatchMetricService metricService = Mockito.mock(EntityMatchMetricService.class);
-        return new EntityMatchInternalServiceImpl(lookupEntryService, null, null, null);
+        return new EntityMatchInternalServiceImpl(lookupEntryService, null, null, entityMatchVersionService, null);
     }
 
     /*
      * all dependent services to null
      */
     private EntityMatchInternalServiceImpl newService() {
-        return new EntityMatchInternalServiceImpl(null, null, null, null);
+        return new EntityMatchInternalServiceImpl(null, null, null, null, null);
     }
 }

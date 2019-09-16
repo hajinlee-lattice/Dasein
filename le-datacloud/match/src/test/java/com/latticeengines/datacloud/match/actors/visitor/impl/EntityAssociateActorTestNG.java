@@ -51,6 +51,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
@@ -93,6 +94,9 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
     @Inject
     private EntityMatchConfigurationService entityMatchConfigurationService;
 
+    @Inject
+    private EntityMatchVersionService entityMatchVersionService;
+
     @BeforeClass(groups = "functional")
     private void setup() {
         entityMatchConfigurationService.setIsAllocateMode(true);
@@ -125,7 +129,7 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
                         .stream() //
                         .map(entry -> Pair.of(tuple, LOOKUP_MAP.get(entry)))) //
                 .collect(Collectors.toList());
-        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity, null, lookupResults,
+        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity, null, null, lookupResults,
                 Collections.emptyMap());
         msg.setInputData(request);
 
@@ -166,7 +170,7 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
         Map<String, String> attrsToUpdate = seedToUpdate.getAttributes();
         DataSourceLookupRequest msg = getBaseRequest();
         // use the first lookup entry to make sure it is associated to the target
-        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity, null,
+        EntityAssociationRequest request = new EntityAssociationRequest(tenant, entity, null, null,
                 singletonList(Pair.of(toMatchKeyTuple(currSeed.getLookupEntries().get(0)), entityId)), attrsToUpdate);
         msg.setInputData(request);
 
@@ -184,7 +188,8 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
 
         // get seed object to check attributes
         Map<String, String> finalAttributes = TestEntityMatchUtils.getUpdatedAttributes(currSeed, seedToUpdate);
-        EntityRawSeed seed = entityRawSeedService.get(STAGING, tenant, entity, entityId);
+        EntityRawSeed seed = entityRawSeedService.get(STAGING, tenant, entity, entityId,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
         Assert.assertNotNull(seed,
                 "Updated seed(ID=" + entityId + ",entity=" + entity + ") should exist in tenant=" + tenant.getId());
         Assert.assertEquals(seed.getAttributes(), finalAttributes, "Updated attributes do not match the expected ones");
@@ -237,11 +242,14 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
     }
 
     private void setupUniverse(@NotNull Tenant tenant) {
-        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_1, true);
-        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_2, true);
+        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_1, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
+        entityRawSeedService.setIfNotExists(STAGING, tenant, SEED_2, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
         List<Pair<EntityLookupEntry, String>> lookupList = LOOKUP_MAP.entrySet().stream()
                 .map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-        entityLookupEntryService.set(STAGING, tenant, lookupList, true);
+        entityLookupEntryService.set(STAGING, tenant, lookupList, true,
+                entityMatchVersionService.getCurrentVersion(STAGING, tenant));
     }
 
     /*

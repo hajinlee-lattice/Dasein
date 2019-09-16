@@ -153,7 +153,8 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         }
         saveAccountIdInContactMatch(extraAttributes, traveler);
 
-        return new EntityAssociationRequest(standardizedTenant, entity,
+        Integer servingVersion = traveler.getMatchInput() == null ? null : traveler.getMatchInput().getServingVersion();
+        return new EntityAssociationRequest(standardizedTenant, entity, servingVersion,
                 getPreferredEntityId(traveler.getEntity(), traveler.getEntityMatchKeyRecord()),
                 postProcessLookupResults(traveler, lookupResults), extraAttributes);
     }
@@ -233,7 +234,8 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             @NotNull MatchTraveler traveler, @NotNull MatchKeyTuple tuple) {
         Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
-        return new EntityLookupRequest(standardizedTenant, entity, tuple);
+        Integer servingVersion = traveler.getMatchInput() == null ? null : traveler.getMatchInput().getServingVersion();
+        return new EntityLookupRequest(standardizedTenant, entity, servingVersion, tuple);
     }
 
     @Override

@@ -42,7 +42,8 @@ public final class DataCloudConstants {
     public static final String ENTITY_ATTR_SID = "SID"; // secondary id
     public static final String ENTITY_ATTR_SEED_ID = "SeedId";
     public static final String ENTITY_ATTR_ENTITY = "Entity";
-    public static final String ENTITY_ATTR_VERSION = "Version";
+    public static final String ENTITY_ATTR_VERSION = "Version"; // current version
+    public static final String ENTITY_ATTR_NEXT_VERSION = "NextVersion"; // next version
     public static final String ENTITY_ATTR_EXPIRED_AT = "ExpiredAt";
 
     // AM attribute names

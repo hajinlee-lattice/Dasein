@@ -32,7 +32,6 @@ import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
-import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -51,16 +50,13 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     /* services */
     private final DynamoItemService dynamoItemService;
-    private final EntityMatchVersionService entityMatchVersionService;
     private final EntityMatchConfigurationService entityMatchConfigurationService;
     private final int numStagingShards;
 
     @Inject
     public EntityLookupEntryServiceImpl(
-            DynamoItemService dynamoItemService, EntityMatchVersionService entityMatchVersionService,
-            EntityMatchConfigurationService entityMatchConfigurationService) {
+            DynamoItemService dynamoItemService, EntityMatchConfigurationService entityMatchConfigurationService) {
         this.dynamoItemService = dynamoItemService;
-        this.entityMatchVersionService = entityMatchVersionService;
         this.entityMatchConfigurationService = entityMatchConfigurationService;
         // NOTE this will not be changed at runtime
         numStagingShards = entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
@@ -68,9 +64,9 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     @Override
     public String get(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
+            int version) {
         checkNotNull(env, tenant, lookupEntry);
-        int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
         String tableName = getTableName(env);
         Item item = getRetryTemplate(env).execute(ctx -> dynamoItemService.getItem(tableName, key));
@@ -79,12 +75,12 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     @Override
     public List<String> get(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull List<EntityLookupEntry> lookupEntries,
+            int version) {
         checkNotNull(env, tenant, lookupEntries);
         if (lookupEntries.isEmpty()) {
             return Collections.emptyList();
         }
-        int version = getMatchVersion(env, tenant);
         List<PrimaryKey> keys = lookupEntries
                 .stream()
                 .map(entry -> buildKey(env, tenant, entry, version))
@@ -105,37 +101,36 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
     @Override
     public boolean createIfNotExists(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId, boolean setTTL) {
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId, boolean setTTL, int version) {
         checkNotNull(env, tenant, lookupEntry, seedId);
         PutItemExpressionSpec expressionSpec = new ExpressionSpecBuilder()
                 // use partition key to determine whether item exists
                 .withCondition(attribute_not_exists(ATTR_PARTITION_KEY))
                 .buildForPut();
-        return conditionalSet(env, tenant, lookupEntry, seedId, expressionSpec, setTTL);
+        return conditionalSet(env, tenant, lookupEntry, seedId, expressionSpec, setTTL, version);
     }
 
     @Override
     public boolean setIfEquals(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId, boolean setTTL) {
+            @NotNull EntityLookupEntry lookupEntry, @NotNull String seedId, boolean setTTL, int version) {
         checkNotNull(env, tenant, lookupEntry, seedId);
         PutItemExpressionSpec expressionSpec = new ExpressionSpecBuilder()
                 // use partition key to determine whether item exists
                 .withCondition(attribute_not_exists(ATTR_SEED_ID).or(S(ATTR_SEED_ID).eq(seedId)))
                 .buildForPut();
-        return conditionalSet(env, tenant, lookupEntry, seedId, expressionSpec, setTTL);
+        return conditionalSet(env, tenant, lookupEntry, seedId, expressionSpec, setTTL, version);
     }
 
     @Override
     public void set(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
-            @NotNull List<Pair<EntityLookupEntry, String>> pairs, boolean setTTL) {
+            @NotNull List<Pair<EntityLookupEntry, String>> pairs, boolean setTTL, int version) {
         checkNotNull(env, tenant, pairs);
         if (pairs.isEmpty()) {
             return;
         }
 
-        int version = getMatchVersion(env, tenant);
         long expiredAt = getExpiredAt();
         Map<PrimaryKey, String> seedIdMap = pairs
                 .stream()
@@ -156,9 +151,9 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     @Override
     public boolean delete(
-            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry) {
+            @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
+            int version) {
         checkNotNull(env, tenant, lookupEntry);
-        int version = getMatchVersion(env, tenant);
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
         return getRetryTemplate(env).execute(ctx -> dynamoItemService.deleteItem(getTableName(env), key));
     }
@@ -168,8 +163,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
      */
     private boolean conditionalSet(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
-            @NotNull String seedId, @NotNull PutItemExpressionSpec expressionSpec, boolean setTTL) {
-        int version = getMatchVersion(env, tenant);
+            @NotNull String seedId, @NotNull PutItemExpressionSpec expressionSpec, boolean setTTL, int version) {
         PrimaryKey key = buildKey(env, tenant, lookupEntry, version);
         Item item = new Item()
                 .withPrimaryKey(key)
@@ -216,10 +210,6 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     private long getExpiredAt() {
         return entityMatchConfigurationService.getExpiredAt();
-    }
-
-    private int getMatchVersion(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant) {
-        return entityMatchVersionService.getCurrentVersion(env, tenant);
     }
 
     private String getTableName(EntityMatchEnvironment environment) {

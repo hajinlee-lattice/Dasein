@@ -83,6 +83,9 @@ public class WorkflowJobUtils {
         if (workflowJob.getStatus() != null) {
             job.setJobStatus(JobStatus.fromString(workflowJob.getStatus()));
         }
+        if (JobStatus.ENQUEUED.equals(job.getJobStatus())) {
+            job.setJobStatus(JobStatus.PENDING);
+        }
         job.setName(workflowJob.getType());
 
         ErrorDetails errorDetails = workflowJob.getErrorDetails();

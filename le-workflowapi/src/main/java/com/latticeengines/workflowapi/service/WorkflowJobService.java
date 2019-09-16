@@ -7,7 +7,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.api.WorkflowSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -18,6 +17,8 @@ public interface WorkflowJobService {
     WorkflowJob getWorkflowJobByPid(String customerSpace, Long workflowPid);
 
     WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId);
+
+    WorkflowExecutionId getWorkflowExecutionIdByWorkflowPid(String customerSpace, Long pid);
 
     JobStatus getJobStatusByWorkflowId(String customerSpace, Long workflowId);
 
@@ -80,7 +81,7 @@ public interface WorkflowJobService {
 
     ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowPid);
 
-    WorkflowSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid);
+    ApplicationId enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid);
 
     List<ApplicationId> drainWorkflowQueue(String podid, String division);
 

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.retry.RetryContext;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -69,7 +70,7 @@ public interface EntityMatchMetricService {
      * @param isAllocateMode
      *            true if it is allocateId mode, false if lookup mode
      */
-    void registerLookupCache(Cache<Pair<String, EntityLookupEntry>, String> cache, boolean isAllocateMode);
+    void registerLookupCache(Cache<Triple<String, Integer, EntityLookupEntry>, String> cache, boolean isAllocateMode);
 
     /**
      * Start gathering cache metrics for given cache instance. Noop if the input
@@ -78,5 +79,5 @@ public interface EntityMatchMetricService {
      * @param cache
      *            target entity seed cache
      */
-    void registerSeedCache(Cache<Pair<Pair<String, String>, String>, EntityRawSeed> cache);
+    void registerSeedCache(Cache<Triple<Pair<String, String>, Integer, String>, EntityRawSeed> cache);
 }

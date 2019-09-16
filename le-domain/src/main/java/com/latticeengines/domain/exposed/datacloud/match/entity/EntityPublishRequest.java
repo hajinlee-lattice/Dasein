@@ -16,8 +16,14 @@ public class EntityPublishRequest {
     @JsonProperty("SrcTenant")
     private Tenant srcTenant;
 
+    @JsonProperty("SrcVersion")
+    private Integer srcVersion;
+
     @JsonProperty("DestTenant")
     private Tenant destTenant;
+
+    @JsonProperty("DestVersion")
+    private Integer destVersion;
 
     @JsonProperty("DestEnv")
     private EntityMatchEnvironment destEnv;
@@ -47,12 +53,28 @@ public class EntityPublishRequest {
         this.srcTenant = srcTenant;
     }
 
+    public Integer getSrcVersion() {
+        return srcVersion;
+    }
+
+    public void setSrcVersion(Integer srcVersion) {
+        this.srcVersion = srcVersion;
+    }
+
     public Tenant getDestTenant() {
         return destTenant;
     }
 
     public void setDestTenant(Tenant destTenant) {
         this.destTenant = destTenant;
+    }
+
+    public Integer getDestVersion() {
+        return destVersion;
+    }
+
+    public void setDestVersion(Integer destVersion) {
+        this.destVersion = destVersion;
     }
 
     public EntityMatchEnvironment getDestEnv() {

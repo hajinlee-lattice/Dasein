@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -85,7 +86,8 @@ public class TestEntityMatchService {
             // create lookup entries
             List<Pair<EntityLookupEntry, String>> entries = getLookupEntryPairs(entity, req.matchKeyIdx,
                     req.entityIdIdx, req.systemIdx, lookupData);
-            entityLookupEntryService.set(env, tenant, entries, setTTL);
+            entityLookupEntryService.set(env, tenant, entries, setTTL,
+                    entityMatchVersionService.getCurrentVersion(env, tenant));
             return entries;
         }, setTTL);
     }
@@ -116,7 +118,8 @@ public class TestEntityMatchService {
             // create seeds
             List<EntityRawSeed> seeds = getSeeds(entity, req.matchKeyIdx, req.entityIdIdx, req.latticeAccountIdIdx,
                     req.systemIdx, seedData);
-            boolean created = entityRawSeedService.batchCreate(env, tenant, seeds, setTTL);
+            boolean created = entityRawSeedService.batchCreate(env, tenant, seeds, setTTL,
+                    entityMatchVersionService.getCurrentVersion(env, tenant));
             Preconditions.checkArgument(created);
             return seeds;
         }, setTTL);
@@ -160,11 +163,13 @@ public class TestEntityMatchService {
      * cleanup lookup & seed cache if they are already instantiated
      */
     private void invalidateSeedLookupCache() {
-        Cache<Pair<Pair<String, String>, String>, EntityRawSeed> seedCache = entityMatchInternalService.getSeedCache();
+        Cache<Triple<Pair<String, String>, Integer, String>, EntityRawSeed> seedCache = entityMatchInternalService
+                .getSeedCache();
         if (seedCache != null) {
             seedCache.invalidateAll();
         }
-        Cache<Pair<String, EntityLookupEntry>, String> lookupCache = entityMatchInternalService.getLookupCache();
+        Cache<Triple<String, Integer, EntityLookupEntry>, String> lookupCache = entityMatchInternalService
+                .getLookupCache();
         if (lookupCache != null) {
             lookupCache.invalidateAll();
         }

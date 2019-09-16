@@ -13,6 +13,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLoo
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Type.NAME_PHONE;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,6 +51,8 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
     private static final String TEST_ENTITY = BusinessEntity.Account.name();
     private static final String MAIN_TEST_SEED_ID = "123";
     private static final String OTHER_TEST_SEED_ID = "456";
+    private static final int TEST_VERSION_1 = 1;
+    private static final int TEST_VERSION_2 = 2;
 
     // test lookup entries
     private static final EntityLookupEntry TEST_ENTRY_1 = EntityLookupEntryConverter
@@ -86,45 +89,79 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
                 .thenReturn(RetryUtils.getRetryTemplate(3));
     }
 
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testVersion() {
+        Tenant tenant = newTestTenant();
+        EntityLookupEntry entry = TEST_ENTRY_1;
+        String id = UUID.randomUUID().toString();
+        EntityMatchEnvironment env = EntityMatchEnvironment.SERVING;
+
+        // set with specific version
+        entityLookupEntryService.set(env, tenant, Collections.singletonList(Pair.of(entry, id)), true, TEST_VERSION_1);
+
+        // should be able to retrieve with the same version
+        String result = entityLookupEntryService.get(env, tenant, entry, TEST_VERSION_1);
+        Assert.assertEquals(result, id);
+        List<String> ids = entityLookupEntryService.get(env, tenant, Collections.singletonList(entry), TEST_VERSION_1);
+        Assert.assertNotNull(ids);
+        Assert.assertEquals(ids.size(), 1);
+        Assert.assertEquals(ids.get(0), id);
+
+        // should not be able to get with another version
+        result = entityLookupEntryService.get(env, tenant, entry, TEST_VERSION_2);
+        Assert.assertNull(result);
+
+        // can set when entry is not mapped to anything
+        boolean isSet = entityLookupEntryService.setIfEquals(env, tenant, entry, id, true, TEST_VERSION_2);
+        Assert.assertTrue(isSet);
+
+        // should be able to get id with another version now
+        result = entityLookupEntryService.get(env, tenant, entry, TEST_VERSION_2);
+        Assert.assertEquals(result, id);
+    }
+
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testCreateIfNotExists(EntityMatchEnvironment env) {
         Tenant tenant = newTestTenant();
+        int version = TEST_VERSION_1;
         // since no current entry, entry is created successfully
         Assert.assertTrue(entityLookupEntryService
-                .createIfNotExists(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
+                .createIfNotExists(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true, version));
         Assert.assertFalse(entityLookupEntryService
-                .createIfNotExists(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
+                .createIfNotExists(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true, version));
 
         // check the seed ID is set correctly
-        Assert.assertEquals(entityLookupEntryService.get(env, tenant, TEST_ENTRY_1), MAIN_TEST_SEED_ID);
+        Assert.assertEquals(entityLookupEntryService.get(env, tenant, TEST_ENTRY_1, version), MAIN_TEST_SEED_ID);
     }
 
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testSetIfEquals(EntityMatchEnvironment env) {
         Tenant tenant = newTestTenant();
+        int version = TEST_VERSION_1;
         // since no current entry, entry is created successfully
         Assert.assertTrue(entityLookupEntryService
-                .setIfEquals(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
+                .setIfEquals(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true, version));
         // check the seed ID is set correctly
-        Assert.assertEquals(entityLookupEntryService.get(env, tenant, TEST_ENTRY_1), MAIN_TEST_SEED_ID);
+        Assert.assertEquals(entityLookupEntryService.get(env, tenant, TEST_ENTRY_1, version), MAIN_TEST_SEED_ID);
         // set still succeeded since seed ID in the input is the same as mapped by the existing entry
         Assert.assertTrue(entityLookupEntryService
-                .setIfEquals(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
+                .setIfEquals(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true, version));
         // fail to set if the seed ID is different
         Assert.assertFalse(entityLookupEntryService
-                .setIfEquals(env, tenant, TEST_ENTRY_1, OTHER_TEST_SEED_ID, true));
+                .setIfEquals(env, tenant, TEST_ENTRY_1, OTHER_TEST_SEED_ID, true, version));
     }
 
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testBatchGet(EntityMatchEnvironment env) {
         Tenant tenant = newTestTenant();
+        int version = TEST_VERSION_1;
         // create entries for batch get
         Assert.assertTrue(entityLookupEntryService
-                .createIfNotExists(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true));
+                .createIfNotExists(env, tenant, TEST_ENTRY_1, MAIN_TEST_SEED_ID, true, version));
         Assert.assertTrue(entityLookupEntryService
-                .createIfNotExists(env, tenant, TEST_ENTRY_4, OTHER_TEST_SEED_ID, true));
+                .createIfNotExists(env, tenant, TEST_ENTRY_4, OTHER_TEST_SEED_ID, true, version));
 
-        List<String> seedIds = entityLookupEntryService.get(env, tenant, TEST_ENTRIES);
+        List<String> seedIds = entityLookupEntryService.get(env, tenant, TEST_ENTRIES, version);
         Assert.assertNotNull(seedIds);
         // result list size should equals input list size
         Assert.assertEquals(seedIds.size(), TEST_ENTRIES.size());
@@ -139,7 +176,8 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testBatchSet(EntityMatchEnvironment env) throws Exception {
         Tenant tenant = newTestTenant();
-        List<String> seedIds = entityLookupEntryService.get(env, tenant, TEST_ENTRIES);
+        int version = TEST_VERSION_1;
+        List<String> seedIds = entityLookupEntryService.get(env, tenant, TEST_ENTRIES, version);
         Assert.assertNotNull(seedIds);
         Assert.assertEquals(seedIds.size(), TEST_ENTRIES.size());
         seedIds.forEach(Assert::assertNull);
@@ -148,12 +186,12 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
                 .stream()
                 .map(entry -> Pair.of(entry, MAIN_TEST_SEED_ID))
                 .collect(Collectors.toList());
-        entityLookupEntryService.set(env, tenant, pairs, true);
+        entityLookupEntryService.set(env, tenant, pairs, true, version);
 
         // wait a bit for eventual consistency
         Thread.sleep(500);
 
-        seedIds = entityLookupEntryService.get(env, tenant, TEST_ENTRIES);
+        seedIds = entityLookupEntryService.get(env, tenant, TEST_ENTRIES, version);
 
         Assert.assertNotNull(seedIds);
         Assert.assertEquals(seedIds.size(), TEST_ENTRIES.size());
@@ -168,16 +206,18 @@ public class EntityLookupEntryServiceImplTestNG extends DataCloudMatchFunctional
         String entity = BusinessEntity.Account.name();
         EntityLookupEntry entry = new EntityLookupEntry(type, entity, keys, values);
         Tenant tenant = newTestTenant();
+        int version = TEST_VERSION_1;
 
         for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
-            entityLookupEntryService.delete(env, tenant, entry);
+            entityLookupEntryService.delete(env, tenant, entry, version);
 
-            String id = entityLookupEntryService.get(env, tenant, entry);
+            String id = entityLookupEntryService.get(env, tenant, entry, version);
             Assert.assertNull(id, String.format("EntityId should be null before inserting %s", prettyToString(entry)));
 
-            entityLookupEntryService.set(env, tenant, ImmutableList.of(Pair.of(entry, MAIN_TEST_SEED_ID)), true);
+            entityLookupEntryService.set(env, tenant, ImmutableList.of(Pair.of(entry, MAIN_TEST_SEED_ID)), true,
+                    version);
 
-            id = entityLookupEntryService.get(env, tenant, entry);
+            id = entityLookupEntryService.get(env, tenant, entry, version);
             Assert.assertEquals(id, MAIN_TEST_SEED_ID,
                     String.format("%s map to the wrong entityId", prettyToString(entry)));
         }

@@ -816,7 +816,7 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private Pair<MatchInput, MatchOutput> matchContactWithDefaultFields(Tenant tenant, String[] data,
             Map<String, EntityKeyMap> entityKeyMapMaps) {
         String entity = BusinessEntity.Contact.name();
-        MatchInput input = prepareEntityMatchInput(tenant, entity, entityKeyMapMaps);
+        MatchInput input = prepareEntityMatchInput(tenant, entity, entityKeyMapMaps, null);
         input.setFields(Arrays.asList(DEFAULT_FIELDS));
         input.setData(Collections.singletonList(Arrays.asList(data)));
         entityMatchConfigurationService.setIsAllocateMode(true);
