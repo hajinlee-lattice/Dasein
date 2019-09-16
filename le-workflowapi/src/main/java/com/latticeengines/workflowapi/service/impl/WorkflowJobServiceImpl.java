@@ -123,6 +123,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
+    public WorkflowExecutionId getWorkflowExecutionIdByWorkflowPid(String customerSpace, Long pid) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(pid);
+        if (workflowJob == null) {
+            return null;
+        }
+        return workflowJob.getAsWorkflowId();
+    }
+
+    @Override
+    @WithCustomerSpace
     public JobStatus getJobStatusByWorkflowId(String customerSpace, Long workflowId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
         if (workflowJob == null) {
@@ -512,7 +522,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                                         Long workflowPid) {
         String podid = CamilleEnvironment.getPodId();
         String division = CamilleEnvironment.getDivision();
-        if (workflowThrottlingService.isWorkflowThrottlingEnabled(podid, division) && workflowThrottlingService.isWorkflowThrottlingRolledOut(podid, division, workflowConfiguration.getWorkflowName())) {
+        if (workflowThrottlingService.shouldEnqueueWorkflow(podid, division, workflowConfiguration.getWorkflowName())) {
             return enqueueWorkflow(customerSpace, workflowConfiguration, workflowPid);
         }
         return workflowContainerService.submitWorkflow(workflowConfiguration, workflowPid);

@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -110,18 +110,19 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
             c.set(flagPath1, new Document("false"));
             c.set(flagPath2, new Document("true"));
             c.set(workflowFlagPath, new Document("true"));
-
-            Path masterConfigPath = PathBuilder.buildWorkflowThrottlingMasterConfigPath();
-            if (c.exists(masterConfigPath)) {
-                originMasterConfigStr = c.get(masterConfigPath).getData();
-                c.delete(masterConfigPath);
-            }
         } catch (Exception e) {
             log.error("Error encountered while setting up zk data.", e);
         }
         TEST_TENANT_ID = CustomerSpace.parse(tenant.getId()).toString();
         populateFakeWorkflows();
         populateTestConfigToZK();
+        String testMasterConfigStr = null;
+        try {
+            testMasterConfigStr = c.get(PathBuilder.buildWorkflowThrottlingMasterConfigPath()).getData();
+        } catch (Exception e) {
+            log.error("Error encountered while reading test master config string from zk.", e);
+        }
+        ReflectionTestUtils.setField(workflowThrottlingService, "masterConfigStr", testMasterConfigStr);
     }
 
     @AfterClass(groups = "functional")
@@ -129,11 +130,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         Camille c = CamilleEnvironment.getCamille();
         try {
             c.delete(PathBuilder.buildPodPath(TEST_PODID));
-            Path masterConfigPath = PathBuilder.buildWorkflowThrottlingMasterConfigPath();
-            c.delete(masterConfigPath);
-            if (StringUtils.isNotEmpty(originMasterConfigStr)) {
-                c.create(masterConfigPath, new Document(originMasterConfigStr), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            }
+            c.delete(PathBuilder.buildWorkflowThrottlingMasterConfigPath());
         } catch (Exception e) {
             log.error("Error encountered while tearing down zk data.", e);
         }
@@ -200,7 +197,8 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
     @Test(groups = "functional", dataProvider = "singleWorkflowFlagProvider")
     public void testSingleWorkflowFlag(String podid, String division, String workflowType, boolean rolledout) {
-        Assert.assertEquals(workflowThrottlingService.isWorkflowThrottlingRolledOut(podid, division, workflowType), rolledout);
+        Assert.assertEquals(workflowThrottlingService.isWorkflowThrottlingRolledOut(podid, division, workflowType),
+                rolledout);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetStatus", dataProvider = "throttlingResultProvider")

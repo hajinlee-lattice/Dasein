@@ -262,8 +262,8 @@ public class WorkflowResource {
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
     public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId,
             @RequestParam(required = false) String customerSpace) {
-        if (applicationId.startsWith(FakeApplicationId.fakedAppIdPrefix)) {
-            return null;
+        if (FakeApplicationId.isFakeApplicationId(applicationId)) {
+            return workflowJobService.getWorkflowExecutionIdByWorkflowPid(customerSpace, FakeApplicationId.toWorkflowJobPid(applicationId));
         }
         return workflowJobService.getWorkflowExecutionIdByApplicationId(customerSpace, applicationId);
     }
@@ -272,8 +272,8 @@ public class WorkflowResource {
     @ApiOperation(value = "Get status about a submitted workflow from YARN applicationId")
     public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId,
             @RequestParam(required = false) String customerSpace) {
-        if (applicationId.startsWith(FakeApplicationId.fakedAppIdPrefix)) {
-            return null;
+        if (FakeApplicationId.isFakeApplicationId(applicationId)) {
+            return workflowJobService.getJobByWorkflowPid(customerSpace, FakeApplicationId.toWorkflowJobPid(applicationId), true);
         }
         return workflowJobService.getJobByApplicationId(customerSpace, applicationId, true);
     }

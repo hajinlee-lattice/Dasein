@@ -241,7 +241,7 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_PA_FLAG_FILE);
     }
 
-    public static Path buildWorkflowThrottlingMasterConfigPath() {
+    public static Path buildWorkflowThrottlingMasterConfigPath() { // for test only
         return new Path(PathConstants.PODS, PathConstants.WORKFLOW_THROTTLING_CONFIG_FILE);
     }
 

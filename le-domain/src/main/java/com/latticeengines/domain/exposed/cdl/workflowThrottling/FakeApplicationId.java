@@ -3,16 +3,16 @@ package com.latticeengines.domain.exposed.cdl.workflowThrottling;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 public class FakeApplicationId extends ApplicationId {
-    public static final String fakedAppIdPrefix = "application_enqueued_";
-    public static final int workflowJobPidIndex = 21;
+    private static final String FAKE_APP_ID_PREFIX = "application_enqueued_";
+    private static final int WORKFLOW_PID_INDEX = FAKE_APP_ID_PREFIX.length();
     private String appId;
 
     public FakeApplicationId(String workflowJobPid) {
-        appId = fakedAppIdPrefix + workflowJobPid;
+        appId = FAKE_APP_ID_PREFIX + workflowJobPid;
     }
 
     public FakeApplicationId(Long workflowJobPid) {
-        appId = fakedAppIdPrefix + workflowJobPid;
+        appId = FAKE_APP_ID_PREFIX + workflowJobPid;
     }
 
     @Override
@@ -41,12 +41,16 @@ public class FakeApplicationId extends ApplicationId {
         return new FakeApplicationId(workflowJobPid);
     }
 
-    public Long toWorkflowJobPid() {
-        return Long.parseLong(appId.substring(workflowJobPidIndex));
-    }
-
     @Override
     public String toString() {
         return appId;
+    }
+
+    public static Long toWorkflowJobPid(String appId) {
+        return Long.parseLong(appId.substring(WORKFLOW_PID_INDEX));
+    }
+
+    public static boolean isFakeApplicationId(String appId) {
+        return appId.startsWith(FAKE_APP_ID_PREFIX);
     }
 }

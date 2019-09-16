@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -65,14 +66,16 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     @Inject
     private EMRCacheService emrCacheService;
 
+    @Value("${workflowapi.throttling.masterconfig}")
+    private String masterConfigStr;
+
     @Override
     public WorkflowThrottlingConfiguration getThrottlingConfig(String podid, String division,
             Set<String> customerSpaces) {
         Camille camille = CamilleEnvironment.getCamille();
         WorkflowThrottlingConfiguration config = new WorkflowThrottlingConfiguration();
         try {
-            Map<String, Map<String, Map<JobStatus, Integer>>> props = JsonUtils.deserializeByTypeRef(
-                    camille.get(PathBuilder.buildWorkflowThrottlingMasterConfigPath()).getData(),
+            Map<String, Map<String, Map<JobStatus, Integer>>> props = JsonUtils.deserializeByTypeRef(masterConfigStr,
                     clusterPropertyFileRef);
             config.setGlobalLimit(props.get(GLOBALCONFIG));
             Map<String, Map<String, Map<JobStatus, Integer>>> tenantLimit = new HashMap<>();
@@ -157,6 +160,11 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     }
 
     @Override
+    public boolean shouldEnqueueWorkflow(String podid, String division, String workflowType) {
+        return isWorkflowThrottlingEnabled(podid, division) && isWorkflowThrottlingRolledOut(podid, division, workflowType);
+    }
+
+    @Override
     public WorkflowThrottlingSystemStatus constructSystemStatus(String podid, String division) {
         Tenant originTenant = MultiTenantContext.getTenant();
         WorkflowThrottlingSystemStatus status = new WorkflowThrottlingSystemStatus();
@@ -213,11 +221,13 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             Map<JobStatus, Integer> tenantLimitMap = WorkflowThrottlingUtils.getTenantMap(config.getTenantLimit(),
                     customerSpace, workflowType);
             if (enqueuedWorkflowJobs.size() >= globalLimitMap.get(JobStatus.ENQUEUED)) {
-                log.error("Global queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType, customerSpace, globalLimitMap.get(JobStatus.ENQUEUED));
+                log.error("Global queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType,
+                        customerSpace, globalLimitMap.get(JobStatus.ENQUEUED));
                 return true;
             }
             if (tenantEnqueuedWorkflowJobs.size() >= tenantLimitMap.get(JobStatus.ENQUEUED)) {
-                log.error("Tenant queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType, customerSpace, tenantLimitMap.get(JobStatus.ENQUEUED));
+                log.error("Tenant queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType,
+                        customerSpace, tenantLimitMap.get(JobStatus.ENQUEUED));
                 return true;
             }
             return false;

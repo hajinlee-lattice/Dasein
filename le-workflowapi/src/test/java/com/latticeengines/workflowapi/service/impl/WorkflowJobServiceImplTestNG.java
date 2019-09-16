@@ -178,14 +178,13 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @Test(groups = "functional", dataProvider = "enqueueWorkflowDataProvider")
     public void testEnqueueWorkflow(boolean expectBackPressure) {
         when(workflowThrottlingService.queueLimitReached(any(), any(), any(), any())).thenReturn(expectBackPressure);
-        when(workflowThrottlingService.isWorkflowThrottlingEnabled(any(), any())).thenReturn(true);
-        when(workflowThrottlingService.isWorkflowThrottlingRolledOut(any(), any(), any())).thenReturn(true);
+        when(workflowThrottlingService.shouldEnqueueWorkflow(any(), any(), any())).thenReturn(true);
         if (expectBackPressure) {
             Assert.assertThrows(IllegalStateException.class, () -> workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null));
         } else {
             ApplicationId workflowSubmission = workflowJobService.enqueueWorkflow(tenant.getId(), shouldEnqueuedWorkflowConfig, null);
             Assert.assertNotNull(workflowSubmission);
-            long workflowJobPid = Long.parseLong(workflowSubmission.toString().substring(FakeApplicationId.workflowJobPidIndex));
+            long workflowJobPid = FakeApplicationId.toWorkflowJobPid(workflowSubmission.toString());
             shouldEnqueuedWorkflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowJobPid);
             Assert.assertNotNull(shouldEnqueuedWorkflowJob);
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getType(), shouldEnqueuedWorkflowConfig.getWorkflowName());
@@ -196,8 +195,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
             Assert.assertNull(shouldEnqueuedWorkflowJob.getEmrClusterId());
             workflowJobEntityMgr.delete(shouldEnqueuedWorkflowJob);
         }
-        when(workflowThrottlingService.isWorkflowThrottlingEnabled(any(), any())).thenReturn(false);
-        when(workflowThrottlingService.isWorkflowThrottlingRolledOut(any(), any(), any())).thenReturn(false);
+        when(workflowThrottlingService.shouldEnqueueWorkflow(any(), any(), any())).thenReturn(false);
     }
 
     @DataProvider(name = "enqueueWorkflowDataProvider")
