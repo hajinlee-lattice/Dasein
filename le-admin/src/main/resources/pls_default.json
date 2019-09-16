@@ -19,6 +19,6 @@
         { "Node": "Contact", "Data": 500}
       ]
     },
-    {"Node": "workflowThrottlerConfig", "Data": "{}"}
+    {"Node": "workflowThrottlerConfig", "Data": ""}
   ]
 }
