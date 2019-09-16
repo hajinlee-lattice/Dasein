@@ -8,7 +8,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.MRJobConfig;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
@@ -26,8 +25,6 @@ public class CSVImportJob extends MRJobCustomizationBase {
 
     public static final String CSV_IMPORT_JOB_TYPE = "eaiCSVImportJob";
 
-    public static final String MAPRED_MAP_TASKS_PROPERTY = "mapreduce.job.maps";
-
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     public CSVImportJob(Configuration config) {
@@ -35,7 +32,7 @@ public class CSVImportJob extends MRJobCustomizationBase {
     }
 
     public CSVImportJob(Configuration config, //
-            MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+                        MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
         this(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
@@ -53,10 +50,8 @@ public class CSVImportJob extends MRJobCustomizationBase {
 
             String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
-
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());
-            TextInputFormat.addInputPath(mrJob, new Path(inputDir));
-
+            CSVImportLineInputFormat.addInputPath(mrJob, new Path(inputDir));
             String tableSchema = properties.getProperty("eai.table.schema");
             config.set("eai.table.schema", tableSchema);
 
@@ -75,17 +70,21 @@ public class CSVImportJob extends MRJobCustomizationBase {
             config.set(MapReduceProperty.OUTPUT.name(), outputDir);
             MapFileOutputFormat.setOutputPath(mrJob, new Path(outputDir));
 
-            mrJob.setInputFormatClass(TextInputFormat.class);
+            mrJob.setInputFormatClass(CSVImportLineInputFormat.class);
             mrJob.setOutputFormatClass(NullOutputFormat.class);
             mrJob.setMapperClass(CSVImportMapper.class);
-            mrJob.setNumReduceTasks(0);
-
-            TextInputFormat.setMinInputSplitSize(mrJob, 100000000000L);
-
+            config.set("mapred.reduce.slowstart.completed.maps", "1");
+            mrJob.setReducerClass(CSVImportReducer.class);
+            mrJob.setNumReduceTasks(1);
+            config.set("mapreduce.job.running.map.limit",
+                    properties.getProperty(CSVFileImportProperty.CSV_FILE_NUM_MAPPERS.name(), "1"));
+            config.set("mapreduce.tasktracker.map.tasks.maximum",
+                    properties.getProperty(CSVFileImportProperty.CSV_FILE_NUM_MAPPERS.name(), "1"));
             MRJobUtil.setLocalizedResources(mrJob, properties);
-
             String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
             config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
+                    + " -DLOG4J_LE_LEVEL=INFO");
+            config.set(MRJobConfig.REDUCE_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
                     + " -DLOG4J_LE_LEVEL=INFO");
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE

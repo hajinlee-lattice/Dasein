@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -17,6 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -41,7 +43,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -75,7 +79,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVImportMapper.class);
 
-    private static final String ERROR_FILE = "error.csv";
+    private String ERROR_FILE;
+
+    private static final String UNDERSCORE = "_";
 
     private static final String NULL = "null";
 
@@ -134,6 +140,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private RedisTemplate<String, Object> redisTemplate;
 
+    private FileSplit fileSplit;
+
+    private boolean hasAvroRecord = false;
+
+    private int fileIndex;
+
+    private long csvFileBlockSize;
+
+    private String randomId = UUID.randomUUID().toString();
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
@@ -141,32 +157,72 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         conf = context.getConfiguration();
         schema = AvroJob.getOutputKeySchema(conf);
         LOG.info("schema is: " + schema.toString());
-
+        fileSplit = getInputSplit(context);
+        LOG.info("split file is " + fileSplit);
+        csvFileBlockSize = conf.getLong(CSVFileImportProperty.CSV_FILE_BLOCK_SIZE.name(), 1073741824l);
+        fileIndex = getFileIndex();
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         LOG.info("table is:" + table);
-
         LOG.info("Deduplicate enable = false");
-
         idColumnName = conf.get("eai.id.column.name");
         LOG.info("Import file id column is: " + idColumnName);
-
         if (StringUtils.isEmpty(idColumnName)) {
             LOG.info("The id column does not exist.");
         }
-
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
-
-        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
-                LECSVFormat.format.withHeader(ImportProperty.ERROR_HEADER));
-
-        if (StringUtils.isEmpty(table.getName())) {
-            avroFileName = "file.avro";
+        ERROR_FILE = getFileName("error", ".csv");
+        if (csvFileBlockSize == -1) {
+            csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
+                    LECSVFormat.format.withHeader(ImportProperty.ERROR_HEADER));
         } else {
-            avroFileName = table.getName() + ".avro";
+            csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
+                    LECSVFormat.format.withHeader((String[]) null));
         }
-
+        if (StringUtils.isEmpty(table.getName())) {
+            avroFileName = getFileName("file", ".avro");
+        } else {
+            avroFileName = getFileName(table.getName(), ".avro");
+        }
         avroRecord = new GenericData.Record(schema);
+    }
+
+    private String getFileName(String fileName, String fileType) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(fileName);
+        stringBuffer.append(UNDERSCORE);
+        stringBuffer.append(fileIndex);
+        stringBuffer.append(UNDERSCORE);
+        stringBuffer.append(randomId);
+        stringBuffer.append(fileType);
+        return stringBuffer.toString();
+    }
+
+    private int getFileIndex() {
+        // if csvFileBlockSize equals to -1, means there is only one split file for import job
+        if (csvFileBlockSize == -1) {
+            return 0;
+        }
+        return (int) ((fileSplit.getStart()) / csvFileBlockSize);
+    }
+
+    private FileSplit getInputSplit(Context context) {
+        InputSplit inputSplit = context.getInputSplit();
+        Class<? extends InputSplit> splitClass = inputSplit.getClass();
+        FileSplit fileSplit = null;
+        if (splitClass.equals(FileSplit.class)) {
+            fileSplit = (FileSplit) inputSplit;
+        } else if (splitClass.getName().equals("org.apache.hadoop.mapreduce.lib.input.TaggedInputSplit")) {
+            try {
+                // when there is multi file input, we need to reflect to get the file input
+                Method getInputSplitMethod = splitClass.getDeclaredMethod("getInputSplit");
+                getInputSplitMethod.setAccessible(true);
+                fileSplit = (FileSplit) getInputSplitMethod.invoke(inputSplit);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+        return fileSplit;
     }
 
     @Override
@@ -181,26 +237,42 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         if (csvFileName == null) {
             throw new RuntimeException("Not able to find csv file from localized files");
         }
-
         String[] headers;
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
             CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
             try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
-                            new BOMInputStream(new FileInputStream(csvFileName), false, ByteOrderMark.UTF_8,
-                                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
-                                    ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
-                headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[] {});
+                    new BOMInputStream(new FileInputStream(csvFileName), false, ByteOrderMark.UTF_8,
+                            ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                            ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
+                headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[]{});
                 Iterator<CSVRecord> iter = parser.iterator();
+                CSVRecord csvRecord = iter.next();
+                if (fileSplit.getStart() > 0) {
+                    // need to handle line which is not the real start of the line, sometimes csv one record can
+                    // contain multi lines.
+                    while (fileSplit.getStart() > csvRecord.getCharacterPosition()) {
+                        lineNum++;
+                        csvRecord = iter.next();
+                    }
+                }
+                long endPosition = fileSplit.getStart() + fileSplit.getLength();
+                if (endPosition < csvRecord.getCharacterPosition()) {
+                    // the split size is less than one record length, so just skip this mapper.
+                    LOG.warn(String.format("Skip file split start: %s, length: %s, since split size is less than" +
+                            " one SCV record size.", fileSplit.getStart(), fileSplit.getLength()));
+                    return;
+                }
                 while (true) {
                     // capture IO exception produced during dealing with line
                     try {
                         beforeEachRecord();
-                        GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), iter.next());
+                        GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), csvRecord);
                         if (errorMap.size() == 0 && duplicateMap.size() == 0) {
                             dataFileWriter.append(currentAvroRecord);
                             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
+                            hasAvroRecord = true;
                         } else {
                             if (errorMap.size() > 0) {
                                 handleError(context, lineNum);
@@ -210,16 +282,23 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             }
                         }
                         lineNum++;
+                        csvRecord = iter.next();
+                        if (endPosition < csvRecord.getCharacterPosition()) {
+                            // reach the end of split file
+                            LOG.warn(String.format("Reach the end of split file start: %s, length: %s.",
+                                    fileSplit.getStart(), fileSplit.getLength()));
+                            break;
+                        }
                     } catch (IllegalStateException ex) {
                         LOG.warn(ex.getMessage(), ex);
                         rowError = true;
                         errorMap.put(String.valueOf(lineNum),
-                                String.format("CSV parser can't parse this line due to %s", ex.getMessage())
-                                        .toString());
+                                String.format("CSV parser can't parse this line due to %s", ex.getMessage()));
                         handleError(context, lineNum);
                     } catch (NoSuchElementException e) {
                         break;
                     }
+
                 }
             } catch (Exception e) {
                 LOG.warn(e.getMessage(), e);
@@ -250,7 +329,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         id = id != null ? id : "";
         csvFilePrinter.printRecord(lineNumber, id, errorMap.values().toString());
         csvFilePrinter.flush();
-
         errorMap.clear();
     }
 
@@ -260,7 +338,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         id = id != null ? id : "";
         csvFilePrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
         csvFilePrinter.flush();
-
         duplicateMap.clear();
     }
 
@@ -302,7 +379,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
                 try {
                     if (StringUtils.isNotEmpty(csvFieldValue) && csvFieldValue.length() > MAX_STRING_LENGTH) {
-                        throw new RuntimeException(String.format( "%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
+                        throw new RuntimeException(String.format("%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
                     }
                     validateAttribute(csvRecord, attr, csvColumnName);
                     if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
@@ -381,79 +458,79 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 fieldCsvValue = fieldCsvValue.trim();
             }
             switch (avroType) {
-            case DOUBLE:
-                return new Double(parseStringToNumber(fieldCsvValue).doubleValue());
-            case FLOAT:
-                return new Float(parseStringToNumber(fieldCsvValue).floatValue());
-            case INT:
-                return new Integer(parseStringToNumber(fieldCsvValue).intValue());
-            case LONG:
-                if (isEmptyString(fieldCsvValue)) {
-                    return null;
-                }
-                if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
-                    errorMsgAvroType = "DATE";
-                    // DP-11078 Add Time Zone Validation to Import Workflow
-                    //　timezone is ISO 8601, value should be in T&Z format
-                    checkTimeZoneValidity(fieldCsvValue, attr.getTimezone());
-                    Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
-                            attr.getTimeFormatString(), attr.getTimezone());
-                    if (timestamp < 0) {
-                        // In order to support the requirements of:
-                        //   https://solutions.lattice-engines.com/browse/PLS-12846  and
-                        //   https://solutions.lattice-engines.com/browse/DP-9653
-                        // We change the behavior of negative timestamps from throwing an exception and failing to
-                        // parse the input CSV row to logging a warning and setting the timestamp value to zero.
-
-                        // Comment out warnings because log files are too large.
-                        //LOG.warn(String.format(
-                        //        "Converting date/time %s to timestamp generated negative value %d for column %s",
-                        //        fieldCsvValue, timestamp, attr.getDisplayName()));
-                        return 0L;
-                    }
-                    return timestamp;
-                } else {
-                    return new Long(parseStringToNumber(fieldCsvValue).longValue());
-                }
-            case STRING:
-                if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
-                    errorMsgAvroType = "TIMESTAMP";
+                case DOUBLE:
+                    return new Double(parseStringToNumber(fieldCsvValue).doubleValue());
+                case FLOAT:
+                    return new Float(parseStringToNumber(fieldCsvValue).floatValue());
+                case INT:
+                    return new Integer(parseStringToNumber(fieldCsvValue).intValue());
+                case LONG:
                     if (isEmptyString(fieldCsvValue)) {
                         return null;
                     }
-                    if (fieldCsvValue.matches("[0-9]+")) {
-                        return fieldCsvValue;
-                    }
-                    try {
-                        Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
+                    if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
+                        errorMsgAvroType = "DATE";
+                        // DP-11078 Add Time Zone Validation to Import Workflow
+                        //　timezone is ISO 8601, value should be in T&Z format
+                        checkTimeZoneValidity(fieldCsvValue, attr.getTimezone());
+                        Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
+                                attr.getTimeFormatString(), attr.getTimezone());
                         if (timestamp < 0) {
-                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
-                                    " using conversion library");
+                            // In order to support the requirements of:
+                            //   https://solutions.lattice-engines.com/browse/PLS-12846  and
+                            //   https://solutions.lattice-engines.com/browse/DP-9653
+                            // We change the behavior of negative timestamps from throwing an exception and failing to
+                            // parse the input CSV row to logging a warning and setting the timestamp value to zero.
+
+                            // Comment out warnings because log files are too large.
+                            //LOG.warn(String.format(
+                            //        "Converting date/time %s to timestamp generated negative value %d for column %s",
+                            //        fieldCsvValue, timestamp, attr.getDisplayName()));
+                            return 0L;
                         }
-                        return Long.toString(timestamp);
-                    } catch (Exception e) {
-                        // Comment out warnings because log files are too large.
-                        //LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
-                        //        "value %s.", attr.getName(), fieldCsvValue));
-                        DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
-                        Long timestamp = dtf.parseDateTime(fieldCsvValue).getMillis();
-                        if (timestamp < 0) {
-                            throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
-                                    " using conversion library or ISO 8601 Format");
-                        }
-                        return Long.toString(timestamp);
+                        return timestamp;
+                    } else {
+                        return new Long(parseStringToNumber(fieldCsvValue).longValue());
                     }
-                }
-                return fieldCsvValue;
-            case ENUM:
-                return fieldCsvValue;
-            case BOOLEAN:
-                return convertBooleanVal(fieldCsvValue);
-            default:
-                // Comment out warnings because log files are too large.
-                //LOG.info("size is:" + fieldCsvValue.length());
-                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDataType:"
-                        + attr.getPhysicalDataType());
+                case STRING:
+                    if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
+                        errorMsgAvroType = "TIMESTAMP";
+                        if (isEmptyString(fieldCsvValue)) {
+                            return null;
+                        }
+                        if (fieldCsvValue.matches("[0-9]+")) {
+                            return fieldCsvValue;
+                        }
+                        try {
+                            Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
+                            if (timestamp < 0) {
+                                throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
+                                        " using conversion library");
+                            }
+                            return Long.toString(timestamp);
+                        } catch (Exception e) {
+                            // Comment out warnings because log files are too large.
+                            //LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
+                            //        "value %s.", attr.getName(), fieldCsvValue));
+                            DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
+                            Long timestamp = dtf.parseDateTime(fieldCsvValue).getMillis();
+                            if (timestamp < 0) {
+                                throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
+                                        " using conversion library or ISO 8601 Format");
+                            }
+                            return Long.toString(timestamp);
+                        }
+                    }
+                    return fieldCsvValue;
+                case ENUM:
+                    return fieldCsvValue;
+                case BOOLEAN:
+                    return convertBooleanVal(fieldCsvValue);
+                default:
+                    // Comment out warnings because log files are too large.
+                    //LOG.info("size is:" + fieldCsvValue.length());
+                    throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDataType:"
+                            + attr.getPhysicalDataType());
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
@@ -467,7 +544,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             // Comment out warnings because log files are too large.
             //LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.\n" +
-                    "Error message was: %s", fieldCsvValue, attr.getPhysicalDataType(), attr.getDisplayName(),
+                            "Error message was: %s", fieldCsvValue, attr.getPhysicalDataType(), attr.getDisplayName(),
                     e.toString()), e);
         }
     }
@@ -483,7 +560,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     @VisibleForTesting
-    void checkTimeZoneValidity(String fieldCsvValue, String timeZone) throws IllegalArgumentException{
+    void checkTimeZoneValidity(String fieldCsvValue, String timeZone) throws IllegalArgumentException {
         fieldCsvValue = fieldCsvValue.trim().replaceFirst("(\\s{2,})",
                 TimeStampConvertUtils.SYSTEM_DELIMITER);
         if (StringUtils.isNotBlank(fieldCsvValue) && StringUtils.isNotBlank(timeZone)) {
@@ -492,7 +569,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             if (isISO8601 && !matchTZ) {
                 // time zone is in ISO-8601, validate its value using T&Z
                 throw new IllegalArgumentException("Time zone should be part of value but is not.");
-            } else if (!isISO8601 && matchTZ){
+            } else if (!isISO8601 && matchTZ) {
                 // time zone is not in ISO-8601, validate value not using T&Z
                 throw new IllegalArgumentException(String.format("Time zone set to %s. Value should not contain time " +
                         "zone setting.", timeZone));
@@ -501,7 +578,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     @VisibleForTesting
-    Number parseStringToNumber(String inputStr) throws ParseException,NullPointerException {
+    Number parseStringToNumber(String inputStr) throws ParseException, NullPointerException {
         inputStr = inputStr.trim();
         if (SCIENTIFIC_PTN.matcher(inputStr).matches()) {
             // handle scientific notation
@@ -525,11 +602,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     @Override
     protected void cleanup(Context context) throws IOException {
         csvFilePrinter.close();
-        HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
+        if (hasAvroRecord) {
+            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
+        }
         if (context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue() == 0) {
             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).setValue(0);
         }
-
         if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() == 0
                 && context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue() == 0) {
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(0);
@@ -543,7 +621,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             }
             HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
         }
-
         if (context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue() == 0) {
             context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).setValue(0);
         }
