@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -242,9 +245,10 @@ public class FuzzyMatchHelper implements DbHelper {
                 .collect(Collectors.toList());
         long startTime = System.currentTimeMillis();
         Tenant tenant = new Tenant(CustomerSpace.parse(context.getInput().getTenant().getId()).getTenantId());
-        // TODO add version support
+        Map<EntityMatchEnvironment, Integer> versionMap = context.getInput().getServingVersion() == null ? null
+                : Collections.singletonMap(SERVING, context.getInput().getServingVersion());
         List<EntityRawSeed> seeds = entityMatchInternalService.get(tenant, context.getInput().getTargetEntity(),
-                seedIds, null);
+                seedIds, versionMap);
         int unmatch = 0;
         for (int i = 0; i < context.getInternalResults().size(); i++) {
             InternalOutputRecord record = context.getInternalResults().get(i);
