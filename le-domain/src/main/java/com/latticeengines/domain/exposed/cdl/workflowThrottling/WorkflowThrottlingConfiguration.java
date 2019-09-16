@@ -7,38 +7,26 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public class WorkflowThrottlingConfiguration {
     /**
-     * workflowType (or global) -> RUNNING/ENQUEUED
-     * Stack (A/B/C) -> workflowType (or global) -> RUNNING/ENQUEUED
-     * CustomerSpace (or global) -> workflowType (or global) -> RUNNING/ENQUEUED
+     * workflowType (or default = default config for each type) -> count
+     * CustomerSpace (or default = config shared by all tenant) -> workflowType (or default) -> RUNNING/ENQUEUED
      */
-    private Map<String, Map<JobStatus, Integer>> envConfig;
+    private Map<String, Map<JobStatus, Integer>> globalLimit;
+    private Map<String, Map<String, Map<JobStatus, Integer>>> tenantLimit;
 
-    private Map<String, Map<String, Map<JobStatus, Integer>>> stackConfig;
-
-    private Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig;
-
-    public Map<String, Map<JobStatus, Integer>> getEnvConfig() {
-        return envConfig;
+    public Map<String, Map<JobStatus, Integer>> getGlobalLimit() {
+        return globalLimit;
     }
 
-    public void setEnvConfig(Map<String, Map<JobStatus, Integer>> envConfig) {
-        this.envConfig = envConfig;
+    public void setGlobalLimit(Map<String, Map<JobStatus, Integer>> globalLimit) {
+        this.globalLimit = globalLimit;
     }
 
-    public Map<String, Map<String, Map<JobStatus, Integer>>> getStackConfig() {
-        return stackConfig;
+    public Map<String, Map<String, Map<JobStatus, Integer>>> getTenantLimit() {
+        return tenantLimit;
     }
 
-    public void setStackConfig(Map<String, Map<String, Map<JobStatus, Integer>>> stackConfig) {
-        this.stackConfig = stackConfig;
-    }
-
-    public Map<String, Map<String, Map<JobStatus, Integer>>> getTenantConfig() {
-        return tenantConfig;
-    }
-
-    public void setTenantConfig(Map<String, Map<String, Map<JobStatus, Integer>>> tenantConfig) {
-        this.tenantConfig = tenantConfig;
+    public void setTenantLimit(Map<String, Map<String, Map<JobStatus, Integer>>> tenantLimit) {
+        this.tenantLimit = tenantLimit;
     }
 
     @Override

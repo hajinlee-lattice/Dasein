@@ -14,6 +14,10 @@ public interface WorkflowThrottlingService {
 
     boolean isWorkflowThrottlingEnabled(String podid, String division);
 
+    boolean isWorkflowThrottlingRolledOut(String podid, String division, String workflowType);
+
+    boolean shouldEnqueueWorkflow(String podid, String division, String workflowType);
+
     boolean queueLimitReached(String customerSpace, String workflowType, String podid, String division);
 
     ThrottlingResult getThrottlingResult(String podid, String division);

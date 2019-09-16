@@ -32,8 +32,8 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.api.WorkflowSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -121,6 +121,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        if (workflowJob == null) {
+            return null;
+        }
+        return workflowJob.getAsWorkflowId();
+    }
+
+    @Override
+    @WithCustomerSpace
+    public WorkflowExecutionId getWorkflowExecutionIdByWorkflowPid(String customerSpace, Long pid) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(pid);
         if (workflowJob == null) {
             return null;
         }
@@ -516,11 +526,20 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration,
                                         Long workflowPid) {
+        String podid = CamilleEnvironment.getPodId();
+        String division = CamilleEnvironment.getDivision();
+        if (workflowThrottlingService.shouldEnqueueWorkflow(podid, division, workflowConfiguration.getWorkflowName())) {
+            return enqueueWorkflow(customerSpace, workflowConfiguration, workflowPid);
+        }
         return workflowContainerService.submitWorkflow(workflowConfiguration, workflowPid);
     }
 
     @Override
-    public WorkflowSubmission enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid) {
+    public ApplicationId enqueueWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowJobPid) {
+        // returns faked applicationID with special prefix
+        if (customerSpace == null) {
+            customerSpace = workflowTenantService.getTenantFromConfiguration(workflowConfiguration).getId();
+        }
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         String podid = CamilleEnvironment.getPodId();
         String division = CamilleEnvironment.getDivision();
@@ -529,7 +548,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             throw new IllegalStateException(String.format("Unable to submit workflow for %s due to back pressure.", customerSpace));
         }
 
-        return new WorkflowSubmission(enqueueWorkflowJob(workflowConfiguration, division, workflowJobPid));
+        return new FakeApplicationId(enqueueWorkflowJob(workflowConfiguration, division, workflowJobPid).toString());
     }
 
     @Override
@@ -541,10 +560,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             List<WorkflowJob> canSubmit = getWorkflowObjects(result.getCanSubmit());
             for (WorkflowJob o : canSubmit) {
                 try {
-                    ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
-                    submitted.add(appId);
                     o.setStatus(JobStatus.PENDING.name());
                     workflowJobEntityMgr.update(o);
+                    ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
+                    submitted.add(appId);
                     log.info("Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
                 } catch (Exception e) {
                     log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);
@@ -609,6 +628,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             jobUpdate.setLastUpdateTime(System.currentTimeMillis());
             workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
         }
+
+        FakeApplicationId fakeApplicationId = new FakeApplicationId(workflowJob.getPid().toString());
+        workflowJob.setApplicationId(fakeApplicationId.toString());
+        workflowJobEntityMgr.updateApplicationId(workflowJob);
 
         return workflowJob.getPid();
     }
