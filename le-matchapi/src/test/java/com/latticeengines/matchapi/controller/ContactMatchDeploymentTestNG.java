@@ -13,70 +13,41 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.Email;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.util.Strings;
 
 import com.google.common.collect.Sets;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
-import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
-import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
-import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.matchapi.testframework.AdvancedMatchDeploymentTestNGBase;
 
 // dpltc deploy -a matchapi,workflowapi,metadata,eai,modeling
-public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
+public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ContactMatchDeploymentTestNG.class);
-
-    private static final String TENANT_ID = ContactMatchDeploymentTestNG.class.getSimpleName()
-            + UUID.randomUUID().toString();
-    private Tenant tenant = new Tenant(CustomerSpace.parse(TENANT_ID).toString());
-    private final String AVRO_DIR = String.format("/tmp/%s", getPodId());
 
     private static final String TestId = "TestId";
 
@@ -144,18 +115,6 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         EXISTING_CONTACT_GROUP.add(Sets.newHashSet("C_CID_11", "C_CID_12", "C_CID_13"));
     }
 
-    @Inject
-    private HdfsPathBuilder hdfsPathBuilder;
-
-    @Inject
-    private DataCloudVersionEntityMgr versionEntityMgr;
-
-    @Inject
-    private TenantService tenantService;
-
-    @Inject
-    private MatchProxy matchProxy;
-
     // CustomerAccountId => AccountEntityId
     private final Map<String, String> accountEntityIdMap = new HashMap<>();
     // CustomerContactId => ContactEntityId
@@ -163,35 +122,24 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     // AccountEntityId => Set(CustomerContactId)
     private final Map<String, Set<String>> contactsInAccount = new HashMap<>();
 
-    // TODO extract common functions and merge with AccountMatchDeploymentTestNG
-
     @BeforeClass(groups = "deployment")
-    private void init() {
-        HdfsPodContext.changeHdfsPodId(this.getClass().getSimpleName());
-        cleanupAvroDir(hdfsPathBuilder.podDir().toString());
+    @Override
+    protected void init() {
+        super.init();
 
-        tenant.setName(TENANT_ID);
-        tenantService.registerTenant(tenant);
-        // populate pid so that the tenant could be deleted in destroy()
-        tenant = tenantService.findByTenantId(tenant.getId());
         accountEntityIdMap.clear();
         contactEntityIdMap.clear();
     }
 
-    @AfterClass(groups = "deployment")
-    private void destroy() {
-        tenantService.discardTenant(tenant);
-    }
-
     @Test(groups = "deployment", priority = 1)
     private void populateExistingData() throws Exception {
-        MatchInput input = prepareBulkMatchInput(prepareBulkData("existing_data", EXISTING_DATA));
+        MatchInput input = prepareBulkMatchInput(prepareStringData("existing_data", DEFAULT_FIELDS, EXISTING_DATA));
 
         MatchCommand result = runAndVerifyBulkMatch(input, getPodId());
         Assert.assertNotNull(result);
 
-        List<GenericRecord> matchResults = getRecords(getOutputPath(result), true);
-        List<GenericRecord> newEntities = getRecords(getNewEntityPath(result), false);
+        List<GenericRecord> matchResults = getRecords(getOutputPath(result), true, true);
+        List<GenericRecord> newEntities = getRecords(getNewEntityPath(result), false, true);
         Assert.assertEquals(matchResults.size(), EXISTING_DATA.length,
                 "Match result row count does not match existing data row count");
         Assert.assertFalse(newEntities.isEmpty(), "Should have newly allocated entities");
@@ -232,13 +180,13 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         boolean hasNewAccount = expectedCAIds.values().stream().anyMatch(Objects::isNull);
 
         MatchInput input = prepareBulkMatchInput(
-                prepareBulkData(String.format("contact_import_1_group_%s", testGroupId), data));
+                prepareStringData(String.format("contact_import_1_group_%s", testGroupId), DEFAULT_FIELDS, data));
 
         MatchCommand result = runAndVerifyBulkMatch(input, getPodId());
         Assert.assertNotNull(result);
 
-        List<GenericRecord> matchResults = getRecords(getOutputPath(result), true);
-        List<GenericRecord> newEntities = getRecords(getNewEntityPath(result), false);
+        List<GenericRecord> matchResults = getRecords(getOutputPath(result), true, true);
+        List<GenericRecord> newEntities = getRecords(getNewEntityPath(result), false, true);
 
         logMatchResult(matchResults, getOutputPath(result));
         logNewEntities(newEntities, getNewEntityPath(result));
@@ -459,29 +407,6 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         return newEntityIds;
     }
 
-    private List<GenericRecord> getRecords(String outputPath, boolean dirExists) throws Exception {
-        if (dirExists) {
-            Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, outputPath),
-                    String.format("%s should be an existing directory", outputPath));
-        }
-
-        if (!HdfsUtils.isDirectory(yarnConfiguration, outputPath)) {
-            return Collections.emptyList();
-        }
-
-        List<GenericRecord> records = new ArrayList<>();
-        Iterator<GenericRecord> it = AvroUtils.iterator(yarnConfiguration, outputPath + "/*.avro");
-        for (int i = 0; it.hasNext(); i++) {
-            GenericRecord record = it.next();
-            Assert.assertNotNull(record, String.format("Record at index %d is null", i));
-
-            String entityId = getStrValue(record, InterfaceName.EntityId.name());
-            Assert.assertNotNull(entityId, "EntityId should not be null");
-            records.add(record);
-        }
-        return records;
-    }
-
     private void logMatchResult(@NotNull List<GenericRecord> records, @NotNull String path) {
         log.info("MatchResults(path={},size={})", path, records.size());
         records.stream().map(record -> toString(record, DEFAULT_MATCH_RESULT_FIELDS)).forEach(log::info);
@@ -508,41 +433,10 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         return getOutputPath(command).replace("Output", "NewEntities");
     }
 
-    private String getStrValue(GenericRecord record, String col) {
-        if (record == null || col == null) {
-            return null;
-        }
-
-        return record.get(col) == null ? null : record.get(col).toString();
-    }
-
-    private void bumpStagingVersion() {
-        BumpVersionRequest request = new BumpVersionRequest();
-        request.setTenant(tenant);
-        request.setEnvironments(Collections.singletonList(EntityMatchEnvironment.STAGING));
-        BumpVersionResponse response = matchProxy.bumpVersion(request);
-        Assert.assertNotNull(response);
-        log.info("Staging version for tenant(ID={}) is {}", tenant.getId(), response.getVersions());
-    }
-
-    private int publishEntity(String entity) {
-        EntityPublishRequest request = new EntityPublishRequest();
-        request.setEntity(entity);
-        request.setSrcTenant(tenant);
-        request.setDestTenant(tenant);
-        request.setDestEnv(EntityMatchEnvironment.SERVING);
-        request.setDestTTLEnabled(true);
-        request.setBumpupVersion(false);
-        List<EntityPublishStatistics> result = matchProxy.publishEntity(Collections.singletonList(request));
-        Assert.assertTrue(CollectionUtils.isNotEmpty(result));
-        Assert.assertNotNull(result.get(0));
-        return result.get(0).getSeedCount();
-    }
-
     private MatchInput prepareBulkMatchInput(InputBuffer buffer) {
         MatchInput input = new MatchInput();
-        input.setTenant(tenant);
-        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        input.setTenant(testTenant);
+        input.setDataCloudVersion(currentDataCloudVersion);
         input.setPredefinedSelection(ColumnSelection.Predefined.ID);
         input.setFields(Arrays.asList(DEFAULT_FIELDS));
         input.setSkipKeyResolution(true);
@@ -555,20 +449,6 @@ public class ContactMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
         return input;
-    }
-
-    private InputBuffer prepareBulkData(String scenario, Object[][] data) {
-        cleanupAvroDir(AVRO_DIR);
-        AvroInputBuffer inputBuffer = new AvroInputBuffer();
-        inputBuffer.setAvroDir(AVRO_DIR);
-        uploadAvroData(data, Arrays.asList(DEFAULT_FIELDS),
-                Arrays.stream(DEFAULT_FIELDS).map(field -> String.class).collect(Collectors.toList()), AVRO_DIR,
-                String.format("%s.avro", scenario));
-        return inputBuffer;
-    }
-
-    private String getPodId() {
-        return this.getClass().getSimpleName();
     }
 
     /*
