@@ -43,7 +43,7 @@ public class LivySessionManager {
 
     private final AtomicReference<LivySession> livySessionHolder = new AtomicReference<>(null);
 
-    LivySession createLivySession(String jobName, int scalingMultiplier) {
+    LivySession createLivySession(String jobName, LivySessionConfig livySessionConfig) {
         LivySession session = livySessionHolder.get();
         if (session != null) {
             killSession();
@@ -52,12 +52,13 @@ public class LivySessionManager {
         if (StringUtils.isBlank(jobName)) {
             jobName = "Workflow";
         }
-        session = sessionService.startSession(jobName, getLivyConf(scalingMultiplier), getSparkConf(scalingMultiplier));
+        session = sessionService.startSession(jobName, getLivyConf(livySessionConfig), getSparkConf(livySessionConfig));
         livySessionHolder.set(session);
         return session;
     }
 
-    private Map<String, Object> getLivyConf(int scalingMultiplier) {
+    private Map<String, Object> getLivyConf(LivySessionConfig livySessionConfig) {
+        int scalingMultiplier = livySessionConfig.scalingMulitplier;
         Map<String, Object> conf = new HashMap<>();
         conf.put("driverCores", driverCores);
         conf.put("driverMemory", driverMem);
@@ -77,7 +78,10 @@ public class LivySessionManager {
         return conf;
     }
 
-    private Map<String, String> getSparkConf(int scalingMultiplier) {
+    private Map<String, String> getSparkConf(LivySessionConfig livySessionConfig) {
+        int scalingMultiplier = livySessionConfig.scalingMulitplier;
+        int partitionMultiplier = scalingMultiplier > 1 ? Math.max(1, livySessionConfig.partitionMultiplier) : 1;
+
         scalingMultiplier = Math.max(scalingMultiplier - 1, 1);
         Map<String, String> conf = new HashMap<>();
         int minExe = minExecutors * scalingMultiplier;
@@ -86,7 +90,8 @@ public class LivySessionManager {
         conf.put("spark.dynamicAllocation.initialExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
-        int partitions = minExe * executorCores;
+
+        int partitions = minExe * executorCores * partitionMultiplier;
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
         return conf;

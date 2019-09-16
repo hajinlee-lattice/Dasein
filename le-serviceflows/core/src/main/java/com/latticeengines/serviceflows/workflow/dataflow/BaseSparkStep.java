@@ -63,10 +63,12 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     protected String s3Bucket;
 
     protected CustomerSpace customerSpace;
-    private int scalingMultiplier;
+    private int scalingMultiplier = 1;
+    private int partitionMultiplier = 1;
 
     protected LivySession createLivySession(String jobName) {
-        return livySessionManager.createLivySession(jobName, scalingMultiplier);
+        return livySessionManager.createLivySession(jobName, //
+                new LivySessionConfig(scalingMultiplier, partitionMultiplier));
     }
 
     protected void killLivySession() {
@@ -126,6 +128,11 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }
         putStringValueInContext(contextKey, tableName);
+    }
+
+    protected void setPartitionMultiplier(int partitionMultiplier) {
+        this.partitionMultiplier = partitionMultiplier;
+        log.info("Adjust partitionMultiplier to {}", this.partitionMultiplier);
     }
 
 }
