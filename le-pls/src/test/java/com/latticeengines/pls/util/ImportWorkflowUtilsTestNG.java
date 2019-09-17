@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
@@ -112,6 +113,82 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(actualRecord, expectedRecord,
                 "Actual Record:\n" + JsonUtils.pprint(actualRecord) + "\nvs\n\nExpected Record:\n" +
                         JsonUtils.pprint(expectedRecord));
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateCurrentFieldDefinitionRecord_noExistingTemplate() throws IOException {
+        FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+
+        // Generate Spec Java class from resource file.
+        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-contact-spec.json",
+                ImportWorkflowSpec.class);
+        log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
+        actualResponse.setImportWorkflowSpec(importWorkflowSpec);
+
+        // Load CSV containing imported Contact data for this test from resource file into HDFS.
+        MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
+        actualResponse.setAutodetectionResultsMap(ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
+
+        // Generate actual FieldDefinitionsRecord based on Contact import CSV and Spec.
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(actualResponse);
+
+        log.info("Actual (no existing template) fetchFieldDefinitionsResponse is:\n" + JsonUtils.pprint(actualResponse));
+
+        FetchFieldDefinitionsResponse expectedResponse = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-response-no-existing-template.json",
+                FetchFieldDefinitionsResponse.class);
+
+        log.info("Expected (no existing template) fetchFieldDefinitionsResponse is:\n" +
+                JsonUtils.pprint(expectedResponse));
+
+        ObjectMapper mapper = new ObjectMapper();
+        Assert.assertTrue(mapper.valueToTree(actualResponse).equals(mapper.valueToTree(expectedResponse)));
+
+        Assert.assertEquals(actualResponse, expectedResponse,
+                "Actual Record:\n" + JsonUtils.pprint(actualResponse) + "\nvs\n\nExpected Record:\n" +
+                        JsonUtils.pprint(expectedResponse));
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateCurrentFieldDefinitionRecord_withExistingTemplate() throws IOException {
+        FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+
+        // Generate Spec Java class from resource file.
+        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-contact-spec.json",
+                ImportWorkflowSpec.class);
+        log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
+        actualResponse.setImportWorkflowSpec(importWorkflowSpec);
+
+        // Generate Table containing existing template from resource file.
+        Table existingTemplateTable = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-existing-contact-template.json", Table.class);
+        log.error("Existing Table is:\n" + JsonUtils.pprint(existingTemplateTable));
+        actualResponse.setExistingFieldDefinitionsMap(
+                ImportWorkflowUtils.getFieldDefinitionsMapFromTable(existingTemplateTable));
+
+        // Load CSV containing imported Contact data for this test from resource file into HDFS.
+        MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
+        actualResponse.setAutodetectionResultsMap(ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
+
+        // Generate actual FieldDefinitionsRecord based on Contact import CSV and Spec.
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(actualResponse);
+
+        log.info("Actual (existing template) fetchFieldDefinitionsResponse is:\n" + JsonUtils.pprint(actualResponse));
+
+        FetchFieldDefinitionsResponse expectedResponse = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-response-existing-template.json",
+                FetchFieldDefinitionsResponse.class);
+
+        log.info("Expected (existing template) fetchFieldDefinitionsResponse is:\n" + JsonUtils.pprint(expectedResponse));
+
+        ObjectMapper mapper = new ObjectMapper();
+        Assert.assertTrue(mapper.valueToTree(actualResponse).equals(mapper.valueToTree(expectedResponse)));
+
+        Assert.assertEquals(actualResponse, expectedResponse,
+                "Actual Response:\n" + JsonUtils.pprint(actualResponse) + "\nvs\n\nExpected Response:\n" +
+                        JsonUtils.pprint(expectedResponse));
     }
 
     // resourceJsonFileRelativePath should start "com/latticeengines/...".

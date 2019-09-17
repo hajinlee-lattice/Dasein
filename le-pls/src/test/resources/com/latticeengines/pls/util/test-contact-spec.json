@@ -1,5 +1,5 @@
 {
-    "systemType": "Default",
+    "systemType": "Test",
     "systemObject": "Contacts",
     "fieldDefinitionsRecordsMap": {
         "Unique ID": [
@@ -10,12 +10,8 @@
                 "matchingColumnNames": [
                     "ID",
                     "CONTACT",
-                    "CONTACTID",
                     "CONTACT ID",
-                    "CONTACT_ID",
-                    "EXTERNALID",
-                    "EXTERNAL ID",
-                    "EXTERNAL_ID"
+                    "EXTERNAL ID"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -35,9 +31,7 @@
                 "fieldType": "TEXT",
                 "screenName": "First Name",
                 "matchingColumnNames": [
-                    "FIRSTNAME",
-                    "FIRST NAME",
-                    "FIRST_NAME"
+                    "FIRST NAME"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -54,9 +48,7 @@
                 "fieldType": "TEXT",
                 "screenName": "Last Name",
                 "matchingColumnNames": [
-                    "LASTNAME",
-                    "LAST NAME",
-                    "LAST_NAME"
+                    "LAST NAME"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -91,7 +83,7 @@
                 "screenName": "Email",
                 "matchingColumnNames": [
                     "EMAIL",
-                    "EMAIL_ADDRESS"
+                    "EMAIL ADDRESS"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -109,9 +101,7 @@
                 "fieldType": "TEXT",
                 "screenName": "Lead Source",
                 "matchingColumnNames": [
-                    "LEADSOURCE",
-                    "LEAD SOURCE",
-                    "LEAD_SOURCE"
+                    "LEAD SOURCE"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -127,9 +117,7 @@
                 "fieldType": "TEXT",
                 "screenName": "Lead Type",
                 "matchingColumnNames": [
-                    "LEADTYPE",
-                    "LEAD TYPE",
-                    "LEAD_TYPE"
+                    "LEAD TYPE"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -145,9 +133,7 @@
                 "fieldType": "BOOLEAN",
                 "screenName": "Has Opted Out of Phone Calls",
                 "matchingColumnNames": [
-                    "DONOTCALL",
-                    "DO NOT CALL",
-                    "DO_NOT_CALL"
+                    "DO NOT CALL"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -163,9 +149,7 @@
                 "fieldType": "DATE",
                 "screenName": "Created Date",
                 "matchingColumnNames": [
-                    "CREATEDDATE",
-                    "CREATED DATE",
-                    "CREATED_DATE"
+                    "CREATED DATE"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -181,12 +165,8 @@
                 "fieldType": "DATE",
                 "screenName": "Last Modified Date",
                 "matchingColumnNames": [
-                    "LASTMODIFIEDDATE",
                     "LAST MODIFIED DATE",
-                    "LAST_MODIFIED_DATE",
-                    "LASTMODIFIED",
-                    "LAST MODIFIED",
-                    "LAST_MODIFIED"
+                    "LAST MODIFIED"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -204,11 +184,8 @@
                 "fieldType": "TEXT",
                 "screenName": "Unique Account Identifier",
                 "matchingColumnNames": [
-                    "ACCOUNTID",
                     "ACCOUNT ID",
-                    "ACCOUNT_ID",
                     "ACCOUNT EXTERNAL ID",
-                    "ACCOUNT_EXTERNAL_ID",
                     "ACCOUNT"
                 ],
                 "required": false,
@@ -246,9 +223,7 @@
                 "matchingColumnNames": [
                     "COMPANY",
                     "COMPANY NAME",
-                    "COMPANY_NAME",
-                    "ACCOUNT NAME",
-                    "ACCOUNT_NAME"
+                    "ACCOUNT NAME"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -265,8 +240,7 @@
                 "screenName": "D-U-N-S",
                 "matchingColumnNames": [
                     "DUNS",
-                    "DUNS NUMBER",
-                    "DUNS_NUMBER"
+                    "DUNS NUMBER"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -283,8 +257,7 @@
                 "screenName": "Country",
                 "matchingColumnNames": [
                     "COUNTRY",
-                    "BILLING COUNTRY",
-                    "BILLING_COUNTRY"
+                    "BILLING COUNTRY"
                 ],
                 "required": false,
                 "approvedUsage": [
@@ -301,20 +274,11 @@
                 "screenName": "Zip Code",
                 "matchingColumnNames": [
                     "ZIP",
-                    "POSTALCODE",
+                    "ZIP CODE",
                     "POSTAL CODE",
-                    "POSTAL_CODE",
-                    "BILLINGZIP",
                     "BILLING ZIP",
-                    "BILLING_ZIP",
-                    "BILLINGZIPCODE",
                     "BILLING ZIP CODE",
-                    "BILLING_ZIP_CODE",
-                    "BILLINGPOSTALCODE",
-                    "BILLING POSTALCODE",
-                    "BILLING_POSTALCODE",
-                    "BILLING POSTAL CODE",
-                    "BILLING_POSTAL_CODE"
+                    "BILLING POSTAL CODE"
                 ],
                 "required": false,
                 "approvedUsage": [
