@@ -3,7 +3,10 @@ package com.latticeengines.domain.exposed.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+
 import com.latticeengines.domain.exposed.aws.AwsApplicationId;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 
 public final class ApplicationIdUtils {
 
@@ -44,4 +47,18 @@ public final class ApplicationIdUtils {
         throw new IllegalArgumentException("Malformed ApplicationId: " + applicationId);
     }
 
+    public static ApplicationId toApplicationIdObj(String appId) {
+        if (appId == null) {
+            return null;
+        }
+        if (FakeApplicationId.isFakeApplicationId(appId)) {
+            Long workflowPid = FakeApplicationId.toWorkflowJobPid(appId);
+            return new FakeApplicationId(workflowPid);
+        }
+        return ApplicationId.fromString(appId);
+    }
+
+    public static boolean isFakeApplicationId(String appId) {
+        return FakeApplicationId.isFakeApplicationId(appId);
+    }
 }
