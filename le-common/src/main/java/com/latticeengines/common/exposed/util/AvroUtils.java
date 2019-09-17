@@ -1609,9 +1609,8 @@ public class AvroUtils {
     public static Schema classToSchema(Class<?> cls) {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         for (java.lang.reflect.Field field : FieldUtils.getAllFields(cls)) {
-            int modifiers = field.getModifiers();
             // Ignore static and synthetic fields
-            if (Modifier.isStatic(modifiers) || field.isSynthetic()) {
+            if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
                 continue;
             }
             columns.add(Pair.of(field.getName(), field.getType().isEnum() ? String.class : field.getType()));
@@ -1639,9 +1638,8 @@ public class AvroUtils {
         GenericRecordBuilder builder = new GenericRecordBuilder(classToSchema(cls));
         return objects.stream().map(object -> {
             for (java.lang.reflect.Field field : org.apache.commons.lang3.reflect.FieldUtils.getAllFields(cls)) {
-                int modifiers = field.getModifiers();
                 // Ignore static and synthetic fields
-                if (Modifier.isStatic(modifiers) || field.isSynthetic()) {
+                if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
                     continue;
                 }
                 try {
@@ -1680,9 +1678,8 @@ public class AvroUtils {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T extends Object> T genericRecordToObject(GenericRecord record, Class<T> cls, T obj) {
         for (java.lang.reflect.Field field : org.apache.commons.lang3.reflect.FieldUtils.getAllFields(cls)) {
-            int modifiers = field.getModifiers();
             // Ignore static and synthetic fields
-            if (Modifier.isStatic(modifiers) || field.isSynthetic()) {
+            if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
                 continue;
             }
             try {
