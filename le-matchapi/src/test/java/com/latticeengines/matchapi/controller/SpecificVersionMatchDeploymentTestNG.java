@@ -80,7 +80,7 @@ public class SpecificVersionMatchDeploymentTestNG extends AdvancedMatchDeploymen
         // lookup with v2, should match the IDs allocated by v2
         input = prepareMatchInput(false, v2);
         log.info("Lookup account with serving version v2 = {}", v2);
-        Map<String, String> v2LookupEntityIds = getEntityIds(runAndVerifyBulkMatch(input, getPodId()), false);
+        Map<String, String> v2LookupEntityIds = getEntityIds(runAndVerifyBulkMatch(input, getPodId()), true);
         Assert.assertEquals(v2LookupEntityIds, v2EntityIds);
     }
 

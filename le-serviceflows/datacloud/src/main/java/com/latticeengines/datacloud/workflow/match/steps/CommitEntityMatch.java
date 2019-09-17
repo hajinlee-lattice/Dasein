@@ -85,6 +85,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
             log.info("Use {} committer to commit entities", useParallelCommitter ? "parallel" : "sequential");
             Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
+            entityMatchVersionService.invalidateCache(standardizedTenant);
             ENTITIES_TO_COMMIT.forEach(entity -> {
                 if (useParallelCommitter) {
                     commitWithCommitter(standardizedTenant, entity);

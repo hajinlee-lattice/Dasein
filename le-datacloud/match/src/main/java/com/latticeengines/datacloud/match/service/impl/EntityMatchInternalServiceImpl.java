@@ -306,6 +306,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             Integer srcStagingVersion, Integer destEnvVersion) {
         sourceTenant = EntityMatchUtils.newStandardizedTenant(sourceTenant);
         destTenant = EntityMatchUtils.newStandardizedTenant(destTenant);
+        // try to get the latest version
+        entityMatchVersionService.invalidateCache(sourceTenant);
+        entityMatchVersionService.invalidateCache(destTenant);
+
         EntityMatchEnvironment sourceEnv = STAGING;
         if (sourceTenant.getId().equals(destTenant.getId()) && sourceEnv == destEnv) {
             // return with default publish count as 0
