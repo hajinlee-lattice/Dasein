@@ -44,7 +44,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
@@ -80,31 +79,11 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     protected abstract String getLatestVersion();
 
     /**
-     * Get avro schema for MetadataColumn
+     * Get java class instance of MetadataColumn
      *
      * @return
      */
-    protected abstract Schema getSchema();
-
-    /**
-     * Convert list of MetadataColumn to list of GenericRecord
-     *
-     * @param schema:
-     *            avro schema for MetadataColumn
-     * @param columns:
-     *            MetadataColumns
-     * @return
-     */
-    protected abstract List<GenericRecord> toGenericRecords(Schema schema, Flux<E> columns);
-
-    /**
-     * Convert GenericRecord back to MetadataColumn
-     *
-     * @param record:
-     *            GenericRecord
-     * @return MetadataColumn
-     */
-    protected abstract E toMetadataColumn(GenericRecord record);
+    protected abstract Class<E> getMetadataColumnClass();
 
     /**
      * Get table name of MetadataColumn
@@ -296,7 +275,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             return total;
         }
 
-        Schema schema = getSchema();
+        Schema schema = AvroUtils.classToSchema(getMetadataColumnClass());
         // Prepare clean S3 prefix and clean local directory to cache metadata
         String s3Prefix = getMDSS3Prefix(dataCloudVersion);
         s3Service.cleanupPrefix(s3Bucket, s3Prefix);
@@ -314,8 +293,8 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             String localFile = localDir + "/" + "part-" + page + ".avro";
             try (PerformanceTimer timer = new PerformanceTimer(
                     String.format("Dump metadata page-%d to local file %s", page, localFile))) {
-                Flux<E> mds = getMetadataColumnEntityMgr().findByPage(dataCloudVersion, page, pageSize);
-                List<GenericRecord> records = toGenericRecords(schema, mds);
+                List<E> mds = getMetadataColumnEntityMgr().findByPage(dataCloudVersion, page, pageSize).collectList().block();
+                List<GenericRecord> records = AvroUtils.objectsToGenericRecords(getMetadataColumnClass(), mds);
                 try {
                     AvroUtils.writeToLocalFile(schema, records, localFile, true);
                 } catch (IOException e) {
@@ -352,8 +331,12 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             });
             try (AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter)) {
                 for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
-                    list.add(toMetadataColumn(record));
+                    list.add(AvroUtils.genericRecordToObject(record, getMetadataColumnClass(),
+                            getMetadataColumnClass().newInstance()));
                 }
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(String.format("Fail to load metadata for version %s from S3 prefix %s",
+                        dataCloudVersion, s3Prefix), e);
             }
             timer.setTimerMessage(String.format("Load %d metadata for version %s from S3 prefix %s", list.size(),
                     dataCloudVersion, s3Prefix));
