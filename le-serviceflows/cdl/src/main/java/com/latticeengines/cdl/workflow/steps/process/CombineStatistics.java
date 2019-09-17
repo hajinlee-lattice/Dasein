@@ -122,9 +122,11 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             }
         }
 
+        boolean mergeStats = "true".equals(getStringValueFromContext(PROCESS_ACCOUNT_STATS_MERGE));
         if (MapUtils.isNotEmpty(statsTableMap)) {
             log.info("Upserting " + statsTableMap.size() + " cubes into stats.");
-            statsTableMap.forEach((entity, table) -> cubeMap.put(entity.name(), getStatsCube(table, entity)));
+            statsTableMap.forEach(
+                    (entity, table) -> cubeMap.put(entity.name(), getStatsCube(table, entity, cubeMap, mergeStats)));
         } else if (MapUtils.isEmpty(statsTableMap) && inactiveVersion.equals(latestStatsVersion)) {
             log.info("Nothing changes to inactive stats, finish the workflow step.");
             return;
@@ -150,14 +152,16 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         });
     }
 
-    private StatsCube getStatsCube(Table targetTable, BusinessEntity entity) {
+    private StatsCube getStatsCube(Table targetTable, BusinessEntity entity, Map<String, StatsCube> cubeMap,
+            boolean mergeStats) {
         List<Extract> extracts = targetTable.getExtracts();
         List<String> paths = new ArrayList<>();
         for (Extract extract : extracts) {
             paths.add(extract.getPath());
         }
         log.info("Checking for result file: " + StringUtils.join(paths, ", "));
-        try (AvroFilesIterator records = AvroUtils.iterateAvroFiles(yarnConfiguration, paths.toArray(new String[]{}))) {
+        try (AvroFilesIterator records = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                paths.toArray(new String[] {}))) {
             StatsCube statsCube = StatsCubeUtils.parseAvro(records);
             if (BusinessEntity.PurchaseHistory.equals(entity)) {
                 processPHCube(statsCube);
@@ -165,8 +169,23 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             if (BusinessEntity.Rating.equals(entity)) {
                 processRatingCube(statsCube);
             }
+            if (mergeStats && BusinessEntity.Account.equals(entity)) {
+                statsCube = processMergeAccountCube(statsCube, cubeMap, entity);
+            }
             return statsCube;
         }
+    }
+
+    private StatsCube processMergeAccountCube(StatsCube statsCube, Map<String, StatsCube> cubeMap,
+            BusinessEntity entity) {
+        StatsCube existingCube = cubeMap.get(entity.name());
+        if (existingCube == null) {
+            log.warn("There's not existing cube for entity=" + entity.name());
+            return statsCube;
+        }
+        existingCube.getStatistics().putAll(statsCube.getStatistics());
+        existingCube.setCount(Math.max(existingCube.getCount(), statsCube.getCount()));
+        return existingCube;
     }
 
     private void processPHCube(StatsCube statsCube) {
