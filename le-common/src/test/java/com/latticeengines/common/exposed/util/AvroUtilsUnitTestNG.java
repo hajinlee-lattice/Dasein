@@ -13,18 +13,14 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -345,38 +341,15 @@ public class AvroUtilsUnitTestNG {
         private TestAvroConversionEnum enumAttr;
     }
 
+    // to test that exact enum identifier should be written to generic record
+    // instead of display name
     public enum TestAvroConversionEnum {
         ENUM1("Enum1"), ENUM2("Enum2");
-
-        private static Map<String, TestAvroConversionEnum> nameMap;
-        private static Set<String> values;
-
-        static {
-            nameMap = new HashMap<>();
-            for (TestAvroConversionEnum item : TestAvroConversionEnum.values()) {
-                nameMap.put(item.getName(), item);
-            }
-            values = new HashSet<>(
-                    Arrays.stream(values()).map(TestAvroConversionEnum::name).collect(Collectors.toSet()));
-        }
 
         private final String name;
 
         TestAvroConversionEnum(String name) {
             this.name = name;
-        }
-
-        public static TestAvroConversionEnum fromName(String name) {
-            if (StringUtils.isBlank(name)) {
-                return null;
-            }
-            if (values.contains(name.toUpperCase())) {
-                return valueOf(name.toUpperCase());
-            } else if (nameMap.containsKey(name)) {
-                return nameMap.get(name);
-            } else {
-                throw new IllegalArgumentException("Cannot find a TestAvroConversionEnum with name " + name);
-            }
         }
 
         public String getName() {
