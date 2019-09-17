@@ -3,13 +3,13 @@ package com.latticeengines.apps.core.service.impl;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.WorkflowJobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -33,7 +33,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Resubmitted workflow with application id %s", applicationId));
-        return ConverterUtils.toApplicationId(applicationId);
+        return ApplicationId.fromString(applicationId);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         String applicationId = submission.getApplicationIds().get(0);
         log.info(String.format("Submitted %s with application id %s", configuration.getWorkflowName(), applicationId));
-        return ConverterUtils.toApplicationId(applicationId);
+        return ApplicationIdUtils.toApplicationIdObj(applicationId);
     }
 
     @Override

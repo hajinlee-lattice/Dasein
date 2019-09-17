@@ -561,6 +561,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             for (WorkflowJob o : canSubmit) {
                 try {
                     o.setStatus(JobStatus.PENDING.name());
+                    o.setStartTimeInMillis(System.currentTimeMillis());
                     workflowJobEntityMgr.update(o);
                     ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
                     submitted.add(appId);

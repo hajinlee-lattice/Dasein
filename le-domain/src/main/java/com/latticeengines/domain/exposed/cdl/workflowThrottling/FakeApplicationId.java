@@ -37,10 +37,6 @@ public class FakeApplicationId extends ApplicationId {
     protected void build() {
     }
 
-    public static ApplicationId fromWorkflowJobPid(Long workflowJobPid) {
-        return new FakeApplicationId(workflowJobPid);
-    }
-
     @Override
     public String toString() {
         return appId;
