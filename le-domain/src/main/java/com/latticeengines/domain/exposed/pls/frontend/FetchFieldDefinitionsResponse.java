@@ -84,4 +84,69 @@ public class FetchFieldDefinitionsResponse {
     public void setOtherTemplateDataMap(Map<String, OtherTemplateData> otherTemplateDataMap) {
         this.otherTemplateDataMap = otherTemplateDataMap;
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof FetchFieldDefinitionsResponse) {
+            FetchFieldDefinitionsResponse response = (FetchFieldDefinitionsResponse) object;
+
+            // Check currentFieldDefinitionsRecord.
+            if (getCurrentFieldDefinitionsRecord() == null || response.getCurrentFieldDefinitionsRecord() == null) {
+                if (getCurrentFieldDefinitionsRecord() != response.getCurrentFieldDefinitionsRecord()) {
+                    return false;
+                }
+            } else if (!getCurrentFieldDefinitionsRecord().equals(response.getCurrentFieldDefinitionsRecord())) {
+                return false;
+            }
+
+            // Check importWorkflowSpec.
+            if (getImportWorkflowSpec() == null || response.getImportWorkflowSpec() == null) {
+                if (getImportWorkflowSpec() != response.getImportWorkflowSpec()) {
+                    return false;
+                }
+            } else if (!getImportWorkflowSpec().equals(response.getImportWorkflowSpec())) {
+                return false;
+            }
+
+            // Check existingFieldDefinitionsMap.
+            if (!mapEquals(getExistingFieldDefinitionsMap(), response.getExistingFieldDefinitionsMap())) {
+                return false;
+            }
+
+            // Check autodetectionResultsMap.
+            if (!mapEquals(getAutodetectionResultsMap(), response.getAutodetectionResultsMap())) {
+                return false;
+            }
+
+            // Check otherTemplateDataMap.
+            if (!mapEquals(getOtherTemplateDataMap(), response.getOtherTemplateDataMap())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static <V> boolean mapEquals(Map<String, V> map1, Map<String, V> map2) {
+        if (map1 == null || map2 == null) {
+            return map1 == map2;
+        } else if (map1.size() != map2.size()) {
+            return false;
+        }
+        for (Map.Entry<String, V> entry : map1.entrySet()) {
+            if (!map2.containsKey(entry.getKey())) {
+                return false;
+            }
+            V val1 = entry.getValue();
+            V val2 = map2.get(entry.getKey());
+            if (val1 == null || val2 == null) {
+                if (val1 != val2) {
+                    return false;
+                }
+            } else if (!val1.equals(val2)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

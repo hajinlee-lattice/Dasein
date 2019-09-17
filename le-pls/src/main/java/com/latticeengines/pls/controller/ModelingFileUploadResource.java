@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.AvailableDateFormat;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -322,7 +323,7 @@ public class ModelingFileUploadResource {
             InputStream fetchResponseInputStream = getClass().getClassLoader().getResourceAsStream(fetchResponseFile);
             if (fetchResponseInputStream != null) {
                 fetchResponseJson = IOUtils.toString(fetchResponseInputStream, "UTF-8");
-                log.error("FetchFieldDefinitionResponse is:\n" + fetchResponseJson);
+                log.error("FetchFieldDefinitionsResponse is:\n" + fetchResponseJson);
             } else {
                 log.error("Loading Fetch Response failed.");
                 return ResponseDocument.failedResponse(new IOException(
@@ -488,13 +489,13 @@ public class ModelingFileUploadResource {
     @RequestMapping(value = "fielddefinition/fetch", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
-    public ResponseDocument<FieldDefinitionsRecord> fetchFieldDefinitions(
+    public ResponseDocument<FetchFieldDefinitionsResponse> fetchFieldDefinitions(
             @RequestParam(value = "systemName", required = true) String systemName, //
             @RequestParam(value = "systemType", required = true) String systemType, //
             @RequestParam(value = "systemObject", required = true) String systemObject, //
             @RequestParam(value = "importFile", required = true) String importFile) {
         try {
-            FieldDefinitionsRecord fetchResponse = modelingFileMetadataService.fetchFieldDefinitions(
+            FetchFieldDefinitionsResponse fetchResponse = modelingFileMetadataService.fetchFieldDefinitions(
                     systemName, systemType, systemObject, importFile);
             // TODO(jwinter): Determine if we need to handle a null fetchResponse.
             return ResponseDocument.successResponse(fetchResponse);

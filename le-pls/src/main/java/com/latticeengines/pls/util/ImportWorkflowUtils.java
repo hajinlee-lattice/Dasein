@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -194,6 +195,48 @@ public class ImportWorkflowUtils {
         return system + SPLIT_CHART + entityType.getDefaultFeedTypeName();
     }
 
+    public static Map<String, FieldDefinition> getFieldDefinitionsMapFromTable(Table table) {
+        if (table == null) {
+            log.warn("Tried to created FieldDefinitionsMap from null Table");
+            return null;
+        }
+        log.info("Creating FieldDefinitionsMap from Table {} for Tenant {}:", table.getName(),
+                table.getTenant() != null ? table.getTenant().getName() : "null");
+        Map<String, FieldDefinition> map = new HashMap<>();
+        for (Attribute attribute : table.getAttributes()) {
+            map.put(attribute.getName(), getFieldDefinitionFromAttribute(attribute));
+            log.info("    Adding fieldName " + attribute.getName() + " to existing field map");
+        }
+        return map;
+    }
+
+    public static Map<String, FieldDefinition> generateAutodetectionResultsMap(MetadataResolver resolver) {
+        if (resolver == null) {
+            throw new IllegalArgumentException("MetadataResolver cannot be null");
+        }
+        Map<String, FieldDefinition> map = new HashMap<>();
+        // Get column header names from imported file.
+        Set<String> columnHeaderNames = resolver.getHeaderFields();
+
+        // DEBUG
+        String existingColumnHeaders = "Import CSV column header names are:\n";
+        for (String columnHeaderName : columnHeaderNames) {
+            existingColumnHeaders += "    " + columnHeaderName + "\n";
+        }
+        log.info(existingColumnHeaders);
+        // END DEBUG
+
+        for (String columnHeaderName : columnHeaderNames) {
+            FieldDefinition definition = new FieldDefinition();
+            setFieldTypeFromColumnContent(resolver, columnHeaderName, definition);
+            definition.setColumnName(StringEscapeUtils.escapeHtml4(columnHeaderName));
+            log.info("Putting columnName {} into autodetected map with type {}", definition.getColumnName(),
+                    definition.getFieldType().getFieldType());
+            map.put(definition.getColumnName(), definition);
+        }
+        return map;
+    }
+
     private static Attribute getAttributeFromFieldDefinition(FieldDefinition definition) {
         if (StringUtils.isBlank(definition.getFieldName()) && StringUtils.isBlank(definition.getColumnName())) {
             throw new IllegalArgumentException(
@@ -345,23 +388,8 @@ public class ImportWorkflowUtils {
 
             // Iterate through each field definition in the Spec section.
             for (FieldDefinition specDefinition : section.getValue()) {
-                if (specDefinition == null) {
-                    log.error("During spec iteration, found null FieldDefinition in section " + section.getKey());
-                    throw new IllegalArgumentException("During spec iteration, found null FieldDefinition in section " +
-                            section.getKey());
-                } else if (StringUtils.isBlank(specDefinition.getFieldName())) {
-                    log.error("During spec iteration, found FieldDefinition with null fieldName in section "
-                            + section.getKey());
-                    throw new IllegalArgumentException("During spec iteration, found FieldDefinition with null fieldName in section "
-                            + section.getKey());
-                } else if (CollectionUtils.isEmpty(specDefinition.getMatchingColumnNames())) {
-                    log.error("During spec iteration, found FieldDefinition with null/empty matchingColumnNames in section "
-                            + section.getKey());
-                    throw new IllegalArgumentException("During spec iteration, found FieldDefinition with null/empty matchingColumnNames in section "
-                            + section.getKey());
-                }
+                validateSpecFieldDefinition(section.getKey(), specDefinition);
 
-                log.info("Spec section: " + section.getKey() + "  fieldName: " + specDefinition.getFieldName());
                 // Convert Spec fieldNames to Avro friendly format if necessary.
                 String avroFieldName = convertFieldNameToAvroFriendlyFormat(specDefinition.getFieldName());
                 if (!avroFieldName.equals(specDefinition.getFieldName())) {
@@ -391,7 +419,7 @@ public class ImportWorkflowUtils {
                         String columnName = columnIterator.next();
                         // Check if the standardized column name matches any of the standardized accepted names for this
                         // field.
-                        if (doesColumnNameMatch(columnName, specDefinition)) {
+                        if (doesColumnNameMatch(columnName, specDefinition.getMatchingColumnNames())) {
                             log.info("Existing field " + recordDefinition.getFieldName() + " matched column " +
                                      columnName);
 
@@ -429,8 +457,6 @@ public class ImportWorkflowUtils {
         // Spec and add them to the FieldDefinitionRecord as Custom Fields.
         log.info("Add existing Custom Fields to FieldDefinitionsRecord:");
         for (FieldDefinition existingDefinition : existingFieldNameToDefinitionMap.values()) {
-            // TODO(jwinter): Should we be setting ScreenName for Custom Fields?
-            //existingDefinition.setScreenName(existingDefinition.getColumnName());
             addFieldDefinitionToRecord(existingDefinition, CUSTOM_FIELDS, fieldDefinitionsRecord);
         }
 
@@ -447,10 +473,204 @@ public class ImportWorkflowUtils {
         return fieldDefinitionsRecord;
     }
 
-    private static boolean doesColumnNameMatch(String columnName, FieldDefinition recordDefinition){
-        List<String> matchingColumnNames = recordDefinition.getMatchingColumnNames();
+    // Create the initial currentFieldDefinitionsRecord which will be used as the starting point recommendation for the
+    // field mapping for the user.
+    public static void generateCurrentFieldDefinitionRecord(FetchFieldDefinitionsResponse fetchResponse) {
+        validateFetchFieldDefinitionsResponse(fetchResponse);
+
+        // Create a FieldDefinitionsRecord to hold the mapping recommendations to be generated based on the import CSV,
+        // the Spec, and the existing template for this System Name, System Type, and System Object.
+        FieldDefinitionsRecord record = new FieldDefinitionsRecord();
+
+        // Generate the set of column header names from imported file, which can be found as the keys of the
+        // autodetection map.  This set will track the columns that are available to map to either new Lattice Fields
+        // or Custom Fields in this import, after removing any column header names mapped to fields in the existing
+        // template.
+        Map<String, FieldDefinition> autodetectionMap = fetchResponse.getAutodetectionResultsMap();
+        Set<String> columnHeaderNamesForNewFields = new HashSet<>(autodetectionMap.keySet());
+        // Iterate through the existing template FieldDefinitions and remove any matching column names from the set
+        // of column header names to prevent them from being mapped again to new Lattice Field or Custom Fields for this
+        // import.
+        Map<String, FieldDefinition> existingMap = fetchResponse.getExistingFieldDefinitionsMap();
+        for (FieldDefinition existingDefinition : existingMap.values()) {
+            if (columnHeaderNamesForNewFields.contains(existingDefinition.getColumnName())) {
+                log.info("Existing field " + existingDefinition.getFieldName() + " matched imported column " +
+                        existingDefinition.getColumnName());
+                columnHeaderNamesForNewFields.remove(existingDefinition.getColumnName());
+            }
+        }
+        // Create a set of the existing template FieldDefinitions to track which existing template fields map to
+        // fields in the Spec.  Some fields in the existing template could be custom fields and need to be added to
+        // that section in the FieldDefintionsRecord.  Further, if the Spec has changed and fields have been removed,
+        // there could be fields in the existing template which no longer map to Lattice Fields and must be set as
+        // custom fields in the record of FieldDefinition recommendations.
+        Set<String> existingFieldNamesToBeMapped = new HashSet<>(existingMap.keySet());
+
+        // Iteration through all the sections in the Spec.
+        ImportWorkflowSpec spec = fetchResponse.getImportWorkflowSpec();
+        log.info("Processing Spec for SystemType {} and SystemObject {}", spec.getSystemType(), spec.getSystemObject());
+        for (Map.Entry<String, List<FieldDefinition>> section : spec.getFieldDefinitionsRecordsMap().entrySet()) {
+            if (CollectionUtils.isEmpty(section.getValue())) {
+                record.addFieldDefinitionsRecords(section.getKey(), new ArrayList<>(), false);
+                continue;
+            }
+
+            // Iterate through each field definition in the Spec section.
+            for (FieldDefinition specDefinition : section.getValue()) {
+                validateSpecFieldDefinition(section.getKey(), specDefinition);
+
+                // Convert Spec fieldNames to Avro friendly format if necessary.
+                String avroFieldName = convertFieldNameToAvroFriendlyFormat(specDefinition.getFieldName());
+                if (!avroFieldName.equals(specDefinition.getFieldName())) {
+                    log.warn("Found non-Avro compatible Spec fieldName {} in section {}", specDefinition.getFieldName(),
+                            section.getKey());
+                    specDefinition.setFieldName(avroFieldName);
+                }
+
+                FieldDefinition recordDefinition = null;
+                if (existingFieldNamesToBeMapped.contains(specDefinition.getFieldName())) {
+                    // If this Spec field was found among the fields in the existing template, create a recommendation
+                    // for this FieldDefinition based on the existing template field, with autodetected date format
+                    // data if necessary.
+                    log.info("Found matching existing field for fieldName " + specDefinition.getFieldName());
+                    FieldDefinition existingDefinition = existingMap.get(specDefinition.getFieldName());
+                    // Note, the columnHeaderNamesForNewFields set is not checked first before trying to get the
+                    // FieldDefinition from the autodetection map.  This allows multiple fields from the existing
+                    // template to get data from the same autodetected column since more than once field can map to
+                    // the same column.
+                    // TODO(jwinter): Need to add copying of external system fields here, once that part has been
+                    // figured out.
+                    recordDefinition = createDefinitionFromExisting(existingDefinition, specDefinition.getScreenName(),
+                            autodetectionMap.get(existingDefinition.getColumnName()));
+                    existingFieldNamesToBeMapped.remove(specDefinition.getFieldName());
+                } else {
+                    // If the Spec field is not in the existing template, check if there is a column in the import whose
+                    // header matches one of the matching column names for this field.  If so, create a FieldDefinition
+                    // based on Spec and autodetected data about the column.  If not, create a stub FieldDefinition
+                    // that is not mapped to a column but may get mapped by the user.
+                    log.info("Creating new field for fieldName " + specDefinition.getFieldName());
+                    String columnName = findMatchingColumnName(specDefinition.getFieldName(),
+                            columnHeaderNamesForNewFields, specDefinition.getMatchingColumnNames());
+                    recordDefinition = createDefinitionFromSpec(specDefinition, autodetectionMap.get(columnName));
+                }
+                // Add the FieldDefinition to the FieldDefinitionRecord for the field definition recommendations.
+                addFieldDefinitionToRecord(recordDefinition, section.getKey(), record);
+            }
+        }
+
+        // Iterate through the remaining existing template FieldDefinitions, which did not match any field in the
+        // Spec and add them to the FieldDefinitionRecord as Custom Fields.
+        log.info("Add existing Custom Fields to FieldDefinitionsRecord:");
+        for (String fieldName : existingFieldNamesToBeMapped) {
+            FieldDefinition recordDefinition = createDefinitionFromExisting(existingMap.get(fieldName), null,
+                    autodetectionMap.get(existingMap.get(fieldName).getColumnName()));
+            addFieldDefinitionToRecord(recordDefinition, CUSTOM_FIELDS, record);
+        }
+
+        // Iterate through the remaining column header names, which did not match any field in the Spec, and add them
+        // to the FieldDefinitionRecord as Custom Fields.
+        log.info("Add new Custom Fields to FieldDefinitionsRecord:");
+        for (String columnName : columnHeaderNamesForNewFields) {
+            FieldDefinition recordDefinition = createNewCustomFieldDefinition(autodetectionMap.get(columnName));
+            addFieldDefinitionToRecord(recordDefinition, CUSTOM_FIELDS, record);
+        }
+
+        // Set the recommend FieldDefinitionsRecord in the fetch response to the record just created.
+        fetchResponse.setCurrentFieldDefinitionsRecord(record);
+    }
+
+    private static void validateFetchFieldDefinitionsResponse(FetchFieldDefinitionsResponse fetchResponse) {
+        if (fetchResponse == null) {
+            throw new IllegalArgumentException(
+                    "FetchFieldDefinitionsResponse is null.  Can't generate Field Mappings.");
+        } else if (fetchResponse.getImportWorkflowSpec() == null) {
+            throw new IllegalArgumentException("ImportWorkflowSpec is null.  Can't generate Field Mappings.");
+        } else if (fetchResponse.getExistingFieldDefinitionsMap() == null) {
+            throw new IllegalArgumentException("ExistingFieldDefinitionsMap is null.  Can't generate Field Mappings.");
+        } else if (fetchResponse.getAutodetectionResultsMap() == null) {
+            throw new IllegalArgumentException("AutodetectionResultsMap is null.  Can't generate Field Mappings.");
+        } else if (fetchResponse.getOtherTemplateDataMap() == null) {
+            throw new IllegalArgumentException("OtherTemplateDataMap is null.  Can't generate Field Mappings.");
+        }
+
+        if (fetchResponse.getImportWorkflowSpec().getFieldDefinitionsRecordsMap().isEmpty()) {
+            log.warn("FetchFieldDefinitionsResponse has ImportWorkflowSpec with empty map");
+        }
+        if (fetchResponse.getAutodetectionResultsMap().isEmpty()) {
+            log.warn("FetchFieldDefinitionsResponse has AutodetectionResults with empty Map");
+        }
+    }
+
+    private static void validateSpecFieldDefinition(String sectionName, FieldDefinition definition) {
+        if (definition == null) {
+            log.error("During spec iteration, found null FieldDefinition in section " + sectionName);
+            throw new IllegalArgumentException("During spec iteration, found null FieldDefinition in section " +
+                    sectionName);
+        } else if (StringUtils.isBlank(definition.getFieldName())) {
+            log.error("During spec iteration, found FieldDefinition with null fieldName in section " + sectionName);
+            throw new IllegalArgumentException(
+                    "During spec iteration, found FieldDefinition with null fieldName in section " + sectionName);
+        } else if (CollectionUtils.isEmpty(definition.getMatchingColumnNames())) {
+            log.error("During spec iteration, found FieldDefinition with null/empty matchingColumnNames in section "
+                    + sectionName);
+            throw new IllegalArgumentException(
+                    "During spec iteration, found FieldDefinition with null/empty matchingColumnNames in section "
+                    + sectionName);
+        }
+        log.info("    Spec section: " + sectionName + "  fieldName: " + definition.getFieldName());
+    }
+
+    // TODO(jwinter): Need to add copying of external system fields here, once that part has been figured out.
+    private static FieldDefinition createDefinitionFromExisting(FieldDefinition existingDefinition,
+                                                                String screenName,
+                                                                FieldDefinition autodetectedDefinition) {
+        FieldDefinition definition = new FieldDefinition();
+        definition.setFieldName(existingDefinition.getFieldName());
+        definition.setFieldType(existingDefinition.getFieldType());
+        definition.setScreenName(screenName);
+        definition.setColumnName(existingDefinition.getColumnName());
+        if (UserDefinedType.DATE.equals(definition.getFieldType())) {
+            definition.setDateFormat(existingDefinition.getDateFormat());
+            definition.setTimeFormat(existingDefinition.getTimeFormat());
+            definition.setTimeZone(existingDefinition.getTimeZone());
+        }
+        if (autodetectedDefinition != null) {
+            definition.setInCurrentImport(true);
+            if (UserDefinedType.DATE.equals(definition.getFieldType())) {
+                if (StringUtils.isBlank(definition.getDateFormat())) {
+                    definition.setDateFormat(autodetectedDefinition.getDateFormat());
+                }
+                if (StringUtils.isBlank(definition.getTimeFormat())) {
+                    definition.setTimeFormat(autodetectedDefinition.getTimeFormat());
+                }
+                if (StringUtils.isBlank(definition.getTimeZone())) {
+                    definition.setTimeZone(autodetectedDefinition.getTimeZone());
+                }
+            }
+        } else {
+            definition.setInCurrentImport(false);
+        }
+        return definition;
+    }
+
+    private static String findMatchingColumnName(String fieldName, Set<String> columnHeaderNamesForNewFields,
+                                                 List<String> matchingColumnNames) {
+        Iterator<String> columnIterator = columnHeaderNamesForNewFields.iterator();
+        while (columnIterator.hasNext()) {
+            String columnName = columnIterator.next();
+            // Check if the standardized column name matches any of the standardized accepted names for this field.
+            if (doesColumnNameMatch(columnName, matchingColumnNames)) {
+                log.info("Existing field " + fieldName + " matched column " + columnName);
+                columnIterator.remove();
+                return columnName;
+            }
+        }
+        return null;
+    }
+
+    private static boolean doesColumnNameMatch(String columnName, List<String> matchingColumnNames){
         if (CollectionUtils.isNotEmpty(matchingColumnNames)) {
-            final String standardizedColumnName = MetadataResolver.standardizeAttrName(columnName);
+            String standardizedColumnName = MetadataResolver.standardizeAttrName(columnName);
             String matchedColumnName = matchingColumnNames.stream() //
                     .filter(allowedName -> MetadataResolver.standardizeAttrName(allowedName)
                             .equalsIgnoreCase(standardizedColumnName)) //
@@ -458,6 +678,40 @@ public class ImportWorkflowUtils {
             return StringUtils.isNotBlank(matchedColumnName);
         }
         return false;
+    }
+
+    private static FieldDefinition createDefinitionFromSpec(FieldDefinition specDefinition,
+                                                            FieldDefinition autodetectedDefinition) {
+        FieldDefinition definition = new FieldDefinition();
+        definition.setFieldName(specDefinition.getFieldName());
+        definition.setFieldType(specDefinition.getFieldType());
+        definition.setScreenName(specDefinition.getScreenName());
+        if (autodetectedDefinition != null) {
+            definition.setColumnName(autodetectedDefinition.getColumnName());
+            definition.setInCurrentImport(true);
+            if (UserDefinedType.DATE.equals(definition.getFieldType())) {
+                definition.setDateFormat(autodetectedDefinition.getDateFormat());
+                definition.setTimeFormat(autodetectedDefinition.getTimeFormat());
+                definition.setTimeZone(autodetectedDefinition.getTimeZone());
+            }
+        } else {
+            definition.setInCurrentImport(false);
+        }
+        return definition;
+    }
+
+    private static FieldDefinition createNewCustomFieldDefinition(FieldDefinition autodetectedDefinition) {
+        FieldDefinition definition = new FieldDefinition();
+        definition.setFieldName(autodetectedDefinition.getFieldName());
+        definition.setFieldType(autodetectedDefinition.getFieldType());
+        definition.setColumnName(autodetectedDefinition.getColumnName());
+        definition.setInCurrentImport(true);
+        if (UserDefinedType.DATE.equals(definition.getFieldType())) {
+            definition.setDateFormat(autodetectedDefinition.getDateFormat());
+            definition.setTimeFormat(autodetectedDefinition.getTimeFormat());
+            definition.setTimeZone(autodetectedDefinition.getTimeZone());
+        }
+        return definition;
     }
 
     private static UserDefinedType getFieldTypeFromColumnContent(FieldDefinition fieldDefinition,
@@ -484,6 +738,28 @@ public class ImportWorkflowUtils {
         return userDefinedType;
     }
 
+    private static void setFieldTypeFromColumnContent(MetadataResolver resolver, String columnHeaderName,
+                                                      FieldDefinition fieldDefinition) {
+        List<String> columnFields = resolver.getColumnFieldsByHeader(columnHeaderName);
+        MutableTriple<String, String, String> dateTimeZone;
+        if (columnFields.isEmpty()) {
+            fieldDefinition.setFieldType(UserDefinedType.TEXT);
+        } else if (MetadataResolver.isBooleanTypeColumn(columnFields)) {
+            fieldDefinition.setFieldType(UserDefinedType.BOOLEAN);
+        } else if (MetadataResolver.isIntegerTypeColumn(columnFields)) {
+            fieldDefinition.setFieldType(UserDefinedType.INTEGER);
+        } else if (MetadataResolver.isDoubleTypeColumn(columnFields)) {
+            fieldDefinition.setFieldType(UserDefinedType.NUMBER);
+        } else if ((dateTimeZone = distinguishDateAndTime(columnFields)) != null) {
+            fieldDefinition.setFieldType(UserDefinedType.DATE);
+            fieldDefinition.setDateFormat(dateTimeZone.getLeft());
+            fieldDefinition.setTimeFormat(dateTimeZone.getMiddle());
+            fieldDefinition.setTimeZone(dateTimeZone.getRight());
+        } else {
+            fieldDefinition.setFieldType(UserDefinedType.TEXT);
+        }
+    }
+
     private static void addFieldDefinitionToRecord(FieldDefinition definition, String section,
                                                    FieldDefinitionsRecord record) {
         if (!record.addFieldDefinition(section, definition, false)) {
@@ -496,18 +772,11 @@ public class ImportWorkflowUtils {
                 definition.getFieldName(), definition.getColumnName(), section);
     }
 
-    private static FieldDefinition createNewCustomFieldDefinition(MetadataResolver resolver, String columnName,
+    private static FieldDefinition createNewCustomFieldDefinition(MetadataResolver resolver, String columnHeaderName,
                                                                   String schemaInterpretationString) {
         FieldDefinition definition = new FieldDefinition();
-        // columnName must be set before fieldType.
-        definition.setColumnName(columnName);
-        definition.setFieldType(getFieldTypeFromColumnContent(definition, resolver));
-        String escapedColumnName = StringEscapeUtils.escapeHtml4(columnName);
-        if (!columnName.equals(escapedColumnName)) {
-            definition.setColumnName(escapedColumnName);
-        }
-        // TODO(jwinter): Should we be setting ScreenName for Custom Fields?
-        //recordDefinition.setScreenName(columnName);
+        setFieldTypeFromColumnContent(resolver, columnHeaderName, definition);
+        definition.setColumnName(StringEscapeUtils.escapeHtml4(columnHeaderName));
         definition.setInCurrentImport(true);
         definition.setRequired(false);
         definition.setApprovedUsage(Arrays.asList(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE));
@@ -596,23 +865,8 @@ public class ImportWorkflowUtils {
 
             // Iterate through each field definition in the Spec section.
             for (FieldDefinition specDefinition : section.getValue()) {
-                if (specDefinition == null) {
-                    log.error("During spec iteration, found null FieldDefinition in section " + section.getKey());
-                    throw new IllegalArgumentException("During spec iteration, found null FieldDefinition in section " +
-                            section.getKey());
-                } else if (StringUtils.isBlank(specDefinition.getFieldName())) {
-                    log.error("During spec iteration, found FieldDefinition with null fieldName in section "
-                            + section.getKey());
-                    throw new IllegalArgumentException("During spec iteration, found FieldDefinition with null fieldName in section "
-                            + section.getKey());
-                } else if (CollectionUtils.isEmpty(specDefinition.getMatchingColumnNames())) {
-                    log.error("During spec iteration, found FieldDefinition with null/empty matchingColumnNames in section "
-                            + section.getKey());
-                    throw new IllegalArgumentException("During spec iteration, found FieldDefinition with null/empty matchingColumnNames in section "
-                            + section.getKey());
-                }
+                validateSpecFieldDefinition(section.getKey(), specDefinition);
 
-                log.info("Spec section: " + section.getKey() + "  fieldName: " + specDefinition.getFieldName());
                 // Convert Spec fieldNames to Avro friendly format if necessary.
                 String avroFieldName = convertFieldNameToAvroFriendlyFormat(specDefinition.getFieldName());
                 if (!avroFieldName.equals(specDefinition.getFieldName())) {
@@ -629,7 +883,7 @@ public class ImportWorkflowUtils {
                 for (String columnName : columnHeaderNames) {
                     // Check if the standardized column name matches any of the standardized accepted names for this
                     // field.
-                    if (doesColumnNameMatch(columnName, specDefinition)) {
+                    if (doesColumnNameMatch(columnName, specDefinition.getMatchingColumnNames())) {
                         log.info("Existing field " + recordDefinition.getFieldName() + " matched column " +
                                 columnName);
 
@@ -672,212 +926,4 @@ public class ImportWorkflowUtils {
         }
         return fieldDefinitionsRecord;
     }
-
-    // OLD CODE, KEEP AROUND UNTIL CONFIRMED TO BE UNNEEDED
-    // Requires Attribute class to have property Spec Section Name to work.
-    /*
-    public static FieldDefinitionsRecord createFieldDefinitionsRecordFromSpecAndTableOld(
-            ImportWorkflowSpec spec, Table existingTable, MetadataResolver resolver) {
-        FieldDefinitionsRecord fieldDefinitionsRecord = new FieldDefinitionsRecord();
-        // For now, if the Spec is null, return an empty result.
-        if (spec == null) {
-            return fieldDefinitionsRecord;
-        }
-
-        // Get column header names from imported file.
-        Set<String> columnHeaderNames = resolver.getHeaderFields();
-
-        // DEBUG
-        String existingColumnHeaders = "Existing column headers are:\n";
-        for (String headerName : columnHeaderNames) {
-            existingColumnHeaders += "    " + headerName + "\n";
-        }
-        log.info(existingColumnHeaders);
-
-        // Create a data structure to hold FieldDefinitions based on existing template Attributes until the Spec is
-        // processed.
-        // Map<fieldName, Pair<specSectionName, FieldDefinition>>
-        Map<String, FieldDefinition> fieldNameToDefinitionMap = new HashMap<>();
-
-        if (existingTable != null) {
-            for (Attribute attribute : existingTable.getAttributes()) {
-                FieldDefinition fieldDefinition = new FieldDefinition();
-                fieldDefinition.setFieldName(attribute.getName());
-                fieldDefinition.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(
-                        attribute.getPhysicalDataType()));
-                fieldDefinition.setColumnName(attribute.getDisplayName());
-                fieldDefinition.setRequired(attribute.getRequired());
-                fieldDefinition.setInCurrentImport(columnHeaderNames.contains(attribute.getDisplayName()));
-                fieldDefinition.setDateFormat(attribute.getDateFormatString());
-                fieldDefinition.setTimeFormat(attribute.getTimeFormatString());
-                fieldDefinition.setTimeZone(attribute.getTimezone());
-
-                // Remove column name from set of column header names eligible to match to new fields in the Spec.
-                columnHeaderNames.remove(fieldDefinition.getColumnName());
-
-                // Store FieldDefinitions in a easy to look up data structure, keyed by FieldName.
-                fieldNameToDefinitionMap.put(fieldDefinition.getFieldName(), fieldDefinition);
-                log.info("Adding fieldName " + fieldDefinition.getFieldName() + " to existing field map");
-                // Put the existing FieldDefinitions in the merged record.
-                if (!fieldDefinitionsRecord.addFieldDefinition(attribute.getSpecSectionName(), fieldDefinition,
-                        false)) {
-                    log.info("Could not add FieldDefinition with fieldName " + fieldDefinition.getFieldName() +
-                            " to section " + attribute.getSpecSectionName() + " because of existing record");
-                    throw new IllegalArgumentException(
-                            "Could not add FieldDefinition with fieldName " + fieldDefinition.getFieldName()  +
-                                    " to section " + attribute.getSpecSectionName() + " because of existing record");
-                }
-                log.info("Successfully added Existing fieldName " + fieldDefinition.getFieldName() + " to section " +
-                        attribute.getSpecSectionName());
-            }
-        }
-
-        // Track all the column header names that match with field definitions from the Spec.
-        Set<String> matchedColumnNames = new HashSet<>();
-
-        // Iteration through all the sections in the Spec.
-        for (Map.Entry<String, List<FieldDefinition>> section : spec.getFieldDefinitionsRecordsMap().entrySet()) {
-            if (CollectionUtils.isEmpty(section.getValue())) {
-                continue;
-            }
-
-            // Iterate through each field definition in the Spec section.
-            for (FieldDefinition specDefinition : section.getValue()) {
-                if (specDefinition == null) {
-                    log.error("During spec iteration, found null FieldDefinition in section " + section.getKey());
-                    continue;
-                } else if (StringUtils.isBlank(specDefinition.getFieldName())) {
-                    log.error("During spec iteration, found FieldDefinition with null fieldName in section "
-                            + section.getKey());
-                    continue;
-                } else if (CollectionUtils.isEmpty(specDefinition.getMatchingColumnNames())) {
-                    log.error("During spec iteration, found FieldDefinition with null/empty matchingColumnNames in section "
-                            + section.getKey());
-                    continue;
-                }
-
-                log.info("Spec section: " + section.getKey() + "  fieldName: " + specDefinition.getFieldName());
-                if (fieldNameToDefinitionMap.containsKey(specDefinition.getFieldName())) {
-                    // If the existing template already has a mapping for this field, only the displayName needs to
-                    // be set.
-                    log.info("Found fieldName " + specDefinition.getFieldName() + " in existing field defintions map");
-                    fieldNameToDefinitionMap.get(specDefinition.getFieldName()).setScreenName(
-                            specDefinition.getScreenName());
-                    continue;
-                }
-
-                FieldDefinition recordDefinition = new FieldDefinition();
-                recordDefinition.setFieldName(specDefinition.getFieldName());
-                recordDefinition.setFieldType(specDefinition.getFieldType());
-                recordDefinition.setScreenName(specDefinition.getScreenName());
-                recordDefinition.setRequired(specDefinition.isRequired());
-
-                // Iterate through all the column header names checking if any match accepted names for the Spec's
-                // FieldDefinition.
-                boolean foundMatchingColumn = false;
-                for (String columnName : columnHeaderNames) {
-                    // Check if the standardized column name matches any of the standardized accepted names for this
-                    // field.
-                    if (doesColumnNameMatch(columnName, specDefinition)) {
-                        foundMatchingColumn = true;
-                        columnHeaderNames.remove(columnName);
-                        recordDefinition.setColumnName(columnName);
-
-                        // If there is a match and this field is a date type, autodetect the date and time formats and
-                        // time zone from the column data.
-                        if (UserDefinedType.DATE.equals(recordDefinition.getFieldType())) {
-                            List<String> columnDataFields = resolver.getColumnFieldsByHeader(columnName);
-                            MutableTriple<String, String, String> dateTimeZone = distinguishDateAndTime(
-                                    columnDataFields);
-                            if (dateTimeZone != null) {
-                                recordDefinition.setDateFormat(dateTimeZone.getLeft());
-                                recordDefinition.setTimeFormat(dateTimeZone.getMiddle());
-                                recordDefinition.setTimeZone(dateTimeZone.getRight());
-                            }
-                        }
-                        break;
-                    }
-                }
-                recordDefinition.setInCurrentImport(foundMatchingColumn);
-
-                // Add the record definition to the FieldDefinitionRecord regardless of whether a match was found
-                // among the column header names.
-                if (!fieldDefinitionsRecord.addFieldDefinition(section.getKey(), recordDefinition,
-                        false)) {
-                    log.error("Could not add FieldDefinition with fieldName " + recordDefinition.getFieldName() +
-                            " to section " + section.getKey() + " because of existing record");
-                    throw new IllegalArgumentException(
-                            "Could not add FieldDefinition with fieldName " + recordDefinition.getFieldName()  +
-                                    " to section " + section.getKey() + " because of existing record");
-                }
-                log.info("Successfully added Spec fieldName " + recordDefinition.getFieldName() + " to section " +
-                        section.getKey());
-            }
-        }
-
-        // A FieldDefinition should be created for the remaining column header names which should be added as custom
-        // fields.
-        for (String columnName : columnHeaderNames) {
-            FieldDefinition recordDefinition = new FieldDefinition();
-            recordDefinition.setColumnName(StringEscapeUtils.escapeHtml4(columnName));
-            recordDefinition.setFieldType(getFieldTypeFromColumnContent(recordDefinition, resolver));
-            // TODO(jwinter): Should we be setting ScreenName for Custom Fields?
-            recordDefinition.setScreenName(columnName);
-            recordDefinition.setRequired(false);
-            recordDefinition.setInCurrentImport(true);
-            if (!fieldDefinitionsRecord.addFieldDefinition(CUSTOM_FIELDS, recordDefinition,
-                    false)) {
-                log.error("Could not add FieldDefinition with columnName " + recordDefinition.getColumnName() +
-                        " to section " + CUSTOM_FIELDS + " because of existing record");
-                throw new IllegalArgumentException(
-                        "Could not add FieldDefinition with columnName " + recordDefinition.getColumnName()  +
-                                " to section " + CUSTOM_FIELDS + " because of existing record");
-            }
-            log.info("Successfully added Custom columnName " + recordDefinition.getColumnName() + " to section " +
-                    CUSTOM_FIELDS);
-
-        }
-        return fieldDefinitionsRecord;
-    }
-    */
-
-    // OLD CODE, KEEP AROUND UNTIL CONFIRMED TO BE UNNEEDED
-    // Requires Attribute class to have property Spec Section Name to work.
-    /*
-    public static FieldDefinitionsRecord createFieldDefinitionsRecordFromTable(Table table, MetadataResolver resolver) {
-        FieldDefinitionsRecord fieldDefinitionsRecord = new FieldDefinitionsRecord();
-        if (table == null) {
-            return fieldDefinitionsRecord;
-        }
-
-        // Get column names from imported file.
-        Set<String> columnNames = resolver.getHeaderFields();
-        Set<String> matchedColumnNames = new HashSet<>();
-
-        for (Attribute attribute : table.getAttributes()) {
-            FieldDefinition fieldDefinition = new FieldDefinition();
-            fieldDefinition.setFieldName(attribute.getName());
-            fieldDefinition.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(
-                    attribute.getPhysicalDataType()));
-            //fieldDefinition.setScreenName();
-            fieldDefinition.setColumnName(attribute.getDisplayName());
-            fieldDefinition.setRequired(attribute.getRequired());
-            //fieldDefinition.setInCurrentImport();
-            fieldDefinition.setDateFormat(attribute.getDateFormatString());
-            fieldDefinition.setTimeFormat(attribute.getTimeFormatString());
-            fieldDefinition.setTimeZone(attribute.getTimezone());
-
-            if (!fieldDefinitionsRecord.addFieldDefinition(attribute.getSpecSectionName(), fieldDefinition,
-                    false)) {
-                log.error("Could not add FieldDefinition with fieldName " + fieldDefinition.getFieldName() +
-                        " to section " + attribute.getSpecSectionName() + " because of existing record");
-                throw new IllegalArgumentException(
-                        "Could not add FieldDefinition with fieldName " + fieldDefinition.getFieldName()  +
-                                " to section " + attribute.getSpecSectionName() + " because of existing record");
-            }
-        }
-        return fieldDefinitionsRecord;
-    }
-    */
-
 }

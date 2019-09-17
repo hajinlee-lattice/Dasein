@@ -1,0 +1,495 @@
+{
+    "currentFieldDefinitionsRecord": {
+        "fieldDefinitionsRecordsMap": {
+            "Unique ID": [
+                {
+                    "fieldName": "CustomerContactId",
+                    "fieldType": "TEXT",
+                    "screenName": "Contact ID",
+                    "columnName": "Contact Id",
+                    "inCurrentImport": true
+                }
+            ],
+            "Match IDs": [],
+            "Other IDs": [],
+            "Contact Fields": [
+                {
+                    "fieldName": "FirstName",
+                    "fieldType": "TEXT",
+                    "screenName": "First Name",
+                    "columnName": "First Name",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldName": "LastName",
+                    "fieldType": "TEXT",
+                    "screenName": "Last Name",
+                    "columnName": "LastName",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldName": "Title",
+                    "fieldType": "TEXT",
+                    "screenName": "Title",
+                    "inCurrentImport": false
+                },
+                {
+                    "fieldName": "Email",
+                    "fieldType": "TEXT",
+                    "screenName": "Email",
+                    "columnName": "EmailAddress",
+                    "inCurrentImport": true
+                }
+            ],
+            "Analysis Fields": [
+                {
+                    "fieldName": "LeadSource",
+                    "fieldType": "TEXT",
+                    "screenName": "Lead Source",
+                    "inCurrentImport": false
+                },
+                {
+                    "fieldName": "LeadType",
+                    "fieldType": "TEXT",
+                    "screenName": "Lead Type",
+                    "columnName": "LeadType",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldName": "DoNotCall",
+                    "fieldType": "BOOLEAN",
+                    "screenName": "Has Opted Out of Phone Calls",
+                    "columnName": "Do_Not_Call",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldName": "CreatedDate",
+                    "fieldType": "DATE",
+                    "screenName": "Created Date",
+                    "columnName": "CreatedDate",
+                    "inCurrentImport": true,
+                    "dateFormat": "MM/DD/YYYY"
+                },
+                {
+                    "fieldName": "LastModifiedDate",
+                    "fieldType": "DATE",
+                    "screenName": "Last Modified Date",
+                    "inCurrentImport": false
+                }
+            ],
+            "Match to Accounts - ID": [
+                {
+                    "fieldName": "CustomerAccountId",
+                    "fieldType": "TEXT",
+                    "screenName": "Unique Account Identifier",
+                    "columnName": "AccountExternalId",
+                    "inCurrentImport": true
+                }
+            ],
+            "Match to Accounts - Fields": [
+                {
+                    "fieldName": "Website",
+                    "fieldType": "TEXT",
+                    "screenName": "Website",
+                    "columnName": "Domain",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldName": "CompanyName",
+                    "fieldType": "TEXT",
+                    "screenName": "Company Name",
+                    "inCurrentImport": false
+                },
+                {
+                    "fieldName": "DUNS",
+                    "fieldType": "TEXT",
+                    "screenName": "D-U-N-S",
+                    "inCurrentImport": false
+                },
+                {
+                    "fieldName": "Country",
+                    "fieldType": "TEXT",
+                    "screenName": "Country",
+                    "columnName": "BillingCountry",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldName": "ZipCode",
+                    "fieldType": "TEXT",
+                    "screenName": "Zip Code",
+                    "columnName": "BILLING_ZIP_CODE",
+                    "inCurrentImport": true
+                }
+            ],
+            "Custom Fields": [
+                {
+                    "fieldType": "INTEGER",
+                    "columnName": "Years At Company",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldType": "TEXT",
+                    "columnName": "Job Title",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldType": "TEXT",
+                    "columnName": "Billing City",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldType": "BOOLEAN",
+                    "columnName": "Heir to Throne",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldType": "TEXT",
+                    "columnName": "Country",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldType": "NUMBER",
+                    "columnName": "Earnings",
+                    "inCurrentImport": true
+                },
+                {
+                    "fieldType": "TEXT",
+                    "columnName": "Last Name",
+                    "inCurrentImport": true
+                }
+            ]
+        }
+    },
+    "importWorkflowSpec": {
+        "fieldDefinitionsRecordsMap": {
+            "Unique ID": [
+                {
+                    "fieldName": "CustomerContactId",
+                    "fieldType": "TEXT",
+                    "screenName": "Contact ID",
+                    "matchingColumnNames": [
+                        "ID",
+                        "CONTACT",
+                        "CONTACT ID",
+                        "EXTERNAL ID"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "logicalDataType": "Id",
+                    "fundamentalType": "ALPHA"
+                }
+            ],
+            "Match IDs": [],
+            "Other IDs": [],
+            "Contact Fields": [
+                {
+                    "fieldName": "FirstName",
+                    "fieldType": "TEXT",
+                    "screenName": "First Name",
+                    "matchingColumnNames": [
+                        "FIRST NAME"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA",
+                    "subcategory": "Account Information"
+                },
+                {
+                    "fieldName": "LastName",
+                    "fieldType": "TEXT",
+                    "screenName": "Last Name",
+                    "matchingColumnNames": [
+                        "LAST NAME"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA",
+                    "subcategory": "Account Information"
+                },
+                {
+                    "fieldName": "Title",
+                    "fieldType": "TEXT",
+                    "screenName": "Title",
+                    "matchingColumnNames": [
+                        "TITLE"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "Model"
+                    ],
+                    "fundamentalType": "ALPHA",
+                    "subcategory": "Account Information"
+                },
+                {
+                    "fieldName": "Email",
+                    "fieldType": "TEXT",
+                    "screenName": "Email",
+                    "matchingColumnNames": [
+                        "EMAIL",
+                        "EMAIL ADDRESS"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "EMAIL",
+                    "statisticalType": "nominal"
+                }
+            ],
+            "Analysis Fields": [
+                {
+                    "fieldName": "LeadSource",
+                    "fieldType": "TEXT",
+                    "screenName": "Lead Source",
+                    "matchingColumnNames": [
+                        "LEAD SOURCE"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "ModelAndAllInsights"
+                    ],
+                    "fundamentalType": "ALPHA",
+                    "statisticalType": "nominal",
+                    "subcategory": "Account Information"
+                },
+                {
+                    "fieldName": "LeadType",
+                    "fieldType": "TEXT",
+                    "screenName": "Lead Type",
+                    "matchingColumnNames": [
+                        "LEAD TYPE"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA"
+                },
+                {
+                    "fieldName": "DoNotCall",
+                    "fieldType": "BOOLEAN",
+                    "screenName": "Has Opted Out of Phone Calls",
+                    "matchingColumnNames": [
+                        "DO NOT CALL"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "BOOLEAN"
+                },
+                {
+                    "fieldName": "CreatedDate",
+                    "fieldType": "DATE",
+                    "screenName": "Created Date",
+                    "matchingColumnNames": [
+                        "CREATED DATE"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "logicalDataType": "Date",
+                    "fundamentalType": "DATE"
+                },
+                {
+                    "fieldName": "LastModifiedDate",
+                    "fieldType": "DATE",
+                    "screenName": "Last Modified Date",
+                    "matchingColumnNames": [
+                        "LAST MODIFIED DATE",
+                        "LAST MODIFIED"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "logicalDataType": "Date",
+                    "fundamentalType": "DATE"
+                }
+            ],
+            "Match to Accounts - ID": [
+                {
+                    "fieldName": "CustomerAccountId",
+                    "fieldType": "TEXT",
+                    "screenName": "Unique Account Identifier",
+                    "matchingColumnNames": [
+                        "ACCOUNT ID",
+                        "ACCOUNT EXTERNAL ID",
+                        "ACCOUNT"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "logicalDataType": "Id",
+                    "fundamentalType": "ALPHA"
+                }
+            ],
+            "Match to Accounts - Fields": [
+                {
+                    "fieldName": "Website",
+                    "fieldType": "TEXT",
+                    "screenName": "Website",
+                    "matchingColumnNames": [
+                        "WEBSITE",
+                        "DOMAIN"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA",
+                    "statisticalType": "nominal"
+                },
+                {
+                    "fieldName": "CompanyName",
+                    "fieldType": "TEXT",
+                    "screenName": "Company Name",
+                    "matchingColumnNames": [
+                        "COMPANY",
+                        "COMPANY NAME",
+                        "ACCOUNT NAME"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA"
+                },
+                {
+                    "fieldName": "DUNS",
+                    "fieldType": "TEXT",
+                    "screenName": "D-U-N-S",
+                    "matchingColumnNames": [
+                        "DUNS",
+                        "DUNS NUMBER"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA"
+                },
+                {
+                    "fieldName": "Country",
+                    "fieldType": "TEXT",
+                    "screenName": "Country",
+                    "matchingColumnNames": [
+                        "COUNTRY",
+                        "BILLING COUNTRY"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA"
+                },
+                {
+                    "fieldName": "ZipCode",
+                    "fieldType": "TEXT",
+                    "screenName": "Zip Code",
+                    "matchingColumnNames": [
+                        "ZIP",
+                        "ZIP CODE",
+                        "POSTAL CODE",
+                        "BILLING ZIP",
+                        "BILLING ZIP CODE",
+                        "BILLING POSTAL CODE"
+                    ],
+                    "required": false,
+                    "approvedUsage": [
+                        "None"
+                    ],
+                    "fundamentalType": "ALPHA"
+                }
+            ],
+            "Custom Fields": []
+        },
+        "systemType": "Test",
+        "systemObject": "Contacts"
+    },
+    "existingFieldDefinitionsMap": {},
+    "autodetectionResultsMap": {
+        "Years At Company": {
+            "fieldType": "INTEGER",
+            "columnName": "Years At Company"
+        },
+        "Do_Not_Call": {
+            "fieldType": "BOOLEAN",
+            "columnName": "Do_Not_Call"
+        },
+        "First Name": {
+            "fieldType": "TEXT",
+            "columnName": "First Name"
+        },
+        "LeadType": {
+            "fieldType": "TEXT",
+            "columnName": "LeadType"
+        },
+        "Job Title": {
+            "fieldType": "TEXT",
+            "columnName": "Job Title"
+        },
+        "EmailAddress": {
+            "fieldType": "TEXT",
+            "columnName": "EmailAddress"
+        },
+        "Billing City": {
+            "fieldType": "TEXT",
+            "columnName": "Billing City"
+        },
+        "BillingCountry": {
+            "fieldType": "TEXT",
+            "columnName": "BillingCountry"
+        },
+        "Heir to Throne": {
+            "fieldType": "BOOLEAN",
+            "columnName": "Heir to Throne"
+        },
+        "CreatedDate": {
+            "fieldType": "DATE",
+            "columnName": "CreatedDate",
+            "dateFormat": "MM/DD/YYYY"
+        },
+        "Country": {
+            "fieldType": "TEXT",
+            "columnName": "Country"
+        },
+        "LastName": {
+            "fieldType": "TEXT",
+            "columnName": "LastName"
+        },
+        "AccountExternalId": {
+            "fieldType": "INTEGER",
+            "columnName": "AccountExternalId"
+        },
+        "Contact Id": {
+            "fieldType": "INTEGER",
+            "columnName": "Contact Id"
+        },
+        "Earnings": {
+            "fieldType": "NUMBER",
+            "columnName": "Earnings"
+        },
+        "Last Name": {
+            "fieldType": "TEXT",
+            "columnName": "Last Name"
+        },
+        "BILLING_ZIP_CODE": {
+            "fieldType": "INTEGER",
+            "columnName": "BILLING_ZIP_CODE"
+        },
+        "Domain": {
+            "fieldType": "TEXT",
+            "columnName": "Domain"
+        }
+    },
+    "otherTemplateDataMap": {}
+}
