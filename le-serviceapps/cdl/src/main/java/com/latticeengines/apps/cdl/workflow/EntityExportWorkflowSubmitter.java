@@ -64,11 +64,12 @@ public class EntityExportWorkflowSubmitter extends WorkflowSubmitter {
     @VisibleForTesting
     private EntityExportWorkflowConfiguration configure(String customerSpace, EntityExportRequest request,
                                                         AtlasExport atlasExport, Boolean saveToDropfolder) {
-        return new EntityExportWorkflowConfiguration.Builder() //
-                .customer(CustomerSpace.parse(customerSpace)) //
-                .dataCollectionVersion(request.getDataCollectionVersion()) //
-                .compressResult(true) //
-                .saveToDropfolder(saveToDropfolder) //
+        return new EntityExportWorkflowConfiguration.Builder()
+                .customer(CustomerSpace.parse(customerSpace))
+                .userId(atlasExport.getCreatedBy())
+                .dataCollectionVersion(request.getDataCollectionVersion())
+                .compressResult(true)
+                .saveToDropfolder(saveToDropfolder)
                 .atlasExportId(atlasExport.getUuid())
                 .build();
     }
