@@ -76,6 +76,8 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
+import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -547,17 +549,14 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
+        boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
         for (User user : users) {
-            if (result.equals("COMPLETED")) {
-                if (AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) {
-                    emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
-                } else if (user.getEmail().equals(emailInfo.getUserId())) {
+            if (result.equals("COMPLETED") && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+                if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) || user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
                 }
-            } else if (result.equals("FAILED")) {
-                if (AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) {
-                    emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);
-                } else if (user.getEmail().equals(emailInfo.getUserId())) {
+            } else if (result.equals("FAILED") && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
+                if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) || user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);
                 }
             }
@@ -650,10 +649,31 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
-
+        log.info("tenant {} notification_level is: {}, notification_type is: {}.", tenant.getId(),
+                tenant.getNotificationLevel().name(), tenant.getNotificationType());
+        boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
         for (User user : users) {
-            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+            if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser()))
+                    || (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
+                switch (result.toUpperCase()) {
+                    case "FAILED":
+                        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
+                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                        }
+                        break;
+                    case "SUCCESS":
+                        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                        }
+                        break;
+                    case "IN_PROGRESS":
+                        if ((tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0 && StringUtils.isEmpty(emailInfo.getErrorMsg())) ||
+                                (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.WARNING) >= 0 && StringUtils.isNotEmpty(emailInfo.getErrorMsg()))) {
+                            emailService.sendIngestionStatusEmail(user, tenant, appPublicUrl, result, emailInfo);
+                        }
+                        break;
+                    default: break;
+                }
             }
         }
     }
@@ -666,9 +686,13 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody S3ImportEmailInfo emailInfo, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
-        for (User user : users) {
-            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                emailService.sendS3TemplateCreateEmail(user, tenant, appPublicUrl, emailInfo);
+        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+            boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
+            for (User user : users) {
+                if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser()))
+                        || (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
+                    emailService.sendS3TemplateCreateEmail(user, tenant, appPublicUrl, emailInfo);
+                }
             }
         }
     }
@@ -682,9 +706,13 @@ public class InternalResource extends InternalResourceBase {
         List<User> users = userService.getUsers(tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
 
-        for (User user : users) {
-            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
-                emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, emailInfo);
+        if (tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+            boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
+            for (User user : users) {
+                if ((onlyCurrentUser && user.getEmail().equalsIgnoreCase(emailInfo.getUser())) ||
+                        (!onlyCurrentUser && user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name()))) {
+                    emailService.sendS3TemplateUpdateEmail(user, tenant, appPublicUrl, emailInfo);
+                }
             }
         }
     }

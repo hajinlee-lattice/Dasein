@@ -20,6 +20,11 @@ public class EntityExportWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
+        public Builder userId(String userId) {
+            configuration.setUserId(userId);
+            return this;
+        }
+
         public Builder dataCollectionVersion(DataCollection.Version version) {
             importS3.setVersion(version);
             step.setDataCollectionVersion(version);

@@ -34,4 +34,6 @@ public interface TenantService {
 
     void setNotificationStateByTenantId(String tenantId, String notificationLevel);
 
+    void setNotificationTypeByTenantId(String tenantId, String notificationType);
+
 }

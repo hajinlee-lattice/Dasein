@@ -21,4 +21,6 @@ public interface TenantEntityMgr extends BaseEntityMgrRepository<Tenant, Long> {
     List<Tenant> findAllByType(TenantType type);
 
     void setNotificationStateByTenantId(String tenantId, String notificationLevel);
+
+    void setNotificationTypeByTenantId(String tenantId, String notificationType);
 }

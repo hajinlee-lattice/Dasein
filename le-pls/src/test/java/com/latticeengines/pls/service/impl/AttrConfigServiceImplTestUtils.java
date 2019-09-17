@@ -902,6 +902,15 @@ public class AttrConfigServiceImplTestUtils {
                 .put(ValidationErrors.Type.INVALID_USAGE_CHANGE, Arrays.asList("")) //
                 .build());
 
+        // add one validation that only contains warning, the request still will be regarded as error
+        AttrValidation validation3 = new AttrValidation();
+        validation3.setAttrName(attrName1);
+        validation3.setSubcategory(subcategory1);
+        ImpactWarnings impactWarnings = new ImpactWarnings();
+        validation3.setImpactWarnings(impactWarnings);
+        validations.add(validation3);
+        impactWarnings.setWarnings(ImmutableMap.<ImpactWarnings.Type, List<String>>builder().put(ImpactWarnings.Type.IMPACTED_SEGMENTS, Arrays.asList(
+                "seg1", "seg2", "seg3")).build());
         return attrConfigRequest;
     }
 
