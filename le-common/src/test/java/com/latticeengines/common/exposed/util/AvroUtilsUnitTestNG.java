@@ -279,8 +279,7 @@ public class AvroUtilsUnitTestNG {
                 Arrays.asList(obj));
 
         // convert generic record back to object
-        TestAvroConversion converted = new TestAvroConversion();
-        converted = AvroUtils.genericRecordToObject(records.get(0), TestAvroConversion.class, converted);
+        TestAvroConversion converted = AvroUtils.genericRecordToObject(records.get(0), TestAvroConversion.class);
 
         validateObjectGenericRecordConversion(obj, converted);
     }
