@@ -34,7 +34,8 @@ public interface EntityMatchVersionService {
     int getNextVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant);
 
     /**
-     * Increase the current match version for given environment and tenant.
+     * (a) Set the current match version to next version and (b) increase next
+     * version for given environment and tenant.
      *
      * @param environment
      *            target environment
@@ -45,6 +46,19 @@ public interface EntityMatchVersionService {
      * @return match version after the increment
      */
     int bumpVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant);
+
+    /**
+     * Increase next version for given environment and tenant.
+     *
+     * @param environment
+     *            target environment
+     * @param tenant
+     *            target tenant, should have non-null {@link Tenant#getPid()} field
+     * @throws ConcurrentModificationException
+     *             multiple clients modifying version at the same time
+     * @return next match version after the increment
+     */
+    int bumpNextVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant);
 
     /**
      * Set current version to a desired value. The target version should be one of

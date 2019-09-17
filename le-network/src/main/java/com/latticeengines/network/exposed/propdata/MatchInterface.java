@@ -30,6 +30,15 @@ public interface MatchInterface {
     BumpVersionResponse bumpVersion(@NotNull BumpVersionRequest request);
 
     /**
+     * Client for MatchResource#bumpNextVersion API
+     *
+     * @param request
+     *            request object, should not be {@literal null}
+     * @return current version of all requested environments after bumped up
+     */
+    BumpVersionResponse bumpNextVersion(@NotNull BumpVersionRequest request);
+
+    /**
      * Client for MatchResource#publishEntity API
      * 
      * @param requests

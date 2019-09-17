@@ -251,11 +251,26 @@ public class MatchResource {
     @ResponseBody
     @ApiOperation(value = "Bump up entity match version of a target tenant in a list of specified environments")
     public BumpVersionResponse bumpVersion(@RequestBody BumpVersionRequest request) {
+        return bumpVersion(request, false);
+    }
+
+    @PostMapping(value = "/entity/versions/next")
+    @ResponseBody
+    @ApiOperation(value = "Bump up next entity match version of a target tenant in a list of specified environments")
+    public BumpVersionResponse bumpNextVersion(@RequestBody BumpVersionRequest request) {
+        return bumpVersion(request, true);
+    }
+
+    /*
+     * set nextVersionOnly to true to bump next version only and not current version
+     */
+    private BumpVersionResponse bumpVersion(@RequestBody BumpVersionRequest request, boolean nextVersionOnly) {
         validateBumpVersionRequest(request);
         Tenant tenant = request.getTenant();
         // env => entity match version after bump up operation
         Map<EntityMatchEnvironment, Integer> versionMap = request.getEnvironments().stream().distinct().map(env -> {
-            int version = entityMatchVersionService.bumpVersion(env, tenant);
+            int version = nextVersionOnly ? entityMatchVersionService.bumpNextVersion(env, tenant)
+                    : entityMatchVersionService.bumpVersion(env, tenant);
             return Pair.of(env, version);
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1));
 

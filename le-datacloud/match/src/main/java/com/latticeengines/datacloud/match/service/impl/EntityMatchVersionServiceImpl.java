@@ -93,17 +93,32 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
 
     @Override
     public int bumpVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
+        return bumpVersion(environment, tenant, true);
+    }
+
+    @Override
+    public int bumpNextVersion(EntityMatchEnvironment environment, Tenant tenant) {
+        return bumpVersion(environment, tenant, false);
+    }
+
+    /*-
+     * if bumpBothVersions is true, set current version to next version and incr next version by 1
+     * otherwise only incr next version by 1
+     */
+    private int bumpVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant,
+            boolean bumpBothVersions) {
         tenant = EntityMatchUtils.newStandardizedTenant(tenant);
         initCache();
         PrimaryKey key = buildKey(environment, tenant);
         Item item = dynamoItemService.getItem(tableName, key);
+        int currVersion = item == null ? DEFAULT_VERSION : item.getInt(ATTR_VERSION);
         int nextVersion = getNextVersion(item);
         UpdateItemExpressionSpec updateSpec = optimisticLocking(new ExpressionSpecBuilder(), item) //
-                .addUpdate(N(ATTR_VERSION).set(nextVersion)) //
+                .addUpdate(N(ATTR_VERSION).set(bumpBothVersions ? nextVersion : currVersion)) //
                 .addUpdate(N(ATTR_NEXT_VERSION).set(nextVersion + 1)) //
                 .buildForUpdate();
-
-        return updateWithSpec(updateSpec, key, tenant, environment);
+        return updateWithSpec(updateSpec, key, tenant, environment,
+                bumpBothVersions ? ATTR_VERSION : ATTR_NEXT_VERSION);
     }
 
     @Override
@@ -121,7 +136,7 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
         UpdateItemExpressionSpec updateSpec = optimisticLocking(new ExpressionSpecBuilder(), item) //
                 .addUpdate(N(ATTR_VERSION).set(version)) //
                 .buildForUpdate();
-        updateWithSpec(updateSpec, key, tenant, environment);
+        updateWithSpec(updateSpec, key, tenant, environment, ATTR_VERSION);
     }
 
     @Override
@@ -178,7 +193,7 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     }
 
     private int updateWithSpec(@NotNull UpdateItemExpressionSpec updateSpec, @NotNull PrimaryKey key,
-            @NotNull Tenant tenant, @NotNull EntityMatchEnvironment environment) {
+            @NotNull Tenant tenant, @NotNull EntityMatchEnvironment environment, @NotNull String returnCol) {
         try {
             UpdateItemSpec spec = new UpdateItemSpec().withPrimaryKey(key) //
                     .withExpressionSpec(updateSpec) //
@@ -188,7 +203,7 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
             Preconditions.checkNotNull(result.getItem());
             // clear cache
             versionCache.invalidate(Pair.of(tenant.getId(), environment));
-            return result.getItem().getInt(ATTR_VERSION);
+            return result.getItem().getInt(returnCol);
         } catch (ConditionalCheckFailedException e) {
             throw new ConcurrentModificationException(e);
         }
