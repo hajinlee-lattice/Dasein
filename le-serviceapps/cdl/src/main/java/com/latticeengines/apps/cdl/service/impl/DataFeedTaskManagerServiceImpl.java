@@ -69,7 +69,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
@@ -336,11 +335,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
-        TenantEmailNotificationLevel notificationLevel = tenant.getNotificationLevel();
-        log.info("tenant " + tenant.getId() + " notification_level is: " + tenant.getNotificationLevel().name());
-        if (notificationLevel.compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
-            sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
-        }
+        sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
         return appId.toString();
     }
 
