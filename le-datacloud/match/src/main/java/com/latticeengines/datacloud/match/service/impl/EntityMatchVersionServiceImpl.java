@@ -205,9 +205,11 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     }
 
     private int getNextVersion(Item item) {
-        // for backward compatibility, need to check whether next version attr exist
-        if (item == null || !item.hasAttribute(ATTR_NEXT_VERSION)) {
+        if (item == null) {
             return DEFAULT_VERSION + 1;
+        } else if (!item.hasAttribute(ATTR_NEXT_VERSION)) {
+            // for backward compatibility, need to check whether next version attr exist
+            return item.getInt(ATTR_VERSION) + 1;
         }
         return item.getInt(ATTR_NEXT_VERSION);
     }
