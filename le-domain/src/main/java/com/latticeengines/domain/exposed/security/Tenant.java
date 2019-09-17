@@ -95,7 +95,7 @@ public class Tenant implements HasName, HasId<String>, HasPid, Serializable {
     @JsonProperty("notification_type")
     @Column(name = "NOTIFICATION_TYPE", length = 40)
     @Enumerated(EnumType.STRING)
-    private TenantEmailNotificationType notificationType = TenantEmailNotificationType.SINGLE_USER;
+    private TenantEmailNotificationType notificationType = TenantEmailNotificationType.ALL_USER;
 
     public Tenant() {
     }

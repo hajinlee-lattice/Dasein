@@ -126,7 +126,7 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
             tenant.setNotificationLevel(TenantEmailNotificationLevel.ERROR);
         }
         if (tenant.getNotificationType() == null) {
-            tenant.setNotificationType(TenantEmailNotificationType.SINGLE_USER);
+            tenant.setNotificationType(TenantEmailNotificationType.ALL_USER);
         }
         super.create(tenant);
     }
