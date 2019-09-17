@@ -66,10 +66,20 @@ public interface EntityMatchVersionService {
     void setVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant, int version);
 
     /**
+     * Invalidate version cache for designated tenant.
+     *
+     * @param tenant
+     *            target tenant, should have non-null {@link Tenant#getId()} field
+     */
+    void invalidateCache(@NotNull Tenant tenant);
+
+    /**
      * Clear the match version for given environment and tenant
      *
-     * @param environment target environment
-     * @param tenant target tenant, should have non-null {@link Tenant#getPid()} field
+     * @param environment
+     *            target environment
+     * @param tenant
+     *            target tenant, should have non-null {@link Tenant#getId()} field
      */
     void clearVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant);
 }

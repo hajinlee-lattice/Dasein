@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.exposed.matchapi;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
@@ -15,6 +17,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
@@ -76,5 +80,21 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
     public BumpVersionResponse bumpVersion(BumpVersionRequest request) {
         String url = constructUrl("/entity/versions");
         return postKryo("bump_version", url, request, BumpVersionResponse.class);
+    }
+
+    @Override
+    public Map<EntityMatchEnvironment, EntityMatchVersion> getEntityMatchVersions(String customerSpace,
+            boolean clearCache) {
+        String url = constructUrl("/entity/versions/{customerSpace}?{clearCache}", customerSpace, clearCache);
+        Map<?, ?> map = get("get_entity_match_versions", url, Map.class);
+        return JsonUtils.convertMap(map, EntityMatchEnvironment.class, EntityMatchVersion.class);
+    }
+
+    @Override
+    public EntityMatchVersion getEntityMatchVersion(@NotNull String customerSpace, @NotNull EntityMatchEnvironment env,
+            boolean clearCache) {
+        String url = constructUrl("/entity/versions/{customerSpace}/{environment}?{clearCache}", customerSpace,
+                env.name(), clearCache);
+        return get("get_entity_match_version", url, EntityMatchVersion.class);
     }
 }

@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
 
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.TimeUnit;
 
@@ -121,6 +122,18 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
                 .addUpdate(N(ATTR_VERSION).set(version)) //
                 .buildForUpdate();
         updateWithSpec(updateSpec, key, tenant, environment);
+    }
+
+    @Override
+    public void invalidateCache(@NotNull Tenant tenant) {
+        tenant = EntityMatchUtils.newStandardizedTenant(tenant);
+        initCache();
+
+        String tenantId = tenant.getId();
+        Arrays.stream(EntityMatchEnvironment.values()).forEach(env -> {
+            Pair<String, EntityMatchEnvironment> cacheKey = Pair.of(tenantId, env);
+            versionCache.invalidate(cacheKey);
+        });
     }
 
     @Override
