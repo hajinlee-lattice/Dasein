@@ -232,7 +232,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     void setGrapherContext() {
         List<Action> actions = getActions();
-        grapherContext.setDataCloudChanged(checkDataCloudChange());
+        boolean[] ldcChanges = checkDataCloudChange();
+        grapherContext.setDataCloudChanged(ldcChanges[0]);
+        grapherContext.setDataCloudRefresh(ldcChanges[1]);
+        grapherContext.setDataCloudNew(ldcChanges[2]);
         grapherContext.setEntitiesRebuildDueToActions(getEntitiesShouldRebuildByActions());
 
         List<Action> attrMgmtActions = getAttrManagementActions(actions);
@@ -261,8 +264,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return RebuildEntitiesProvider.getRebuildEntities(this);
     }
 
-    private boolean checkDataCloudChange() {
+    private boolean[] checkDataCloudChange() {
         boolean changed = false;
+        boolean newLdc = false;
+        boolean weeklyRefresh = false;
         String currentBuildNumber = null, statusBuildNumber = null;
         if (Boolean.TRUE.equals(configuration.getIgnoreDataCloudChange())) {
             log.info("Specified to ignore data cloud change.");
@@ -285,6 +290,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 status.setDataCloudBuildNumber(currentBuildNumber);
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
             }
+            newLdc = status == null || status.getDataCloudBuildNumber() == null
+                    || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber());
         }
 
         if (changed) {
@@ -304,10 +311,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 status = DataCollectionStatusUtils.updateTimeForCategoryChange(status,
                         getLongValueFromContext(PA_TIMESTAMP), Category.INTENT);
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
+                weeklyRefresh = true;
             }
         }
 
-        return changed;
+        return new boolean[] { changed, weeklyRefresh, newLdc };
     }
 
     private void createSystemAction(ActionType type, String description) {

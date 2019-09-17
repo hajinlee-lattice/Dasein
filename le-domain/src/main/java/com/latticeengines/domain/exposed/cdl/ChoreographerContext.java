@@ -21,6 +21,12 @@ public class ChoreographerContext {
     private boolean dataCloudChanged;
 
     @JsonProperty
+    private boolean dataCloudRefresh;
+
+    @JsonProperty
+    private boolean dataCloudNew;
+
+    @JsonProperty
     private boolean hasAccountAttrLifeCycleChange;
 
     @JsonProperty
@@ -52,6 +58,22 @@ public class ChoreographerContext {
 
     public void setDataCloudChanged(boolean dataCloudChanged) {
         this.dataCloudChanged = dataCloudChanged;
+    }
+
+    public boolean isDataCloudRefresh() {
+        return dataCloudRefresh;
+    }
+
+    public void setDataCloudRefresh(boolean dataCloudRefresh) {
+        this.dataCloudRefresh = dataCloudRefresh;
+    }
+
+    public boolean isDataCloudNew() {
+        return dataCloudNew;
+    }
+
+    public void setDataCloudNew(boolean dataCloudNew) {
+        this.dataCloudNew = dataCloudNew;
     }
 
     public boolean isHasAccountAttrLifeCycleChange() {

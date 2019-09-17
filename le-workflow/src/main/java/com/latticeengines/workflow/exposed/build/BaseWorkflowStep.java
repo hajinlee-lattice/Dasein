@@ -172,6 +172,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
     protected static final String RECOMMENDATION_ACCOUNT_DISPLAY_NAMES = "RECOMMENDATION_ACCOUNT_DISPLAY_NAMES";
     protected static final String RECOMMENDATION_CONTACT_DISPLAY_NAMES = "RECOMMENDATION_CONTACT_DISPLAY_NAMES";
+    protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";
