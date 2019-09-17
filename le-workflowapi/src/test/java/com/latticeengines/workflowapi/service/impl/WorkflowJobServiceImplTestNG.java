@@ -52,6 +52,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
@@ -191,7 +192,9 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getWorkflowConfiguration().getCustomerSpace(), shouldEnqueuedWorkflowConfig.getCustomerSpace());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getStatus(), JobStatus.ENQUEUED.name());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getStack(), CamilleEnvironment.getDivision());
+            Assert.assertNotNull(shouldEnqueuedWorkflowJob.getApplicationId());
             Assert.assertEquals(shouldEnqueuedWorkflowJob.getApplicationId(), new FakeApplicationId(workflowJobPid).toString());
+            Assert.assertTrue(ApplicationIdUtils.isFakeApplicationId(shouldEnqueuedWorkflowJob.getApplicationId()));
             Assert.assertNull(shouldEnqueuedWorkflowJob.getEmrClusterId());
             workflowJobEntityMgr.delete(shouldEnqueuedWorkflowJob);
         }

@@ -83,6 +83,12 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
     }
 
     @Override
+    public BumpVersionResponse bumpNextVersion(BumpVersionRequest request) {
+        String url = constructUrl("/entity/versions/next");
+        return postKryo("bump_next_version", url, request, BumpVersionResponse.class);
+    }
+
+    @Override
     public Map<EntityMatchEnvironment, EntityMatchVersion> getEntityMatchVersions(String customerSpace,
             boolean clearCache) {
         String url = constructUrl("/entity/versions/{customerSpace}?{clearCache}", customerSpace, clearCache);

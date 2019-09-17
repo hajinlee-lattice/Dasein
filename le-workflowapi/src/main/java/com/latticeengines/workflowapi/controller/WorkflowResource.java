@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationI
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.JobRequest;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
@@ -260,8 +261,9 @@ public class WorkflowResource {
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
     public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId,
             @RequestParam(required = false) String customerSpace) {
-        if (FakeApplicationId.isFakeApplicationId(applicationId)) {
-            return workflowJobService.getWorkflowExecutionIdByWorkflowPid(customerSpace, FakeApplicationId.toWorkflowJobPid(applicationId));
+        if (ApplicationIdUtils.isFakeApplicationId(applicationId)) {
+            return workflowJobService.getWorkflowExecutionIdByWorkflowPid(customerSpace,
+                    FakeApplicationId.toWorkflowJobPid(applicationId));
         }
         return workflowJobService.getWorkflowExecutionIdByApplicationId(customerSpace, applicationId);
     }
@@ -270,8 +272,9 @@ public class WorkflowResource {
     @ApiOperation(value = "Get status about a submitted workflow from YARN applicationId")
     public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId,
             @RequestParam(required = false) String customerSpace) {
-        if (FakeApplicationId.isFakeApplicationId(applicationId)) {
-            return workflowJobService.getJobByWorkflowPid(customerSpace, FakeApplicationId.toWorkflowJobPid(applicationId), true);
+        if (ApplicationIdUtils.isFakeApplicationId(applicationId)) {
+            return workflowJobService.getJobByWorkflowPid(customerSpace,
+                    FakeApplicationId.toWorkflowJobPid(applicationId), true);
         }
         return workflowJobService.getJobByApplicationId(customerSpace, applicationId, true);
     }

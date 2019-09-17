@@ -24,8 +24,9 @@ public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctiona
     private static final Tenant TEST_BASIC_OPERATION_TENANT = new Tenant("test_version_basic_operation");
     private static final Tenant TEST_CACHE_TENANT = new Tenant("test_version_cache");
     private static final Tenant TEST_SET_VERSION_TENANT = new Tenant("test_version_set_version");
+    private static final Tenant TEST_BUMP_NEXT_VERSION_TENANT = new Tenant("test_bump_next_version");
     private static final List<Tenant> TEST_TENANTS = Arrays.asList(
-            TEST_BASIC_OPERATION_TENANT, TEST_CACHE_TENANT, TEST_SET_VERSION_TENANT);
+            TEST_BASIC_OPERATION_TENANT, TEST_CACHE_TENANT, TEST_SET_VERSION_TENANT, TEST_BUMP_NEXT_VERSION_TENANT);
 
     @Inject
     private EntityMatchVersionServiceImpl entityMatchVersionService;
@@ -91,6 +92,22 @@ public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctiona
         // out of range versions, should fail
         setInvalidVersion(env, tenant, currVersion - 1);
         setInvalidVersion(env, tenant, nextVersion);
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testBumpNextVersion() {
+        EntityMatchEnvironment env = EntityMatchEnvironment.SERVING;
+        Tenant tenant = TEST_BUMP_NEXT_VERSION_TENANT;
+
+        int currVersion = entityMatchVersionService.getCurrentVersion(env, tenant);
+        int nextVersion = entityMatchVersionService.getNextVersion(env, tenant);
+
+        int bumpedNextVersion = entityMatchVersionService.bumpNextVersion(env, tenant);
+
+        Assert.assertNotEquals(bumpedNextVersion, nextVersion);
+        // current version is not changed
+        Assert.assertEquals(entityMatchVersionService.getCurrentVersion(env, tenant), currVersion);
+        Assert.assertEquals(entityMatchVersionService.getNextVersion(env, tenant), bumpedNextVersion);
     }
 
     /*

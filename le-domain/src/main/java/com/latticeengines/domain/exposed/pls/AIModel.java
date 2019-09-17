@@ -15,7 +15,6 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedEntityGraphs;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -30,6 +29,7 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 import io.swagger.annotations.ApiModel;
@@ -80,9 +80,7 @@ public class AIModel extends RatingModel {
     @JsonIgnore
     @Transient
     public ApplicationId getModelingYarnJobId() {
-        if (StringUtils.isNotBlank(modelingJobId))
-            return ApplicationId.fromString(modelingJobId);
-        return null;
+        return ApplicationIdUtils.toApplicationIdObj(modelingJobId);
     }
 
     @JsonProperty("modelingJobId")
@@ -115,8 +113,7 @@ public class AIModel extends RatingModel {
     public void setAdvancedModelingConfigStr(String advancedModelingConfig) {
         AdvancedModelingConfig advancedModelingConfigObj = null;
         if (advancedModelingConfig != null) {
-            advancedModelingConfigObj = JsonUtils.deserialize(advancedModelingConfig,
-                    AdvancedModelingConfig.class);
+            advancedModelingConfigObj = JsonUtils.deserialize(advancedModelingConfig, AdvancedModelingConfig.class);
         }
         this.advancedModelingConfig = advancedModelingConfigObj;
     }
