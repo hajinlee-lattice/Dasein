@@ -377,13 +377,15 @@ public class ModelingFileUploadResource {
 
         try {
             validateFieldDefinitionRequestParameters("Validate", systemName, systemType, systemObject, importFile);
-            validateFieldDefinitionsRequestBody("Validate", validateRequest);
+            validateFieldDefinitionsRequestBody("Validate", validateRequest.getCurrentFieldDefinitionsRecord());
         } catch (LedpException e) {
             return ResponseDocument.failedResponse(e);
         }
 
         ValidateFieldDefinitionsResponse validateResponse = new ValidateFieldDefinitionsResponse();
 
+        Map<String, List<FieldDefinition>> recordsMap =
+                validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap();
         // Decide how to handle the Validation Request for mock.  For now, provide either PASS, WARNING, or ERROR
         // response depending on Template State page number.
         int modulo = systemName.length() % 3;
@@ -392,33 +394,26 @@ public class ModelingFileUploadResource {
         } else if (modulo == 1) {
             validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
 
-            for (Map.Entry<String, List<FieldDefinition>> changeEntry :
-                    validateRequest.getFieldDefinitionsChangesMap().entrySet()) {
+            for (Map.Entry<String, List<FieldDefinition>> changeEntry : recordsMap.entrySet()) {
                 List<FieldValidationMessage> warningList = new ArrayList<>();
                 for (FieldDefinition definition : changeEntry.getValue()) {
-                    FieldValidationMessage message = new FieldValidationMessage();
-                    message.setFieldName(definition.getFieldName());
-                    message.setColumnName(definition.getColumnName());
-                    message.setMessageLevel(FieldValidationMessage.MessageLevel.WARNING);
-                    message.setMessage(definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
-                            definition.getFieldName());
+                    FieldValidationMessage message = new FieldValidationMessage(definition.getFieldName(),
+                            definition.getColumnName(), definition.getColumnName() + " has BLAH BLAH minor issue when mapped to " +
+                            definition.getFieldName(), FieldValidationMessage.MessageLevel.WARNING);
                     warningList.add(message);
                 }
                 validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningList, true);
             }
-            validateResponse.setFieldDefinitionsChangesMap(validateRequest.getFieldDefinitionsChangesMap());
 
         } else {
             validateResponse.setValidationResult(ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
 
             int count = 0;
-            for (Map.Entry<String, List<FieldDefinition>> changeEntry :
-                    validateRequest.getFieldDefinitionsChangesMap().entrySet()) {
+            for (Map.Entry<String, List<FieldDefinition>> changeEntry : recordsMap.entrySet()) {
                 List<FieldValidationMessage> warningErrorList = new ArrayList<>();
                 for (FieldDefinition definition : changeEntry.getValue()) {
-                    FieldValidationMessage message = new FieldValidationMessage();
-                    message.setFieldName(definition.getFieldName());
-                    message.setColumnName(definition.getColumnName());
+                    FieldValidationMessage message = new FieldValidationMessage(definition.getFieldName(),
+                            definition.getColumnName(), null, null);
                     if (count++ % 2 == 0) {
                         message.setMessageLevel(FieldValidationMessage.MessageLevel.ERROR);
                         message.setMessage(definition.getColumnName() + " has OH BOY major problem when mapped to " +
@@ -432,11 +427,9 @@ public class ModelingFileUploadResource {
                 }
                 validateResponse.addFieldValidationMessages(changeEntry.getKey(), warningErrorList, true);
             }
-            validateResponse.setFieldDefinitionsChangesMap(validateRequest.getFieldDefinitionsChangesMap());
         }
 
         // For now, set fieldDefinitionsRecordsMap and fieldDefinitionsChangesMap to the values provided at input.
-        validateResponse.setFieldDefinitionsRecordsMap(validateRequest.getFieldDefinitionsRecordsMap());
 
         //log.error("JAW ------ END Mock Validate Field Definition -----");
 
@@ -503,6 +496,33 @@ public class ModelingFileUploadResource {
             log.error("Fetch Field Definition Failed with Exception: ", e);
             return ResponseDocument.failedResponse(e);
         }
+    }
+
+    // Real API for Import Workflow 2.0 Fetch Field Definitions.
+    // Parameters:
+    //   systemName: The user defined name for the system for which a template is being created, eg. Marketo 1.
+    //   systemType: The type of system for which a template is being created, eg. Salesforce
+    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
+    //   importFile: The name of the CSV file this template is being generated for.
+    // Body:
+    // ValidateFieldDefinitionsRequest representing field definition changes/records
+    @RequestMapping(value = "fielddefinition/validate", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Provide validation result and merged field definition to front end")
+    public ResponseDocument<ValidateFieldDefinitionsResponse> validateFieldDefinitions(
+            @RequestParam(value = "systemName", required = true) String systemName, //
+            @RequestParam(value = "systemType", required = true) String systemType, //
+            @RequestParam(value = "systemObject", required = true) String systemObject, //
+            @RequestParam(value = "importFile", required = true) String importFile, //
+            @RequestBody(required = true) ValidateFieldDefinitionsRequest validateRequest) {
+        ValidateFieldDefinitionsResponse validateFieldDefinitionsResponse = null;
+        try {
+            validateFieldDefinitionsResponse = modelingFileMetadataService.validateFieldDefinitions(systemName,
+                    systemType, systemObject, importFile, validateRequest);
+        } catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
+        return ResponseDocument.successResponse(validateFieldDefinitionsResponse);
     }
 
     // Real API for Import Workflow 2.0 Commit Field Definitions.

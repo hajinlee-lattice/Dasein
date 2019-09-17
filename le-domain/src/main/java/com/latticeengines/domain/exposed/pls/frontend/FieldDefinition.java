@@ -122,6 +122,8 @@ public class FieldDefinition {
     @JsonProperty
     protected String subcategory;
 
+    // read-only property to record whether column name was ignored for validation
+    private Boolean ignored;
 
     //
     // Properties for defining template IDs and linking with external systems.  These are not set for most fields.
@@ -327,6 +329,12 @@ public class FieldDefinition {
 
     public void setExternalSystemName(String externalSystemName) {
         this.externalSystemName = externalSystemName;
+    }
+
+
+    @JsonProperty
+    public Boolean getIgnored() {
+        return ignored;
     }
 
     @Override
