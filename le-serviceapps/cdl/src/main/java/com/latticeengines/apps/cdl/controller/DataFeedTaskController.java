@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
+import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
@@ -36,6 +38,9 @@ public class DataFeedTaskController {
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskController.class);
 
     private final DataFeedTaskManagerService dataFeedTaskManagerService;
+
+    @Inject
+    private DataFeedTaskTemplateService dataFeedTaskTemplateService;
 
     @Inject
     public DataFeedTaskController(DataFeedTaskManagerService dataFeedTaskManagerService) {
@@ -146,9 +151,22 @@ public class DataFeedTaskController {
 
     }
 
+    @PostMapping(value = "/setup/webvisit")
+    @ResponseBody
+    @ApiOperation(value = "Create a WebVist template")
+    public ResponseDocument<Boolean> createWebVisitTemplate(@PathVariable String customerSpace,
+                                                            @RequestBody SimpleTemplateMetadata simpleTemplateMetadata) {
+        try {
+            return ResponseDocument.successResponse(
+                    dataFeedTaskTemplateService.setupWebVisitTemplate(customerSpace, simpleTemplateMetadata));
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
     @PostMapping(value = "/diagnostic/{taskIdentifier}")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Template diagnostic")
     public ResponseDocument<ImportTemplateDiagnostic> templateDiagnostic(@PathVariable String customerSpace,
                                                                          @PathVariable String taskIdentifier) {
         return ResponseDocument.successResponse(dataFeedTaskManagerService.diagnostic(customerSpace, taskIdentifier));
