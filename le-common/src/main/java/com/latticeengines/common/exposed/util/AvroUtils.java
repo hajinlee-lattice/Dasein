@@ -1671,12 +1671,16 @@ public class AvroUtils {
      *            generic record
      * @param cls:
      *            java class of the java object
-     * @param obj:
-     *            java object
      * @return
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T extends Object> T genericRecordToObject(GenericRecord record, Class<T> cls, T obj) {
+    public static <T extends Object> T genericRecordToObject(GenericRecord record, Class<T> cls) {
+        T obj = null;
+        try {
+            obj = cls.newInstance();
+        } catch (InstantiationException | IllegalAccessException e1) {
+            throw new RuntimeException("Fail to instantiate class " + cls.getSimpleName());
+        }
         for (java.lang.reflect.Field field : org.apache.commons.lang3.reflect.FieldUtils.getAllFields(cls)) {
             // Ignore static and synthetic fields
             if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {

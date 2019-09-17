@@ -331,12 +331,8 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             });
             try (AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter)) {
                 for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
-                    list.add(AvroUtils.genericRecordToObject(record, getMetadataColumnClass(),
-                            getMetadataColumnClass().newInstance()));
+                    list.add(AvroUtils.genericRecordToObject(record, getMetadataColumnClass()));
                 }
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(String.format("Fail to load metadata for version %s from S3 prefix %s",
-                        dataCloudVersion, s3Prefix), e);
             }
             timer.setTimerMessage(String.format("Load %d metadata for version %s from S3 prefix %s", list.size(),
                     dataCloudVersion, s3Prefix));
