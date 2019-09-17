@@ -6,6 +6,8 @@ shopt -s expand_aliases
 echo "Sourcing aliases file"
 source ${WSHOME}/le-dev/aliases
 
+cfgbld
+
 CLUSTER_NAME=$(cat ${WSHOME}/le-config/conf/env/devcluster/latticeengines.properties | grep aws.emr.cluster | cut -d = -f 2)
 echo "From properties file, find emr cluster name: ${CLUSTER_NAME}"
 
@@ -29,8 +31,6 @@ CLUSTER_ID=$(aws emr list-clusters --region us-east-1 --query 'Clusters[?Name==`
 #Query to get the Master Node IP based on the Cluster ID
 EMR_HOST_NAME=$(aws emr list-instances --region us-east-1 --cluster-id ${CLUSTER_ID} --instance-group-types MASTER | jq -r .Instances[0].PrivateIpAddress)
 echo "Find emr master ip: ${EMR_HOST_NAME}"
-
-cfgbld
 
 PROP_FILE=${WSHOME}/le-config/conf/env/devcluster/latticeengines.properties
 if [[ $(uname) == 'Darwin' ]]; then
