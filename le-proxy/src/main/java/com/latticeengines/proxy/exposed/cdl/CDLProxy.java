@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -514,6 +515,19 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException(
                     "Failed to start entityExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean createWebVisitTemplate(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/webvisit",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<Boolean> responseDoc = post("create webvisit template", url, simpleTemplateMetadata,
+                ResponseDocument.class);
+        if (responseDoc.isSuccess()) {
+            return responseDoc.getResult();
+        } else {
+            return false;
         }
     }
 
