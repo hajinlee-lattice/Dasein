@@ -11,15 +11,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -269,5 +274,118 @@ public class AvroUtilsUnitTestNG {
                 { "aa ", false }, //
                 { "99 ", false }, //
         };
+    }
+
+    @Test(groups = "unit")
+    public void testObjectGenericRecordConversion() {
+        TestAvroConversion obj = createObjectGenericRecordConversion();
+        List<GenericRecord> records = AvroUtils.objectsToGenericRecords(TestAvroConversion.class,
+                Arrays.asList(obj));
+
+        // convert generic record back to object
+        TestAvroConversion converted = new TestAvroConversion();
+        converted = AvroUtils.genericRecordToObject(records.get(0), TestAvroConversion.class, converted);
+
+        validateObjectGenericRecordConversion(obj, converted);
+    }
+
+    private TestAvroConversion createObjectGenericRecordConversion() {
+        TestAvroConversion obj = new TestAvroConversion();
+        obj.shortAttr = (short) 1;
+        obj.intAttr = 2;
+        obj.intWrapAttr = 3;
+        obj.longAttr = 4L;
+        obj.longWrapAttr = 5L;
+        obj.floatAttr = (float) 6.0;
+        obj.floatWrapAttr = (float) 7.0;
+        obj.doubleAttr = 8.0;
+        obj.doubleWrapAttr = 9.0;
+        obj.boolAttr = true;
+        obj.boolWrapAttr = Boolean.TRUE;
+        obj.strAttr = "ABC";
+        obj.enumAttr = TestAvroConversionEnum.ENUM1;
+        return obj;
+    }
+
+    private void validateObjectGenericRecordConversion(TestAvroConversion origin,
+            TestAvroConversion converted) {
+        Assert.assertEquals(converted.shortAttr, origin.shortAttr);
+        Assert.assertEquals(converted.intAttr, origin.intAttr);
+        Assert.assertEquals(converted.intWrapAttr, origin.intWrapAttr);
+        Assert.assertEquals(converted.longAttr, origin.longAttr);
+        Assert.assertEquals(converted.longWrapAttr, origin.longWrapAttr);
+        Assert.assertEquals(converted.floatAttr, origin.floatAttr);
+        Assert.assertEquals(converted.floatWrapAttr, origin.floatWrapAttr);
+        Assert.assertEquals(converted.doubleAttr, origin.doubleAttr);
+        Assert.assertEquals(converted.doubleWrapAttr, origin.doubleWrapAttr);
+        Assert.assertEquals(converted.boolAttr, origin.boolAttr);
+        Assert.assertEquals(converted.boolWrapAttr, origin.boolWrapAttr);
+        Assert.assertEquals(converted.strAttr, origin.strAttr);
+        Assert.assertEquals(converted.nullAttr, origin.nullAttr);
+        Assert.assertEquals(converted.enumAttr, origin.enumAttr);
+    }
+
+    private class TestAvroConversion {
+        @SuppressWarnings("unused")
+        public static final String STATIC_ATTR = "STATIC_ATTR";
+
+        private short shortAttr;
+        private int intAttr;
+        private Integer intWrapAttr;
+        private long longAttr;
+        private Long longWrapAttr;
+        private float floatAttr;
+        private Float floatWrapAttr;
+        private double doubleAttr;
+        private Double doubleWrapAttr;
+        private boolean boolAttr;
+        private Boolean boolWrapAttr;
+        private String strAttr;
+        private String nullAttr; // don't set anything to test null
+        private TestAvroConversionEnum enumAttr;
+    }
+
+    public enum TestAvroConversionEnum {
+        ENUM1("Enum1"), ENUM2("Enum2");
+
+        private static Map<String, TestAvroConversionEnum> nameMap;
+        private static Set<String> values;
+
+        static {
+            nameMap = new HashMap<>();
+            for (TestAvroConversionEnum item : TestAvroConversionEnum.values()) {
+                nameMap.put(item.getName(), item);
+            }
+            values = new HashSet<>(
+                    Arrays.stream(values()).map(TestAvroConversionEnum::name).collect(Collectors.toSet()));
+        }
+
+        private final String name;
+
+        TestAvroConversionEnum(String name) {
+            this.name = name;
+        }
+
+        public static TestAvroConversionEnum fromName(String name) {
+            if (StringUtils.isBlank(name)) {
+                return null;
+            }
+            if (values.contains(name.toUpperCase())) {
+                return valueOf(name.toUpperCase());
+            } else if (nameMap.containsKey(name)) {
+                return nameMap.get(name);
+            } else {
+                throw new IllegalArgumentException("Cannot find a TestAvroConversionEnum with name " + name);
+            }
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 }

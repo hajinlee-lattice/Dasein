@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.JDBCType;
@@ -51,10 +52,12 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -660,16 +663,22 @@ public class AvroUtils {
         }
         switch (javaClassName) {
         case "Double":
+        case "double":
             return Type.DOUBLE;
         case "Float":
+        case "float":
             return Type.FLOAT;
         case "Integer":
+        case "int":
+        case "short":
             return Type.INT;
         case "Long":
+        case "long":
             return Type.LONG;
         case "String":
             return Type.STRING;
         case "Boolean":
+        case "boolean":
             return Type.BOOLEAN;
         case "Date":
             return Type.LONG;
@@ -1581,5 +1590,115 @@ public class AvroUtils {
         } else {
             return record.get(field).toString();
         }
+    }
+
+    /**
+     * Convert a java class to an avro schema. Static & synthetic fields are
+     * ignored. Class member MUST be with the type supported in getAvroType()
+     * method (Nested member with customized class type is not supported unless
+     * we add some serialization for it).
+     *
+     * NOTE: Be cautious to use this method. It might not be generic enough to
+     * handle all the classes. Existing test cases are covered in
+     * AvroUtilsUnitTestNG.testObjectGenericRecordConversion()
+     *
+     * @param cls:
+     *            java class
+     * @return avro schema
+     */
+    public static Schema classToSchema(Class<?> cls) {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        for (java.lang.reflect.Field field : FieldUtils.getAllFields(cls)) {
+            int modifiers = field.getModifiers();
+            // Ignore static and synthetic fields
+            if (Modifier.isStatic(modifiers) || field.isSynthetic()) {
+                continue;
+            }
+            columns.add(Pair.of(field.getName(), field.getType().isEnum() ? String.class : field.getType()));
+        }
+        return constructSchema(cls.getSimpleName(), columns);
+    }
+
+    /**
+     * Convert java objects to avro generic records. Static & synthetic fields
+     * are ignored. Class member MUST be with the type supported in
+     * getAvroType() method (Nested member with customized class type is not
+     * supported unless we add some serialization for it).
+     *
+     * NOTE: Be cautious to use this method. It might not be generic enough to
+     * handle all the classes. Existing test cases are covered in
+     * AvroUtilsUnitTestNG.testObjectGenericRecordConversion()
+     *
+     * @param cls:
+     *            java class
+     * @param objects:
+     *            list of java objects to be converted
+     * @return list of avro generic records
+     */
+    public static <T> List<GenericRecord> objectsToGenericRecords(Class<T> cls, List<T> objects) {
+        GenericRecordBuilder builder = new GenericRecordBuilder(classToSchema(cls));
+        return objects.stream().map(object -> {
+            for (java.lang.reflect.Field field : org.apache.commons.lang3.reflect.FieldUtils.getAllFields(cls)) {
+                int modifiers = field.getModifiers();
+                // Ignore static and synthetic fields
+                if (Modifier.isStatic(modifiers) || field.isSynthetic()) {
+                    continue;
+                }
+                try {
+                    Object value = org.apache.commons.lang3.reflect.FieldUtils.readField(field, object, true);
+                    if (field.getType().isEnum() && value != null) {
+                        value = ((Enum<?>) value).name();
+                    }
+                    builder.set(field.getName(), value);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(
+                            "Fail to convert java object in type of " + cls.getSimpleName() + " to generic record", e);
+                }
+            }
+            return builder.build();
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Convert a generic record to a java object with specified java type.
+     * Static & synthetic fields are ignored. Class member MUST be with the type
+     * supported in getAvroType() method (Nested member with customized class
+     * type is not supported unless we add some serialization for it)
+     *
+     * NOTE: Be cautious to use this method. It might not be generic enough to
+     * handle all the classes. Existing test cases are covered in
+     * AvroUtilsUnitTestNG.testObjectGenericRecordConversion()
+     *
+     * @param record:
+     *            generic record
+     * @param cls:
+     *            java class of the java object
+     * @param obj:
+     *            java object
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T extends Object> T genericRecordToObject(GenericRecord record, Class<T> cls, T obj) {
+        for (java.lang.reflect.Field field : org.apache.commons.lang3.reflect.FieldUtils.getAllFields(cls)) {
+            int modifiers = field.getModifiers();
+            // Ignore static and synthetic fields
+            if (Modifier.isStatic(modifiers) || field.isSynthetic()) {
+                continue;
+            }
+            try {
+                Object value = record.get(field.getName());
+                if (value instanceof Utf8 && value != null) {
+                    value = value.toString();
+                }
+                if (field.getType().isEnum() && value != null) {
+                    value = Enum.valueOf((Class<? extends Enum>) field.getType(), value.toString());
+                }
+                org.apache.commons.lang3.reflect.FieldUtils.writeField(field, obj, value, true);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(
+                        "Fail to convert generic record to java object in type of " + cls.getSimpleName(), e);
+            }
+        }
+        return obj;
     }
 }
