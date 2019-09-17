@@ -1678,8 +1678,8 @@ public class AvroUtils {
         T obj = null;
         try {
             obj = cls.newInstance();
-        } catch (InstantiationException | IllegalAccessException e1) {
-            throw new RuntimeException("Fail to instantiate class " + cls.getSimpleName());
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("Fail to instantiate class " + cls.getSimpleName(), e);
         }
         for (java.lang.reflect.Field field : org.apache.commons.lang3.reflect.FieldUtils.getAllFields(cls)) {
             // Ignore static and synthetic fields
