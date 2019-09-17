@@ -320,7 +320,7 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(converted.enumAttr, origin.enumAttr);
     }
 
-    private class TestAvroConversion {
+    static class TestAvroConversion {
         @SuppressWarnings("unused")
         public static final String STATIC_ATTR = "STATIC_ATTR";
 
@@ -342,7 +342,7 @@ public class AvroUtilsUnitTestNG {
 
     // to test that exact enum identifier should be written to generic record
     // instead of display name
-    public enum TestAvroConversionEnum {
+    enum TestAvroConversionEnum {
         ENUM1("Enum1"), ENUM2("Enum2");
 
         private final String name;
