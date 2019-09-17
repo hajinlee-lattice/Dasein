@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
 
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.TimeUnit;
 
@@ -124,6 +125,18 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     }
 
     @Override
+    public void invalidateCache(@NotNull Tenant tenant) {
+        tenant = EntityMatchUtils.newStandardizedTenant(tenant);
+        initCache();
+
+        String tenantId = tenant.getId();
+        Arrays.stream(EntityMatchEnvironment.values()).forEach(env -> {
+            Pair<String, EntityMatchEnvironment> cacheKey = Pair.of(tenantId, env);
+            versionCache.invalidate(cacheKey);
+        });
+    }
+
+    @Override
     public void clearVersion(@NotNull EntityMatchEnvironment environment, @NotNull Tenant tenant) {
         tenant = EntityMatchUtils.newStandardizedTenant(tenant);
         initCache();
@@ -192,9 +205,11 @@ public class EntityMatchVersionServiceImpl implements EntityMatchVersionService 
     }
 
     private int getNextVersion(Item item) {
-        // for backward compatibility, need to check whether next version attr exist
-        if (item == null || !item.hasAttribute(ATTR_NEXT_VERSION)) {
+        if (item == null) {
             return DEFAULT_VERSION + 1;
+        } else if (!item.hasAttribute(ATTR_NEXT_VERSION)) {
+            // for backward compatibility, need to check whether next version attr exist
+            return item.getInt(ATTR_VERSION) + 1;
         }
         return item.getInt(ATTR_NEXT_VERSION);
     }

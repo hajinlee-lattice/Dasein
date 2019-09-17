@@ -1,6 +1,7 @@
 package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ import com.latticeengines.datacloud.match.exposed.service.MatchValidationService
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
@@ -43,6 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -263,6 +266,35 @@ public class MatchResource {
         return response;
     }
 
+    @GetMapping(value = "/entity/versions/{customerSpace}")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve entity match versions of all environments for designated tenant")
+    public Map<EntityMatchEnvironment, EntityMatchVersion> getVersions(
+            @PathVariable("customerSpace") String customerSpace, //
+            @RequestParam(value = "clearCache", required = false) boolean clearCache) {
+        Map<EntityMatchEnvironment, EntityMatchVersion> versions = Arrays.stream(EntityMatchEnvironment.values()) //
+                .map(env -> Pair.of(env, getVersion(customerSpace, env, clearCache))) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        log.info("EntityMatchVersions={} for tenant={}", versions, customerSpace);
+        return versions;
+    }
+
+    @GetMapping(value = "/entity/versions/{customerSpace}/{environment}")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve entity match versions of all environments for designated tenant")
+    public EntityMatchVersion getVersion( //
+            @PathVariable("customerSpace") String customerSpace, //
+            @PathVariable("environment") EntityMatchEnvironment environment, //
+            @RequestParam(value = "clearCache", required = false) boolean clearCache) {
+        Tenant tenant = new Tenant(CustomerSpace.parse(customerSpace).toString());
+        if (clearCache) {
+            entityMatchVersionService.invalidateCache(tenant);
+        }
+        int currentVersion = entityMatchVersionService.getCurrentVersion(environment, tenant);
+        int nextVersion = entityMatchVersionService.getNextVersion(environment, tenant);
+        return new EntityMatchVersion(currentVersion, nextVersion);
+    }
+
     private void validateEntityPublishRequest(EntityPublishRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Please provide non-empty entity publish request");
@@ -291,9 +323,7 @@ public class MatchResource {
         }
         // Validate all requests first instead of finishing some publish
         // requests and failing validation in the middle.
-        requests.forEach(request -> {
-            validateEntityPublishRequest(request);
-        });
+        requests.forEach(this::validateEntityPublishRequest);
     }
 
     private void validateBumpVersionRequest(BumpVersionRequest request) {
