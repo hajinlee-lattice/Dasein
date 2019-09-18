@@ -355,6 +355,7 @@ public enum LedpCode {
     LEDP_18228("Play Launch Channel {0} not found."),
     LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"),
     LEDP_18230("{0} Field Definition Request has invalid body: {1}"),
+    LEDP_18231("No attributes can be exported for export type: {0}."),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
