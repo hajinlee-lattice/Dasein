@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -73,9 +74,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private String orgName2 = "marketo_org";
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
-
-    private Date invalidExpirationDate = Date
-            .from(LocalDate.of(3000, 3, 17).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
@@ -203,8 +201,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(retrieved.getId(), playLaunchChannel1.getId());
         Assert.assertTrue(retrieved.getIsAlwaysOn());
         Assert.assertNotNull(retrieved.getExpirationDate());
-        Assert.assertNotEquals(retrieved.getExpirationDate(), invalidExpirationDate);
-        log.info(retrieved.getExpirationDate().toString());
 
     }
 
@@ -266,7 +262,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         playLaunchChannel.setLaunchType(LaunchType.FULL);
         playLaunchChannel.setId(NamingUtils.randomSuffix("pl", 16));
         playLaunchChannel.setCronScheduleExpression(CRON_EXPRESSION);
-        playLaunchChannel.setExpirationDate(invalidExpirationDate);
+        playLaunchChannel.setExpirationDate(Date.from(new Date().toInstant().plus(Duration.ofHours(2))));
         return playLaunchChannel;
     }
 

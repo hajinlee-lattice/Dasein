@@ -356,6 +356,8 @@ public enum LedpCode {
     LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"),
     LEDP_18230("{0} Field Definition Request has invalid body: {1}"),
     LEDP_18231("No attributes can be exported for export type: {0}."),
+    LEDP_18232("Expiration Date {0} for PlayLaunchChannel is greater than allowed time of 6 months."),
+    LEDP_18233("Expiration Date {0} for PlayLaunchChannel occured in the past."),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
