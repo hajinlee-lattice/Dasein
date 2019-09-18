@@ -125,6 +125,10 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "NEXT_SCHEDULED_LAUNCH")
     private Date nextScheduledLaunch;
 
+    @JsonProperty("expirationDate")
+    @Column(name = "EXPIRATION_DATE")
+    private Date expirationDate;
+
     @JsonProperty("channelConfig")
     @Column(name = "CHANNEL_CONFIG")
     @Lob
@@ -335,6 +339,14 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setNextScheduledLaunch(Date nextScheduledLaunch) {
         this.nextScheduledLaunch = nextScheduledLaunch;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public PlayLaunch getLastLaunch() {
