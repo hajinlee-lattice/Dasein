@@ -85,28 +85,34 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         evaluationDate = parseEvaluationDateStr(configuration);
 
         // 1) setup queries from play and channel settings
-        FrontEndQuery accountQuery = new CampaignFrontEndQueryBuilder.Builder().mainEntity(BusinessEntity.Account)
-                .customerSpace(customerSpace).targetSegmentRestriction(play.getTargetSegment().getAccountRestriction())
+        FrontEndQuery accountQuery = new CampaignFrontEndQueryBuilder.Builder() //
+                .mainEntity(BusinessEntity.Account) //
+                .customerSpace(customerSpace) //
+                .targetSegmentRestriction(play.getTargetSegment().getAccountRestriction()) //
                 .isSupressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
                         && ((SalesforceChannelConfig) channel.getChannelConfig())
-                                .isSupressAccountsWithoutLookupId() == Boolean.TRUE)
-                .bucketsToLaunch(channel.getBucketsToLaunch()).lookupId(channel.getLookupIdMap().getAccountId())
-                .launchUnscored(channel.isLaunchUnscored())
-                .destinationSystemName(channel.getLookupIdMap().getExternalSystemName())
-                .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null)
+                                .isSupressAccountsWithoutLookupId() == Boolean.TRUE) //
+                .bucketsToLaunch(channel.getBucketsToLaunch()) //
+                .lookupId(channel.getLookupIdMap().getAccountId()) //
+                .launchUnscored(channel.isLaunchUnscored()) //
+                .destinationSystemName(channel.getLookupIdMap().getExternalSystemName()) //
+                .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
                 .getCampaignFrontEndQueryBuilder().build();
 
         log.info("Full Account Universe Query: " + accountQuery.toString());
 
-        FrontEndQuery contactQuery = new CampaignFrontEndQueryBuilder.Builder().mainEntity(BusinessEntity.Contact)
-                .customerSpace(customerSpace).targetSegmentRestriction(play.getTargetSegment().getContactRestriction())
+        FrontEndQuery contactQuery = new CampaignFrontEndQueryBuilder.Builder() //
+                .mainEntity(BusinessEntity.Contact) //
+                .customerSpace(customerSpace) //
+                .targetSegmentRestriction(play.getTargetSegment().getContactRestriction()) //
                 .isSupressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
                         && ((SalesforceChannelConfig) channel.getChannelConfig())
                                 .isSupressAccountsWithoutLookupId() == Boolean.TRUE)
-                .bucketsToLaunch(channel.getBucketsToLaunch()).lookupId(channel.getLookupIdMap().getAccountId())
-                .launchUnscored(channel.isLaunchUnscored())
-                .destinationSystemName(channel.getLookupIdMap().getExternalSystemName())
-                .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null)
+                .bucketsToLaunch(channel.getBucketsToLaunch()) //
+                .lookupId(channel.getLookupIdMap().getAccountId()) //
+                .launchUnscored(channel.isLaunchUnscored()) //
+                .destinationSystemName(channel.getLookupIdMap().getExternalSystemName()) //
+                .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
                 .getCampaignFrontEndQueryBuilder().build();
 
         log.info("Full Contact Universe Query: " + contactQuery.toString());
@@ -115,7 +121,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
         SparkJobResult deltaCalculationResult = executeSparkJob(accountQuery, contactQuery, channel);
 
-        // 3) save current launch universe and delta as files
+        // 3) Generate Metadata tables for delta results
         processDeltaCalculationResult(deltaCalculationResult, config);
     }
 
@@ -176,7 +182,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     private SparkJobResult executeSparkJob(FrontEndQuery accountQuery, FrontEndQuery contactQuery,
             PlayLaunchChannel channel) {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(1); // todo: make it 3 later
+        RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         Table previousAccountUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
                 ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
                         channel.getCurrentLaunchedAccountUniverseTable())

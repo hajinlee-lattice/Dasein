@@ -3,8 +3,10 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -71,7 +74,10 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        TestPlaySetupConfig plConfig = new TestPlaySetupConfig.Builder().build();
+        Map<String, Boolean> featureFlags = new HashMap<>();
+        featureFlags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
+        featureFlags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        TestPlaySetupConfig plConfig = new TestPlaySetupConfig.Builder().featureFlags(featureFlags).build();
 
         testPlayCreationHelper.setupTenantAndCreatePlay(plConfig);
 
