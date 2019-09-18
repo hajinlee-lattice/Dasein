@@ -66,12 +66,11 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         }
 
         defaultOutreachExportFields = defaultExportFieldMetadataEntityMgr
-            .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
+                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
 
         if (defaultOutreachExportFields.size() == 0) {
             defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
         }
-
 
     }
 
@@ -87,10 +86,9 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         assertEquals(defaultMarketoExportFields.size(), 41);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                35);
+                34);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 23);
-
 
     }
 
@@ -101,8 +99,7 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
 
         assertEquals(defaultS3ExportFields.size(), 41);
         assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 34);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                33);
+        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 33);
 
     }
 
@@ -120,10 +117,10 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         assertEquals(defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 3);
 
-        assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Account)
-                .count(), 2);
-        assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Contact)
-                .count(), 1);
+        assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Account).count(),
+                2);
+        assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Contact).count(),
+                1);
 
     }
 
@@ -144,17 +141,16 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
     @Test(groups = "functional")
     public void testOutreach() {
         defaultOutreachExportFields = defaultExportFieldMetadataEntityMgr
-            .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
+                .getAllDefaultExportFieldMetadata(CDLExternalSystemName.Outreach);
 
-        assertEquals(defaultOutreachExportFields.size(), 41);
+        assertEquals(defaultOutreachExportFields.size(), 42);
         assertEquals(
-            defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-            34);
+                defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
+                34);
         assertEquals(defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-            27);
+                27);
 
     }
-
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
         String filePath = String.format("service/impl/%s_default_export_fields.json",
