@@ -5,6 +5,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
@@ -52,9 +53,13 @@ public class EntityExportWorkflowListener extends LEJobListener {
                 log.info(String.format("userId: %s; segmentExportId: %s", atlasExport.getCreatedBy(),
                         atlasExport.getUuid()));
                 String jobStatus = jobExecution.getStatus().name();
-                if (updateExportStatus && atlasExport.getStatus().equals(MetadataSegmentExport.Status.RUNNING)) {
-                    atlasExportProxy.updateAtlasExportStatus(tenantId, atlasExport.getUuid(),
-                            MetadataSegmentExport.Status.COMPLETED);
+                if (atlasExport.getStatus().equals(MetadataSegmentExport.Status.RUNNING)) {
+                    if (updateExportStatus) {
+                        atlasExportProxy.updateAtlasExportStatus(tenantId, atlasExport.getUuid(),
+                                MetadataSegmentExport.Status.COMPLETED);
+                    }
+                } else if (atlasExport.getStatus().equals(MetadataSegmentExport.Status.FAILED)) {
+                    jobStatus = BatchStatus.FAILED.name();
                 }
                 plsInternalProxy.sendAtlasExportEmail(jobStatus, tenantId, atlasExport);
             }
