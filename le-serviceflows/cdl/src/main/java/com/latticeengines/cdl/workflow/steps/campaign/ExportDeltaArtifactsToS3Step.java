@@ -33,7 +33,7 @@ public class ExportDeltaArtifactsToS3Step extends BaseImportExportS3<ExportDelta
         addTableDirs(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class), requests);
         addTableDirs(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class), requests);
         addTableDirs(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class), requests);
-        addTableDirs(getObjectFromContext(FULL_ACCOUNT_TABLE_NAME, String.class), requests);
+        addTableDirs(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class), requests);
         addTableDirs(getObjectFromContext(FULL_CONTACTS_UNIVERSE, String.class), requests);
     }
 
