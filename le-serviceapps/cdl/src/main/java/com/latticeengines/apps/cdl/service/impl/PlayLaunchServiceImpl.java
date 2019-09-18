@@ -298,7 +298,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                         CDLExternalSystemType externalSystemTypeEnum;
 
                         if (StringUtils.isBlank(externalSysType)
-                                || EnumUtils.isValidEnum(CDLExternalSystemType.class, externalSysType)) {
+                                || !EnumUtils.isValidEnum(CDLExternalSystemType.class, externalSysType)) {
                             key = NULL_KEY;
                             externalSystemTypeEnum = null;
                         } else {

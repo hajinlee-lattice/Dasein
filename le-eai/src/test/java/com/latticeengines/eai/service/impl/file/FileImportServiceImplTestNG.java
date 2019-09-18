@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
@@ -91,6 +92,10 @@ public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGB
                 properties.get(ImportProperty.FILEURLPROPERTIES));
 
         Job mrJob = createMRJob(CSVImportJob.class, fileEventTableImportStrategyBase.getProperties(ctx, tables.get(0)));
+        // force to set out put key class to LongWritable since default out put key is org.apache.hadoop.io.LongWritable,
+        // csv import job has more than 1 reducer, so the out put key must implement WritableComparable, AvroKey
+        // doesn't implement WritableComparable, please see AvroJob.setOutputKeySchema in CSVImportJob.java
+        mrJob.setOutputKeyClass(LongWritable.class);
         JobID jobID = JobService.runMRJob(mrJob, "jobName", true);
         assertNotNull(jobID);
         fileEventTableImportStrategyBase.updateContextProperties(ctx, tables.get(0));

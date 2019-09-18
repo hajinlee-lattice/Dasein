@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
@@ -61,25 +62,41 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+                                                     List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace), entity);
-        if (version != null) {
-            url += "?version=" + version.toString();
-            if (CollectionUtils.isNotEmpty(groups)) {
-                url += "&groups=" + StringUtils.join(groups, ",");
-            }
-        } else {
-            if (CollectionUtils.isNotEmpty(groups)) {
-                url += "?groups=" + StringUtils.join(groups, ",");
-            }
-        }
+        url += getVersionGroupParm(version, groups);
         List<ColumnMetadata> list = getList("serving store metadata", url, ColumnMetadata.class);
         if (CollectionUtils.isNotEmpty(list)) {
             return Flux.fromIterable(list);
         } else {
             return Flux.empty();
         }
+    }
+
+    private String getVersionGroupParm(DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+        StringBuffer url = new StringBuffer();
+        if (version != null) {
+            url.append("?version=" + version.toString());
+            if (CollectionUtils.isNotEmpty(groups)) {
+                url.append("&groups=" + StringUtils.join(groups, ","));
+            }
+        } else {
+            if (CollectionUtils.isNotEmpty(groups)) {
+                url.append("?groups=" + StringUtils.join(groups, ","));
+            }
+        }
+        return url.toString();
+    }
+
+    @Override
+    public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities,
+                                                     List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/decoratedmetadata", //
+                shortenCustomerSpace(customerSpace));
+        url += getVersionGroupParm(version, groups);
+        List<?> list = post("serving store metadata", url, entities, List.class);
+        return JsonUtils.convertList(list, ColumnMetadata.class);
     }
 
     @Override

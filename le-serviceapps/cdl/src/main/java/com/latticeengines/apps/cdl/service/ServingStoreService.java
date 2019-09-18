@@ -23,6 +23,9 @@ public interface ServingStoreService {
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version,
                                               List<ColumnSelection.Predefined> groups);
 
+    List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities, DataCollection.Version version,
+                                              List<ColumnSelection.Predefined> groups);
+
     Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity,
                                                  DataCollection.Version version, Boolean allCustomerAttrs);
 

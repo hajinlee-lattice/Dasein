@@ -28,6 +28,8 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.AccountContactExportContext;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -86,44 +89,50 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         atlasExport = buildAtlasExport();
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
         List<String> filesToDelete = new ArrayList<>();
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        Map<ExportEntity, HdfsDataUnit> resultMap = retry.execute(ctx -> {
-            if (ctx.getRetryCount() > 0) {
-                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
-                log.warn("Previous failure:", ctx.getLastThrowable());
-            }
-            Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
-            try {
-                startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                List<ExportEntity> entities = new ArrayList<>();
-                if (AtlasExportType.ACCOUNT.equals(atlasExport.getExportType())) {
-                    entities.add(ExportEntity.Account);
-                    resultForCurrentAttempt = getResultAttempt(entities);
-                    addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
-                } else if (AtlasExportType.CONTACT.equals(atlasExport.getExportType())) {
-                    entities.add(ExportEntity.Contact);
-                    resultForCurrentAttempt = getResultAttempt(entities);
-                    addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
-                } else if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType())) {
-                    entities.add(ExportEntity.Account);
-                    entities.add(ExportEntity.Contact);
-                    resultForCurrentAttempt = getResultAttempt(entities);
-                    addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
-                    SparkJobResult sparkJobResult = executeSparkJob(AccountContactExportJob.class,
-                            generateAccountAndContactExportConfig(resultForCurrentAttempt.get(ExportEntity.Account),
-                                    resultForCurrentAttempt.get(ExportEntity.Contact)));
-                    resultForCurrentAttempt = new HashMap<>();
-                    HdfsDataUnit hdfsDataUnit = sparkJobResult.getTargets().get(0);
-                    filesToDelete.add(hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/")));
-                    resultForCurrentAttempt.put(ExportEntity.AccountContact, hdfsDataUnit);
+        try {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            Map<ExportEntity, HdfsDataUnit> resultMap = retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                    log.warn("Previous failure:", ctx.getLastThrowable());
                 }
-            } finally {
-                stopSparkSQLSession();
-            }
-            return resultForCurrentAttempt;
-        });
-        putObjectInContext(ATLAS_EXPORT_DATA_UNIT, resultMap);
-        putObjectInContext(ATLAS_EXPORT_DELETE_PATH, filesToDelete);
+                Map<ExportEntity, HdfsDataUnit> resultForCurrentAttempt = new HashMap<>();
+                try {
+                    startSparkSQLSession(getHdfsPaths(attrRepo), false);
+                    List<ExportEntity> entities = new ArrayList<>();
+                    if (AtlasExportType.ACCOUNT.equals(atlasExport.getExportType())) {
+                        entities.add(ExportEntity.Account);
+                        resultForCurrentAttempt = getResultAttempt(entities);
+                        addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
+                    } else if (AtlasExportType.CONTACT.equals(atlasExport.getExportType())) {
+                        entities.add(ExportEntity.Contact);
+                        resultForCurrentAttempt = getResultAttempt(entities);
+                        addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
+                    } else if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType())) {
+                        entities.add(ExportEntity.Account);
+                        entities.add(ExportEntity.Contact);
+                        resultForCurrentAttempt = getResultAttempt(entities);
+                        addPathToDeletePath(filesToDelete, resultForCurrentAttempt);
+                        SparkJobResult sparkJobResult = executeSparkJob(AccountContactExportJob.class,
+                                generateAccountAndContactExportConfig(resultForCurrentAttempt.get(ExportEntity.Account),
+                                        resultForCurrentAttempt.get(ExportEntity.Contact)));
+                        resultForCurrentAttempt = new HashMap<>();
+                        HdfsDataUnit hdfsDataUnit = sparkJobResult.getTargets().get(0);
+                        filesToDelete.add(hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/")));
+                        resultForCurrentAttempt.put(ExportEntity.AccountContact, hdfsDataUnit);
+                    }
+                } finally {
+                    stopSparkSQLSession();
+                }
+                return resultForCurrentAttempt;
+            });
+            putObjectInContext(ATLAS_EXPORT_DATA_UNIT, resultMap);
+            putObjectInContext(ATLAS_EXPORT_DELETE_PATH, filesToDelete);
+        } catch (Exception e) {
+            atlasExportProxy.updateAtlasExportStatus(customerSpace.toString(), atlasExport.getUuid(),
+                    MetadataSegmentExport.Status.FAILED);
+            throw new LedpException(LedpCode.LEDP_18167, e);
+        }
     }
 
     private void addPathToDeletePath(List<String> files, Map<ExportEntity, HdfsDataUnit> outputUnits) {
@@ -232,7 +241,11 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
             if (!BusinessEntity.Contact.equals(entity)) {
                 List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
-                cms.forEach(cm -> lookups.add(new AttributeLookup(entity, cm.getAttrName())));
+                cms.forEach(cm -> {
+                    if (!isAccountOrContaceId(cm)) {
+                        lookups.add(new AttributeLookup(entity, cm.getAttrName()));
+                    }
+                });
             }
         }
         // when the export type is ACCOUNT_AND_CONTACT, needs to set the join used by AccountContactExportJob
@@ -253,34 +266,24 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return lookups;
     }
 
-    private Map<String, Lookup> getAccountLookupMap() {
-        Map<String, Lookup> lookupMap = new HashMap<>();
-        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
-            if (!BusinessEntity.Contact.equals(entity)) {
-                List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
-                cms.forEach(cm -> lookupMap.put(cm.getAttrName(), new AttributeLookup(entity, cm.getAttrName())));
-            }
-        }
-        return lookupMap;
+    private boolean isAccountOrContaceId(ColumnMetadata cm) {
+        return cm.getAttrName().equals(InterfaceName.AccountId) || cm.getAttrName().equals(InterfaceName.ContactId);
     }
 
     private List<Lookup> getContactLookup() {
         List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
         List<Lookup> lookups;
         boolean alreadyHaveAccountId = false;
-        // remove the attribute already exist in account if query account and contact together
         if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
-            Map<String, Lookup> accountLookupMap = getAccountLookupMap();
             lookups =
-                    cms.stream().filter(cm -> !accountLookupMap.containsKey(cm.getAttrName()) && !InterfaceName.AccountId.name().equals(cm.getAttrName()))
-                            .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
-                            .collect(Collectors.toList());
+                    cms.stream().filter(cm -> !isAccountOrContaceId(cm))
+                            .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName())).collect(Collectors.toList());
             // needs to add account id for left join operation later
             alreadyHaveAccountId = true;
             addAccountId(BusinessEntity.Contact, lookups);
         } else {
-            lookups = cms.stream().map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()))
-                    .collect(Collectors.toList());
+            lookups = cms.stream().filter(cm -> !isAccountOrContaceId(cm))
+                    .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName())).collect(Collectors.toList());
         }
         if (!batonService.isEntityMatchEnabled(customerSpace)) {
             if (!alreadyHaveAccountId) {

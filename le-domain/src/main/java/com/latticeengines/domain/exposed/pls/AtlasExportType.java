@@ -54,16 +54,17 @@ public enum AtlasExportType {
     AtlasExportType(String displayName, String pathFriendlyName, BusinessEntity... entities) {
         this.displayName = displayName;
         this.pathFriendlyName = pathFriendlyName;
-        Set<InterfaceName> attrName = new HashSet<>();
+        Set<Pair<BusinessEntity, InterfaceName>> attrName = new HashSet<>();
         this.defaultAttributeTuples = Arrays.stream(entities)//
                 .map(e -> getDefaultExportAttributesPair(e).stream() //
                         .map(p -> {
                             InterfaceName interfaceName = p.getLeft();
                             Triple<BusinessEntity, String, String> res = null;
-                            if (!attrName.contains(interfaceName)) {
+                            Pair<BusinessEntity, InterfaceName> pair = Pair.of(e, interfaceName);
+                            if (!attrName.contains(pair)) {
                                 // give precedence to field from first type
                                 // if there are duplicate field names
-                                attrName.add(interfaceName);
+                                attrName.add(Pair.of(e, interfaceName));
                                 res = new ImmutableTriple<>(e, interfaceName.name(), p.getRight());
                             }
                             return res;

@@ -59,7 +59,7 @@ public class AtlasExportTypeUnitTestNG {
             Assert.assertTrue(StringUtils.isNotBlank(p.getMiddle()));
             Assert.assertTrue(StringUtils.isNotBlank(p.getRight()));
         });
-        Assert.assertEquals(defaultAttributeTuples.size(), 12);
+        Assert.assertEquals(defaultAttributeTuples.size(), 14);
     }
 
     @Test(groups = "unit")

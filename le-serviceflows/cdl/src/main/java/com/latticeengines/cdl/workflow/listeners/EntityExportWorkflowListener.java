@@ -53,15 +53,13 @@ public class EntityExportWorkflowListener extends LEJobListener {
                 log.info(String.format("userId: %s; segmentExportId: %s", atlasExport.getCreatedBy(),
                         atlasExport.getUuid()));
                 String jobStatus = jobExecution.getStatus().name();
-                if (updateExportStatus) {
-                    if (atlasExport.getStatus() == MetadataSegmentExport.Status.FAILED) {
-                        jobStatus = BatchStatus.FAILED.name();
-                        atlasExportProxy.updateAtlasExportStatus(tenantId, atlasExport.getUuid(),
-                                MetadataSegmentExport.Status.FAILED);
-                    } else {
+                if (atlasExport.getStatus().equals(MetadataSegmentExport.Status.RUNNING)) {
+                    if (updateExportStatus) {
                         atlasExportProxy.updateAtlasExportStatus(tenantId, atlasExport.getUuid(),
                                 MetadataSegmentExport.Status.COMPLETED);
                     }
+                } else if (atlasExport.getStatus().equals(MetadataSegmentExport.Status.FAILED)) {
+                    jobStatus = BatchStatus.FAILED.name();
                 }
                 plsInternalProxy.sendAtlasExportEmail(jobStatus, tenantId, atlasExport);
             }
