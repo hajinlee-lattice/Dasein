@@ -21,7 +21,7 @@ if (targets.length != output.length) {
     + s"but ${output.length} outputs are generated!")
 }
 
-val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
+val finalTargets: List[JsonNode] = targets.zip(output).par.map { t =>
   val tgt = t._1
   val df = t._2
   val path = tgt.get("Path").asText()
@@ -43,7 +43,7 @@ val finalTargets: List[JsonNode] = targets.zip(output).map { t =>
     json.put("DataFormat", tgt.get("DataFormat"))
   }
   json
-}
+}.toList
 
 lattice.orphanViews.map { view => spark.catalog.dropTempView(view) }
 

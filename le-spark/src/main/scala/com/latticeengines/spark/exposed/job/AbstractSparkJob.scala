@@ -88,7 +88,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       throw new IllegalArgumentException(s"${targets.length} targets are declared " //
         + s"but ${output.length} outputs are generated!")
     }
-    val results = targets.zip(output).map { t =>
+    val results = targets.zip(output).par.map { t =>
       val tgt = t._1
       val df = t._2
       val path = tgt.getPath
@@ -102,7 +102,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val df2 = spark.read.format(fmt).load(path)
       tgt.setCount(df2.count())
       tgt
-    }
+    }.toList
     latticeCtx.orphanViews map spark.catalog.dropTempView
     results
   }
