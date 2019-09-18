@@ -445,6 +445,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
+            customEventMatchWorkflowConfigurationBuilder.mapToLatticeAccount(mapToLatticeAccount);
+            return this;
+        }
+
         public Builder dataCollectionVersion(DataCollection.Version version) {
             generateAIRating.dataCollectionVersion(version);
             useConfiguredModelingAttributesBuilder.dataCollectionVersion(version);
