@@ -87,9 +87,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchChannel.setPlay(play);
         playLaunchChannel.setTenant(MultiTenantContext.getTenant());
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
-        create(playLaunchChannel);
+        playLaunchChannel = create(playLaunchChannel);
         if (launchNow) {
-            playLaunchChannel.setLastLaunch(createPlayLaunchFromChannel(playLaunchChannel, play));
+            createPlayLaunchFromChannel(playLaunchChannel, play);
         }
         return playLaunchChannel;
     }
@@ -102,9 +102,10 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
         playLaunchChannel.setPlay(play);
-        playLaunchChannel.setLastLaunch(launchNow ? createPlayLaunchFromChannel(playLaunchChannel, play) : null);
-
         playLaunchChannel = update(playLaunchChannel);
+        if (launchNow) {
+            createPlayLaunchFromChannel(playLaunchChannel, play);
+        }
         return playLaunchChannel;
     }
 
@@ -160,7 +161,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         if (StringUtils.isBlank(channelId)) {
             throw new LedpException(LedpCode.LEDP_18228);
         }
-        playLaunchEntityMgr.deleteByLaunchId(channelId, hardDelete);
+        playLaunchChannelEntityMgr.deleteByChannelId(channelId, hardDelete);
     }
 
     @Override
@@ -223,6 +224,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setRemoveContactsTable(removeContactsTable);
 
         playLaunchEntityMgr.create(playLaunch);
+        playLaunchChannel.setLastLaunch(playLaunch);
         return playLaunch;
 
     }
