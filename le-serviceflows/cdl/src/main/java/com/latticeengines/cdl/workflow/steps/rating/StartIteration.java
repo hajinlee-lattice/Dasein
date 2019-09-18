@@ -86,7 +86,7 @@ public class StartIteration extends BaseWorkflowStep<ProcessRatingStepConfigurat
                 Table existingRatingTable;
                 String previousIterationResultName = getStringValueFromContext(RATING_ITERATION_RESULT_TABLE_NAME);
                 if (StringUtils.isNotBlank(previousIterationResultName)) {
-                    existingRatingTable = metadataProxy.getTableSummary(customerSpace, previousIterationResultName);
+                    existingRatingTable = metadataProxy.getTable(customerSpace, previousIterationResultName);
                 } else {
                     existingRatingTable = dataCollectionProxy.getTable(customerSpace, //
                             BusinessEntity.Rating.getServingStore(), inactive);
