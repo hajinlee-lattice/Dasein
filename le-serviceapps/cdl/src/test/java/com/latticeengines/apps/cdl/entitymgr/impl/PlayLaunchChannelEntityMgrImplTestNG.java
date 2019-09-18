@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -30,6 +31,8 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -75,6 +78,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
     private String CREATED_BY = "lattice@lattice-engines.com";
+    private String CRON_EXPRESSION = "0 0 12 ? * WED *";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -116,6 +120,8 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
         playLaunchChannel1.setIsAlwaysOn(true);
         playLaunchChannel2.setIsAlwaysOn(false);
+        playLaunchChannel1.setChannelConfig(new SalesforceChannelConfig());
+        playLaunchChannel2.setChannelConfig(new MarketoChannelConfig());
 
     }
 
@@ -142,9 +148,9 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional", dependsOnMethods = { "testNextDateFromCronExpression" })
     public void testCreateChannel() throws InterruptedException {
-        playLaunchChannelEntityMgr.create(playLaunchChannel1);
+        playLaunchChannelEntityMgr.createPlayLaunchChannel(playLaunchChannel1);
         Thread.sleep(1000);
-        playLaunchChannelEntityMgr.create(playLaunchChannel2);
+        playLaunchChannelEntityMgr.createPlayLaunchChannel(playLaunchChannel2);
         Thread.sleep(1000);
         long playLaunchChannel1Pid = playLaunchChannel1.getPid();
         long playLaunchChannel2Pid = playLaunchChannel2.getPid();
@@ -187,6 +193,18 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
+    public void testExpirationDate() throws InterruptedException {
+
+        PlayLaunchChannel retrieved = playLaunchChannelEntityMgr.findById(playLaunchChannel1.getId());
+
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getId(), playLaunchChannel1.getId());
+        Assert.assertTrue(retrieved.getIsAlwaysOn());
+        Assert.assertNotNull(retrieved.getExpirationDate());
+
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testExpirationDate" })
     public void testUpdate() throws InterruptedException {
 
         PlayLaunchChannel retrieved = playLaunchChannelEntityMgr.findById(playLaunchChannel1.getId());
@@ -197,6 +215,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), playLaunchChannel1.getId());
         Assert.assertFalse(retrieved.getIsAlwaysOn());
+        Assert.assertNull(retrieved.getExpirationDate());
 
     }
 
@@ -242,6 +261,8 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         playLaunchChannel.setUpdatedBy(CREATED_BY);
         playLaunchChannel.setLaunchType(LaunchType.FULL);
         playLaunchChannel.setId(NamingUtils.randomSuffix("pl", 16));
+        playLaunchChannel.setCronScheduleExpression(CRON_EXPRESSION);
+        playLaunchChannel.setExpirationDate(Date.from(new Date().toInstant().plus(Duration.ofHours(2))));
         return playLaunchChannel;
     }
 
