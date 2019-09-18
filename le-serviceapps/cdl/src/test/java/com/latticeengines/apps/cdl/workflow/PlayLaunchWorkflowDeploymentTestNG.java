@@ -98,6 +98,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         featureFlags.put(LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ALPHA_FEATURE.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName(), true);
+        featureFlags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
+        featureFlags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
 
         marketoTestPlayChannelSetupConfig = new TestPlayChannelConfig.Builder()
                 .destinationSystemType(CDLExternalSystemType.MAP).destinationSystemName(CDLExternalSystemName.Marketo)
@@ -395,6 +397,5 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
             log.error("Error while cleaning up dropbox files ", ex);
         }
     }
-
 
 }
