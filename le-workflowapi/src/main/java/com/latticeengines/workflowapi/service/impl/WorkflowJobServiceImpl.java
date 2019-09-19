@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.locks.LockManager;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.service.ReportService;
@@ -802,11 +803,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @Scheduled(fixedRate = 300000L)
     public void scheduledDrainQueueWrapper() {
-        String podid = CamilleEnvironment.getPodId();
-        String division = CamilleEnvironment.getDivision();
-        if (workflowThrottlingService.isWorkflowThrottlingEnabled(podid, division)) {
-            log.info("Drain queue process launched at {}-{}.", podid, division);
-            drainWorkflowQueue(podid, division);
+        if (BeanFactoryEnvironment.getEnvironment().equals(BeanFactoryEnvironment.Environment.WebApp)) {
+            String podid = CamilleEnvironment.getPodId();
+            String division = CamilleEnvironment.getDivision();
+            if (workflowThrottlingService.isWorkflowThrottlingEnabled(podid, division)) {
+                log.info("Drain queue process launched at {}-{}.", podid, division);
+                drainWorkflowQueue(podid, division);
+            }
         }
     }
 
