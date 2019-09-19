@@ -45,7 +45,7 @@ public class AttributeLookup extends Lookup implements Comparable<AttributeLooku
             try {
                 String[] tokens = str.split("\\.");
                 if (tokens.length >= 2) {
-                    BusinessEntity entity = BusinessEntity.valueOf(tokens[0]);
+                    BusinessEntity entity = BusinessEntity.getByName(tokens[0]);
                     String attrName = str.replace(tokens[0] + ".", "");
                     return new AttributeLookup(entity, attrName);
                 } else {
