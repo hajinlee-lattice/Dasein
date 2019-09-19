@@ -68,6 +68,8 @@ public class EMRScalingRunnable implements Runnable {
             throw e;
         }
 
+        initializeEmrTracker();
+
         try {
             reqResource = getYarnTracker().getRequestingResources();
         } catch (Exception e) {
@@ -75,8 +77,6 @@ public class EMRScalingRunnable implements Runnable {
                     + emrCluster);
             throw e;
         }
-
-        initializeEmrTracker();
 
         // always available free resource, until maxed out: 25% core nodes
         minAvailMemMb = getStaticMemBuffer();
