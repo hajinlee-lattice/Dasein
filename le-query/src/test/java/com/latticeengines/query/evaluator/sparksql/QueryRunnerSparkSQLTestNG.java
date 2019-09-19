@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 
@@ -44,6 +45,13 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
     @AfterClass(groups = SPARK_TEST_GROUP, alwaysRun = true)
     public void teardown() {
         teardownQueryTester();
+    }
+
+    @BeforeMethod(groups = SPARK_TEST_GROUP)
+    public void refreshSparkSession() {
+        if (sparkSQLQueryTester.getCurrentSessionUsage() > 10) {
+            sparkSQLQueryTester.refreshLivySession();
+        }
     }
 
     @DataProvider(name = "userContexts")

@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -29,6 +32,8 @@ import com.latticeengines.spark.exposed.service.LivySessionService;
 
 @Component
 public class SparkSQLQueryTester {
+
+    private static final Logger log = LoggerFactory.getLogger(SparkSQLQueryTester.class);
 
     @Inject
     private LivySessionService sessionService;
@@ -50,10 +55,12 @@ public class SparkSQLQueryTester {
 
     private LivySession session;
     private int reuseLivySession = 0; // set the session id to reuse.
+    private boolean sessionIsReused = false;
 
     protected AttributeRepository attrRepo;
     protected Map<String, String> tblPathMap;
     protected CustomerSpace customerSpace;
+    private AtomicInteger executionCounter;
 
     public AttributeRepository getAttrRepo() {
         return attrRepo;
@@ -73,11 +80,10 @@ public class SparkSQLQueryTester {
         this.tblPathMap = tblPathMap;
 
         if (reuseLivySession > 0) {
+            sessionIsReused = true;
             reuseLivyEnvironment(reuseLivySession);
         } else {
             setupLivyEnvironment();
-            // comment out this statement to reuse the livy session in next run
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> sessionService.stopSession(session)));
         }
 
         String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
@@ -87,6 +93,9 @@ public class SparkSQLQueryTester {
     private void setupLivyEnvironment() {
         session = sparkSQLService.initializeLivySession(attrRepo, tblPathMap, 1, //
                 "MEMORY_AND_DISK_SER", null);
+        // comment out this statement to reuse the livy session in next run
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> sessionService.stopSession(session)));
+        executionCounter = new AtomicInteger(0);
     }
 
     private void reuseLivyEnvironment(int sessionId) {
@@ -97,6 +106,7 @@ public class SparkSQLQueryTester {
             livyHost = "http://localhost:8998";
         }
         session = sessionService.getSession(new LivySession(livyHost, sessionId));
+        executionCounter = new AtomicInteger(0);
     }
 
     public void teardown() {
@@ -106,23 +116,39 @@ public class SparkSQLQueryTester {
         }
     }
 
+    public void refreshLivySession() {
+        teardown();
+        setupLivyEnvironment();
+        String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
+        sparkSQLService.prepareForCrossSellQueries(session, "Month", trxnTable, "MEMORY_AND_DISK_SER");
+    }
+
+    private void incrementExecutionCounter() {
+        log.info("Livy session {} has been used for {} times.", //
+                session.getSessionId(), executionCounter.incrementAndGet());
+    }
+
     public long getCountFromSpark(Query query) {
         String sql1 = queryEvaluatorService.getQueryStr(attrRepo, query, SparkQueryProvider.SPARK_BATCH_USER);
         long count1 = sparkSQLService.getCount(customerSpace, session, sql1);
+        incrementExecutionCounter();
         // test idempotent
         String sql2 = queryEvaluatorService.getQueryStr(attrRepo, query, SparkQueryProvider.SPARK_BATCH_USER);
         long count2 = sparkSQLService.getCount(customerSpace, session, sql2);
+        incrementExecutionCounter();
         Assert.assertEquals(count1, count2);
         return count1;
     }
 
     public HdfsDataUnit getDataFromSpark(Query query) {
         String sql = queryEvaluatorService.getQueryStr(attrRepo, query, SparkQueryProvider.SPARK_BATCH_USER);
-        return sparkSQLService.getData(customerSpace, session, sql, null);
+        HdfsDataUnit dataUnit = sparkSQLService.getData(customerSpace, session, sql, null);
+        incrementExecutionCounter();
+        return dataUnit;
     }
 
-    public HdfsDataUnit getDataFromSpark(String queryString) {
-        return sparkSQLService.getData(customerSpace, session, queryString, null);
+    public int getCurrentSessionUsage() {
+        return executionCounter.get();
     }
 
     public List<Map<String, Object>> convertHdfsDataUnitToList(HdfsDataUnit sparkResult) {
