@@ -204,12 +204,14 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     }
 
     private void logGlobalQueueFullness(String podid, Map<String, Integer> enqueuedWorkflowInEnv) {
-        StringBuilder str = new StringBuilder("WorkflowThrottling Global Queue Status: ");
+        StringBuilder str = new StringBuilder(
+                String.format("WorkflowThrottling Global Queue Status on environment=%s: ", podid));
         log.info(str.append(enqueuedWorkflowInEnv).toString());
     }
 
     private void logTenantQueueFullness(String podid, Map<String, Map<String, Integer>> tenantEnqueuedWorkflow) {
-        StringBuilder str = new StringBuilder("WorkflowThrottling Tenant Queue Status: ");
+        StringBuilder str = new StringBuilder(
+                String.format("WorkflowThrottling Tenant Queue Status on environment=%s: ", podid));
         tenantEnqueuedWorkflow.forEach((tenantId, workflowMap) -> {
             str.append(String.format("%s=%s", tenantId, workflowMap));
         });
@@ -237,13 +239,13 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             Map<JobStatus, Integer> tenantLimitMap = WorkflowThrottlingUtils.getTenantMap(config.getTenantLimit(),
                     customerSpace, workflowType);
             if (enqueuedWorkflowJobs.size() >= globalLimitMap.get(JobStatus.ENQUEUED)) {
-                log.error("Global queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType,
-                        customerSpace, globalLimitMap.get(JobStatus.ENQUEUED));
+                log.error("Global queue limit reached. Environment: {} WorkflowType: {}, tenant: {}. Limit is {}",
+                        podid, workflowType, customerSpace, globalLimitMap.get(JobStatus.ENQUEUED));
                 return true;
             }
             if (tenantEnqueuedWorkflowJobs.size() >= tenantLimitMap.get(JobStatus.ENQUEUED)) {
-                log.error("Tenant queue limit reached. WorkflowType: {}, tenant: {}. Limit is {}", workflowType,
-                        customerSpace, tenantLimitMap.get(JobStatus.ENQUEUED));
+                log.error("Tenant queue limit reached. Environment: {} WorkflowType: {}, tenant: {}. Limit is {}",
+                        podid, workflowType, customerSpace, tenantLimitMap.get(JobStatus.ENQUEUED));
                 return true;
             }
             return false;
