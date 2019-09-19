@@ -254,7 +254,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     // contain multi lines.
                     while (fileSplit.getStart() > csvRecord.getCharacterPosition()) {
                         lineNum++;
-                        csvRecord = iter.next();
+                        try {
+                            csvRecord = iter.next();
+                        } catch (Exception e) {
+                            LOG.warn("Exception happened when parse csv file");
+                        }
                     }
                 }
                 long endPosition = fileSplit.getStart() + fileSplit.getLength();
