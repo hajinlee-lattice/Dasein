@@ -193,6 +193,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 dataFeedTask.setImportTemplate(finalTemplate);
                 dataFeedTaskService.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
+                log.info(String.format("DataFeedTask %s template has been updated by user: %s",
+                        dataFeedTask.getUniqueId(), user));
                 if (sendEmail) {
                     sendS3TemplateChangeEmail(customerSpace.toString(), dataFeedTask, user, false);
                 }
