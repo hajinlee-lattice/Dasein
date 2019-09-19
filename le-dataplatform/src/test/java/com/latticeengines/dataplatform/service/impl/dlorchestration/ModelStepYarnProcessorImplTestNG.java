@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
+@Deprecated
 public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ModelStepYarnProcessorImplTestNG.class);
@@ -39,7 +40,6 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         return false;
     }
 
-    @Deprecated
     @Test(groups = "sqoop", enabled = false)
     public void testExecuteYarnSteps() throws Exception {
         cleanUpHdfs(CUSTOMER);
@@ -65,7 +65,6 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
-    @Deprecated
     @Test(groups = "sqoop", enabled = false)
     public void testExecuteYarnStepsFeatureThreshold() throws Exception {
         cleanUpHdfs(CUSTOMER);

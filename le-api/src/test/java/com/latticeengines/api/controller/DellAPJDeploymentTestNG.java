@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
+@Deprecated
 public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(DellAPJDeploymentTestNG.class);
@@ -39,7 +40,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
 
     private Model model;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -55,8 +56,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
         return new AbstractMap.SimpleEntry<>("Target", features.getElements());
     }
 
-    @Deprecated
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig(model);
@@ -68,7 +68,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "load" })
+    @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = false)
     public void createSamples() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
         SamplingConfiguration samplingConfig = getSampleConfig(model);
@@ -82,7 +82,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
+    @Test(groups = "deployment", dependsOnMethods = { "createSamples" }, enabled = false)
     public void profile() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "profile");
         DataProfileConfiguration config = getProfileConfig(model);
@@ -94,7 +94,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "profile" }, enabled = false)
     public void submit() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "submit");
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();

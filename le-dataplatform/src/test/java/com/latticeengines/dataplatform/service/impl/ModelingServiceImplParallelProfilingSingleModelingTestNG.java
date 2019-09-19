@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingType;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
+@Deprecated
 public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends DataPlatformFunctionalTestNGBase {
     private static final String TARGET_COLUMN_NAME = "P1_Event";
     public static final String COUNTER_GROUP_NAME = "Event_Counter_Group";
@@ -72,6 +73,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         return getClass().getSimpleName();
     }
 
+    @Deprecated
     private Model createModel(ModelDefinition modelDef) {
         Model m = new Model();
         m.setModelDefinition(modelDef);
@@ -85,7 +87,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         return m;
     }
 
-    @BeforeClass(groups = "sqoop")
+    @BeforeClass(groups = "sqoop", enabled = false)
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         String customer = getCustomer();
@@ -104,8 +106,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         model = createModel(modelDef);
     }
 
-    @Deprecated
-    @Test(groups = "sqoop")
+    @Test(groups = "sqoop", enabled = false)
     public void loadData() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
@@ -113,7 +114,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "sqoop", dependsOnMethods = { "loadData" })
+    @Test(groups = "sqoop", dependsOnMethods = { "loadData" }, enabled = false)
     public void createSamples() throws Exception {
         runEventCounter();
 
@@ -145,6 +146,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Deprecated
     private void runEventCounter() throws Exception {
         EventCounterConfiguration eventCounterConfig = new EventCounterConfiguration();
         eventCounterConfig.setCustomer(getCustomer());
@@ -158,7 +160,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "sqoop", dependsOnMethods = { "createSamples" })
+    @Test(groups = "sqoop", dependsOnMethods = { "createSamples" }, enabled = false)
     public void profile() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -173,7 +175,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "sqoop", dependsOnMethods = { "profile" })
+    @Test(groups = "sqoop", dependsOnMethods = { "profile" }, enabled = false)
     public void submit() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);

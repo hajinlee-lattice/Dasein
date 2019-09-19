@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorith
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
+@Deprecated
 public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTestNG {
 
     @Inject
@@ -44,7 +45,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
 
     private Model model;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         throttleConfigurationEntityMgr.deleteAll();
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -86,8 +87,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
         model.setDataFormat("avro");
     }
 
-    @Deprecated
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
@@ -98,9 +98,8 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Deprecated
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment", dependsOnMethods = { "load" })
+    @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = false)
     public void loadAgain() {
         LoadConfiguration config = getLoadConfig(model);
         Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject(modelingEndpointHost + "/rest/load",
@@ -109,7 +108,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
         assertTrue(errorResult.containsKey("errorCode"));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "load" })
+    @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = false)
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = getSampleConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/createSamples",
@@ -121,7 +120,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
+    @Test(groups = "deployment", dependsOnMethods = { "createSamples" }, enabled = false)
     public void profile() throws Exception {
         DataProfileConfiguration config = getProfileConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/profile", config,
@@ -132,7 +131,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "profile" }, enabled = false)
     public void submit() throws Exception {
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
                 AppSubmission.class);

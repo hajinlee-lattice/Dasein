@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
+@Deprecated
 public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Deprecated
@@ -34,7 +35,6 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private DBConnectionMBean dbcMBean;
 
-    @Deprecated
     @Test(groups = { "functional.platform", "functional.production" }, enabled = false)
     public void testDataSourceConnection() throws Exception {
         if (dataSourceType.equals("MySQL")) {

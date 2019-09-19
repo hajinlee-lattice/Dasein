@@ -127,7 +127,6 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
         return new ModelingServiceExecutor(bldr);
     }
 
-    @Deprecated
     @Test(groups = { "lpe2e", "deployment.production" }, enabled = false, dataProvider = "modelMetadataProvider")
     public void runPipeline(String tenant, String modelName, String metadataSuffix, String tableName) throws Exception {
         LOGGER.info(String.format("Running pipeline for model %s in tenant %s using table %s", modelName, tenant,

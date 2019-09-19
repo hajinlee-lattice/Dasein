@@ -55,6 +55,7 @@ import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
  *
  */
 
+@Deprecated
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Inject
@@ -84,11 +85,11 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return false;
     }
 
-    @BeforeMethod(groups = "sqoop")
+    @BeforeMethod(groups = "sqoop", enabled = false)
     public void beforeMethod() {
     }
 
-    @BeforeClass(groups = "sqoop")
+    @BeforeClass(groups = "sqoop", enabled = false)
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         String customer = getCustomer();
@@ -109,11 +110,12 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         model = createModel(modelDef);
     }
 
-    @AfterClass(groups = "sqoop")
+    @AfterClass(groups = "sqoop", enabled = false)
     public void tearDown() throws Exception {
         httpServer.stop();
     }
 
+    @Deprecated
     private Model createModel(ModelDefinition modelDef) {
         Model m = new Model();
         m.setModelDefinition(modelDef);
@@ -166,7 +168,6 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return config;
     }
 
-    @Deprecated
     @Test(groups = "sqoop", enabled = false, expectedExceptions = LedpException.class)
     public void loadBadTableInput() {
         LoadConfiguration loadConfig = getLoadConfig();
@@ -174,8 +175,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         modelingService.loadData(loadConfig);
     }
 
-    @Deprecated
-    @Test(groups = "sqoop")
+    @Test(groups = "sqoop", enabled = false)
     public void retrieveMetadataAndWriteToHdfs() throws Exception {
         httpServer = new StandaloneHttpServer();
         httpServer.init();
@@ -189,9 +189,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
     }
 
-    @Deprecated
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
+    @Test(groups = "sqoop", dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" }, enabled = false)
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
@@ -200,7 +199,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", dependsOnMethods = { "load" })
+    @Test(groups = "sqoop", dependsOnMethods = { "load" }, enabled = false)
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setRandomSeed(123456L);
@@ -225,7 +224,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", dependsOnMethods = { "createSamples" })
+    @Test(groups = "sqoop", dependsOnMethods = { "createSamples" }, enabled = false)
     public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -240,7 +239,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "sqoop", dependsOnMethods = { "profileData" })
+    @Test(groups = "sqoop", dependsOnMethods = { "profileData" }, enabled = false)
     public void reviewData() throws Exception {
         ModelReviewConfiguration config = new ModelReviewConfiguration();
         config.setCustomer(model.getCustomer());
@@ -254,7 +253,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "sqoop", dependsOnMethods = { "reviewData" })
+    @Test(groups = "sqoop", dependsOnMethods = { "reviewData" }, enabled = false)
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
