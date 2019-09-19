@@ -430,7 +430,7 @@ public class ModelingFileUploadResource {
         }
 
         // For now, set fieldDefinitionsRecordsMap and fieldDefinitionsChangesMap to the values provided at input.
-
+        validateResponse.setFieldDefinitionsRecordsMap(validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap());
         //log.error("JAW ------ END Mock Validate Field Definition -----");
 
         return ResponseDocument.successResponse(validateResponse);

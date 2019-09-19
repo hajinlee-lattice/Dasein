@@ -943,7 +943,8 @@ public class ImportWorkflowUtils {
         ValidateFieldDefinitionsResponse response = new ValidateFieldDefinitionsResponse();
         Set<String> unMappedColumnNames = fieldDefinitionsRecordsMap.getOrDefault(ImportWorkflowUtils.CUSTOM_FIELDS,
                 new ArrayList<>()).stream().filter(definition -> Boolean.TRUE.equals(definition.isInCurrentImport()) &&
-                StringUtils.isNotBlank(definition.getColumnName())).map(FieldDefinition::getColumnName).collect(Collectors.toSet());
+                StringUtils.isNotBlank(definition.getColumnName()) && !Boolean.TRUE.equals(definition.getIgnored()))
+                .map(FieldDefinition::getColumnName).collect(Collectors.toSet());
 
         // generate validation message
         for (Map.Entry<String, List<FieldDefinition>> entry : fieldDefinitionsRecordsMap.entrySet()) {
@@ -981,63 +982,82 @@ public class ImportWorkflowUtils {
                 // check for lattice attribute
                 List<FieldDefinition> specDefinitions = specFieldDefinitionsRecordsMap.getOrDefault(sectionName,
                         new ArrayList<>());
+                Set<String> requiredFiledNames =
+                        specDefinitions.stream().filter(FieldDefinition::isRequired).map(FieldDefinition::getFieldName)
+                                .collect(Collectors.toSet());
                 Set<String> mappedLatticeField = new HashSet<>();
                 Map<String, FieldDefinition> specFieldNameToDefinition =
                         specDefinitions.stream().collect(Collectors.toMap(FieldDefinition::getFieldName,
                                 field -> field));
                 for (FieldDefinition definition : definitions) {
 
-                    if (StringUtils.isBlank(definition.getFieldName())) {
+                    String fieldName = definition.getFieldName();
+                    if (StringUtils.isBlank(fieldName)) {
                         throw new RuntimeException("FieldName shouldn't be empty.");
                     }
-                    FieldDefinition specDefinition = specFieldNameToDefinition.getOrDefault(definition.getFieldName(),
-                            null);
+                    FieldDefinition specDefinition = specFieldNameToDefinition.getOrDefault(fieldName, null);
                     // should find definition in default spec
                     if (specDefinition == null) {
                         throw new RuntimeException("Inconsistent with lattice attribute");
                     }
 
                     if (Boolean.TRUE.equals(definition.isInCurrentImport())) {
-                        if (StringUtils.isBlank(definition.getColumnName())) {
+                        String columnName = definition.getColumnName();
+                        if (StringUtils.isBlank(columnName)) {
                             throw new RuntimeException("ColumnName shouldn't be empty when inCurrentImport is true.");
                         }
+                        FieldDefinition autoDetectedFieldDefinition = autoDetectionResultsMap.get(columnName);
+                        if (autoDetectedFieldDefinition == null) {
+                            throw new RuntimeException(String.format("column %s doesn't exist in field definition",
+                                    columnName));
+                        }
                         // required flag check
-                        if (Boolean.TRUE.equals(specDefinition.isRequired()) && Boolean.FALSE.equals(definition.isRequired())) {
+                        if (Boolean.TRUE.equals(specDefinition.isRequired()) && !Boolean.TRUE.equals(definition.isRequired())) {
+                            requiredFiledNames.remove(fieldName);
                             String message = String.format("Required flag is not the same for attribute %s",
                                     specDefinition.getScreenName());
-                            validations.add(new FieldValidationMessage(definition.getFieldName(), null, message,
+                            requiredFiledNames.remove(fieldName);
+                            validations.add(new FieldValidationMessage(fieldName, null, message,
                                     FieldValidationMessage.MessageLevel.ERROR));
                         }
                         // change field type for standard field , Error
-                        if (specDefinition.getFieldType() != definition.getFieldType()) {
+                        if (specDefinition.getFieldType() != definition.getFieldType() && specialFieldTypeCase(specDefinition, definition)) {
                             String message = String.format("Data type for %s is not same to standard", specDefinition.getScreenName());
-                            validations.add(new FieldValidationMessage(definition.getFieldName(),
-                                    definition.getColumnName(), message, FieldValidationMessage.MessageLevel.ERROR));
+                            validations.add(new FieldValidationMessage(fieldName,
+                                    columnName, message, FieldValidationMessage.MessageLevel.ERROR));
+                        }
+                        // WARNING if the autodetected fieldType based on column data doesn’t match the Spec defined fieldType of a Lattice Field.
+                        if (autoDetectedFieldDefinition.getFieldType() != specDefinition.getFieldType()) {
+                            String message = String.format("auto-detected fieldType %s based on column data %s " +
+                                            "doesn’t match the Spec defined fieldType %s of a Lattice Field %s",
+                                    autoDetectedFieldDefinition.getFieldType(),
+                                    autoDetectedFieldDefinition.getColumnName(), specDefinition.getFieldType(),
+                                    specDefinition.getFieldName());
+                            validations.add(new FieldValidationMessage(fieldName,
+                                    columnName, message, FieldValidationMessage.MessageLevel.WARNING));
                         }
                         if (UserDefinedType.DATE.equals(definition.getFieldType())) {
-                            FieldDefinition autoDetectedFieldDefinition =
-                                    autoDetectionResultsMap.get(definition.getColumnName());
                             validateFieldDefinitionWithDate(definition, autoDetectedFieldDefinition, resolver,
                                     validations);
                         }
                         // multiple user field mapped to same standard field
-                        if (mappedLatticeField.contains(definition.getFieldName())) {
+                        if (mappedLatticeField.contains(fieldName)) {
                             String message = String.format("Multiple user fields are mapped to standard field %s",
-                                    definition.getFieldName());
-                            validations.add(new FieldValidationMessage(definition.getFieldName(),
-                                    definition.getColumnName(), message, FieldValidationMessage.MessageLevel.ERROR));
+                                    fieldName);
+                            validations.add(new FieldValidationMessage(fieldName,
+                                    columnName, message, FieldValidationMessage.MessageLevel.ERROR));
                         } else {
-                            mappedLatticeField.add(definition.getFieldName());
+                            mappedLatticeField.add(fieldName);
                         }
-                    }
+                    } else {
                     // check the case user field can be mapped to lattice field
-                    if (Boolean.FALSE.equals(definition.isInCurrentImport())) {
                         for (String columnName : unMappedColumnNames) {
-                            if (!Boolean.TRUE.equals(definition.getIgnored()) && (columnName.equalsIgnoreCase(definition.getColumnName())
-                                    || ImportWorkflowUtils.doesColumnNameMatch(columnName, definition.getMatchingColumnNames()))) {
+                            if ((columnName.equalsIgnoreCase(definition.getColumnName())
+                                    || ImportWorkflowUtils.doesColumnNameMatch(columnName,
+                                    specDefinition.getMatchingColumnNames()))) {
                                 String message = String.format("Column name %s matched Lattice Field %s, but they are" +
-                                        " not mapped to each other", columnName, definition.getFieldName());
-                                validations.add(new FieldValidationMessage(definition.getFieldName(),
+                                        " not mapped to each other", columnName, fieldName);
+                                validations.add(new FieldValidationMessage(fieldName,
                                         definition.getColumnName(), message, FieldValidationMessage.MessageLevel.WARNING));
                                 break;
                             }
@@ -1045,9 +1065,17 @@ public class ImportWorkflowUtils {
                     }
                 }
 
+                if (CollectionUtils.isNotEmpty(requiredFiledNames)) {
+                    requiredFiledNames.forEach(name -> {
+                        String message = String.format("Field name %s is required, need set column name", name);
+                        validations.add(new FieldValidationMessage(name,
+                                null, message, FieldValidationMessage.MessageLevel.ERROR));
+                    });
+                }
             }
             response.addFieldValidationMessages(entry.getKey(), validations, true);
         }
+
         setValidationResult(response);
         return response;
     }
@@ -1099,12 +1127,38 @@ public class ImportWorkflowUtils {
                     FieldValidationMessage.MessageLevel.WARNING));
         } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
             // this is case that user change the date/time format which can be parsed
-            String message = String.format("%s is set as %s which can parse the value from uploaded " +
-                    "file.", definition.getColumnName(), userFormat);
+            String message = String.format("%s is set to %s from original %s which can parse the value from " +
+                    "uploaded file.", definition.getColumnName(), userFormat, formatWithBestEffort);
             validations.add(new FieldValidationMessage(definition.getFieldName(),
                     definition.getColumnName(), message,
                     FieldValidationMessage.MessageLevel.WARNING));
         }
     }
 
+    private static boolean specialFieldTypeCase(FieldDefinition specDefinition, FieldDefinition definition) {
+        // A temp fix for schema update in maint_4.8.0.
+        if (InterfaceName.Amount.name().equalsIgnoreCase(specDefinition.getFieldName())
+                || InterfaceName.Quantity.name().equalsIgnoreCase(specDefinition.getFieldName())
+                || InterfaceName.Cost.name().equalsIgnoreCase(specDefinition.getFieldName())) {
+            if (!UserDefinedType.INTEGER.equals(definition.getFieldType())
+                    && !UserDefinedType.NUMBER.equals(definition.getFieldType())) {
+                log.error(String.format("Attribute %s has wrong physicalDataType %s", definition.getFieldName(),
+                        definition.getFieldType()));
+                return false;
+            }
+        } else if (InterfaceName.CreatedDate.name().equalsIgnoreCase(specDefinition.getFieldName())
+                || InterfaceName.LastModifiedDate.name().equals(specDefinition.getFieldName())) {
+            if (!UserDefinedType.TEXT.equals(definition.getFieldType())
+                    && !UserDefinedType.DATE.equals(definition.getFieldType())) {
+                log.error(String.format("Attribute %s has wrong physicalDataType %s", definition.getFieldName(),
+                        definition.getFieldType()));
+                return false;
+            }
+
+        } else {
+            log.error("PhysicalDataType is not the same for attribute: " + definition.getFieldName());
+            return false;
+        }
+        return true;
+    }
 }

@@ -52,6 +52,9 @@ public class FieldDefinition {
     @JsonProperty
     protected Boolean inCurrentImport;
 
+    // property to record whether column name was ignored for validation
+    @JsonProperty
+    private Boolean ignored;
 
     //
     // Properties that are part of the API with the UI, but only apply for fields with fieldType "DATE".
@@ -122,8 +125,6 @@ public class FieldDefinition {
     @JsonProperty
     protected String subcategory;
 
-    // read-only property to record whether column name was ignored for validation
-    private Boolean ignored;
 
     //
     // Properties for defining template IDs and linking with external systems.  These are not set for most fields.
@@ -331,10 +332,12 @@ public class FieldDefinition {
         this.externalSystemName = externalSystemName;
     }
 
-
-    @JsonProperty
     public Boolean getIgnored() {
         return ignored;
+    }
+
+    public void setIgnored(Boolean ignored) {
+        this.ignored = ignored;
     }
 
     @Override

@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -215,13 +213,12 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
                 ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(importWorkflowSpec, null, resolver);
 
         Map<String, List<FieldDefinition>> fieldDefinitionMap = record.getFieldDefinitionsRecordsMap();
-        Set<String> headers = resolver.getHeaderFields();
-        Map autoDetectionResultsMap = new HashMap<>();
-        headers.forEach(header -> {
-            FieldDefinition def = new FieldDefinition();
-            def.setColumnName(header);
-            autoDetectionResultsMap.put(header, def);
-        });
+        Map<String, FieldDefinition> autoDetectionResultsMap = ImportWorkflowUtils.generateAutodetectionResultsMap(resolver);
+
+
+        ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
+                , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
+        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
 
 
         // change customer field's type
@@ -230,7 +227,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         FieldDefinition customField = customNameToFieldDefinition.get("Earnings");
         Assert.assertNotNull(customField);
         customField.setFieldType(UserDefinedType.TEXT);
-        ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
+        response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
                 , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
 
