@@ -565,7 +565,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     workflowJobEntityMgr.update(o);
                     ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
                     submitted.add(appId);
-                    log.info("Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
+                    log.info("WorkflowThrottling Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
                 } catch (Exception e) {
                     log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);
                 }
@@ -630,9 +630,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
         }
 
-        FakeApplicationId fakeApplicationId = new FakeApplicationId(workflowJob.getPid().toString());
+        FakeApplicationId fakeApplicationId = new FakeApplicationId(workflowJob.getPid());
         workflowJob.setApplicationId(fakeApplicationId.toString());
         workflowJobEntityMgr.updateApplicationId(workflowJob);
+
+        String podid = CamilleEnvironment.getPodId();
+        log.info("WorkflowThrottling enqueued workflow pid={} type={} env={} stack{} tenant={}", workflowJob.getPid(), workflowJob.getType(), podid, division, tenant.getId());
 
         return workflowJob.getPid();
     }
