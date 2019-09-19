@@ -161,7 +161,8 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
 
     @Override
     public boolean shouldEnqueueWorkflow(String podid, String division, String workflowType) {
-        return isWorkflowThrottlingEnabled(podid, division) && isWorkflowThrottlingRolledOut(podid, division, workflowType);
+        return isWorkflowThrottlingEnabled(podid, division)
+                && isWorkflowThrottlingRolledOut(podid, division, workflowType);
     }
 
     @Override
@@ -188,6 +189,8 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         // drain workflowJobs enqueued in db
         try {
             WorkflowThrottlingSystemStatus status = constructSystemStatus(podid, division);
+            logGlobalQueueFullness(podid, status.getEnqueuedWorkflowInEnv());
+            logTenantQueueFullness(podid, status.getTenantEnqueuedWorkflow());
             List<WorkflowThrottlingConstraint> constraintList = Arrays.asList(new NotExceedingEnvQuota(),
                     new NotExceedingTenantQuota(), new IsForCurrentStack());
             List<WorkflowJobSchedulingObject> enqueuedWorkflowSchedulingObjects = status.getEnqueuedWorkflowJobs()
@@ -198,6 +201,19 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             log.error("Failed to get workflow throttling result.", e);
             throw e;
         }
+    }
+
+    private void logGlobalQueueFullness(String podid, Map<String, Integer> enqueuedWorkflowInEnv) {
+        StringBuilder str = new StringBuilder("WorkflowThrottling Global Queue Status: ");
+        log.info(str.append(enqueuedWorkflowInEnv).toString());
+    }
+
+    private void logTenantQueueFullness(String podid, Map<String, Map<String, Integer>> tenantEnqueuedWorkflow) {
+        StringBuilder str = new StringBuilder("WorkflowThrottling Tenant Queue Status: ");
+        tenantEnqueuedWorkflow.forEach((tenantId, workflowMap) -> {
+            str.append(String.format("%s=%s", tenantId, workflowMap));
+        });
+        log.info(str.toString());
     }
 
     @Override
