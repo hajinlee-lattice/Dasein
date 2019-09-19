@@ -2,6 +2,8 @@ package com.latticeengines.matchapi.controller;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +22,7 @@ import javax.inject.Inject;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +88,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final String SFDC_ID = "SfdcId";
     private static final String TEST_ID = "TestId"; // To track test cases
+    private static final String BOOL_FIELD = "BooleanField";
 
     private static final String[] FIELDS = {
             TEST_ID, //
@@ -122,10 +126,13 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             MatchKey.Email.name(), //
     };
 
+    // use account id column as preferred ID to simulate rematch case
+    private static final String PREFERRED_ID_COLUMN = InterfaceName.AccountId.name();
     private static final String[] FIELDS_PREFERRED_ID = { //
             TEST_ID, //
             InterfaceName.CustomerAccountId.name(), //
-            InterfaceName.AccountId.name(), //
+            PREFERRED_ID_COLUMN, //
+            BOOL_FIELD,
     };
 
     private static final List<Class<?>> SCHEMA = new ArrayList<>(Collections.nCopies(FIELDS.length, String.class));
@@ -377,16 +384,25 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             /*-
              * valid preferred IDs
              */
-            { "C15_01", "caid_1", "acc_1" }, //
-            { "C15_02", "caid_2", "acc_2" }, //
-            { "C15_03", "caid_3", "acc_3" }, //
-            { "C15_04", "caid_4", "acc_4" }, //
+            { "C15_01", "caid_1", "acc_1", TRUE.toString() }, //
+            { "C15_02", "caid_2", "acc_2", TRUE.toString() }, //
+            { "C15_03", "caid_3", "acc_3", TRUE.toString() }, //
+            { "C15_04", "caid_4", "acc_4", TRUE.toString() }, //
             /*-
              * blank preferred IDs, will get random ID
              */
-            { "C15_05", "caid_5", "" }, //
-            { "C15_06", "caid_6", "    " }, //
-            { "C15_07", "caid_7", null }, //
+            { "C15_05", "caid_5", "", FALSE.toString() }, //
+            { "C15_06", "caid_6", "    ", FALSE.toString() }, //
+            { "C15_07", "caid_7", null, FALSE.toString() },
+            /*-
+             * IDs contains invalid character, ignored and allocate new ID
+             * TODO will be changed to skip the entire row later
+             */
+            { "C15_08", "caid_8", "abc123#", FALSE.toString() }, // hash tag
+            { "C15_09", "caid_9", "account:123:456", FALSE.toString() }, // colon
+            { "C15_10", "caid_10", "account||abc  ", FALSE.toString() }, // double pipe
+            { "C15_11", "caid_11", "a:b#C||4", FALSE.toString() }, // mix
+            { "C15_12", "caid_12", RandomStringUtils.randomAlphanumeric(1000), FALSE.toString() }, // too long
     };
 
     // prepare in the run time because it needs EntityId got from non-fetch-only
@@ -833,22 +849,34 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         Assert.assertNotNull(command);
         Assert.assertNotNull(command.getResultLocation());
 
+        int testIdIdx = ArrayUtils.indexOf(FIELDS_PREFERRED_ID, PREFERRED_ID_COLUMN);
+        int preferredIdIdx = ArrayUtils.indexOf(FIELDS_PREFERRED_ID, PREFERRED_ID_COLUMN);
+        // testId -> each row of test data
+        Map<String, Object[]> testDataMap = generateTestDataMap(DATA_PREFERRED_ID, testIdIdx);
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration,
                 command.getResultLocation() + "/*.avro");
         Set<String> testIds = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            testIds.add(record.get(TEST_ID).toString());
+            String testId = record.get(TEST_ID).toString();
+            testIds.add(testId);
             String entityId = record.get(ENTITY_ID_FIELD).toString();
-            Object preferredIdObj = record.get(MatchKey.PreferredEntityId.name());
-            String preferredEntityId = preferredIdObj == null ? null : preferredIdObj.toString();
+            String accountId = record.get(InterfaceName.AccountId.name()).toString();
+            String preferredEntityId = (String) testDataMap.get(testId)[preferredIdIdx];
+            String usedPreferredIdForAllocation = record.get(BOOL_FIELD).toString();
 
-            if (StringUtils.isNotBlank(preferredEntityId)) {
+            log.info("TestId={}, EntityId={}, PreferredEntityId={}, UsedPreferredIdForAllocation={}", testId, entityId,
+                    preferredEntityId, usedPreferredIdForAllocation);
+
+            Assert.assertEquals(accountId, entityId, "AccountId should be the same as EntityId");
+            if (TRUE.toString().equalsIgnoreCase(usedPreferredIdForAllocation)) {
                 Assert.assertEquals(entityId, preferredEntityId,
                         "valid preferredEntityId should be used to allocate new entity");
             } else {
                 Assert.assertTrue(StringUtils.isNotBlank(entityId),
                         "Should not get blank entity ID even if no valid preferred entity ID is provided");
+                Assert.assertNotEquals(entityId, preferredEntityId,
+                        "EntityId should be different than PreferredEntityId");
             }
         }
         Assert.assertEquals(testIds.size(), DATA_PREFERRED_ID.length,
