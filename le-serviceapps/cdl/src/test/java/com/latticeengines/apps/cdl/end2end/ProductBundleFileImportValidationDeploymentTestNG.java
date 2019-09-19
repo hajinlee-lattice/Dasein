@@ -18,6 +18,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -29,6 +30,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -58,12 +60,15 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     private static final Logger log = LoggerFactory.getLogger(ProductBundleFileImportValidationDeploymentTestNG.class);
     private String customerSpace;
     private static final String MODELS_RESOURCE_ROOT = "end2end/models";
+    private static final String S3_ATLAS_DATA_TABLE_DIR = "/%s/atlas/Data/Tables";
+    private static final String HDFS_DATA_TABLE_DIR = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production/Data/Tables";
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private SegmentProxy segmentProxy;
+
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
@@ -72,6 +77,15 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String bucket;
+
+    @Value("${camille.zk.pod.id}")
+    protected String podId;
 
     // Target Products are shared with CrossSellModelEnd2EndDeploymentTestNG RefreshRatingDeploymentTestNG
     private static final ImmutableList<String> targetProducts = ImmutableList.of("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o");
@@ -153,6 +167,13 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);
         Assert.assertEquals(job.getErrorMsg(), "Import failed because there were 4 errors : 3 missing product bundles" +
                 " in use (this import will completely replace the previous one), 2 product bundle has different product SKUs. Dependant models will need to be remodelled to get accurate scores. error when validating with input file, please reference error.csv for details.");
+        List<?> rawList = JsonUtils.deserialize(job.getOutputs().get("DATAFEEDTASK_IMPORT_ERROR_FILES"), List.class);
+        String errorFile = JsonUtils.convertList(rawList, String.class).get(0);
+        Assert.assertNotNull(errorFile);
+        String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
+        String s3File = String.format(S3_ATLAS_DATA_TABLE_DIR, tenantId) +
+                        errorFile.substring(String.format(HDFS_DATA_TABLE_DIR, podId, tenantId, tenantId).length());
+        Assert.assertTrue(s3Service.objectExist(bucket, s3File));
     }
 
     private void setupAIModels() {
