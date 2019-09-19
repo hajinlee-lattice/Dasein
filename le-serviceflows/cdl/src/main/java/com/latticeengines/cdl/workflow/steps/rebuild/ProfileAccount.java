@@ -284,9 +284,11 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         boolean ldcChange = grapherContext != null && !grapherContext.isDataCloudChanged();
         ldcRefresh = grapherContext != null && grapherContext.isDataCloudRefresh();
         hasFilter = (!ldcChange || ldcRefresh) && !grapherContext.isDataCloudNew();
+        boolean enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
+        hasFilter = hasFilter && !enforceRebuild;
         putStringValueInContext(PROCESS_ACCOUNT_STATS_MERGE, hasFilter + "");
         log.info("hasFilter=" + hasFilter + " ldcChange=" + ldcChange + " ldcRefresh=" + ldcRefresh + " ldcNew="
-                + grapherContext.isDataCloudNew());
+                + grapherContext.isDataCloudNew() + " enforceRebuild=" + enforceRebuild);
     }
 
     private boolean checkManyUpdate() {
