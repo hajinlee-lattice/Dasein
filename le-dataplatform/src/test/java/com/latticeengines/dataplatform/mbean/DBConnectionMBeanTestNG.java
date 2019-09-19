@@ -10,12 +10,15 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 
 public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.url}")
     private String dataSourceURL;
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.user}")
     private String dataSourceUser;
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.type}")
     private String dataSourceType;
 
@@ -31,6 +34,7 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private DBConnectionMBean dbcMBean;
 
+    @Deprecated
     @Test(groups = { "functional.platform", "functional.production" }, enabled = false)
     public void testDataSourceConnection() throws Exception {
         if (dataSourceType.equals("MySQL")) {

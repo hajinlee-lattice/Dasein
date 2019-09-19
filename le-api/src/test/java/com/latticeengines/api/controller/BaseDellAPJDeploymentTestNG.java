@@ -42,6 +42,7 @@ public class BaseDellAPJDeploymentTestNG extends ApiFunctionalTestNGBase {
         return model;
     }
 
+    @Deprecated
     LoadConfiguration getLoadConfig(Model model) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();

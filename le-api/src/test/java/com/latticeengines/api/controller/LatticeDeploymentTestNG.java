@@ -75,6 +75,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         return new AbstractMap.SimpleEntry<>("P1_Event", features.getElements());
     }
 
+    @Deprecated
     @Test(groups = "deployment")
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");
@@ -87,6 +88,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED, String.format("ApplicationId is %s", appId.toString()));
     }
 
+    @Deprecated
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();

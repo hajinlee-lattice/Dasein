@@ -37,18 +37,23 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
+    @Deprecated
     @Value("${pls.modelingservice.testdsdb}")
     private String dataSourceDb;
 
+    @Deprecated
     @Value("${pls.modelingservice.testdsdbhost}")
     private String dataSourceHost;
 
+    @Deprecated
     @Value("${pls.modelingservice.testdsdbuser}")
     private String dataSourceUser;
 
+    @Deprecated
     @Value("${pls.modelingservice.testdsdbpasswd.encrypted}")
     private String dataSourcePassword;
 
+    @Deprecated
     @Value("${pls.modelingservice.testdsdbport}")
     private int dataSourcePort;
 
@@ -81,6 +86,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
         }
     }
 
+    @Deprecated
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table)
             throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
@@ -121,6 +127,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
         return new ModelingServiceExecutor(bldr);
     }
 
+    @Deprecated
     @Test(groups = { "lpe2e", "deployment.production" }, enabled = false, dataProvider = "modelMetadataProvider")
     public void runPipeline(String tenant, String modelName, String metadataSuffix, String tableName) throws Exception {
         LOGGER.info(String.format("Running pipeline for model %s in tenant %s using table %s", modelName, tenant,

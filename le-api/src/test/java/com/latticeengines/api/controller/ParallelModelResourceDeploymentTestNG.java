@@ -75,6 +75,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         model.setDataFormat("avro");
     }
 
+    @Deprecated
     @Test(groups = "deployment")
     public void parallel_load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);

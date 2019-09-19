@@ -82,6 +82,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         return new AbstractMap.SimpleEntry<>("P1_Event", features.getElements());
     }
 
+    @Deprecated
     @Test(groups = "deployment")
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig();
@@ -93,6 +94,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Deprecated
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();

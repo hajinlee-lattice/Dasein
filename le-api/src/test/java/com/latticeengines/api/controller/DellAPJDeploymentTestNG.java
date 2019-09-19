@@ -55,6 +55,7 @@ public class DellAPJDeploymentTestNG extends BaseDellAPJDeploymentTestNG {
         return new AbstractMap.SimpleEntry<>("Target", features.getElements());
     }
 
+    @Deprecated
     @Test(groups = "deployment")
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");

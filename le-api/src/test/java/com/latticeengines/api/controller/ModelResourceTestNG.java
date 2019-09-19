@@ -170,6 +170,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         assertTrue(submission.isImmediate());
     }
 
+    @Deprecated
     @Test(groups = "functional", enabled = false)
     public void load() throws Exception {
         LoadConfiguration config = new LoadConfiguration();

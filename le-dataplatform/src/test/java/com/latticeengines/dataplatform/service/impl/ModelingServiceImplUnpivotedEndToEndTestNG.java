@@ -79,6 +79,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return getClass().getSimpleName();
     }
 
+    @Override
     protected boolean doClearDbTables() {
         return false;
     }
@@ -131,6 +132,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return m;
     }
 
+    @Deprecated
     private Pair<String[], Integer[]> getTableColumnMetadata() {
         DataSchema schema = sqoopMetadataService.createDataSchema(getCreds(), "Q_EventTable_Nutanix");
         List<Field> fields = schema.getFields();
@@ -144,6 +146,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return new Pair<>(cols, types);
     }
 
+    @Deprecated
     private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
@@ -151,6 +154,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return new DbCreds(builder);
     }
 
+    @Deprecated
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds creds = getCreds();
@@ -162,6 +166,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return config;
     }
 
+    @Deprecated
     @Test(groups = "sqoop", enabled = false, expectedExceptions = LedpException.class)
     public void loadBadTableInput() {
         LoadConfiguration loadConfig = getLoadConfig();
@@ -169,6 +174,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         modelingService.loadData(loadConfig);
     }
 
+    @Deprecated
     @Test(groups = "sqoop")
     public void retrieveMetadataAndWriteToHdfs() throws Exception {
         httpServer = new StandaloneHttpServer();
@@ -183,6 +189,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
     }
 
+    @Deprecated
     @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "sqoop", dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
     public void load() throws Exception {

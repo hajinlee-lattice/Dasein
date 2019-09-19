@@ -39,6 +39,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         return false;
     }
 
+    @Deprecated
     @Test(groups = "sqoop", enabled = false)
     public void testExecuteYarnSteps() throws Exception {
         cleanUpHdfs(CUSTOMER);
@@ -64,6 +65,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
+    @Deprecated
     @Test(groups = "sqoop", enabled = false)
     public void testExecuteYarnStepsFeatureThreshold() throws Exception {
         cleanUpHdfs(CUSTOMER);
@@ -113,6 +115,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         }
     }
 
+    @Deprecated
     private void setupDBConfig() {
         modelStepYarnProcessor.setDBConfig(dataSourceHost, dataSourcePort, dataSourceDB, dataSourceUser,
                 dataSourcePasswd, dataSourceDBType);

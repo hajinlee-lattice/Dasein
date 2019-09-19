@@ -48,6 +48,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
 
     private Model model;
 
+    @Deprecated
     private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
@@ -55,6 +56,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         return new DbCreds(builder);
     }
 
+    @Deprecated
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds creds = getCreds();
@@ -102,6 +104,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         model = createModel(modelDef);
     }
 
+    @Deprecated
     @Test(groups = "sqoop")
     public void loadData() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();

@@ -86,6 +86,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
         model.setDataFormat("avro");
     }
 
+    @Deprecated
     @Test(groups = "deployment")
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
@@ -97,6 +98,7 @@ public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTe
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Deprecated
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void loadAgain() {
