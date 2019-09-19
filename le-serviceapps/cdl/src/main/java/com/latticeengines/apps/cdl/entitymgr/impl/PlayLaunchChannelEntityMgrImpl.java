@@ -175,6 +175,9 @@ public class PlayLaunchChannelEntityMgrImpl
                 existingPlayLaunchChannel.setChannelConfig(playLaunchChannel.getChannelConfig());
             }
         }
+        if (playLaunchChannel.getLastLaunch() != null) {
+            existingPlayLaunchChannel.setLastLaunch(playLaunchChannel.getLastLaunch());
+        }
         if (StringUtils.isNotBlank(playLaunchChannel.getCurrentLaunchedAccountUniverseTable())) {
             Table table = tableEntityMgr.findByName(playLaunchChannel.getCurrentLaunchedAccountUniverseTable(), false,
                     false);
