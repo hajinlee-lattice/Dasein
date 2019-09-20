@@ -257,7 +257,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             csvRecord = iter.next();
                             lineNum++;
                         } catch (Exception e) {
-                            LOG.warn("Exception happened when parse csv file");
+                            LOG.warn(String.format("Exception %s happened when parse csv file ", e));
                         }
                     }
                 }
@@ -335,7 +335,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
         }
         context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-
         id = id != null ? id : "";
         csvFilePrinter.printRecord(lineNumber, id, errorMap.values().toString());
         csvFilePrinter.flush();
@@ -343,7 +342,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private void handleDuplicate(Context context, long lineNumber) throws IOException {
-        LOG.info("Handle duplicate record in line: " + String.valueOf(lineNumber));
+        LOG.info("Handle duplicate record in line: " + lineNumber);
         context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).increment(1);
         id = id != null ? id : "";
         csvFilePrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
