@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -35,7 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "ATLAS_DIMENSION", uniqueConstraints = { //
-        @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID" }) })
+        @UniqueConstraint(columnNames = { "NAME", "FK_STREAM_ID", "FK_TENANT_ID" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Dimension implements HasPid, Serializable, HasAuditingFields {
@@ -99,6 +101,15 @@ public class Dimension implements HasPid, Serializable, HasAuditingFields {
     @Transient
     private DimensionCalculator calculator;
 
+    @JsonIgnore
+    @Column(name = "ATTRIBUTE_DERIVER", nullable = false, length = 1000)
+    private String attributeDeriverConfig;
+
+    // configuration to derive attributes for stream
+    @JsonProperty("attribute_derivers")
+    @Transient
+    private List<StreamAttributeDeriver> attributeDerivers;
+
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty("created")
@@ -159,10 +170,6 @@ public class Dimension implements HasPid, Serializable, HasAuditingFields {
         this.stream = stream;
     }
 
-    public String getGeneratorConfig() {
-        return generatorConfig;
-    }
-
     public void setGeneratorConfig(String generatorConfig) {
         this.generatorConfig = generatorConfig;
         this.generator = JsonUtils.deserialize(generatorConfig, DimensionGenerator.class);
@@ -189,6 +196,30 @@ public class Dimension implements HasPid, Serializable, HasAuditingFields {
     public void setCalculator(DimensionCalculator calculator) {
         this.calculator = calculator;
         this.calculatorConfig = JsonUtils.serialize(calculator);
+    }
+
+    public void setAttributeDeriverConfig(String attributeDeriverConfig) {
+        this.attributeDeriverConfig = attributeDeriverConfig;
+        List<?> list = JsonUtils.deserialize(attributeDeriverConfig, List.class);
+        this.attributeDerivers = JsonUtils.convertList(list, StreamAttributeDeriver.class);
+    }
+
+    public List<StreamAttributeDeriver> getAttributeDerivers() {
+        if (attributeDerivers != null) {
+            return attributeDerivers;
+        }
+        if (attributeDeriverConfig == null) {
+            attributeDerivers = new ArrayList<>();
+        } else {
+            List<?> list = JsonUtils.deserialize(attributeDeriverConfig, List.class);
+            attributeDerivers = JsonUtils.convertList(list, StreamAttributeDeriver.class);
+        }
+        return attributeDerivers;
+    }
+
+    public void setAttributeDerivers(List<StreamAttributeDeriver> attributeDerivers) {
+        this.attributeDerivers = attributeDerivers;
+        this.attributeDeriverConfig = JsonUtils.serialize(attributeDerivers);
     }
 
     @Override
