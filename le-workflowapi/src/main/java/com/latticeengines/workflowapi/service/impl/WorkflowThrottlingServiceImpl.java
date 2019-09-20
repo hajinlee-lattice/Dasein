@@ -310,7 +310,9 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     private void addWorkflowToMap(Map<String, Integer> map, WorkflowJob workflow) {
         // update record for global and specific type
         String type = workflow.getType();
-        map.put(GLOBAL, map.getOrDefault(GLOBAL, 0) + 1);
-        map.put(type, map.getOrDefault(type, 0) + 1);
+        if (type != null) {
+            map.put(GLOBAL, map.getOrDefault(GLOBAL, 0) + 1);
+            map.put(type, map.getOrDefault(type, 0) + 1);
+        }
     }
 }
