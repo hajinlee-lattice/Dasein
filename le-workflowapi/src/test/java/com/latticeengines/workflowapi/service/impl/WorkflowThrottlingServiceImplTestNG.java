@@ -159,25 +159,31 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
 
     @Test(groups = "functional", dependsOnMethods = "testGetConfig", dataProvider = "testGetStatusProvider")
     public void testGetStatus(String podid, String div, List<WorkflowJob> fakedWorkflowJobs) {
+        List<WorkflowJob> runningWorkflowJobInCurrentcluster = fakedWorkflowJobs.stream()
+                .filter(o -> EMR_CLUSTER_ID.equals(o.getEmrClusterId()))
+                .filter(o -> JobStatus.RUNNING.name().equals(o.getStatus())
+                        || JobStatus.PENDING.name().equals(o.getStatus()))
+                .collect(Collectors.toList());
+        List<WorkflowJob> enqueuedWorkflowJobInCurrentStack = fakedWorkflowJobs.stream()
+                .filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus())).filter(o -> div.equals(o.getStack()))
+                .collect(Collectors.toList());
         when(emrCacheService.getClusterId()).thenReturn(EMR_CLUSTER_ID);
         when(workflowJobEntityMgr.findByStatusesAndClusterId(emrCacheService.getClusterId(),
-                Collections.singletonList(JobStatus.RUNNING.name()))).thenReturn(
-                        fakedWorkflowJobs.stream().filter(o -> JobStatus.RUNNING.name().equals(o.getStatus()))
-                                .collect(Collectors.toList()));
-        when(workflowJobEntityMgr.findByStatuses(Arrays.asList(JobStatus.ENQUEUED.name(), JobStatus.PENDING.name())))
-                .thenReturn(
-                        fakedWorkflowJobs.stream()
-                                .filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus())
-                                        || JobStatus.PENDING.name().equals(o.getStatus()))
-                                .collect(Collectors.toList()));
+                Arrays.asList(JobStatus.RUNNING.name(), JobStatus.PENDING.name())))
+                        .thenReturn(runningWorkflowJobInCurrentcluster);
+        when(workflowJobEntityMgr.findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name())))
+                .thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus()))
+                        .collect(Collectors.toList()));
         WorkflowThrottlingSystemStatus status = workflowThrottlingService.constructSystemStatus(podid, div);
         Assert.assertNotNull(status);
 
-        assertTotalExistingMatch(status, fakedWorkflowJobs, div, JobStatus.RUNNING);
-        assertTotalExistingMatch(status, fakedWorkflowJobs, div, JobStatus.ENQUEUED);
+        assertTotalExistingMatch(status.getRunningWorkflowInEnv(), runningWorkflowJobInCurrentcluster, div);
+        assertTotalExistingMatch(status.getEnqueuedWorkflowInEnv(), enqueuedWorkflowJobInCurrentStack, div);
 
-        assertTenantExistingMatch(status.getTenantRunningWorkflow(), fakedWorkflowJobs, JobStatus.RUNNING);
-        assertTenantExistingMatch(status.getTenantEnqueuedWorkflow(), fakedWorkflowJobs, JobStatus.ENQUEUED);
+        assertTenantExistingMatch(status.getTenantRunningWorkflow(), runningWorkflowJobInCurrentcluster,
+                JobStatus.RUNNING);
+        assertTenantExistingMatch(status.getTenantEnqueuedWorkflow(), enqueuedWorkflowJobInCurrentStack,
+                JobStatus.ENQUEUED);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetConfig", dataProvider = "testBackPressureProvider")
@@ -202,21 +208,16 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetStatus", dataProvider = "throttlingResultProvider")
-    public void testGetThrottlingResult(String podid, String division, List<WorkflowJob> fakedWorkflowJobs,
+    public void testGetThrottlingResult(String podid, String div, List<WorkflowJob> fakedWorkflowJobs,
             int submittedCount, int enqueuedCount) {
         when(emrCacheService.getClusterId()).thenReturn(EMR_CLUSTER_ID);
         when(workflowJobEntityMgr.findByStatusesAndClusterId(emrCacheService.getClusterId(),
-                Collections.singletonList(JobStatus.RUNNING.name()))).thenReturn(
-                        fakedWorkflowJobs.stream().filter(o -> JobStatus.RUNNING.name().equals(o.getStatus()))
-                                .collect(Collectors.toList()));
-        when(workflowJobEntityMgr.findByStatuses(Arrays.asList(JobStatus.ENQUEUED.name(), JobStatus.PENDING.name())))
-                .thenReturn(
-                        fakedWorkflowJobs.stream()
-                                .filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus())
-                                        || JobStatus.PENDING.name().equals(o.getStatus()))
-                                .collect(Collectors.toList()));
+                Arrays.asList(JobStatus.RUNNING.name(), JobStatus.PENDING.name()))).thenReturn(Collections.emptyList());
+        when(workflowJobEntityMgr.findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name())))
+                .thenReturn(fakedWorkflowJobs.stream().filter(o -> JobStatus.ENQUEUED.name().equals(o.getStatus()))
+                        .collect(Collectors.toList()));
 
-        ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, division);
+        ThrottlingResult result = workflowThrottlingService.getThrottlingResult(podid, div);
 
         // count canSubmit
         Assert.assertEquals(result.getCanSubmit().getOrDefault(TEST_TENANT_ID, Collections.emptyList()).size(),
@@ -229,8 +230,8 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
     public Object[][] throttlingResultProvider() {
         // podid, division, faked workflowJobs, expect submittedCount, expect
         // enqueuedCount
-        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_FOR_RESULT1, 4, 10 },
-                { TEST_PODID, TEST_DIV2, FAKE_WORKFLOW_FOR_RESULT2, 0, 6 } };
+        return new Object[][] { { TEST_PODID, TEST_DIV1, FAKE_WORKFLOW_FOR_RESULT1, 4, 0 },
+                { TEST_PODID, TEST_DIV2, FAKE_WORKFLOW_FOR_RESULT2, 0, 0 } };
     }
 
     @DataProvider(name = "flagProvider")
@@ -398,9 +399,12 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
             }
         };
         try {
+            Path masterConfigPath = PathBuilder.buildWorkflowThrottlingMasterConfigPath();
             String masterPropertyFileStr = JsonUtils.serialize(masterPropertyFile);
-            c.create(PathBuilder.buildWorkflowThrottlingMasterConfigPath(), new Document(masterPropertyFileStr),
-                    ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            if (c.exists(masterConfigPath)) {
+                c.delete(masterConfigPath);
+            }
+            c.create(masterConfigPath, new Document(masterPropertyFileStr), ZooDefs.Ids.OPEN_ACL_UNSAFE);
             String tenantOverwriteStr = JsonUtils.serialize(tenantOverwrite);
             c.create(
                     PathBuilder.buildWorkflowThrottlingTenantConfigPath(TEST_PODID,
@@ -411,22 +415,11 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
         }
     }
 
-    private void assertTotalExistingMatch(WorkflowThrottlingSystemStatus status, List<WorkflowJob> fakeWorkflows,
-            String division, JobStatus jobStatus) {
-        List<JobStatus> desiredStatus = jobStatus.equals(JobStatus.RUNNING)
-                ? Arrays.asList(JobStatus.RUNNING, JobStatus.PENDING)
-                : Collections.singletonList(JobStatus.ENQUEUED);
-        Assert.assertEquals(
-                jobStatus.equals(JobStatus.RUNNING) ? status.getTotalRunningWorkflowInEnv()
-                        : status.getTotalEnqueuedWorkflowInEnv(),
-                fakeWorkflows.stream()
-                        .filter(workflowJob -> desiredStatus.contains(JobStatus.fromString(workflowJob.getStatus())))
-                        .count());
-        Map<String, Integer> map = jobStatus.equals(JobStatus.RUNNING) ? status.getRunningWorkflowInEnv()
-                : status.getEnqueuedWorkflowInEnv();
-        Assert.assertEquals((int) map.getOrDefault(TEST_WF_TYPE, 0), fakeWorkflows.stream().filter(
-                wf -> desiredStatus.contains(JobStatus.fromString(wf.getStatus())) && wf.getType().equals(TEST_WF_TYPE))
-                .count());
+    private void assertTotalExistingMatch(Map<String, Integer> existingWorkflows, List<WorkflowJob> fakeWorkflows,
+            String division) {
+        Assert.assertEquals((int) existingWorkflows.get(GLOBAL), fakeWorkflows.size());
+        Assert.assertEquals((int) existingWorkflows.getOrDefault(TEST_WF_TYPE, 0), fakeWorkflows.stream()
+                .filter(o -> TEST_WF_TYPE.equals(o.getType())).collect(Collectors.toList()).size());
     }
 
     private void assertTenantExistingMatch(Map<String, Map<String, Integer>> existingWorkflows,
