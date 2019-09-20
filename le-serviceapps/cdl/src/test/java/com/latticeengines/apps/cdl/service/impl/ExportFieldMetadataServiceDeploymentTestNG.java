@@ -192,7 +192,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         long nonStandardFieldsCount = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         log.info("" + nonStandardFieldsCount);
-        assertEquals(nonStandardFieldsCount, 23);
+        assertEquals(nonStandardFieldsCount, 21);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
@@ -208,11 +208,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 80);
+        assertEquals(columnMetadata.size(), 79);
 
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
-        assertEquals(nonStandardFields.size(), 23);
+        assertEquals(nonStandardFields.size(), 21);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithExportAttributes")
@@ -250,7 +250,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
         log.info(JsonUtils.serialize(nonStandardFields));
-        assertEquals(nonStandardFields.size(), 3);
+        assertEquals(nonStandardFields.size(), 2);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testFacebookLaunch")
