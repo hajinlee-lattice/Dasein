@@ -16,6 +16,8 @@ public class AccountContactExportConfig extends SparkJobConfig {
 
     public static final String NAME = "exportAccountContact";
 
+    public static final String contactRenamed = "ContactRenamed_";
+
     @JsonProperty("AccountContactExportContext")
     private AccountContactExportContext accountContactExportContext;
 
@@ -47,11 +49,4 @@ public class AccountContactExportConfig extends SparkJobConfig {
         this.dropKeys = dropKeys;
     }
 
-    public Map<String, String> getContactColumnNames() {
-        return contactColumnNames;
-    }
-
-    public void setContactColumnNames(Map<String, String> contactColumnNames) {
-        this.contactColumnNames = contactColumnNames;
-    }
 }

@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
@@ -149,12 +150,20 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 int suffix = 1;
                 while (outputCols.contains(displayName.toLowerCase())) {
                     log.warn("Displayname [" + displayName + "] has already been assigned to another attr, " +
-                            "cannot be assigned to [" + cm.getAttrName() + "]. Append a number to differentiate." );
+                            "cannot be assigned to [" + cm.getAttrName() + "]. Append a number to differentiate.");
                     displayName = originalDisplayName + " (" + (++suffix) + ")";
                 }
-                displayNameMap.put(cm.getAttrName(), displayName);
+                // need to rename contact column name
+                if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
+                    displayNameMap.put(AccountContactExportConfig.contactRenamed + cm.getAttrName(), displayName);
+                } else {
+                    displayNameMap.put(cm.getAttrName(), displayName);
+                }
                 outputCols.add(displayName.toLowerCase());
             } else {
+                if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
+                    displayNameMap.put(AccountContactExportConfig.contactRenamed + cm.getAttrName(), cm.getAttrName());
+                }
                 outputCols.add(cm.getAttrName().toLowerCase());
             }
         });

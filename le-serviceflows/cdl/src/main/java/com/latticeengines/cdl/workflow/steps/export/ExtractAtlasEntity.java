@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -80,7 +78,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private AttributeRepository attrRepo;
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
     private AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
-    private Map<String, String> contactColumnNames = new HashMap<>();
 
     @Override
     public void execute() {
@@ -164,10 +161,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         if (batonService.isEntityMatchEnabled(customerSpace)) {
             List<String> dropKeys = new ArrayList<>();
             dropKeys.add(InterfaceName.AccountId.name());
-            dropKeys.add(contactColumnNames.getOrDefault(InterfaceName.AccountId.name(), InterfaceName.AccountId.name()));
+            dropKeys.add(AccountContactExportConfig.contactRenamed + InterfaceName.AccountId.name());
             accountContactExportConfig.setDropKeys(dropKeys);
         }
-        accountContactExportConfig.setContactColumnNames(contactColumnNames);
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
     }
@@ -275,62 +271,19 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return cm.getAttrName().equals(InterfaceName.AccountId) || cm.getAttrName().equals(InterfaceName.ContactId);
     }
 
-    private Map<String, Lookup> getAccountLookupMap() {
-        Map<String, Lookup> lookupMap = new HashMap<>();
-        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
-            if (!BusinessEntity.Contact.equals(entity)) {
-                List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
-                cms.forEach(cm -> lookupMap.put(cm.getAttrName(), new AttributeLookup(entity, cm.getAttrName())));
-            }
-        }
-        return lookupMap;
-    }
-
-    private boolean useDisplayName(ColumnMetadata cm) {
-        return StringUtils.isNotBlank(cm.getDisplayName()) && !cm.getDisplayName().equals(cm.getAttrName());
-    }
-
     private List<Lookup> getContactLookup() {
         List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
         List<Lookup> lookups = new ArrayList<>();
         boolean alreadyHaveAccountId = false;
         if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
-            Map<String, Lookup> accountLookupMap = getAccountLookupMap();
-            Set<String> outputCols = new HashSet<>();
-            String suffixStr = "_" + BusinessEntity.Contact.name();
             cms.forEach(cm -> {
                 if (!cm.getAttrName().equals(InterfaceName.ContactId)) {
-                    String originalDisplayName = cm.getDisplayName();
-                    String displayName = originalDisplayName;
-                    if (accountLookupMap.containsKey(cm.getAttrName())) {
-                        boolean useDisplayName = useDisplayName(cm);
-                        if (useDisplayName) {
-                            int suffix = 1;
-                            while (outputCols.contains(displayName.toLowerCase() + suffixStr)) {
-                                displayName = originalDisplayName + suffixStr + " (" + (++suffix) + ")";
-                            }
-                            contactColumnNames.put(cm.getAttrName(), displayName + suffixStr);
-                            outputCols.add(displayName.toLowerCase());
-                        } else {
-                            contactColumnNames.put(cm.getAttrName(), cm.getAttrName() + suffixStr);
-                        }
-                    }
                     lookups.add(new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()));
                 }
             });
             // needs to add account id for left join operation later
             alreadyHaveAccountId = true;
             addAccountId(BusinessEntity.Contact, lookups);
-            // fix the account id display name
-            String accountIdDisplayName = contactColumnNames.get(InterfaceName.AccountId.name());
-            if (StringUtils.isEmpty(accountIdDisplayName)) {
-                String customerAccountIdDisplayName = contactColumnNames.get(InterfaceName.CustomerAccountId.name());
-                if (StringUtils.isEmpty(customerAccountIdDisplayName)) {
-                    contactColumnNames.put(InterfaceName.AccountId.name(), InterfaceName.AccountId.name() + suffixStr);
-                } else {
-                    contactColumnNames.put(InterfaceName.AccountId.name(), customerAccountIdDisplayName + "_" + InterfaceName.AccountId.name());
-                }
-            }
         } else {
             cms.forEach(cm -> {
                 if (!isAccountOrContactId(cm)) {
