@@ -173,9 +173,10 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         try {
             MultiTenantContext.clearTenant();
             List<WorkflowJob> workflowJobs = new ArrayList<>(workflowJobEntityMgr.findByStatusesAndClusterId(
-                    emrCacheService.getClusterId(), Collections.singletonList(JobStatus.RUNNING.name())));
-            workflowJobs.addAll(workflowJobEntityMgr
-                    .findByStatuses(Arrays.asList(JobStatus.ENQUEUED.name(), JobStatus.PENDING.name())));
+                    emrCacheService.getClusterId(), Arrays.asList(JobStatus.RUNNING.name(), JobStatus.PENDING.name())));
+            workflowJobs
+                    .addAll(workflowJobEntityMgr.findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name()))
+                            .stream().filter(o -> division.equals(o.getStack())).collect(Collectors.toList()));
             addCurrentSystemState(status, workflowJobs, podid, division);
         } finally {
             MultiTenantContext.setTenant(originTenant);
@@ -189,10 +190,10 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         // drain workflowJobs enqueued in db
         try {
             WorkflowThrottlingSystemStatus status = constructSystemStatus(podid, division);
-            logGlobalStatus(podid, status.getEnqueuedWorkflowInEnv(),
-                    String.format("WorkflowThrottling Global Queue Status on environment=%s: ", podid));
-            logGlobalStatus(podid, status.getRunningWorkflowInEnv(),
-                    String.format("WorkflowThrottling Global Running Status on environment=%s: ", podid));
+            logGlobalStatus(status.getEnqueuedWorkflowInEnv(),
+                    String.format("WorkflowThrottling Global Queue Status on environment=%s stack=%s cluster=%s: ", podid, division, emrCacheService.getClusterId()));
+            logGlobalStatus(status.getRunningWorkflowInEnv(),
+                    String.format("WorkflowThrottling Global Running Status on environment=%s stack=%s cluster=%s: ", podid, division, emrCacheService.getClusterId()));
             List<WorkflowThrottlingConstraint> constraintList = Arrays.asList(new NotExceedingEnvQuota(),
                     new NotExceedingTenantQuota(), new IsForCurrentStack());
             List<WorkflowJobSchedulingObject> enqueuedWorkflowSchedulingObjects = status.getEnqueuedWorkflowJobs()
@@ -205,7 +206,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         }
     }
 
-    private void logGlobalStatus(String podid, Map<String, Integer> workflowMap, String label) {
+    private void logGlobalStatus(Map<String, Integer> workflowMap, String label) {
         StringBuilder str = new StringBuilder(label);
         log.info(str.append(JsonUtils.serialize(workflowMap)).toString());
     }
@@ -279,24 +280,14 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
 
             if (workflow.getStatus().equals(JobStatus.RUNNING.name())
                     || workflow.getStatus().equals(JobStatus.PENDING.name())) {
+                addWorkflowToMap(runningWorkflowInEnv, workflow);
                 tenantRunningWorkflow.putIfAbsent(customerSpace, new HashMap<>());
                 addWorkflowToMap(tenantRunningWorkflow.get(customerSpace), workflow);
-
-                addWorkflowToMap(runningWorkflowInEnv, workflow);
-
-                if (division.equals(workflow.getStack())) {
-                    addWorkflowToMap(runningWorkflowInStack, workflow);
-                }
             } else if (workflow.getStatus().equals(JobStatus.ENQUEUED.name())) {
                 tenantEnqueuedWorkflow.putIfAbsent(customerSpace, new HashMap<>());
                 addWorkflowToMap(tenantEnqueuedWorkflow.get(customerSpace), workflow);
-
                 addWorkflowToMap(enqueuedWorkflowInEnv, workflow);
-
                 enqueuedWorkflowJobs.add(workflow);
-                if (division.equals(workflow.getStack())) {
-                    addWorkflowToMap(enqueuedWorkflowInStack, workflow);
-                }
             }
         }
         status.setRunningWorkflowInEnv(runningWorkflowInEnv);
