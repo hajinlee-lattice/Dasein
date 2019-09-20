@@ -14,15 +14,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -31,9 +32,10 @@ import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase {
+public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImplTestNG.class);
 
@@ -44,7 +46,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
     private PlayLaunchService playLaunchService;
 
     @Autowired
-    private PlayEntityMgr playEntityMgr;
+    private PlayService playService;
 
     @Autowired
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -54,6 +56,9 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
 
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private SegmentProxy segmentProxy;
 
     private Play play;
 
@@ -77,9 +82,15 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
     private String CREATED_BY = "lattice@lattice-engines.com";
     private String CRON_EXPRESSION = "0 0 12 ? * WED *";
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithDummySegment();
+        setupTestEnvironment();
+        MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainCustomerSpace,
+                constructSegment(SEGMENT_NAME));
+        Thread.sleep(1000);
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(mainCustomerSpace,
+                createdSegment.getName());
+        Assert.assertNotNull(retrievedSegment);
 
         types = playTypeService.getAllPlayTypes(mainCustomerSpace);
         play = new Play();
@@ -92,9 +103,9 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
         play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);
-        play.setTargetSegment(testSegment);
+        play.setTargetSegment(retrievedSegment);
 
-        playEntityMgr.create(play);
+        playService.createOrUpdate(play, mainTestTenant.getId());
         Assert.assertNotNull(play);
 
         lookupIdMap1 = new LookupIdMap();
@@ -122,13 +133,13 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testGetPreCreate() {
         List<PlayLaunchChannel> channels = playLaunchChannelService.getPlayLaunchChannels(play.getName(), false);
         Assert.assertNotNull(channels);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateChannel() throws InterruptedException {
         playLaunchChannelService.createPlayLaunchChannel(play.getName(), playLaunchChannel1, false);
         Thread.sleep(1000);
@@ -141,7 +152,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
         Assert.assertNotNull(playLaunchChannel2.getId());
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCreateChannel" })
+    @Test(groups = "deployment", dependsOnMethods = { "testCreateChannel" })
     public void testBasicOperations() {
 
         PlayLaunchChannel retrieved = playLaunchChannelService.findById(playLaunchChannel1.getId());
@@ -174,7 +185,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
 
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
+    @Test(groups = "deployment", dependsOnMethods = { "testBasicOperations" })
     public void testCreateFromChannel() throws InterruptedException {
         PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel1.getPid());
         Assert.assertNull(retrievedLaunch);
@@ -186,7 +197,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
 
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCreateFromChannel" })
+    @Test(groups = "deployment", dependsOnMethods = { "testCreateFromChannel" })
     public void testUpdate() throws InterruptedException {
 
         PlayLaunchChannel retrieved = playLaunchChannelService.findById(playLaunchChannel1.getId());
@@ -206,13 +217,13 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
 
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         playLaunchChannelService.deleteByChannelId(playLaunchChannel1.getId(), true);
         playLaunchChannelService.deleteByChannelId(playLaunchChannel2.getId(), true);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testDelete" })
+    @Test(groups = "deployment", dependsOnMethods = { "testDelete" })
     public void testPostDelete() {
         try {
             Thread.sleep(TimeUnit.SECONDS.toMillis(10L));
@@ -225,7 +236,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLFunctionalTestNGBase 
         Assert.assertNull(retrieved);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void teardown() throws Exception {
         if (playLaunchChannel1 != null && playLaunchChannel1.getId() != null) {
             playLaunchChannelService.deleteByChannelId(playLaunchChannel1.getId(), true);
