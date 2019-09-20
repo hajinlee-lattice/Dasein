@@ -566,7 +566,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     workflowJobEntityMgr.update(o);
                     ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
                     submitted.add(appId);
-                    log.info("WorkflowThrottling Submitted workflow job pid={} for tenant {}", o.getPid(), o.getTenant().getId());
+                    log.info("WorkflowThrottling Submitted workflow job pid={} for tenant {}. ApplicationId={}", o.getPid(), o.getTenant().getId(), appId);
                 } catch (Exception e) {
                     log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);
                 }
@@ -803,7 +803,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @Scheduled(fixedRate = 300000L)
     public void scheduledDrainQueueWrapper() {
-        if (BeanFactoryEnvironment.getEnvironment().equals(BeanFactoryEnvironment.Environment.WebApp)) {
+        if (BeanFactoryEnvironment.Environment.WebApp.equals(BeanFactoryEnvironment.getEnvironment())) {
             String podid = CamilleEnvironment.getPodId();
             String division = CamilleEnvironment.getDivision();
             if (workflowThrottlingService.isWorkflowThrottlingEnabled(podid, division)) {
