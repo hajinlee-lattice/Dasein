@@ -31,6 +31,8 @@ public class CSVImportReducer extends Reducer<NullWritable, NullWritable, NullWr
 
     private Configuration yarnConfiguration;
 
+    private long csvFileBlockSize;
+
     /**
      * RFC 4180 defines line breaks as CRLF
      */
@@ -41,6 +43,7 @@ public class CSVImportReducer extends Reducer<NullWritable, NullWritable, NullWr
     protected void setup(Context context) throws IOException, InterruptedException {
         yarnConfiguration = context.getConfiguration();
         outputPath = MapFileOutputFormat.getOutputPath(context);
+        csvFileBlockSize = yarnConfiguration.getLong(CSVFileImportProperty.CSV_FILE_BLOCK_SIZE.name(), 1073741824l);
         log.info("Path is:" + outputPath);
     }
 
@@ -58,11 +61,12 @@ public class CSVImportReducer extends Reducer<NullWritable, NullWritable, NullWr
             }
             HdfsUtils.HdfsFilenameFilter hdfsFilenameFilter = filename -> filename.startsWith(ERROR_FILE_NAME);
             List<String> errorPaths = HdfsUtils.getFilesForDir(yarnConfiguration, outputPath.toString(), hdfsFilenameFilter);
-            if (errorPaths.size() == 1) {
+            if (errorPaths.size() == 1 && csvFileBlockSize == -1) {
                 // only rename the file if the file length is 1
                 fs.rename(new Path(errorPaths.get(0)), new Path(outputPath + "/" + ERROR_FILE));
             } else {
                 errorPaths.sort(String::compareTo);
+                log.info("Generated error file list is {}", errorPaths);
                 try (FSDataOutputStream fsDataOutputStream = fs.create(
                         new Path(outputPath + "/" + ERROR_FILE))) {
                     fsDataOutputStream.writeBytes(StringUtils.join(ImportProperty.ERROR_HEADER, ","));
