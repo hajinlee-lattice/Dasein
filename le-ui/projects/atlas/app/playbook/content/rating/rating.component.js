@@ -13,7 +13,8 @@ angular.module('lp.playbook.wizard.rating', [])
         pageSize: 10,
         block_user: true,
         scoredAccountsKeys: [],
-        scoredAccounts: {}
+        scoredAccounts: {},
+        showCounts: false
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
