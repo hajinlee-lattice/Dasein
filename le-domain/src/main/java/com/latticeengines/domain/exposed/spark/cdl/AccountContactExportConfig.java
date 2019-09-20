@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.AccountContactExportContext;
@@ -23,9 +22,6 @@ public class AccountContactExportConfig extends SparkJobConfig {
 
     @JsonProperty("DropKeys")
     private List<String> dropKeys;
-
-    @JsonProperty("ContactColumns")
-    private Map<String, String> contactColumnNames;
 
     @Override
     @JsonProperty("Name")
