@@ -146,7 +146,7 @@ public class Stream implements HasPid, Serializable, HasAuditingFields {
 
     public void setMatchEntityConfig(String matchEntityConfig) {
         this.matchEntityConfig = matchEntityConfig;
-        this.matchEntities = matchEntityConfig == null ? new ArrayList<>()
+        matchEntities = matchEntityConfig == null ? new ArrayList<>()
                 : Arrays.asList(matchEntityConfig.split(SEPERATOR));
     }
 
@@ -154,19 +154,19 @@ public class Stream implements HasPid, Serializable, HasAuditingFields {
         if (matchEntities != null) {
             return matchEntities;
         }
-        this.matchEntities = matchEntityConfig == null ? new ArrayList<>()
+        matchEntities = matchEntityConfig == null ? new ArrayList<>()
                 : Arrays.asList(matchEntityConfig.split(SEPERATOR));
         return matchEntities;
     }
 
     public void setMatchEntities(List<String> matchEntities) {
         this.matchEntities = matchEntities;
-        this.matchEntityConfig = matchEntities == null ? null : String.join(SEPERATOR, matchEntities);
+        matchEntityConfig = matchEntities == null ? null : String.join(SEPERATOR, matchEntities);
     }
 
     public void setAggrEntityConfig(String aggrEntityConfig) {
         this.aggrEntityConfig = aggrEntityConfig;
-        this.aggrEntities = aggrEntityConfig == null ? new ArrayList<>()
+        aggrEntities = aggrEntityConfig == null ? new ArrayList<>()
                 : Arrays.asList(aggrEntityConfig.split(SEPERATOR));
     }
 

@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "ATLAS_DIMENSION", uniqueConstraints = { //
+@Table(name = "ACTIVITY_DIMENSION", uniqueConstraints = { //
         @UniqueConstraint(columnNames = { "NAME", "FK_STREAM_ID", "FK_TENANT_ID" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -172,36 +172,52 @@ public class Dimension implements HasPid, Serializable, HasAuditingFields {
 
     public void setGeneratorConfig(String generatorConfig) {
         this.generatorConfig = generatorConfig;
-        this.generator = JsonUtils.deserialize(generatorConfig, DimensionGenerator.class);
+        generator = generatorConfig == null ? null
+                : JsonUtils.deserialize(generatorConfig, DimensionGenerator.class);
     }
 
     public DimensionGenerator getGenerator() {
+        if (generator != null) {
+            return generator;
+        }
+        generator = generatorConfig == null ? null
+                : JsonUtils.deserialize(generatorConfig, DimensionGenerator.class);
         return generator;
     }
 
     public void setGenerator(DimensionGenerator generator) {
         this.generator = generator;
-        this.generatorConfig = JsonUtils.serialize(generator);
+        generatorConfig = generator == null ? null : JsonUtils.serialize(generator);
     }
 
     public void setCalculatorConfig(String calculatorConfig) {
         this.calculatorConfig = calculatorConfig;
-        this.calculator = JsonUtils.deserialize(calculatorConfig, DimensionCalculator.class);
+        calculator = calculatorConfig == null ? null
+                : JsonUtils.deserialize(calculatorConfig, DimensionCalculator.class);
     }
 
     public DimensionCalculator getCalculator() {
+        if (calculator != null) {
+            return calculator;
+        }
+        calculator = calculatorConfig == null ? null
+                : JsonUtils.deserialize(calculatorConfig, DimensionCalculator.class);
         return calculator;
     }
 
     public void setCalculator(DimensionCalculator calculator) {
         this.calculator = calculator;
-        this.calculatorConfig = JsonUtils.serialize(calculator);
+        calculatorConfig = calculator == null ? null : JsonUtils.serialize(calculator);
     }
 
     public void setAttributeDeriverConfig(String attributeDeriverConfig) {
         this.attributeDeriverConfig = attributeDeriverConfig;
-        List<?> list = JsonUtils.deserialize(attributeDeriverConfig, List.class);
-        this.attributeDerivers = JsonUtils.convertList(list, StreamAttributeDeriver.class);
+        if (attributeDeriverConfig == null) {
+            attributeDerivers = new ArrayList<>();
+        } else {
+            List<?> list = JsonUtils.deserialize(attributeDeriverConfig, List.class);
+            attributeDerivers = JsonUtils.convertList(list, StreamAttributeDeriver.class);
+        }
     }
 
     public List<StreamAttributeDeriver> getAttributeDerivers() {
@@ -219,7 +235,7 @@ public class Dimension implements HasPid, Serializable, HasAuditingFields {
 
     public void setAttributeDerivers(List<StreamAttributeDeriver> attributeDerivers) {
         this.attributeDerivers = attributeDerivers;
-        this.attributeDeriverConfig = JsonUtils.serialize(attributeDerivers);
+        attributeDeriverConfig = attributeDerivers == null ? null : JsonUtils.serialize(attributeDerivers);
     }
 
     @Override
