@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
+import com.latticeengines.cdl.workflow.steps.rebuild.EnrichAccount;
+import com.latticeengines.cdl.workflow.steps.rebuild.GenerateBucketedAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -48,6 +50,12 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private RebuildAccountWorkflow rebuildAccountWorkflow;
+
+    @Inject
+    private EnrichAccount enrichAccount;
+
+    @Inject
+    private GenerateBucketedAccount generateBucketedAccount;
 
     protected boolean rebuildNotForDataCloudChange = false;
     protected boolean dataCloudChanged = false;
@@ -155,11 +163,24 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         if (skip) {
             AbstractWorkflow<?> workflow = rebuildWorkflow();
             String namespace = getStepNamespace(seq);
-            return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".")
-                    || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
+            return isStepInWorkflow(workflow, namespace);
 
         }
+        if (rebuildOnlyDueToAttrLifeCycleChange()) {
+            AbstractWorkflow<?> workflow = rebuildWorkflow();
+            String namespace = getStepNamespace(seq);
+            if (isStepInWorkflow(workflow, namespace) && !generateBucketedAccount.name().equals(step.name())
+                    && !enrichAccount.name().equals(step.name())) {
+                log.info("Workflow=" + workflow.name() + " step=" + step.name() + " is skipped");
+                return true;
+            }
+        }
         return false;
+    }
+
+    private boolean rebuildOnlyDueToAttrLifeCycleChange() {
+        return rebuild && !enforceRebuild && diffRate == 0 && !dataCloudChanged && !hasSchemaChange
+                && hasAttrLifeCycleChange;
     }
 
     boolean hasNonTrivialChange() {
