@@ -82,4 +82,6 @@ if __name__ == "__main__":
         my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
     commands = ['mvn'] + propDirsOpts(args.remote) + commonOpts() + testOpts(args)
     print('Executing [with common opts added]: ', ' '.join(commands))
-    subprocess.call(commands, env=my_env)
+    code = subprocess.call(commands, env=my_env)
+    if code != 0:
+        raise Exception("Maven command failed!")
