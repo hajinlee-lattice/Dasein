@@ -29,7 +29,9 @@
                         <span class="fa fa-times" ng-show="vm.search.length"></span>
                     </a>
                 </div>
+                <button class="button blue-button" style="float: right;" ng-click="vm.showCounts=true" ng-disabled="vm.showCounts">Show Counts</button>
             </div>
+            
 
             <table>
                 <thead>
@@ -72,9 +74,10 @@
                             <span class="fa fa-spinner fa-pulse fa-fw" ng-show="!vm.productCoverage.hasOwnProperty(product.ProductId)"></span>
                         </td> -->
                         <td>
-                            <label for="{{product.ProductId}}" ng-if="vm.productCoverageCounts[vm.getPurchasePeriodToQuery()].hasOwnProperty(product.ProductId)">{{vm.productCoverageCounts[vm.getPurchasePeriodToQuery()][product.ProductId].toLocaleString()}}</label>
-                            <span ng-show="vm.errorProductsMap.has(product.ProductId)"> N/A </span>
-                            <span class="fa fa-spinner fa-pulse fa-fw" ng-show="!vm.productCoverageCounts[vm.getPurchasePeriodToQuery()].hasOwnProperty(product.ProductId) && !vm.errorProductsMap.has(product.ProductId)"></span>
+                            <label for="{{product.ProductId}}" ng-if="vm.productCoverageCounts[vm.getPurchasePeriodToQuery()].hasOwnProperty(product.ProductId) && vm.showCounts">{{vm.productCoverageCounts[vm.getPurchasePeriodToQuery()][product.ProductId].toLocaleString()}}</label>
+                            <span ng-show="vm.errorProductsMap.has(product.ProductId) && vm.showCounts"> N/A </span>
+                            <span class="fa fa-spinner fa-pulse fa-fw" ng-show="!vm.productCoverageCounts[vm.getPurchasePeriodToQuery()].hasOwnProperty(product.ProductId) && !vm.errorProductsMap.has(product.ProductId) && vm.showCounts"></span>
+                            <span ng-show="!vm.showCounts"> -- </span>
                         </td>
                         <!--<td>
                             <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>

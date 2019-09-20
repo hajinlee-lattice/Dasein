@@ -20,7 +20,8 @@ angular.module('lp.ratingsengine.wizard.products', [
             ratingEngine: RatingEngine,
             productCoverage: {},
             productCoverageCounts: {},
-            errorProductsMap: new Set()
+            errorProductsMap: new Set(),
+            showCounts: false
         });
 
         // $scope.$watch('vm.search', function(newValue, oldValue) {

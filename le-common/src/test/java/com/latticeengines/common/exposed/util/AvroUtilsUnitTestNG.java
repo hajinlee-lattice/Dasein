@@ -20,6 +20,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,16 +120,62 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("LONG"), Type.LONG);
     }
 
-    @Test(groups = "unit")
-    public void isAvroFriendlyFieldName() {
-        Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("abc"));
-        Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("_abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("1abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("+abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("/abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("-abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName(""));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName(null));
+    @Test(groups = "unit", dataProvider = "avroFieldNames")
+    public void isAvroFriendlyFieldName(String originalName, boolean expectedFriendly, String expectedConvertedName) {
+        if (expectedFriendly) {
+            Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName(originalName));
+        } else {
+            Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName(originalName));
+        }
+
+        if (StringUtils.isNotBlank(expectedConvertedName)) {
+            String convertedName = AvroUtils.getAvroFriendlyString(originalName);
+            Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName(convertedName));
+            Assert.assertEquals(convertedName, expectedConvertedName);
+        } else {
+            Assert.assertThrows(() -> AvroUtils.getAvroFriendlyString(originalName));
+        }
+    }
+
+    @DataProvider(name = "avroFieldNames")
+    public Object[][] provideAvroFieldNames() {
+        return new Object[][] {
+                { "abc", true, "abc" },
+                { "_abc", true, "_abc" },
+                { "1abc", false, "x1abc" },
+                { "+abc", false, "_abc" },
+                { "/abc", false, "_abc" },
+                { "-abc", false, "_abc" },
+                { "(abc)", false, "_abc_" },
+
+                { "", false, "" },
+                { null, false, null },
+
+                // latin extensions
+                { "ä1×2", false, "ä1_2" },
+                { "ä3÷2", false, "ä3_2" },
+                { "αβ_k", true, "αβ_k" },
+                { "αβ+k", false, "αβ_k" },
+                { "\u03b1\u03B2_\u006b", true, "αβ_k" },
+                { "k_(αβ)", false, "k__αβ_" },
+
+                // CJK
+                { "众志成城", true, "众志成城" },
+                { "+众志成城", false, "_众志成城" },
+                { "1众志成城", false, "x1众志成城" },
+                { " 众志成城", false, "众志成城" },
+                { "众志成城 ", false, "众志成城" },
+                { "众志 成城", false, "众志_成城" },
+                { " 众志  成城 ", false, "众志_成城" },
+                { "众志(成城)", false, "众志_成城_" },
+                { "众志成城。", false, "众志成城_" },
+
+                { "一葉知秋", true, "一葉知秋" },
+                { "a（一葉知秋）", false, "a_一葉知秋_" },
+                { "「一葉知秋」", false, "_一葉知秋_" },
+                { "1【一葉知秋】", false, "x1_一葉知秋_" },
+                { "｛一葉知秋｝", false, "_一葉知秋_" }
+        };
     }
 
     @DataProvider(name = "avscFileProvider")

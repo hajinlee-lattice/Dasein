@@ -486,7 +486,48 @@ public class AvroUtils {
     }
 
     public static String getAvroFriendlyString(String value) {
-        return value.replaceAll("[^A-Za-z0-9()\\[\\]]", "_");
+        if (value == null) {
+            throw new IllegalArgumentException("Cannot parse null input string to a valid avro name.");
+        }
+
+        String afStr = value.trim().replaceAll("\\s+", " "); // remove extra spaces
+        afStr = afStr.replaceAll("[\r\n]", ""); // remove new line characters
+        if (afStr.length() == 0) {
+            throw new IllegalArgumentException("Cannot parse empty input string to a valid avro name.");
+        }
+
+        // prepend a 'x' if starting with 0-9, because they are just invalid at the beginning of a string
+        char firstChar = afStr.charAt(0);
+        if (firstChar >= 48 && firstChar <= 57) { // 0-9
+            afStr = "x" + afStr;
+        }
+
+        // convert non letters to _
+        StringBuilder b = new StringBuilder();
+        for (char c : afStr.toCharArray()) {
+            if (!Character.isLetterOrDigit(c)) {
+                b.append("_");
+            } else {
+                b.append(c);
+            }
+        }
+        afStr = b.toString();
+
+        // safe guard
+        if (!isAvroFriendlyFieldName(afStr)) {
+            b = new StringBuilder();
+            for (char c : afStr.toCharArray()) {
+                if (!isAvroFriendlyFieldName("x" + c)) {
+                    log.warn("Character " + c + " is not avro friendly.");
+                    b.append("_");
+                } else {
+                    b.append(c);
+                }
+            }
+            afStr = b.toString();
+        }
+
+        return afStr;
     }
 
     public static boolean isAvroFriendlyFieldName(String fieldName) {
