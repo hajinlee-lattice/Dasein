@@ -261,7 +261,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                     }
                 }
-                long endPosition = fileSplit.getStart() + fileSplit.getLength();
+                long endPosition = fileSplit.getStart() + fileSplit.getLength() - 1l;
                 if (endPosition < csvRecord.getCharacterPosition()) {
                     // the split size is less than one record length, so just skip this mapper.
                     LOG.warn(String.format("Skip file split start: %s, length: %s, since split size is less than" +

@@ -84,7 +84,7 @@ public class CSVImportLineInputFormat extends FileInputFormat<LongWritable, Text
     }
 
     private FileSplit createFileSplit(Path fileName, long begin, long length) {
-        return new FileSplit(fileName, begin, length - 1L, new String[0]);
+        return new FileSplit(fileName, begin, length, new String[0]);
     }
 
     private void setCSVFileBlockSize(JobContext job, long blockSize) {
