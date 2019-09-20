@@ -166,8 +166,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
             return isStepInWorkflow(workflow, namespace);
 
         }
-        if (rebuild && !enforceRebuild && diffRate == 0 && !dataCloudChanged && !hasSchemaChange
-                && hasAttrLifeCycleChange) {
+        if (rebuildOnlyDueToAttrLifeCycleChange()) {
             AbstractWorkflow<?> workflow = rebuildWorkflow();
             String namespace = getStepNamespace(seq);
             if (isStepInWorkflow(workflow, namespace) && !generateBucketedAccount.name().equals(step.name())
@@ -179,9 +178,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         return false;
     }
 
-    private boolean isStepInWorkflow(AbstractWorkflow<?> workflow, String namespace) {
-        return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".")
-                || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
+    private boolean rebuildOnlyDueToAttrLifeCycleChange() {
+        return rebuild && !enforceRebuild && diffRate == 0 && !dataCloudChanged && !hasSchemaChange
+                && hasAttrLifeCycleChange;
     }
 
     boolean hasNonTrivialChange() {
