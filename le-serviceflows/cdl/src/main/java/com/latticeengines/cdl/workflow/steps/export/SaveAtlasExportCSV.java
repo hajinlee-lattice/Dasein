@@ -144,28 +144,21 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         Map<String, String> displayNameMap = new HashMap<>();
         Set<String> outputCols = new HashSet<>();
         schema.forEach(cm -> {
-            if (StringUtils.isNotBlank(cm.getDisplayName()) && !cm.getDisplayName().equals(cm.getAttrName())) {
-                String originalDisplayName = cm.getDisplayName();
-                String displayName = originalDisplayName;
-                int suffix = 1;
-                while (outputCols.contains(displayName.toLowerCase())) {
-                    log.warn("Displayname [" + displayName + "] has already been assigned to another attr, " +
-                            "cannot be assigned to [" + cm.getAttrName() + "]. Append a number to differentiate.");
-                    displayName = originalDisplayName + " (" + (++suffix) + ")";
-                }
-                // need to rename contact column name
-                if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
-                    displayNameMap.put(AccountContactExportConfig.contactRenamed + cm.getAttrName(), displayName);
-                } else {
-                    displayNameMap.put(cm.getAttrName(), displayName);
-                }
-                outputCols.add(displayName.toLowerCase());
-            } else {
-                if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
-                    displayNameMap.put(AccountContactExportConfig.contactRenamed + cm.getAttrName(), cm.getAttrName());
-                }
-                outputCols.add(cm.getAttrName().toLowerCase());
+            String originalDisplayName = cm.getDisplayName();
+            String displayName = originalDisplayName;
+            int suffix = 1;
+            while (outputCols.contains(displayName.toLowerCase())) {
+                log.warn("Displayname [" + displayName + "] has already been assigned to another attr, " +
+                        "cannot be assigned to [" + cm.getAttrName() + "]. Append a number to differentiate.");
+                displayName = originalDisplayName + " (" + (++suffix) + ")";
             }
+            // need to rename contact column name
+            if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
+                displayNameMap.put(AccountContactExportConfig.contactRenamed + cm.getAttrName(), displayName);
+            } else {
+                displayNameMap.put(cm.getAttrName(), displayName);
+            }
+            outputCols.add(displayName.toLowerCase());
         });
         return displayNameMap;
     }
