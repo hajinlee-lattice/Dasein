@@ -253,8 +253,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     // need to handle line which is not the real start of the line, sometimes csv one record can
                     // contain multi lines.
                     while (fileSplit.getStart() > csvRecord.getCharacterPosition()) {
-                        lineNum++;
-                        csvRecord = iter.next();
+                        try {
+                            csvRecord = iter.next();
+                            lineNum++;
+                        } catch (Exception e) {
+                            LOG.warn(String.format("Exception %s happened when parse csv file ", e.getMessage()));
+                        }
                     }
                 }
                 long endPosition = fileSplit.getStart() + fileSplit.getLength();
@@ -264,11 +268,24 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             " one SCV record size.", fileSplit.getStart(), fileSplit.getLength()));
                     return;
                 }
+                boolean firstRecord = true;
                 while (true) {
                     // capture IO exception produced during dealing with line
                     try {
                         beforeEachRecord();
-                        GenericRecord currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), csvRecord);
+                        GenericRecord currentAvroRecord;
+                        if (firstRecord) {
+                            firstRecord = false;
+                        } else {
+                            csvRecord = iter.next();
+                        }
+                        if (endPosition < csvRecord.getCharacterPosition()) {
+                            // reach the end of split file
+                            LOG.warn(String.format("Reach the end of split file start: %s, length: %s.",
+                                    fileSplit.getStart(), fileSplit.getLength()));
+                            break;
+                        }
+                        currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), csvRecord);
                         if (errorMap.size() == 0 && duplicateMap.size() == 0) {
                             dataFileWriter.append(currentAvroRecord);
                             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
@@ -282,13 +299,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             }
                         }
                         lineNum++;
-                        csvRecord = iter.next();
-                        if (endPosition < csvRecord.getCharacterPosition()) {
-                            // reach the end of split file
-                            LOG.warn(String.format("Reach the end of split file start: %s, length: %s.",
-                                    fileSplit.getStart(), fileSplit.getLength()));
-                            break;
-                        }
                     } catch (IllegalStateException ex) {
                         LOG.warn(ex.getMessage(), ex);
                         rowError = true;
@@ -325,7 +335,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
         }
         context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-
         id = id != null ? id : "";
         csvFilePrinter.printRecord(lineNumber, id, errorMap.values().toString());
         csvFilePrinter.flush();
@@ -333,7 +342,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private void handleDuplicate(Context context, long lineNumber) throws IOException {
-        LOG.info("Handle duplicate record in line: " + String.valueOf(lineNumber));
+        LOG.info("Handle duplicate record in line: " + lineNumber);
         context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).increment(1);
         id = id != null ? id : "";
         csvFilePrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
