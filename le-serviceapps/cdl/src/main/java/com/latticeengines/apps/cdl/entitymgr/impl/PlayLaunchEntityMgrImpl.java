@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +56,19 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         if (playLaunch.getLaunchState() != null) {
             existingPlayLaunch.setLaunchState(playLaunch.getLaunchState());
         }
+        if (StringUtils.isNotBlank(playLaunch.getApplicationId())) {
+            existingPlayLaunch.setApplicationId(playLaunch.getApplicationId());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getTableName())) {
+            existingPlayLaunch.setTableName(playLaunch.getTableName());
+        }
+
+        // Account stats
         if (playLaunch.getAccountsSelected() != null) {
             existingPlayLaunch.setAccountsSelected(playLaunch.getAccountsSelected());
         }
         if (playLaunch.getAccountsLaunched() != null) {
             existingPlayLaunch.setAccountsLaunched(playLaunch.getAccountsLaunched());
-        }
-        if (playLaunch.getContactsLaunched() != null) {
-            existingPlayLaunch.setContactsLaunched(playLaunch.getContactsLaunched());
         }
         if (playLaunch.getAccountsSuppressed() != null) {
             existingPlayLaunch.setAccountsSuppressed(playLaunch.getAccountsSuppressed());
@@ -69,8 +76,16 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         if (playLaunch.getAccountsErrored() != null) {
             existingPlayLaunch.setAccountsErrored(playLaunch.getAccountsErrored());
         }
+        if (playLaunch.getAccountsDuplicated() != null) {
+            existingPlayLaunch.setAccountsDuplicated(playLaunch.getAccountsDuplicated());
+        }
+
+        // Contact stats
         if (playLaunch.getContactsSelected() != null) {
             existingPlayLaunch.setContactsSelected(playLaunch.getContactsSelected());
+        }
+        if (playLaunch.getContactsLaunched() != null) {
+            existingPlayLaunch.setContactsLaunched(playLaunch.getContactsLaunched());
         }
         if (playLaunch.getContactsSuppressed() != null) {
             existingPlayLaunch.setContactsSuppressed(playLaunch.getContactsSuppressed());
@@ -78,33 +93,50 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         if (playLaunch.getContactsErrored() != null) {
             existingPlayLaunch.setContactsErrored(playLaunch.getContactsErrored());
         }
-        if (playLaunch.getAccountsDuplicated() != null) {
-            existingPlayLaunch.setAccountsDuplicated(playLaunch.getAccountsDuplicated());
-        }
         if (playLaunch.getContactsDuplicated() != null) {
             existingPlayLaunch.setContactsDuplicated(playLaunch.getContactsDuplicated());
         }
-        if (playLaunch.getAudienceId() != null) {
+
+        // Tray System properties
+        if (StringUtils.isNotBlank(playLaunch.getAudienceId())) {
             existingPlayLaunch.setAudienceId(playLaunch.getAudienceId());
         }
-        if (playLaunch.getAudienceName() != null) {
+        if (StringUtils.isNotBlank(playLaunch.getAudienceName())) {
             existingPlayLaunch.setAudienceName(playLaunch.getAudienceName());
-        }
-        if (playLaunch.getFolderName() != null) {
-            existingPlayLaunch.setFolderName(playLaunch.getFolderName());
-        }
-        if (playLaunch.getExportFile() != null) {
-            existingPlayLaunch.setExportFile(playLaunch.getExportFile());
         }
         if (playLaunch.getAudienceSize() != null) {
             existingPlayLaunch.setAudienceSize(playLaunch.getAudienceSize());
         }
+        if (StringUtils.isNotBlank(playLaunch.getFolderName())) {
+            existingPlayLaunch.setFolderName(playLaunch.getFolderName());
+        }
         if (playLaunch.getMatchedCount() != null) {
             existingPlayLaunch.setMatchedCount(playLaunch.getMatchedCount());
         }
+
+        // TODO: Keeping here for backwards compatibility with UI, should go away after M32
+        if (CollectionUtils.isNotEmpty(playLaunch.getBucketsToLaunch())) {
+            existingPlayLaunch.setBucketsToLaunch(playLaunch.getBucketsToLaunch());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
+            existingPlayLaunch.setDestinationAccountId(playLaunch.getDestinationAccountId());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
+            existingPlayLaunch.setDestinationOrgId(playLaunch.getDestinationOrgId());
+        }
+        if (playLaunch.getDestinationSysType() != null) {
+            existingPlayLaunch.setDestinationSysType(playLaunch.getDestinationSysType());
+        }
+        if (playLaunch.getDestinationOrgName() != null) {
+            existingPlayLaunch.setDestinationOrgName(playLaunch.getDestinationOrgName());
+        }
+        if (playLaunch.getExcludeItemsWithoutSalesforceId() != null) {
+            existingPlayLaunch.setExcludeItemsWithoutSalesforceId(playLaunch.getExcludeItemsWithoutSalesforceId());
+        }
+        existingPlayLaunch.setLaunchUnscored(playLaunch.isLaunchUnscored());
+
         existingPlayLaunch.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
         existingPlayLaunch.setUpdatedBy(playLaunch.getUpdatedBy());
-
         playLaunchDao.update(existingPlayLaunch);
     }
 
