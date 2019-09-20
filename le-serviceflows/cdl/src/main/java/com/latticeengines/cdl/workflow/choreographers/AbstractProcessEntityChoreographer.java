@@ -46,7 +46,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean rebuildDueToActions = false;
     private boolean initialized = false;
     private boolean hasBatchStore = false;
-    private float diffRate = 0;
+    float diffRate = 0;
 
     boolean rebuild = false;
     boolean update = false;
