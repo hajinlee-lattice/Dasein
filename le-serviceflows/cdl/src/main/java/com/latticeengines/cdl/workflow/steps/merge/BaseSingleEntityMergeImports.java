@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,17 +29,23 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Co
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
 public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseMergeImports<T> {
@@ -47,6 +55,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     protected String inputMasterTableName;
     protected String diffTableName;
     protected Table masterTable;
+
+    @Inject
+    private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     private List<BusinessEntity> businessEntities = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
             BusinessEntity.Product, BusinessEntity.Transaction);
@@ -88,13 +99,27 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         if (businessEntities.contains(configuration.getMainEntity())) {
             AttributeLimit limit = getObjectFromContext(ATTRIBUTE_QUOTA_LIMIT, AttributeLimit.class);
             Integer attrQuota = 0;
-            Set<String> names = table.getAttributes().stream().map(entry -> entry.getName()).collect(Collectors.toSet());
+            Set<String> names = table.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
             Set<String> internalNames = SchemaRepository.getSystemAttributes(configuration.getMainEntity(),
                     entityMatch).stream().map(InterfaceName::name).collect(Collectors.toSet());
-            Set<String> namesExculdeInternal =
+            log.info(String.format("internal attributes %s.", internalNames));
+            Set<String> namesExcludeInternal =
                     names.stream().filter(name -> !internalNames.contains(name)).collect(Collectors.toSet());
+            AttrConfigRequest configRequest = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace.toString(),
+                    configuration.getMainEntity(), true);
+            Set<String> nameExcludeInternalAndInactive = namesExcludeInternal;
+            if (CollectionUtils.isNotEmpty(configRequest.getAttrConfigs())) {
+                Set<String> inactiveNames =
+                        configRequest.getAttrConfigs().stream().filter(config -> !AttrState.Active.equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
+                                .map(AttrConfig::getAttrName).collect(Collectors.toSet());
+                log.info(String.format("inactive attribute %s.", inactiveNames));
+                nameExcludeInternalAndInactive =
+                        namesExcludeInternal.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
+            }
 
-            Integer attrCount = namesExculdeInternal.size();
+
+            Integer attrCount = nameExcludeInternalAndInactive.size();
+            log.info(String.format( "the size of remaining attributes is %s.", nameExcludeInternalAndInactive.size()));
             switch(configuration.getMainEntity()) {
                 case Account:
                     attrQuota = limit.getAccountAttributeQuotaLimit();
