@@ -40,4 +40,9 @@ public class BaseChoreographer implements Choreographer {
         }
     }
 
+    protected boolean isStepInWorkflow(AbstractWorkflow<?> workflow, String namespace) {
+        return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".")
+                || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
+    }
+
 }
