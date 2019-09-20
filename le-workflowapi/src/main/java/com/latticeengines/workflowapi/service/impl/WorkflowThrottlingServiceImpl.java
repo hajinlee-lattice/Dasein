@@ -189,8 +189,10 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         // drain workflowJobs enqueued in db
         try {
             WorkflowThrottlingSystemStatus status = constructSystemStatus(podid, division);
-            logGlobalQueueFullness(podid, status.getEnqueuedWorkflowInEnv());
-            logTenantQueueFullness(podid, status.getTenantEnqueuedWorkflow());
+            logGlobalStatus(podid, status.getEnqueuedWorkflowInEnv(),
+                    String.format("WorkflowThrottling Global Queue Status on environment=%s: ", podid));
+            logGlobalStatus(podid, status.getRunningWorkflowInEnv(),
+                    String.format("WorkflowThrottling Global Running Status on environment=%s: ", podid));
             List<WorkflowThrottlingConstraint> constraintList = Arrays.asList(new NotExceedingEnvQuota(),
                     new NotExceedingTenantQuota(), new IsForCurrentStack());
             List<WorkflowJobSchedulingObject> enqueuedWorkflowSchedulingObjects = status.getEnqueuedWorkflowJobs()
@@ -203,19 +205,9 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         }
     }
 
-    private void logGlobalQueueFullness(String podid, Map<String, Integer> enqueuedWorkflowInEnv) {
-        StringBuilder str = new StringBuilder(
-                String.format("WorkflowThrottling Global Queue Status on environment=%s: ", podid));
-        log.info(str.append(enqueuedWorkflowInEnv).toString());
-    }
-
-    private void logTenantQueueFullness(String podid, Map<String, Map<String, Integer>> tenantEnqueuedWorkflow) {
-        StringBuilder str = new StringBuilder(
-                String.format("WorkflowThrottling Tenant Queue Status on environment=%s: ", podid));
-        tenantEnqueuedWorkflow.forEach((tenantId, workflowMap) -> {
-            str.append(String.format("%s=%s", tenantId, workflowMap));
-        });
-        log.info(str.toString());
+    private void logGlobalStatus(String podid, Map<String, Integer> workflowMap, String label) {
+        StringBuilder str = new StringBuilder(label);
+        log.info(str.append(JsonUtils.serialize(workflowMap)).toString());
     }
 
     @Override
