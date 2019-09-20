@@ -23,6 +23,7 @@
                         <span class="fa fa-times" ng-show="vm.search.length"></span>
                     </a>
                 </div>
+                <button class="button blue-button" style="float: right;" ng-click="vm.showCounts=true" ng-disabled="vm.showCounts">Show Counts</button>
             </div>
             <ul class="list">
                 <li class="item header rating_">
@@ -51,20 +52,22 @@
                             <label for="{{rating.id}}">{{rating.displayName}}</label>
                         </li>
                         <li class="unscored">
-                            <label for="{{rating.id}}" ng-if="!vm.scoredAccounts[rating.id]">
+                            <label for="{{rating.id}}" ng-if="!vm.scoredAccounts[rating.id] && vm.showCounts">
                                 <span class="fa fa-spinner fa-spin fa-fw"></span>
                             </label>
-                            <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id]">
+                            <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id] && vm.showCounts">
                                 {{vm.scoredAccounts[rating.id].unscoredAccountCount || 0}}
                             </label>
+                            <span ng-show="!vm.showCounts"> -- </span>
                         </li>
                         <li class="scored">
-                            <label for="{{rating.id}}" ng-if="!vm.scoredAccounts[rating.id]">
+                            <label for="{{rating.id}}" ng-if="!vm.scoredAccounts[rating.id] && vm.showCounts">
                                 <span class="fa fa-spinner fa-spin fa-fw"></span>
                             </label>
-                            <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id]">
+                            <label for="{{rating.id}}" ng-if="vm.scoredAccounts[rating.id] && vm.showCounts">
                                 {{vm.scoredAccounts[rating.id].scoredAccountCount || 0}}
                             </label>
+                            <span ng-show="!vm.showCounts"> -- </span>
                         </li>
                     </ul>
                 </li>
