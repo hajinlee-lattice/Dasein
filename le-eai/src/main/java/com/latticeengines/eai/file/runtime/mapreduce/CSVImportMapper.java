@@ -257,7 +257,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             csvRecord = iter.next();
                             lineNum++;
                         } catch (Exception e) {
-                            LOG.warn(String.format("Exception %s happened when parse csv file ", e));
+                            LOG.warn(String.format("Exception %s happened when parse csv file ", e.getMessage()));
                         }
                     }
                 }
