@@ -94,7 +94,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         }
         if (importSystem.isMapToLatticeContact()) {
             for (S3ImportSystem system : currentSystems) {
-                if (!system.getName().equals(importSystem.getName()) && system.isMapToLatticeContact()) {
+                if (!system.getName().equals(importSystem.getName()) && Boolean.TRUE.equals(system.isMapToLatticeContact())) {
                     throw new LedpException(LedpCode.LEDP_40061,
                             new String[] {String.format("System %s already set map to lattice Contact!",
                                     system.getDisplayName())});

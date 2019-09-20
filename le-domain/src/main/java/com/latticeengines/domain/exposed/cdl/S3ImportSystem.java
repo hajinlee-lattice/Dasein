@@ -30,6 +30,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
 
     @Id
