@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
@@ -77,9 +78,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Value("${cdl.play.service.default.types.user}")
+    private String serviceUser;
+
     @Override
-    public PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel,
-            Boolean launchNow) {
+    public PlayLaunchChannel create(String playName, PlayLaunchChannel playLaunchChannel) {
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
@@ -87,35 +90,24 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchChannel.setPlay(play);
         playLaunchChannel.setTenant(MultiTenantContext.getTenant());
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
-        playLaunchChannel = create(playLaunchChannel);
-        if (launchNow) {
-            createPlayLaunchFromChannel(playLaunchChannel, play);
-        }
+        playLaunchChannel = playLaunchChannelEntityMgr.createPlayLaunchChannel(playLaunchChannel);
+        playLaunchChannel.setPlay(play); // ensure play exists if used in resource
         return playLaunchChannel;
     }
 
     @Override
-    public PlayLaunchChannel updatePlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel,
-            Boolean launchNow) {
+    public PlayLaunchChannel update(String playName, PlayLaunchChannel playLaunchChannel) {
         Play play = playService.getPlayByName(playName, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
         playLaunchChannel.setPlay(play);
         playLaunchChannel = update(playLaunchChannel);
-        if (launchNow) {
-            createPlayLaunchFromChannel(playLaunchChannel, play);
-        }
+        playLaunchChannel.setPlay(play); // ensure play exists if used in resource
         return playLaunchChannel;
     }
 
-    @Override
-    public PlayLaunchChannel create(PlayLaunchChannel playLaunchChannel) {
-        return playLaunchChannelEntityMgr.createPlayLaunchChannel(playLaunchChannel);
-    }
-
-    @Override
-    public PlayLaunchChannel update(PlayLaunchChannel playLaunchChannel) {
+    private PlayLaunchChannel update(PlayLaunchChannel playLaunchChannel) {
         PlayLaunchChannel retrievedPlayLaunchChannel = findById(playLaunchChannel.getId());
         if (retrievedPlayLaunchChannel == null) {
             throw new NullPointerException("Cannot find Play Launch Channel for given play channel id");
@@ -165,15 +157,15 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play,
-            String addAccountTable, String removeAccountsTable, String addContactsTable, String removeContactsTable) {
+    public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel, String addAccountTable,
+            String removeAccountsTable, String addContactsTable, String removeContactsTable, boolean autoLaunch) {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
 
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
-        playLaunch.setUpdatedBy(playLaunchChannel.getUpdatedBy());
-        playLaunch.setCreatedBy(playLaunchChannel.getUpdatedBy());
+        playLaunch.setUpdatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
+        playLaunch.setCreatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
         playLaunch.setPlay(play);
         playLaunch.setPlayLaunchChannel(playLaunchChannel);
         playLaunch.setLaunchState(LaunchState.Queued);
@@ -230,8 +222,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play) {
-        return createPlayLaunchFromChannel(playLaunchChannel, play, null, null, null, null);
+    public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel) {
+        return queueNewLaunchForChannel(play, playLaunchChannel, null, null, null, null, false);
     }
 
     private void runValidations(String customerSpace, Play play, PlayLaunchChannel playLaunchChannel) {

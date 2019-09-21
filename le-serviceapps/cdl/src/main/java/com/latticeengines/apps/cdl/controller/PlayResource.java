@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -205,7 +206,14 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_18220,
                     new String[] { playName, playLaunchChannel.getLookupIdMap().getId() });
         }
-        return playLaunchChannelService.createPlayLaunchChannel(playName, playLaunchChannel, launchNow);
+        playLaunchChannel = playLaunchChannelService.create(playName, playLaunchChannel);
+        if (launchNow) {
+            PlayLaunch launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
+                    playLaunchChannel);
+            log.info(String.format("Queued new launch for play:%s and channel: %s : %s", playName,
+                    playLaunchChannel.getId(), launch.getLaunchId()));
+        }
+        return playLaunchChannel;
     }
 
     @GetMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
@@ -238,7 +246,14 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_18219,
                     new String[] { "ChannelId is not the same for the Play launch channel being updated" });
         }
-        return playLaunchChannelService.updatePlayLaunchChannel(playName, playLaunchChannel, launchNow);
+        playLaunchChannel = playLaunchChannelService.update(playName, playLaunchChannel);
+        if (launchNow) {
+            PlayLaunch launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
+                    playLaunchChannel);
+            log.info(String.format("Queued new launch for play:%s and channel: %s : %s", playName, channelId,
+                    launch.getLaunchId()));
+        }
+        return playLaunchChannel;
     }
 
     @PatchMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
@@ -256,21 +271,30 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Channel found with id: " + channelId });
         }
         channel.setPlay(play);
-        channel.setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(channel));
-        channel = playLaunchChannelService.update(channel);
+        Date nextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel);
+        if (nextLaunchDate.after(channel.getExpirationDate())) {
+            log.info(String.format(
+                    "Channel: %s has expired turning auto launches off (Expiration Date: %s, Next Scheduled Launch Date: %s)",
+                    channelId, channel.getExpirationDate().toString(), nextLaunchDate.toString()));
+            channel.setIsAlwaysOn(false);
+        } else {
+            channel.setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(channel));
+        }
+        channel = playLaunchChannelService.update(play.getName(), channel);
         return channel;
     }
 
     @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Queue a new Play launch for a given play and channel")
+    @ApiOperation(value = "Queue a new Play launch for a given play, channel with delta tables")
     public PlayLaunch queueNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId, //
             @RequestParam(value = PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE, required = false) String addAccountsTable, //
             @RequestParam(value = PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE, required = false) String removeAccountsTable, //
             @RequestParam(value = PlayUtils.ADDED_CONTACTS_DELTA_TABLE, required = false) String addContactsTable, //
-            @RequestParam(value = PlayUtils.REMOVED_CONTACTS_DELTA_TABLE, required = false) String removeContactsTable) {
+            @RequestParam(value = PlayUtils.REMOVED_CONTACTS_DELTA_TABLE, required = false) String removeContactsTable, //
+            @RequestParam(value = "is-auto-launch", required = false) boolean isAutoLaunch) {
         if (StringUtils.isEmpty(playName)) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Play Id" });
         }
@@ -288,18 +312,19 @@ public class PlayResource {
         channel.setPlay(play);
         channel.setTenant(MultiTenantContext.getTenant());
         channel.setTenantId(MultiTenantContext.getTenant().getPid());
-        return playLaunchChannelService.createPlayLaunchFromChannel(channel, play, addAccountsTable,
-                removeAccountsTable, addContactsTable, removeContactsTable);
+        return playLaunchChannelService.queueNewLaunchForChannel(play, channel, addAccountsTable, removeAccountsTable,
+                addContactsTable, removeContactsTable, isAutoLaunch);
     }
 
     @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-workflow", headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Internal only use API to kick off workflow immediately from channel")
+    @ApiOperation(value = "Internal only use API to kick off campaignLaunch workflow immediately for a channel")
+    @Deprecated
     public String kickOffWorkflowFromChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
         PlayLaunch playLaunch = queueNewLaunchByPlayAndChannel(customerSpace, playName, channelId, null, null, null,
-                null);
+                null, false);
         return kickOffLaunch(customerSpace, playName, playLaunch.getId());
     }
 
