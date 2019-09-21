@@ -24,10 +24,10 @@ class AccountContactExportJob extends AbstractSparkJob[AccountContactExportConfi
 
     if (listSize == 2) {
       var contactTable: DataFrame = lattice.input(1)
-      val newAttrs = contactTable.columns.map(c => AccountContactExportConfig.contactRenamed + c)
+      val newAttrs = contactTable.columns.map(c => AccountContactExportConfig.CONTACT_ATTR_PREFIX + c)
       contactTable = contactTable.toDF(newAttrs: _*)
       // left join
-      val contactJoinKey = AccountContactExportConfig.contactRenamed + joinKey;
+      val contactJoinKey = AccountContactExportConfig.CONTACT_ATTR_PREFIX + joinKey;
       var joinResult: DataFrame = accountTable.join(contactTable, accountTable(joinKey) === contactTable(contactJoinKey), "left")
       if (CollectionUtils.isNotEmpty(config.getDropKeys)) {
         config.getDropKeys.asScala.foreach(dropKey => joinResult = joinResult.drop(dropKey))
