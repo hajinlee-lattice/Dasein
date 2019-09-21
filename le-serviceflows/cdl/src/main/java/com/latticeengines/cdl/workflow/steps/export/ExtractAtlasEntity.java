@@ -161,6 +161,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         if (batonService.isEntityMatchEnabled(customerSpace)) {
             List<String> dropKeys = new ArrayList<>();
             dropKeys.add(InterfaceName.AccountId.name());
+            dropKeys.add(AccountContactExportConfig.CONTACT_ATTR_PREFIX + InterfaceName.AccountId.name());
             accountContactExportConfig.setDropKeys(dropKeys);
         }
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
@@ -242,7 +243,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             if (!BusinessEntity.Contact.equals(entity)) {
                 List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
                 cms.forEach(cm -> {
-                    if (!isAccountOrContaceId(cm)) {
+                    if (!isAccountOrContactId(cm)) {
                         lookups.add(new AttributeLookup(entity, cm.getAttrName()));
                     }
                 });
@@ -266,24 +267,29 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return lookups;
     }
 
-    private boolean isAccountOrContaceId(ColumnMetadata cm) {
+    private boolean isAccountOrContactId(ColumnMetadata cm) {
         return cm.getAttrName().equals(InterfaceName.AccountId) || cm.getAttrName().equals(InterfaceName.ContactId);
     }
 
     private List<Lookup> getContactLookup() {
         List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
-        List<Lookup> lookups;
+        List<Lookup> lookups = new ArrayList<>();
         boolean alreadyHaveAccountId = false;
         if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
-            lookups =
-                    cms.stream().filter(cm -> !isAccountOrContaceId(cm))
-                            .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName())).collect(Collectors.toList());
+            cms.forEach(cm -> {
+                if (!cm.getAttrName().equals(InterfaceName.ContactId)) {
+                    lookups.add(new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()));
+                }
+            });
             // needs to add account id for left join operation later
             alreadyHaveAccountId = true;
             addAccountId(BusinessEntity.Contact, lookups);
         } else {
-            lookups = cms.stream().filter(cm -> !isAccountOrContaceId(cm))
-                    .map(cm -> new AttributeLookup(BusinessEntity.Contact, cm.getAttrName())).collect(Collectors.toList());
+            cms.forEach(cm -> {
+                if (!isAccountOrContactId(cm)) {
+                    lookups.add(new AttributeLookup(BusinessEntity.Contact, cm.getAttrName()));
+                }
+            });
         }
         if (!batonService.isEntityMatchEnabled(customerSpace)) {
             if (!alreadyHaveAccountId) {
