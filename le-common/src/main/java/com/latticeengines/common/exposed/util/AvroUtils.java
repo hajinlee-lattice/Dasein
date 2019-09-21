@@ -1613,7 +1613,8 @@ public class AvroUtils {
      * 2. Fields in java enum type
      *
      * 3. Fields in customized class type who declares an instance method
-     * annotated with @SerializeForAvro and returning string type
+     * annotated with @SerializeForAvro, returning string type and without
+     * parameter
      *
      * @param cls:
      *            java class
