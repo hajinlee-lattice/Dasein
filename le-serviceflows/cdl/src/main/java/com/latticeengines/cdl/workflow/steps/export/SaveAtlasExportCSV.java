@@ -154,7 +154,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             }
             // need to rename contact column name
             if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
-                displayNameMap.put(AccountContactExportConfig.contactRenamed + cm.getAttrName(), displayName);
+                displayNameMap.put(AccountContactExportConfig.CONTACT_ATTR_PREFIX + cm.getAttrName(), displayName);
             } else {
                 displayNameMap.put(cm.getAttrName(), displayName);
             }

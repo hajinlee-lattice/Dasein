@@ -161,7 +161,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         if (batonService.isEntityMatchEnabled(customerSpace)) {
             List<String> dropKeys = new ArrayList<>();
             dropKeys.add(InterfaceName.AccountId.name());
-            dropKeys.add(AccountContactExportConfig.contactRenamed + InterfaceName.AccountId.name());
+            dropKeys.add(AccountContactExportConfig.CONTACT_ATTR_PREFIX + InterfaceName.AccountId.name());
             accountContactExportConfig.setDropKeys(dropKeys);
         }
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));

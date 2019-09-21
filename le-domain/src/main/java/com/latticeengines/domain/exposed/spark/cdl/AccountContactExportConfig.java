@@ -15,7 +15,7 @@ public class AccountContactExportConfig extends SparkJobConfig {
 
     public static final String NAME = "exportAccountContact";
 
-    public static final String contactRenamed = "ContactRenamed_";
+    public static final String CONTACT_ATTR_PREFIX = "ContactRenamed_";
 
     @JsonProperty("AccountContactExportContext")
     private AccountContactExportContext accountContactExportContext;
