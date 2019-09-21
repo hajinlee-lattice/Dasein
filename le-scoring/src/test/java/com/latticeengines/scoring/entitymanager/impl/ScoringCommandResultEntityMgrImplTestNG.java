@@ -31,15 +31,15 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void beforeMethod() {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testFindByScoringCommandState() throws Exception {
         ScoringCommand command = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 0, 100,
                 Timestamp.valueOf("2015-04-28 00:00:00"));

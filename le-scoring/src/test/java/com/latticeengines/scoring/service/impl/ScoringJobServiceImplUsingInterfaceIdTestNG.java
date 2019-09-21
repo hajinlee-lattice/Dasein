@@ -47,7 +47,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
 
     private Map<String, Double> scores = new HashMap<>();
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(this.getClass().getSimpleName()).toString();
         path = customerBaseDir + "/" + tenant;
@@ -80,7 +80,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     protected void score() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);
@@ -111,7 +111,8 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         }
     }
 
-    @AfterMethod(lastTimeOnly = true, alwaysRun = true)
+    @Override
+    @AfterMethod(lastTimeOnly = true, alwaysRun = true, enabled = false)
     public void afterEachTest() {
         try {
             HdfsUtils.rmdir(yarnConfiguration, path);

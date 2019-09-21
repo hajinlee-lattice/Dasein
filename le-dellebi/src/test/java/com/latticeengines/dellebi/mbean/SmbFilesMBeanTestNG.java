@@ -17,6 +17,7 @@ import com.latticeengines.dellebi.functionalframework.DellEbiTestNGBase;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
+@Deprecated
 public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
     static final Logger log = LoggerFactory.getLogger(SmbFilesMBeanTestNG.class);
 
@@ -33,13 +34,13 @@ public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
             "tgt_order_detail_global_1_20151127_235435.zip", "tgt_order_detail_global_5_20151127_235435.zip",
             "tgt_all_chnl_hier_1_20151125_201055.zip", "tgt_order_detail_global_5_20151127_235435_1.zip" };
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         dellEbiConfigEntityMgr.initialService();
         smbUpload(getUploadedFileData());
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testSmbFilesMBean() {
 
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
@@ -86,7 +87,7 @@ public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testInvalidSmbFiles() {
 
         String wrongName1 = "tgt_order_detail_global_5_20151127_235435_1.zip";
@@ -104,7 +105,7 @@ public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
         smbFilesMBean.sortSmbFiles(null);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "functional", enabled = false)
     public void tearDown() throws Exception {
         smbClean(getUploadedFileData());
     }

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
+@Deprecated
 public class DailyJobDeploymentTestNG extends DellEbiTestNGBase {
 
     static final Logger log = LoggerFactory.getLogger(DailyJobDeploymentTestNG.class);
@@ -53,19 +54,19 @@ public class DailyJobDeploymentTestNG extends DellEbiTestNGBase {
 
     private DellEbiExecutionLog dellEbiExecutionLog;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         dellEbiConfigEntityMgr.initialService();
         smbClean(getValidateNameData());
         smbClean(getStartDateNameData());
     }
 
-    @BeforeMethod(groups = "deployment")
+    @BeforeMethod(groups = "deployment", enabled = false)
     public void setUpBeforeMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dataHadoopWorkingPath);
     }
 
-    @Test(groups = "deployment", dataProvider = "fileDataProvider", enabled = true)
+    @Test(groups = "deployment", dataProvider = "fileDataProvider", enabled = false)
     public void testExecute(String file, String sourceType, Boolean isProcessed) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "WrongType, order_detail ,Order_Summary ,Warranty,SKU_Global,SKU_Manufacturer,"

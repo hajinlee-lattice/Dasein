@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
+@Deprecated
 public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(LatticeDeploymentTestNG.class);
@@ -44,7 +45,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     private Model model;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path(customerBaseDir + "/INTERNAL_LatticeDeploymentTestNG"), true);
@@ -75,7 +76,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         return new AbstractMap.SimpleEntry<>("P1_Event", features.getElements());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void load() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig();
@@ -100,7 +101,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         return config;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "load" })
+    @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = false)
     public void createSamples() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
@@ -130,7 +131,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED, String.format("ApplicationId is %s", appId.toString()));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
+    @Test(groups = "deployment", dependsOnMethods = { "createSamples" }, enabled = false)
     public void profile() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "profile");
         DataProfileConfiguration config = new DataProfileConfiguration();
@@ -149,7 +150,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
                 String.format("ApplicationId is %s", profileAppId.toString()));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "profile" }, enabled = false)
     public void submit() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "submit");
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();

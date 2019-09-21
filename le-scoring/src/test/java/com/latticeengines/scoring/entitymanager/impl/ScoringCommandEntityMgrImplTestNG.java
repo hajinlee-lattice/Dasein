@@ -19,15 +19,15 @@ public class ScoringCommandEntityMgrImplTestNG extends ScoringFunctionalTestNGBa
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void beforeMethod() {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testGetPopulatedAndConsumed() throws Exception {
         assertEquals(scoringCommandEntityMgr.getPopulated().size(), 0);
 

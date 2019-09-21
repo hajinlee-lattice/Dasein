@@ -50,21 +50,27 @@ public class DataPlatformFunctionalTestNGBase extends YarnFunctionalTestNGBase
     @Autowired
     private OrderedEntityMgrListForDbClean orderedEntityMgrListForDbClean;
 
+    @Deprecated
     @Value("${dataplatform.test.datasource.host}")
     protected String dataSourceHost;
 
+    @Deprecated
     @Value("${dataplatform.test.datasource.port}")
     protected int dataSourcePort;
 
+    @Deprecated
     @Value("${dataplatform.test.datasource.dbname}")
     protected String dataSourceDB;
 
+    @Deprecated
     @Value("${dataplatform.test.datasource.user}")
     protected String dataSourceUser;
 
+    @Deprecated
     @Value("${dataplatform.test.datasource.password.encrypted}")
     protected String dataSourcePasswd;
 
+    @Deprecated
     @Value("${dataplatform.test.datasource.type}")
     protected String dataSourceDBType;
 
@@ -200,6 +206,7 @@ public class DataPlatformFunctionalTestNGBase extends YarnFunctionalTestNGBase
      * @param yarnClient
      *            the Yarn client
      */
+    @Override
     public void setYarnClient(YarnClient yarnClient) {
         this.yarnClient = yarnClient;
     }

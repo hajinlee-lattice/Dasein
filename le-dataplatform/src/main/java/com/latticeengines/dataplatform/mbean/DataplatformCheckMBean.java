@@ -32,7 +32,7 @@ public class DataplatformCheckMBean {
 
         List<String> checkRes = new ArrayList<String>();
         checkRes.add(dbcMBean.checkLedpConnection());
-        checkRes.add(dbcMBean.checkLeadScoringDBConnection());
+        // checkRes.add(dbcMBean.checkLeadScoringDBConnection());
         checkRes.add(hdfsAcMBean.checkHDFSAccess());
         checkRes.add(hdfsRcMBean.checkHDFSResource());
         checkRes.add(httpFSMBean.checkHttpAccess());

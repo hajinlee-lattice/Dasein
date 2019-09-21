@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class BaseModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
+    @Deprecated
     LoadConfiguration getLoadConfig(Model model) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();

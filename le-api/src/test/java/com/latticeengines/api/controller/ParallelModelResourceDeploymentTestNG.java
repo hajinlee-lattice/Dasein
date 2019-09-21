@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
+@Deprecated
 public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTestNG {
 
     @SuppressWarnings("unused")
@@ -43,7 +44,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
 
     private Model model;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         throttleConfigurationEntityMgr.deleteAll();
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -75,7 +76,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         model.setDataFormat("avro");
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void parallel_load() throws Exception {
         LoadConfiguration config = getLoadConfig(model);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
@@ -86,7 +87,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "parallel_load" })
+    @Test(groups = "deployment", dependsOnMethods = { "parallel_load" }, enabled = false)
     public void parallel_createSamples() throws Exception {
         SamplingConfiguration samplingConfig = getSampleConfig(model);
         samplingConfig.setParallelEnabled(true);
@@ -100,7 +101,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "parallel_createSamples" })
+    @Test(groups = "deployment", dependsOnMethods = { "parallel_createSamples" }, enabled = false)
     public void parallel_profile() throws Exception {
         DataProfileConfiguration config = getProfileConfig(model);
         config.setParallelEnabled(true);
@@ -113,7 +114,7 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "parallel_profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "parallel_profile" }, enabled = false)
     public void submit() throws Exception {
         model.setParallelEnabled(true);
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/submit", model,
