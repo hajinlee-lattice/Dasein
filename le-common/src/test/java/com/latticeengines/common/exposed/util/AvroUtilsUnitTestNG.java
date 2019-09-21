@@ -422,7 +422,11 @@ public class AvroUtilsUnitTestNG {
         }
     }
 
+    // Method annotated with @SerializeForAvro needs some paramaters,
+    // field with this type is ignored in avro serialization and
+    // de-serialization
     static class TestAvroIgnoreField1 {
+        @SuppressWarnings("unused")
         private String name;
 
         TestAvroIgnoreField1(String name) {
@@ -440,7 +444,9 @@ public class AvroUtilsUnitTestNG {
         }
     }
 
-    // Method annotated with @SerializeForAvro doesn't return String
+    // Method annotated with @SerializeForAvro doesn't return String,
+    // field with this type is ignored in avro serialization and
+    // de-serialization
     static class TestAvroIgnoreField2 {
         private Integer name;
 
@@ -460,7 +466,8 @@ public class AvroUtilsUnitTestNG {
     }
 
     // Method annotated with @DeserializeFromAvro doesn't return
-    // TestAvroIgnoreField3
+    // TestAvroIgnoreField3, field with this type is ignored in avro
+    // serialization and de-serialization
     static class TestAvroIgnoreField3 {
         private String name;
 
@@ -483,7 +490,8 @@ public class AvroUtilsUnitTestNG {
     }
 
     // Method annotated with @DeserializeFromAvro doesn't satisfy the condition
-    // that taking and only taking single string parameter
+    // that taking and only taking single string parameter, field with this type
+    // is ignored in avro serialization and de-serialization
     static class TestAvroIgnoreField4 {
         private String name;
 
