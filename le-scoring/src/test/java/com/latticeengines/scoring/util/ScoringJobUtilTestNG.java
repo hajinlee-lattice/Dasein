@@ -41,7 +41,7 @@ public class ScoringJobUtilTestNG extends ScoringFunctionalTestNGBase {
 
     private String dir;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void beforeMethod() throws Exception {
         URL modelSummaryUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/data/part-m-00000.avro"); //
         HdfsUtils.mkdir(yarnConfiguration, dir);
@@ -49,13 +49,13 @@ public class ScoringJobUtilTestNG extends ScoringFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         dir = customerBaseDir + "/test_customer/scoring/data/some_table";
         HdfsUtils.rmdir(yarnConfiguration, dir);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void findModelUrlsToLocalize() throws Exception {
         List<String> modelGuidsInHdfs = Arrays.<String> asList(new String[] { "c412ea67-6c5b-472e-91ef-d7cfd375c24d",
                 "02ed95bf-4bad-44da-9274-7de877d5612b", "0fc8614c-85ad-405c-8b1d-ff38f94ec741",
@@ -117,7 +117,7 @@ public class ScoringJobUtilTestNG extends ScoringFunctionalTestNGBase {
         return "ms__" + uuid + "-PLSModel";
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testGenerateDataTypeSchema() throws JsonParseException, JsonMappingException, IOException, Exception {
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(dir + "/part-m-00000.avro"));
         JsonNode dataType = ScoringJobUtil.generateDataTypeSchema(schema);
