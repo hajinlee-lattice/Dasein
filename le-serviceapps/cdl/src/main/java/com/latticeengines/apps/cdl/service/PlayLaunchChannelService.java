@@ -8,9 +8,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public interface PlayLaunchChannelService {
 
-    PlayLaunchChannel create(PlayLaunchChannel playLaunchChannel);
+    PlayLaunchChannel create(String playName, PlayLaunchChannel playLaunchChannel);
 
-    PlayLaunchChannel update(PlayLaunchChannel playLaunchChannel);
+    PlayLaunchChannel update(String playName, PlayLaunchChannel playLaunchChannel);
 
     void deleteByChannelId(String channelId, boolean hardDelete);
 
@@ -22,13 +22,8 @@ public interface PlayLaunchChannelService {
 
     PlayLaunchChannel findById(String channelId);
 
-    PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play);
+    PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel);
 
-    PlayLaunch createPlayLaunchFromChannel(PlayLaunchChannel playLaunchChannel, Play play, String addAccountTable,
-            String removeAccountsTable, String addContactsTable, String removeContactsTable);
-
-    PlayLaunchChannel updatePlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel, Boolean launchNow);
-
-    PlayLaunchChannel createPlayLaunchChannel(String playName, PlayLaunchChannel playLaunchChannel, Boolean launchNow);
-
+    PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel, String addAccountTable,
+            String removeAccountsTable, String addContactsTable, String removeContactsTable, boolean autoLaunch);
 }

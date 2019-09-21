@@ -141,9 +141,10 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateChannel() throws InterruptedException {
-        playLaunchChannelService.createPlayLaunchChannel(play.getName(), playLaunchChannel1, false);
+        playLaunchChannelService.create(play.getName(), playLaunchChannel1);
         Thread.sleep(1000);
-        playLaunchChannelService.createPlayLaunchChannel(play.getName(), playLaunchChannel2, true);
+        playLaunchChannelService.create(play.getName(), playLaunchChannel2);
+        playLaunchChannelService.queueNewLaunchForChannel(play, playLaunchChannel2);
         Thread.sleep(1000);
         long playLaunchChannel1Pid = playLaunchChannel1.getPid();
         long playLaunchChannel2Pid = playLaunchChannel2.getPid();
@@ -199,10 +200,8 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreateFromChannel" })
     public void testUpdate() throws InterruptedException {
-
-        PlayLaunchChannel retrieved = playLaunchChannelService.findById(playLaunchChannel1.getId());
         playLaunchChannel1.setIsAlwaysOn(false);
-        retrieved = playLaunchChannelService.updatePlayLaunchChannel(play.getName(), playLaunchChannel1, true);
+        PlayLaunchChannel retrieved = playLaunchChannelService.update(play.getName(), playLaunchChannel2);
         Thread.sleep(1000);
 
         Assert.assertNotNull(retrieved);

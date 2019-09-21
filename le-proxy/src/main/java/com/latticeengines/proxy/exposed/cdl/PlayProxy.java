@@ -210,6 +210,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return post("update play launch", url, pLayLaunch, PlayLaunch.class);
     }
 
+    @Deprecated
     public PlayLaunch launchPlay(String customerSpace, String playName, String launchId, boolean isDryRunMode,
             boolean useSpark) {
         String url = constructUrl(
@@ -219,6 +220,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return post("Launchplay", url, null, PlayLaunch.class);
     }
 
+    @Deprecated
     public PlayLaunch launchPlay(String customerSpace, String playName, String launchId, boolean isDryRunMode) {
         return launchPlay(customerSpace, playName, launchId, isDryRunMode, false);
     }
@@ -405,13 +407,6 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return put("update play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
     }
 
-    @Deprecated
-    public PlayLaunchChannel launchAlwaysOn(String customerSpace) {
-        String url = constructUrl(URL_PREFIX + "/launch-always-on", shortenCustomerSpace(customerSpace));
-        log.info("url is " + url);
-        return post("Always on play launches", url, null, null);
-    }
-
     public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
                 shortenCustomerSpace(customerSpace), playName, channelId);
@@ -420,7 +415,8 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId,
-            String addAccountTable, String removeAccountsTable, String addContactsTable, String removeContactsTable) {
+            String addAccountTable, String removeAccountsTable, String addContactsTable, String removeContactsTable,
+            boolean isAutoLaunch) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
                 shortenCustomerSpace(customerSpace), playName, channelId);
         List<String> params = new ArrayList<>();
@@ -436,11 +432,15 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         if (StringUtils.isNotBlank(removeContactsTable)) {
             params.add(PlayUtils.REMOVED_CONTACTS_DELTA_TABLE + "=" + removeContactsTable);
         }
+        if (isAutoLaunch) {
+            params.add("is-auto-launch=true");
+        }
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
         }
         log.info("url is " + url);
-        return post("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunch.class);
+        return post("Queuing a new PlayLaunch for a given play and channel with delta tables", url, null,
+                PlayLaunch.class);
     }
 
     public PlayLaunchChannel getChannelById(String customerSpace, String playName, String channelId) {
