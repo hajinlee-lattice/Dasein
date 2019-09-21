@@ -15,6 +15,7 @@ import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
+@Deprecated
 public class LocalFileTestNG extends DellEbiTestNGBase {
 
     @SuppressWarnings("unused")
@@ -32,12 +33,12 @@ public class LocalFileTestNG extends DellEbiTestNGBase {
     @Autowired
     private ExportAndReportService exportAndReportService;
 
-    @BeforeMethod(groups = "manual")
+    @BeforeMethod(groups = "manual", enabled = false)
     public void setUpBeforeMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dataHadoopWorkingPath);
     }
 
-    @Test(groups = "manual")
+    @Test(groups = "manual", enabled = false)
     public void process() {
 
         String typesStr = "WrongType, order_detail ,Order_Summary ,Warranty,SKU_Global,SKU_Manufacturer,"

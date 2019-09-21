@@ -24,8 +24,7 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
 
     @Override
     public void execute() {
-        // 4) Update current launch universe in the channel for the next delta
-        // calculation
+        // 4) Update current launch universe in the channel for the next delta calculation
         PlayLaunchChannel channel = playProxy.getChannelById(configuration.getCustomerSpace().getTenantId(),
                 configuration.getPlayId(), configuration.getChannelId());
         channel.setCurrentLaunchedAccountUniverseTable(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class));
@@ -43,7 +42,7 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
                 getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class),
                 getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class),
                 getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class),
-                getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
+                getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class), true);
 
         log.info("Queued New Launch: " + launch.getId());
 

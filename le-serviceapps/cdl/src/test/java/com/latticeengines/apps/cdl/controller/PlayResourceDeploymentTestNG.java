@@ -2,8 +2,8 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -35,11 +36,11 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     private String playName;
     PlayLaunch playLaunch;
 
-    private static boolean USE_EXISTING_TENANT = false;
-    private static String EXISTING_TENANT = "JLM1526244443808";
-
     @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
+
+    @Value("${cdl.play.service.default.types.user}")
+    private String serviceUser;
 
     @Inject
     private CDLTestDataService cdlTestDataService;
@@ -58,12 +59,12 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        testPlaySetupConfig = new TestPlaySetupConfig.Builder()
-                .existingTenant(USE_EXISTING_TENANT ? EXISTING_TENANT : null)
+        String existingTenant = null;
+        testPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant)
                 .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)
+                        .bucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.A, RatingBucketName.B)))
                         .destinationSystemName(CDLExternalSystemName.Salesforce)
                         .destinationSystemId(CDLExternalSystemName.Salesforce.name() + System.currentTimeMillis())
-                        .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString())
                         .isAlwaysOn(true).cronSchedule("0 0 12 ? * THU *").build())
                 .build();
 
@@ -82,6 +83,49 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     public void testCrud() {
         playCreationHelper.createDefaultPlayAndTestCrud(testPlaySetupConfig);
         playName = playCreationHelper.getPlayName();
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
+    public void createPlayLaunchFromChannel() {
+        String testuser = "testuser@lattice-engines.com";
+        play = playCreationHelper.getPlay();
+        PlayLaunchChannel channel = playProxy
+                .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
+        channel.setUpdatedBy(testuser);
+        playProxy.updatePlayLaunchChannel(playCreationHelper.getCustomerSpace(), play.getName(), channel.getId(),
+                channel, false);
+
+        // Mimicking a manual Launch creation
+        PlayLaunch testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(),
+                play.getName(), channel.getId());
+        Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
+        Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
+        Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
+        Assert.assertNotNull(testPlayLaunch.getAccountsErrored());
+        Assert.assertNotNull(testPlayLaunch.getAccountsSuppressed());
+        Assert.assertEquals(testPlayLaunch.getCreatedBy(), testuser);
+        Assert.assertEquals(testPlayLaunch.getUpdatedBy(), testuser);
+        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Queued);
+        totalRatedAccounts = testPlayLaunch.getAccountsSelected();
+
+        playProxy.deletePlayLaunch(playCreationHelper.getCustomerSpace(), playCreationHelper.getPlayName(),
+                testPlayLaunch.getLaunchId(), true);
+
+        // Mimicking an automatic Launch creation
+        testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(), play.getName(),
+                channel.getId(), null, null, null, null, true);
+        Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
+        Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
+        Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
+        Assert.assertNotNull(testPlayLaunch.getAccountsErrored());
+        Assert.assertNotNull(testPlayLaunch.getAccountsSuppressed());
+        Assert.assertEquals(testPlayLaunch.getCreatedBy(), serviceUser);
+        Assert.assertEquals(testPlayLaunch.getUpdatedBy(), serviceUser);
+        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Queued);
+        totalRatedAccounts = testPlayLaunch.getAccountsSelected();
+
+        playProxy.deletePlayLaunch(playCreationHelper.getCustomerSpace(), playCreationHelper.getPlayName(),
+                testPlayLaunch.getLaunchId(), true);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })

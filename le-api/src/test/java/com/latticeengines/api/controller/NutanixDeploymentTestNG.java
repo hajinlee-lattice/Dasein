@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
+@Deprecated
 public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Inject
@@ -41,7 +42,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     private Model model;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path(customerBaseDir + "/INTERNAL_NutanixDeploymentTestNG"), true);
@@ -82,7 +83,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         return new AbstractMap.SimpleEntry<>("P1_Event", features.getElements());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject(modelingEndpointHost + "/rest/load", config,
@@ -93,6 +94,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Deprecated
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -106,7 +108,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         return config;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
+    @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = false)
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
@@ -134,7 +136,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
+    @Test(groups = "deployment", dependsOnMethods = { "createSamples" }, enabled = false)
     public void profile() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -151,7 +153,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "profile" })
+    @Test(groups = "deployment", dependsOnMethods = { "profile" }, enabled = false)
     public void submit() throws Exception {
         AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         this.model.setFeaturesList(targetAndFeatures.getValue());

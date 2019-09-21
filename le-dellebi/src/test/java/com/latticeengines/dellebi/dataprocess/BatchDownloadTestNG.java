@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
+@Deprecated
 @ContextConfiguration(locations = { "classpath:common-properties-context.xml", })
 public class BatchDownloadTestNG extends AbstractTestNGSpringContextTests {
 
@@ -42,7 +43,7 @@ public class BatchDownloadTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Test(groups = "manual")
+    @Test(groups = "manual", enabled = false)
     public void batchDownload() throws Exception {
 
         String batchInputDir = dataHadoopWorkingPath + "/ZipDir/";

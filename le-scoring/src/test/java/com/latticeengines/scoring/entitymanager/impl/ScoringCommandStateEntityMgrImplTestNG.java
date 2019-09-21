@@ -25,15 +25,15 @@ public class ScoringCommandStateEntityMgrImplTestNG extends ScoringFunctionalTes
     @Autowired
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void beforeMethod() {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testFindLastStateByScoringCommand(){
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:00"));
         scoringCommandEntityMgr.create(scoringCommand);

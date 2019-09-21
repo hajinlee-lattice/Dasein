@@ -290,7 +290,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         channel.setChannelConfig(channelConfig);
         channel.setLookupIdMap(lookupIdMap);
 
-        channel = playLaunchChannelService.create(channel);
+        channel = playLaunchChannelService.create(play.getName(), channel);
     }
 
     private void registerMarketoLookupIdMap() {

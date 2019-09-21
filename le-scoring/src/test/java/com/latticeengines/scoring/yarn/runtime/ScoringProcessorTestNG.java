@@ -69,7 +69,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private RTSBulkScoringConfiguration rtsBulkScoringConfig;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         uploadedAvro = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/data/allTest_with_lattice_accountId.avro");
@@ -85,20 +85,20 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         bulkScoringProcessor.setConfiguration(yarnConfiguration);
     }
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void beforeMethod() throws Exception {
         HdfsUtils.mkdir(yarnConfiguration, dir);
         filePath = dir + "/allTest_with_lattice_accountId.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, uploadedAvro.getFile(), filePath);
     }
 
-    @AfterMethod(groups = "functional")
+    @AfterMethod(groups = "functional", enabled = false)
     public void AfterMethod() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, dir);
         FileUtils.deleteQuietly(new File(ScoringDaemonService.IMPORT_ERROR_FILE_NAME));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testAvroUtils() throws IOException {
         // upload anther avro file
         String anotherFilePath = dir + "/allTest_with_lattice_accountId_1.avro";
@@ -114,7 +114,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(count, 852);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConvertAvroToBulkScoreRequest() throws IllegalArgumentException, Exception {
         List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
         Iterator<GenericRecord> iterator = bulkScoringProcessor.instantiateIteratorForBulkScoreRequest(dir);
@@ -144,7 +144,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConvertMultipleAvroToBulkScoreRequest() throws IllegalArgumentException, Exception {
         // upload anther avro file
         String anotherFilePath = dir + "/allTest_with_lattice_accountId_1.avro";
@@ -172,7 +172,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(scoreRequestList.get(8).getRecords().size(), 52);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testConvertAvroToBulkScoreRequest")
+    @Test(groups = "functional", dependsOnMethods = "testConvertAvroToBulkScoreRequest", enabled = false)
     public void testConvertAvroToBulkScoreRequestWithScoreTestFileOff() throws IllegalArgumentException, Exception {
         List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
         BulkRecordScoreRequest scoreRequest = null;
@@ -214,7 +214,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         System.out.println("record is " + record);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConvertBulkScoreResponseToAvro() throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
 
@@ -225,7 +225,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         checkScoreAndErrorFiles(false);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConvertBulkScoreResponseToAvroWithCorrectAttributeMap() throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
@@ -236,7 +236,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         checkScoreAndErrorFiles(true);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConvertBulkScoreResponseToAvroWithIncompleteAttributeMap()
             throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
@@ -253,7 +253,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         checkScoreAndErrorFiles(false);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConvertBulkScoreResponseToAvroWithNullAttributeMap() throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         try {
@@ -265,7 +265,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         checkScoreAndErrorFiles(false);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testConvertBulkScoreResponseToAvroWithAttributeMapButNullAttributs()
             throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();

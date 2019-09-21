@@ -138,9 +138,9 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
         Assert.assertNotNull(playLaunchChannel1);
         playLaunchChannelEntityMgr.create(playLaunchChannel2);
         Assert.assertNotNull(playLaunchChannel2);
-        playLaunch1 = playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel1, play);
+        playLaunch1 = playLaunchChannelService.queueNewLaunchForChannel(play, playLaunchChannel1);
         Assert.assertNotNull(playLaunch1);
-        playLaunch2 = playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel2, play);
+        playLaunch2 = playLaunchChannelService.queueNewLaunchForChannel(play, playLaunchChannel2);
         Assert.assertNotNull(playLaunch2);
         Thread.sleep(1000);
 
@@ -151,15 +151,14 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> queuedPlayLaunchesIdList = //
                     playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
-                    .stream().map(PlayLaunch::getId).collect(Collectors.toList());
+                            .stream().map(PlayLaunch::getId).collect(Collectors.toList());
             Assert.assertTrue(queuedPlayLaunchesIdList.contains(playLaunch1.getId()));
             Assert.assertTrue(queuedPlayLaunchesIdList.contains(playLaunch2.getId()));
         });
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> launchingPlayLaunchesIdList = playLaunchService
                     .getByStateAcrossTenants(LaunchState.Launching, null).stream() //
-                    .map(PlayLaunch::getId)
-                    .collect(Collectors.toList());
+                    .map(PlayLaunch::getId).collect(Collectors.toList());
             Assert.assertFalse(launchingPlayLaunchesIdList.contains(playLaunch1.getId()));
             Assert.assertFalse(launchingPlayLaunchesIdList.contains(playLaunch2.getId()));
         });
@@ -169,7 +168,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> queuedPlayLaunchesIdList = //
                     playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
-                    .stream().map(PlayLaunch::getId).collect(Collectors.toList());
+                            .stream().map(PlayLaunch::getId).collect(Collectors.toList());
             Assert.assertFalse(queuedPlayLaunchesIdList.contains(playLaunch1.getId()));
             Assert.assertFalse(queuedPlayLaunchesIdList.contains(playLaunch2.getId()));
             List<String> launchingPlayLaunchesIdList = playLaunchService
@@ -181,7 +180,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
         // test that a play launch that's in queued state does not launch if
         // there already is a play launch launching to the same channel
-        PlayLaunch playLaunch2a = playLaunchChannelService.createPlayLaunchFromChannel(playLaunchChannel2, play);
+        PlayLaunch playLaunch2a = playLaunchChannelService.queueNewLaunchForChannel(play, playLaunchChannel2);
         Assert.assertNotNull(playLaunch2a);
         Thread.sleep(1000);
         TestRetryUtils.retryForAssertionError(() -> {
@@ -199,7 +198,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> queuedPlayLaunchesIdList = //
                     playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
-                    .stream().map(PlayLaunch::getId).collect(Collectors.toList());
+                            .stream().map(PlayLaunch::getId).collect(Collectors.toList());
             Assert.assertTrue(queuedPlayLaunchesIdList.contains(playLaunch2a.getId()));
             List<String> launchingPlayLaunchesIdList = playLaunchService
                     .getByStateAcrossTenants(LaunchState.Launching, null).stream() //

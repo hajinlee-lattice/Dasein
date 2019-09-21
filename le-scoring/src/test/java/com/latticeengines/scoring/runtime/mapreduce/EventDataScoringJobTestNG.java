@@ -40,7 +40,7 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
     private String uuid = "f7f1eb16-0d26-4aa1-8c4a-3ac696e13d06";
 
     @Override
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         super.setup();
         tenant = CustomerSpace.parse(this.getClass().getSimpleName()).toString();
@@ -74,7 +74,7 @@ public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBa
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "scoring", scoringHdfsPath);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void test() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);

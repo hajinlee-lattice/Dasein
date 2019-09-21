@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
+@Deprecated
 public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ModelStepYarnProcessorImplTestNG.class);
@@ -113,6 +114,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         }
     }
 
+    @Deprecated
     private void setupDBConfig() {
         modelStepYarnProcessor.setDBConfig(dataSourceHost, dataSourcePort, dataSourceDB, dataSourceUser,
                 dataSourcePasswd, dataSourceDBType);

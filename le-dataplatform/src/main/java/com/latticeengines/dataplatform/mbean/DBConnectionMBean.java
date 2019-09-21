@@ -13,15 +13,19 @@ import org.springframework.stereotype.Component;
 @ManagedResource(objectName = "Diagnostics:name=DBConnectionCheck")
 public class DBConnectionMBean {
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.url}")
     private String dataSourceURL;
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.user}")
     private String dataSourceUser;
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
     private String dataSourcePasswd;
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.type}")
     private String dataSourceType;
 
@@ -48,6 +52,7 @@ public class DBConnectionMBean {
         return getConnectionStatus(url);
     }
 
+    @Deprecated
     @ManagedOperation(description = "Check LeadScoringDB Connection")
     public String checkLeadScoringDBConnection() {
         String url = "";

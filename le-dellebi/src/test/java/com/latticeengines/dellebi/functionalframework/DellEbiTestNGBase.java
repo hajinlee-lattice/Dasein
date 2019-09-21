@@ -30,6 +30,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
 
+@Deprecated
 @ContextConfiguration(locations = { "classpath:test-dellebi-context.xml" })
 public class DellEbiTestNGBase extends AbstractTestNGSpringContextTests {
 

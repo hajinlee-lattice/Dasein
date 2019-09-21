@@ -8,14 +8,18 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
+@Deprecated
 public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.url}")
     private String dataSourceURL;
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.user}")
     private String dataSourceUser;
 
+    @Deprecated
     @Value("${dataplatform.dlorchestration.datasource.type}")
     private String dataSourceType;
 
