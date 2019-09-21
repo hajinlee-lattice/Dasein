@@ -1679,8 +1679,7 @@ public class AvroUtils {
                     // Validation of existence of serializeMethod is in
                     // isFieldSerializable()
                     Method serializeMethod = Arrays.stream(field.getType().getDeclaredMethods()) //
-                            .filter(method -> !Modifier.isStatic(method.getModifiers())
-                                    && method.isAnnotationPresent(SerializeForAvro.class)) //
+                            .filter(method -> isAvroSerializationMethod(method)) //
                             .findFirst().get();
                     builder.set(field.getName(), serializeMethod.invoke(value));
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -1710,14 +1709,26 @@ public class AvroUtils {
         }
         int nSerializeMethod = 0;
         for (Method method : field.getType().getDeclaredMethods()) {
-            if (!Modifier.isStatic(method.getModifiers()) //
-                    && method.isAnnotationPresent(SerializeForAvro.class) //
-                    && method.getReturnType() == String.class //
-                    && method.getParameterCount() == 0) {
+            if (isAvroSerializationMethod(method)) {
                 nSerializeMethod++;
             }
         }
         return nSerializeMethod == 1;
+    }
+
+    /**
+     * Whether a method is to serialize an instance to an generic record string
+     * field: an instance method, annotated with @SerializeForAvro, no
+     * parameter, return type is string
+     *
+     * @param method
+     * @return
+     */
+    private static boolean isAvroSerializationMethod(Method method) {
+        return !Modifier.isStatic(method.getModifiers()) //
+                && method.isAnnotationPresent(SerializeForAvro.class) //
+                && method.getReturnType() == String.class //
+                && method.getParameterCount() == 0;
     }
 
     /**
@@ -1773,8 +1784,7 @@ public class AvroUtils {
                     continue;
                 }
                 Method deserializeMethod = Arrays.stream(field.getType().getDeclaredMethods()) //
-                        .filter(method -> Modifier.isStatic(method.getModifiers())
-                                && method.isAnnotationPresent(DeserializeFromAvro.class)) //
+                        .filter(method -> isAvroDeserializationMethod(method, field.getType())) //
                         .findFirst().get();
                 FieldUtils.writeField(field, obj, deserializeMethod.invoke(null, value.toString()), true);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -1803,14 +1813,27 @@ public class AvroUtils {
         }
         int nDeserializeMethod = 0;
         for (Method method : field.getType().getDeclaredMethods()) {
-            if (Modifier.isStatic(method.getModifiers()) //
-                    && method.isAnnotationPresent(DeserializeFromAvro.class) //
-                    && method.getReturnType() == field.getType() //
-                    && method.getParameterCount() == 1 //
-                    && method.getParameterTypes()[0] == String.class) {
+            if (isAvroDeserializationMethod(method, field.getType())) {
                 nDeserializeMethod++;
             }
         }
         return nDeserializeMethod == 1;
+    }
+
+    /**
+     * Whether a method is to de-serialize an avro string field to java instance
+     * of expected type: a static method, annotated with @DeserializeFromAvro,
+     * return type is expected, takes and only takes single string parameter
+     *
+     * @param method
+     * @param returnType
+     * @return
+     */
+    private static boolean isAvroDeserializationMethod(Method method, Class<?> returnType) {
+        return Modifier.isStatic(method.getModifiers()) //
+                && method.isAnnotationPresent(DeserializeFromAvro.class) //
+                && method.getReturnType() == returnType //
+                && method.getParameterCount() == 1 //
+                && method.getParameterTypes()[0] == String.class;
     }
 }
