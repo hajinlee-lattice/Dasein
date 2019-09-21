@@ -62,9 +62,6 @@ public class ProcessAnalyzeListener extends LEJobListener {
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String initialDataFeedStatus = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_STATUS);
-        boolean isAlwaysOnCampaign =
-                Boolean.parseBoolean(job.getInputContextValue(WorkflowContextConstants.Inputs.ALWAYS_ON_CAMPAIGNS));
-
         customerSpace = job.getTenant().getId();
 
         String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
@@ -87,13 +84,6 @@ public class ProcessAnalyzeListener extends LEJobListener {
                 throw new RuntimeException("Can't finish execution");
             }
             cleanupInactiveVersion();
-            if (isAlwaysOnCampaign) {
-                try {
-                    playProxy.launchAlwaysOn(customerSpace);
-                } catch (Exception e) {
-                    log.error("Cannot update play launch channel for: " + customerSpace);
-                }
-            }
         } else {
             log.warn("Workflow ended in an unknown state.");
         }
