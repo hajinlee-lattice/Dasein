@@ -2,6 +2,8 @@ package com.latticeengines.apps.lp.service.impl;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.lp.service.ModelCopyService;
@@ -13,12 +15,19 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("modelCopyService")
 public class ModelCopyServiceImpl implements ModelCopyService {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelCopyServiceImpl.class);
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     private final ModelSummaryService modelSummaryService;
     private final ModelMetadataService modelMetadataService;
@@ -48,8 +57,28 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         try (PerformanceTimer timer = new PerformanceTimer("Copy model function")) {
             result = modelService.copyModel(modelSummary, sourceTenantId, targetTenantId);
         }
+        log.info("Before downloading model summary...");
         modelSummaryService.downloadModelSummary(targetTenantId, null);
+        log.info("Before copyBucketedScoreSummary...");
+        copyBucketedScoreSummary(modelId, result, sourceTenantId, targetTenantId);
         return result;
+    }
+
+    private void copyBucketedScoreSummary(String sourceModelGuid, String targetModelGuid, String sourceTenantId,
+            String targetTenantId) {
+        BucketedScoreSummary bucketedScoreSummary = bucketedScoreProxy
+                .getBucketedScoreSummary(CustomerSpace.parse(sourceTenantId).toString(), sourceModelGuid);
+        if (bucketedScoreSummary == null) {
+            log.warn("There's no bucketed score summary found for source modelId=" + sourceModelGuid
+                    + ", source tenantId=" + sourceTenantId);
+            return;
+        }
+        bucketedScoreSummary.setPid(null);
+        bucketedScoreProxy.createOrUpdateBucketedScoreSummary(CustomerSpace.parse(targetTenantId).toString(),
+                targetModelGuid, bucketedScoreSummary);
+        log.info("Finished copying bucketed score summary for source modelId=" + sourceModelGuid + ", source tenantId="
+                + sourceTenantId + " to target modelId=" + targetModelGuid + " for target tenantId=" + targetTenantId);
+
     }
 
     @Override
