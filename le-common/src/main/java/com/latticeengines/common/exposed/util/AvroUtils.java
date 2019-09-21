@@ -1610,10 +1610,10 @@ public class AvroUtils {
      *
      * 1. Fields in java class type contained in TYPE_MAP
      *
-     * 2. Fields in java enum type -- serialize to string
+     * 2. Fields in java enum type
      *
      * 3. Fields in customized class type who declares an instance method
-     * annotated with @SerializeForAvro -- serialize to string
+     * annotated with @SerializeForAvro and returning string type
      *
      * @param cls:
      *            java class
@@ -1643,10 +1643,11 @@ public class AvroUtils {
      *
      * 1. Fields in java class type contained in TYPE_MAP
      *
-     * 2. Fields in java enum type -- serialize to string
+     * 2. Fields in java enum type
      *
      * 3. Fields in customized class type who declares an INSTANCE method
-     * annotated with @SerializeForAvro -- serialize to string
+     * annotated with @SerializeForAvro, returning string type and without
+     * parameter
      *
      * @param cls:
      *            java class
@@ -1708,7 +1709,10 @@ public class AvroUtils {
         }
         int nSerializeMethod = 0;
         for (Method method : field.getType().getDeclaredMethods()) {
-            if (!Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(SerializeForAvro.class)) {
+            if (!Modifier.isStatic(method.getModifiers()) //
+                    && method.isAnnotationPresent(SerializeForAvro.class) //
+                    && method.getReturnType() == String.class //
+                    && method.getParameterCount() == 0) {
                 nSerializeMethod++;
             }
         }
@@ -1723,10 +1727,11 @@ public class AvroUtils {
      * 1. Fields in java class type contained in TYPE_MAP (if java class is
      * primitive, value cannot be null)
      *
-     * 2. Fields in java enum type -- de-serialize from string
+     * 2. Fields in java enum type
      *
      * 3. Fields in customized class type who declares a STATIC method annotated
-     * with @DeserializeForAvro -- de-serialize from string
+     * with @DeserializeForAvro, returning field's type and taking and only
+     * taking single string parameter
      *
      * @param record:
      *            generic record
@@ -1797,7 +1802,11 @@ public class AvroUtils {
         }
         int nDeserializeMethod = 0;
         for (Method method : field.getType().getDeclaredMethods()) {
-            if (Modifier.isStatic(method.getModifiers()) && method.isAnnotationPresent(DeserializeFromAvro.class)) {
+            if (Modifier.isStatic(method.getModifiers()) //
+                    && method.isAnnotationPresent(DeserializeFromAvro.class) //
+                    && method.getReturnType() == field.getType() //
+                    && method.getParameterCount() == 1 //
+                    && method.getParameterTypes()[0] == String.class) {
                 nDeserializeMethod++;
             }
         }

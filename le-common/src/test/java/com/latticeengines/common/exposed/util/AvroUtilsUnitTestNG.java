@@ -273,18 +273,18 @@ public class AvroUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testObjectGenericRecordConversion() {
-        TestAvroConversion obj = createObjectGenericRecordConversion();
+    public void testSerializationDeserialization() {
+        TestAvroConversion obj = createTestAvroConversion();
         List<GenericRecord> records = AvroUtils.serialize(TestAvroConversion.class,
                 Arrays.asList(obj));
         TestAvroConversion converted = AvroUtils.deserialize(records.get(0), TestAvroConversion.class);
-        validateObjectGenericRecordConversion(obj, converted);
+        validateSerializationDeserialization(obj, converted);
 
         records.get(0).put("intAttr", null);
         Assert.assertThrows(() -> AvroUtils.deserialize(records.get(0), TestAvroConversion.class));
     }
 
-    private TestAvroConversion createObjectGenericRecordConversion() {
+    private TestAvroConversion createTestAvroConversion() {
         TestAvroConversion obj = new TestAvroConversion();
         obj.shortAttr = (short) 1;
         obj.intAttr = 2;
@@ -301,10 +301,14 @@ public class AvroUtilsUnitTestNG {
         obj.enumAttr = TestAvroConversionEnum.ENUM1;
         obj.serializableAttr = new TestAvroField("TestAvroField");
         obj.nonSerializableAttr = new TestAvroIgnoreField("TestAvroIgnoreField");
+        obj.nonSerializableAttr1 = new TestAvroIgnoreField1("TestAvroIgnoreField1");
+        obj.nonSerializableAttr2 = new TestAvroIgnoreField2(0);
+        obj.nonSerializableAttr3 = new TestAvroIgnoreField3("TestAvroIgnoreField3");
+        obj.nonSerializableAttr4 = new TestAvroIgnoreField4("TestAvroIgnoreField4");
         return obj;
     }
 
-    private void validateObjectGenericRecordConversion(TestAvroConversion origin,
+    private void validateSerializationDeserialization(TestAvroConversion origin,
             TestAvroConversion converted) {
         Assert.assertEquals(converted.shortAttr, origin.shortAttr);
         Assert.assertEquals(converted.intAttr, origin.intAttr);
@@ -323,6 +327,10 @@ public class AvroUtilsUnitTestNG {
 
         Assert.assertNotNull(origin.nonSerializableAttr);
         Assert.assertNull(converted.nonSerializableAttr);
+        Assert.assertNull(converted.nonSerializableAttr1);
+        Assert.assertNull(converted.nonSerializableAttr2);
+        Assert.assertNull(converted.nonSerializableAttr3);
+        Assert.assertNull(converted.nonSerializableAttr4);
 
         Assert.assertNull(converted.nullAttr);
         Assert.assertNull(converted.nullAttr1);
@@ -348,6 +356,10 @@ public class AvroUtilsUnitTestNG {
         private TestAvroField nullAttr1; // don't set anything to test null
         private TestAvroField serializableAttr;
         private TestAvroIgnoreField nonSerializableAttr;
+        private TestAvroIgnoreField1 nonSerializableAttr1;
+        private TestAvroIgnoreField2 nonSerializableAttr2;
+        private TestAvroIgnoreField3 nonSerializableAttr3;
+        private TestAvroIgnoreField4 nonSerializableAttr4;
     }
 
     // to test that exact enum identifier should be written to generic record
@@ -407,6 +419,87 @@ public class AvroUtilsUnitTestNG {
 
         public static TestAvroIgnoreField fromString(String name) {
             return new TestAvroIgnoreField(name);
+        }
+    }
+
+    static class TestAvroIgnoreField1 {
+        private String name;
+
+        TestAvroIgnoreField1(String name) {
+            this.name = name;
+        }
+
+        @SerializeForAvro
+        public String toString(String name1) {
+            return name1;
+        }
+
+        @DeserializeFromAvro
+        public static TestAvroIgnoreField1 fromString(String name) {
+            return new TestAvroIgnoreField1(name);
+        }
+    }
+
+    // Method annotated with @SerializeForAvro doesn't return String
+    static class TestAvroIgnoreField2 {
+        private Integer name;
+
+        TestAvroIgnoreField2(Integer name) {
+            this.name = name;
+        }
+
+        @SerializeForAvro
+        public Integer getName() {
+            return name;
+        }
+
+        @DeserializeFromAvro
+        public static TestAvroIgnoreField2 fromString(String name) {
+            return new TestAvroIgnoreField2(Integer.valueOf(name));
+        }
+    }
+
+    // Method annotated with @DeserializeFromAvro doesn't return
+    // TestAvroIgnoreField3
+    static class TestAvroIgnoreField3 {
+        private String name;
+
+        TestAvroIgnoreField3(String name) {
+            this.name = name;
+        }
+
+        @SerializeForAvro
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        // Not return TestAvroIgnoreField3, but return TestAvroIgnoreField
+        // instead
+        @DeserializeFromAvro
+        public static TestAvroIgnoreField fromString(String name) {
+            return new TestAvroIgnoreField(name);
+        }
+    }
+
+    // Method annotated with @DeserializeFromAvro doesn't satisfy the condition
+    // that taking and only taking single string parameter
+    static class TestAvroIgnoreField4 {
+        private String name;
+
+        TestAvroIgnoreField4(String name) {
+            this.name = name;
+        }
+
+        @SerializeForAvro
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        @DeserializeFromAvro
+        public static TestAvroIgnoreField4 fromString(String name1, String name2) {
+            return new TestAvroIgnoreField4(name1 + name2);
         }
     }
 
