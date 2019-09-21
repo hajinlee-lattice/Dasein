@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "ACTIVITY_DIMENSION", uniqueConstraints = { //
+@Table(name = "ATLAS_ACTIVITY_DIMENSION", uniqueConstraints = { //
         @UniqueConstraint(columnNames = { "NAME", "FK_STREAM_ID", "FK_TENANT_ID" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
