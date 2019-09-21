@@ -38,7 +38,7 @@ if [[ $(uname) == 'Darwin' ]]; then
     sed -i '' 's/${LE_STACK}/'${STACK_NAME}'/g' ${PROP_FILE}
     sed -i '' 's/${LE_CLIENT_ADDRESS}/'${STACK_IP}'/g' ${PROP_FILE}
 else
-    echo "You are on ${UNAME}"
+    echo "You are on $(uname)"
     sed -i 's/${LE_STACK}/'${STACK_NAME}'/g' ${PROP_FILE}
     sed -i 's/${LE_CLIENT_ADDRESS}/'${STACK_IP}'/g' ${PROP_FILE}
 fi
