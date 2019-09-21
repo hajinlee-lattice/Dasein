@@ -294,7 +294,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             try (PerformanceTimer timer = new PerformanceTimer(
                     String.format("Dump metadata page-%d to local file %s", page, localFile))) {
                 List<E> mds = getMetadataColumnEntityMgr().findByPage(dataCloudVersion, page, pageSize).collectList().block();
-                List<GenericRecord> records = AvroUtils.objectsToGenericRecords(getMetadataColumnClass(), mds);
+                List<GenericRecord> records = AvroUtils.serialize(getMetadataColumnClass(), mds);
                 try {
                     AvroUtils.writeToLocalFile(schema, records, localFile, true);
                 } catch (IOException e) {
@@ -331,7 +331,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             });
             try (AvroStreamsIterator iter = AvroUtils.iterateAvroStreams(streamIter)) {
                 for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
-                    list.add(AvroUtils.genericRecordToObject(record, getMetadataColumnClass()));
+                    list.add(AvroUtils.deserialize(record, getMetadataColumnClass()));
                 }
             }
             timer.setTimerMessage(String.format("Load %d metadata for version %s from S3 prefix %s", list.size(),

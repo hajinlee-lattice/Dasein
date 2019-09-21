@@ -275,12 +275,9 @@ public class AvroUtilsUnitTestNG {
     @Test(groups = "unit")
     public void testObjectGenericRecordConversion() {
         TestAvroConversion obj = createObjectGenericRecordConversion();
-        List<GenericRecord> records = AvroUtils.objectsToGenericRecords(TestAvroConversion.class,
+        List<GenericRecord> records = AvroUtils.serialize(TestAvroConversion.class,
                 Arrays.asList(obj));
-
-        // convert generic record back to object
-        TestAvroConversion converted = AvroUtils.genericRecordToObject(records.get(0), TestAvroConversion.class);
-
+        TestAvroConversion converted = AvroUtils.deserialize(records.get(0), TestAvroConversion.class);
         validateObjectGenericRecordConversion(obj, converted);
     }
 
@@ -299,6 +296,7 @@ public class AvroUtilsUnitTestNG {
         obj.boolWrapAttr = Boolean.TRUE;
         obj.strAttr = "ABC";
         obj.enumAttr = TestAvroConversionEnum.ENUM1;
+        obj.serializableAttr = new TestAvroField("TestAvroField");
         return obj;
     }
 
@@ -316,12 +314,14 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(converted.boolAttr, origin.boolAttr);
         Assert.assertEquals(converted.boolWrapAttr, origin.boolWrapAttr);
         Assert.assertEquals(converted.strAttr, origin.strAttr);
-        Assert.assertEquals(converted.nullAttr, origin.nullAttr);
         Assert.assertEquals(converted.enumAttr, origin.enumAttr);
+        Assert.assertEquals(converted.serializableAttr.name, origin.serializableAttr.name);
+
+        Assert.assertNull(converted.nullAttr);
+        Assert.assertNull(converted.nullAttr1);
     }
 
     static class TestAvroConversion {
-        @SuppressWarnings("unused")
         public static final String STATIC_ATTR = "STATIC_ATTR";
 
         private short shortAttr;
@@ -338,6 +338,8 @@ public class AvroUtilsUnitTestNG {
         private String strAttr;
         private String nullAttr; // don't set anything to test null
         private TestAvroConversionEnum enumAttr;
+        private TestAvroField nullAttr1; // don't set anything to test null
+        private TestAvroField serializableAttr;
     }
 
     // to test that exact enum identifier should be written to generic record
@@ -360,4 +362,24 @@ public class AvroUtilsUnitTestNG {
             return this.name;
         }
     }
+
+    static class TestAvroField {
+        private String name;
+
+        TestAvroField(String name) {
+            this.name = name;
+        }
+
+        @SerializeForAvro
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        @DeserializeFromAvro
+        public static TestAvroField fromString(String name) {
+            return new TestAvroField(name);
+        }
+    }
+
 }
