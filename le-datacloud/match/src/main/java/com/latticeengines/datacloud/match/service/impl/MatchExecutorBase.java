@@ -173,7 +173,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
         List<String> histories = new ArrayList<>();
         matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-        log.info("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory");
+        log.debug("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory");
         firehoseService.sendBatch(deliveryStreamName, histories);
     }
 
