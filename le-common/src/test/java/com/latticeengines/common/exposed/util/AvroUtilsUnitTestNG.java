@@ -279,6 +279,9 @@ public class AvroUtilsUnitTestNG {
                 Arrays.asList(obj));
         TestAvroConversion converted = AvroUtils.deserialize(records.get(0), TestAvroConversion.class);
         validateObjectGenericRecordConversion(obj, converted);
+
+        records.get(0).put("intAttr", null);
+        Assert.assertThrows(() -> AvroUtils.deserialize(records.get(0), TestAvroConversion.class));
     }
 
     private TestAvroConversion createObjectGenericRecordConversion() {
@@ -297,6 +300,7 @@ public class AvroUtilsUnitTestNG {
         obj.strAttr = "ABC";
         obj.enumAttr = TestAvroConversionEnum.ENUM1;
         obj.serializableAttr = new TestAvroField("TestAvroField");
+        obj.nonSerializableAttr = new TestAvroIgnoreField("TestAvroIgnoreField");
         return obj;
     }
 
@@ -317,12 +321,15 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(converted.enumAttr, origin.enumAttr);
         Assert.assertEquals(converted.serializableAttr.name, origin.serializableAttr.name);
 
+        Assert.assertNotNull(origin.nonSerializableAttr);
+        Assert.assertNull(converted.nonSerializableAttr);
+
         Assert.assertNull(converted.nullAttr);
         Assert.assertNull(converted.nullAttr1);
     }
 
     static class TestAvroConversion {
-        public static final String STATIC_ATTR = "STATIC_ATTR";
+        public static String staticAttr;
 
         private short shortAttr;
         private int intAttr;
@@ -340,6 +347,7 @@ public class AvroUtilsUnitTestNG {
         private TestAvroConversionEnum enumAttr;
         private TestAvroField nullAttr1; // don't set anything to test null
         private TestAvroField serializableAttr;
+        private TestAvroIgnoreField nonSerializableAttr;
     }
 
     // to test that exact enum identifier should be written to generic record
@@ -379,6 +387,26 @@ public class AvroUtilsUnitTestNG {
         @DeserializeFromAvro
         public static TestAvroField fromString(String name) {
             return new TestAvroField(name);
+        }
+    }
+
+    // No method annotated with @SerializeForAvro and @DeserializeFromAvro,
+    // field with this type is ignored in avro serialization and
+    // de-serialization
+    static class TestAvroIgnoreField {
+        private String name;
+
+        TestAvroIgnoreField(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        public static TestAvroIgnoreField fromString(String name) {
+            return new TestAvroIgnoreField(name);
         }
     }
 
