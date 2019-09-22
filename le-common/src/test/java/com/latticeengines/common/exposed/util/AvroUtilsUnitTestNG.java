@@ -326,6 +326,10 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(converted.serializableAttr.name, origin.serializableAttr.name);
 
         Assert.assertNotNull(origin.nonSerializableAttr);
+        Assert.assertNotNull(origin.nonSerializableAttr1);
+        Assert.assertNotNull(origin.nonSerializableAttr2);
+        Assert.assertNotNull(origin.nonSerializableAttr3);
+        Assert.assertNotNull(origin.nonSerializableAttr4);
         Assert.assertNull(converted.nonSerializableAttr);
         Assert.assertNull(converted.nonSerializableAttr1);
         Assert.assertNull(converted.nonSerializableAttr2);
