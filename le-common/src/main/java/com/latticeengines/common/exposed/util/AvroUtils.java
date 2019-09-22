@@ -103,7 +103,7 @@ public class AvroUtils {
             .put(Integer.class, Pair.of(Type.INT, Boolean.FALSE)) //
             .put(long.class, Pair.of(Type.LONG, Boolean.TRUE)) //
             .put(Long.class, Pair.of(Type.LONG, Boolean.FALSE)) //
-            .put(String.class, Pair.of(Type.INT, Boolean.FALSE)) //
+            .put(String.class, Pair.of(Type.STRING, Boolean.FALSE)) //
             .put(boolean.class, Pair.of(Type.BOOLEAN, Boolean.TRUE)) //
             .put(Boolean.class, Pair.of(Type.BOOLEAN, Boolean.FALSE)) //
             .build();
