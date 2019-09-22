@@ -53,9 +53,9 @@ public class AccountAttributeQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploy
         resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
         testCurrentAttributeNum();
         importData();
-        processAnalyze(Boolean.FALSE);
+        processAnalyze(JobStatus.FAILED);
         setInactiveAttr();
-        processAnalyze(Boolean.TRUE);
+        processAnalyze(JobStatus.COMPLETED);
     }
 
     //account limit is 47, the table with role ConsolidatedAccount has 48 user fields, inactivate 2 attrs,
@@ -66,6 +66,7 @@ public class AccountAttributeQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploy
         config1.setEntity(BusinessEntity.Account);
         AttrConfig config2 = new AttrConfig();
         config2.setAttrName("Website");
+        config2.setEntity(BusinessEntity.Account);
         AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
         prop.setCustomValue(AttrState.Inactive);
         config1.setAttrProps(ImmutableMap.of(ColumnMetadataKey.State, prop));
@@ -89,17 +90,18 @@ public class AccountAttributeQuotaLimitDeploymentTestNG extends CDLEnd2EndDeploy
 
     }
 
-    protected void processAnalyze(Boolean result) {
+    protected void processAnalyze(JobStatus result) {
         log.info("Start processing and analyzing ...");
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), null);
         processAnalyzeAppId = appId.toString();
         log.info("processAnalyzeAppId=" + processAnalyzeAppId);
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         Assert.assertEquals(status, result);
-        if (Boolean.FALSE.equals(result)) {
+        if (JobStatus.FAILED.equals(result)) {
             Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(),
                     CustomerSpace.parse(mainTestTenant.getId()).toString());
-            Assert.assertEquals(job.getErrorMsg(), "The input contains more than 30 fields. Please reduce the no. of Account fields and try again");
+            Assert.assertEquals(job.getErrorMsg(), "The input contains more than 47 fields. Please reduce the no. of " +
+                    "Account fields and try again");
         }
     }
 

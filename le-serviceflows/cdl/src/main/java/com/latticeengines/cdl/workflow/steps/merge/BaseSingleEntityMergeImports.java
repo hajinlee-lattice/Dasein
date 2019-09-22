@@ -118,8 +118,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             }
 
 
-            Integer attrCount = nameExcludeInternalAndInactive.size();
-            log.info(String.format( "the size of remaining attributes is %s.", nameExcludeInternalAndInactive.size()));
+            int attrCount = nameExcludeInternalAndInactive.size();
+            log.info(String.format( "the size of remaining attributes is %s.", attrCount));
             switch(configuration.getMainEntity()) {
                 case Account:
                     attrQuota = limit.getAccountAttributeQuotaLimit();
