@@ -25,6 +25,7 @@ public class InternalOutputRecord extends OutputRecord {
     private String parsedEmail;
     private Tenant parsedTenant;
     private Map<String, String> parsedSystemIds;
+    private Map<String, String> parsedPreferredEntityIds;
 
     private String origDomain;
     private NameLocation origNameLocation;
@@ -32,6 +33,7 @@ public class InternalOutputRecord extends OutputRecord {
     private String origEmail;
     private Tenant origTenant;
     private Map<String, String> origSystemIds;
+    private Map<String, String> origPreferredEntityIds;
 
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
     private Map<String, Object> queryResult = new HashMap<>();
@@ -65,10 +67,6 @@ public class InternalOutputRecord extends OutputRecord {
 
     // Match result: entity -> entityId
     private Map<String, String> entityIds;
-
-    // Preferred IDs when there is a need to allocate new entity: entity ->
-    // preferredEntityId
-    private Map<String, String> preferredEntityIds;
 
     // Store the EntityMatchHistory so it can be passed between the MatchTraveler and the MatchHistory.
     private EntityMatchHistory entityMatchHistory;
@@ -347,12 +345,20 @@ public class InternalOutputRecord extends OutputRecord {
         this.entityIds = entityIds;
     }
 
-    public Map<String, String> getPreferredEntityIds() {
-        return preferredEntityIds;
+    public Map<String, String> getOrigPreferredEntityIds() {
+        return origPreferredEntityIds;
     }
 
-    public void setPreferredEntityIds(Map<String, String> preferredEntityIds) {
-        this.preferredEntityIds = preferredEntityIds;
+    public void setOrigPreferredEntityIds(Map<String, String> origPreferredEntityIds) {
+        this.origPreferredEntityIds = origPreferredEntityIds;
+    }
+
+    public Map<String, String> getParsedPreferredEntityIds() {
+        return parsedPreferredEntityIds;
+    }
+
+    public void setParsedPreferredEntityIds(Map<String, String> parsedPreferredEntityIds) {
+        this.parsedPreferredEntityIds = parsedPreferredEntityIds;
     }
 
     public EntityMatchHistory getEntityMatchHistory() {

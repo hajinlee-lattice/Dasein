@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.util.ValidationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
@@ -31,6 +34,8 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 @Component("matchStandardizationService")
 public class MatchStandardizationServiceImpl implements MatchStandardizationService {
+
+    private static final int MAX_LOG_VALUE_LENGTH = 50;
 
     private static Logger log = LoggerFactory.getLogger(MatchStandardizationServiceImpl.class);
 
@@ -249,7 +254,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
             return;
         }
 
-        keyPositionMap.get(MatchKey.PreferredEntityId).stream() //
+        List<Pair<String, String>> standardizedIds = keyPositionMap.get(MatchKey.PreferredEntityId).stream() //
                 .filter(Objects::nonNull) //
                 .map(inputRecord::get) //
                 .map(val -> {
@@ -262,11 +267,28 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     }
                 }).filter(StringUtils::isNotBlank) //
                 .map(origId -> Pair.of(origId, StringStandardizationUtils.getStandardizedSystemId(origId))) //
-                .findFirst() //
-                .ifPresent(pair -> {
-                    record.addOrigPreferredEntityId(entity, pair.getLeft());
-                    record.addParsedPreferredEntityId(entity, pair.getRight());
-                });
+                .collect(Collectors.toList());
+        Optional<Pair<String, String>> chosenId = standardizedIds.stream() //
+                .filter(pair -> ValidationUtils.isValidMatchFieldValue(pair.getRight())) //
+                .findFirst();
+        if (chosenId.isPresent()) {
+            record.addOrigPreferredEntityId(entity, chosenId.get().getLeft());
+            record.addParsedPreferredEntityId(entity, chosenId.get().getRight());
+        } else {
+            // TODO move to planner and fail the entire row (clean tuple and log error)
+            // no valid ID, find the first original value
+            standardizedIds.stream() //
+                    .map(Pair::getLeft) //
+                    .findFirst() //
+                    .ifPresent(origId -> {
+                        record.addOrigPreferredEntityId(entity, origId);
+                        // just in case ID is too long
+                        String msg = String.format("%s%s is not a valid value for preferredId",
+                                StringUtils.truncate(origId, MAX_LOG_VALUE_LENGTH),
+                                origId.length() > MAX_LOG_VALUE_LENGTH ? "..." : "");
+                        record.addErrorMessages(msg);
+                    });
+        }
     }
 
     @Override

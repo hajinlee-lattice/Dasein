@@ -107,6 +107,11 @@ public class StringStandardizationUtilsUnitTestNG {
                 { "123456789", "123456789" }, //
                 { "1a2b3c4d5e", "1a2b3c4d5e" }, //
                 { "   AbCDEfghiJkLmnOPQRSTuvwxyz   ", "abcdefghijklmnopqrstuvwxyz" }, //
+                /*-
+                 * multiple spaces into single space
+                 */
+                { "   AbCDEfg     hiJkL     mnOPQRSTuvwxyz   ", "abcdefg hijkl mnopqrstuvwxyz" }, //
+                { "   AbCDEfg\thiJkL\nmnOPQRSTuvwxyz   ", "abcdefg hijkl mnopqrstuvwxyz" }, //
         };
     }
 

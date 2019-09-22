@@ -1,5 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -36,6 +38,51 @@ public class ValidationUtilsUnitTestNG {
             Assert.assertNotNull(e.getMessage());
             Assert.assertTrue(e.getMessage().contains(objectName));
         }
+    }
+
+    @Test(groups = "unit", dataProvider = "matchFieldValidation")
+    private void testMatchFieldValidation(String str, boolean expectedValid) {
+        Assert.assertEquals(ValidationUtils.isValidMatchFieldValue(str), expectedValid,
+                String.format("%s should be a(n) %s match field value", str, expectedValid ? "Valid" : "Invalid"));
+    }
+
+    @DataProvider(name = "matchFieldValidation")
+    private Object[][] provideMatchFieldValidationTestData() {
+        return new Object[][] { //
+                /*-
+                 * all kinds of blank/null str is fine
+                 */
+                { null, true }, //
+                { "    ", true }, //
+                { "", true }, //
+                /*-
+                 * Valid values
+                 */
+                { "account_123", true }, //
+                { " acco   unt|1   23", true }, //
+                { "12345", true }, //
+                { " aabb", true }, //
+                { " AbCDEfgh  123 4", true }, //
+                { "ZZZZZ", true }, //
+                { "abc@gmail.com", true }, //
+                { "Google Inc.", true }, //
+                { "facebook.com", true }, //
+                { "USA", true }, //
+                { "CA", true }, //
+                { "CA|123", true }, // single pipe
+                { "(123)-123-1234", true }, //
+                { "333-333-3333", true }, //
+                { "Ronnie O'sullivan", true }, //
+                /*-
+                 * Invalid values
+                 */
+                { "abc||123  ", false }, // double pipe
+                { "abc|1|2|||3  ", false }, // double pipe
+                { "#some awesome hashtag", false }, // hashtag
+                { "123:456:789", false }, // colon
+                { "abc#123:||:AAd#", false }, // mix
+                { randomAlphanumeric(1000), false }, // exceed length limit
+        }; //
     }
 
     @DataProvider(name = "validationTestCase")
