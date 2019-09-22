@@ -375,6 +375,7 @@ public class AvroUtilsUnitTestNG {
         private TestAvroIgnoreField4 nonSerializableAttr4;
     }
 
+    // None of the fields could be serialized to an avro field
     static class TestUnserializable {
         @SuppressWarnings("unused")
         private TestAvroIgnoreField nonSerializableAttr;
