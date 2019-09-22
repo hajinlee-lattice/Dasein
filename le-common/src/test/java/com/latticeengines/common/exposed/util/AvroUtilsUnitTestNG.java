@@ -282,6 +282,9 @@ public class AvroUtilsUnitTestNG {
 
         records.get(0).put("intAttr", null);
         Assert.assertThrows(() -> AvroUtils.deserialize(records.get(0), TestAvroConversion.class));
+
+        TestUnserializable obj1 = createTestUnserializable();
+        Assert.assertThrows(() -> AvroUtils.serialize(TestUnserializable.class, Arrays.asList(obj1)));
     }
 
     private TestAvroConversion createTestAvroConversion() {
@@ -305,6 +308,12 @@ public class AvroUtilsUnitTestNG {
         obj.nonSerializableAttr2 = new TestAvroIgnoreField2(0);
         obj.nonSerializableAttr3 = new TestAvroIgnoreField3("TestAvroIgnoreField3");
         obj.nonSerializableAttr4 = new TestAvroIgnoreField4("TestAvroIgnoreField4");
+        return obj;
+    }
+
+    private TestUnserializable createTestUnserializable() {
+        TestUnserializable obj = new TestUnserializable();
+        obj.nonSerializableAttr = new TestAvroIgnoreField("TestAvroIgnoreField");
         return obj;
     }
 
@@ -364,6 +373,11 @@ public class AvroUtilsUnitTestNG {
         private TestAvroIgnoreField2 nonSerializableAttr2;
         private TestAvroIgnoreField3 nonSerializableAttr3;
         private TestAvroIgnoreField4 nonSerializableAttr4;
+    }
+
+    static class TestUnserializable {
+        @SuppressWarnings("unused")
+        private TestAvroIgnoreField nonSerializableAttr;
     }
 
     // to test that exact enum identifier should be written to generic record

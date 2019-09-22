@@ -1658,14 +1658,16 @@ public class AvroUtils {
      */
     public static <T> List<GenericRecord> serialize(Class<T> cls, List<T> objects) {
         Schema schema = classToSchema(cls);
-        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        List<java.lang.reflect.Field> fields = Arrays.stream(FieldUtils.getAllFields(cls)) //
+                .filter(field -> isFieldSerializable(field)) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(fields)) {
+            throw new RuntimeException(
+                    "None of the fields could be serialized to an avro field in class " + cls.getSimpleName());
+        }
         return objects.stream().map(object -> {
-            for (java.lang.reflect.Field field : FieldUtils.getAllFields(cls)) {
-                if (!isFieldSerializable(field)) {
-                    log.debug("Field {} with type {} is not supported in serialization to avro", field.getName(),
-                            field.getType().getSimpleName());
-                    continue;
-                }
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            for (java.lang.reflect.Field field : fields) {
                 try {
                     Object value = FieldUtils.readField(field, object, true);
                     if (TYPE_MAP.containsKey(field.getType()) || value == null) {
