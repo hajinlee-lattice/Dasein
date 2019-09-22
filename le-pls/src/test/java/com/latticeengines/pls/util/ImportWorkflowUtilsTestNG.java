@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflow
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
@@ -209,16 +210,16 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         // Load CSV containing imported Contact data for this test from resource file into HDFS.
         MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
-        FieldDefinitionsRecord record =
-                ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(importWorkflowSpec, null, resolver);
-
-        Map<String, List<FieldDefinition>> fieldDefinitionMap = record.getFieldDefinitionsRecordsMap();
         Map<String, FieldDefinition> autoDetectionResultsMap = ImportWorkflowUtils.generateAutodetectionResultsMap(resolver);
 
 
-        ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
-                , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
-        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
+        FetchFieldDefinitionsResponse fetchResponse = new FetchFieldDefinitionsResponse();
+        fetchResponse.setAutodetectionResultsMap(autoDetectionResultsMap);
+        fetchResponse.setImportWorkflowSpec(importWorkflowSpec);
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchResponse);
+        FieldDefinitionsRecord currentFieldDefinitionsRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
+        Map<String, List<FieldDefinition>> fieldDefinitionMap =
+                currentFieldDefinitionsRecord.getFieldDefinitionsRecordsMap();
 
 
         // change customer field's type
@@ -227,9 +228,10 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         FieldDefinition customField = customNameToFieldDefinition.get("Earnings");
         Assert.assertNotNull(customField);
         customField.setFieldType(UserDefinedType.TEXT);
-        response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
+        ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
                 , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
+        checkGeneratedResult(response, ImportWorkflowUtils.CUSTOM_FIELDS, "Earnings", FieldValidationMessage.MessageLevel.WARNING);
 
         // change field type for lattice field
         Map<String, FieldDefinition> IDNameToFieldDefinition =
@@ -240,6 +242,28 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap, autoDetectionResultsMap,
                         importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
+        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.WARNING);
+    }
+
+    private void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
+                                      FieldValidationMessage.MessageLevel messageLevel) {
+        Map<String, List<FieldValidationMessage>> validationMap = response.getFieldValidationMessagesMap();
+        Assert.assertNotNull(validationMap);
+        List<FieldValidationMessage> validationMessages = validationMap.get(section);
+        Assert.assertNotNull(validationMessages);
+        if (ImportWorkflowUtils.CUSTOM_FIELDS.equals(section)) {
+            FieldValidationMessage validation =
+                    validationMessages.stream().filter(message -> name.equals(message.getColumnName())).findFirst().orElse(null);
+            Assert.assertNotNull(validation);
+            Assert.assertEquals(validation.getMessageLevel(), messageLevel);
+        } else {
+            FieldValidationMessage validation =
+                    validationMessages.stream().filter(message -> name.equals(message.getFieldName())).findFirst().orElse(null);
+            Assert.assertNotNull(validation);
+            Assert.assertEquals(validation.getMessageLevel(), messageLevel);
+        }
+
+
     }
 
     // resourceJsonFileRelativePath should start "com/latticeengines/...".
