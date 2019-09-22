@@ -351,6 +351,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         internalRecord.setParsedNameLocation(entityRecord.getParsedNameLocation());
         internalRecord.setParsedEmail(entityRecord.getParsedEmail());
         internalRecord.setParsedTenant(entityRecord.getParsedTenant());
+        internalRecord.setParsedPreferredEntityIds(entityRecord.getParsedPreferredEntityIds());
         internalRecord.setParsedSystemIds(entityRecord.getParsedSystemIds());
         internalRecord.setOrigDomain(entityRecord.getOrigDomain());
         internalRecord.setOrigNameLocation(entityRecord.getOrigNameLocation());
@@ -360,6 +361,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         internalRecord.setFailed(entityRecord.isFailed());
         internalRecord.setErrorMessages(entityRecord.getErrorMessages());
         internalRecord.setOrigSystemIds(entityRecord.getOrigSystemIds());
+        internalRecord.setOrigPreferredEntityIds(entityRecord.getOrigPreferredEntityIds());
     }
 
     private void dumpTravelStory(InternalOutputRecord record, MatchTraveler traveler, Level level) {

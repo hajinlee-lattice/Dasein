@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.Resource;
 
@@ -203,7 +204,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             // sequence is very important in all values
             // input attr -> output attr -> dedupe -> debug
             // the sequence is the same as constructing the output schema
-            List<Object> allValues = new ArrayList<>(outputRecord.getInput());
+            List<Object> allValues = copyAndfilterOverwrittenInput(outputRecord, processorContext);
             allValues.addAll(outputRecord.getOutput());
             MatchInput originalInput = processorContext.getOriginalInput();
             if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource())
@@ -228,6 +229,22 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             AvroUtils.writeToLocalFile(schema, records, splitAvro, useSnappy);
         }
         log.info("Write " + records.size() + " generic records to " + splitAvro);
+    }
+
+    /*
+     * copy the original input and filter out any values that will be overwritten by
+     * output
+     */
+    private List<Object> copyAndfilterOverwrittenInput(OutputRecord outputRecord, ProcessorContext processorContext) {
+        List<Object> input = outputRecord.getInput();
+        if (CollectionUtils.isNotEmpty(processorContext.getOverriddenInputColumnIdx())) {
+            // filter out entity ID values in input
+            return IntStream.range(0, input.size()) //
+                    .filter(idx -> !processorContext.getOverriddenInputColumnIdx().contains(idx)) //
+                    .mapToObj(input::get) //
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>(input);
     }
 
     private void buildAvroRecords(List<Object> allValues, GenericRecordBuilder builder, List<Schema.Field> fields) {

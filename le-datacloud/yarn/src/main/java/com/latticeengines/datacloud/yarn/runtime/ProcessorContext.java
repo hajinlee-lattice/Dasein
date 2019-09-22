@@ -9,6 +9,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.I
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,11 +20,13 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.Resource;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -117,6 +120,7 @@ public class ProcessorContext {
     private Date receivedAt;
     private Schema outputSchema;
     private Schema inputSchema;
+    private Set<Integer> overriddenInputColumnIdx;
     private MatchInput groupMatchInput;
     private String podId;
     private String dataCloudVersion;
@@ -301,6 +305,10 @@ public class ProcessorContext {
 
     public void setOriginalInput(MatchInput originalInput) {
         this.originalInput = originalInput;
+    }
+
+    public Set<Integer> getOverriddenInputColumnIdx() {
+        return overriddenInputColumnIdx;
     }
 
     public int getSplits() {
@@ -540,6 +548,30 @@ public class ProcessorContext {
         }
     }
 
+    /*
+     * Generate a set of indices that (a) represent the location of EntityId fields
+     * in the input field list and (b) is in output schema. Basically the indices of
+     * fields in input that should be overwritten by output
+     */
+    private Set<Integer> buildOverriddenInputColumnIdx(MatchInput input, Schema outputSchema) {
+        if (input == null || CollectionUtils.isEmpty(input.getFields())) {
+            return Collections.emptySet();
+        }
+
+        Set<String> outputFields = new HashSet<>();
+        if (outputSchema != null && CollectionUtils.isNotEmpty(outputSchema.getFields())) {
+            outputSchema.getFields().stream().map(Schema.Field::name).forEach(outputFields::add);
+        }
+
+        List<String> fields = input.getFields();
+        // get all indices in input that is an entity ID field
+        return IntStream.range(0, fields.size()) //
+                .filter(idx -> InterfaceName.isEntityId(fields.get(idx), false)) //
+                .filter(idx -> outputFields.contains(fields.get(idx))) //
+                .boxed() //
+                .collect(Collectors.toSet());
+    }
+
     @MatchStep
     private Schema constructOutputSchema(String recordName, MatchInput input) {
         Schema outputSchema;
@@ -589,6 +621,19 @@ public class ProcessorContext {
             log.info("Using provided input schema: \n"
                     + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
         }
+
+        // need to build before input schema is merged with output schema
+        overriddenInputColumnIdx = buildOverriddenInputColumnIdx(originalInput, outputSchema);
+        if (CollectionUtils.isNotEmpty(overriddenInputColumnIdx) && originalInput != null
+                && CollectionUtils.isNotEmpty(originalInput.getFields())) {
+            List<String> fields = originalInput.getFields();
+            List<String> overriddenFields = IntStream.range(0, fields.size()) //
+                    .filter(overriddenInputColumnIdx::contains) //
+                    .mapToObj(fields::get) //
+                    .collect(Collectors.toList());
+            log.info("Overridden input column index = {}. Fields = {}", overriddenInputColumnIdx, overriddenFields);
+        }
+
         Schema newInputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
         return (Schema) AvroUtils.combineSchemas(newInputSchema, outputSchema)[0];
     }
