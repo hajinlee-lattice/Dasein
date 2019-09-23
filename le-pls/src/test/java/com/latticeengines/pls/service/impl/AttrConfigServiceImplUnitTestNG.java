@@ -647,4 +647,16 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertTrue(html.contains("<b>sub1:</b><ul><li>attr4</li><li>attr5</li></ul>"));
     }
 
+    @Test(groups = "unit")
+    public void testGenerateErrorMsg() {
+        AttrConfigRequest request = AttrConfigServiceImplTestUtils.generateValidationErrorAttrConfigRequest();
+        String html = attrConfigService.generateErrorMsg(request);
+        log.info("html for Error is: " + html);
+        Assert.assertTrue(html.contains(String.format("<p>%s</p>", AttrConfigServiceImpl.UPDATE_FAIL_MSG)));
+
+        Assert.assertTrue(html.contains("<b>Cannot activate deprecated attribute: 2 attributes:</b>"));
+        Assert.assertTrue(html.contains("<li>User cannot change deprecated attribute to active.</li>"));
+
+
+    }
 }
