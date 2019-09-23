@@ -7,7 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.JDBCType;
@@ -51,10 +53,12 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -72,6 +76,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.transformer.AvroToCsvTransformer;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -84,6 +89,24 @@ public class AvroUtils {
     private static final String SQLSERVER_TYPE_LONG = "long";
     private static Schema NULL_SCHEMA = Schema.create(Schema.Type.NULL);
     private static Logger log = LoggerFactory.getLogger(AvroUtils.class);
+    
+    // java type -> (avro schema type, whether java type is primitive)
+    // TODO: Java type as Date/Timestamp, List and Map are to be added
+    private static final Map<Class<?>, Pair<Type, Boolean>> TYPE_MAP = ImmutableMap
+            .<Class<?>, Pair<Type, Boolean>> builder()
+            .put(double.class, Pair.of(Type.DOUBLE, Boolean.TRUE)) //
+            .put(Double.class, Pair.of(Type.DOUBLE, Boolean.FALSE)) //
+            .put(float.class, Pair.of(Type.FLOAT, Boolean.TRUE)) //
+            .put(Float.class, Pair.of(Type.FLOAT, Boolean.FALSE)) //
+            .put(int.class, Pair.of(Type.INT, Boolean.TRUE)) //
+            .put(short.class, Pair.of(Type.INT, Boolean.TRUE)) //
+            .put(Integer.class, Pair.of(Type.INT, Boolean.FALSE)) //
+            .put(long.class, Pair.of(Type.LONG, Boolean.TRUE)) //
+            .put(Long.class, Pair.of(Type.LONG, Boolean.FALSE)) //
+            .put(String.class, Pair.of(Type.STRING, Boolean.FALSE)) //
+            .put(boolean.class, Pair.of(Type.BOOLEAN, Boolean.TRUE)) //
+            .put(Boolean.class, Pair.of(Type.BOOLEAN, Boolean.FALSE)) //
+            .build();
 
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
         SeekableInput input;
@@ -701,16 +724,22 @@ public class AvroUtils {
         }
         switch (javaClassName) {
         case "Double":
+        case "double":
             return Type.DOUBLE;
         case "Float":
+        case "float":
             return Type.FLOAT;
         case "Integer":
+        case "int":
+        case "short":
             return Type.INT;
         case "Long":
+        case "long":
             return Type.LONG;
         case "String":
             return Type.STRING;
         case "Boolean":
+        case "boolean":
             return Type.BOOLEAN;
         case "Date":
             return Type.LONG;
@@ -1616,11 +1645,238 @@ public class AvroUtils {
         return column.matches("^[A-Za-z\\d][A-Za-z\\d\\_]*$");
     }
 
-    public static String getString(GenericRecord record, String field) {
-        if (record.get(field) == null) {
-            return null;
-        } else {
-            return record.get(field).toString();
+    /**
+     * Convert java class to avro schema. Support converting following class
+     * fields to avro fields, other fields are ignored:
+     *
+     * 1. Fields in java class type contained in TYPE_MAP
+     *
+     * 2. Fields in java enum type
+     *
+     * 3. Fields in customized class type who declares an instance method
+     * annotated with @SerializeForAvro, returning string type and without
+     * parameter
+     *
+     * @param cls:
+     *            java class
+     * @return: avro schema
+     */
+    public static Schema classToSchema(Class<?> cls) {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        for (java.lang.reflect.Field field : FieldUtils.getAllFields(cls)) {
+            if (!isFieldSerializable(field)) {
+                log.debug("Field {} with type {} is not supported in serialization to avro", field.getName(),
+                        field.getType().getSimpleName());
+                continue;
+            }
+            if (TYPE_MAP.containsKey(field.getType())) {
+                columns.add(Pair.of(field.getName(), field.getType()));
+            } else {
+                columns.add(Pair.of(field.getName(), String.class));
+            }
         }
+        return constructSchema(cls.getSimpleName(), columns);
+    }
+
+    /**
+     * Serialize list of java objects to list of generic records for avro.
+     * Support converting following class fields to avro fields, other fields
+     * are ignored:
+     *
+     * 1. Fields in java class type contained in TYPE_MAP
+     *
+     * 2. Fields in java enum type
+     *
+     * 3. Fields in customized class type who declares an INSTANCE method
+     * annotated with @SerializeForAvro, returning string type and without
+     * parameter
+     *
+     * @param cls:
+     *            java class
+     * @param objects:
+     *            list of java objects
+     * @return: list of generic records for avro
+     */
+    public static <T> List<GenericRecord> serialize(Class<T> cls, List<T> objects) {
+        Schema schema = classToSchema(cls);
+        List<java.lang.reflect.Field> fields = Arrays.stream(FieldUtils.getAllFields(cls)) //
+                .filter(field -> isFieldSerializable(field)) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(fields)) {
+            throw new RuntimeException(
+                    "None of the fields could be serialized to an avro field in class " + cls.getSimpleName());
+        }
+        return objects.stream().map(object -> {
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            for (java.lang.reflect.Field field : fields) {
+                try {
+                    Object value = FieldUtils.readField(field, object, true);
+                    if (TYPE_MAP.containsKey(field.getType()) || value == null) {
+                        builder.set(field.getName(), value);
+                        continue;
+                    }
+                    if (field.getType().isEnum()) {
+                        builder.set(field.getName(), ((Enum<?>) value).name());
+                        continue;
+                    }
+                    // Validation of existence of serializeMethod is in
+                    // isFieldSerializable()
+                    Method serializeMethod = Arrays.stream(field.getType().getDeclaredMethods()) //
+                            .filter(method -> isAvroSerializationMethod(method)) //
+                            .findFirst().get();
+                    builder.set(field.getName(), serializeMethod.invoke(value));
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    throw new RuntimeException(
+                            "Fail to convert java object in type of " + cls.getSimpleName() + " to generic record", e);
+                }
+            }
+            return builder.build();
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Whether a field in java class is serializable to an avro field
+     *
+     * @param field
+     * @return
+     */
+    private static boolean isFieldSerializable(java.lang.reflect.Field field) {
+        if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
+            return false;
+        }
+        if (TYPE_MAP.containsKey(field.getType())) {
+            return true;
+        }
+        if (field.getType().isEnum()) {
+            return true;
+        }
+        int nSerializeMethod = 0;
+        for (Method method : field.getType().getDeclaredMethods()) {
+            if (isAvroSerializationMethod(method)) {
+                nSerializeMethod++;
+            }
+        }
+        return nSerializeMethod == 1;
+    }
+
+    /**
+     * Whether a method is to serialize an instance to an generic record string
+     * field: an instance method, annotated with @SerializeForAvro, no
+     * parameter, return type is string
+     *
+     * @param method
+     * @return
+     */
+    private static boolean isAvroSerializationMethod(Method method) {
+        return !Modifier.isStatic(method.getModifiers()) //
+                && method.isAnnotationPresent(SerializeForAvro.class) //
+                && method.getReturnType() == String.class //
+                && method.getParameterCount() == 0;
+    }
+
+    /**
+     * De-serialize an generic record to a java object with specified type
+     * Support converting avro fields to following class fields, otherwise
+     * ignore the field:
+     *
+     * 1. Fields in java class type contained in TYPE_MAP (if java class is
+     * primitive, value cannot be null)
+     *
+     * 2. Fields in java enum type
+     *
+     * 3. Fields in customized class type who declares a STATIC method annotated
+     * with @DeserializeForAvro, returning field's type and taking and only
+     * taking single string parameter
+     *
+     * @param record:
+     *            generic record
+     * @param cls:
+     *            java class
+     * @return: java object
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T extends Object> T deserialize(GenericRecord record, Class<T> cls) {
+        T obj = null;
+        try {
+            obj = cls.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("Fail to instantiate class " + cls.getSimpleName(), e);
+        }
+        for (java.lang.reflect.Field field : FieldUtils.getAllFields(cls)) {
+            if (!isFieldDeserializable(field)) {
+                log.debug("Field {} with type {} is not supported in de-serialization to avro", field.getName(),
+                        field.getType().getSimpleName());
+                continue;
+            }
+            try {
+                Object value = record.get(field.getName());
+                if (value instanceof Utf8) {
+                    value = value.toString();
+                }
+                if (value == null && field.getType().isPrimitive()) {
+                    throw new RuntimeException(String.format("Attempted to set null to field %s with primitive type %s",
+                            field.getName(), field.getType().getSimpleName()));
+                }
+                if (TYPE_MAP.containsKey(field.getType()) || value == null) {
+                    FieldUtils.writeField(field, obj, value, true);
+                    continue;
+                }
+                if (field.getType().isEnum()) {
+                    value = Enum.valueOf((Class<? extends Enum>) field.getType(), value.toString());
+                    FieldUtils.writeField(field, obj, value, true);
+                    continue;
+                }
+                Method deserializeMethod = Arrays.stream(field.getType().getDeclaredMethods()) //
+                        .filter(method -> isAvroDeserializationMethod(method, field.getType())) //
+                        .findFirst().get();
+                FieldUtils.writeField(field, obj, deserializeMethod.invoke(null, value.toString()), true);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw new RuntimeException(
+                        "Fail to convert generic record to java object in type of " + cls.getSimpleName(), e);
+            }
+        }
+        return obj;
+    }
+
+    /**
+     * Whether a java class field is de-serializable from an avro field
+     *
+     * @param field
+     * @return
+     */
+    private static boolean isFieldDeserializable(java.lang.reflect.Field field) {
+        if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
+            return false;
+        }
+        if (TYPE_MAP.containsKey(field.getType())) {
+            return true;
+        }
+        if (field.getType().isEnum()) {
+            return true;
+        }
+        int nDeserializeMethod = 0;
+        for (Method method : field.getType().getDeclaredMethods()) {
+            if (isAvroDeserializationMethod(method, field.getType())) {
+                nDeserializeMethod++;
+            }
+        }
+        return nDeserializeMethod == 1;
+    }
+
+    /**
+     * Whether a method is to de-serialize an avro string field to java instance
+     * of expected type: a static method, annotated with @DeserializeFromAvro,
+     * return type is expected, takes and only takes single string parameter
+     *
+     * @param method
+     * @param returnType
+     * @return
+     */
+    private static boolean isAvroDeserializationMethod(Method method, Class<?> returnType) {
+        return Modifier.isStatic(method.getModifiers()) //
+                && method.isAnnotationPresent(DeserializeFromAvro.class) //
+                && method.getReturnType() == returnType //
+                && method.getParameterCount() == 1 //
+                && method.getParameterTypes()[0] == String.class;
     }
 }
