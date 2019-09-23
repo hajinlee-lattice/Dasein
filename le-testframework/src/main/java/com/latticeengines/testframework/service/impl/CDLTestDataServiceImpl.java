@@ -27,7 +27,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -105,9 +104,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
-
-    @Inject
-    private Configuration yarnConfiguration;
 
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
@@ -218,7 +214,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         int maxCount;
         String msg = String.format("Mocking the rating table %s for engineIds %s using coverage %s", ratingTableName,
                 engineIds, JsonUtils.serialize(modelRatingBuckets));
-        List<List<Object>> dataList = null;
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
             maxCount = modelRatingBuckets.values().stream().map(m -> m.stream() //
                     .map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b)).max(Integer::compare).orElse(null);
@@ -269,7 +264,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 redshiftService.insertValuesIntoTable(ratingTableName, columns, data);
                 return null;
             });
-            dataList = data;
         }
 
         msg = String.format("Inserting rating stats for %d engines.", engineIds.size());
@@ -289,19 +283,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
 
         Schema schema = AvroUtils.constructSchema(ratingTableName, columns);
-        String recordName = "Input";
-        String dirPath = "/Pods/Default/" + tenantId + "/" + recordName;
-        Object[][] dataObjects = dataList.stream().map(l -> l.stream().toArray(Object[]::new)).toArray(Object[][]::new);
-        try {
-            AvroUtils.uploadAvro(yarnConfiguration, dataObjects, columns, recordName, dirPath);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to upload avro to hdfs.", e);
-        }
-        // List<Extract> extracts = convertToExtracts(yarnConfiguration,
-        // dirPath, false);
-        // Table table = MetadataConverter.getTable(schema, null,
-        // InterfaceName.AccountId.name(), null, false);
-        Table table = MetadataConverter.getTable(yarnConfiguration, dirPath, InterfaceName.AccountId.name(), null);
+        Table table = MetadataConverter.getTable(schema, null, InterfaceName.AccountId.name(), null, false);
         metadataProxy.createTable(tenantId, ratingTableName, table);
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(tenantId);
         dataCollectionProxy.upsertTable(tenantId, ratingTableName, TableRoleInCollection.PivotedRating, active);
