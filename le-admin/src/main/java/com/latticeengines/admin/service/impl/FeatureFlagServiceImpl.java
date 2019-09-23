@@ -159,7 +159,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_MODELING, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.MIGRATION_TENANT, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, cg).setDefaultValue(false);
