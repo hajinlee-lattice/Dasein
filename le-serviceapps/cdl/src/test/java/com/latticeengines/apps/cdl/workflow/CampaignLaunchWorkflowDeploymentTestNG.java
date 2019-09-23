@@ -22,7 +22,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
@@ -90,7 +89,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         return testPlayCreationHelper.getTenant();
     }
 
-    @BeforeClass(groups = "deployment-app", enabled = false)
+    @BeforeClass(groups = "deployment-app", enabled = true)
     public void setup() throws Exception {
         String existingTenant = null;
         Map<String, Boolean> featureFlags = new HashMap<>();
@@ -105,7 +104,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
                 .trayAuthenticationId(UUID.randomUUID().toString()).audienceId(UUID.randomUUID().toString()).build();
 
         marketoTestPlaySetupConfig = new TestPlaySetupConfig.Builder().existingTenant(existingTenant)
-                .mockRatingTable(false).testPlayCrud(false).addChannel(marketoTestPlayChannelSetupConfig)
+                .mockRatingTable(true).testPlayCrud(false).addChannel(marketoTestPlayChannelSetupConfig)
                 .featureFlags(featureFlags).build();
 
         s3TestPlayChannelSetupConfig = new TestPlayChannelConfig.Builder()
@@ -133,9 +132,9 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         super.testBed = testPlayCreationHelper.getDeploymentTestBed();
         setMainTestTenant(super.testBed.getMainTestTenant());
         checkpointService.setMainTestTenant(super.testBed.getMainTestTenant());
-        checkpointService.resumeCheckpoint( //
-                "update3", //
-                CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
+        // checkpointService.resumeCheckpoint( //
+        // "update3", //
+        // CDLEnd2EndDeploymentTestNGBase.S3_CHECKPOINTS_VERSION);
 
         FeatureFlagValueMap ffVMap = super.testBed.getFeatureFlags();
         log.info("Feature Flags for Tenant: " + ffVMap);
@@ -149,7 +148,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         defaultPlay = testPlayCreationHelper.getPlay();
     }
 
-    @Test(groups = "deployment-app", enabled = false)
+    @Test(groups = "deployment-app", enabled = true)
     public void testMarketoPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoTestPlaySetupConfig, true);
