@@ -294,7 +294,7 @@ public class WorkflowThrottlingServiceImplTestNG extends WorkflowApiFunctionalTe
             {
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
                 add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
-                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV2, GENERIC_WF_TYPE, null, tenant));
+                add(workflowJobBuilder(JobStatus.ENQUEUED, TEST_DIV1, GENERIC_WF_TYPE, null, tenant));
             }
         };
 
