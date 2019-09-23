@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,16 +120,42 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("LONG"), Type.LONG);
     }
 
-    @Test(groups = "unit")
-    public void isAvroFriendlyFieldName() {
-        Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("abc"));
-        Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName("_abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("1abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("+abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("/abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName("-abc"));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName(""));
-        Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName(null));
+    @Test(groups = "unit", dataProvider = "avroFieldNames")
+    public void isAvroFriendlyFieldName(String originalName, boolean expectedFriendly, String expectedConvertedName) {
+        if (expectedFriendly) {
+            Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName(originalName));
+        } else {
+            Assert.assertFalse(AvroUtils.isAvroFriendlyFieldName(originalName));
+        }
+
+        if (StringUtils.isNotBlank(expectedConvertedName)) {
+            String convertedName = AvroUtils.getAvroFriendlyString(originalName);
+            Assert.assertTrue(AvroUtils.isAvroFriendlyFieldName(convertedName));
+            Assert.assertEquals(convertedName, expectedConvertedName);
+        } else {
+            Assert.assertThrows(() -> AvroUtils.getAvroFriendlyString(originalName));
+        }
+    }
+
+    @DataProvider(name = "avroFieldNames")
+    public Object[][] provideAvroFieldNames() {
+        return new Object[][] { { "abc", true, "abc" }, { "_abc", true, "_abc" }, { "1abc", false, "x1abc" },
+                { "+abc", false, "_abc" }, { "/abc", false, "_abc" }, { "-abc", false, "_abc" },
+                { "(abc)", false, "_abc_" },
+
+                { "", false, "" }, { null, false, null },
+
+                // latin extensions
+                { "ä1×2", false, "ä1_2" }, { "ä3÷2", false, "ä3_2" }, { "αβ_k", true, "αβ_k" },
+                { "αβ+k", false, "αβ_k" }, { "\u03b1\u03B2_\u006b", true, "αβ_k" }, { "k_(αβ)", false, "k__αβ_" },
+
+                // CJK
+                { "众志成城", true, "众志成城" }, { "+众志成城", false, "_众志成城" }, { "1众志成城", false, "x1众志成城" },
+                { " 众志成城", false, "众志成城" }, { "众志成城 ", false, "众志成城" }, { "众志 成城", false, "众志_成城" },
+                { " 众志  成城 ", false, "众志_成城" }, { "众志(成城)", false, "众志_成城_" }, { "众志成城。", false, "众志成城_" },
+
+                { "一葉知秋", true, "一葉知秋" }, { "a（一葉知秋）", false, "a_一葉知秋_" }, { "「一葉知秋」", false, "_一葉知秋_" },
+                { "1【一葉知秋】", false, "x1_一葉知秋_" }, { "｛一葉知秋｝", false, "_一葉知秋_" } };
     }
 
     @DataProvider(name = "avscFileProvider")
@@ -270,94 +296,5 @@ public class AvroUtilsUnitTestNG {
                 { "aa ", false }, //
                 { "99 ", false }, //
         };
-    }
-
-    @Test(groups = "unit")
-    public void testObjectGenericRecordConversion() {
-        TestAvroConversion obj = createObjectGenericRecordConversion();
-        List<GenericRecord> records = AvroUtils.objectsToGenericRecords(TestAvroConversion.class,
-                Arrays.asList(obj));
-
-        // convert generic record back to object
-        TestAvroConversion converted = AvroUtils.genericRecordToObject(records.get(0), TestAvroConversion.class);
-
-        validateObjectGenericRecordConversion(obj, converted);
-    }
-
-    private TestAvroConversion createObjectGenericRecordConversion() {
-        TestAvroConversion obj = new TestAvroConversion();
-        obj.shortAttr = (short) 1;
-        obj.intAttr = 2;
-        obj.intWrapAttr = 3;
-        obj.longAttr = 4L;
-        obj.longWrapAttr = 5L;
-        obj.floatAttr = (float) 6.0;
-        obj.floatWrapAttr = (float) 7.0;
-        obj.doubleAttr = 8.0;
-        obj.doubleWrapAttr = 9.0;
-        obj.boolAttr = true;
-        obj.boolWrapAttr = Boolean.TRUE;
-        obj.strAttr = "ABC";
-        obj.enumAttr = TestAvroConversionEnum.ENUM1;
-        return obj;
-    }
-
-    private void validateObjectGenericRecordConversion(TestAvroConversion origin,
-            TestAvroConversion converted) {
-        Assert.assertEquals(converted.shortAttr, origin.shortAttr);
-        Assert.assertEquals(converted.intAttr, origin.intAttr);
-        Assert.assertEquals(converted.intWrapAttr, origin.intWrapAttr);
-        Assert.assertEquals(converted.longAttr, origin.longAttr);
-        Assert.assertEquals(converted.longWrapAttr, origin.longWrapAttr);
-        Assert.assertEquals(converted.floatAttr, origin.floatAttr);
-        Assert.assertEquals(converted.floatWrapAttr, origin.floatWrapAttr);
-        Assert.assertEquals(converted.doubleAttr, origin.doubleAttr);
-        Assert.assertEquals(converted.doubleWrapAttr, origin.doubleWrapAttr);
-        Assert.assertEquals(converted.boolAttr, origin.boolAttr);
-        Assert.assertEquals(converted.boolWrapAttr, origin.boolWrapAttr);
-        Assert.assertEquals(converted.strAttr, origin.strAttr);
-        Assert.assertEquals(converted.nullAttr, origin.nullAttr);
-        Assert.assertEquals(converted.enumAttr, origin.enumAttr);
-    }
-
-    static class TestAvroConversion {
-        @SuppressWarnings("unused")
-        public static final String STATIC_ATTR = "STATIC_ATTR";
-
-        private short shortAttr;
-        private int intAttr;
-        private Integer intWrapAttr;
-        private long longAttr;
-        private Long longWrapAttr;
-        private float floatAttr;
-        private Float floatWrapAttr;
-        private double doubleAttr;
-        private Double doubleWrapAttr;
-        private boolean boolAttr;
-        private Boolean boolWrapAttr;
-        private String strAttr;
-        private String nullAttr; // don't set anything to test null
-        private TestAvroConversionEnum enumAttr;
-    }
-
-    // to test that exact enum identifier should be written to generic record
-    // instead of display name
-    enum TestAvroConversionEnum {
-        ENUM1("Enum1"), ENUM2("Enum2");
-
-        private final String name;
-
-        TestAvroConversionEnum(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
     }
 }
