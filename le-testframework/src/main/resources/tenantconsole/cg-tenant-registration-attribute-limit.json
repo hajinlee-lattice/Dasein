@@ -34,7 +34,7 @@
         },
         { "Node": "DataCloudLicense",
           "Children" : [
-            { "Node": "Account", "Data": 30},
+            { "Node": "Account", "Data": 47},
             { "Node": "Contact", "Data": 500}
           ]
         }
@@ -72,7 +72,7 @@
       "displayName": "${TENANT}_CG",
       "description": "A CG solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"Dante\":true,\"EnableDataEncryption\":true,\"EnableTalkingPoints\":true}"
+    "featureFlags": "{\"Dante\":true,\"EnableDataEncryption\":true,\"EnableTalkingPoints\":true,\"EnableEntityMatch\":false,\"EnableEntityMatchGA\":false}"
   },
   "TenantInfo": {
     "properties": {
