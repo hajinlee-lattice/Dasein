@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.repository.writer;
+package com.latticeengines.apps.cdl.repository.jpa.writer;
 
 import com.latticeengines.apps.cdl.repository.StreamRepository;
 

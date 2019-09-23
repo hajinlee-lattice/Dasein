@@ -75,12 +75,14 @@ public class Dimension implements HasPid, Serializable, HasAuditingFields {
     @JsonProperty("stream")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_STREAM_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Stream stream;
 
     // for dimension which is generated from catalog
     @JsonProperty("catalog")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_CATALOG_ID")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Catalog catalog;
 
     @JsonIgnore
@@ -102,7 +104,7 @@ public class Dimension implements HasPid, Serializable, HasAuditingFields {
     private DimensionCalculator calculator;
 
     @JsonIgnore
-    @Column(name = "ATTRIBUTE_DERIVER", nullable = false, length = 1000)
+    @Column(name = "ATTRIBUTE_DERIVER", length = 1000)
     private String attributeDeriverConfig;
 
     // configuration to derive attributes for stream

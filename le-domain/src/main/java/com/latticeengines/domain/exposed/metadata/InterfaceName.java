@@ -132,11 +132,14 @@ public enum InterfaceName {
     // Rating
     ModelId, Rating, Score, RawScore, ExpectedValue, Likelihood, Lift,
 
-    //WebVisit
+    // WebVisit
     WebVisitPageUrl, UserId, WebVisitDate,
 
-    //WebVisitTPathPattern
-    PathPatternName, PathPattern,
+    // WebVisitTPathPattern
+    PathPatternName, PathPattern, PathPatternId,
+
+    // Eloqua Activity
+    ActivityType,
 
     // Internal
     __Composite_Key__; // primary key for internal use
