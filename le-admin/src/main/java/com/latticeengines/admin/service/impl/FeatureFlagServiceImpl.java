@@ -159,13 +159,13 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_MODELING, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, cg).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.MIGRATION_TENANT, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA, cg).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL, cg).setDefaultValue(false);
 
         // multi-product flags
