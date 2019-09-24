@@ -147,6 +147,21 @@ public class ProductUtilsFunctionalTestNG {
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, PATH));
     }
 
+    @Test(groups="functional", dependsOnMethods = "testSaveProducts")
+    public void testCountProducts() {
+        long activeHierarchy = ProductUtils.countProducts(yarnConfiguration, PATH,
+                Arrays.asList(ProductType.Hierarchy.name()),
+                ProductStatus.Active.name());
+        Assert.assertEquals(activeHierarchy, 2l);
+        long hierarchy = ProductUtils.countProducts(yarnConfiguration, PATH,
+                Arrays.asList(ProductType.Hierarchy.name()));
+        Assert.assertEquals(hierarchy, 2l);
+        long activeHierarchyAndBundle = ProductUtils.countProducts(yarnConfiguration, PATH,
+                Arrays.asList(ProductType.Hierarchy.name(), ProductType.Bundle.name()), ProductStatus.Active.name());
+        Assert.assertEquals(activeHierarchyAndBundle, 3l);
+
+    }
+
     @Test(groups = "functional", dependsOnMethods = "testSaveProducts")
     public void testLoadProducts() {
         loadedProductList = ProductUtils.loadProducts(yarnConfiguration, PATH, null, null);

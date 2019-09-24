@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
@@ -121,9 +122,13 @@ public class ProductUtils {
     }
 
     public static long countProducts(Configuration yarnConfiguration, String filePath,
-            List<String> productTypes) {
+            List<String> productTypes, String... productStatuses) {
         Set<String> productIds = new HashSet<>();
         filePath = getPath(filePath);
+        Set<String> statuses = new HashSet<>();
+        if (productStatuses != null && productStatuses.length > 0) {
+            statuses = new HashSet<>(Arrays.asList(productStatuses));
+        }
         log.info("Load products from " + filePath + "/*.avro");
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
@@ -134,6 +139,10 @@ public class ProductUtils {
             }
             String productType = getString(record, InterfaceName.ProductType.name());
             if (productTypes != null && !productTypes.contains(productType)) {
+                continue;
+            }
+            String productStatus = getString(record, InterfaceName.ProductStatus.name());
+            if (CollectionUtils.isNotEmpty(statuses) && ! statuses.contains(productStatus)) {
                 continue;
             }
             productIds.add(productId);
