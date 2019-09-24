@@ -144,8 +144,16 @@ public class FrontEndQueryCreator {
                     result);
         }
         if (batonService.isEntityMatchEnabled(playLaunchContext.getCustomerSpace())) {
-            accountLookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()));
-            contactLookups.add(new AttributeLookup(BusinessEntity.Contact, InterfaceName.CustomerContactId.name()));
+            Lookup customerAccountIdLookup = new AttributeLookup(BusinessEntity.Account,
+                    InterfaceName.CustomerAccountId.name());
+            Lookup customerContactIdLookup = new AttributeLookup(BusinessEntity.Contact,
+                    InterfaceName.CustomerContactId.name());
+            if (!accountLookups.contains(customerAccountIdLookup)) {
+                accountLookups.add(customerAccountIdLookup);
+            }
+            if (!contactLookups.contains(customerContactIdLookup)) {
+                contactLookups.add(customerContactIdLookup);
+            }
         }
         playLaunchContext.getAccountFrontEndQuery().setLookups(accountLookups);
         playLaunchContext.getContactFrontEndQuery().setLookups(contactLookups);

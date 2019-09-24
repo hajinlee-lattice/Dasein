@@ -2166,6 +2166,61 @@
     ]
   },
   {
+        "AttrName": "CustomerAccountId",
+        "DisplayName": "Account ID",
+        "Subcategory": "Account IDs",
+        "Entity": "Account",
+        "State": "Active",
+        "JavaClass": "String",
+        "LogicalDataType": "Id",
+        "Groups": {
+            "Enrichment": true,
+            "Segment": true,
+            "CompanyProfile": true,
+            "Model": false,
+            "TalkingPoint": true
+        },
+        "IsHiddenForRemodelingUI": false,
+        "IsCoveredByOptionalRule": false,
+        "IsCoveredByMandatoryRule": false,
+        "AssociatedDataRules": [],
+        "IsCampaignDerivedField": false,
+        "ColumnId": "CustomerAccountId",
+        "FundamentalType": "alpha",
+        "ApprovedUsage": [
+            "None"
+        ],
+        "Category": "My Attributes"
+  },
+  {
+        "AttrName": "CustomerContactId",
+        "DisplayName": "Contact ID",
+        "Subcategory": "Other",
+        "Entity": "Contact",
+        "State": "Active",
+        "JavaClass": "String",
+        "LogicalDataType": "Id",
+        "Groups": {
+            "Enrichment": true,
+            "Segment": true,
+            "CompanyProfile": false,
+            "Model": false,
+            "TalkingPoint": true
+        },
+        "CanModel": false,
+        "IsHiddenForRemodelingUI": false,
+        "IsCoveredByOptionalRule": false,
+        "IsCoveredByMandatoryRule": false,
+        "AssociatedDataRules": [],
+        "IsCampaignDerivedField": false,
+        "ColumnId": "CustomerContactId",
+        "FundamentalType": "alpha",
+        "ApprovedUsage": [
+            "None"
+        ],
+        "Category": "Contact Attributes"
+  },
+  {
     "AttrName": "engine_drapmhqds9acmrwduowhtq",
     "DisplayName": "Rules segment1532 - 2018/07/30 18:38:59 Rating",
     "Subcategory": "segment1532",
