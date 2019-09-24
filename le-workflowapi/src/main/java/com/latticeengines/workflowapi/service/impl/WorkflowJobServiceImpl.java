@@ -563,8 +563,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 try {
                     o.setStatus(JobStatus.PENDING.name());
                     o.setStartTimeInMillis(System.currentTimeMillis());
+                    WorkflowConfiguration workflowConfiguration = o.getWorkflowConfiguration();
+                    o.setWorkflowConfiguration(null);
                     workflowJobEntityMgr.update(o);
-                    ApplicationId appId = workflowContainerService.submitWorkflow(o.getWorkflowConfiguration(), o.getPid());
+                    ApplicationId appId = workflowContainerService.submitWorkflow(workflowConfiguration, o.getPid());
                     submitted.add(appId);
                     log.info("WorkflowThrottling Submitted workflow job pid={} for tenant {}. ApplicationId={}", o.getPid(), o.getTenant().getId(), appId);
                 } catch (Exception e) {
