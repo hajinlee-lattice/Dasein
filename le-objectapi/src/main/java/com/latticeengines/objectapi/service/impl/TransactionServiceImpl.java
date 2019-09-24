@@ -67,12 +67,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TimeFilterTranslator getTimeFilterTranslator(String evaluationDate) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        log.info("try to get timefilter for " + customerSpace + " with evaluation date " + evaluationDate);
         initializeTimeTranslatorCache();
         if (StringUtils.isBlank(evaluationDate)) {
             evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         }
-        log.info("evaluationDate=" + evaluationDate);
         return timeTranslatorCache.getWatcherCache() //
                 .get(String.format("%s|%s", customerSpace.getTenantId(), evaluationDate));
     }
@@ -129,7 +127,6 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
         }
-        log.info("frontendquery=" + frontEndQuery + ", and hasTxn=" + hasTxn);
         return hasTxn;
     }
 
