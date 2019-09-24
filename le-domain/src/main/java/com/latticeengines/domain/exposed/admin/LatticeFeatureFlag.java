@@ -36,7 +36,6 @@ public enum LatticeFeatureFlag {
     AUTO_IMPORT_ON_INACTIVE("AutoImportOnInactive", "Run Auto Import on Inactive stack"), //
     IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."), //
     ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"), //
-    ALWAYS_ON_CAMPAIGNS("AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"), //
     MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"), //
     PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
     ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
@@ -45,7 +44,6 @@ public enum LatticeFeatureFlag {
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
     ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
-    ENABLE_EXPORT_FIELD_METADATA("EnableExportFieldMetadata", "Enable export field metadata integration"), //
     ENABLE_EXPORT_WITH_SPARK_SQL("EnableExportWithSparkSQL", "Enable segment export using spark SQL"), //
 
     @Deprecated
@@ -67,7 +65,8 @@ public enum LatticeFeatureFlag {
     @Deprecated
     USE_DNB_RTS_AND_MODELING(true, "UseDnbRtsAndModeling", "User DNB RTS and Modeling"), //
     @Deprecated
-    ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE(true, "EnableLatticeMarketoCredentialPage", "Enable Lattice Marketo Credential Page"), //
+    ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE(true, "EnableLatticeMarketoCredentialPage",
+            "Enable Lattice Marketo Credential Page"), //
     @Deprecated
     ENABLE_DATA_PROFILING_V2(true, "EnableDataProfilingV2", "Enable Data Profiling Version 2"), //
     @Deprecated
@@ -75,7 +74,11 @@ public enum LatticeFeatureFlag {
     @Deprecated
     BYPASS_DNB_CACHE(true, "BypassDnbCache", "Bypass DnB Cache"), //
     @Deprecated
-    ENABLE_CDL(true, "EnableCdl", "Enable Customer Data Lake"); //
+    ENABLE_CDL(true, "EnableCdl", "Enable Customer Data Lake"), //
+    @Deprecated
+    ALWAYS_ON_CAMPAIGNS("AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"), //
+    @Deprecated
+    ENABLE_EXPORT_FIELD_METADATA("EnableExportFieldMetadata", "Enable export field metadata integration"); //
 
     private static Set<String> names;
 
