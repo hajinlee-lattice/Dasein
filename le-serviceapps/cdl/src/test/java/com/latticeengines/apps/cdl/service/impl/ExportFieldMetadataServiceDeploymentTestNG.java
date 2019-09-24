@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotEquals;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -86,21 +87,19 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     @Inject
     private SegmentService segmentService;
 
-    Set<String> defaultMarketoFields = new HashSet<String>(Arrays.asList(InterfaceName.CompanyName.name(),
+    private Set<String> defaultMarketoFields = new HashSet<String>(Arrays.asList(InterfaceName.CompanyName.name(),
             InterfaceName.Email.name(), InterfaceName.PhoneNumber.name()));
 
-    Set<String> defaultS3Fields = new HashSet<String>(Arrays.asList("PLAY_ID"));
+    private Set<String> defaultS3Fields = new HashSet<>(Collections.singletonList("PLAY_ID"));
 
-    List<ExportFieldMetadataDefaults> defaultMarketoExportFields;
-    List<ExportFieldMetadataDefaults> defaultS3ExportFields;
-    List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
-    List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
+    private List<ExportFieldMetadataDefaults> defaultMarketoExportFields;
+    private List<ExportFieldMetadataDefaults> defaultS3ExportFields;
+    private List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
+    private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
 
-    Map<CDLExternalSystemName, List<ExportFieldMetadataDefaults>> defaultExportFieldsMap;
-    List<CDLExternalSystemName> EXTERNAL_SYSTEM_NAMES = Arrays.asList(CDLExternalSystemName.Marketo,
+    private Map<CDLExternalSystemName, List<ExportFieldMetadataDefaults>> defaultExportFieldsMap;
+    private List<CDLExternalSystemName> EXTERNAL_SYSTEM_NAMES = Arrays.asList(CDLExternalSystemName.Marketo,
             CDLExternalSystemName.AWS_S3, CDLExternalSystemName.LinkedIn, CDLExternalSystemName.Facebook);
-
-    Integer standardDefaultFields;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {

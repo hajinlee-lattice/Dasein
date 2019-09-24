@@ -34,7 +34,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private Play play;
     private String playName;
-    PlayLaunch playLaunch;
+    private PlayLaunch playLaunch;
 
     @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
@@ -55,7 +55,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private long totalRatedAccounts;
 
-    TestPlaySetupConfig testPlaySetupConfig = null;
+    private TestPlaySetupConfig testPlaySetupConfig = null;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -86,7 +86,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
-    public void createPlayLaunchFromChannel() {
+    public void mimicManualPlayLaunchByChannel() throws InterruptedException {
         String testuser = "testuser@lattice-engines.com";
         play = playCreationHelper.getPlay();
         PlayLaunchChannel channel = playProxy
@@ -94,6 +94,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         channel.setUpdatedBy(testuser);
         playProxy.updatePlayLaunchChannel(playCreationHelper.getCustomerSpace(), play.getName(), channel.getId(),
                 channel, false);
+
+        Thread.sleep(30000); // Making sure update passes thru to the read cluster
 
         // Mimicking a manual Launch creation
         PlayLaunch testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(),
@@ -110,10 +112,16 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         playProxy.deletePlayLaunch(playCreationHelper.getCustomerSpace(), playCreationHelper.getPlayName(),
                 testPlayLaunch.getLaunchId(), true);
+    }
 
+    @Test(groups = "deployment-app", dependsOnMethods = { "mimicManualPlayLaunchByChannel" })
+    public void mimicAutomaticPlayLaunchByChannel() {
+        play = playCreationHelper.getPlay();
+        PlayLaunchChannel channel = playProxy
+                .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
         // Mimicking an automatic Launch creation
-        testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(), play.getName(),
-                channel.getId(), null, null, null, null, true);
+        PlayLaunch testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(),
+                play.getName(), channel.getId(), null, null, null, null, true);
         Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
         Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
         Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
@@ -128,7 +136,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
                 testPlayLaunch.getLaunchId(), true);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCrud", "mimicAutomaticPlayLaunchByChannel" })
     public void createPlayLaunch() {
         playCreationHelper.createPlayLaunch(testPlaySetupConfig);
         play = playCreationHelper.getPlay();
@@ -143,7 +151,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         totalRatedAccounts = playLaunch.getAccountsSelected();
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "createPlayLaunch" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "createPlayLaunch", "mimicAutomaticPlayLaunchByChannel" })
     private void searchPlayLaunch() {
         List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Collections.singletonList(LaunchState.Failed));
@@ -153,7 +161,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         playProxy.updatePlayLaunch(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), LaunchState.Launched);
         playProxy.updatePlayLaunchProgress(mainTestTenant.getId(), playName, playLaunch.getLaunchId(), 100.0D, 8L, 25L,
-                0L, (totalRatedAccounts - 8L - 0L), 0L, 0L);
+                0L, (totalRatedAccounts - 8L), 0L, 0L);
 
         launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Arrays.asList(LaunchState.Canceled, LaunchState.Failed, LaunchState.Launched));
@@ -191,7 +199,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         assertLaunchStats(retrievedLaunch.getAccountsLaunched(), 8L);
         assertLaunchStats(retrievedLaunch.getContactsLaunched(), 25L);
         assertLaunchStats(retrievedLaunch.getAccountsErrored(), 0L);
-        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), (totalRatedAccounts - 8L - 0L));
+        assertLaunchStats(retrievedLaunch.getAccountsSuppressed(), (totalRatedAccounts - 8L));
     }
 
     private void assertLaunchStats(Long count, long expectedVal) {
