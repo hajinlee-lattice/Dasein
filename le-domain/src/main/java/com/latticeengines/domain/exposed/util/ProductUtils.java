@@ -125,7 +125,7 @@ public class ProductUtils {
             List<String> productTypes, String... productStatuses) {
         Set<String> productIds = new HashSet<>();
         filePath = getPath(filePath);
-        Set<String> statuses = new HashSet<>();
+        Set<String> statuses = null;
         if (productStatuses != null && productStatuses.length > 0) {
             statuses = new HashSet<>(Arrays.asList(productStatuses));
         }
@@ -142,7 +142,7 @@ public class ProductUtils {
                 continue;
             }
             String productStatus = getString(record, InterfaceName.ProductStatus.name());
-            if (CollectionUtils.isNotEmpty(statuses) && ! statuses.contains(productStatus)) {
+            if (CollectionUtils.isNotEmpty(statuses) && !statuses.contains(productStatus)) {
                 continue;
             }
             productIds.add(productId);
