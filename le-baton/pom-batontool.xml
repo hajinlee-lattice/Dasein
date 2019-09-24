@@ -6,18 +6,18 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-baton-tool</artifactId>
     <packaging>jar</packaging>
-    <version>4.19.0-SNAPSHOT</version>
+    <version>4.20.0-SNAPSHOT</version>
     <name>le-${component-name}</name>
 
     <properties>
         <component-name>baton-tool</component-name>
-        <le.domain.version>4.19.0-SNAPSHOT</le.domain.version>
+        <le.domain.version>4.20.0-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.19.0-SNAPSHOT</version>
+        <version>4.20.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -81,7 +81,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
-            <version>4.19.0-SNAPSHOT</version>
+            <version>4.20.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
