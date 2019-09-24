@@ -6,7 +6,7 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.19.0-SNAPSHOT</version>
+    <version>4.20.0-SNAPSHOT</version>
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
 

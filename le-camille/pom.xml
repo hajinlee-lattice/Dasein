@@ -8,13 +8,13 @@
 
     <properties>
         <component-name>camille</component-name>
-        <le.domain.version>4.19.0-SNAPSHOT</le.domain.version>
+        <le.domain.version>4.20.0-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.19.0-SNAPSHOT</version>
+        <version>4.20.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
