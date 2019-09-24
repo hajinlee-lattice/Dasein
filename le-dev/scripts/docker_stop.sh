@@ -15,7 +15,7 @@ elif [ "${IMAGE}" = "kafka" ]; then
 
 else
 
-    docker stop lattice_${IMAGE}
+    docker stop le_${IMAGE}
 
 fi
 
