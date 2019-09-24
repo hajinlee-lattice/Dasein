@@ -67,7 +67,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
     private PlayLaunchChannel playLaunchChannel1;
     private PlayLaunchChannel playLaunchChannel2;
 
-    List<PlayType> types;
+    private List<PlayType> types;
 
     private String orgId1 = "org1";
     private String orgName1 = "salesforce_org";
@@ -187,7 +187,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testBasicOperations" })
-    public void testCreateFromChannel() throws InterruptedException {
+    public void testCreateFromChannel() {
         PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel1.getPid());
         Assert.assertNull(retrievedLaunch);
 
@@ -205,11 +205,11 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Thread.sleep(1000);
 
         Assert.assertNotNull(retrieved);
-        Assert.assertEquals(retrieved.getId(), playLaunchChannel1.getId());
+        Assert.assertEquals(retrieved.getId(), playLaunchChannel2.getId());
         Assert.assertFalse(retrieved.getIsAlwaysOn());
         Assert.assertNull(retrieved.getExpirationDate());
 
-        PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel1.getPid());
+        PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel2.getPid());
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertNotNull(retrieved.getLastLaunch());
         Assert.assertEquals(retrieved.getLastLaunch().getId(), retrievedLaunch.getId());
@@ -236,7 +236,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
     }
 
     @AfterClass(groups = "deployment")
-    public void teardown() throws Exception {
+    public void teardown() {
         if (playLaunchChannel1 != null && playLaunchChannel1.getId() != null) {
             playLaunchChannelService.deleteByChannelId(playLaunchChannel1.getId(), true);
         }

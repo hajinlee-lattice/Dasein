@@ -164,7 +164,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
         });
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
-        Thread.sleep(1000);
+        Thread.sleep(20000);
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> queuedPlayLaunchesIdList = //
                     playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
@@ -208,7 +208,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
     }
 
     @AfterClass(groups = "deployment")
-    public void teardown() throws Exception {
+    public void teardown() {
         if (playLaunch1 != null && playLaunch1.getLaunchId() != null) {
             playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         }

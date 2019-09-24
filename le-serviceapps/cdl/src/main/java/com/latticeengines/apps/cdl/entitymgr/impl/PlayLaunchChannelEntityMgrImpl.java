@@ -156,8 +156,8 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(playLaunchChannel.getLaunchType());
         }
-        if (playLaunchChannel.getCronScheduleExpression() != null && !playLaunchChannel.getCronScheduleExpression()
-                .equals(existingPlayLaunchChannel.getCronScheduleExpression())) {
+        if (StringUtils.isNotBlank(playLaunchChannel.getCronScheduleExpression()) && !playLaunchChannel
+                .getCronScheduleExpression().equals(existingPlayLaunchChannel.getCronScheduleExpression())) {
             existingPlayLaunchChannel.setCronScheduleExpression(playLaunchChannel.getCronScheduleExpression());
             existingPlayLaunchChannel
                     .setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(existingPlayLaunchChannel));
@@ -255,20 +255,20 @@ public class PlayLaunchChannelEntityMgrImpl
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Need a Cron Schedule Expression if Channel is Always On" });
             }
-//            if (playLaunchChannel.getExpirationDate() == null) {
-//                throw new LedpException(LedpCode.LEDP_32000,
-//                        new String[] { "Need a Expiration Date if Channel is Always On" });
-//            } else if ((ChronoUnit.MONTHS.between(LocalDateTime.now(),
-//                    LocalDateTime.ofInstant(playLaunchChannel.getExpirationDate().toInstant(),
-//                            ZoneId.systemDefault())) > maxExpirationMonths)) {
-//                throw new LedpException(LedpCode.LEDP_18232,
-//                        new String[] { playLaunchChannel.getExpirationDate().toString() });
-//            } else if (new Date().getTime() > playLaunchChannel.getExpirationDate().getTime()) {
-//                throw new LedpException(LedpCode.LEDP_18233,
-//                        new String[] { playLaunchChannel.getExpirationDate().toString() });
-//            }
-        }
-        else {
+            // if (playLaunchChannel.getExpirationDate() == null) {
+            // throw new LedpException(LedpCode.LEDP_32000,
+            // new String[] { "Need a Expiration Date if Channel is Always On" });
+            // } else if ((ChronoUnit.MONTHS.between(LocalDateTime.now(),
+            // LocalDateTime.ofInstant(playLaunchChannel.getExpirationDate().toInstant(),
+            // ZoneId.systemDefault())) > maxExpirationMonths)) {
+            // throw new LedpException(LedpCode.LEDP_18232,
+            // new String[] { playLaunchChannel.getExpirationDate().toString() });
+            // } else if (new Date().getTime() >
+            // playLaunchChannel.getExpirationDate().getTime()) {
+            // throw new LedpException(LedpCode.LEDP_18233,
+            // new String[] { playLaunchChannel.getExpirationDate().toString() });
+            // }
+        } else {
             playLaunchChannel.setExpirationDate(null);
         }
     }
