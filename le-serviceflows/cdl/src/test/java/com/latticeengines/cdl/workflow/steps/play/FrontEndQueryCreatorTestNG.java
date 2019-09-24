@@ -85,8 +85,8 @@ public class FrontEndQueryCreatorTestNG {
         int accountColsRecNotIncludedStd = result.getAccountColsRecNotIncludedStd().size();
         Assert.assertEquals(17, accountColsRecIncluded);
         Assert.assertEquals(4, accountColsRecNotIncludedNonStd);
-        Assert.assertEquals(7, contactCols);
-        Assert.assertEquals(56, accountColsRecNotIncludedStd);
+        Assert.assertEquals(8, contactCols);
+        Assert.assertEquals(57, accountColsRecNotIncludedStd);
         Assert.assertEquals(fieldMappingMetadata.size(),
                 accountColsRecIncluded + accountColsRecNotIncludedNonStd + contactCols + accountColsRecNotIncludedStd);
         List<Lookup> accountLookups = playLaunchContext.getAccountFrontEndQuery().getLookups();
