@@ -626,6 +626,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
+        boolean skipReMatchFlag = true;
+        if (entityMatchEnabled && request.getFullRematch() && CollectionUtils.isEmpty(needDeletedEntities)) {
+            skipReMatchFlag = false;
+        }
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -664,6 +668,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .skipEntities(request.getSkipEntities()) //
                 .skipPublishToS3(Boolean.TRUE.equals(request.getSkipPublishToS3())) //
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
+                .skipEntityMatchRematch(skipReMatchFlag)
                 .build();
     }
 

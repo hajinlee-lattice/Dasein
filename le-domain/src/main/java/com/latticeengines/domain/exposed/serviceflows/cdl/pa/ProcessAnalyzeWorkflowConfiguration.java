@@ -63,6 +63,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
         private ApsGenerationStepConfiguration apsGenerationStepConfiguration = new ApsGenerationStepConfiguration();
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
+        private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder =
+                new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
@@ -82,6 +84,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             curatedAttributesWorkflowBuilder.customer(customerSpace);
             processRatingWorkflowBuilder.customer(customerSpace);
             commitEntityWorkflowBuilder.customer(customerSpace);
+            convertBatchStoreToDataTableWorkflowBuilder.customer(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             exportToRedshift.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
@@ -115,6 +118,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             curatedAttributesWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             commitEntityWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            convertBatchStoreToDataTableWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             exportToRedshift.setInternalResourceHostPort(internalResourceHostPort);
             exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
@@ -326,10 +330,19 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipEntityMatchRematch(boolean skipEntityMatchRematch) {
+            convertBatchStoreToDataTableWorkflowBuilder.setSkipStep(skipEntityMatchRematch);
+            if (!skipEntityMatchRematch) {
+                convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig();
+            }
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(processStepConfiguration);
+            configuration.add(convertBatchStoreToDataTableWorkflowBuilder.build());
             configuration.add(matchEntityWorkflowBuilder.build());
             configuration.add(processAccountWorkflowBuilder.build());
             configuration.add(processContactWorkflowBuilder.build());

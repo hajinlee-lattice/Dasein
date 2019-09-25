@@ -99,6 +99,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private CommitEntityMatchWorkflow commitEntityMatchWorkflow;
 
+    @Inject
+    private ConvertBatchStoreToDataTableWorkflow convertBatchStoreToDataTableWorkflow;
+
     @Value("${cdl.aps.use.spark}")
     private boolean apsUseSpark;
 
@@ -108,6 +111,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
         return new WorkflowBuilder(name(), config) //
                 .next(startProcessing) //
                 .next(importProcessAnalyzeFromS3) //
+                .next(convertBatchStoreToDataTableWorkflow)
                 .next(matchEntityWorkflow) //
                 .next(processAccountWorkflow) //
                 .next(processContactWorkflow) //
