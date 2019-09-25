@@ -242,7 +242,8 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap, autoDetectionResultsMap,
                         importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
-        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.WARNING);
+        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.ERROR);
+
     }
 
     private void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
