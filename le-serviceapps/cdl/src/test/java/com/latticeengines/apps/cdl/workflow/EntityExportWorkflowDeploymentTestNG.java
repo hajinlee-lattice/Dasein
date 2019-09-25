@@ -249,8 +249,8 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
 
     protected void verifyCsvGzHeder(Map<String, Integer> headerMap) {
         // make sure header map contains account and contact id
-        Assert.assertTrue(headerMap.containsKey("Atlas Account ID"), "Header map: " + JsonUtils.serialize(headerMap));
-        Assert.assertTrue(headerMap.containsKey("Atlas Contact ID"), "Header map: " + JsonUtils.serialize(headerMap));
+        Assert.assertTrue(headerMap.containsKey("ID"), "Header map: " + JsonUtils.serialize(headerMap));
+        Assert.assertTrue(headerMap.containsKey("ContactId"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"), "Header map: " + JsonUtils.serialize(headerMap));
