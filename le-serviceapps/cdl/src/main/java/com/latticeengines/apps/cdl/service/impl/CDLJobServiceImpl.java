@@ -42,6 +42,7 @@ import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
@@ -51,13 +52,11 @@ import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -77,7 +76,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -136,7 +134,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     private SchedulingPAService schedulingPAService;
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionService dataCollectionService;
 
     @Inject
     private AtlasExportService atlasExportService;
@@ -733,7 +731,8 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     @VisibleForTesting
-    boolean submitExportJob(String customerSpace, boolean retry, Tenant tenant, AtlasExportType atlasExportType) {
+    public boolean submitExportJob(String customerSpace, boolean retry, Tenant tenant,
+                                   AtlasExportType atlasExportType) {
         String applicationId;
         boolean success = true;
         if (tenant == null) {
@@ -742,12 +741,11 @@ public class CDLJobServiceImpl implements CDLJobService {
             MultiTenantContext.setTenant(tenant);
         }
         try {
-            AtlasExport atlasExport = atlasExportService.createAtlasExport(customerSpace, atlasExportType);
             EntityExportRequest request = new EntityExportRequest();
-            request.setAtlasExportId(atlasExport.getUuid());
             request.setSaveToDropfolder(true);
-            request.setDataCollectionVersion(dataCollectionProxy.getActiveVersion(customerSpace));
-            ApplicationId tempApplicationId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
+            request.setDataCollectionVersion(dataCollectionService.getActiveVersion(customerSpace));
+            request.setExportType(atlasExportType);
+            ApplicationId tempApplicationId = cdlProxy.entityExport(customerSpace, request);
             applicationId = tempApplicationId.toString();
             if (!retry) {
                 Pair<String, AtlasExportType> value = Pair.of(customerSpace, atlasExportType);

@@ -1,7 +1,11 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.cdl.service.ServingStoreService;
+import com.latticeengines.apps.cdl.util.EntityExportUtils;
 import com.latticeengines.apps.cdl.util.PAValidationUtils;
 import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ConvertBatchStoreToImportWorkflowSubmitter;
@@ -25,11 +32,13 @@ import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,6 +58,8 @@ public class DataFeedController {
     private final CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final PAValidationUtils paValidationUtils;
+    private final AtlasExportService atlasExportService;
+    private final ServingStoreService servingStoreService;
 
     @Value("${cdl.processAnalyze.retry.expired.time}")
     private long retryExpiredTime;
@@ -59,7 +70,8 @@ public class DataFeedController {
                               EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
                               ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter,
                               CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter,
-                              DataFeedService dataFeedService, PAValidationUtils paValidationUtils) {
+                              DataFeedService dataFeedService, PAValidationUtils paValidationUtils,
+                              AtlasExportService atlasExportService, ServingStoreService servingStoreService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
@@ -67,6 +79,8 @@ public class DataFeedController {
         this.cdlEntityMatchMigrationWorkflowSubmitter = cdlEntityMatchMigrationWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
         this.paValidationUtils = paValidationUtils;
+        this.atlasExportService = atlasExportService;
+        this.servingStoreService = servingStoreService;
     }
 
     @PostMapping(value = "/processanalyze", headers = "Accept=application/json")
@@ -167,6 +181,14 @@ public class DataFeedController {
         }
     }
 
+    private ApplicationId submitWorkflow(String customerSpace, EntityExportRequest request, AtlasExportType exportType) {
+        AtlasExport atlasExport = atlasExportService.createAtlasExport(customerSpace, exportType);
+        request.setAtlasExportId(atlasExport.getUuid());
+        ApplicationId appId = entityExportWorkflowSubmitter.submit(customerSpace, request,
+                new WorkflowPidWrapper(-1L));
+        return appId;
+    }
+
     @PostMapping(value = "/entityexport", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
@@ -174,9 +196,34 @@ public class DataFeedController {
                                                  @RequestBody EntityExportRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
-            ApplicationId appId = entityExportWorkflowSubmitter.submit(customerSpace, request,
-                    new WorkflowPidWrapper(-1L));
-            return ResponseDocument.successResponse(appId.toString());
+            ApplicationId appId;
+            // if export id doesn't have value, we should check attribute count and setup atlas report
+            if (StringUtils.isEmpty(request.getAtlasExportId())) {
+                AtlasExportType exportType = request.getExportType();
+                if (exportType != null) {
+                    EntityExportUtils.checkExportAttribute(exportType, customerSpace, request.getDataCollectionVersion(), servingStoreService);
+                    appId = submitWorkflow(customerSpace, request, exportType);
+                    return ResponseDocument.successResponse(appId.toString());
+                } else {
+                    // empty export type means export both account and contact
+                    List<String> responseMessages = new ArrayList();
+                    for (AtlasExportType atlasExportType : AtlasExportType.UI_EXPORT_TYPES) {
+                        try {
+                            EntityExportUtils.checkExportAttribute(atlasExportType, customerSpace, request.getDataCollectionVersion(), servingStoreService);
+                        } catch (RuntimeException e) {
+                            responseMessages.add(e.getMessage());
+                            continue;
+                        }
+                        appId = submitWorkflow(customerSpace, request, atlasExportType);
+                        responseMessages.add(appId.toString());
+                    }
+                    return ResponseDocument.successResponse(StringUtils.join(responseMessages.toArray(), ","));
+                }
+            } else {
+                // already have atlas report, just submit workflow
+                appId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
+                return ResponseDocument.successResponse(appId.toString());
+            }
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }
