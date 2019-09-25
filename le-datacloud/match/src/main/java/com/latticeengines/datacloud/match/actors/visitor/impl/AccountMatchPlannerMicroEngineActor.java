@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.actors.template.ExecutorMicroEngineTemplate;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("accountMatchPlannerMicroEngineActor")
 @Scope("prototype")
-public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
+public class AccountMatchPlannerMicroEngineActor extends PlannerMicroEngineActorBase {
 
     @Value("${datacloud.match.planner.account.executors.num}")
     private int executorNum;
@@ -108,21 +108,20 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
     }
 
     @Override
-    protected void execute(Traveler traveler) {
-        MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        List<Object> inputRecord = matchTraveler.getInputDataRecord();
-        Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps()
-                .getOrDefault(Account.name(), new HashMap<>());
-        EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
+    protected void standardizeMatchFields(@NotNull MatchTraveler traveler) {
+        List<Object> inputRecord = traveler.getInputDataRecord();
+        Map<MatchKey, List<Integer>> keyPositionMap = traveler.getEntityKeyPositionMaps().getOrDefault(Account.name(),
+                new HashMap<>());
+        EntityMatchKeyRecord entityMatchKeyRecord = traveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForNameLocation(inputRecord, keyPositionMap, null, entityMatchKeyRecord);
         matchStandardizationService.parseRecordForDuns(inputRecord, keyPositionMap, entityMatchKeyRecord);
         matchStandardizationService.parseRecordForDomain(inputRecord, keyPositionMap,
-                matchTraveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
+                traveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
 
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createAccountMatchKeyTuple(entityMatchKeyRecord);
 
-        Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(matchTraveler.getMatchInput(),
+        Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(traveler.getMatchInput(),
                 Account.name());
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
                 entityMatchKeyRecord);
@@ -138,8 +137,8 @@ public class AccountMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
 
         matchKeyTuple
                 .setDomainFromMultiCandidates(matchStandardizationService.hasMultiDomain(inputRecord, keyPositionMap));
-        matchTraveler.setMatchKeyTuple(matchKeyTuple);
-        matchTraveler.addEntityMatchKeyTuple(Account.name(), matchKeyTuple);
-        matchTraveler.addEntityMatchKeyTuple(BusinessEntity.LatticeAccount.name(), matchKeyTuple);
+        traveler.setMatchKeyTuple(matchKeyTuple);
+        traveler.addEntityMatchKeyTuple(Account.name(), matchKeyTuple);
+        traveler.addEntityMatchKeyTuple(BusinessEntity.LatticeAccount.name(), matchKeyTuple);
     }
 }
