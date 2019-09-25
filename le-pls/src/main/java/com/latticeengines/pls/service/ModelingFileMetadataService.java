@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 
 public interface ModelingFileMetadataService {
 
@@ -50,4 +52,8 @@ public interface ModelingFileMetadataService {
                                                           String importFile, boolean runImport,
                                                           FieldDefinitionsRecord commitRequest)
             throws LedpException, IllegalArgumentException ;
+
+    ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
+                                                              String systemObject, String importFile,
+                                                              ValidateFieldDefinitionsRequest validateRequest) throws Exception;
 }

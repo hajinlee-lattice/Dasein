@@ -20,6 +20,14 @@ public class FieldValidationMessage {
         ERROR
     }
 
+    public FieldValidationMessage (String fieldName, String columnName, String message
+            , FieldValidationMessage.MessageLevel level) {
+        this.fieldName = fieldName;
+        this.columnName = columnName;
+        this.message = message;
+        this.messageLevel = level;
+    }
+
     // The error message level.
     @JsonProperty
     private MessageLevel messageLevel;
