@@ -3,6 +3,10 @@ package com.latticeengines.pls.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -18,9 +22,13 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 
@@ -189,6 +197,74 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(actualResponse, expectedResponse,
                 "Actual Response:\n" + JsonUtils.pprint(actualResponse) + "\nvs\n\nExpected Response:\n" +
                         JsonUtils.pprint(expectedResponse));
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateValidation() throws IOException {
+
+        // Generate Spec Java class from resource file.
+        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-contact-spec.json",
+                ImportWorkflowSpec.class);
+        log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
+
+        // Load CSV containing imported Contact data for this test from resource file into HDFS.
+        MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
+        Map<String, FieldDefinition> autoDetectionResultsMap = ImportWorkflowUtils.generateAutodetectionResultsMap(resolver);
+
+
+        FetchFieldDefinitionsResponse fetchResponse = new FetchFieldDefinitionsResponse();
+        fetchResponse.setAutodetectionResultsMap(autoDetectionResultsMap);
+        fetchResponse.setImportWorkflowSpec(importWorkflowSpec);
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchResponse);
+        FieldDefinitionsRecord currentFieldDefinitionsRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
+        Map<String, List<FieldDefinition>> fieldDefinitionMap =
+                currentFieldDefinitionsRecord.getFieldDefinitionsRecordsMap();
+
+
+        // change customer field's type
+        Map<String, FieldDefinition> customNameToFieldDefinition =
+                fieldDefinitionMap.getOrDefault(ImportWorkflowUtils.CUSTOM_FIELDS, new ArrayList<>()).stream().collect(Collectors.toMap(FieldDefinition::getColumnName, field -> field));
+        FieldDefinition customField = customNameToFieldDefinition.get("Earnings");
+        Assert.assertNotNull(customField);
+        customField.setFieldType(UserDefinedType.TEXT);
+        ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
+                , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
+        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
+        checkGeneratedResult(response, ImportWorkflowUtils.CUSTOM_FIELDS, "Earnings", FieldValidationMessage.MessageLevel.WARNING);
+
+        // change field type for lattice field
+        Map<String, FieldDefinition> IDNameToFieldDefinition =
+                fieldDefinitionMap.getOrDefault("Unique ID", new ArrayList<>()).stream().collect(Collectors.toMap(FieldDefinition::getFieldName, field -> field));
+        FieldDefinition IDDefinition = IDNameToFieldDefinition.get("CustomerContactId");
+        Assert.assertNotNull(IDDefinition);
+        IDDefinition.setFieldType(UserDefinedType.INTEGER);
+        response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap, autoDetectionResultsMap,
+                        importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
+        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
+        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.ERROR);
+
+    }
+
+    private void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
+                                      FieldValidationMessage.MessageLevel messageLevel) {
+        Map<String, List<FieldValidationMessage>> validationMap = response.getFieldValidationMessagesMap();
+        Assert.assertNotNull(validationMap);
+        List<FieldValidationMessage> validationMessages = validationMap.get(section);
+        Assert.assertNotNull(validationMessages);
+        if (ImportWorkflowUtils.CUSTOM_FIELDS.equals(section)) {
+            FieldValidationMessage validation =
+                    validationMessages.stream().filter(message -> name.equals(message.getColumnName())).findFirst().orElse(null);
+            Assert.assertNotNull(validation);
+            Assert.assertEquals(validation.getMessageLevel(), messageLevel);
+        } else {
+            FieldValidationMessage validation =
+                    validationMessages.stream().filter(message -> name.equals(message.getFieldName())).findFirst().orElse(null);
+            Assert.assertNotNull(validation);
+            Assert.assertEquals(validation.getMessageLevel(), messageLevel);
+        }
+
+
     }
 
     // resourceJsonFileRelativePath should start "com/latticeengines/...".

@@ -672,20 +672,16 @@ public class MetadataResolver {
 
     /**
      *
-     * @param fieldMapping
      * @param  warningMessage indicate the message returned by date/time format and time zone validation
      * check the given format can be used to parse column value, if number of column value can be parsed is more than
      * 10% of size of columnFields return null if the check can pass, return one error value if the check can't pass
      */
     @VisibleForTesting
-    public boolean checkUserDateType(FieldMapping fieldMapping, StringBuilder warningMessage,
+    public boolean checkUserDateType(String columnHeaderName, String dateFormat,
+                                     String timeFormat, String timezone, StringBuilder warningMessage,
                                      String formatWithBestEffort) {
-        String columnHeaderName = fieldMapping.getUserField();
         String errorValue = null;
         List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
-        String dateFormat = fieldMapping.getDateFormatString();
-        String timeFormat = fieldMapping.getTimeFormatString();
-        String timezone = fieldMapping.getTimezone();
         boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
         if (StringUtils.isEmpty(dateFormat)) {
             return false;

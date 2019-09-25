@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ValidateFieldDefinitionsResponse extends ValidateFieldDefinitionsRecord {
+public class ValidateFieldDefinitionsResponse extends FieldDefinitionsRecord {
 
     public enum ValidationResult {
         PASS,

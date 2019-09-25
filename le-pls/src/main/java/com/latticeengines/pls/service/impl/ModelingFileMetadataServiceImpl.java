@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -69,6 +70,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
@@ -370,7 +373,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
                         // deal with case format can't parse the value
                         StringBuilder warningMessage = new StringBuilder();
-                        boolean match = resolver.checkUserDateType(fieldMapping, warningMessage, formatWithBestEffort);
+                        boolean match = resolver.checkUserDateType(userField, fieldMapping.getDateFormatString(),
+                                fieldMapping.getTimeFormatString(), fieldMapping.getTimezone(), warningMessage,
+                                formatWithBestEffort);
                         if (!match && warningMessage.length() > 0) {
                             validations.add(createValidation(userField, fieldMapping.getMappedField(),
                                     ValidationStatus.WARNING, warningMessage.toString()));
@@ -1262,6 +1267,58 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         return dataFeedTask.getUniqueId();
     }
+
+    /**
+     1. Required Spec (Lattice) Fields are mapped
+     2. No fieldNames are mapped more than once
+     3. If the standard Lattice fields are not mapped, they are included as “new” customer fields unless ignored by the user.
+     4. Physical Data Type
+     Compare physicalDataType against column data.
+     5. Need to support special case allowed physical date type changes for backwards compatibility
+     Deal with attribute name case sensitivity issues.
+     6. DATE Type Validation
+     Compare data and time format of DATE type against column data
+     */
+    @Override
+    public ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
+                                                                     String systemObject, String importFile,
+                                                                     ValidateFieldDefinitionsRequest validateRequest) throws Exception {
+
+        validateFieldDefinitionRequestParameters("Validate", systemName, systemType, systemObject, importFile);
+
+        // get default spec from s3
+        if (validateRequest.getImportWorkflowSpec() == null || MapUtils.isEmpty(validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap())) {
+            throw new RuntimeException(String.format("no spec info for system type %s and system object %s",
+                    systemType, systemObject));
+        }
+
+        if (MapUtils.isEmpty(validateRequest.getAutodetectionResultsMap())) {
+            throw new RuntimeException("no auto-detected field definition");
+        }
+
+        if (validateRequest.getCurrentFieldDefinitionsRecord() == null || MapUtils.isEmpty(validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap())) {
+            throw new RuntimeException("no field definition records");
+        }
+
+        Map<String, FieldDefinition> autoDetectionResultsMap = validateRequest.getAutodetectionResultsMap();
+        Map<String, List<FieldDefinition>> specFieldDefinitionsRecordsMap =
+                validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap();
+        Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap =
+                validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap();
+
+        // 1 Generate source file and resolver
+        SourceFile sourceFile = getSourceFile(importFile);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
+
+        // 2. generate validation message
+        ValidateFieldDefinitionsResponse response =
+                ImportWorkflowUtils.generateValidationResponse(fieldDefinitionsRecordsMap, autoDetectionResultsMap,
+                        specFieldDefinitionsRecordsMap, resolver);
+        // set field definition records map for ui
+        response.setFieldDefinitionsRecordsMap(fieldDefinitionsRecordsMap);
+        return response;
+    }
+
 
     private LatticeSchemaField getLatticeFieldFromTableAttribute(Attribute attribute) {
         LatticeSchemaField latticeSchemaField = new LatticeSchemaField();
