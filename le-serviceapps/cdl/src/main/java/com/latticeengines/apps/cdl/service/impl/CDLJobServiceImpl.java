@@ -39,13 +39,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
-import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
-import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CronUtils;
@@ -101,9 +99,6 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static String REDIS_TEMPLATE_KEY;
 
-    @Inject
-    private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
-
     @VisibleForTesting
     static LinkedHashMap<String, Long> appIdMap;
 
@@ -135,9 +130,6 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private DataCollectionService dataCollectionService;
-
-    @Inject
-    private AtlasExportService atlasExportService;
 
     @VisibleForTesting
     @Value("${cdl.processAnalyze.concurrent.job.count}")
