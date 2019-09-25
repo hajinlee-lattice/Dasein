@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -36,6 +37,8 @@ public enum AtlasExportType {
     String displayName;
 
     String pathFriendlyName;
+
+    public static final Set<AtlasExportType> UI_EXPORT_TYPES = ImmutableSet.of(ACCOUNT, CONTACT);
 
     List<Triple<BusinessEntity, String, String>> defaultAttributeTuples;
 

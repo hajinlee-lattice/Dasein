@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.AtlasExportType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -26,6 +27,9 @@ public class EntityExportRequest {
     @JsonProperty("AtlasExportId")
     private String atlasExportId;
 
+    @JsonProperty("ExportType")
+    private AtlasExportType exportType;
+
     @JsonProperty("SaveToDropfolder")
     private boolean saveToDropfolder;
 
@@ -43,5 +47,13 @@ public class EntityExportRequest {
 
     public void setSaveToDropfolder(boolean saveToDropfolder) {
         this.saveToDropfolder = saveToDropfolder;
+    }
+
+    public AtlasExportType getExportType() {
+        return exportType;
+    }
+
+    public void setExportType(AtlasExportType exportType) {
+        this.exportType = exportType;
     }
 }

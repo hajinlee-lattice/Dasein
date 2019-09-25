@@ -170,8 +170,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(metadataSegmentExport.getType())) {
             cms = servingStoreProxy.getDecoratedMetadata(customerSpace, ImmutableList.copyOf(BusinessEntity.EXPORT_ENTITIES), groups, version);
         } else if (AtlasExportType.ACCOUNT.equals(metadataSegmentExport.getType())) {
-            List<BusinessEntity> businessEntities = BusinessEntity.EXPORT_ENTITIES.stream().collect(Collectors.toList());
-            businessEntities.remove(BusinessEntity.Contact);
+            List<BusinessEntity> businessEntities =
+                    BusinessEntity.EXPORT_ENTITIES.stream().filter(businessEntity -> !BusinessEntity.Contact.equals(businessEntity)).collect(Collectors.toList());
             cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version);
         } else if (AtlasExportType.CONTACT.equals(metadataSegmentExport.getType())) {
             List<BusinessEntity> businessEntities = new ArrayList<>();
