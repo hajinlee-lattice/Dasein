@@ -34,35 +34,44 @@ public class ExistsResolver extends BaseRestrictionResolver<ExistsRestriction>
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public BooleanExpression resolve(ExistsRestriction restriction) {
-        BusinessEntity tgtEntity = restriction.getEntity();
-        // find one-to-many relationships pointing to tgt entity
-        JoinSpecification join = joins.stream() //
-                .filter(j -> j.getDestinationEntity().equals(tgtEntity)) //
-                .findAny().orElseThrow(() -> new QueryEvaluationException(
-                        "Cannot find a proper join to construct exists clause for " + tgtEntity));
-        BusinessEntity srcEntity = join.getSourceEntity();
-        BusinessEntity.Relationship relationship = srcEntity.join(tgtEntity);
-        List<Predicate> joinPredicates = QueryUtils.getJoinPredicates(relationship);
-        StringPath mainTable = AttrRepoUtils.getTablePath(attrRepo, tgtEntity);
-        SQLQuery<?> query = queryFactory.getQuery(attrRepo, getSqlUser()).from(mainTable.as(tgtEntity.name()));
-        Restriction innerRestriction = restriction.getRestriction();
-        BooleanExpression innerPredicate = null;
-        if (innerRestriction != null) {
-            RestrictionResolver innerResolver = factory.getRestrictionResolver(innerRestriction.getClass());
-            innerPredicate = innerResolver.resolve(innerRestriction);
-        }
-        for (Predicate p : joinPredicates) {
-            if (innerPredicate == null) {
-                innerPredicate = Expressions.asBoolean(p);
-            } else {
-                innerPredicate = innerPredicate.and(p);
+        if (restriction.getSubQueryExpression() == null) {
+            BusinessEntity tgtEntity = restriction.getEntity();
+            // find one-to-many relationships pointing to tgt entity
+            JoinSpecification join = joins.stream() //
+                    .filter(j -> j.getDestinationEntity().equals(tgtEntity)) //
+                    .findAny().orElseThrow(() -> new QueryEvaluationException(
+                            "Cannot find a proper join to construct exists clause for " + tgtEntity));
+            BusinessEntity srcEntity = join.getSourceEntity();
+            BusinessEntity.Relationship relationship = srcEntity.join(tgtEntity);
+            List<Predicate> joinPredicates = QueryUtils.getJoinPredicates(relationship);
+            StringPath mainTable = AttrRepoUtils.getTablePath(attrRepo, tgtEntity);
+            SQLQuery<?> query = queryFactory.getQuery(attrRepo, getSqlUser()).from(mainTable.as(tgtEntity.name()));
+            Restriction innerRestriction = restriction.getRestriction();
+            BooleanExpression innerPredicate = null;
+            if (innerRestriction != null) {
+                RestrictionResolver innerResolver = factory.getRestrictionResolver(innerRestriction.getClass());
+                innerPredicate = innerResolver.resolve(innerRestriction);
             }
-        }
-        query = query.where(innerPredicate);
-        if (restriction.getNegate()) {
-            return query.notExists();
+            for (Predicate p : joinPredicates) {
+                if (innerPredicate == null) {
+                    innerPredicate = Expressions.asBoolean(p);
+                } else {
+                    innerPredicate = innerPredicate.and(p);
+                }
+            }
+            query = query.where(innerPredicate);
+            if (restriction.getNegate()) {
+                return query.notExists();
+            } else {
+                return query.exists();
+            }
         } else {
-            return query.exists();
+            SQLQuery<?> subQuery = (SQLQuery<?>) restriction.getSubQueryExpression();
+            if (restriction.getNegate()) {
+                return subQuery.notExists();
+            } else {
+                return subQuery.exists();
+            }
         }
     }
 
