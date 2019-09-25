@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -568,7 +569,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 workflowJobPids.add(action.getTrackingPid().toString());
             } else if (isVisibleAction(action)) {
                 Job job = new Job();
-                job.setName(action.getType().getDisplayName());
+                job.setName(getActionDisplayName(action));
                 job.setJobType(action.getType().getName());
                 job.setUser(action.getActionInitiator());
                 job.setStartTimestamp(action.getCreated());
@@ -983,5 +984,18 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return Collections.emptyList();
         }
         return applyUiFriendlyFilters(jobs, filterNonUiJobs, generateEmptyPAJob);
+    }
+
+    private String getActionDisplayName(Action action) {
+        String displayName = action.getType().getDisplayName();
+        if (!action.getType().equals(ActionType.DATA_REPLACE) || (action.getType().equals(ActionType.DATA_REPLACE) && !(action.getActionConfiguration() instanceof CleanupActionConfiguration))) {
+            return displayName;
+        }
+        CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+        if (CollectionUtils.isEmpty(cleanupActionConfiguration.getImpactEntities())) {
+            return displayName;
+        }
+        displayName = String.format("%s: %s", displayName, cleanupActionConfiguration.getImpactEntities().get(0));
+        return displayName;
     }
 }
