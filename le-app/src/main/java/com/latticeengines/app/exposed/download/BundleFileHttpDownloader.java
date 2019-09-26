@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -111,7 +112,9 @@ public class BundleFileHttpDownloader extends AbstractHttpFileDownLoader {
                                     new Path(filePath))) {
                                 for (GenericRecord record : reader) {
                                     String productType = getString(record, InterfaceName.ProductType.name());
-                                    if (ProductType.Bundle.name().equals(productType)) {
+                                    String productStatus = getString(record, InterfaceName.ProductStatus.name());
+                                    if (ProductType.Bundle.name().equals(productType)
+                                            && ProductStatus.Active.name().equals(productStatus)) {
                                         String id = getString(record, InterfaceName.ProductId.name());
                                         String bundle = getString(record, InterfaceName.ProductBundle.name());
                                         String productName = getString(record, InterfaceName.ProductName.name());

@@ -13,6 +13,10 @@ function processErrors
 # Test for required env variables
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
 
+# 2019-09 Currently this script requires the working directory to be $WSHOME . Ref.
+# https://confluence.lattice-engines.com/display/ENG/How+to+verify+a+new+environment
+cd $WSHOME
+
 UNAME=`uname`
 
 . $WSHOME/le-dev/scripts/setupzk.sh

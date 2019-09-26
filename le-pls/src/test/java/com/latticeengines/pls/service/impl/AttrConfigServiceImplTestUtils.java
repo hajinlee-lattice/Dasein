@@ -883,10 +883,15 @@ public class AttrConfigServiceImplTestUtils {
         validation1.setValidationErrors(validationErrors1);
         validations.add(validation1);
         validationErrors1.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>> builder()
-                .put(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT, Arrays.asList("")) //
-                .put(ValidationErrors.Type.EXCEED_USAGE_LIMIT, Arrays.asList("")) //
-                .put(ValidationErrors.Type.INVALID_ACTIVATION, Arrays.asList("")) //
-                .put(ValidationErrors.Type.INVALID_USAGE_CHANGE, Arrays.asList("")) //
+                .put(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT, Arrays.asList("You are trying to enable 500 Account " +
+                        "attributes, Please not choose more than the limit 400")) //
+                .put(ValidationErrors.Type.EXCEED_USAGE_LIMIT, Arrays.asList("You are trying to enable 500 Company " +
+                        "Profile attributes, Please not choose more than the limit 400")) //
+                .put(ValidationErrors.Type.INVALID_ACTIVATION, Arrays.asList("User cannot change deprecated attribute" +
+                        " to active.")) //
+                .put(ValidationErrors.Type.INVALID_USAGE_CHANGE, Arrays.asList("Usage change is not allowed(Usage " +
+                        "group Model ,"
+                        + "Attribute type Account)")) //
                 .build());
 
         AttrValidation validation2 = new AttrValidation();
@@ -896,10 +901,15 @@ public class AttrConfigServiceImplTestUtils {
         validation2.setValidationErrors(validationErrors2);
         validations.add(validation2);
         validationErrors2.setErrors(ImmutableMap.<ValidationErrors.Type, List<String>> builder()
-                .put(ValidationErrors.Type.EXCEED_DATA_LICENSE, Arrays.asList("")) //
-                .put(ValidationErrors.Type.INVALID_PROP_CHANGE, Arrays.asList("")) //
-                .put(ValidationErrors.Type.INVALID_ACTIVATION, Arrays.asList("")) //
-                .put(ValidationErrors.Type.INVALID_USAGE_CHANGE, Arrays.asList("")) //
+                .put(ValidationErrors.Type.EXCEED_DATA_LICENSE, Arrays.asList("You are trying to enable 100 Intent " +
+                        "attributes, Please not choose more than the limit 80")) //
+                .put(ValidationErrors.Type.INVALID_PROP_CHANGE, Arrays.asList("Property State does not allow " +
+                        "customization.")) //
+                .put(ValidationErrors.Type.INVALID_ACTIVATION, Arrays.asList("User cannot change deprecated attribute" +
+                        " to active.")) //
+                .put(ValidationErrors.Type.INVALID_USAGE_CHANGE, Arrays.asList("Usage change is not allowed(Usage " +
+                        "group Model ,"
+                        + "Attribute type Account)")) //
                 .build());
 
         // add one validation that only contains warning, the request still will be regarded as error

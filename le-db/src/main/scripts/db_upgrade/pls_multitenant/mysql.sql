@@ -90,3 +90,9 @@ CREATE PROCEDURE `UpdatePLSTables`()
 DELIMITER;
 
 CALL `UpdatePLSTables`();
+
+CALL `CreatePlayChannels`();
+
+CALL `AttachPlayChannelsToPlayLaunch`();
+
+

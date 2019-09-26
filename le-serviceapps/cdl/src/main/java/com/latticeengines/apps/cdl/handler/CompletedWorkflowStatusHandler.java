@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
@@ -63,9 +64,10 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             } else {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
             }
-            CDLExternalSystemName systemName = playLaunch.getPlayLaunchChannel() != null
-                    && playLaunch.getPlayLaunchChannel().getLookupIdMap() != null
-                            ? playLaunch.getPlayLaunchChannel().getLookupIdMap().getExternalSystemName()
+            PlayLaunchChannel playLaunchChannel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getLaunchId());
+            CDLExternalSystemName systemName = playLaunchChannel != null
+                    && playLaunchChannel.getLookupIdMap() != null
+                            ? playLaunchChannel.getLookupIdMap().getExternalSystemName()
                             : null;
             log.info("Channel Config for launch ID " + playLaunch.getLaunchId() + ": "
                     + JsonUtils.serialize(playLaunch.getChannelConfig()));

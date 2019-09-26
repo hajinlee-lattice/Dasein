@@ -21,5 +21,8 @@
 
     <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />
     <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />
+    <mvc:interceptors>
+        <bean class="com.latticeengines.ulysses.utils.LoggerInterceptor"/>
+    </mvc:interceptors>
 
 </beans>

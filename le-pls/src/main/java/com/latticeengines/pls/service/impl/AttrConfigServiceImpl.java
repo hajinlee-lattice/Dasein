@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -305,19 +306,29 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @VisibleForTesting
     String generateErrorMsg(AttrConfigRequest saveResponse) {
         List<AttrValidation> validations = saveResponse.getDetails().getValidations();
-        Map<ValidationErrors.Type, Integer> errorMap = new HashMap<>();
+        Map<ValidationErrors.Type, MutablePair<Integer, Set<String>>> errorMap = new HashMap<>();
         validations.stream().forEach(validation -> {
             if (validation.getValidationErrors() != null) {
                 Map<ValidationErrors.Type, List<String>> errors = validation.getValidationErrors().getErrors();
-                for (ValidationErrors.Type type : errors.keySet()) {
-                    errorMap.put(type, errorMap.getOrDefault(type, 0) + 1);
+                for (Map.Entry<ValidationErrors.Type, List<String>> entry: errors.entrySet()) {
+                    ValidationErrors.Type type = entry.getKey();
+                    List<String> messages = entry.getValue();
+                    errorMap.putIfAbsent(type, new MutablePair<>(0, new HashSet<>()));
+                    MutablePair<Integer, Set<String>> pair = errorMap.get(type);
+                    pair.setLeft(pair.getLeft() + 1);
+                    pair.getRight().addAll(messages);
                 }
             }
         });
         StringBuilder html = new StringBuilder();
         html.append(p(UPDATE_FAIL_MSG).render());
         for (ValidationErrors.Type type : errorMap.keySet()) {
-            html.append(li(String.format(type.getMessage(), errorMap.get(type))).render());
+            MutablePair<Integer, Set<String>> pair = errorMap.get(type);
+            Set<String> details = pair.getRight();
+            html.append((b(String.format(type.getMessage(), pair.getLeft()) + ":").render()));
+            html.append(ul().with( //
+                    each(details, attr -> //
+                            li(attr))).render());
         }
         return html.toString();
     }
