@@ -76,9 +76,9 @@ public enum LatticeFeatureFlag {
     @Deprecated
     ENABLE_CDL(true, "EnableCdl", "Enable Customer Data Lake"), //
     @Deprecated
-    ALWAYS_ON_CAMPAIGNS("AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"), //
+    ALWAYS_ON_CAMPAIGNS(true, "AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"), //
     @Deprecated
-    ENABLE_EXPORT_FIELD_METADATA("EnableExportFieldMetadata", "Enable export field metadata integration"); //
+    ENABLE_EXPORT_FIELD_METADATA(true, "EnableExportFieldMetadata", "Enable export field metadata integration"); //
 
     private static Set<String> names;
 
