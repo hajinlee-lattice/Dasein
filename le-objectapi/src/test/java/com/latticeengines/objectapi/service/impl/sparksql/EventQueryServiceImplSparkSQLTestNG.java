@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -142,24 +143,17 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
         BucketRestriction bktRes3 = new BucketRestriction(attrLp, bkt3);
 
         TimeFilter last4Years = new TimeFilter(attrLp, ComparisonType.WITHIN, "Year", Collections.singletonList(4));
-        Bucket.Transaction txn = new Bucket.Transaction("LHdgKhusYLJqk9JgC5SdJrwNv8tg9il", last4Years, null, null, true);
+        AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN,
+                Collections.singletonList(0));
+        Bucket.Transaction txn = new Bucket.Transaction("LHdgKhusYLJqk9JgC5SdJrwNv8tg9il", last4Years, greaterThan0, null, true);
         Bucket bkt4 = Bucket.txnBkt(txn);
         BucketRestriction bktRes4 = new BucketRestriction(attrLp, bkt4);
 
         Restriction logical2 = Restriction.builder().or(bktRes3, bktRes4).build();
         Restriction logical3 = Restriction.builder().and(logical1, logical2).build();
 
-        // contact
-        AttributeLookup attrLp2 = new AttributeLookup(BusinessEntity.Contact, "Title");
-        Bucket bkt5 = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("a"));
-        BucketRestriction bktRes5 = new BucketRestriction(attrLp2, bkt5);
-        Bucket bkt6 = Bucket.valueBkt(ComparisonType.NOT_CONTAINS, Collections.singletonList("a"));
-        BucketRestriction bktRes6 = new BucketRestriction(attrLp2, bkt6);
-        Restriction logical4 = Restriction.builder().or(bktRes5, bktRes6).build();
-
         FrontEndQuery segmentQuery = new FrontEndQuery();
         segmentQuery.setAccountRestriction(new FrontEndRestriction(logical3));
-        segmentQuery.setContactRestriction(new FrontEndRestriction(logical4));
         segmentQuery.setMainEntity(BusinessEntity.Account);
         segmentQuery.setEvaluationDateStr(maxTransactionDate);
 
@@ -173,7 +167,7 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
                 DataCollection.Version.Blue);
         System.out.println(sql);
         long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery,DataCollection.Version.Blue);
-        Assert.assertEquals(count, 5692L);
+        Assert.assertEquals(count, 27327L);
         long count2 = eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertEquals(count2, count);
     }
