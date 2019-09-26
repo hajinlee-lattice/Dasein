@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,7 @@ public class SegmentExportUtil {
                                 && (!attr.getName().startsWith(ent.getKey() + SEPARATOR) || !EM_HIDE_ATTRS
                                         .contains(attr.getName().substring((ent.getKey() + SEPARATOR).length()))))
                         .collect(Collectors.toList());
+
             }
             combineAttributes(configuredAttributes, combinedAttributes);
         }
@@ -91,10 +93,10 @@ public class SegmentExportUtil {
     }
 
     private static void combineAttributes(List<Attribute> configuredAttributes,
-            List<Attribute> combinedAttributes) {
+                                          List<Attribute> combinedAttributes) {
         if (CollectionUtils.isNotEmpty(configuredAttributes)) {
             combinedAttributes.addAll(Flux.fromIterable(configuredAttributes) //
-                    .collectSortedList((a, b) -> a.getName().compareTo(b.getName())).block());
+                    .collectSortedList(Comparator.comparing(Attribute::getName)).block());
         }
     }
 

@@ -82,8 +82,8 @@ public enum AtlasExportType {
         List<Pair<InterfaceName, String>> defaultExportAttributesPair = getDefaultExportAttributesPair(
                 entity);
         return defaultExportAttributesPair.stream() //
-                .map(pair -> (!enableEntityMatch || !EM_ATTR_MAP.containsKey(pair.getLeft())) ? //
-                        pair.getLeft() : EM_ATTR_MAP.get(pair.getLeft()))
+                .map(pair -> !enableEntityMatch ? (ATTR_MAP.containsKey(pair.getLeft()) ?
+                        ATTR_MAP.get(pair.getLeft()) : pair.getLeft()) : (EM_ATTR_MAP.containsKey(pair.getLeft()) ? EM_ATTR_MAP.get(pair.getLeft()) : pair.getLeft()))
                 .collect(Collectors.toSet());
     }
 
@@ -93,6 +93,7 @@ public enum AtlasExportType {
         switch (entity) {
             case Account:
                 attrs.add(new ImmutablePair<>(InterfaceName.AccountId, "Account Id"));
+                attrs.add(new ImmutablePair<>(InterfaceName.CustomerAccountId, "Customer Account Id"));
                 attrs.add(new ImmutablePair<>(InterfaceName.CompanyName, "Company Name"));
                 attrs.add(new ImmutablePair<>(InterfaceName.Website, "Website"));
                 attrs.add(new ImmutablePair<>(InterfaceName.Address_Street_1, "Street"));
@@ -104,10 +105,12 @@ public enum AtlasExportType {
                 break;
             case Contact:
                 attrs.add(new ImmutablePair<>(InterfaceName.ContactId, "Contact Id"));
+                attrs.add(new ImmutablePair<>(InterfaceName.CustomerContactId, "Customer Contact Id"));
                 attrs.add(new ImmutablePair<>(InterfaceName.ContactName, "Contact Name"));
                 attrs.add(new ImmutablePair<>(InterfaceName.Email, "Email"));
                 attrs.add(new ImmutablePair<>(InterfaceName.PhoneNumber, "Contact Phone"));
                 attrs.add(new ImmutablePair<>(InterfaceName.AccountId, "Account Id"));
+                attrs.add(new ImmutablePair<>(InterfaceName.CustomerAccountId, "Customer Account Id"));
             default:
         }
         return attrs;
@@ -141,4 +144,10 @@ public enum AtlasExportType {
             InterfaceName.AccountId, InterfaceName.CustomerAccountId, //
             InterfaceName.ContactId, InterfaceName.CustomerContactId //
     );
+
+    private static final Map<InterfaceName, InterfaceName> ATTR_MAP = ImmutableMap.of( //
+            InterfaceName.CustomerAccountId, InterfaceName.AccountId, //
+            InterfaceName.CustomerContactId, InterfaceName.ContactId //
+    );
 }
+

@@ -3,10 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl
 import com.latticeengines.domain.exposed.pls.AccountContactExportContext
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.commons.collections4.CollectionUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
-
-import scala.collection.JavaConverters._
 
 class AccountContactExportJob extends AbstractSparkJob[AccountContactExportConfig] {
 
@@ -29,9 +26,6 @@ class AccountContactExportJob extends AbstractSparkJob[AccountContactExportConfi
       // left join
       val contactJoinKey = AccountContactExportConfig.CONTACT_ATTR_PREFIX + joinKey;
       var joinResult: DataFrame = accountTable.join(contactTable, accountTable(joinKey) === contactTable(contactJoinKey), "left")
-      if (CollectionUtils.isNotEmpty(config.getDropKeys)) {
-        config.getDropKeys.asScala.foreach(dropKey => joinResult = joinResult.drop(dropKey))
-      }
       lattice.output = joinResult :: Nil
     }
   }

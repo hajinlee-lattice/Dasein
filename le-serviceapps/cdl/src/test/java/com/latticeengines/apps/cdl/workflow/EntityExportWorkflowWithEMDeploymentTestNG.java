@@ -34,6 +34,9 @@ public class EntityExportWorkflowWithEMDeploymentTestNG extends EntityExportWork
     }
 
     protected void verifyCsvGzHeder(Map<String, Integer> headerMap) {
+        // make sure header map contains customer account and contact id
+        Assert.assertTrue(headerMap.containsKey("CustomerContactId"), "Header map: " + JsonUtils.serialize(headerMap));
+        Assert.assertTrue(headerMap.containsKey("CustomerAccountId"), "Header map: " + JsonUtils.serialize(headerMap));
         // make sure no account and contact id
         Assert.assertFalse(headerMap.containsKey("Atlas Account ID"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertFalse(headerMap.containsKey("Atlas Contact ID"), "Header map: " + JsonUtils.serialize(headerMap));
