@@ -15,6 +15,9 @@ public class PatchBookConfiguration extends ProviderConfiguration {
     @JsonProperty("SkipValidation")
     private boolean skipValidation;
 
+    @JsonProperty("BatchSize")
+    private Integer batchSize = 0;
+
     // Don't allow multiple PatchBook ingestion running at same time
     @Override
     @JsonProperty("ConcurrentNum")
@@ -26,6 +29,14 @@ public class PatchBookConfiguration extends ProviderConfiguration {
     @JsonProperty("ConcurrentNum")
     public void setConcurrentNum(Integer concurrentNum) {
         this.concurrentNum = 1;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(Integer batchSize) {
+        this.batchSize = batchSize;
     }
 
     public PatchBook.Type getBookType() {

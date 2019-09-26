@@ -90,9 +90,13 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         long totalSize = patchBookEntityMgr.findCountByTypeAndHotFix(patchConfig.getBookType(),
                 PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-        int batchCnt = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
-        log.info(String.format("Total rows to ingest: %d; Divide into %d batches", totalSize, batchCnt));
-        int[] batches = BatchUtils.divideBatches(totalSize, batchCnt);
+        int batchSize = 50000;
+        if (patchConfig.getBatchSize() != 0) {
+            batchSize = patchConfig.getBatchSize();
+        }
+        log.info(String.format("Total rows to ingest: %d; Divide into %d batches", totalSize,
+                batchSize));
+        int[] batches = BatchUtils.divideBatches(totalSize, batchSize);
 
         List<Ingester> ingesters = initializeIngester(patchConfig, currentDate, progress, batches);
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("patchbook-ingest", maxConcurrentBatchCnt);
@@ -100,7 +104,8 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         updateCurrentVersion(ingestion, progress.getVersion());
 
-        progress = ingestionProgressService.updateProgress(progress).size(totalSize).status(ProgressStatus.FINISHED)
+        progress = ingestionProgressService.updateProgress(progress).size(totalSize)
+                .status(ProgressStatus.FINISHED)
                 .commit(true);
         log.info("Ingestion finished. Progress: " + progress.toString());
     }
@@ -108,10 +113,11 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     private List<Ingester> initializeIngester(PatchBookConfiguration patchConfig, Date currentDate,
             IngestionProgress progress, int[] batches) {
         List<Ingester> ingesters = new ArrayList<>();
-        int offset = 0;
+        int minPid = 0;
         for (int i = 0; i < batches.length; i++) {
-            Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i], offset);
-            offset += batches[i];
+            Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i],
+                    minPid);
+            minPid += batches[i];
             ingesters.add(ingester);
         }
         return ingesters;
@@ -123,17 +129,17 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         private final Date currentDate;
         private final IngestionProgress progress;
         private final int batchSeq;
-        private final int batchSize;
-        private final int offset;
+        private final long maxPid;
+        private final long minPid;
 
         Ingester(PatchBookConfiguration patchConfig, Date currentDate, IngestionProgress progress, int batchSeq,
-                int batchSize, int offset) {
+                int batchSize, long minPid) {
             this.patchConfig = patchConfig;
             this.currentDate = currentDate;
             this.progress = progress;
             this.batchSeq = batchSeq;
-            this.batchSize = batchSize;
-            this.offset = offset;
+            this.minPid = minPid;
+            this.maxPid = minPid + batchSize;
         }
 
         @Override
@@ -146,16 +152,17 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         private void validate() {
             try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format("Validated PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize))) {
+                    String.format(
+                            "Validated PatchBook with type=%s, mode=%s, minPid=%d, batch size = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
+                            maxPid))) {
                 log.info(String.format("Validating PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                        patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize));
+                        patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
                 PatchRequest patchRequest = new PatchRequest();
                 patchRequest.setMode(patchConfig.getPatchMode());
                 patchRequest.setDataCloudVersion(progress.getDataCloudVersion());
-                patchRequest.setOffset(offset);
-                patchRequest.setLimit(batchSize);
-                patchRequest.setSortByfield(PatchBook.COLUMN_PID);
+                patchRequest.setOffset(Integer.valueOf(minPid + ""));
+                patchRequest.setLimit(Integer.valueOf(maxPid+""));
 
                 PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
                         patchRequest);
@@ -169,12 +176,15 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         private void ingest() {
             try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format("Imported PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize))) {
-                log.info(String.format("Importing PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                        patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize));
-                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, batchSize,
-                        PatchBook.COLUMN_PID, patchConfig.getBookType(),
+                    String.format(
+                            "Imported PatchBook with type=%s, mode=%s, minPid=%d, maxPid = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
+                            maxPid))) {
+                log.info(String.format(
+                        "Importing PatchBook with type=%s, mode=%s, minPid=%d, maxPid= %d",
+                        patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
+                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
+                        minPid, maxPid, patchConfig.getBookType(),
                         PatchMode.HotFix.equals(patchConfig.getPatchMode()));
                 List<PatchBook> activeBooks = getActiveBooks(books, currentDate);
                 String fileName = "part-" + batchSeq + ".avro";
