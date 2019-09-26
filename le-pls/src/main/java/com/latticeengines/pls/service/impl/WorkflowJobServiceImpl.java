@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.JobStepDisplayInfoMapping;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
@@ -955,7 +956,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Submitted %s with application id %s", configuration.getWorkflowName(), applicationId));
-        return ConverterUtils.toApplicationId(applicationId);
+        return ApplicationIdUtils.toApplicationIdObj(applicationId);
     }
 
     @Override
