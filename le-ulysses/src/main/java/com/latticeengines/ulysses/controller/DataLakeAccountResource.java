@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.RequestEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,7 +59,7 @@ public class DataLakeAccountResource {
     @Qualifier(AccountDanteFormatter.Qualifier)
     private Provider<AccountDanteFormatter> accountDanteFormatterProvider;
 
-    @RequestMapping(value = "/{accountId}/{attributeGroup}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/{accountId}/{attributeGroup}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     public DataPage getAccountById(RequestEntity<String> requestEntity, @PathVariable String accountId, //
@@ -67,7 +67,7 @@ public class DataLakeAccountResource {
         return getAccountById(requestEntity, accountId, attributeGroup, null);
     }
 
-    @RequestMapping(value = "/{accountId}/{attributeGroup}/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     public FrontEndResponse<String> getAccountByIdInDanteFormat(RequestEntity<String> requestEntity,
@@ -94,7 +94,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @RequestMapping(value = "/{accountId}/{attributeGroup}/danteformat/aslist", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat/aslist",  headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     public FrontEndResponse<List<String>> getAccountsByIdInDanteFormat(RequestEntity<String> requestEntity,
@@ -121,7 +121,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @RequestMapping(value = "/spendanalyticssegments/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/spendanalyticssegments/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     public FrontEndResponse<List<String>> getAccountSegmentsInDanteFormat() {

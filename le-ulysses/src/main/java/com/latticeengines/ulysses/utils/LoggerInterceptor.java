@@ -24,7 +24,17 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
                     "/ulysses/danteconfiguration", //
                     "/ulysses/purchasehistory/account/(.*)/danteformat", //
                     "/ulysses/purchasehistory/spendanalyticssegment/(.*)/danteformat", //
-                    "/ulysses/datacollection/accounts/spendanalyticssegments/danteformat");
+                    "/ulysses/producthierarchy/danteformat", //
+                    "/ulysses/datacollection/accounts/spendanalyticssegments/danteformat", //
+                    "/ulysses/datacollection/accounts/(.*)/(.*)/danteformat", //
+                    "/ulysses/datacollection/accounts/(.*)/(.*)/danteformat/aslist", //
+                    "/ulysses/datacollection/accounts/(.*)/(.*)/danteformat", //
+                    "/ulysses/datacollection/accounts/(.*)/(.*)",
+                    "/ulysses/recommendations/(.*)/danteformat", //
+                    "/ulysses/recommendations/(.*)", //
+                    "/ulysses/talkingpoints/playid/(.*)", //
+                    "/ulysses/talkingpoints/playid/(.*)/danteformat" //
+            );
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

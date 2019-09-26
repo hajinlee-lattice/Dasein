@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,18 +41,15 @@ public class ProductHierarchyResource {
     @Resource(name = ProductHierarchyDanteFormatter.Qualifier)
     private ProductHierarchyDanteFormatter productHierarchyDanteFormatter;
 
-    @RequestMapping(value = "/danteformat", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the product hierarchy data for the given account")
     public FrontEndResponse<List<String>> getProductHierarchy() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         try {
-            return new FrontEndResponse<>(
-                    productHierarchyDanteFormatter
-                            .format(JsonUtils.convertList(
-                                    periodTransactionProxy.getProductHierarchy(customerSpace, //
-                                            dataCollectionProxy.getActiveVersion(customerSpace)),
-                                    ProductHierarchy.class)));
+            return new FrontEndResponse<>(productHierarchyDanteFormatter
+                    .format(JsonUtils.convertList(periodTransactionProxy.getProductHierarchy(customerSpace, //
+                            dataCollectionProxy.getActiveVersion(customerSpace)), ProductHierarchy.class)));
         } catch (LedpException le) {
             log.error("Failed to get the product hierarchy data", le);
             return new FrontEndResponse<>(le.getErrorDetails());
