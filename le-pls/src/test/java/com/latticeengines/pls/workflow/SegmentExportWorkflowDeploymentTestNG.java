@@ -148,6 +148,8 @@ public class SegmentExportWorkflowDeploymentTestNG extends PlsDeploymentTestNGBa
             Reader in = new InputStreamReader(s3Stream);
             CSVParser records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
             Map<String, Integer> headerMap = records.getHeaderMap();
+            Assert.assertTrue(headerMap.containsKey("Customer Account Id"), "Header map: " + JsonUtils.serialize(headerMap));
+            Assert.assertTrue(headerMap.containsKey("Customer Contact Id"), "Header map: " + JsonUtils.serialize(headerMap));
             Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
             Assert.assertTrue(headerMap.containsKey("CEO Title"), "Header map: " + JsonUtils.serialize(headerMap));
             Assert.assertEquals(records.getRecords().size(), 235);

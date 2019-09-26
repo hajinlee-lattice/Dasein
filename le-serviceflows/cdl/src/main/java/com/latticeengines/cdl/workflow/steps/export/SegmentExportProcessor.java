@@ -24,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.conf.Configuration;
 import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
@@ -113,6 +114,16 @@ public abstract class SegmentExportProcessor {
     protected abstract void fetchAndProcessPage(Schema schema, SegmentExportContext segmentExportContext,
                                                 File localFile) throws IOException;
 
+    private boolean filterAccountId(Triple<BusinessEntity, String, String> tuple, boolean entityMatchEnabled) {
+        return InterfaceName.AccountId.name().equals(tuple.getMiddle()) ||
+                (entityMatchEnabled && InterfaceName.CustomerAccountId.name().equals(tuple.getMiddle()));
+    }
+
+    private boolean filterContactId(Triple<BusinessEntity, String, String> tuple, boolean entityMatchEnabled) {
+        return InterfaceName.ContactId.name().equals(tuple.getMiddle()) ||
+                (entityMatchEnabled && InterfaceName.CustomerContactId.name().equals(tuple.getMiddle()));
+    }
+
     public void executeExportActivity(Tenant tenant, SegmentExportStepConfiguration config,
                                       Configuration yarnConfiguration) {
         CustomerSpace customerSpace = config.getCustomerSpace();
@@ -135,13 +146,12 @@ public abstract class SegmentExportProcessor {
         List<Attribute> configuredRatingAttributes = configuredBusEntityAttrMap.get(BusinessEntity.Rating);
         List<Attribute> configuredPurHistoryAttributes = configuredBusEntityAttrMap.get(BusinessEntity.PurchaseHistory);
         List<Attribute> configuredCuratedAccAttributes = configuredBusEntityAttrMap.get(BusinessEntity.CuratedAccount);
-
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(customerSpace);
         if (exportType == AtlasExportType.ACCOUNT || exportType == AtlasExportType.ACCOUNT_AND_CONTACT) {
             configuredAccountAttributes.addAll(getSchema(tenant.getId(), BusinessEntity.Account));
-
             Map<String, Attribute> defaultAccountAttributesMap = exportType.getDefaultAttributeTuples().stream() //
                     .filter(tuple -> tuple.getLeft() == BusinessEntity.Account
-                            && InterfaceName.AccountId.name().equals(tuple.getMiddle())) //
+                            && filterAccountId(tuple, entityMatchEnabled))
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Account.name() + SEPARATOR + tuple.getMiddle());
@@ -151,9 +161,7 @@ public abstract class SegmentExportProcessor {
                         return attribute;
                     }) //
                     .collect(Collectors.toMap(Attribute::getName, att -> att));
-
             configuredAccountAttributes.forEach(attr -> defaultAccountAttributesMap.remove(attr.getName()));
-
             if (MapUtils.isNotEmpty(defaultAccountAttributesMap)) {
                 configuredAccountAttributes.addAll(defaultAccountAttributesMap.values());
             }
@@ -177,8 +185,7 @@ public abstract class SegmentExportProcessor {
             Map<String, Attribute> defaultContactAttributesMap = new HashMap<>();
             exportType.getDefaultAttributeTuples().stream() //
                     .filter(tuple -> tuple.getLeft() == BusinessEntity.Contact
-                            && (InterfaceName.ContactId.name().equals(tuple.getMiddle())
-                            || InterfaceName.AccountId.name().equals(tuple.getMiddle()))) //
+                            && (filterAccountId(tuple, entityMatchEnabled) || filterContactId(tuple, entityMatchEnabled))) //
                     .map(tuple -> {
                         Attribute attribute = new Attribute();
                         attribute.setName(BusinessEntity.Contact.name() + SEPARATOR + tuple.getMiddle());
@@ -203,7 +210,7 @@ public abstract class SegmentExportProcessor {
             });
         }
 
-        registerTableForExport(customerSpace, metadataSegmentExport, configuredBusEntityAttrMap);
+        registerTableForExport(customerSpace, metadataSegmentExport, configuredBusEntityAttrMap, entityMatchEnabled);
         config.setMetadataSegmentExport(metadataSegmentExport);
         SegmentExportContext segmentExportContext = initSegmentExportContext(tenant, config, metadataSegmentExport,
                 configuredBusEntityAttrMap);
@@ -250,13 +257,12 @@ public abstract class SegmentExportProcessor {
         }
     }
 
-    private void registerTableForExport( //
-                                         CustomerSpace customerSpace, MetadataSegmentExport metadataSegmentExportJob, //
-                                         Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap) {
+    private void registerTableForExport(CustomerSpace customerSpace, MetadataSegmentExport metadataSegmentExportJob,
+                                        Map<BusinessEntity, List<Attribute>> configuredBusEntityAttrMap, boolean entityMatchEnabled) {
 
         Tenant tenant = new Tenant(customerSpace.toString());
         Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(tenant, metadataSegmentExportJob,
-                configuredBusEntityAttrMap, batonService.isEntityMatchEnabled(customerSpace));
+                configuredBusEntityAttrMap, entityMatchEnabled);
 
         metadataProxy.createTable(tenant.getId(), segmentExportTable.getName(), segmentExportTable);
     }
@@ -361,7 +367,7 @@ public abstract class SegmentExportProcessor {
     }
 
     private void setSortField(BusinessEntity entityType, List<String> sortBy, boolean descending,
-                                    FrontEndQuery entityFrontEndQuery) {
+                              FrontEndQuery entityFrontEndQuery) {
         if (CollectionUtils.isEmpty(sortBy)) {
             sortBy = Collections.singletonList(InterfaceName.AccountId.name());
         }
@@ -456,3 +462,4 @@ public abstract class SegmentExportProcessor {
     }
 
 }
+
