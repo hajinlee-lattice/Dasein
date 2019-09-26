@@ -8,8 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.actors.template.ExecutorMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -32,9 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 
 @Component("contactMatchPlannerMicroEngineActor")
 @Scope("prototype")
-public class ContactMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemplate {
-
-    private static final Logger log = LoggerFactory.getLogger(ContactMatchPlannerMicroEngineActor.class);
+public class ContactMatchPlannerMicroEngineActor extends PlannerMicroEngineActorBase {
 
     @Value("${datacloud.match.planner.contact.executors.num}")
     private int executorNum;
@@ -93,16 +88,15 @@ public class ContactMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
     }
 
     @Override
-    protected void execute(Traveler traveler) {
-        MatchTraveler matchTraveler = (MatchTraveler) traveler;
-        List<Object> inputRecord = matchTraveler.getInputDataRecord();
-        Map<MatchKey, List<Integer>> keyPositionMap = matchTraveler.getEntityKeyPositionMaps()
+    protected void standardizeMatchFields(MatchTraveler traveler) {
+        List<Object> inputRecord = traveler.getInputDataRecord();
+        Map<MatchKey, List<Integer>> keyPositionMap = traveler.getEntityKeyPositionMaps()
                 .getOrDefault(Contact.name(), new HashMap<>());
-        EntityMatchKeyRecord entityMatchKeyRecord = matchTraveler.getEntityMatchKeyRecord();
+        EntityMatchKeyRecord entityMatchKeyRecord = traveler.getEntityMatchKeyRecord();
 
         matchStandardizationService.parseRecordForContact(inputRecord, keyPositionMap, entityMatchKeyRecord);
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createContactMatchKeyTuple(entityMatchKeyRecord);
-        Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(matchTraveler.getMatchInput(),
+        Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(traveler.getMatchInput(),
                 Contact.name());
         // MatchKeyTuple.SystemIds is updated during parsing
         matchStandardizationService.parseRecordForSystemIds(inputRecord, keyMap, keyPositionMap, matchKeyTuple,
@@ -110,7 +104,7 @@ public class ContactMatchPlannerMicroEngineActor extends ExecutorMicroEngineTemp
         matchStandardizationService.parseRecordForPreferredEntityId(Contact.name(), inputRecord, keyPositionMap,
                 entityMatchKeyRecord);
 
-        matchTraveler.setMatchKeyTuple(matchKeyTuple);
-        matchTraveler.addEntityMatchKeyTuple(Contact.name(), matchKeyTuple);
+        traveler.setMatchKeyTuple(matchKeyTuple);
+        traveler.addEntityMatchKeyTuple(Contact.name(), matchKeyTuple);
     }
 }

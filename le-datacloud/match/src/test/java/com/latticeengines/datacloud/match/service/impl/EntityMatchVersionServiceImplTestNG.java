@@ -1,74 +1,76 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.datacloud.match.testframework.EntityMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
-public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class EntityMatchVersionServiceImplTestNG extends EntityMatchFunctionalTestNGBase {
 
-    private static final Tenant TEST_BASIC_OPERATION_TENANT = new Tenant("test_version_basic_operation");
-    private static final Tenant TEST_CACHE_TENANT = new Tenant("test_version_cache");
-    private static final Tenant TEST_SET_VERSION_TENANT = new Tenant("test_version_set_version");
-    private static final Tenant TEST_BUMP_NEXT_VERSION_TENANT = new Tenant("test_bump_next_version");
-    private static final List<Tenant> TEST_TENANTS = Arrays.asList(
-            TEST_BASIC_OPERATION_TENANT, TEST_CACHE_TENANT, TEST_SET_VERSION_TENANT, TEST_BUMP_NEXT_VERSION_TENANT);
+    private static final Logger log = LoggerFactory.getLogger(EntityMatchVersionServiceImplTestNG.class);
 
     @Inject
     private EntityMatchVersionServiceImpl entityMatchVersionService;
 
-    @BeforeClass(groups = "functional")
+    private Queue<Tenant> tenants = new ConcurrentLinkedQueue<>();
+
     @AfterClass(groups = "functional")
     private void clearVersions() {
         for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
-            TEST_TENANTS.forEach(tenant -> entityMatchVersionService.clearVersion(env, tenant));
+            tenants.forEach(tenant -> entityMatchVersionService.clearVersion(env, tenant));
         }
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testBasicOperations() {
+        Tenant tenant = newTestTenant();
+        tenants.add(tenant);
         // clear version
         EntityMatchEnvironment env1 = EntityMatchEnvironment.STAGING;
         EntityMatchEnvironment env2 = EntityMatchEnvironment.SERVING;
 
         // get default version
-        int defaultVersion1 = entityMatchVersionService.getCurrentVersion(env1, TEST_BASIC_OPERATION_TENANT);
-        int nextVersion1 = entityMatchVersionService.getNextVersion(env1, TEST_BASIC_OPERATION_TENANT);
-        int defaultVersion2 = entityMatchVersionService.getCurrentVersion(env2, TEST_BASIC_OPERATION_TENANT);
-        int nextVersion2 = entityMatchVersionService.getNextVersion(env2, TEST_BASIC_OPERATION_TENANT);
+        int defaultVersion1 = entityMatchVersionService.getCurrentVersion(env1, tenant);
+        int nextVersion1 = entityMatchVersionService.getNextVersion(env1, tenant);
+        int defaultVersion2 = entityMatchVersionService.getCurrentVersion(env2, tenant);
+        int nextVersion2 = entityMatchVersionService.getNextVersion(env2, tenant);
         Assert.assertEquals(defaultVersion1, defaultVersion2); // different env should have the same default version
         Assert.assertEquals(nextVersion1, nextVersion2);
         Assert.assertNotEquals(defaultVersion1, nextVersion1);
 
         // bump version
-        int bumpedVersion1 = entityMatchVersionService.bumpVersion(env1, TEST_BASIC_OPERATION_TENANT);
-        int bumpedNextVersion1 = entityMatchVersionService.getNextVersion(env1, TEST_BASIC_OPERATION_TENANT);
+        int bumpedVersion1 = entityMatchVersionService.bumpVersion(env1, tenant);
+        int bumpedNextVersion1 = entityMatchVersionService.getNextVersion(env1, tenant);
         // check bumped
         Assert.assertEquals(bumpedVersion1, nextVersion1);
         Assert.assertNotEquals(bumpedVersion1, bumpedNextVersion1);
-        Assert.assertEquals(entityMatchVersionService.getCurrentVersion(env1, TEST_BASIC_OPERATION_TENANT), bumpedVersion1);
+        Assert.assertEquals(entityMatchVersionService.getCurrentVersion(env1, tenant), bumpedVersion1);
         // the other is not changed
-        Assert.assertEquals(entityMatchVersionService.getCurrentVersion(env2, TEST_BASIC_OPERATION_TENANT), defaultVersion2);
+        Assert.assertEquals(entityMatchVersionService.getCurrentVersion(env2, tenant), defaultVersion2);
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testSetVersion() {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING;
-        Tenant tenant = TEST_SET_VERSION_TENANT;
+        Tenant tenant = newTestTenant();
+        tenants.add(tenant);
 
         int currVersion = entityMatchVersionService.getCurrentVersion(env, tenant);
         int nextVersion = entityMatchVersionService.getNextVersion(env, tenant);
@@ -97,7 +99,8 @@ public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctiona
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testBumpNextVersion() {
         EntityMatchEnvironment env = EntityMatchEnvironment.SERVING;
-        Tenant tenant = TEST_BUMP_NEXT_VERSION_TENANT;
+        Tenant tenant = newTestTenant();
+        tenants.add(tenant);
 
         int currVersion = entityMatchVersionService.getCurrentVersion(env, tenant);
         int nextVersion = entityMatchVersionService.getNextVersion(env, tenant);
@@ -115,7 +118,8 @@ public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctiona
      */
     @Test(groups = "functional")
     private void testCache() {
-        Tenant tenant = TEST_CACHE_TENANT;
+        Tenant tenant = newTestTenant();
+        tenants.add(tenant);
         for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
             int v1 = entityMatchVersionService.getCurrentVersion(env, tenant);
             // check the value is cache is correct
@@ -144,5 +148,15 @@ public class EntityMatchVersionServiceImplTestNG extends DataCloudMatchFunctiona
         Assert.assertNotNull(entityMatchVersionService.getVersionCache());
         Pair<String, EntityMatchEnvironment> cacheKey = Pair.of(tenant.getId(), env);
         Assert.assertEquals(entityMatchVersionService.getVersionCache().getIfPresent(cacheKey), expectedVersion);
+    }
+
+    @Override
+    protected List<String> getExpectedOutputColumns() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    protected Logger getLogger() {
+        return log;
     }
 }

@@ -95,6 +95,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // Prepare before entering actor system or at match planner actor
     private MatchKeyTuple matchKeyTuple;
 
+    // whether there are invalid match field value
+    private Boolean hasInvalidValue = false;
+
     // Whether match goal is achieved in current decision graph
     private Boolean isMatched = false;
 
@@ -166,6 +169,15 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     protected void recoverOtherTransitionHistory(List<Object> others) {
         matchLookupResults = (List<Pair<MatchKeyTuple, List<String>>>) others.get(0);
         actorLookupResIdxes = (Map<String, Integer>) others.get(1);
+        if (hasInvalidValue) {
+            // clear whatever lookup results since some match field is invalid
+            if (matchLookupResults != null) {
+                matchLookupResults.clear();
+            }
+            if (actorLookupResIdxes != null) {
+                actorLookupResIdxes.clear();
+            }
+        }
     }
 
     /*******************************
@@ -282,6 +294,15 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setMatchKeyTuple(MatchKeyTuple matchKeyTuple) {
         this.matchKeyTuple = matchKeyTuple;
+    }
+
+    @MetricField(name = "HasInvalidValue", fieldType = MetricField.FieldType.BOOLEAN)
+    public Boolean getHasInvalidValue() {
+        return hasInvalidValue;
+    }
+
+    public void setHasInvalidValue(Boolean hasInvalidValue) {
+        this.hasInvalidValue = hasInvalidValue;
     }
 
     @MetricField(name = "Matched", fieldType = MetricField.FieldType.BOOLEAN)

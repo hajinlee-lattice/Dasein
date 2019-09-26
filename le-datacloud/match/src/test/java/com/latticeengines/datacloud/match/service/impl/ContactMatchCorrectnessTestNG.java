@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -706,6 +707,58 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                         }, //
                         new String[] { "C_CID_1", "j.reese@netflix.com", null, null, null, null, null, null }, //
                         EntityMatchStatus.MERGE_EXISTING, EntityMatchStatus.MERGE_EXISTING) }, //
+        };
+    }
+
+    @Test(groups = "functional", dataProvider = "invalidMatchField", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testInvalidMatchField(ContactMatchTestCase testCase) {
+        matchAndVerify(testCase);
+    }
+
+    @DataProvider(name = "invalidMatchField")
+    private Object[][] invalidMatchFieldTestData() {
+        return new Object[][] { //
+                /*-
+                 * Invalid contact match fields, valid account match fields
+                 */
+                { new ContactMatchTestCase(null, //
+                        new String[] { "C_CID#1", "j.reese@google.com", null, null, "C_AID_1", null, null, null }, //
+                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                { new ContactMatchTestCase(null, //
+                        new String[] { null, null, "John:Doe", "999-333-1234", "C_AID_4", null, null, null }, //
+                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                /*-
+                 * Valid contact match fields, invalid account match fields
+                 */
+                { new ContactMatchTestCase(null, //
+                        new String[] { "C_CID_1", "j.reese@google.com", null, null, "C_AID||2", null, null, null }, //
+                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                { new ContactMatchTestCase(null, //
+                        new String[] { null, "john.doe@google.com", null, null, "C_AID_4",
+                                RandomStringUtils.randomAlphanumeric(1000), null, null }, //
+                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                /*-
+                 * Invalid account and contact match fields
+                 */
+                { new ContactMatchTestCase(null, //
+                        new String[] { "C_CID_:3||ab#", null, null, null, "C_AID||3", null, null, null }, //
+                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                { new ContactMatchTestCase(null, //
+                        new String[] { "C_CID_:5||ab#", null, "John:Doe", "333-444-1234", "C_AID3",
+                                "Invalid:Company#Name", null, null }, //
+                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                /*-
+                 * no match fields provided, just in case
+                 */
+                { new ContactMatchTestCase(null, //
+                        new String[] { null, null, null, null, null, null, null, null }, //
+                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                /*-
+                 * for email, standardization will take care of invalid characters
+                 */
+                { new ContactMatchTestCase(null, //
+                        new String[] { null, "joh#n:do||e@google.com", null, null, "C_AID_4", null, null, null }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
         };
     }
 
