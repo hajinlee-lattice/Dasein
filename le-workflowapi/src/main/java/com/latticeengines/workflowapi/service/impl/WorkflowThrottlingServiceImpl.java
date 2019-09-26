@@ -191,9 +191,11 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
         try {
             WorkflowThrottlingSystemStatus status = constructSystemStatus(podid, division);
             logGlobalStatus(status.getEnqueuedWorkflowInEnv(),
-                    String.format("WorkflowThrottling Global Queue Status on environment=%s stack=%s cluster=%s: ", podid, division, emrCacheService.getClusterId()));
+                    String.format("WorkflowThrottling Global Queue Status on environment=%s stack=%s cluster=%s: ",
+                            podid, division, emrCacheService.getClusterId()));
             logGlobalStatus(status.getRunningWorkflowInEnv(),
-                    String.format("WorkflowThrottling Global Running Status on environment=%s stack=%s cluster=%s: ", podid, division, emrCacheService.getClusterId()));
+                    String.format("WorkflowThrottling Global Running Status on environment=%s stack=%s cluster=%s: ",
+                            podid, division, emrCacheService.getClusterId()));
             List<WorkflowThrottlingConstraint> constraintList = Arrays.asList(new NotExceedingEnvQuota(),
                     new NotExceedingTenantQuota(), new IsForCurrentStack());
             List<WorkflowJobSchedulingObject> enqueuedWorkflowSchedulingObjects = status.getEnqueuedWorkflowJobs()
@@ -224,7 +226,8 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
                         customerSpace, division));
             }
             List<WorkflowJob> enqueuedWorkflowJobs = workflowJobEntityMgr
-                    .findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name()));
+                    .findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name())).stream()
+                    .filter(o -> division.equals(o.getStack())).collect(Collectors.toList());
             List<WorkflowJob> tenantEnqueuedWorkflowJobs = enqueuedWorkflowJobs.stream()
                     .filter(o -> customerSpace.equals(o.getTenant().getId())).collect(Collectors.toList());
             Map<JobStatus, Integer> globalLimitMap = config.getGlobalLimit().getOrDefault(workflowType,
