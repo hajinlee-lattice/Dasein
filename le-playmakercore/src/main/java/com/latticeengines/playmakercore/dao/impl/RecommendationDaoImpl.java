@@ -324,21 +324,17 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     @Override
     public int deleteInBulkByLaunchId(String launchId, boolean hardDelete, int maxUpdateRows) {
         Session session = getSessionFactory().getCurrentSession();
+        String softDeleteQueryStr = "UPDATE " + getEntityClass().getSimpleName() + " " //
+                + "SET deleted = :deleted " //
+                + "WHERE launchId = :launchId AND deleted = :notDeleted ";
 
-        Class<Recommendation> entityClz = getEntityClass();
-        String selectQueryStr = "SELECT recommendationId " + "FROM %s " //
-                + "WHERE launchId = :launchId " //
-                + "AND deleted = :deleted ";
-
-        selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
-
-        Query<?> query = session.createQuery(selectQueryStr);
+        Query<?> query = session.createQuery(softDeleteQueryStr);
         query.setParameter("launchId", launchId);
-        query.setParameter("deleted", Boolean.FALSE);
+        query.setParameter("deleted", Boolean.TRUE);
+        query.setParameter("notDeleted", Boolean.FALSE);
         query.setMaxResults(maxUpdateRows);
-        List<?> recommendationIds = query.getResultList();
 
-        return runBulkUpdate(session, entityClz, recommendationIds);
+        return query.executeUpdate();
     }
 
     @SuppressWarnings("deprecation")
@@ -371,39 +367,16 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             return 0;
         }
         Session session = getSessionFactory().getCurrentSession();
-
-        Class<Recommendation> entityClz = getEntityClass();
-        String selectQueryStr = "SELECT recommendationId " //
-                + "FROM %s " //
-                + "WHERE UNIX_TIMESTAMP(launchDate) <= :launchDate " //
-                + "AND deleted = :deleted ";
-
-        selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
-
-        Query<?> query = session.createQuery(selectQueryStr);
-        query.setBigInteger("launchDate", new BigInteger((dateToUnixTimestamp(cutoffDate).toString())));
-        query.setParameter("deleted", Boolean.FALSE);
-
-        query.setMaxResults(maxUpdateRows);
-        List<?> recommendationIds = query.getResultList();
-
-        return runBulkUpdate(session, entityClz, recommendationIds);
-    }
-
-    private int runBulkUpdate(Session session, Class<Recommendation> entityClz, List<?> recommendationIds) {
-        if (CollectionUtils.isEmpty(recommendationIds)) {
-            return 0;
-        }
-
-        String updateQueryStr = "UPDATE %s " //
+        String softDeleteQueryStr = "UPDATE " + getEntityClass().getSimpleName() + " " //
                 + "SET deleted = :deleted " //
-                + "WHERE recommendationId IN ( :recommendationIds ) ";
+                + "WHERE UNIX_TIMESTAMP(launchDate) <= :launchDate AND deleted = :notDeleted ";
 
-        updateQueryStr = String.format(updateQueryStr, entityClz.getSimpleName());
-
-        Query<?> query = session.createQuery(updateQueryStr);
+        Query<?> query = session.createQuery(softDeleteQueryStr);
         query.setParameter("deleted", Boolean.TRUE);
-        query.setParameterList("recommendationIds", recommendationIds);
+        query.setParameter("notDeleted", Boolean.FALSE);
+        query.setBigInteger("launchDate", new BigInteger((dateToUnixTimestamp(cutoffDate).toString())));
+        query.setMaxResults(maxUpdateRows);
+
         return query.executeUpdate();
     }
 
