@@ -61,9 +61,10 @@ alias pytests='cd $WSHOME/le-dataplatform/src/test/python && PYTHONPATH=../../ma
 alias runjetty='runtest -p jetty -c jetty:run'
 alias runjetty2='runtest -p jetty2 -c jetty:run-forked'
 
-alias uibld='pushd $WSHOME/le-ui && npm install && popd'
-alias uirunlpi='cd $WSHOME/le-ui && npm run local'
-alias uirunadmin='cd $WSHOME/le-ui && npm run local_admin'
+# New var UIHOME=${UIHOME:-"${WSHOME}/../leui"} for new UI repo leui as of Aug, 2019
+alias uibld='pushd ${UIHOME:-"${WSHOME}/../leui"} && npm install && popd'
+alias uirunlpi='cd ${UIHOME:-"${WSHOME}/../leui"} && npm run local'
+alias uirunadmin='cd ${UIHOME:-"${WSHOME}/../leui"} && npm run local_admin'
 
 alias dpltc='python $WSHOME/le-dev/scripts/tcdpl.py'
 alias dpltc3='python3 $WSHOME/le-dev/scripts/tcdpl.py'
@@ -98,8 +99,8 @@ alias dkstopui='docker stop le-ui; dkrmc'
 alias recordtransformertest='MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m" mvn -Pfunctional -Djetty.port=8016 -DTENANT=tenant10 -Dtest=RecordTransformerTestNG verify &> /tmp/test.log'
 alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
 
-alias runui='pushd $WSHOME/le-ui && npm install && npm run local && popd'
-alias runadminui='pushd $WSHOME/le-ui && npm install && npm run local_admin && popd'
+alias runui='pushd ${UIHOME:-"${WSHOME}/../leui"} && npm install && npm run local && popd'
+alias runadminui='pushd ${UIHOME:-"${WSHOME}/../leui"} && npm install && npm run local_admin && popd'
 
 alias kfk-deploy='bash $WSHOME/le-dev/scripts/setupkafka.sh'
 alias kfk-start='bash $WSHOME/le-dev/scripts/start-kafka.sh'
