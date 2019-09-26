@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,6 +202,22 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Assert.assertEquals(
                 lookupAccount(tenant, nextVersion, true, "acct_1", null, null, null, null, null, null, null),
                 entityIdInNextVersion);
+    }
+
+    @Test(groups = "functional", dataProvider = "invalidMatchField", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testInvalidMatchFieldAllocation(String[] data, boolean hasInvalidField) {
+        Tenant tenant = newTestTenant();
+
+        MatchOutput output = matchAccount(Arrays.asList(data), true, tenant, getEntityKeyMap(), FIELDS, null)
+                .getRight();
+        String entityId = verifyAndGetEntityId(output);
+
+        // error out the entire row when some match field is invalid
+        if (hasInvalidField) {
+            Assert.assertEquals(entityId, ENTITY_ANONYMOUS_ID);
+        } else {
+            Assert.assertNotEquals(entityId, ENTITY_ANONYMOUS_ID);
+        }
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
@@ -1032,6 +1050,37 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
             }
         });
         return map;
+    }
+
+    /*-
+     * Test data for match field value validation. If some field contains invalid value,
+     * entire row will be errored out and we'll get anonymous entity.
+     *
+     * 1. [ CustomerAccountId, MktoId, EloquaId, Name, Domain, Country, State, DUNS, PreferredEntityId ]
+     * 2. hasInvalidValue
+     */
+    @DataProvider(name = "invalidMatchField")
+    private Object[][] provideInvalidMatchFieldTestData() {
+        return new Object[][] { //
+                /*-
+                 * invalid value in diff match fields
+                 */
+                { new String[] { "caid:1", null, "eid_1", "google", "google.com", null, null, null, null }, true }, //
+                { new String[] { "caid#2", null, "eid||123", "hello:world", "google.com", null, null, null, null },
+                        true }, //
+                { new String[] { "caid3", null, "eid3", "google", "google.com", null, null, null,
+                        "invalid:preferred||id" }, true }, //
+                { new String[] { "caid3", null, "eid3", RandomStringUtils.randomAlphanumeric(1000), "google.com", null,
+                        null, null, "account_123" }, true }, //
+                { new String[] { "caid3", "||:#", "eid3", null, null, null, null, null, "account_123" }, true }, //
+                /*-
+                 * standardization on certain fields take care of invalid characters
+                 */
+                { new String[] { "caid4", null, null, "google", "goo||gle.com", "USA", "CA", null, "" }, false }, //
+                { new String[] { "caid5", null, null, "google", "google.com", "U#S#A", "CA", null, "" }, false }, //
+                { new String[] { "caid4", null, null, "google", null, null, "state:123", null, null }, false }, //
+                { new String[] { "caid4", null, null, "google", null, null, null, "invalid||duns", null }, false }, //
+        }; //
     }
 
     /**

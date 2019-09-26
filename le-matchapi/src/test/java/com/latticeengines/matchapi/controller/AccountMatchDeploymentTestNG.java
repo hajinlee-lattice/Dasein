@@ -1,5 +1,6 @@
 package com.latticeengines.matchapi.controller;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 import static java.lang.Boolean.FALSE;
@@ -135,6 +136,13 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             BOOL_FIELD,
     };
 
+    private static final String[] FIELDS_INVALID_VALUE = { //
+            TEST_ID, //
+            InterfaceName.CustomerAccountId.name(), //
+            MatchKey.Name.name(), //
+            BOOL_FIELD, //
+    };
+
     private static final List<Class<?>> SCHEMA = new ArrayList<>(Collections.nCopies(FIELDS.length, String.class));
 
     private static final List<Class<?>> SCHEMA_FETCHONLY = new ArrayList<>(
@@ -148,6 +156,9 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final List<Class<?>> SCHEMA_PREFERRED_ID = new ArrayList<>(
             Collections.nCopies(FIELDS_PREFERRED_ID.length, String.class));
+
+    private static final List<Class<?>> SCHEMA_INVALID_VALUE = new ArrayList<>(
+            Collections.nCopies(FIELDS_INVALID_VALUE.length, String.class));
 
     /***************************************************************
      * TestId is designed with format C<CaseGroupId>_<CaseId>
@@ -405,6 +416,29 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "C15_12", "caid_12", RandomStringUtils.randomAlphanumeric(1000), FALSE.toString() }, // too long
     };
 
+    // Schema: TestId, CustomerAccountId, CompanyName, HasInvalidValue
+    private static final Object[][] DATA_INVALID_VALUE = {
+            /*-
+             * invalid match field values
+             */
+            { "C_16_01", "caid:1", "some_company_name", TRUE.toString() }, //
+            { "C_16_02", "caid#2", "some_company_name", TRUE.toString() }, //
+            { "C_16_03", "caid||3", "some_company_name", TRUE.toString() }, //
+            { "C_16_04", RandomStringUtils.randomAlphanumeric(1000), "some_company_name", TRUE.toString() }, //
+            { "C_16_05", "caid16_5", RandomStringUtils.randomAlphanumeric(1000), TRUE.toString() }, //
+            { "C_16_06", "caid:123#456||789", "some_company_name:123", TRUE.toString() }, //
+            /*-
+             * company name cleanup deal with invalid characters
+             */
+            { "C_16_07", "caid16_7", "some_company_name#123", FALSE.toString() }, //
+            { "C_16_08", "caid16_8", "some_company_name:456", FALSE.toString() }, //
+            { "C_16_09", "caid16_9", "some_company_name||789", FALSE.toString() }, //
+            /*-
+             * valid match field values
+             */
+            { "C_16_10", "caid16_10", "some_company_name", FALSE.toString() }, //
+    };
+
     // prepare in the run time because it needs EntityId got from non-fetch-only
     // mode test
     private Object[][] dataFetchOnly;
@@ -416,6 +450,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String CASE_LEAD_TO_ACCT_NOAID = "LEAD_TO_ACCT_NOAID";
     private static final String CASE_ID_CASEINSENSITIVE_MATCH = "SYSTEM_ID_CASE_INSENSITIVE";
     private static final String CASE_PREFERRED_ID = "PREFERRED_ID";
+    private static final String CASE_INVALID_VALUE = "INVALID_MATCH_FIELD_VALUE";
 
     private String googleEntityId = null;
 
@@ -494,6 +529,12 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         runAndVerify(input, CASE_PREFERRED_ID);
     }
 
+    @Test(groups = "deployment", priority = 8)
+    public void testInvalidMatchFieldValue() {
+        MatchInput input = prepareInvalidMatchFieldValueMatchInput();
+        runAndVerify(input, CASE_INVALID_VALUE);
+    }
+
     private void publishBaseSet() {
         // No need to bump up version because test generates new test every time
         EntityPublishRequest request = new EntityPublishRequest();
@@ -517,6 +558,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             validateLeadToAcctResult(finalStatus, scenario);
         } else if (CASE_PREFERRED_ID.equals(scenario)) {
             validatePreferredEntityIdResult(finalStatus);
+        } else if (CASE_INVALID_VALUE.equals(scenario)) {
+            validateInvalidMatchValueResult(finalStatus);
         } else if (input.isFetchOnly()) {
             validateAcctMatchFetchOnlyResult(finalStatus.getResultLocation());
         } else {
@@ -593,6 +636,29 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
+        return input;
+    }
+
+    private MatchInput prepareInvalidMatchFieldValueMatchInput() {
+        MatchInput input = new MatchInput();
+        input.setTenant(tenant);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
+        input.setPredefinedSelection(Predefined.ID);
+        input.setFields(Arrays.asList(FIELDS_INVALID_VALUE));
+        input.setSkipKeyResolution(true);
+        input.setOperationalMode(OperationalMode.ENTITY_MATCH);
+        input.setTargetEntity(BusinessEntity.Account.name());
+        input.setAllocateId(true);
+        input.setUseDnBCache(true);
+        input.setUseRemoteDnB(true);
+        // not testing new entity feature
+        input.setOutputNewEntities(false);
+
+        MatchInput.EntityKeyMap map = new MatchInput.EntityKeyMap();
+        map.addMatchKey(MatchKey.SystemId, InterfaceName.CustomerAccountId.name());
+        map.addMatchKey(MatchKey.Name, MatchKey.Name.name());
+        input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
+        input.setInputBuffer(prepareBulkData(CASE_INVALID_VALUE));
         return input;
     }
 
@@ -675,6 +741,10 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         case CASE_PREFERRED_ID:
             uploadAvroData(DATA_PREFERRED_ID, Arrays.asList(FIELDS_PREFERRED_ID), SCHEMA_PREFERRED_ID, avroDir,
                     CASE_PREFERRED_ID + ".avro");
+            break;
+        case CASE_INVALID_VALUE:
+            uploadAvroData(DATA_INVALID_VALUE, Arrays.asList(FIELDS_INVALID_VALUE), SCHEMA_INVALID_VALUE, avroDir,
+                    CASE_INVALID_VALUE + ".avro");
             break;
         default:
             throw new UnsupportedOperationException("Unknown test scenario " + scenario);
@@ -841,6 +911,36 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     }
 
     /*-
+     * Validate that if some match field value is invalid, the row will be errored out and return anonymous entity
+     */
+    private void validateInvalidMatchValueResult(@NotNull MatchCommand command) {
+        Assert.assertNotNull(command);
+        Assert.assertNotNull(command.getResultLocation());
+
+        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                command.getResultLocation() + "/*.avro");
+        Set<String> testIds = new HashSet<>();
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String testId = record.get(TEST_ID).toString();
+            testIds.add(testId);
+            String entityId = record.get(ENTITY_ID_FIELD).toString();
+            String hasInvalidValue = record.get(BOOL_FIELD).toString();
+
+            log.info("TestId={}, EntityId={}, HasInvalidValue={}", testId, entityId, hasInvalidValue);
+
+            if (TRUE.toString().equalsIgnoreCase(hasInvalidValue)) {
+                Assert.assertEquals(entityId, ENTITY_ANONYMOUS_ID,
+                        "Should get anonymous account when some match field values are invalid");
+            } else {
+                Assert.assertNotEquals(entityId, ENTITY_ANONYMOUS_ID);
+            }
+        }
+        Assert.assertEquals(testIds.size(), DATA_INVALID_VALUE.length,
+                "Output records should have the same number as input data");
+    }
+
+    /*-
      * Validate that
      * (a) if preferred ID is provided, should be used to allocate new entity.
      * (b) if no valid preferred ID, random ID should be used.
@@ -849,7 +949,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         Assert.assertNotNull(command);
         Assert.assertNotNull(command.getResultLocation());
 
-        int testIdIdx = ArrayUtils.indexOf(FIELDS_PREFERRED_ID, PREFERRED_ID_COLUMN);
+        int testIdIdx = ArrayUtils.indexOf(FIELDS_PREFERRED_ID, TEST_ID);
         int preferredIdIdx = ArrayUtils.indexOf(FIELDS_PREFERRED_ID, PREFERRED_ID_COLUMN);
         // testId -> each row of test data
         Map<String, Object[]> testDataMap = generateTestDataMap(DATA_PREFERRED_ID, testIdIdx);
@@ -926,7 +1026,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // helper to generate map of (testcase => one row of test data)
     private Map<String, Object[]> generateTestDataMap(Object[][] data, int testIdIdx) {
-        return Arrays.stream(data).collect(Collectors.toMap(row -> (String) row[0], row -> row));
+        return Arrays.stream(data).collect(Collectors.toMap(row -> (String) row[testIdIdx], row -> row));
     }
 
     private String extractCaseGroup(String caseId) {

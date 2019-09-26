@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.common.exposed.util.ValidationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
@@ -269,13 +268,12 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                 .map(origId -> Pair.of(origId, StringStandardizationUtils.getStandardizedSystemId(origId))) //
                 .collect(Collectors.toList());
         Optional<Pair<String, String>> chosenId = standardizedIds.stream() //
-                .filter(pair -> ValidationUtils.isValidMatchFieldValue(pair.getRight())) //
+                .filter(pair -> StringUtils.isNotBlank(pair.getRight())) // find first non-blank id
                 .findFirst();
         if (chosenId.isPresent()) {
             record.addOrigPreferredEntityId(entity, chosenId.get().getLeft());
             record.addParsedPreferredEntityId(entity, chosenId.get().getRight());
         } else {
-            // TODO move to planner and fail the entire row (clean tuple and log error)
             // no valid ID, find the first original value
             standardizedIds.stream() //
                     .map(Pair::getLeft) //
