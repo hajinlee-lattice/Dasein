@@ -36,7 +36,7 @@ public class SparkSQLQueryUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testExtractCTEForComplexQuery() {
+    public void testExtractCTE() {
         String sql = readSqlFromResource("query1-1");
         List<List<String>> queries = SparkSQLQueryUtils.extractSubQueries(sql, "segment");
         queries.forEach(l -> {
@@ -44,25 +44,6 @@ public class SparkSQLQueryUtilsUnitTestNG {
             String statement = l.get(1);
             System.out.println("\n========== " + alias + " ==========");
             System.out.println(statement);
-        });
-    }
-
-    @Test(groups = "unit")
-    public void testExtractCTE() {
-        String sql = "select t1.Id from Table1 as t1";
-        sql += " where t1.Id in (select Id from Table2 where Attr = 'a')";
-        sql += " and not t1.Id in (select Id from Table3 as t3 where Attr = 'b')";
-        sql += " or t1.Id in (select Id from Table3 where Attr = 'c') as t3";
-
-        List<List<String>> queries = SparkSQLQueryUtils.extractSubQueries(sql, "segment");
-        queries.forEach(l -> {
-            String alias = l.get(0);
-            String statement = l.get(1);
-            System.out.println("\n========== " + alias + " ==========");
-            System.out.println(statement);
-            if ("segment".equals(alias)) {
-                Assert.assertFalse(statement.contains("in"));
-            }
         });
     }
 
