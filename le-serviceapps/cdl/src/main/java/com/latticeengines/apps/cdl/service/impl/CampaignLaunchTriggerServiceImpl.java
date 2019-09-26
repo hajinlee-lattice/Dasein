@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -88,6 +89,7 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
+            MultiTenantContext.setTenant(launch.getTenant());
             if (launch.getPlayLaunchChannel() == null) {
                 log.info(String.format("No play channel for this play launch %s", launch.getId()));
                 continue;
@@ -107,10 +109,12 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                         null, String.class);
                 launch.setApplicationId(appId);
                 launch.setLaunchState(LaunchState.Launching);
-                playLaunchService.update(launch);
             } catch (Exception e) {
-                log.error("Failed to kick off Play launch", e);
+                launch.setLaunchState(LaunchState.Canceled);
+                log.error(String.format("Failed to kick off Campaign launch workflow for launchId: %s due to ",
+                        launch.getLaunchId()), e);
             }
+            playLaunchService.update(launch);
             i++;
         }
         return true;
