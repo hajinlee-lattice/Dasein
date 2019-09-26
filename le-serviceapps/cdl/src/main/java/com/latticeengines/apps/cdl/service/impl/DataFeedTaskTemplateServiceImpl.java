@@ -13,9 +13,12 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
@@ -27,6 +30,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -42,6 +46,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 @Component("dataFeedTaskTemplateService")
 public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateService {
 
+    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskTemplateServiceImpl.class);
+
     private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
     private static final String USER_PREFIX = "user_";
 
@@ -50,6 +56,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     @Inject
     private DataFeedTaskService dataFeedTaskService;
+
+    @Inject
+    private CatalogEntityMgr catalogEntityMgr;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -108,6 +117,18 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dataFeedTask.setSubType(entityType.getSubType());
         dataFeedTask.setTemplateDisplayName(dataFeedTask.getFeedType());
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
+
+        if (EntityType.WebVisitPathPattern == entityType) {
+            // create ptn catalog
+            Catalog catalog = new Catalog();
+            catalog.setTenant(websiteSystem.getTenant());
+            catalog.setName(EntityType.WebVisitPathPattern.name());
+            catalog.setDataFeedTask(dataFeedTask);
+            catalogEntityMgr.create(catalog);
+            log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
+                    customerSpace, catalog, dataFeedTask.getUniqueId());
+        }
+
         return true;
     }
 
