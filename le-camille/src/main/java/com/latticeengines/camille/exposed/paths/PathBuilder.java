@@ -262,6 +262,6 @@ public final class PathBuilder {
     }
 
     public static Path buildSingleWorkflowThrottlingFlagPath(String podId, String division, String workflowType) {
-        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division, workflowType);
+        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division, PathConstants.WORKFLOW_THROTTLING_FLAG, workflowType);
     }
 }
