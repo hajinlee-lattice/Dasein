@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -319,7 +320,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             if (tableRole == TableRoleInCollection.ConsolidatedProduct) {
                 log.info("Count products in HDFS " + hdfsPath);
                 result = ProductUtils.countProducts(yarnConfiguration, hdfsPath,
-                        Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()));
+                        Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()), ProductStatus.Active.name());
             } else {
                 if (!hdfsPath.endsWith("*.avro")) {
                     if (hdfsPath.endsWith("/")) {
