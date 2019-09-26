@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -857,7 +858,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (CollectionUtils.isEmpty(actions)) {
             return importedEntity;
         }
-        for (Action action : actions) {
+        Iterator<Action> actionIterator = actions.iterator();
+        while (actionIterator.hasNext()){
+            Action action = actionIterator.next();
             if (!ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())) {
                 continue;
             }
@@ -869,7 +872,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
                 DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace,
                         importActionConfiguration.getDataFeedTaskId());
-                importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
+                if (dataFeedTask != null) {
+                    importedEntity.add(BusinessEntity.getByName(dataFeedTask.getEntity()));
+                } else {
+                    actionService.cancel(action.getPid());
+                    actionIterator.remove();
+                }
             }
         }
         return importedEntity;
