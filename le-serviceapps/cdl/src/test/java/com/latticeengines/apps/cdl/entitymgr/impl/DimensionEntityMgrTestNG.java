@@ -1,11 +1,17 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.IsClosed;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadSource;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -18,8 +24,6 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator.DimensionCalculatorOption;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption;
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
@@ -31,12 +35,11 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
     private static final String STREAM_OPP = "Oppotunity";
     private static final List<String> STREAM_NAMES = Arrays.asList(STREAM_WEBVISIT, STREAM_OPP);
 
-    private static final InterfaceName DIM_PATH_PATTERN_ID = InterfaceName.PathPatternId;
-    private static final InterfaceName DIM_LEAD_SOURCE = InterfaceName.LeadSource;
-    private static final InterfaceName DIM_IS_CLOSED = InterfaceName.IsClosed;
+    private static final String DIM_PATH_PATTERN_ID = PathPatternId.name();
+    private static final String DIM_LEAD_SOURCE = LeadSource.name();
+    private static final String DIM_IS_CLOSED = IsClosed.name();
 
-    private Map<InterfaceName, Dimension> dimensions = new HashMap<>();
-    private List<StreamAttributeDeriver> derivers = getAttributeDerivers();
+    private Map<String, Dimension> dimensions = new HashMap<>();
 
     @Override
     protected List<String> getCatalogNames() {
@@ -74,7 +77,8 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testFind() {
         for (Dimension d : dimensions.values()) {
-            Dimension dimension = dimensionEntityMgr.findByNameAndTenantAndStream(d.getName(), mainTestTenant, d.getStream());
+            Dimension dimension = dimensionEntityMgr.findByNameAndTenantAndStream(d.getName(), mainTestTenant,
+                    d.getStream());
             validateDimension(dimension);
         }
         Assert.assertEquals(dimensionEntityMgr.findByTenant(mainTestTenant).size(), dimensions.size());
@@ -97,11 +101,8 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
         Assert.assertNotNull(dimension.getStream());
         if (STREAM_OPP.equals(dimension.getStream().getName())) {
             Assert.assertNull(dimension.getCatalog());
-            Assert.assertTrue(CollectionUtils.isEmpty(dimension.getAttributeDerivers()));
         } else {
             Assert.assertNotNull(dimension.getCatalog());
-            Assert.assertNotNull(dimension.getAttributeDerivers());
-            Assert.assertEquals(dimension.getAttributeDerivers().size(), derivers.size());
         }
         Assert.assertNotNull(dimension.getGenerator());
         Assert.assertNotNull(dimension.getCalculator());
@@ -110,44 +111,43 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
     private Dimension getWebVisitDimension() {
         Dimension dimension = new Dimension();
         dimension.setName(DIM_PATH_PATTERN_ID);
-        dimension.setDisplayName(dimension.getName().name());
+        dimension.setDisplayName(dimension.getName());
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_WEBVISIT));
         dimension.setCatalog(catalogs.get(CATALOG_WEBVISIT));
 
         DimensionGenerator generator = new DimensionGenerator();
-        generator.setAttribute(InterfaceName.PathPatternName);
+        generator.setAttribute(PathPatternName.name());
         generator.setFromCatalog(true);
         generator.setOption(DimensionGeneratorOption.HASH);
         dimension.setGenerator(generator);
 
         DimensionCalculator calculator = new DimensionCalculator();
-        calculator.setAttribute(InterfaceName.WebVisitPageUrl);
+        calculator.setAttribute(WebVisitPageUrl.name());
         calculator.setOption(DimensionCalculatorOption.REGEX);
-        calculator.setPatternAttribute(InterfaceName.PathPattern);
+        calculator.setPatternAttribute(PathPattern.name());
         calculator.setPatternFromCatalog(true);
         dimension.setCalculator(calculator);
 
-        dimension.setAttributeDerivers(derivers);
         return dimension;
     }
 
     private Dimension getLeadSourceDimension() {
         Dimension dimension = new Dimension();
         dimension.setName(DIM_LEAD_SOURCE);
-        dimension.setDisplayName(dimension.getName().name());
+        dimension.setDisplayName(dimension.getName());
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_OPP));
         dimension.setCatalog(catalogs.get(STREAM_OPP));
 
         DimensionGenerator generator = new DimensionGenerator();
-        generator.setAttribute(InterfaceName.LeadSource);
+        generator.setAttribute(LeadSource.name());
         generator.setFromCatalog(false);
         generator.setOption(DimensionGeneratorOption.ENUM);
         dimension.setGenerator(generator);
 
         DimensionCalculator calculator = new DimensionCalculator();
-        calculator.setAttribute(InterfaceName.LeadSource);
+        calculator.setAttribute(LeadSource.name());
         calculator.setOption(DimensionCalculatorOption.EXACT_MATCH);
         dimension.setCalculator(calculator);
 
@@ -157,37 +157,22 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
     private Dimension getIsClosedDimension() {
         Dimension dimension = new Dimension();
         dimension.setName(DIM_IS_CLOSED);
-        dimension.setDisplayName(dimension.getName().name());
+        dimension.setDisplayName(dimension.getName());
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_OPP));
         dimension.setCatalog(catalogs.get(STREAM_OPP));
 
         DimensionGenerator generator = new DimensionGenerator();
-        generator.setAttribute(InterfaceName.IsClosed);
+        generator.setAttribute(IsClosed.name());
         generator.setFromCatalog(false);
         generator.setOption(DimensionGeneratorOption.BOOLEAN);
         dimension.setGenerator(generator);
 
         DimensionCalculator calculator = new DimensionCalculator();
-        calculator.setAttribute(InterfaceName.IsClosed);
+        calculator.setAttribute(IsClosed.name());
         calculator.setOption(DimensionCalculatorOption.EXACT_MATCH);
         dimension.setCalculator(calculator);
 
         return dimension;
-    }
-
-    // Fake some derived attributes
-    private List<StreamAttributeDeriver> getAttributeDerivers() {
-        StreamAttributeDeriver deriver1 = new StreamAttributeDeriver();
-        deriver1.setCalculation(StreamAttributeDeriver.Calculation.COUNT);
-        deriver1.setSourceAttributes(Arrays.asList(InterfaceName.ContactId));
-        deriver1.setTargetAttribute(InterfaceName.NumberOfContacts);
-
-        StreamAttributeDeriver deriver2 = new StreamAttributeDeriver();
-        deriver2.setCalculation(StreamAttributeDeriver.Calculation.SUM);
-        deriver2.setSourceAttributes(Arrays.asList(InterfaceName.Amount));
-        deriver2.setTargetAttribute(InterfaceName.TotalAmount);
-
-        return Arrays.asList(deriver1, deriver2);
     }
 }

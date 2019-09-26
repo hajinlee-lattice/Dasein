@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,35 +14,38 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StreamAttributeDeriver {
+public class StreamAttributeDeriver implements Serializable {
+
+    private static final long serialVersionUID = -2150789161039571407L;
+
     // target attribute to be generated
     @JsonProperty("target_attributes")
-    private InterfaceName targetAttribute;
+    private String targetAttribute;
 
     // input attributes to derive target attribute
     @JsonProperty("source_attributes")
-    private List<InterfaceName> sourceAttributes;
+    private List<String> sourceAttributes;
 
     // how to derive target attribute
+    @JsonProperty("calculation")
     private Calculation calculation;
 
-    public InterfaceName getTargetAttribute() {
+    public String getTargetAttribute() {
         return targetAttribute;
     }
 
-    public void setTargetAttribute(InterfaceName targetAttribute) {
+    public void setTargetAttribute(String targetAttribute) {
         this.targetAttribute = targetAttribute;
     }
 
-    public List<InterfaceName> getSourceAttributes() {
+    public List<String> getSourceAttributes() {
         return sourceAttributes;
     }
 
-    public void setSourceAttributes(List<InterfaceName> sourceAttributes) {
+    public void setSourceAttributes(List<String> sourceAttributes) {
         this.sourceAttributes = sourceAttributes;
     }
 

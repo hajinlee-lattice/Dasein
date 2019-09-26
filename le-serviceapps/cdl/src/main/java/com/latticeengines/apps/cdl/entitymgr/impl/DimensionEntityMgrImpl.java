@@ -18,7 +18,6 @@ import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.cdl.activity.Dimension;
 import com.latticeengines.domain.exposed.cdl.activity.Stream;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("dimensionEntityMgr")
@@ -32,7 +31,7 @@ public class DimensionEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Dimension
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Dimension findByNameAndTenantAndStream(@NotNull InterfaceName name, @NotNull Tenant tenant,
+    public Dimension findByNameAndTenantAndStream(@NotNull String name, @NotNull Tenant tenant,
             @NotNull Stream stream) {
         Preconditions.checkNotNull(name, "Name should not be null");
         Preconditions.checkNotNull(tenant, "Tenant should not be null");

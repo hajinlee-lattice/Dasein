@@ -12,14 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DimensionCalculator {
     // target attribute in stream to parse/calculate dimension
     @JsonProperty("attribute")
-    private InterfaceName attribute;
+    private String attribute;
 
     // how to parse/calculate dimension
     @JsonProperty("option")
@@ -28,18 +27,18 @@ public class DimensionCalculator {
     // for REGEX option: attribute in stream or catalog which contains regex
     // info
     @JsonProperty("pattern_attribute")
-    private InterfaceName patternAttribute;
+    private String patternAttribute;
 
     // for REGEX option: whether the attribute which contains regex info
     // is from stream of catalog
     @JsonProperty("pattern_from_catalog")
     private boolean patternFromCatalog;
 
-    public InterfaceName getAttribute() {
+    public String getAttribute() {
         return attribute;
     }
 
-    public void setAttribute(InterfaceName attribute) {
+    public void setAttribute(String attribute) {
         this.attribute = attribute;
     }
 
@@ -51,11 +50,11 @@ public class DimensionCalculator {
         this.option = option;
     }
 
-    public InterfaceName getPatternAttribute() {
+    public String getPatternAttribute() {
         return patternAttribute;
     }
 
-    public void setPatternAttribute(InterfaceName patternAttribute) {
+    public void setPatternAttribute(String patternAttribute) {
         this.patternAttribute = patternAttribute;
     }
 

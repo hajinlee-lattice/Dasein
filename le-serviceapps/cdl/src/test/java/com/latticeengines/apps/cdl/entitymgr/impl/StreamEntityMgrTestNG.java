@@ -69,11 +69,14 @@ public class StreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBas
         Assert.assertNotNull(stream.getPeriods());
         Assert.assertEquals(stream.getPeriods().size(), PERIODS.size());
         Assert.assertNotNull(stream.getRetentionDays());
+        Assert.assertNotNull(stream.getAttributeDerivers());
+        Assert.assertEquals(stream.getAttributeDerivers().size(), attrDerivers.size());
     }
 
     @Override
     protected List<String> getStreamNames() {
         return STREAM_NAMES;
     }
+
 
 }

@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.Stream;
+import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -57,6 +58,7 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
     protected Map<String, Catalog> catalogs = new HashMap<>();
     // stream name -> stream
     protected Map<String, Stream> streams = new HashMap<>();
+    protected List<StreamAttributeDeriver> attrDerivers = getAttributeDerivers();
 
     // Override this method to provide a list of names to create catalogs
     protected List<String> getCatalogNames() {
@@ -110,11 +112,27 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
         stream.setTenant(mainTestTenant);
         stream.setMatchEntities(MATCH_ENTITIES);
         stream.setAggrEntities(AGGR_ENTITIES);
-        stream.setDateAttribute(InterfaceName.WebVisitDate);
+        stream.setDateAttribute(InterfaceName.WebVisitDate.name());
         stream.setPeriods(PERIODS);
         stream.setRetentionDays(1000);
+        stream.setAttributeDerivers(attrDerivers);
         streamEntityMgr.create(stream);
         return stream;
+    }
+
+    // Fake some derived attributes
+    private List<StreamAttributeDeriver> getAttributeDerivers() {
+        StreamAttributeDeriver deriver1 = new StreamAttributeDeriver();
+        deriver1.setCalculation(StreamAttributeDeriver.Calculation.COUNT);
+        deriver1.setSourceAttributes(Arrays.asList(InterfaceName.ContactId.name()));
+        deriver1.setTargetAttribute(InterfaceName.NumberOfContacts.name());
+
+        StreamAttributeDeriver deriver2 = new StreamAttributeDeriver();
+        deriver2.setCalculation(StreamAttributeDeriver.Calculation.SUM);
+        deriver2.setSourceAttributes(Arrays.asList(InterfaceName.Amount.name()));
+        deriver2.setTargetAttribute(InterfaceName.TotalAmount.name());
+
+        return Arrays.asList(deriver1, deriver2);
     }
 
     protected Tenant notExistTenant() {

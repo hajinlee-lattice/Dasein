@@ -6,7 +6,6 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.cdl.activity.Dimension;
 import com.latticeengines.domain.exposed.cdl.activity.Stream;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface DimensionEntityMgr extends BaseEntityMgrRepository<Dimension, Long> {
@@ -23,7 +22,7 @@ public interface DimensionEntityMgr extends BaseEntityMgrRepository<Dimension, L
      * @return matching Dimension object, {@code null} if no such Dimension
      *         exists
      */
-    Dimension findByNameAndTenantAndStream(@NotNull InterfaceName name, @NotNull Tenant tenant, @NotNull Stream stream);
+    Dimension findByNameAndTenantAndStream(@NotNull String name, @NotNull Tenant tenant, @NotNull Stream stream);
 
     /**
      * Retrieve all Dimension in target tenant

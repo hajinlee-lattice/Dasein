@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 /**
  * This class is to configure how to generate activity dimension value universe
@@ -23,7 +22,7 @@ public class DimensionGenerator {
     // attribute to get/generate dimension values, could be from stream of
     // catalog
     @JsonProperty("attribute")
-    private InterfaceName attribute;
+    private String attribute;
 
     // whether the attribute to get/generate dimension values is from stream of
     // catalog
@@ -34,11 +33,11 @@ public class DimensionGenerator {
     @JsonProperty("option")
     private DimensionGeneratorOption option;
     
-    public InterfaceName getAttribute() {
+    public String getAttribute() {
         return attribute;
     }
 
-    public void setAttribute(InterfaceName attribute) {
+    public void setAttribute(String attribute) {
         this.attribute = attribute;
     }
 
