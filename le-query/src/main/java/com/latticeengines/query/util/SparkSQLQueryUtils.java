@@ -110,8 +110,13 @@ public class SparkSQLQueryUtils {
                                 StringUtils.substringAfterLast(inner, ".") : inner;
                         String innerAlias = TranslatorUtils.generateAlias(inner);
                         queries.addAll(extractSubQueries(stmt, innerAlias));
-                        sql = sql.replace(outer + " in (" + stmt + ")", //
-                                outer + " in (select " + inner + " from " + innerAlias + ")");
+                        if (outer.contains(".")) {
+                            String newSql = "exists (select 1 from " + innerAlias + " where " + innerAlias + "." + inner + " = " + outer +")";
+                            sql = sql.replace(outer + " in (" + stmt + ")", newSql);//
+                        } else {
+                            String newSql = outer + " in (select " + inner + " from " + innerAlias + ")";
+                            sql = sql.replace(outer + " in (" + stmt + ")", newSql);//
+                        }
                         found = true;
                         hasChange = true;
                         break;
@@ -121,12 +126,14 @@ public class SparkSQLQueryUtils {
                     break;
                 }
             }
+
         }
 
         queries.add(Arrays.asList(alias, sql));
         return queries;
     }
 
+    // scan forward to extract info in parenthesis
     private static String extractInParenthesis(String str) {
         StringBuilder sb = new StringBuilder();
         int numOfOpenParenthesis = 1;
@@ -146,6 +153,7 @@ public class SparkSQLQueryUtils {
         return sb.toString();
     }
 
+    // scan backward to extract info in parenthesis
     private static String extractReverseInParenthesis(String str) {
         StringBuilder sb = new StringBuilder();
         int numOfOpenParenthesis = 1;
