@@ -124,7 +124,6 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
         }).collectList().block();
     }
 
-    @Override
     protected ExternalColumn toMetadataColumn(GenericRecord record) {
         ExternalColumn column = new ExternalColumn();
         column.setPid((Long) record.get(PID));
