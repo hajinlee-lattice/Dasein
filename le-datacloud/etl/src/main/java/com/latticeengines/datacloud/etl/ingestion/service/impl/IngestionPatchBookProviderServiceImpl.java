@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -49,6 +50,9 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     private static Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImpl.class);
 
+    private static final String MIN_PID = "MIN";
+    private static final String MAX_PID = "MAX";
+
     @Value("${datacloud.patcher.ingest.batch.size.min}")
     private int minBatchSize;
 
@@ -87,9 +91,21 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             HdfsUtils.rmdir(yarnConfiguration, progress.getDestination());
         }
         HdfsUtils.mkdir(yarnConfiguration, progress.getDestination());
-        long totalSize = patchBookEntityMgr.findAll().size(); // ingest all records if minPid and maxPid not provided
-        if (patchConfig.getMinPid() >= 0L && patchConfig.getMaxPid() > 0L) { // compute total num of records if minPid and maxPid provided
-            totalSize = patchConfig.getMaxPid() - patchConfig.getMinPid();
+        long totalSize = 0L;
+        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(patchConfig.getBookType(), PatchBook.COLUMN_PID); // ingest all records if minPid and maxPid not provided
+        Long minPid = patchConfig.getMinPid();
+        Long maxPid = patchConfig.getMaxPid();
+        if (minPid != null && maxPid != null) { // compute total num of records if minPid and maxPid provided
+            if(minPid >= 0 && maxPid > minPid) { // check the range
+                totalSize = patchConfig.getMaxPid() - patchConfig.getMinPid();
+            } else { // fail if minPid and maxPid range is wrong
+                log.error(String.format(
+                        "MinPid and MaxPid range is not correct. MinPid : %d MaxPid: %d",
+                        patchConfig.getMinPid(), patchConfig.getMaxPid()));
+                throw new RuntimeException("PatchBook ingestion failed because of invalid MinPid and MaxPid provided");
+            }
+        } else {
+            totalSize = minMaxPid.get(MIN_PID) - minMaxPid.get(MAX_PID);
         }
         int batchSize = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
         if (patchConfig.getBatchSize() > 0) {
@@ -114,12 +130,16 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     private List<Ingester> initializeIngester(PatchBookConfiguration patchConfig, Date currentDate,
             IngestionProgress progress, int[] batches) {
         List<Ingester> ingesters = new ArrayList<>();
-        int minPid = (int) (long) patchConfig.getMinPid();
+        Long minPid = patchConfig.getMinPid();
+        if (minPid == null) {
+            minPid = 0L;
+            patchConfig.setMinPid(minPid);
+        }
         for (int i = 0; i < batches.length; i++) {
             Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i],
                     minPid);
             minPid += batches[i];
-            patchConfig.setMaxPid(Long.parseLong(String.valueOf(minPid)));
+            patchConfig.setMaxPid(minPid);
             ingesters.add(ingester);
         }
         return ingesters;
