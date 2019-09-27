@@ -26,6 +26,27 @@ public class DefaultYarnClientCustomizationUnitTestNG {
         containerProperties = new Properties();
     }
 
+    @Test(groups = "unit", dataProvider = "xssSettings")
+    public void getXssSetting(String stackSize, String expectedValue) {
+        customization = new DefaultYarnClientCustomization(yarnConfiguration, null, null, null,
+                null, null);
+        if (stackSize != null) {
+            containerProperties.setProperty(AppMasterProperty.JVM_STACK.name(), stackSize);
+        }
+        String xmx = customization.getXssSetting(containerProperties);
+        assertEquals(xmx, expectedValue);
+    }
+
+    @DataProvider(name = "xssSettings")
+    public Object[][] getXssSettings() {
+        return new Object[][]{ //
+                {"1024", "-Xss1024k"},
+                {null, "-Xss1024k"},
+                {"2048", "-Xss2048k"},
+                {"", "-Xss1024k"},
+        };
+    }
+
     @AfterMethod(groups = "unit")
     public void tearDownMethod() {
         containerProperties.clear();
