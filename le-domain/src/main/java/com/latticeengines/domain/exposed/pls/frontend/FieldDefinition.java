@@ -136,17 +136,7 @@ public class FieldDefinition {
     // Indicates whether this field should be treated as the global ID for this entity type, which represents the
     // backwards compatible "Entity Id", such as Account ID or Contact ID.
     @JsonProperty
-    protected Boolean mappedToLatticeId;
-
-    public enum IdEntityType {
-        Account,
-        Contact
-    }
-
-    // When this field represents an ID, this enumeration represents the entity type of the ID.  Currently, the only
-    // supported values are Account and Contact.
-    @JsonProperty
-    protected IdEntityType idEntityType;
+    protected Boolean mappedToLatticeId = false;
 
     // When this field represents an external system ID (as set on the Other IDs page), eg. a Salesforce Contact ID,
     // this property indicates the type of external system the ID is from.
@@ -308,14 +298,6 @@ public class FieldDefinition {
         this.mappedToLatticeId = mappedToLatticeId;
     }
 
-    public IdEntityType getIdEntityType() {
-        return idEntityType;
-    }
-
-    public void setIdEntityType(IdEntityType idEntityType) {
-        this.idEntityType = idEntityType;
-    }
-
     public CDLExternalSystemType getExternalSystemType() {
         return externalSystemType;
     }
@@ -366,7 +348,6 @@ public class FieldDefinition {
         output += "\ncategory: " + category;
         output += "\nsubcategory: " + subcategory;
         output += "\nmappedToLatticeId: " + mappedToLatticeId;
-        output += "\nidEntityType: " + idEntityType;
         output += "\nexternalSystemType: " + externalSystemType;
         output += "\nexternalSystemName: " + externalSystemName;
         return output;
@@ -388,7 +369,6 @@ public class FieldDefinition {
                     !StringUtils.equals(this.statisticalType, definition.statisticalType) ||
                     !StringUtils.equals(this.category, definition.category) ||
                     !StringUtils.equals(this.subcategory, definition.subcategory) ||
-                    this.idEntityType != definition.idEntityType ||
                     this.externalSystemType != definition.externalSystemType ||
                     !StringUtils.equals(this.externalSystemName, definition.externalSystemName)) {
                 return false;
