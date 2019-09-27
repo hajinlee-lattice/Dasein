@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.activity.Dimension;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
-import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator.DimensionCalculatorOption;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
@@ -106,6 +106,11 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
         }
         Assert.assertNotNull(dimension.getGenerator());
         Assert.assertNotNull(dimension.getCalculator());
+        if (STREAM_WEBVISIT.equals(dimension.getStream().getName())) {
+            Assert.assertTrue(dimension.getCalculator() instanceof DimensionCalculatorRegexMode);
+        } else {
+            Assert.assertTrue(dimension.getCalculator() instanceof DimensionCalculator);
+        }
     }
 
     private Dimension getWebVisitDimension() {
@@ -122,9 +127,8 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
         generator.setOption(DimensionGeneratorOption.HASH);
         dimension.setGenerator(generator);
 
-        DimensionCalculator calculator = new DimensionCalculator();
+        DimensionCalculatorRegexMode calculator = new DimensionCalculatorRegexMode();
         calculator.setAttribute(WebVisitPageUrl.name());
-        calculator.setOption(DimensionCalculatorOption.REGEX);
         calculator.setPatternAttribute(PathPattern.name());
         calculator.setPatternFromCatalog(true);
         dimension.setCalculator(calculator);
@@ -148,7 +152,6 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
 
         DimensionCalculator calculator = new DimensionCalculator();
         calculator.setAttribute(LeadSource.name());
-        calculator.setOption(DimensionCalculatorOption.EXACT_MATCH);
         dimension.setCalculator(calculator);
 
         return dimension;
@@ -170,7 +173,6 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
 
         DimensionCalculator calculator = new DimensionCalculator();
         calculator.setAttribute(IsClosed.name());
-        calculator.setOption(DimensionCalculatorOption.EXACT_MATCH);
         dimension.setCalculator(calculator);
 
         return dimension;
