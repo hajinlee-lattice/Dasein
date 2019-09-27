@@ -250,6 +250,10 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
+      // calculate the total number of contact
+      val selectedContactNum = limitedAccountTable.join(contactTable, joinKey :: Nil, "inner").count()
+      logSpark(f"selectedContactNum=$selectedContactNum%d")
+      
       val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
         
       // join
@@ -261,7 +265,9 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       val contactCount = recommendations.agg( //
     	  sum("CONTACT_NUM")
       ).first.get(0)
-      recommendations.select(joinKey, "CONTACT_NUM").show()
+    
+      logSpark(f"playLaunch_Id=$playLaunchId%s")
+      recommendations.select(joinKey, "CONTACT_NUM").show(100)
       finalRecommendations = recommendations//
         .withColumnRenamed(joinKey,"ACCOUNT_ID") //
         .drop("CONTACT_NUM")
