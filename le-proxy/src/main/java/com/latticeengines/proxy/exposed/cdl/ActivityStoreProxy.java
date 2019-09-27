@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -21,10 +22,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         super(hostPort, ROOT_PATH);
     }
 
-    public Catalog createCatalog(@NotNull String customerSpace, @NotNull Catalog catalog) {
+    public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId) {
         String url = constructUrl("/customerspaces/{customerSpace}/activities/catalogs",
                 shortenCustomerSpace(customerSpace));
-        return post("create_catalog", url, catalog, Catalog.class);
+        CreateCatalogRequest request = new CreateCatalogRequest(catalogName, taskUniqueId);
+        return post("create_catalog", url, request, Catalog.class);
     }
 
     public Catalog findCatalogByName(@NotNull String customerSpace, @NotNull String catalogName) {

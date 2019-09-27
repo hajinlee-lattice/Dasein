@@ -25,11 +25,13 @@ public class CatalogServiceImpl implements CatalogService {
     private CatalogEntityMgr catalogEntityMgr;
 
     @Override
-    public Catalog create(@NotNull String customerSpace, @NotNull Catalog catalog) {
-        checkCatalog(catalog);
+    public Catalog create(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(catalogName), "catalog name should not be blank");
         Tenant tenant = MultiTenantContext.getTenant();
+        Catalog catalog = new Catalog();
+        catalog.setName(catalogName);
         catalog.setTenant(tenant);
-        checkDataFeedTask(tenant, catalog.getDataFeedTask());
+        catalog.setDataFeedTask(getDataFeedTask(tenant, taskUniqueId));
         catalogEntityMgr.create(catalog);
         return catalog;
     }
@@ -41,24 +43,20 @@ public class CatalogServiceImpl implements CatalogService {
         return catalogEntityMgr.findByNameAndTenant(catalogName, tenant);
     }
 
-    private void checkDataFeedTask(@NotNull Tenant tenant, DataFeedTask task) {
-        if (task == null) {
-            return;
+    private DataFeedTask getDataFeedTask(@NotNull Tenant tenant, String taskId) {
+        if (StringUtils.isBlank(taskId)) {
+            return null;
         }
 
-        String taskId = task.getUniqueId();
-        task = dataFeedTaskService.getDataFeedTask(tenant.getId(), taskId);
-        if (task == null || task.getDataFeed() == null) {
-            throw new IllegalArgumentException(String.format("Input DataFeedTask(uniqueId=%s) not exist", taskId));
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(tenant.getId(), taskId);
+        if (dataFeedTask == null || dataFeedTask.getDataFeed() == null) {
+            throw new IllegalArgumentException(
+                    String.format("Provided DataFeedTask uniqueId %s does not match any existing feed task", taskId));
         }
-        Tenant taskTenant = task.getDataFeed().getTenant();
+        Tenant taskTenant = dataFeedTask.getDataFeed().getTenant();
         if (taskTenant == null || taskTenant.getId() == null || !taskTenant.getId().equals(tenant.getId())) {
             throw new IllegalArgumentException(String.format("Tenant for input DataFeedTask %s is not the same as input tenant %s", taskTenant, tenant));
         }
-    }
-
-    private void checkCatalog(@NotNull Catalog catalog) {
-        Preconditions.checkNotNull(catalog, "Catalog should not be null");
-        Preconditions.checkArgument(StringUtils.isNotBlank(catalog.getName()), "Catalog should have non blank name");
+        return dataFeedTask;
     }
 }

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface CatalogService {
@@ -12,11 +13,13 @@ public interface CatalogService {
      *
      * @param customerSpace
      *            target tenant
-     * @param catalog
-     *            input catalog, must contains all required fields
+     * @param catalogName
+     *            catalog name, must be provided
+     * @param taskUniqueId
+     *            unique id for associated {@link DataFeedTask}, can be optional
      * @return created catalog, will not be {@code null}
      */
-    Catalog create(@NotNull String customerSpace, @NotNull Catalog catalog);
+    Catalog create(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId);
 
     /**
      * Wrapper for {@link CatalogEntityMgr#findByNameAndTenant(String, Tenant)} to
