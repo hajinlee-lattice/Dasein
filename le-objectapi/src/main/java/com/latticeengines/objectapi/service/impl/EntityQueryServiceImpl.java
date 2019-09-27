@@ -72,6 +72,10 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 queryEvaluatorService);
         try {
             Query query = getQuery(attrRepo, frontEndQuery, sqlUser, true);
+            if (QueryServiceUtils.getQueryLoggingConfig()){
+                log.info("getData using query:" + System.lineSeparator()
+                        + getQueryStr(frontEndQuery, version, sqlUser, true));
+            }
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
@@ -139,6 +143,10 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         Query query = getQuery(attrRepo, frontEndQuery, sqlUser, false);
+        if (QueryServiceUtils.getQueryLoggingConfig()){
+            log.info("getData using query:" + System.lineSeparator()
+            + getQueryStr(frontEndQuery, version, sqlUser, false));
+        }
         try {
             if (enforceTranslation) {
                 Map<String, Map<Long, String>> translationMapping = getDecodeMapping(attrRepo, query.getLookups());
