@@ -105,7 +105,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 throw new RuntimeException("PatchBook ingestion failed because of invalid MinPid and MaxPid provided");
             }
         } else {
-            totalSize = minMaxPid.get(MIN_PID) - minMaxPid.get(MAX_PID);
+            totalSize = minMaxPid.get(MAX_PID) - minMaxPid.get(MIN_PID);
         }
         int batchSize = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
         if (patchConfig.getBatchSize() > 0) {
