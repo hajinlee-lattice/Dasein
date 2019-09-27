@@ -3,6 +3,7 @@ package com.latticeengines.yarn.exposed.client;
 public enum AppMasterProperty {
 
     VIRTUALCORES, //
+    JVM_STACK,
     MEMORY, //
     QUEUE, //
     PRIORITY, //

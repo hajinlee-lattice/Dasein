@@ -92,6 +92,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Value("${dataplatform.trustore.jks}")
     private String trustStoreJks;
 
+    @Value("${yarn.jvm.stack.size}")
+    private int stackSize;
+
     @Override
     public ApplicationId submitWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid) {
         WorkflowJob workflowJob = upsertWorkflowJob(workflowConfig, workflowPid);
@@ -101,7 +104,6 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                     workflowPid, JsonUtils.serialize(workflowConfig)));
             return null;
         }
-
         try {
             Job job = createJob(workflowConfig);
             ApplicationId appId = jobService.submitJob(job);
@@ -296,7 +298,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
         appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
                 workflowConfig.getWorkflowName().replace(" ", "_"));
-
+        appMasterProperties.put(AppMasterProperty.JVM_STACK.name(), String.valueOf(stackSize));
         Properties containerProperties = new Properties();
         containerProperties.put(WorkflowProperty.WORKFLOWCONFIG, workflowConfig.toString());
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
