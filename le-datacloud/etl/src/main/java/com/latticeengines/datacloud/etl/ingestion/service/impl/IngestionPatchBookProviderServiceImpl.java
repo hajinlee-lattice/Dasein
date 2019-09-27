@@ -87,11 +87,12 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             HdfsUtils.rmdir(yarnConfiguration, progress.getDestination());
         }
         HdfsUtils.mkdir(yarnConfiguration, progress.getDestination());
-
-        long totalSize = patchBookEntityMgr.findCountByTypeAndHotFix(patchConfig.getBookType(),
-                PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-        int batchSize = 50000;
-        if (patchConfig.getBatchSize() != 0) {
+        long totalSize = patchBookEntityMgr.findAll().size(); // ingest all records if minPid and maxPid not provided
+        if (patchConfig.getMinPid() >= 0L && patchConfig.getMaxPid() > 0L) { // compute total num of records if minPid and maxPid provided
+            totalSize = patchConfig.getMaxPid() - patchConfig.getMinPid();
+        }
+        int batchSize = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
+        if (patchConfig.getBatchSize() > 0) {
             batchSize = patchConfig.getBatchSize();
         }
         log.info(String.format("Total rows to ingest: %d; Divide into %d batches", totalSize,
@@ -113,11 +114,10 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     private List<Ingester> initializeIngester(PatchBookConfiguration patchConfig, Date currentDate,
             IngestionProgress progress, int[] batches) {
         List<Ingester> ingesters = new ArrayList<>();
-        int minPid = 0;
+        int minPid = (int) (long) patchConfig.getMinPid();
         for (int i = 0; i < batches.length; i++) {
             Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i],
                     minPid);
-            patchConfig.setMinPid(Long.parseLong(String.valueOf(minPid)));
             minPid += batches[i];
             patchConfig.setMaxPid(Long.parseLong(String.valueOf(minPid)));
             ingesters.add(ingester);

@@ -260,6 +260,13 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         PatchBookConfiguration conf = new PatchBookConfiguration();
         conf.setBookType(type);
         conf.setBatchSize(5);
+        conf.setMinPid(0L);
+        if (type.equals(PatchBook.Type.Attribute)) {
+            conf.setMaxPid((long) MOCK_ATTR_BOOKS.size());
+        }
+        if (type.equals(PatchBook.Type.Domain)) {
+            conf.setMaxPid((long) MOCK_DOMAIN_BOOKS.size());
+        }
         conf.setEmailEnabled(false);
         conf.setSkipValidation(true);
         // Test HotFix mode for Attribute patch type
