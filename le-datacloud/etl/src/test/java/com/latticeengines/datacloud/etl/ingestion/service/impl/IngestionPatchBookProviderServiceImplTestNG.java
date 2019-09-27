@@ -454,7 +454,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         }
     }
 
-    // Test data with Attribute type is all mar ked as hotfix while that with
+    // Test data with Attribute type is all marked as hotfix while that with
     // Domain type is not hotfix. So no need to do any filter by hotfix here
     private List<PatchBook> mockFindByTypeAndHotFixWithPaginNoSort(int minPid, int maxPid,
             PatchBook.Type type, boolean hotfix) {
@@ -470,7 +470,6 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             throw new UnsupportedOperationException(
                     "Unsupported PatchBook type in mockFindCountByTypeAndHotFix: " + type);
         }
-        System.out.println("mock###minPid : " + minPid + " mock##maxPid : " + maxPid);
         List<PatchBook> toReturn = new ArrayList<>();
         for (int i = minPid; i < maxPid; i++) {
             toReturn.add(books.get(i));
