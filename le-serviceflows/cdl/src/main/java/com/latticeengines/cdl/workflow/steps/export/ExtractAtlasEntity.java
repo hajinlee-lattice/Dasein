@@ -126,9 +126,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 } finally {
                     stopSparkSQLSession();
                 }
-                if (true) {
-                    throw new Exception();
-                }
                 return resultForCurrentAttempt;
             });
             putObjectInContext(ATLAS_EXPORT_DATA_UNIT, resultMap);
