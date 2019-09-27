@@ -254,14 +254,14 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(validationMessages);
         if (ImportWorkflowUtils.CUSTOM_FIELDS.equals(section)) {
             FieldValidationMessage validation =
-                    validationMessages.stream().filter(message -> name.equals(message.getColumnName())).findFirst().orElse(null);
+                    validationMessages.stream().filter(message -> name.equals(message.getColumnName())
+                            && messageLevel.equals(message.getMessageLevel())).findFirst().orElse(null);
             Assert.assertNotNull(validation);
-            Assert.assertEquals(validation.getMessageLevel(), messageLevel);
         } else {
             FieldValidationMessage validation =
-                    validationMessages.stream().filter(message -> name.equals(message.getFieldName())).findFirst().orElse(null);
+                    validationMessages.stream().filter(message -> name.equals(message.getFieldName())
+                            && messageLevel.equals(message.getMessageLevel())).findFirst().orElse(null);
             Assert.assertNotNull(validation);
-            Assert.assertEquals(validation.getMessageLevel(), messageLevel);
         }
 
 
