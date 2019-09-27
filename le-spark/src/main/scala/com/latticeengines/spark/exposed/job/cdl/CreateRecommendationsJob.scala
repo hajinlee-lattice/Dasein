@@ -193,13 +193,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val accountColsRecNotIncludedNonStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedNonStd != null) playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
     val contactCols: Seq[String] = if (playLaunchContext.getContactCols != null) playLaunchContext.getContactCols.asScala else Seq.empty[String]
 
-    println("----- BEGIN SCRIPT OUTPUT -----")
-	  println(f"playId=$playId%s, playLaunchId=$playLaunchId%s")
-	  println("----- END SCRIPT OUTPUT -----")
+	  logSpark(f"playId=$playId%s, playLaunchId=$playLaunchId%s")
 
     // Read Input
 	  val listSize = lattice.input.size
-	  println(s"input size is: $listSize")
+	  logSpark(s"input size is: $listSize")
     val accountTable: DataFrame = lattice.input.head
 
     // Manipulate Account Table with PlayLaunchContext
@@ -238,11 +236,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
     var limitedAccountTable = derivedAccounts
     if (topNCount != null) {
-      println(s"topNCount is: $topNCount")
+      logSpark(s"topNCount is: $topNCount")
       limitedAccountTable = derivedAccounts.limit(topNCount.toString.toInt)
     }
     val limitedAccountTableSize = limitedAccountTable.count()
-    println(s"limitedAccountTableSize is: $limitedAccountTableSize")
+    logSpark(s"limitedAccountTableSize is: $limitedAccountTableSize")
 
     // Manipulate Contact Table
     var finalRecommendations: DataFrame = null
@@ -259,9 +257,9 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       // join
       val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey :: Nil, "left")
       //recommendations.rdd.saveAsTextFile("/tmp/recommendations.txt")
-      println("----- BEGIN SCRIPT OUTPUT -----")
+      logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    recommendations.printSchema
-	    println("----- END SCRIPT OUTPUT -----")
+	    logSpark("----- END SCRIPT OUTPUT -----")
       val contactCount = recommendations.agg( //
     	  sum("CONTACT_NUM")
       ).first.get(0)
@@ -311,7 +309,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val accountColsRecNotIncludedStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedStd != null) playLaunchContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
     val accountColsRecNotIncludedNonStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedNonStd != null) playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
     val contactCols: Seq[String] = if (playLaunchContext.getContactCols != null) playLaunchContext.getContactCols.asScala else Seq.empty[String]
-    println("Four categories of column metadata are as follows:")
+    logSpark("Four categories of column metadata are as follows:")
     println(accountColsRecIncluded)
     println(accountColsRecNotIncludedStd)
     println(accountColsRecNotIncludedNonStd)     
@@ -396,9 +394,9 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       )
       val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("[]").cast(StringType)).otherwise(col("CONTACTS")))
       //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
-      println("----- BEGIN SCRIPT OUTPUT -----")
+      logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    processedAggrContacts.printSchema
-	    println("----- END SCRIPT OUTPUT -----")
+	    logSpark("----- END SCRIPT OUTPUT -----")
       return processedAggrContacts
   }
   
