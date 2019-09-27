@@ -61,7 +61,7 @@ public class RatingResource {
 
     @PostMapping(value = "/query")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query")
+    @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
                            @RequestParam(value = "version", required = false) DataCollection.Version version,
                            @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
@@ -70,7 +70,7 @@ public class RatingResource {
 
     @PostMapping(value = "/coverage")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query")
+    @ApiOperation(value = "Retrieve the rating count for the specified query")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
             @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,

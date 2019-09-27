@@ -55,7 +55,7 @@ public class EventResource {
 
     @PostMapping(value = "/data/scoring")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query")
+    @ApiOperation(value = "Retrieve the scoring tuples for the specified query")
     public DataPage getScoringTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getScoringTuples(frontEndQuery, version);
@@ -63,7 +63,7 @@ public class EventResource {
 
     @PostMapping(value = "/data/training")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query")
+    @ApiOperation(value = "Retrieve the training tuples for the specified query")
     public DataPage getTrainingTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getTrainingTuples(frontEndQuery, version);
@@ -71,7 +71,7 @@ public class EventResource {
 
     @PostMapping(value = "/data/event")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query")
+    @ApiOperation(value = "Retrieve the event tuples for the specified query")
     public DataPage getEventTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getEventTuples(frontEndQuery, version);
@@ -79,7 +79,7 @@ public class EventResource {
 
     @PostMapping(value = "/query")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query")
+    @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, //
             @RequestBody EventFrontEndQuery frontEndQuery, //
             @RequestParam(value = "eventType", required = true) EventType eventType, //
