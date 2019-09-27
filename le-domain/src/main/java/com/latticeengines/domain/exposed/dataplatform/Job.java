@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 
 @Entity
 @Table(name = "JOB", indexes = { @Index(name = "IX_JOB_ID", columnList = "JOB_ID") })
@@ -69,7 +70,7 @@ public class Job implements HasPid, HasId<String> {
     @JsonIgnore
     @Transient
     public ApplicationId getAppId() {
-        return ApplicationId.fromString(id);
+        return ApplicationIdUtils.toApplicationIdObj(id);
     }
 
     @Column(name = "CUSTOMER")

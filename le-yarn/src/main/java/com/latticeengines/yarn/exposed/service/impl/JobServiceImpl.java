@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.JobCounters;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
@@ -256,7 +257,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Override
     public void populateJobStatusFromYarnAppReport(JobStatus jobStatus, String applicationId) {
-        ApplicationReport appReport = getJobReportById(ApplicationId.fromString(applicationId));
+        ApplicationReport appReport = getJobReportById(ApplicationIdUtils.toApplicationIdObj(applicationId));
         jobStatus.setId(applicationId);
         if (appReport != null) {
             jobStatus.setStatus(appReport.getFinalApplicationStatus());
@@ -298,7 +299,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                 try (org.apache.hadoop.yarn.client.api.YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
                     yarnClient.start();
                     ApplicationReport appReport =
-                            yarnClient.getApplicationReport(ApplicationId.fromString(applicationId));
+                            yarnClient.getApplicationReport(ApplicationIdUtils.toApplicationIdObj(applicationId));
                     jobStatus.setId(applicationId);
                     if (appReport != null) {
                         jobStatus.setStatus(appReport.getFinalApplicationStatus());

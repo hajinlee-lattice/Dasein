@@ -23,6 +23,7 @@ import com.latticeengines.datacloud.workflow.match.steps.BulkMatchContextKey;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("updateFailedMatchListener")
@@ -85,7 +86,7 @@ public class UpdateFailedMatchListener extends LEJobListener {
         List<MatchBlock> matchBlocks = matchCommandService.getByRootOperationUid(rootUid).getMatchBlocks();
         for (MatchBlock block: matchBlocks) {
             if (!YarnUtils.TERMINAL_APP_STATE.contains(block.getApplicationState())) {
-                ApplicationId appId = ApplicationId.fromString(block.getApplicationId());
+                ApplicationId appId = ApplicationIdUtils.toApplicationIdObj(block.getApplicationId());
                 try {
                     ApplicationReport report = yarnClient.getApplicationReport(appId);
                     if (!YarnUtils.TERMINAL_APP_STATE.contains(report.getYarnApplicationState())) {

@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -63,8 +64,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to start processAnalyze job: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -87,8 +87,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to start processAnalyze job: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -165,8 +164,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to submit import job: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -182,8 +180,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new LedpException(LedpCode.LEDP_40056,
                     new String[] { StringUtils.join(responseDoc.getErrors(), ",") });
@@ -212,7 +209,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (res.isSuccess()) {
-            return StringUtils.isNotBlank(res.getResult()) ? ApplicationId.fromString(res.getResult()) : null;
+            return ApplicationIdUtils.toApplicationIdObj(res.getResult());
         } else {
             throw new RuntimeException("Fail to submit bulk entity match job, errors = " + res.getErrors());
         }
@@ -226,8 +223,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult().toString();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult().toString());
         } else {
             throw new RuntimeException(
                     "Failed to submit orphanRecordsExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -251,8 +247,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException("Failed to cleanupAll: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
@@ -274,8 +269,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException("Failed to cleanupAllData: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
@@ -310,8 +304,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to cleanupAllAttrConfig: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -328,8 +321,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to start convert batchstore job: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -349,8 +341,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to start migrate import job: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -379,8 +370,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to cleanupByTimeRange: " + StringUtils.join(responseDoc.getErrors(), ","));
@@ -407,8 +397,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
@@ -435,8 +424,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
@@ -510,8 +498,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return null;
         }
         if (responseDoc.isSuccess()) {
-            String appIdStr = responseDoc.getResult();
-            return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new RuntimeException(
                     "Failed to start entityExport job: " + StringUtils.join(responseDoc.getErrors(), ","));

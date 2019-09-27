@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfigurati
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")
@@ -133,7 +134,7 @@ public class IngestionServiceImpl implements IngestionService {
         List<IngestionProgress> progresses = ingestionProgressService.getProgressesByField(fields, null);
         for (IngestionProgress progress : progresses) {
             try {
-                ApplicationId appId = ApplicationId.fromString(progress.getApplicationId());
+                ApplicationId appId = ApplicationIdUtils.toApplicationIdObj(progress.getApplicationId());
                 ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, appId);
                 if (report == null || report.getYarnApplicationState() == null
                         || report.getYarnApplicationState().equals(YarnApplicationState.FAILED)

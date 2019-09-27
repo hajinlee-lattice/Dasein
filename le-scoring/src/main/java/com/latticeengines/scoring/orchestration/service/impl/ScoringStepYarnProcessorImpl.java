@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -151,7 +152,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 .setSplitColumn(PID)//
                 .build();//
         String appIdStr = sqoopProxy.importData(importer).getApplicationIds().get(0);
-        return ApplicationId.fromString(appIdStr);
+        return ApplicationIdUtils.toApplicationIdObj(appIdStr);
     }
 
     private ApplicationId score(ScoringCommand scoringCommand) {
