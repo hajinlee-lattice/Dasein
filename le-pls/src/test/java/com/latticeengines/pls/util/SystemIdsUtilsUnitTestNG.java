@@ -7,7 +7,6 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
@@ -33,9 +33,6 @@ public class SystemIdsUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testProcessUniqueId_contactsWithMatchIds1() throws IOException {
-
-        log.info("----- Running Test 1 -----");
-
         CustomerSpace customerSpace = new CustomerSpace("test", "test", "1");
 
         EntityType entityType = EntityType.Contacts;
@@ -43,7 +40,6 @@ public class SystemIdsUtilsUnitTestNG {
                 "com/latticeengines/pls/util/test-system-ids-contact-test1-record.json",
                 FieldDefinitionsRecord.class);
         CDLService mockCdlService = Mockito.mock(CDLService.class);
-
 
         S3ImportSystem defaultImportSystem = new S3ImportSystem();
         defaultImportSystem.setName(defaultSystemName);
@@ -55,8 +51,6 @@ public class SystemIdsUtilsUnitTestNG {
 
         S3ImportSystem salesforceImportSystem = new S3ImportSystem();
         salesforceImportSystem.setName(salesforceSystemName);
-        //salesforceImportSystem.setMapToLatticeContact(true);
-        //salesforceImportSystem.setContactSystemId("user_" + salesforceSystemName + "_22222222_ContactId");
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), salesforceSystemName)).thenReturn(
                 salesforceImportSystem);
 
@@ -74,11 +68,11 @@ public class SystemIdsUtilsUnitTestNG {
 
         SystemIdsUtils.processSystemIds(customerSpace, salesforceSystemName, entityType, actualRecord, mockCdlService);
 
-        log.error("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
-        log.error("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
-        log.error("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
-        log.error("MarketoImportSystem:\n" + JsonUtils.pprint(marketoImportSystem));
-        log.error("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
+        log.info("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
+        log.info("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
+        log.info("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
+        log.info("MarketoImportSystem:\n" + JsonUtils.pprint(marketoImportSystem));
+        log.info("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
 
         FieldDefinitionsRecord expectedRecord = ImportWorkflowUtilsTestNG.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/expected-system-ids-contact-test1-record.json",
@@ -101,9 +95,6 @@ public class SystemIdsUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testProcessUniqueId_contactsWithMatchIds2() throws IOException {
-
-        log.info("----- Running Test 2 -----");
-
         CustomerSpace customerSpace = new CustomerSpace("test", "test", "1");
 
         EntityType entityType = EntityType.Contacts;
@@ -112,11 +103,8 @@ public class SystemIdsUtilsUnitTestNG {
                 FieldDefinitionsRecord.class);
         CDLService mockCdlService = Mockito.mock(CDLService.class);
 
-
         S3ImportSystem defaultImportSystem = new S3ImportSystem();
         defaultImportSystem.setName(defaultSystemName);
-        //defaultImportSystem.setAccountSystemId("user_" + defaultSystemName + "_11111111_AccountId");
-        //defaultImportSystem.setMapToLatticeAccount(true);
         defaultImportSystem.setContactSystemId("user_" + defaultSystemName + "_11111111_ContactId");
         defaultImportSystem.setMapToLatticeContact(true);
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), defaultSystemName))
@@ -126,14 +114,12 @@ public class SystemIdsUtilsUnitTestNG {
         salesforceImportSystem.setName(salesforceSystemName);
         salesforceImportSystem.setMapToLatticeAccount(true);
         salesforceImportSystem.setAccountSystemId("user_" + salesforceSystemName + "_22222222_AccountId");
-        //salesforceImportSystem.setMapToLatticeContact(true);
         salesforceImportSystem.setContactSystemId("user_" + salesforceSystemName + "_22222222_ContactId");
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), salesforceSystemName)).thenReturn(
                 salesforceImportSystem);
 
         S3ImportSystem marketoImportSystem = new S3ImportSystem();
         marketoImportSystem.setName(marketoSystemName);
-        //marketoImportSystem.setContactSystemId("user_" + marketoSystemName + "_33333333_ContactId");
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), marketoSystemName)).thenReturn(
                 marketoImportSystem);
 
@@ -145,11 +131,11 @@ public class SystemIdsUtilsUnitTestNG {
 
         SystemIdsUtils.processSystemIds(customerSpace, marketoSystemName, entityType, actualRecord, mockCdlService);
 
-        log.error("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
-        log.error("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
-        log.error("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
-        log.error("MarketoImportSystem:\n" + JsonUtils.pprint(marketoImportSystem));
-        log.error("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
+        log.info("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
+        log.info("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
+        log.info("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
+        log.info("MarketoImportSystem:\n" + JsonUtils.pprint(marketoImportSystem));
+        log.info("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
 
         FieldDefinitionsRecord expectedRecord = ImportWorkflowUtilsTestNG.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/expected-system-ids-contact-test2-record.json",
@@ -172,9 +158,6 @@ public class SystemIdsUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testProcessUniqueId_contactsWithMissingSystem() throws IOException {
-
-        log.info("----- Running Test 3 -----");
-
         CustomerSpace customerSpace = new CustomerSpace("test", "test", "1");
 
         EntityType entityType = EntityType.Contacts;
@@ -207,10 +190,10 @@ public class SystemIdsUtilsUnitTestNG {
                         salesforceSystemName + " as match ID in section " + SystemIdsUtils.MATCH_IDS_SECTION +
                         " before that system has been set up"));
 
-        log.error("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
-        log.error("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
-        log.error("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
-        log.error("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
+        log.info("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
+        log.info("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
+        log.info("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
+        log.info("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
 
         FieldDefinitionsRecord expectedRecord = ImportWorkflowUtilsTestNG.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/expected-system-ids-contact-missing-system-record.json",
@@ -233,9 +216,6 @@ public class SystemIdsUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testProcessUniqueId_accountsWithMatchIds() throws IOException {
-
-        log.info("----- Running Test 4 -----");
-
         CustomerSpace customerSpace = new CustomerSpace("test", "test", "1");
 
         EntityType entityType = EntityType.Accounts;
@@ -252,7 +232,6 @@ public class SystemIdsUtilsUnitTestNG {
 
         S3ImportSystem salesforceImportSystem = new S3ImportSystem();
         salesforceImportSystem.setName(salesforceSystemName);
-        //salesforceImportSystem.setAccountSystemId("user_" + salesforceSystemName + "_22222222_AccountId");
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), salesforceSystemName)).thenReturn(
                 salesforceImportSystem);
 
@@ -271,11 +250,11 @@ public class SystemIdsUtilsUnitTestNG {
 
         SystemIdsUtils.processSystemIds(customerSpace, salesforceSystemName, entityType, actualRecord, mockCdlService);
 
-        log.error("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
-        log.error("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
-        log.error("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
-        log.error("DataWarehouseImportSystem:\n" + JsonUtils.pprint(dataWarehouseImportSystem));
-        log.error("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
+        log.info("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
+        log.info("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
+        log.info("SalesforceImportSystem:\n" + JsonUtils.pprint(salesforceImportSystem));
+        log.info("DataWarehouseImportSystem:\n" + JsonUtils.pprint(dataWarehouseImportSystem));
+        log.info("BomboraImportSystem:\n" + JsonUtils.pprint(bomboraImportSystem));
 
         FieldDefinitionsRecord expectedRecord = ImportWorkflowUtilsTestNG.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/expected-system-ids-account-record.json",
@@ -285,13 +264,11 @@ public class SystemIdsUtilsUnitTestNG {
                 SystemIdsUtils.UNIQUE_ID_SECTION);
         assertEquals(actualUniqueIdDefinitionList.size(), 1);
         String actualUniqueIdFieldName = actualUniqueIdDefinitionList.get(0).getFieldName();
-        log.error("$$$$$ Actual Unique Field Name: {}", actualUniqueIdFieldName);
         assertTrue(actualUniqueIdFieldName.matches("user_SalesforceSystem_(\\w{8})_AccountId"));
         List<FieldDefinition> expectedUniqueIdDefinitionList = expectedRecord.getFieldDefinitionsRecords(
                 SystemIdsUtils.UNIQUE_ID_SECTION);
         assertEquals(expectedUniqueIdDefinitionList.size(), 1);
         expectedUniqueIdDefinitionList.get(0).setFieldName(actualUniqueIdFieldName);
-        log.error("$$$$$ Expected Unique Field Name: {}", expectedUniqueIdDefinitionList.get(0).getFieldName());
 
         Assert.assertEquals(actualRecord, expectedRecord,
                 "Actual Record:\n" + JsonUtils.pprint(actualRecord) + "\nvs\n\nExpected Record:\n" +

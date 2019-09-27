@@ -29,12 +29,12 @@ public class SystemIdsUtils {
                                        FieldDefinitionsRecord record, CDLService cdlService) {
         if (!BusinessEntity.Account.equals(entityType.getEntity()) &&
                 !BusinessEntity.Contact.equals(entityType.getEntity())) {
-            log.info("No System ID support for Business Entity: {}.  Tenant is: {}", entityType.getEntity(),
+            log.warn("No System ID support for Business Entity: {}.  Tenant is: {}", entityType.getEntity(),
                     customerSpace.getTenantId());
             return;
         }
-        log.info("Processing System IDs for Tenant {}, System Name {}, System Object {}", customerSpace.getTenantId(),
-                systemName, entityType.getDisplayName());
+        //log.info("Processing System IDs for Tenant {}, System Name {}, System Object {}", customerSpace.getTenantId(),
+        //        systemName, entityType.getDisplayName());
 
         // TODO(jwinter): Evaluate if there is another way to process IDs without hardcoding section names.
         S3ImportSystem currentImportSystem = processUniqueId(customerSpace, systemName, entityType, record,
@@ -80,11 +80,12 @@ public class SystemIdsUtils {
                 importSystem.setMapToLatticeAccount(uniqueIdDefinition.isMappedToLatticeId());
             }
 
-            log.info("State|  entity: {}  section: {}  importSystem: {}  isMappedtoAccount:  {}  " +
-                            "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(), sectionName,
-                    importSystem.getName(), importSystem.isMapToLatticeAccount(),
-                    importSystem.isMapToLatticeContact(), uniqueIdDefinition.getColumnName(),
-                    uniqueIdDefinition.getFieldName());
+            //log.info("State|  entity: {}  section: {}  importSystem: {}  isMappedtoAccount:  {}  " +
+            //                "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(),
+            //        sectionName,
+            //        importSystem.getName(), importSystem.isMapToLatticeAccount(),
+            //        importSystem.isMapToLatticeContact(), uniqueIdDefinition.getColumnName(),
+            //        uniqueIdDefinition.getFieldName());
 
             updateLatticeId(importSystem.isMapToLatticeAccount(), InterfaceName.CustomerAccountId.name(),
                     uniqueIdDefinition.getColumnName(), record);
@@ -99,11 +100,12 @@ public class SystemIdsUtils {
                 importSystem.setMapToLatticeContact(uniqueIdDefinition.isMappedToLatticeId());
             }
 
-            log.info("State|  entity: {}  section: {}  importSystem: {}  isMappedtoAccount:  {}  " +
-                            "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(), sectionName,
-                    importSystem.getName(), importSystem.isMapToLatticeAccount(),
-                    importSystem.isMapToLatticeContact(), uniqueIdDefinition.getColumnName(),
-                    uniqueIdDefinition.getFieldName());
+            //log.info("State|  entity: {}  section: {}  importSystem: {}  isMappedtoAccount:  {}  " +
+            //                "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(),
+            //        sectionName,
+            //        importSystem.getName(), importSystem.isMapToLatticeAccount(),
+            //        importSystem.isMapToLatticeContact(), uniqueIdDefinition.getColumnName(),
+            //        uniqueIdDefinition.getFieldName());
 
             updateLatticeId(importSystem.isMapToLatticeContact(), InterfaceName.CustomerContactId.name(),
                     uniqueIdDefinition.getColumnName(), record);
@@ -128,8 +130,8 @@ public class SystemIdsUtils {
                     matchIdDefinition.getExternalSystemName() : currentImportSystem.getName();
             S3ImportSystem importSystem = systemName.equals(currentImportSystem.getName()) ? currentImportSystem :
                     cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-            log.error("systemName: {}  currentSystem:  {}  definitionSystem:  {}", systemName,
-                    currentImportSystem.getName(), matchIdDefinition.getExternalSystemName());
+            //log.info("systemName: {}  currentSystem:  {}  definitionSystem:  {}", systemName,
+            //        currentImportSystem.getName(), matchIdDefinition.getExternalSystemName());
 
             if (BusinessEntity.Account.equals(entityType.getEntity())) {
                 if (StringUtils.isBlank(importSystem.getAccountSystemId())) {
@@ -143,11 +145,11 @@ public class SystemIdsUtils {
                     matchIdDefinition.setFieldName(importSystem.getAccountSystemId());
                 }
 
-                log.info("State|  entity: {}  section: {}  curSystem: {}  defSystem: {}  isMappedtoAccount:  {}  " +
-                        "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(), sectionName,
-                        currentImportSystem.getName(), importSystem.getName(), importSystem.isMapToLatticeAccount(),
-                        importSystem.isMapToLatticeContact(), matchIdDefinition.getColumnName(),
-                        matchIdDefinition.getFieldName());
+                //log.info("State|  entity: {}  section: {}  curSystem: {}  defSystem: {}  isMappedtoAccount:  {}  " +
+                //        "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(), sectionName,
+                //        currentImportSystem.getName(), importSystem.getName(), importSystem.isMapToLatticeAccount(),
+                //        importSystem.isMapToLatticeContact(), matchIdDefinition.getColumnName(),
+                //        matchIdDefinition.getFieldName());
 
                 updateLatticeId(importSystem.isMapToLatticeAccount(), InterfaceName.CustomerAccountId.name(),
                         matchIdDefinition.getColumnName(), record);
@@ -164,11 +166,12 @@ public class SystemIdsUtils {
                     matchIdDefinition.setFieldName(importSystem.getContactSystemId());
                 }
 
-                log.info("State|  entity: {}  section: {}  curSystem: {}  fieldSystem: {}  isMappedtoAccount:  {}  " +
-                                "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(), sectionName,
-                        currentImportSystem.getName(), importSystem.getName(), importSystem.isMapToLatticeAccount(),
-                        importSystem.isMapToLatticeContact(), matchIdDefinition.getColumnName(),
-                        matchIdDefinition.getFieldName());
+                //log.info("State|  entity: {}  section: {}  curSystem: {}  fieldSystem: {}  isMappedtoAccount:  {}  " +
+                //                "isMappedToContact: {}  columnName: {}  fieldName: {}", entityType.getEntity(),
+                //        sectionName,
+                //        currentImportSystem.getName(), importSystem.getName(), importSystem.isMapToLatticeAccount(),
+                //        importSystem.isMapToLatticeContact(), matchIdDefinition.getColumnName(),
+                //        matchIdDefinition.getFieldName());
 
                 updateLatticeId(importSystem.isMapToLatticeContact(), InterfaceName.CustomerContactId.name(),
                         matchIdDefinition.getColumnName(), record);
@@ -187,79 +190,11 @@ public class SystemIdsUtils {
                 latticeIdDefinition.setColumnName(columnName);
                 record.addFieldDefinition(LATTICE_IDS_SECTION, latticeIdDefinition, false);
 
-                log.info("Creating new Lattice ID field " + fieldName + " for " + columnName);
+                //log.info("Creating new Lattice ID field " + fieldName + " for " + columnName);
             } else {
                 latticeIdDefinition.setColumnName(columnName);
-                log.info("Updating old Lattice ID field " + fieldName + " which columnName " + columnName);
+                //log.info("Updating old Lattice ID field " + fieldName + " which columnName " + columnName);
             }
         }
     }
-
-    /*
-    private static void processMatchIdsOld(CustomerSpace customerSpace, String systemName, EntityType entityType,
-                                        FieldDefinitionsRecord record, String sectionName, CDLService cdlService) {
-        List<FieldDefinition> fieldDefinitionList = record.getFieldDefinitionsRecords(sectionName);
-        if (CollectionUtils.isEmpty(fieldDefinitionList)) {
-            return;
-        }
-        for (FieldDefinition matchIdDefinition : fieldDefinitionList) {
-            String definitionSystemName = StringUtils.isNotBlank(matchIdDefinition.getExternalSystemName()) ?
-                    matchIdDefinition.getExternalSystemName() : systemName;
-            S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), definitionSystemName);
-            if (BusinessEntity.Account.equals(entityType.getEntity())) {
-                if (StringUtils.isBlank(importSystem.getAccountSystemId())) {
-                    throw new IllegalStateException("Cannot assign column " + matchIdDefinition.getColumnName() +
-                            " as " + entityType.getEntity() + " ID from system " +
-                            definitionSystemName + " as match ID in section " + sectionName +
-                            " before that system has been set up");
-                }
-
-                matchIdDefinition.setFieldName(importSystem.getAccountSystemId());
-                updateLatticeId(importSystem.isMapToLatticeAccount(), InterfaceName.CustomerAccountId.name(),
-                        matchIdDefinition.getColumnName(), record);
-            } else {
-                if (StringUtils.isBlank(importSystem.getContactSystemId())) {
-                    throw new IllegalStateException("Cannot assign column " + matchIdDefinition.getColumnName() +
-                            " as " + entityType.getEntity() + " ID from system " +
-                            definitionSystemName + " as match ID in section " + sectionName +
-                            " before that system has been set up");
-                }
-                matchIdDefinition.setFieldName(importSystem.getContactSystemId());
-                updateLatticeId(importSystem.isMapToLatticeContact(), InterfaceName.CustomerContactId.name(),
-                        matchIdDefinition.getColumnName(), record);
-            }
-        }
-    }
-
-    private static void processMatchToAccountId(CustomerSpace customerSpace, String systemName, EntityType entityType,
-                                                FieldDefinitionsRecord record, String sectionName,
-                                                CDLService cdlService) {
-        List<FieldDefinition> fieldDefinitionList = record.getFieldDefinitionsRecords(sectionName);
-        if (CollectionUtils.isEmpty(fieldDefinitionList)) {
-            return;
-        }
-
-        // For now, we assume there is only one FieldDefinition in this list.
-        if (fieldDefinitionList.size() != 1) {
-            throw new IllegalStateException(sectionName + " section of system name " + systemName +
-                    " and object " + entityType.getDisplayName() + " has more than one field");
-        }
-        FieldDefinition accountIdDefinition = fieldDefinitionList.get(0);
-        String definitionSystemName = StringUtils.isNotBlank(accountIdDefinition.getExternalSystemName()) ?
-                accountIdDefinition.getExternalSystemName() : systemName;
-        S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(),
-                definitionSystemName);
-
-        if (StringUtils.isBlank(importSystem.getAccountSystemId())) {
-            throw new IllegalStateException("Cannot assign column " + accountIdDefinition.getColumnName() +
-                    " as " + entityType.getEntity() + " ID from system " +
-                    definitionSystemName + " as match ID in section " + sectionName +
-                    " before that system has been set up");
-        }
-        accountIdDefinition.setFieldName(importSystem.getAccountSystemId());
-        updateLatticeId(importSystem.isMapToLatticeAccount(), InterfaceName.CustomerAccountId.name(),
-                accountIdDefinition.getColumnName(), record);\
-    }
-    */
-
 }
