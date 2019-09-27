@@ -117,7 +117,9 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         for (int i = 0; i < batches.length; i++) {
             Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i],
                     minPid);
+            patchConfig.setMinPid(Long.parseLong(String.valueOf(minPid)));
             minPid += batches[i];
+            patchConfig.setMaxPid(Long.parseLong(String.valueOf(minPid)));
             ingesters.add(ingester);
         }
         return ingesters;
@@ -186,7 +188,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
                         minPid, maxPid, patchConfig.getBookType(),
                         PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-                List<PatchBook> activeBooks = getActiveBooks(books, currentDate);
+                List<PatchBook> activeBooks = getActiveBooks(books, currentDate, minPid, maxPid);
                 String fileName = "part-" + batchSeq + ".avro";
                 try {
                     long importSize = importToHdfs(activeBooks, progress.getDestination(), fileName, patchConfig);
@@ -204,9 +206,11 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     }
 
-    private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate) {
+    private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate, long minPid,
+            long maxPid) {
         return books.stream() //
-                .filter(book -> !PatchBookUtils.isEndOfLife(book, currentDate)) //
+                .filter(book -> !PatchBookUtils.isEndOfLife(book, currentDate)
+                        && book.getPid() >= minPid && book.getPid() < maxPid) //
                 .collect(Collectors.toList());
     }
 

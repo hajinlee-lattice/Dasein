@@ -84,6 +84,9 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
     private IngestionPatchBookProviderServiceImpl ingestionProviderService;
 
     @Inject
+    private PatchBookEntityMgr patchBookEntityMgr;
+
+    @Inject
     private IngestionEntityMgr ingestionEntityMgr;
 
     @Inject
@@ -145,20 +148,20 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             List<PatchBook> activeDomainBooks = MOCK_DOMAIN_BOOKS.stream() //
                         .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)
                                 && book.getPid() >= 0
-                                && book.getPid() < AvroUtils.count(yarnConfiguration, glob)) //
+                                && book.getPid() < MOCK_DOMAIN_BOOKS.size()) //
                     .collect(Collectors.toList());
-                /*Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
-                        (long) activeDomainBooks.size());*/
+                Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
+                        (long) activeDomainBooks.size());
             verifyUpdatedPatchBook(activeDomainBooks);
             break;
         case Attribute:
             List<PatchBook> activeAttrBooks = MOCK_ATTR_BOOKS.stream() //
                         .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)
                                 && book.getPid() >= 0
-                                && book.getPid() < AvroUtils.count(yarnConfiguration, glob)) //
+                                && book.getPid() < MOCK_ATTR_BOOKS.size()) //
                     .collect(Collectors.toList());
-                /*Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
-                        (long) activeAttrBooks.size());*/
+                Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
+                        (long) activeAttrBooks.size());
             verifyUpdatedPatchBook(activeAttrBooks);
             break;
         default:
@@ -451,7 +454,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         }
     }
 
-    // Test data with Attribute type is all marked as hotfix while that with
+    // Test data with Attribute type is all mar ked as hotfix while that with
     // Domain type is not hotfix. So no need to do any filter by hotfix here
     private List<PatchBook> mockFindByTypeAndHotFixWithPaginNoSort(int minPid, int maxPid,
             PatchBook.Type type, boolean hotfix) {
@@ -467,7 +470,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             throw new UnsupportedOperationException(
                     "Unsupported PatchBook type in mockFindCountByTypeAndHotFix: " + type);
         }
-
+        System.out.println("mock###minPid : " + minPid + " mock##maxPid : " + maxPid);
         List<PatchBook> toReturn = new ArrayList<>();
         for (int i = minPid; i < maxPid; i++) {
             toReturn.add(books.get(i));

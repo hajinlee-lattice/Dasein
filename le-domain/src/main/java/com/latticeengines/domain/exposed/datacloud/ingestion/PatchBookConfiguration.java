@@ -18,6 +18,12 @@ public class PatchBookConfiguration extends ProviderConfiguration {
     @JsonProperty("BatchSize")
     private Integer batchSize = 0;
 
+    @JsonProperty("MinPid")
+    private Long minPid;
+
+    @JsonProperty("MaxPid")
+    private Long maxPid;
+
     // Don't allow multiple PatchBook ingestion running at same time
     @Override
     @JsonProperty("ConcurrentNum")
@@ -61,5 +67,21 @@ public class PatchBookConfiguration extends ProviderConfiguration {
 
     public void setSkipValidation(boolean skipValidation) {
         this.skipValidation = skipValidation;
+    }
+
+    public Long getMinPid() {
+        return minPid;
+    }
+
+    public void setMinPid(Long minPid) {
+        this.minPid = minPid;
+    }
+
+    public Long getMaxPid() {
+        return maxPid;
+    }
+
+    public void setMaxPid(Long maxPid) {
+        this.maxPid = maxPid;
     }
 }
