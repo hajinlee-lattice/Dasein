@@ -154,6 +154,20 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     }
 
     @VisibleForTesting
+    String getXssSetting(Properties appMasterProperties) {
+        int stackSize = 1024;
+        if (appMasterProperties != null) {
+            String stackSizeStr = appMasterProperties.getProperty(AppMasterProperty.JVM_STACK.name());
+            if (StringUtils.isNotEmpty(stackSizeStr)) {
+                stackSize = Integer.parseInt(stackSizeStr);
+            }
+        }
+        // set JVM stack size
+        String xss = String.format("-Xss%dk", stackSize);
+        return xss;
+    }
+
+    @VisibleForTesting
     String getXmxSetting(Properties appMasterProperties, boolean byFitting) {
         int minAllocationInMb = yarnConfiguration.getInt("yarn.scheduler.minimum-allocation-mb", -1);
 
@@ -238,6 +252,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 "&&", //
                 "$JAVA_HOME/bin/java", //
                 getXmxSetting(appMasterProperties, true), //
+                getXssSetting(appMasterProperties),
                 "${LE_LOG_OPTS}", //
                 "${LE_CIPHER_OPTS}", //
                 "${LE_JACOCO_OPT}",
