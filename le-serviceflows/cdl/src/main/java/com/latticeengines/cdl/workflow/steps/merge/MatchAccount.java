@@ -112,6 +112,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         if (configuration.isEntityMatchEnabled()) {
             // combine columns from all imports
             Set<String> columnNames = getInputTableColumnNames();
+            setServingVersionForEntityMatchTenant(matchInput);
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
                     getSystemIds(BusinessEntity.Account), null);
         } else {

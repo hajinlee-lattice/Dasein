@@ -183,6 +183,11 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
 
+        String convertBatchStoreTableName = getConvertBatchStoreTableName();
+        if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
+            addBaseTables(step, convertBatchStoreTableName);
+        }
+
         MergeImportsConfig config = new MergeImportsConfig();
         config.setDedupSrc(false);
         config.setJoinKey(null);
@@ -231,6 +236,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             String targetTableNamePrefix, ETLEngineLoad engineLoad) {
         TransformationStepConfig step = new TransformationStepConfig();
         inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
+
+        String convertBatchStoreTableName = getConvertBatchStoreTableName();
+        if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
+            addBaseTables(step, convertBatchStoreTableName);
+        }
+
         if (targetTableNamePrefix != null) {
             setTargetTable(step, targetTableNamePrefix);
         }
@@ -423,6 +434,14 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                 table.getAttributes().forEach(attr -> attrsMap.putIfAbsent(attr.getName(), attr));
             }
         }
+    }
+
+    protected String getConvertBatchStoreTableName() {
+        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
+        if (rematchTables == null) {
+            return null;
+        }
+        return rematchTables.get(configuration.getMainEntity().name());
     }
 
 }

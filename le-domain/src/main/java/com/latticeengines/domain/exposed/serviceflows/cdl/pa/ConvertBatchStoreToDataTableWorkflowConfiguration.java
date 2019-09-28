@@ -1,6 +1,14 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.HashMap;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertAccountWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertContactWorkflowConfiguration;
@@ -34,17 +42,21 @@ public class ConvertBatchStoreToDataTableWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
-        public Builder setSkipStep(boolean skipStep) {
-            convertAccountWorkflowBuilder.setSkipStep(skipStep);
-            convertContactWorkflowBuilder.setSkipStep(skipStep);
-            convertTransactionWorkflowBuilder.setSkipStep(skipStep);
+        /**
+         *
+         * @param entityList those entity haven't batchStore, skip this step
+         */
+        public Builder setSkipStep(Set<BusinessEntity> entityList) {
+            convertAccountWorkflowBuilder.setSkipStep(!CollectionUtils.isEmpty(entityList) && entityList.contains(BusinessEntity.Account));
+            convertContactWorkflowBuilder.setSkipStep(!CollectionUtils.isEmpty(entityList) && entityList.contains(BusinessEntity.Contact));
+            convertTransactionWorkflowBuilder.setSkipStep(!CollectionUtils.isEmpty(entityList) && entityList.contains(BusinessEntity.Transaction));
             return this;
         }
 
-        public Builder setConvertServiceConfig() {
-            convertAccountWorkflowBuilder.setConvertServiceConfig();
-            convertContactWorkflowBuilder.setConvertServiceConfig();
-            convertTransactionWorkflowBuilder.setConvertServiceConfig();
+        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables) {
+            convertAccountWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
+            convertContactWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
+            convertTransactionWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
             return this;
         }
 

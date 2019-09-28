@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -58,6 +59,9 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("skip_publish_to_s3")
     private boolean skipPublishToS3;
+
+    @JsonProperty("serving_version")
+    private EntityMatchVersion servingVersion;
 
     private boolean targetScoreDerivationEnabled;
 
@@ -198,5 +202,13 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setSkipPublishToS3(boolean skipPublishToS3) {
         this.skipPublishToS3 = skipPublishToS3;
+    }
+
+    public EntityMatchVersion getServingVersion() {
+        return servingVersion;
+    }
+
+    public void setServingVersion(EntityMatchVersion servingVersion) {
+        this.servingVersion = servingVersion;
     }
 }

@@ -60,9 +60,13 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -87,6 +91,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -146,12 +151,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final DataFeedTaskService dataFeedTaskService;
 
+    private final MatchProxy matchProxy;
+
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService, DataCollectionService dataCollectionService,
-            DataFeedTaskService dataFeedTaskService, WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
-            AtlasStreamEntityMgr streamEntityMgr, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy,
-            S3ImportSystemService s3ImportSystemService) {
+    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
+                                           DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
+                                           WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
+                                           AtlasStreamEntityMgr streamEntityMgr,
+                                           ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
+                                           CDLAttrConfigProxy cdlAttrConfigProxy,
+                                           S3ImportSystemService s3ImportSystemService, MatchProxy matchProxy) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
@@ -164,6 +173,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
         this.s3ImportSystemService = s3ImportSystemService;
         this.dataFeedTaskService = dataFeedTaskService;
+        this.matchProxy = matchProxy;
     }
 
     @WithWorkflowJobPid
@@ -630,6 +640,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (entityMatchEnabled && request.getFullRematch() && CollectionUtils.isEmpty(needDeletedEntities)) {
             skipReMatchFlag = false;
         }
+        Set<BusinessEntity> needSkipConvertEntities;
+        HashMap<TableRoleInCollection, Table> needConvertBatchStoreMap = new HashMap<>();
+        if (skipReMatchFlag) {
+            needSkipConvertEntities = new HashSet<>();
+            needSkipConvertEntities.add(BusinessEntity.Account);
+            needSkipConvertEntities.add(BusinessEntity.Contact);
+            needSkipConvertEntities.add(BusinessEntity.Transaction);
+        } else {
+            needSkipConvertEntities = getNonBatchStoreEntities(customerSpace, needConvertBatchStoreMap);
+        }
+        //entityMatchVersion is using to bumpVersion when we Rematch entityMatch tenant.
+        EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace,
+                EntityMatchEnvironment.SERVING, false);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -668,7 +691,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .skipEntities(request.getSkipEntities()) //
                 .skipPublishToS3(Boolean.TRUE.equals(request.getSkipPublishToS3())) //
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
-                .skipEntityMatchRematch(skipReMatchFlag)
+                .skipEntityMatchRematch(needSkipConvertEntities)
+                .setConvertServiceConfig(needConvertBatchStoreMap)
+                .setServingVersions(entityMatchVersion)
                 .build();
     }
 
@@ -993,5 +1018,31 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         currentNeedDeletedEntity.retainAll(importedEntity);
         log.info("currentNeedDeletedEntity: {}.", JsonUtils.serialize(currentNeedDeletedEntity));
         return currentNeedDeletedEntity;
+    }
+
+    //get batchStoreTableName when we need rematch entityMatch tenant, if no rematch, this list will be empty;
+    private Set<BusinessEntity> getNonBatchStoreEntities(String customerSpace,
+                                                         HashMap<TableRoleInCollection, Table> needConvertBatchStoreMap) {
+        Set<BusinessEntity> entities = new HashSet<>();
+        getBatchStoreTable(customerSpace, BusinessEntity.Account, entities, needConvertBatchStoreMap);
+        getBatchStoreTable(customerSpace, BusinessEntity.Contact, entities, needConvertBatchStoreMap);
+        getBatchStoreTable(customerSpace, BusinessEntity.Transaction, entities, needConvertBatchStoreMap);
+        return entities;
+    }
+
+    private void getBatchStoreTable(String customerSpace, BusinessEntity entity, Set<BusinessEntity> entities,
+                                    HashMap<TableRoleInCollection
+            , Table> needConvertBatchStoreMap) {
+        TableRoleInCollection tableRoleInCollection = entity.getBatchStore();
+        if (entity.equals(BusinessEntity.Transaction)) {
+            tableRoleInCollection = TableRoleInCollection.ConsolidatedRawTransaction;
+        }
+        List<Table> masterTable = dataCollectionService.getTables(customerSpace, null,
+                BusinessEntity.Account.getBatchStore(), null);
+        if (masterTable == null || masterTable.isEmpty()) {
+            entities.add(entity);
+        } else {
+            needConvertBatchStoreMap.put(tableRoleInCollection, masterTable.get(0));
+        }
     }
 }

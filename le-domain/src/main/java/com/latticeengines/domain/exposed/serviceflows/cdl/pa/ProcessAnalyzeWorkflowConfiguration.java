@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -330,11 +334,18 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder skipEntityMatchRematch(boolean skipEntityMatchRematch) {
-            convertBatchStoreToDataTableWorkflowBuilder.setSkipStep(skipEntityMatchRematch);
-            if (!skipEntityMatchRematch) {
-                convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig();
-            }
+        public Builder skipEntityMatchRematch(Set<BusinessEntity> entities) {
+            convertBatchStoreToDataTableWorkflowBuilder.setSkipStep(entities);
+            return this;
+        }
+
+        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables) {
+            convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
+            return this;
+        }
+
+        public Builder setServingVersions(EntityMatchVersion entityMatchVersion) {
+            processStepConfiguration.setServingVersion(entityMatchVersion);
             return this;
         }
 

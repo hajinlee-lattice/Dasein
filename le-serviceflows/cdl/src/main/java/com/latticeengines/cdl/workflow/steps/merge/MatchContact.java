@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ContactNameConcatenateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -117,12 +118,14 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
         String configStr;
+        MatchInput matchInput = getBaseMatchInput();
+        setServingVersionForEntityMatchTenant(matchInput);
         if (configuration.isEntityMatchGAOnly()) {
-            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
+            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
                     getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
                     getSystemIds(BusinessEntity.Contact), null);
         } else {
-            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
+            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
                     getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
                     getSystemIds(BusinessEntity.Contact), newAccountTableName);
         }

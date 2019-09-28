@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,8 @@ import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.MigrateImportServiceConfiguration;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -195,5 +198,26 @@ public class MigrateImportService
                 throw new IllegalArgumentException("Not supported entity: " + config.getEntity().name());
         }
         migrateTrackingProxy.updateReport(customerSpace, migrateTracking.getPid(), migrateTracking.getReport());
+    }
+
+    @Override
+    public void setDataTable(String migratedImportTableName, String customerSpace, Table templateTable, MigrateImportServiceConfiguration config, Configuration yarnConfiguration) {
+        //do nothing
+    }
+
+    @Override
+    public Table verifyTenantStatus(String customerSpace, MigrateImportServiceConfiguration config) {
+        return null;
+    }
+
+    @Override
+    public List<String> getAttributes(String customerSpace, Table templateTable, MigrateImportServiceConfiguration config) {
+        return null;
+    }
+
+    @Override
+    public Table getMasterTable(String customerSpace,
+                                TableRoleInCollection batchStore, MigrateImportServiceConfiguration config) {
+        return null;
     }
 }

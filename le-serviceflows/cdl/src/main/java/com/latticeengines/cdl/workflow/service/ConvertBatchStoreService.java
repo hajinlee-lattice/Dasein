@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.BaseConvertBatchStoreServiceConfiguration;
@@ -120,4 +123,34 @@ public abstract class ConvertBatchStoreService<T extends BaseConvertBatchStoreSe
      * @param actionId Registered ActionId.
      */
     public abstract void updateRegisteredAction(String customerSpace, T config, Long actionId);
+
+    /**
+     *
+     * @param migratedImportTableName been converted data table name
+     * @param customerSpace identity tenant
+     * @param templateTable related entity template
+     * @param config config convert service configuration
+     * @param yarnConfiguration using to count dataLine
+     */
+    public abstract void setDataTable(String migratedImportTableName, String customerSpace, Table templateTable,
+                             T config, Configuration yarnConfiguration);
+
+    /**
+     *
+     * @param customerSpace identity tenant
+     * @param config config convert service configuration
+     * @return templateTable
+     */
+    public abstract Table verifyTenantStatus(String customerSpace, T config);
+
+    /**
+     *
+     * @param customerSpace identity tenant
+     * @param templateTable tenant templateTable
+     * @param config config convert service configuration
+     * @return template Table attribute list
+     */
+    public abstract List<String> getAttributes(String customerSpace, Table templateTable, T config);
+
+    public abstract Table getMasterTable(String customerSpace, TableRoleInCollection batchStore, T config);
 }
