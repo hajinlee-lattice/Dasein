@@ -1,14 +1,9 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
@@ -19,23 +14,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.TenantStatus;
-import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
-public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
+public class CatalogEntityMgrImplTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CatalogEntityMgrImplTestNG.class);
 
@@ -44,21 +30,10 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final String PRODUCT = "Product";
     private static final List<String> CATALOG_NAMES = Arrays.asList(WEB_VISIT, ACTIVITY, PRODUCT);
 
-    @Inject
-    private DataFeedEntityMgr datafeedEntityMgr;
-
-    @Inject
-    private CatalogEntityMgr catalogEntityMgr;
-
-    /*-
-     * test objects
-     */
-    private DataFeed feed;
-    // catalog name -> datafeed task
-    private Map<String, DataFeedTask> taskMap = new HashMap<>();
-    private Table importTemplate;
-    // catalog name -> catalog
-    private Map<String, Catalog> catalogs = new HashMap<>();
+    @Override
+    protected List<String> getCatalogNames() {
+        return CATALOG_NAMES;
+    };
 
     @BeforeClass(groups = "functional")
     private void setup() {
@@ -160,70 +135,5 @@ public class CatalogEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(dataFeedTask.getImportTemplate(), "Import template should not be null");
         Assert.assertEquals(dataFeedTask.getImportTemplate().getPid(), importTemplate.getPid());
         Assert.assertEquals(dataFeedTask.getImportTemplate().getName(), importTemplate.getName());
-    }
-
-    /*-
-     * test data helpers
-     */
-
-    private Tenant notExistTenant() {
-        Tenant tenant = new Tenant(getClass().getSimpleName() + "_" + UUID.randomUUID().toString());
-        tenant.setPid(-1L);
-        tenant.setTenantType(TenantType.QA);
-        tenant.setStatus(TenantStatus.ACTIVE);
-        tenant.setUiVersion("4.0");
-        return tenant;
-    }
-
-    private void prepareDataFeed() {
-        feed = testDataFeed();
-        importTemplate = testImportTemplate();
-        for (String name : CATALOG_NAMES) {
-            DataFeedTask task = testFeedTask();
-            task.setDataFeed(feed);
-            feed.addTask(task);
-            task.setImportTemplate(importTemplate);
-            taskMap.put(name, task);
-        }
-        datafeedEntityMgr.create(feed);
-    }
-
-    private DataFeed testDataFeed() {
-        DataFeed feed = new DataFeed();
-        feed.setName(name());
-        feed.setStatus(DataFeed.Status.Active);
-        feed.setDataCollection(dataCollection);
-        return feed;
-    }
-
-    private DataFeedTask testFeedTask() {
-        DataFeedTask task = new DataFeedTask();
-        task.setActiveJob("Not specified");
-        task.setEntity(BusinessEntity.Account.name());
-        task.setSource("SFDC");
-        task.setStatus(DataFeedTask.Status.Active);
-        task.setSourceConfig("config");
-        task.setStartTime(new Date());
-        task.setLastImported(new Date());
-        task.setLastUpdated(new Date());
-        task.setUniqueId(name());
-        return task;
-    }
-
-    private Table testImportTemplate() {
-        Table table = new Table();
-        table.setName(name());
-        table.setDisplayName(table.getName());
-        table.setTenant(mainTestTenant);
-        Attribute attr = new Attribute();
-        attr.setName(name());
-        attr.setDisplayName(attr.getName());
-        attr.setPhysicalDataType(String.class.getName());
-        table.addAttribute(attr);
-        return table;
-    }
-
-    private String name() {
-        return NamingUtils.uuid(getClass().getSimpleName());
     }
 }
