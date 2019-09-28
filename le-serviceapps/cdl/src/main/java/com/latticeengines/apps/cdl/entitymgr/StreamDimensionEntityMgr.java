@@ -4,13 +4,14 @@ import java.util.List;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
-import com.latticeengines.domain.exposed.cdl.activity.Dimension;
-import com.latticeengines.domain.exposed.cdl.activity.Stream;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public interface DimensionEntityMgr extends BaseEntityMgrRepository<Dimension, Long> {
+
+public interface StreamDimensionEntityMgr extends BaseEntityMgrRepository<StreamDimension, Long> {
     /**
-     * Find the unique {@link Dimension} with target name in specific tenant and
+     * Find the unique {@link StreamDimension} with target name in specific tenant and
      * stream.
      *
      * @param name
@@ -22,7 +23,7 @@ public interface DimensionEntityMgr extends BaseEntityMgrRepository<Dimension, L
      * @return matching Dimension object, {@code null} if no such Dimension
      *         exists
      */
-    Dimension findByNameAndTenantAndStream(@NotNull String name, @NotNull Tenant tenant, @NotNull Stream stream);
+    StreamDimension findByNameAndTenantAndStream(@NotNull String name, @NotNull Tenant tenant, @NotNull AtlasStream stream);
 
     /**
      * Retrieve all Dimension in target tenant
@@ -31,5 +32,5 @@ public interface DimensionEntityMgr extends BaseEntityMgrRepository<Dimension, L
      *            target tenant
      * @return list of Dimension, will not be {@code null}
      */
-    List<Dimension> findByTenant(@NotNull Tenant tenant);
+    List<StreamDimension> findByTenant(@NotNull Tenant tenant);
 }

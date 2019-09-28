@@ -10,15 +10,15 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.DimensionEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.StreamEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
-import com.latticeengines.domain.exposed.cdl.activity.Stream;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -45,10 +45,10 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
     protected CatalogEntityMgr catalogEntityMgr;
 
     @Inject
-    protected StreamEntityMgr streamEntityMgr;
+    protected AtlasStreamEntityMgr streamEntityMgr;
 
     @Inject
-    protected DimensionEntityMgr dimensionEntityMgr;
+    protected StreamDimensionEntityMgr dimensionEntityMgr;
 
     protected DataFeed feed;
     // catalog name -> datafeed task
@@ -57,7 +57,7 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
     // catalog name -> catalog
     protected Map<String, Catalog> catalogs = new HashMap<>();
     // stream name -> stream
-    protected Map<String, Stream> streams = new HashMap<>();
+    protected Map<String, AtlasStream> streams = new HashMap<>();
     protected List<StreamAttributeDeriver> attrDerivers = getAttributeDerivers();
 
     // Override this method to provide a list of names to create catalogs
@@ -101,13 +101,13 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
 
     protected void prepareStream() {
         for (String name : getStreamNames()) {
-            Stream stream = createStream(name);
+            AtlasStream stream = createStream(name);
             streams.put(name, stream);
         }
     }
 
-    protected Stream createStream(String name) {
-        Stream stream = new Stream();
+    protected AtlasStream createStream(String name) {
+        AtlasStream stream = new AtlasStream();
         stream.setName(name);
         stream.setTenant(mainTestTenant);
         stream.setMatchEntities(MATCH_ENTITIES);

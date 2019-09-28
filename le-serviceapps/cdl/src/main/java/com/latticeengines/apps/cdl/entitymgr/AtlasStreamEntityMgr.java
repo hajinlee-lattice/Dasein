@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
-import com.latticeengines.domain.exposed.cdl.activity.Stream;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public interface StreamEntityMgr extends BaseEntityMgrRepository<Stream, Long> {
+public interface AtlasStreamEntityMgr extends BaseEntityMgrRepository<AtlasStream, Long> {
     /**
-     * Find the unique {@link Stream} with target name in specific tenant.
+     * Find the unique {@link AtlasStream} with target name in specific tenant.
      *
      * @param name
      *            target Stream name
@@ -17,7 +17,7 @@ public interface StreamEntityMgr extends BaseEntityMgrRepository<Stream, Long> {
      *            target tenant
      * @return matching Stream object, {@code null} if no such Stream exists
      */
-    Stream findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant);
+    AtlasStream findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant);
 
     /**
      * Retrieve all Stream in target tenant
@@ -26,5 +26,5 @@ public interface StreamEntityMgr extends BaseEntityMgrRepository<Stream, Long> {
      *            target tenant
      * @return list of Stream, will not be {@code null}
      */
-    List<Stream> findByTenant(@NotNull Tenant tenant);
+    List<AtlasStream> findByTenant(@NotNull Tenant tenant);
 }

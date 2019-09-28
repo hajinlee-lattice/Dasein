@@ -19,15 +19,15 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.cdl.activity.Dimension;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
-public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
+public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
     private static final String CATALOG_WEBVISIT = "WebVisitPathPatterns";
     private static final List<String> CATALOG_NAMES = Arrays.asList(CATALOG_WEBVISIT);
 
@@ -39,7 +39,7 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
     private static final String DIM_LEAD_SOURCE = LeadSource.name();
     private static final String DIM_IS_CLOSED = IsClosed.name();
 
-    private Map<String, Dimension> dimensions = new HashMap<>();
+    private Map<String, StreamDimension> dimensions = new HashMap<>();
 
     @Override
     protected List<String> getCatalogNames() {
@@ -60,7 +60,7 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
     }
 
     @Test(groups = "functional", dataProvider = "Dimensions")
-    public void testCreate(Dimension dimension) {
+    public void testCreate(StreamDimension dimension) {
         dimensionEntityMgr.create(dimension);
         dimensions.put(dimension.getName(), dimension);
         Assert.assertNotNull(dimension.getPid());
@@ -70,14 +70,14 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
     @Test(groups = "functional", dependsOnMethods = "testCreate", expectedExceptions = {
             DataIntegrityViolationException.class })
     public void testCreateConflict() {
-        Dimension dimension = getWebVisitDimension();
+        StreamDimension dimension = getWebVisitDimension();
         dimensionEntityMgr.create(dimension);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testFind() {
-        for (Dimension d : dimensions.values()) {
-            Dimension dimension = dimensionEntityMgr.findByNameAndTenantAndStream(d.getName(), mainTestTenant,
+        for (StreamDimension d : dimensions.values()) {
+            StreamDimension dimension = dimensionEntityMgr.findByNameAndTenantAndStream(d.getName(), mainTestTenant,
                     d.getStream());
             validateDimension(dimension);
         }
@@ -93,7 +93,7 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
         };
     }
 
-    private void validateDimension(Dimension dimension) {
+    private void validateDimension(StreamDimension dimension) {
         Assert.assertNotNull(dimension);
         Assert.assertNotNull(dimension.getName());
         Assert.assertNotNull(dimension.getDisplayName());
@@ -113,8 +113,8 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
         }
     }
 
-    private Dimension getWebVisitDimension() {
-        Dimension dimension = new Dimension();
+    private StreamDimension getWebVisitDimension() {
+        StreamDimension dimension = new StreamDimension();
         dimension.setName(DIM_PATH_PATTERN_ID);
         dimension.setDisplayName(dimension.getName());
         dimension.setTenant(mainTestTenant);
@@ -136,8 +136,8 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
         return dimension;
     }
 
-    private Dimension getLeadSourceDimension() {
-        Dimension dimension = new Dimension();
+    private StreamDimension getLeadSourceDimension() {
+        StreamDimension dimension = new StreamDimension();
         dimension.setName(DIM_LEAD_SOURCE);
         dimension.setDisplayName(dimension.getName());
         dimension.setTenant(mainTestTenant);
@@ -157,8 +157,8 @@ public class DimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNG
         return dimension;
     }
 
-    private Dimension getIsClosedDimension() {
-        Dimension dimension = new Dimension();
+    private StreamDimension getIsClosedDimension() {
+        StreamDimension dimension = new StreamDimension();
         dimension.setName(DIM_IS_CLOSED);
         dimension.setDisplayName(dimension.getName());
         dimension.setTenant(mainTestTenant);

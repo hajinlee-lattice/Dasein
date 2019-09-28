@@ -10,33 +10,33 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Preconditions;
-import com.latticeengines.apps.cdl.entitymgr.DimensionEntityMgr;
-import com.latticeengines.apps.cdl.repository.jpa.writer.DimensionWriterRepository;
-import com.latticeengines.apps.cdl.repository.reader.DimensionReaderRepository;
+import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
+import com.latticeengines.apps.cdl.repository.jpa.writer.StreamDimensionWriterRepository;
+import com.latticeengines.apps.cdl.repository.reader.StreamDimensionReaderRepository;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
-import com.latticeengines.domain.exposed.cdl.activity.Dimension;
-import com.latticeengines.domain.exposed.cdl.activity.Stream;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-@Component("dimensionEntityMgr")
-public class DimensionEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Dimension, Long> implements DimensionEntityMgr {
+@Component("streamDimensionEntityMgr")
+public class StreamDimensionEntityMgrImpl extends JpaEntityMgrRepositoryImpl<StreamDimension, Long> implements StreamDimensionEntityMgr {
 
     @Inject
-    private DimensionReaderRepository readerRepository;
+    private StreamDimensionReaderRepository readerRepository;
 
     @Inject
-    private DimensionWriterRepository writerRepository;
+    private StreamDimensionWriterRepository writerRepository;
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Dimension findByNameAndTenantAndStream(@NotNull String name, @NotNull Tenant tenant,
-            @NotNull Stream stream) {
+    public StreamDimension findByNameAndTenantAndStream(@NotNull String name, @NotNull Tenant tenant,
+            @NotNull AtlasStream stream) {
         Preconditions.checkNotNull(name, "Name should not be null");
         Preconditions.checkNotNull(tenant, "Tenant should not be null");
         Preconditions.checkNotNull(stream, "Stream should not be null");
-        List<Dimension> dimensions = readerRepository.findByNameAndTenantAndStream(name, tenant, stream);
+        List<StreamDimension> dimensions = readerRepository.findByNameAndTenantAndStream(name, tenant, stream);
         if (CollectionUtils.isEmpty(dimensions)) {
             return null;
         }
@@ -48,13 +48,13 @@ public class DimensionEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Dimension
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Dimension> findByTenant(@NotNull Tenant tenant) {
+    public List<StreamDimension> findByTenant(@NotNull Tenant tenant) {
         Preconditions.checkNotNull(tenant, "Tenant should not be null");
         return readerRepository.findByTenant(tenant);
     }
 
     @Override
-    public BaseJpaRepository<Dimension, Long> getRepository() {
+    public BaseJpaRepository<StreamDimension, Long> getRepository() {
         return writerRepository;
     }
 }

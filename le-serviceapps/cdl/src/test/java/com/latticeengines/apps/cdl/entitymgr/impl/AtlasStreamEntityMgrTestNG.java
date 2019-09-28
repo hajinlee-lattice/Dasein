@@ -10,12 +10,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.cdl.activity.Stream;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
-public class StreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
+public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
 
     private static final String STREAM_WEBVISIT = "WebVisit";
     private static final String STREAM_MARKETO = "MarketoActivity";
@@ -30,7 +30,7 @@ public class StreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBas
     public void testCreate() {
         prepareStream();
         for (String name : STREAM_NAMES) {
-            Stream stream = streams.get(name);
+            AtlasStream stream = streams.get(name);
             Assert.assertNotNull(stream);
             Assert.assertNotNull(stream.getPid());
         }
@@ -46,10 +46,10 @@ public class StreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBas
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testFind() {
         for (String name : STREAM_NAMES) {
-            Stream stream = streamEntityMgr.findByNameAndTenant(name, mainTestTenant);
+            AtlasStream stream = streamEntityMgr.findByNameAndTenant(name, mainTestTenant);
             validateStream(stream);
         }
-        List<Stream> streams = streamEntityMgr.findByTenant(mainTestTenant);
+        List<AtlasStream> streams = streamEntityMgr.findByTenant(mainTestTenant);
         Assert.assertEquals(streams.size(), STREAM_NAMES.size());
 
         Tenant tenant2 = notExistTenant();
@@ -57,7 +57,7 @@ public class StreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTestNGBas
         Assert.assertTrue(CollectionUtils.isEmpty(streamEntityMgr.findByTenant(tenant2)));
     }
 
-    private void validateStream(Stream stream) {
+    private void validateStream(AtlasStream stream) {
         Assert.assertNotNull(stream);
         Assert.assertNotNull(stream.getName());
         Assert.assertNotNull(stream.getTenant());
