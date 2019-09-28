@@ -21,6 +21,7 @@ import org.springframework.retry.support.RetryTemplate;
 import com.amazonaws.services.batch.model.JobStatus;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
@@ -84,7 +85,7 @@ public class WorkflowJobStatusChangeCallable implements Callable<Boolean> {
                     try {
                         try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
                             yarnClient.start();
-                            ApplicationId applicationId = ApplicationId.fromString(appId);
+                            ApplicationId applicationId = ApplicationIdUtils.toApplicationIdObj(appId);
                             ApplicationReport appReport = yarnClient.getApplicationReport(applicationId);
                             YarnApplicationState state = appReport.getYarnApplicationState();
                             log.info(String.format("begin to deal with workflow %s, %s, %s.", job.getPid(), clusterId,

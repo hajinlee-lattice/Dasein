@@ -14,7 +14,6 @@ import javax.annotation.Resource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
@@ -31,6 +30,7 @@ import com.google.common.collect.ComparisonChain;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.service.YarnService;
 
@@ -151,7 +151,7 @@ public class YarnServiceImpl implements YarnService {
     @Override
     public ApplicationReport getApplication(String appId) {
         try {
-            return yarnClient.getApplicationReport(ApplicationId.fromString(appId));
+            return yarnClient.getApplicationReport(ApplicationIdUtils.toApplicationIdObj(appId));
         } catch (IOException | YarnException e) {
             throw new RuntimeException("Failed to get application report", e);
         }

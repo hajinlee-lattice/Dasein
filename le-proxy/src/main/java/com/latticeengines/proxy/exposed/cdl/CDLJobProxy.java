@@ -2,11 +2,11 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -25,8 +25,7 @@ public class CDLJobProxy extends MicroserviceRestApiProxy implements ProxyInterf
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+        return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
     }
 
     @SuppressWarnings("unchecked")
@@ -37,7 +36,6 @@ public class CDLJobProxy extends MicroserviceRestApiProxy implements ProxyInterf
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ApplicationId.fromString(appIdStr);
+        return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
     }
 }

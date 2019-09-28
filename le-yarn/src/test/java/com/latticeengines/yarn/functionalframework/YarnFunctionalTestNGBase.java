@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeMethod;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.aws.AwsApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.yarn.exposed.service.AwsBatchJobService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -149,7 +150,7 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         if (AwsApplicationId.isAwsBatchJob(appIdStr)) {
             return AwsApplicationId.fromString(appIdStr);
         } else {
-            return ApplicationId.fromString(appIdStr);
+            return ApplicationIdUtils.toApplicationIdObj(appIdStr);
         }
     }
 }

@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("publicationService")
@@ -110,7 +111,7 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
                 String appIdStr = progress.getApplicationId();
                 try {
                     ApplicationReport report = YarnUtils.getApplicationReport(yarnClient,
-                            ApplicationId.fromString(appIdStr));
+                            ApplicationIdUtils.toApplicationIdObj(appIdStr));
                     if (YarnApplicationState.FAILED.equals(report.getYarnApplicationState())) {
                         log.info("Found a running progress which is already failed.");
                         publicationProgressService.update(progress).fail("Yarn application failed.").commit();
