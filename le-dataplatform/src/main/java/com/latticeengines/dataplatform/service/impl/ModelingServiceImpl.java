@@ -73,6 +73,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorit
 import com.latticeengines.domain.exposed.modeling.algorithm.DataReviewAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -161,7 +162,7 @@ public class ModelingServiceImpl implements ModelingService {
                     .asList(columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()).split(",")));
         }
         String appId = sqoopProxy.importData(builder.build()).getApplicationIds().get(0);
-        return ApplicationId.fromString(appId);
+        return ApplicationIdUtils.toApplicationIdObj(appId);
 
     }
 
@@ -176,7 +177,7 @@ public class ModelingServiceImpl implements ModelingService {
                 .setCustomer(config.getCustomer())//
                 .build();
         String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
-        return ApplicationId.fromString(appId);
+        return ApplicationIdUtils.toApplicationIdObj(appId);
     }
 
     @Override

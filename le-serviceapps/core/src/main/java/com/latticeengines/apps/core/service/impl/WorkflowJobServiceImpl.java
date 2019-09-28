@@ -33,17 +33,17 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Resubmitted workflow with application id %s", applicationId));
-        return ApplicationId.fromString(applicationId);
+        return ApplicationIdUtils.toApplicationIdObj(applicationId);
     }
 
     @Override
     public ApplicationId restart(Long jobId, String customerSpace, Integer memory, Boolean autoRetry) {
-        AppSubmission submission = workflowProxy.restartWorkflowExecution(String.valueOf(jobId), customerSpace,
-                memory, autoRetry);
+        AppSubmission submission = workflowProxy.restartWorkflowExecution(String.valueOf(jobId), customerSpace, memory,
+                autoRetry);
         String applicationId = submission.getApplicationIds().get(0);
 
         log.info(String.format("Resubmitted workflow with application id %s", applicationId));
-        return ApplicationId.fromString(applicationId);
+        return ApplicationIdUtils.toApplicationIdObj(applicationId);
     }
 
     @Override

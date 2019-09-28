@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
@@ -148,8 +149,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         }
         while ((remainingJobs.size() > 0) && (applicationIds.size() < maxConcurrentBlocks)) {
             DataCloudJobConfiguration jobConfiguration = remainingJobs.remove(0);
-            ApplicationId appId = ApplicationId //
-                    .fromString(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+            ApplicationId appId = ApplicationIdUtils //
+                    .toApplicationIdObj(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
             blockUuidMap.put(appId.toString(), jobConfiguration.getBlockOperationUid());
             applicationIds.add(appId);
 
@@ -396,8 +397,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.info(errorMsg + ". Retry the block.");
             for (DataCloudJobConfiguration jobConfiguration : jobConfigurations) {
                 if (jobConfiguration.getBlockOperationUid().equals(blockUid)) {
-                    ApplicationId newAppId = ApplicationId
-                            .fromString(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+                    ApplicationId newAppId = ApplicationIdUtils
+                            .toApplicationIdObj(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
                     blockUuidMap.remove(appId.toString());
                     blockUuidMap.put(newAppId.toString(), jobConfiguration.getBlockOperationUid());
                     applicationIds.add(newAppId);

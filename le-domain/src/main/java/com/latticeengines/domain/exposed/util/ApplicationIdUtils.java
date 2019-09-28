@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.aws.AwsApplicationId;
@@ -48,7 +49,7 @@ public final class ApplicationIdUtils {
     }
 
     public static ApplicationId toApplicationIdObj(String appId) {
-        if (appId == null) {
+        if (StringUtils.isBlank(appId)) {
             return null;
         }
         if (FakeApplicationId.isFakeApplicationId(appId)) {

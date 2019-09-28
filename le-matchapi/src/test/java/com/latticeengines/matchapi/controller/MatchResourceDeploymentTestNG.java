@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputService;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
@@ -324,7 +325,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) input.getInputBuffer();
         avroInputBuffer.setAvroDir(avroDirInThisRun);
         MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
+        ApplicationId appId = ApplicationIdUtils.toApplicationIdObj(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -372,7 +373,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         MatchInput input = createAvroBulkMatchInput(false, null, version, avroDir, fileName);
         input.setExcludePublicDomain(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
+        ApplicationId appId = ApplicationIdUtils.toApplicationIdObj(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -395,7 +396,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         MatchInput input = createAvroBulkMatchInput(true, null, version, path, fileName);
         MatchCommand command = matchProxy.matchBulk(input, podId);
-        ApplicationId appId = ApplicationId.fromString(command.getApplicationId());
+        ApplicationId appId = ApplicationIdUtils.toApplicationIdObj(command.getApplicationId());
         log.info("Test multi-block match command: DataCloudVersion = {}, ApplicationId = {}, Submitted Rows = {}",
                 version, appId.toString(), expectedTotal);
 
@@ -403,7 +404,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         command = waitForMatchBlockCreated(command, appId);
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
         // Kill one block and expect it will be retried automatically
-        jobService.killJob(ApplicationId.fromString(blockAppId));
+        jobService.killJob(ApplicationIdUtils.toApplicationIdObj(blockAppId));
 
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -424,7 +425,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         // Submit match command again and kill same block twice. Expect the
         // whole match command should fail
         command = matchProxy.matchBulk(input, podId);
-        appId = ApplicationId.fromString(command.getApplicationId());
+        appId = ApplicationIdUtils.toApplicationIdObj(command.getApplicationId());
         log.info("Test failing multi-block match command: DataCloudVersion = {}, ApplicationId = {}", version,
                 appId.toString());
         Set<String> killedAppIds = new HashSet<>();
@@ -436,7 +437,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 Thread.sleep(5000L);
                 continue;
             } else {
-                jobService.killJob(ApplicationId.fromString(blockAppId));
+                jobService.killJob(ApplicationIdUtils.toApplicationIdObj(blockAppId));
                 killedAppIds.add(blockAppId);
             }
         }

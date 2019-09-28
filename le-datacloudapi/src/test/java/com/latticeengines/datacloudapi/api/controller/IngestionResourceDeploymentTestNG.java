@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 
 /**
@@ -264,7 +265,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     }
 
     private void assertProgress(Ingestion ingestion, IngestionProgress progress, Integer size, String version) {
-        ApplicationId appId = ApplicationId.fromString(progress.getApplicationId());
+        ApplicationId appId = ApplicationIdUtils.toApplicationIdObj(progress.getApplicationId());
         FinalApplicationStatus appStatus = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
         Assert.assertEquals(appStatus, FinalApplicationStatus.SUCCEEDED);
         Assert.assertEquals(progress.getStatus(), ProgressStatus.FINISHED);
