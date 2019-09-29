@@ -281,7 +281,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
         ChoreographerContext grapherContext = getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
-        boolean ldcChange = grapherContext != null && !grapherContext.isDataCloudChanged();
+        boolean ldcChange = grapherContext != null && grapherContext.isDataCloudChanged();
         ldcRefresh = grapherContext != null && grapherContext.isDataCloudRefresh();
         hasFilter = (!ldcChange || ldcRefresh) && !grapherContext.isDataCloudNew();
         boolean enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
