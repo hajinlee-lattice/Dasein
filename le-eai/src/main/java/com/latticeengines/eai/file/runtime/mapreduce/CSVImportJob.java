@@ -73,9 +73,7 @@ public class CSVImportJob extends MRJobCustomizationBase {
             mrJob.setInputFormatClass(CSVImportLineInputFormat.class);
             mrJob.setOutputFormatClass(NullOutputFormat.class);
             mrJob.setMapperClass(CSVImportMapper.class);
-            config.set("mapred.reduce.slowstart.completed.maps", "1");
-            mrJob.setReducerClass(CSVImportReducer.class);
-            mrJob.setNumReduceTasks(1);
+            mrJob.setNumReduceTasks(0);
             config.set("mapreduce.job.running.map.limit",
                     properties.getProperty(CSVFileImportProperty.CSV_FILE_NUM_MAPPERS.name(), "1"));
             config.set("mapreduce.tasktracker.map.tasks.maximum",
@@ -83,8 +81,6 @@ public class CSVImportJob extends MRJobCustomizationBase {
             MRJobUtil.setLocalizedResources(mrJob, properties);
             String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
             config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
-                    + " -DLOG4J_LE_LEVEL=INFO");
-            config.set(MRJobConfig.REDUCE_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
                     + " -DLOG4J_LE_LEVEL=INFO");
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE

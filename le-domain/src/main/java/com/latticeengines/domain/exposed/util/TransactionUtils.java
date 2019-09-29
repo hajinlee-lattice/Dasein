@@ -98,20 +98,6 @@ public class TransactionUtils {
     }
 
     private static String getPath(String avroDir) {
-        log.info("Get avro path input " + avroDir);
-        if (!avroDir.endsWith(".avro")) {
-            return avroDir;
-        } else {
-            String[] dirs = avroDir.trim().split("/");
-            avroDir = "";
-            for (int i = 0; i < (dirs.length - 1); i++) {
-                log.info("Get avro path dir " + dirs[i]);
-                if (!dirs[i].isEmpty()) {
-                    avroDir = avroDir + "/" + dirs[i];
-                }
-            }
-        }
-        log.info("Get avro path output " + avroDir);
-        return avroDir;
+        return ProductUtils.getPath(avroDir);
     }
 }

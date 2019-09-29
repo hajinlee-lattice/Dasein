@@ -8,15 +8,13 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationConfiguration;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 
 public abstract class InputFileValidationService<T extends InputFileValidationConfiguration> {
-    private static Logger log = LoggerFactory.getLogger(InputFileValidationService.class);
     private static Map<String, InputFileValidationService<? extends InputFileValidationConfiguration>> map = new HashMap<>();
     protected static final List<Character> invalidChars = Arrays.asList('/', '&');
     @Autowired
@@ -66,21 +64,7 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
         }
     }
 
-
     protected static String getPath(String avroDir) {
-        log.info("Get avro path input " + avroDir);
-        if (!avroDir.endsWith(".avro")) {
-            return avroDir;
-        } else {
-            String[] dirs = avroDir.trim().split("/");
-            avroDir = "";
-            for (int i = 0; i < (dirs.length - 1); i++) {
-                if (!dirs[i].isEmpty()) {
-                    avroDir = avroDir + "/" + dirs[i];
-                }
-            }
-        }
-        log.info("Get avro path output " + avroDir);
-        return avroDir;
+       return ProductUtils.getPath(avroDir);
     }
 }
