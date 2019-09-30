@@ -12,15 +12,13 @@ public interface PatchBookDao extends BaseDao<PatchBook> {
 
     String MIN_PID = "MIN";
     String MAX_PID = "MAX";
+
     /**
      * Update specified field of all the entities that have primary ID in the given list to the given value
      * @param pIds given list of primary IDs
      * @param fieldName field name, should not be {@literal null}
      * @param value value to be set, nullable
      */
-    String MIN_PID = "MIN";
-    String MAX_PID = "MAX";
-
     void updateField(@NotNull List<Long> pIds, @NotNull String fieldName, Object value);
 
     /*

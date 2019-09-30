@@ -103,7 +103,10 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 throw new RuntimeException("PatchBook ingestion failed because of invalid MinPid and MaxPid provided");
             }
         } else {
-            Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(patchConfig.getBookType(), PatchBook.COLUMN_PID); // ingest all records if minPid and maxPid not provided
+            /*-
+             * ingest all records if minPid and maxPid not provided
+             */
+            Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(patchConfig.getBookType());
             Long computedMaxPid = minMaxPid.get(PatchBookDao.MAX_PID);
             Long computedMinPid = minMaxPid.get(PatchBookDao.MIN_PID);
             totalSize = computedMaxPid - computedMinPid;
