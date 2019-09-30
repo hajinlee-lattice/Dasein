@@ -92,6 +92,11 @@ public class TransactionServiceImpl implements TransactionService {
 
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
+        if (QueryServiceUtils.getQueryLoggingConfig()){
+            log.info("getMaxTransactionDate using query: {}",
+                    queryEvaluatorService.getQueryStr(attrRepo, query, RedshiftQueryProvider.USER_SEGMENT)
+                    .replaceAll("\\r\\n|\\r|\\n", " "));
+        }
 
         RetryTemplate retry = new RetryTemplate();
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
