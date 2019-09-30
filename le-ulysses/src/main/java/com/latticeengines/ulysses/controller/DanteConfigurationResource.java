@@ -15,8 +15,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -84,7 +84,7 @@ public class DanteConfigurationResource {
     @Inject
     private EntityProxy entityProxy;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get an account by of attributes in a group")
     public FrontEndResponse<FrontEndDanteConfigurationDocument> getDanteConfiguration() {
