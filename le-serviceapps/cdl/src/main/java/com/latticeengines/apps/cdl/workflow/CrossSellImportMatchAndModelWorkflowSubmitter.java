@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CrossSellImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -168,6 +169,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 .notesContent(parameters.getNotesContent()) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
+                .exportInclusionColumns(getExportInclusionColumns()) //
                 .apsRollupPeriod(dataCollectionService
                         .getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version).getApsRollingPeriod());
         return builder.build();
@@ -196,6 +198,16 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
             return columnMetadataProxy.latestVersion(null).getVersion();
         }
         return null;
+    }
+
+    private String getExportInclusionColumns() {
+        return InterfaceName.CustomerAccountId.name() + ";" //
+                + InterfaceName.AccountId.name() + ";" //
+                + InterfaceName.Event.name() + ";" //
+                + InterfaceName.Target.name() + ";" //
+                + ScoreResultField.Percentile.displayName + ";" //
+                + ScoreResultField.Rating.displayName + ";" //
+                + ScoreResultField.ExpectedRevenue.displayName;
     }
 
     public ApplicationId submit(CrossSellModelingParameters parameters) {

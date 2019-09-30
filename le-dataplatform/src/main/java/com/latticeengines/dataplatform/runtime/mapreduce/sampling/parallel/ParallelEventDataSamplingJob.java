@@ -13,6 +13,7 @@ import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.avro.mapreduce.AvroKeyOutputFormat;
 import org.apache.avro.mapreduce.AvroMultipleOutputs;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -21,6 +22,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.util.ToolRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -41,6 +44,8 @@ import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.yarn.exposed.runtime.mapreduce.MRJobCustomizationBase;
 
 public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ParallelEventDataSamplingJob.class);
 
     public static final String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
     private static final String SAMPLE_JOB_TYPE = "parallelSamplingJob";
@@ -93,7 +98,12 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
         config.set(LEDP_SAMPLE_CONFIG, samplingConfigStr);
         String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
         config.set("mapreduce.job.queuename", queueName);
-
+        String memSize = (String) properties.get(MapReduceProperty.REDUCE_MEMORY_SIZE.name());
+        if (!StringUtils.isBlank(memSize)) {
+            properties.put("mapreduce.reduce.java.opts",
+                    String.format("-Xmx%dm", (int) (Integer.parseInt(memSize) * 0.8)));
+        }
+        log.info("mapreduce.reduce.java.opts=" + properties.get("mapreduce.reduce.java.opts"));
         config.set(MRPathFilter.INPUT_FILE_PATTERN, HdfsFileFormat.AVRO_FILE);
     }
 

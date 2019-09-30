@@ -96,6 +96,11 @@ public class CSVFileExportStrategyBase extends ExportStrategy {
                     ctx.getProperty(ExportProperty.EXPORT_EXCLUSION_COLUMNS, String.class));
         }
 
+        if (ctx.getProperty(ExportProperty.EXPORT_INCLUSION_COLUMNS, String.class) != null) {
+            props.setProperty(ExportProperty.EXPORT_INCLUSION_COLUMNS,
+                    ctx.getProperty(ExportProperty.EXPORT_INCLUSION_COLUMNS, String.class));
+        }
+
         List<String> cacheFiles = new ArrayList<>();
         try {
             cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
