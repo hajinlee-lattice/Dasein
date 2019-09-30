@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import com.latticeengines.common.exposed.util.BatchUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.datacloud.core.dao.PatchBookDao;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
@@ -48,6 +50,7 @@ import com.latticeengines.proxy.exposed.matchapi.PatchProxy;
 public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServiceImpl {
 
     private static Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImpl.class);
+
 
     @Value("${datacloud.patcher.ingest.batch.size.min}")
     private int minBatchSize;
@@ -87,12 +90,33 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             HdfsUtils.rmdir(yarnConfiguration, progress.getDestination());
         }
         HdfsUtils.mkdir(yarnConfiguration, progress.getDestination());
-
-        long totalSize = patchBookEntityMgr.findCountByTypeAndHotFix(patchConfig.getBookType(),
-                PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-        int batchCnt = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
-        log.info(String.format("Total rows to ingest: %d; Divide into %d batches", totalSize, batchCnt));
-        int[] batches = BatchUtils.divideBatches(totalSize, batchCnt);
+        long totalSize = 0L;
+        Long minPid = patchConfig.getMinPid();
+        Long maxPid = patchConfig.getMaxPid();
+        if (minPid != null && maxPid != null) { // compute total num of records if minPid and maxPid provided
+            if(minPid >= 0 && maxPid > minPid) { // check the range
+                totalSize = patchConfig.getMaxPid() - patchConfig.getMinPid();
+            } else { // fail if minPid and maxPid range is wrong
+                log.error(String.format(
+                        "MinPid and MaxPid range is not correct. MinPid : %d MaxPid: %d",
+                        patchConfig.getMinPid(), patchConfig.getMaxPid()));
+                throw new RuntimeException("PatchBook ingestion failed because of invalid MinPid and MaxPid provided");
+            }
+        } else {
+            Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(patchConfig.getBookType(), PatchBook.COLUMN_PID); // ingest all records if minPid and maxPid not provided
+            Long computedMaxPid = minMaxPid.get(PatchBookDao.MAX_PID);
+            Long computedMinPid = minMaxPid.get(PatchBookDao.MIN_PID);
+            totalSize = computedMaxPid - computedMinPid;
+            patchConfig.setMaxPid(computedMaxPid);
+            patchConfig.setMinPid(computedMinPid);
+        }
+        int batchSize = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
+        if (patchConfig.getBatchSize() > 0) {
+            batchSize = patchConfig.getBatchSize();
+        }
+        log.info(String.format("Total rows to ingest: %d; Divide into %d batches", totalSize,
+                batchSize));
+        int[] batches = BatchUtils.divideBatches(totalSize, batchSize);
 
         List<Ingester> ingesters = initializeIngester(patchConfig, currentDate, progress, batches);
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("patchbook-ingest", maxConcurrentBatchCnt);
@@ -100,7 +124,8 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         updateCurrentVersion(ingestion, progress.getVersion());
 
-        progress = ingestionProgressService.updateProgress(progress).size(totalSize).status(ProgressStatus.FINISHED)
+        progress = ingestionProgressService.updateProgress(progress).size(totalSize)
+                .status(ProgressStatus.FINISHED)
                 .commit(true);
         log.info("Ingestion finished. Progress: " + progress.toString());
     }
@@ -108,10 +133,16 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     private List<Ingester> initializeIngester(PatchBookConfiguration patchConfig, Date currentDate,
             IngestionProgress progress, int[] batches) {
         List<Ingester> ingesters = new ArrayList<>();
-        int offset = 0;
+        Long minPid = patchConfig.getMinPid();
+        if (minPid == null) {
+            minPid = 0L;
+            patchConfig.setMinPid(minPid);
+        }
         for (int i = 0; i < batches.length; i++) {
-            Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i], offset);
-            offset += batches[i];
+            Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i],
+                    minPid);
+            minPid += batches[i];
+            patchConfig.setMaxPid(minPid);
             ingesters.add(ingester);
         }
         return ingesters;
@@ -123,17 +154,17 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         private final Date currentDate;
         private final IngestionProgress progress;
         private final int batchSeq;
-        private final int batchSize;
-        private final int offset;
+        private final long maxPid;
+        private final long minPid;
 
         Ingester(PatchBookConfiguration patchConfig, Date currentDate, IngestionProgress progress, int batchSeq,
-                int batchSize, int offset) {
+                int batchSize, long minPid) {
             this.patchConfig = patchConfig;
             this.currentDate = currentDate;
             this.progress = progress;
             this.batchSeq = batchSeq;
-            this.batchSize = batchSize;
-            this.offset = offset;
+            this.minPid = minPid;
+            this.maxPid = minPid + batchSize;
         }
 
         @Override
@@ -146,16 +177,17 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         private void validate() {
             try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format("Validated PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize))) {
+                    String.format(
+                            "Validated PatchBook with type=%s, mode=%s, minPid=%d, batch size = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
+                            maxPid))) {
                 log.info(String.format("Validating PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                        patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize));
+                        patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
                 PatchRequest patchRequest = new PatchRequest();
                 patchRequest.setMode(patchConfig.getPatchMode());
                 patchRequest.setDataCloudVersion(progress.getDataCloudVersion());
-                patchRequest.setOffset(offset);
-                patchRequest.setLimit(batchSize);
-                patchRequest.setSortByfield(PatchBook.COLUMN_PID);
+                patchRequest.setOffset(Integer.valueOf(minPid + ""));
+                patchRequest.setLimit(Integer.valueOf(maxPid+""));
 
                 PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
                         patchRequest);
@@ -169,14 +201,17 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         private void ingest() {
             try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format("Imported PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize))) {
-                log.info(String.format("Importing PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                        patchConfig.getBookType(), patchConfig.getPatchMode(), offset, batchSize));
-                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPagination(offset, batchSize,
-                        PatchBook.COLUMN_PID, patchConfig.getBookType(),
+                    String.format(
+                            "Imported PatchBook with type=%s, mode=%s, minPid=%d, maxPid = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
+                            maxPid))) {
+                log.info(String.format(
+                        "Importing PatchBook with type=%s, mode=%s, minPid=%d, maxPid= %d",
+                        patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
+                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
+                        minPid, maxPid, patchConfig.getBookType(),
                         PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-                List<PatchBook> activeBooks = getActiveBooks(books, currentDate);
+                List<PatchBook> activeBooks = getActiveBooks(books, currentDate, minPid, maxPid);
                 String fileName = "part-" + batchSeq + ".avro";
                 try {
                     long importSize = importToHdfs(activeBooks, progress.getDestination(), fileName, patchConfig);
@@ -194,9 +229,11 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     }
 
-    private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate) {
+    private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate, long minPid,
+            long maxPid) {
         return books.stream() //
-                .filter(book -> !PatchBookUtils.isEndOfLife(book, currentDate)) //
+                .filter(book -> !PatchBookUtils.isEndOfLife(book, currentDate)
+                        && book.getPid() >= minPid && book.getPid() < maxPid) //
                 .collect(Collectors.toList());
     }
 

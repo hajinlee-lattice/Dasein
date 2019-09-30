@@ -18,6 +18,9 @@ public interface PatchBookDao extends BaseDao<PatchBook> {
      * @param fieldName field name, should not be {@literal null}
      * @param value value to be set, nullable
      */
+    String MIN_PID = "MIN";
+    String MAX_PID = "MAX";
+
     void updateField(@NotNull List<Long> pIds, @NotNull String fieldName, Object value);
 
     /*

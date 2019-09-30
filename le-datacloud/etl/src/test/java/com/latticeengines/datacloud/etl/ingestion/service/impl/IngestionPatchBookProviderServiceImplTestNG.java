@@ -140,21 +140,26 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         String version = ingestionVersionService.findCurrentVersion(ingestion);
         String hdfsPath = hdfsPathBuilder.constructIngestionDir(ingestion.getIngestionName(), version).toString();
         String glob = new Path(hdfsPath, "*.avro").toString();
-
         switch (patchConfig.getBookType()) {
-        case Domain:
+            case Domain:
             List<PatchBook> activeDomainBooks = MOCK_DOMAIN_BOOKS.stream() //
-                    .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)) //
+                        .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)
+                                && book.getPid() >= 0
+                                && book.getPid() < MOCK_DOMAIN_BOOKS.size()) //
                     .collect(Collectors.toList());
-            Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob), (long) activeDomainBooks.size());
-            verifyUpdatedPatchBook(MOCK_DOMAIN_BOOKS);
+                Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
+                        (long) activeDomainBooks.size());
+            verifyUpdatedPatchBook(activeDomainBooks);
             break;
         case Attribute:
             List<PatchBook> activeAttrBooks = MOCK_ATTR_BOOKS.stream() //
-                    .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)) //
+                        .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)
+                                && book.getPid() >= 0
+                                && book.getPid() < MOCK_ATTR_BOOKS.size()) //
                     .collect(Collectors.toList());
-            Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob), (long) activeAttrBooks.size());
-            verifyUpdatedPatchBook(MOCK_ATTR_BOOKS);
+                Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
+                        (long) activeAttrBooks.size());
+            verifyUpdatedPatchBook(activeAttrBooks);
             break;
         default:
             break;
@@ -251,6 +256,14 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         ingestion.setIngestionType(Ingestion.IngestionType.PATCH_BOOK);
         PatchBookConfiguration conf = new PatchBookConfiguration();
         conf.setBookType(type);
+        conf.setBatchSize(5);
+        conf.setMinPid(0L);
+        if (type.equals(PatchBook.Type.Attribute)) {
+            conf.setMaxPid((long) MOCK_ATTR_BOOKS.size());
+        }
+        if (type.equals(PatchBook.Type.Domain)) {
+            conf.setMaxPid((long) MOCK_DOMAIN_BOOKS.size());
+        }
         conf.setEmailEnabled(false);
         conf.setSkipValidation(true);
         // Test HotFix mode for Attribute patch type
@@ -350,11 +363,23 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         PatchBookEntityMgr patchBookEntityMgr = Mockito.mock(PatchBookEntityMgr.class);
 
         try {
-            when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Domain), any(boolean.class)))
-                    .thenReturn(MOCK_DOMAIN_BOOKS);
+            when(patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(Mockito.anyLong(), Mockito.anyLong(), eq(PatchBook.Type.Domain), any(boolean.class)))
+                    .thenAnswer(invocation -> {
+                        long minPid = invocation.getArgument(0);
+                        long maxPid = invocation.getArgument(1);
+                                return MOCK_DOMAIN_BOOKS.stream().filter(
+                                        book -> book.getPid() >= minPid && book.getPid() < maxPid)
+                                        .collect(Collectors.toList());
+                    });
 
-            when(patchBookEntityMgr.findByTypeAndHotFix(eq(PatchBook.Type.Attribute), any(boolean.class)))
-                    .thenReturn(MOCK_ATTR_BOOKS);
+            when(patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(Mockito.anyLong(), Mockito.anyLong(), eq(PatchBook.Type.Attribute), any(boolean.class)))
+                    .thenAnswer(invocation -> {
+                        long minPid = invocation.getArgument(0);
+                        long maxPid = invocation.getArgument(1);
+                        return MOCK_ATTR_BOOKS.stream().filter(
+                                        book -> book.getPid() >= minPid && book.getPid() < maxPid)
+                                        .collect(Collectors.toList());
+                    });
 
             doAnswer(inv -> {
                 mockSetHotFix((List<Long>) inv.getArguments()[0], (boolean) inv.getArguments()[1]);
@@ -382,11 +407,11 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             }).when(patchBookEntityMgr).findCountByTypeAndHotFix(any(), any(boolean.class));
 
             doAnswer(inv -> {
-                return mockFindByTypeAndHotFixWithPagination((int) inv.getArguments()[0], (int) inv.getArguments()[1],
-                        (String) inv.getArguments()[2], (PatchBook.Type) inv.getArguments()[3],
-                        (boolean) inv.getArguments()[4]);
-            }).when(patchBookEntityMgr).findByTypeAndHotFixWithPagination(any(int.class), any(int.class), any(), any(),
-                    any(boolean.class));
+                return mockFindByTypeAndHotFixWithPaginNoSort((int) inv.getArguments()[0],
+                        (int) inv.getArguments()[1], (PatchBook.Type) inv.getArguments()[2],
+                        (boolean) inv.getArguments()[3]);
+            }).when(patchBookEntityMgr).findByTypeAndHotFixWithPaginNoSort(any(int.class),
+                    any(int.class), any(), any(boolean.class));
         } catch (Exception e) {
             log.error("Mock patchBookEntityMgr failed", e);
             throw e;
@@ -435,7 +460,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
 
     // Test data with Attribute type is all marked as hotfix while that with
     // Domain type is not hotfix. So no need to do any filter by hotfix here
-    private List<PatchBook> mockFindByTypeAndHotFixWithPagination(int offset, int limit, String sortByField,
+    private List<PatchBook> mockFindByTypeAndHotFixWithPaginNoSort(int minPid, int maxPid,
             PatchBook.Type type, boolean hotfix) {
         List<PatchBook> books;
         switch (type) {
@@ -449,9 +474,8 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             throw new UnsupportedOperationException(
                     "Unsupported PatchBook type in mockFindCountByTypeAndHotFix: " + type);
         }
-
         List<PatchBook> toReturn = new ArrayList<>();
-        for (int i = offset; i < offset + limit; i++) {
+        for (int i = minPid; i < maxPid; i++) {
             toReturn.add(books.get(i));
         }
         return toReturn;
