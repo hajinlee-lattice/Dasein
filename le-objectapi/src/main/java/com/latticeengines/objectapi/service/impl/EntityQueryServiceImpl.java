@@ -145,8 +145,9 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 queryEvaluatorService);
         Query query = getQuery(attrRepo, frontEndQuery, sqlUser, false);
         if (QueryServiceUtils.getQueryLoggingConfig()){
-            log.info("getData using query:" + System.lineSeparator()
-            + getQueryStr(frontEndQuery, version, sqlUser, false));
+            log.info("getData using query: {}",
+                    getQueryStr(frontEndQuery, version, sqlUser, false)
+                    .replaceAll("\\r\\n|\\r|\\n"," "));
         }
         try {
             if (enforceTranslation) {
