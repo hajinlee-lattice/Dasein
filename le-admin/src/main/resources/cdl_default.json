@@ -33,13 +33,19 @@
       "Node": "DefaultAPSRollupPeriod",
       "Data": "Business Quarter"
     },
-    { 
+    {
       "Node": "ModelingProfilingVersion",
       "Data": "v2"
     },
     {
       "Node": "ExportCronExpression",
       "Data": ""
+    },
+    {
+      "Node": "Diagnostics",
+      "Children": [
+        {"Node": "QueryLogging", "Data": false}
+      ]
     }
   ]
 }

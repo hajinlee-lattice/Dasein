@@ -24,6 +24,11 @@
             ]
         }
     },
-    { "Node": "ExportCronExpression", "Data": {"Type": "string", "Required": false}}
+    { "Node": "ExportCronExpression", "Data": {"Type": "string", "Required": false}},
+    { "Node": "Diagnostics",
+      "Children": [
+          { "Node": "QueryLogging", "Data": {"Type": "boolean", "Required": false}}
+      ]
+    }
   ]
 }

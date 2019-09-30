@@ -114,6 +114,11 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                 queryEvaluatorService);
         try {
             Query query = getQuery(attrRepo, frontEndQuery, eventType);
+            if (QueryServiceUtils.getQueryLoggingConfig()){
+                log.info("getData using query: {}",
+                        getQueryStr(frontEndQuery, eventType, version)
+                        .replaceAll("\\r\\n|\\r|\\n", " "));
+            }
             return queryEvaluatorService.getData(attrRepo, query, getBatchUser());
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);

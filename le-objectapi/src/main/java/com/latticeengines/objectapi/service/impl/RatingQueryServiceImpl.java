@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -49,6 +51,8 @@ import reactor.core.publisher.Flux;
 
 @Service("ratingQueryService")
 public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements RatingQueryService {
+
+    private static Logger log = LoggerFactory.getLogger(RatingQueryServiceImpl.class);
 
     private final TransactionService transactionService;
 
@@ -131,6 +135,11 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
+            if (QueryServiceUtils.getQueryLoggingConfig()){
+                log.info("getData using query: {}",
+                        getQueryStr(frontEndQuery, version, sqlUser)
+                        .replaceAll("\\r\\n|\\r|\\n", " "));
+            }
             return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
