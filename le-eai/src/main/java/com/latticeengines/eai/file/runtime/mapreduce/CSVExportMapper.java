@@ -15,6 +15,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -54,6 +55,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
 
     private Table table;
     private Set<String> exclusionColumns = new HashSet<>();
+    private Set<String> inclusionColumns = new HashSet<>();
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -69,6 +71,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
         table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
         boolean exportUsingDisplayName = config.getBoolean("eai.export.displayname", true);
         getExclusionColumns();
+        getInclusionColumns();
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
             if (outputField(field)) {
@@ -97,6 +100,15 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
         csvFilePrinter = new CSVPrinter(new BufferedWriter(new FileWriter(OUTPUT_FILE), 8192 * 2),
                 LECSVFormat.format.withHeader(headers.toArray(new String[] {})));
         return this;
+    }
+
+    private void getInclusionColumns() {
+        String columns = config.get(ExportProperty.EXPORT_INCLUSION_COLUMNS);
+        if (columns == null || columns.length() == 0) {
+            return;
+        }
+        String[] tokens = columns.split(";");
+        inclusionColumns.addAll(Arrays.asList(tokens));
     }
 
     private void getExclusionColumns() {
@@ -154,6 +166,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 && !field.name().equals(InterfaceName.InternalId.toString()) //
                 && !field.name().equals(ScoreResultField.RawScore.displayName) //
                 && !field.name().endsWith(INT_LDC_DEDUPE_ID) //
-                && !exclusionColumns.contains(field.name());
+                && !exclusionColumns.contains(field.name()) //
+                && (CollectionUtils.isNotEmpty(inclusionColumns) ? inclusionColumns.contains(field.name()) : true);
     }
 }

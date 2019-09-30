@@ -424,6 +424,11 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
+        public Builder exportInclusionColumns(String exportInclusionColumns) {
+            exportScoreTrainingFile.setExportInclusionColumns(exportInclusionColumns);
+            return this;
+        }
+        
         public CrossSellImportMatchAndModelWorkflowConfiguration build() {
             exportBucketTool.setUsingDisplayName(Boolean.FALSE);
             generateAIRating.saveBucketMetadata();
