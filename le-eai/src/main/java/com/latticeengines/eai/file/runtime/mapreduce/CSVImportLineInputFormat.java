@@ -18,12 +18,16 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.LineRecordReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @InterfaceAudience.Public
 @InterfaceStability.Stable
 public class CSVImportLineInputFormat extends FileInputFormat<LongWritable, Text> {
 
     private long gigaByte = 1073741824l;
+
+    private static final Logger logger = LoggerFactory.getLogger(CSVImportLineInputFormat.class);
 
     public CSVImportLineInputFormat() {
     }
@@ -50,6 +54,7 @@ public class CSVImportLineInputFormat extends FileInputFormat<LongWritable, Text
             throw new IOException("Not a file: " + fileName);
         } else {
             long totalLength = status.getLen();
+            logger.info("Total imported file size is {}.", totalLength);
             long blockSize = status.getBlockSize();
             if (totalLength <= blockSize) {
                 setCSVFileBlockSize(job, -1l);

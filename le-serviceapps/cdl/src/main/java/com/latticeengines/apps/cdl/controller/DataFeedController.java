@@ -199,6 +199,7 @@ public class DataFeedController {
             ApplicationId appId;
             // if export id doesn't have value, we should check attribute count and setup atlas report
             if (StringUtils.isEmpty(request.getAtlasExportId())) {
+                request.setSaveToDropfolder(true);
                 AtlasExportType exportType = request.getExportType();
                 if (exportType != null) {
                     EntityExportUtils.checkExportAttribute(exportType, customerSpace, request.getDataCollectionVersion(), servingStoreService);

@@ -167,18 +167,7 @@ public class TimeSeriesUtils {
     }
 
     static String getPath(String avroDir) {
-        if (!avroDir.endsWith(".avro")) {
-            return avroDir;
-        } else {
-            String[] dirs = avroDir.trim().split("/");
-            avroDir = "";
-            for (int i = 0; i < (dirs.length - 1); i++) {
-                if (!dirs[i].isEmpty()) {
-                    avroDir = avroDir + "/" + dirs[i];
-                }
-            }
-        }
-        return avroDir;
+        return ProductUtils.getPath(avroDir);
     }
 
     public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir,

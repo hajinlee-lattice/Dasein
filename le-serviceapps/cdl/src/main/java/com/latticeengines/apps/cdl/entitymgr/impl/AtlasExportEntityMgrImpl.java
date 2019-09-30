@@ -29,6 +29,8 @@ public class AtlasExportEntityMgrImpl
         extends BaseReadWriteRepoEntityMgrImpl<AtlasExportRepository, AtlasExport, Long>
         implements AtlasExportEntityMgr {
 
+    private static final String DATA_DUMP_PRFIX = "FULL_DATA_DUMP_";
+
     private static final String UUID_PREFIX = "AtlasExport";
 
     private static final SimpleDateFormat exportDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -85,6 +87,7 @@ public class AtlasExportEntityMgrImpl
         export.setStatus(MetadataSegmentExport.Status.RUNNING);
         export.setUuid(NamingUtils.uuid(UUID_PREFIX));
         export.setScheduled(true);
+        export.setSegmentName(DATA_DUMP_PRFIX + exportType.name());
         export.setDatePrefix(exportDateFormat.format(new Date()));
         export.setCleanupBy(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(30)));
         atlasExportDao.create(export);

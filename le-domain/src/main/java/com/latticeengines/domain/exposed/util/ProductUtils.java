@@ -328,7 +328,7 @@ public class ProductUtils {
         return productList;
     }
 
-    private static String getPath(String avroDir) {
+    public static String getPath(String avroDir) {
         log.info("Get avro path input " + avroDir);
         if (!avroDir.endsWith(".avro")) {
             return avroDir;
