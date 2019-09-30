@@ -45,6 +45,7 @@ public class FileExportServiceImpl extends ExportService {
         boolean exportUsingDisplayName = exportConfig.getUsingDisplayName();
         context.setProperty(ExportProperty.EXPORT_USING_DISPLAYNAME, String.valueOf(exportUsingDisplayName));
         context.setProperty(ExportProperty.EXPORT_EXCLUSION_COLUMNS, exportConfig.getExclusionColumns());
+        context.setProperty(ExportProperty.EXPORT_INCLUSION_COLUMNS, exportConfig.getInclusionColumns());
         return context;
     }
 

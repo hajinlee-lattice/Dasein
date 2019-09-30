@@ -49,5 +49,9 @@ public class CSVExportJob extends AvroExportJob {
             config.set(ExportProperty.EXPORT_EXCLUSION_COLUMNS,
                     properties.getProperty(ExportProperty.EXPORT_EXCLUSION_COLUMNS));
         }
+        if (properties.getProperty(ExportProperty.EXPORT_INCLUSION_COLUMNS) != null) {
+            config.set(ExportProperty.EXPORT_INCLUSION_COLUMNS,
+                    properties.getProperty(ExportProperty.EXPORT_INCLUSION_COLUMNS));
+        }
     }
 }

@@ -13,6 +13,7 @@ public class ExportProperty extends BaseProperty {
     public static final String EXPORT_USING_DISPLAYNAME = "exportUsingDisplayName";
 
     public static final String EXPORT_EXCLUSION_COLUMNS = "exportExclusionColumns";
+    public static final String EXPORT_INCLUSION_COLUMNS = "exportInclusionColumns";
 
     public static final String NUM_MAPPERS = "numMappers";
 }

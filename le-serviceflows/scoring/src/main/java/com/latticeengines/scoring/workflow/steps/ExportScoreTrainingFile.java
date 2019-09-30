@@ -41,6 +41,10 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
         return StringUtils.isNotBlank(outputPath) ? outputPath : null;
     }
 
+    protected String getInclusionColumns() {
+        return getConfiguration().getExportInclusionColumns();
+    }
+
     protected String getExclusionColumns() {
         String exclusionColumns = ScoreResultField.NormalizedScore.displayName + ";" //
                 + ScoreResultField.PredictedRevenuePercentile.displayName + ";" //
