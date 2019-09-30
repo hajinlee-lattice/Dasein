@@ -870,9 +870,6 @@ public class CDLJobServiceImpl implements CDLJobService {
         DataFeedExecution execution;
         execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
                 DataFeedExecutionJobType.PA);
-        if (execution.getWorkflowId() == null) {
-            throw new NullPointerException("can not find workflowId in tenant " + tenantId);
-        }
         return execution;
     }
 
