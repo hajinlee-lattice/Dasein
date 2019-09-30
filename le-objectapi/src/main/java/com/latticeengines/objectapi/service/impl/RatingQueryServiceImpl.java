@@ -136,8 +136,9 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                 queryEvaluatorService);
         try {
             if (QueryServiceUtils.getQueryLoggingConfig()){
-                log.info("getData using query:" + System.lineSeparator()
-                + getQueryStr(frontEndQuery, version, sqlUser));
+                log.info("getData using query: {}",
+                        getQueryStr(frontEndQuery, version, sqlUser)
+                        .replaceAll("\\r\\n|\\r|\\n", " "));
             }
             return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser);
         } catch (Exception e) {

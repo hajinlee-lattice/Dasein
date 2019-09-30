@@ -73,6 +73,7 @@ public class QueryServiceUtils {
 
     public static boolean getQueryLoggingConfig() {
         if (!localQueryFlag) {
+            localQueryFlag = true; // only check zk first time through
             Path path = null;
             CustomerSpace customerSpace = null;
             String podId = null;
@@ -85,11 +86,9 @@ public class QueryServiceUtils {
                         .append(ENABLE_QUERY_LOGGING);
                 String querySetting = camille.get(path).getData();
                 queryLogging = querySetting.equalsIgnoreCase("true");
-                localQueryFlag = true;
             } catch (Exception e) {
-                log.info("Failed to find QueryLogging config " + path
-                        + " for customer {} in podId " + podId
-                        + ". Defaulting to " + queryLogging + ".", customerSpace);
+                log.info("Failed to find config {} for customer {} in podId {}. Defaulting to {}.",
+                        path, podId, customerSpace, queryLogging);
             }
         }
         return queryLogging;

@@ -73,8 +73,9 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         try {
             Query query = getQuery(attrRepo, frontEndQuery, sqlUser, true);
             if (QueryServiceUtils.getQueryLoggingConfig()){
-                log.info("getData using query:" + System.lineSeparator()
-                        + getQueryStr(frontEndQuery, version, sqlUser, true));
+                log.info("getData using query: {}",
+                        getQueryStr(frontEndQuery, version, sqlUser, true)
+                        .replaceAll("\\r\\n|\\r|\\n", " "));
             }
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {

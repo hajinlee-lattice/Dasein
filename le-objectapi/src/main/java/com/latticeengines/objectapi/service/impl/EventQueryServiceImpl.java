@@ -115,8 +115,9 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         try {
             Query query = getQuery(attrRepo, frontEndQuery, eventType);
             if (QueryServiceUtils.getQueryLoggingConfig()){
-                log.info("getData using query:"+System.lineSeparator()
-                        + getQueryStr(frontEndQuery, eventType, version));
+                log.info("getData using query: {}",
+                        getQueryStr(frontEndQuery, eventType, version)
+                        .replaceAll("\\r\\n|\\r|\\n", " "));
             }
             return queryEvaluatorService.getData(attrRepo, query, getBatchUser());
         } catch (Exception e) {
