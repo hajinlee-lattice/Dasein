@@ -171,11 +171,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
-        ERROR_FILE = getFileName("error", ".csv");
         if (csvFileBlockSize == -1) {
+            ERROR_FILE = ImportProperty.ERROR_FILE;
             csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
                     LECSVFormat.format.withHeader(ImportProperty.ERROR_HEADER));
         } else {
+            ERROR_FILE = getFileName("error", ".csv");
             csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
                     LECSVFormat.format.withHeader((String[]) null));
         }

@@ -1,12 +1,18 @@
 package com.latticeengines.cdl.workflow.steps.validations;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -24,6 +31,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.serv
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ContactFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
@@ -36,6 +44,13 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
+
+    private final String ERROR_FILE_NAME = "error";
+
+    /**
+     * RFC 4180 defines line breaks as CRLF
+     */
+    private final String CRLF = "\r\n";
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -66,7 +81,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
             return;
         }
-
+        mergeErrorFile(pathList);
         BusinessEntity entity = configuration.getEntity();
         boolean enableEntityMatch = configuration.isEnableEntityMatch();
         log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
@@ -123,6 +138,33 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
                     String.valueOf(totalFailed), statistics.toString());
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
+        }
+    }
+
+    private void mergeErrorFile(List<String> pathList) {
+        String outputPath = ProductUtils.getPath(pathList.get(0));
+        String errorFile = outputPath + "/" + ImportProperty.ERROR_FILE;
+        try (FileSystem fs = HdfsUtils.getFileSystem(yarnConfiguration, errorFile)) {
+            Path path = new Path(errorFile);
+            // if the error file doesn't exist, need to merge it
+            if (!fs.exists(path)) {
+                HdfsUtils.HdfsFilenameFilter hdfsFilenameFilter = filename -> filename.startsWith(ERROR_FILE_NAME);
+                List<String> errorPaths = HdfsUtils.getFilesForDir(yarnConfiguration, outputPath, hdfsFilenameFilter);
+                errorPaths.sort(String::compareTo);
+                log.info("Generated error file list is {}", errorPaths);
+                try (FSDataOutputStream fsDataOutputStream = fs.create(path)) {
+                    fsDataOutputStream.writeBytes(StringUtils.join(ImportProperty.ERROR_HEADER, ","));
+                    fsDataOutputStream.writeBytes(CRLF);
+                    for (String errorPath : errorPaths) {
+                        try (InputStream inputStream = HdfsUtils.getInputStream(yarnConfiguration, errorPath)) {
+                            IOUtils.copy(inputStream, fsDataOutputStream);
+                        }
+                        fs.delete(new Path(errorPath), false);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error(String.format("IOException happened during the process for merge file: %s.", e.getMessage()));
         }
     }
 
