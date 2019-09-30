@@ -583,17 +583,21 @@ public class PlayResource {
             @PathVariable("launchId") String launchId, //
             @RequestParam("launchCompletionPercent") Double launchCompletionPercent, //
             @RequestParam("accountsLaunched") Long accountsLaunched, //
-            @RequestParam("contactsLaunched") Long contactsLaunched, //
             @RequestParam("accountsErrored") Long accountsErrored, //
-            @RequestParam("accountsSuppressed") Long accountsSuppressed) {
+            @RequestParam("accountsSuppressed") Long accountsSuppressed, //
+            @RequestParam("contactsLaunched") Long contactsLaunched, //
+            @RequestParam("contactsErrored") Long contactsErrored, //
+            @RequestParam("contactsSuppressed") Long contactsSuppressed) {
         log.debug(String.format("Record play launch progress for %s launchId", launchId));
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
         playLaunch.setAccountsLaunched(accountsLaunched);
         playLaunch.setAccountsErrored(accountsErrored);
-        playLaunch.setContactsLaunched(contactsLaunched);
-        playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
         playLaunch.setAccountsSuppressed(accountsSuppressed);
+        playLaunch.setContactsLaunched(contactsLaunched);
+        playLaunch.setContactsErrored(contactsErrored);
+        playLaunch.setContactsSuppressed(contactsSuppressed);
         return playLaunchService.update(playLaunch);
     }
 
