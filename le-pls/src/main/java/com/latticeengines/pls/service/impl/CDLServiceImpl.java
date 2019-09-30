@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -64,6 +65,7 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -85,6 +87,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     protected SourceFileService sourceFileService;
+
+    @Inject
+    private ActivityStoreProxy activityStoreProxy;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -644,8 +649,16 @@ public class CDLServiceImpl implements CDLService {
         sourceFileService.update(templateFile);
         String feedType = EntityTypeUtils.generateFullFeedType(websiteSystem.getName(), entityType);
         String subType = entityType.getSubType() == null ? "" : entityType.getSubType().name();
-        createS3Template(customerSpace, templateFile.getName(), "File", entityType.getEntity().name(),
+        String taskId = createS3Template(customerSpace, templateFile.getName(), "File", entityType.getEntity().name(),
                 feedType, subType, feedType);
+
+        if (EntityType.WebVisitPathPattern == entityType) {
+            // create ptn catalog
+            Catalog catalog = activityStoreProxy.createCatalog(customerSpace, EntityType.WebVisitPathPattern.name(),
+                    taskId);
+            log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
+                    customerSpace, catalog, taskId);
+        }
         return true;
     }
 

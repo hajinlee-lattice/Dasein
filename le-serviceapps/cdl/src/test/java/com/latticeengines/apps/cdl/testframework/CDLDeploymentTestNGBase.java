@@ -59,7 +59,6 @@ import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -91,9 +90,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
-
-    @Inject
-    protected PeriodTransactionProxy periodTransactionProxy;
 
     @Inject
     protected CheckpointService checkpointService;

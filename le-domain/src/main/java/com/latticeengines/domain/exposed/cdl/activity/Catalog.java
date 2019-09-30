@@ -100,6 +100,20 @@ public class Catalog implements HasPid, Serializable, HasAuditingFields {
         return dataFeedTask;
     }
 
+    @JsonProperty("task_unique_id")
+    public void setDataFeedTaskUniqueId(String uniqueId) {
+        if (dataFeedTask == null) {
+            // dummy object
+            dataFeedTask = new DataFeedTask();
+        }
+        dataFeedTask.setUniqueId(uniqueId);
+    }
+
+    @JsonProperty("task_unique_id")
+    public String getDataFeedTaskUniqueId() {
+        return dataFeedTask == null ? null : dataFeedTask.getUniqueId();
+    }
+
     public void setDataFeedTask(DataFeedTask dataFeedTask) {
         this.dataFeedTask = dataFeedTask;
     }
