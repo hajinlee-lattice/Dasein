@@ -84,9 +84,6 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
     private IngestionPatchBookProviderServiceImpl ingestionProviderService;
 
     @Inject
-    private PatchBookEntityMgr patchBookEntityMgr;
-
-    @Inject
     private IngestionEntityMgr ingestionEntityMgr;
 
     @Inject

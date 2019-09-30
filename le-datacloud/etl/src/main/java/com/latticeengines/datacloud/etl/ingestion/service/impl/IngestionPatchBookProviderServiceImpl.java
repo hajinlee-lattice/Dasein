@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.util.BatchUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.datacloud.core.dao.PatchBookDao;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.PatchBookUtils;
@@ -50,8 +51,6 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     private static Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImpl.class);
 
-    private static final String MIN_PID = "MIN";
-    private static final String MAX_PID = "MAX";
 
     @Value("${datacloud.patcher.ingest.batch.size.min}")
     private int minBatchSize;
@@ -92,7 +91,6 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         }
         HdfsUtils.mkdir(yarnConfiguration, progress.getDestination());
         long totalSize = 0L;
-        Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(patchConfig.getBookType(), PatchBook.COLUMN_PID); // ingest all records if minPid and maxPid not provided
         Long minPid = patchConfig.getMinPid();
         Long maxPid = patchConfig.getMaxPid();
         if (minPid != null && maxPid != null) { // compute total num of records if minPid and maxPid provided
@@ -105,7 +103,12 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 throw new RuntimeException("PatchBook ingestion failed because of invalid MinPid and MaxPid provided");
             }
         } else {
-            totalSize = minMaxPid.get(MAX_PID) - minMaxPid.get(MIN_PID);
+            Map<String, Long> minMaxPid = patchBookEntityMgr.findMinMaxPid(patchConfig.getBookType(), PatchBook.COLUMN_PID); // ingest all records if minPid and maxPid not provided
+            Long computedMaxPid = minMaxPid.get(PatchBookDao.MAX_PID);
+            Long computedMinPid = minMaxPid.get(PatchBookDao.MIN_PID);
+            totalSize = computedMaxPid - computedMinPid;
+            patchConfig.setMaxPid(computedMaxPid);
+            patchConfig.setMinPid(computedMinPid);
         }
         int batchSize = BatchUtils.determineBatchCnt(totalSize, minBatchSize, maxBatchSize, maxConcurrentBatchCnt);
         if (patchConfig.getBatchSize() > 0) {
