@@ -240,6 +240,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       limitedAccountTable = derivedAccounts.limit(topNCount.toString.toInt)
     }
     // add log
+    logSpark("Before joining, the limitedAccountTable is:")
     limitedAccountTable.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
     
     val limitedAccountTableSize = limitedAccountTable.count()
@@ -252,14 +253,15 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
       // calculate the total number of contact
+      limitedAccountTable.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
       val selectedContactNum = contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").count()
       logSpark(f"selectedContactNum=$selectedContactNum%d")
-      
+      limitedAccountTable.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
       // add log
       contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
       
       
-      val selectedAccountList =  contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").select(joinKey)
+      val selectedAccountList =  contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").select(joinKey).distinct()
       // add log
       selectedAccountList.orderBy((joinKey)).show(100)
       val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
