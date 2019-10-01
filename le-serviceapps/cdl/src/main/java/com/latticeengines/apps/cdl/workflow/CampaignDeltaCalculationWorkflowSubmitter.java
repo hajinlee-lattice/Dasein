@@ -31,7 +31,6 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignDeltaCalculationWorkflow");
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
-        log.info("In Submitter: " + customerSpace);
         CampaignDeltaCalculationWorkflowConfiguration configuration = new CampaignDeltaCalculationWorkflowConfiguration.Builder()
                 .workflow("campaignDeltaCalculationWorkflow") //
                 .dataCollectionVersion(version) //
