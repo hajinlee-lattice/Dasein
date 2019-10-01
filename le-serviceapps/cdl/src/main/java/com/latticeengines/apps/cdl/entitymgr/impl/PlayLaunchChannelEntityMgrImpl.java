@@ -227,7 +227,7 @@ public class PlayLaunchChannelEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<PlayLaunchChannel> getAllValidScheduledChannels() {
-        List<PlayLaunchChannel> channels = readerRepository.findAlwaysOnChannelsByNextScheduledTime(true,
+        List<PlayLaunchChannel> channels = readerRepository.findAlwaysOnChannelsByNextScheduledTime(
                 new Date(Long.MIN_VALUE), DateUtils.addMinutes(new Date(), 15));
         channels.forEach(c -> {
             Hibernate.initialize(c.getTenant());
