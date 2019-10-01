@@ -56,7 +56,7 @@ public class AtlasExportResourceDeploymentTestNG extends CDLDeploymentTestNGBase
         String systemPath = atlasExportProxy.getSystemExportPath(mainCustomerSpace, false);
         Assert.assertTrue(s3Service.objectExist(s3Bucket, dropFolderPath));
         Assert.assertTrue(s3Service.objectExist(s3Bucket, systemPath));
-        Assert.assertEquals(atlasExport.getSegmentName(), "FULL_DATA_DUMP_" + AtlasExportType.ACCOUNT_AND_CONTACT);
+        Assert.assertEquals(atlasExport.getSegmentName(), "Customer Master");
 
         String s3DropFolderPath = atlasExportProxy.getS3PathWithProtocol(mainCustomerSpace, dropFolderPath);
         String s3SystemPath = atlasExportProxy.getS3PathWithProtocol(mainCustomerSpace, systemPath);
