@@ -23,6 +23,7 @@ import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -95,6 +96,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
+        MultiTenantContext.setTenant(mainTestTenant);
 
         MetadataSegment createdSegment = segmentService.createOrUpdateSegment(constructSegment(SEGMENT_NAME));
         MetadataSegment reTestSegment = segmentService.findByName(createdSegment.getName());
@@ -165,6 +167,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(20000);
+        MultiTenantContext.setTenant(mainTestTenant);
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> queuedPlayLaunchesIdList = //
                     playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //
@@ -195,6 +198,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
         campaignLaunchTriggerService.triggerQueuedLaunches();
         Thread.sleep(1000);
+        MultiTenantContext.setTenant(mainTestTenant);
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> queuedPlayLaunchesIdList = //
                     playLaunchService.getByStateAcrossTenants(LaunchState.Queued, null) //

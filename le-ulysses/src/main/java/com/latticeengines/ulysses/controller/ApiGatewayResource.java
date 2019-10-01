@@ -3,8 +3,8 @@ package com.latticeengines.ulysses.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.RequestEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,22 +22,22 @@ public class ApiGatewayResource {
 
     @Autowired
     private Oauth2RestApiProxy oauth2RestApiProxy;
-    
-    @RequestMapping(value = "/tenant-config", method = RequestMethod.GET, headers = "Accept=application/json")
+
+    @GetMapping(value = "/tenant-config", headers = "Accept=application/json")
     public GatewayPolicyConfiguration getGatewayPolicyConfiguration(RequestEntity<String> requestEntity) {
         String tenantName = oauth2RestApiProxy.getTenantNameFromOAuthRequest(requestEntity);
-        
+
         if (StringUtils.isBlank(tenantName)) {
             throw new LedpException(LedpCode.LEDP_39002);
         }
-        
+
         PlaymakerTenant oAuthTenant = oauth2RestApiProxy.getTenant(tenantName);
-        
+
         GatewayPolicyConfiguration gwPolicyConfig = new GatewayPolicyConfiguration();
         gwPolicyConfig.setPrincipal(tenantName);
         gwPolicyConfig.setApiKey(oAuthTenant.getGwApiKey());
-        
+
         return gwPolicyConfig;
     }
-    
+
 }
