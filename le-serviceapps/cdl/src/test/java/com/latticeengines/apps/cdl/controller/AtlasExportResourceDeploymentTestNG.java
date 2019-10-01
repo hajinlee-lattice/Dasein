@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.impl.AtlasExportEntityMgrImpl;
 import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
