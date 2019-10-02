@@ -87,8 +87,9 @@ public class FrontEndQueryCreator {
         if (applyExcludeItemsWithoutSalesforceIdOnContacts != Boolean.FALSE) {
             contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
         }
-
-        addSort(playLaunchContext, accountFrontEndQuery, contactFrontEndQuery);
+        if (!useSpark) {
+            addSort(playLaunchContext, accountFrontEndQuery, contactFrontEndQuery);
+        }
         log.info("AccountFrontEndQuery=" + JsonUtils.serialize(accountFrontEndQuery));
         log.info("ContactFrontEndQuery=" + JsonUtils.serialize(contactFrontEndQuery));
         return result;
