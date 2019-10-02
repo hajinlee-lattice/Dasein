@@ -14,7 +14,7 @@ import org.apache.commons.lang3.{EnumUtils, StringUtils}
 import org.apache.spark.sql.functions.{col, count, lit, sum, when}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-//import collection.mutable._
+import org.apache.spark.sql.functions.asc
 import scala.collection.JavaConverters._
 
 object CreateRecommendationsJob {
@@ -187,6 +187,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val joinKey: String = playLaunchContext.getJoinKey
     val playId: String = playLaunchContext.getPlayName
     val playLaunchId: String = playLaunchContext.getPlayLaunchId
+    val ratingId: String = playLaunchContext.getRatingId
     val tenantId: Long = playLaunchContext.getTenantPid
     val accountColsRecIncluded: Seq[String] = if (playLaunchContext.getAccountColsRecIncluded != null ) playLaunchContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
     val accountColsRecNotIncludedStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedStd != null) playLaunchContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
@@ -237,7 +238,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
     val limitedAccountTable = if (topNCount != null) {
         logSpark(s"topNCount is: $topNCount")
-        derivedAccounts.sort(joinKey).limit(topNCount.toString.toInt)
+        if (ratingId != null) {
+          derivedAccounts.sort(asc(ratingId), asc(joinKey)).limit(topNCount.toString.toInt)
+        } else {
+          derivedAccounts.sort(asc(joinKey)).limit(topNCount.toString.toInt)
+        }
     } else {
         derivedAccounts
     }.checkpoint(eager = true)
@@ -260,17 +265,13 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       logDataFrame("limitedAccountTable", limitedAccountTable, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
       val selectedContactNum = contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").count()
       logSpark(f"selectedContactNum=$selectedContactNum%d")
-      logSpark("Check again after joining, the limitedAccountTable is:")
-      logDataFrame("limitedAccountTable", limitedAccountTable, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
-      // add log
+
       logSpark("Right after joining, the contactTable is is:")
       logDataFrame("contact join account", contactTable.join(limitedAccountTable, joinKey :: Nil, "inner"),
         joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
 
-      val selectedAccountList =  contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").select(joinKey).distinct()
-      // add log
-      selectedAccountList.orderBy((joinKey)).collect().foreach(r => logSpark(r.toString))
-      val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
+//      val selectedAccountList =  contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").select(joinKey).distinct()
+//      val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
 //      val aggregatedContacts = aggregateContacts(selctedContacts, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
       val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
 
@@ -317,9 +318,6 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "CONTACTS",
         "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
 
-    // add log
-    logDataFrame("orderedRec", orderedRec, "ACCOUNT_ID", Seq("ACCOUNT_ID"), limit = 100)
-
     // No user configured field mapping is provided. Only generate Recommendation DF
     if (accountColsRecIncluded.isEmpty //
         && accountColsRecNotIncludedStd.isEmpty //
@@ -329,8 +327,6 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     } else {
       // generate dataframe for csv file exporter
       val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendations, accountTable, playLaunchContext, joinKey)
-      logDataFrame("orderedRec", orderedRec, "ACCOUNT_ID", Seq("ACCOUNT_ID", "COMPANY_NAME"), limit = 100)
-      logDataFrame("userConfiguredDataFrame", userConfiguredDataFrame, "AccountId", Seq("AccountId", "CompanyName"), limit = 100)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
     }
   }
@@ -345,9 +341,6 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     println(accountColsRecNotIncludedStd)
     println(accountColsRecNotIncludedNonStd)
     println(contactCols)
-
-    // add log
-    finalRecommendations.orderBy(("ACCOUNT_ID")).select("ACCOUNT_ID", "CUSTOMER_ACCOUNT_ID").show(100)
 
     // 1. combine Recommendation-contained columns (including Contacts column if required)
     // with Recommendation-not-contained standard columns
@@ -371,26 +364,18 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
     // map internal column names to Recommendation column names
     val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
-    // add log
-    println(mappedToRecAppendedCols)
     // get the map from Recommendation column names to internal column names for later rename purpose
     val recColsToInternalNameMap = mappedToRecAppendedCols.map{col => {col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.asScala.getOrElse(col, col)}}.toMap
-    // add log
-    println(recColsToInternalNameMap)
     // select columns from Recommendation Dataframe
     val selectedRecTable = finalRecommendations.select((mappedToRecAppendedCols).map(name => col(name)) : _*)
     // translate Recommendation column name to internal column name
     val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
-    // add log
-    selectedRecTableTranslated.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
 
     if (accountColsRecNotIncludedStd.nonEmpty) {
       // 2. need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
       val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
       if (containsJoinKey) {
         recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left")
-       // add log
-       recContainedCombinedWithStd.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
       } else {
         recContainedCombinedWithStd = selectedRecTableTranslated.join(selectedAccTable, joinKey :: Nil, "left").drop(joinKey).drop("CUSTOMER_ACCOUNT_ID")
       }
@@ -413,8 +398,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         }
       }
     }
-    // add log
-    userConfiguredDataFrame.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
+
     // 4. Drop Contacts column if not needed
     if (!needContactsColumn) {
       userConfiguredDataFrame = userConfiguredDataFrame.drop(RecommendationColumnName.CONTACTS.name)
@@ -424,8 +408,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     if (userConfiguredDataFrame.columns.contains(joinKey)) {
       userConfiguredDataFrame = userConfiguredDataFrame.drop(joinKey).withColumnRenamed("CUSTOMER_ACCOUNT_ID", joinKey)
     }
-    // add log
-    userConfiguredDataFrame.orderBy((joinKey)).select(joinKey).show(100)
+
     userConfiguredDataFrame
   }
 
@@ -441,9 +424,6 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    processedAggrContacts.printSchema
 	    logSpark("----- END SCRIPT OUTPUT -----")
-
-      // add log
-      processedAggrContacts.orderBy((joinKey)).select(joinKey, "CONTACT_NUM").show(100)
 
       processedAggrContacts
   }
