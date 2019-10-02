@@ -214,9 +214,11 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
     @AfterClass(groups = "deployment")
     public void teardown() {
         if (playLaunch1 != null && playLaunch1.getLaunchId() != null) {
+            MultiTenantContext.setTenant(playLaunch1.getTenant());
             playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         }
         if (playLaunch2 != null && playLaunch2.getLaunchId() != null) {
+            MultiTenantContext.setTenant(playLaunch2.getTenant());
             playLaunchEntityMgr.deleteByLaunchId(playLaunch2.getLaunchId(), false);
         }
         Tenant tenant1 = tenantService.findByTenantId("testTenant1");

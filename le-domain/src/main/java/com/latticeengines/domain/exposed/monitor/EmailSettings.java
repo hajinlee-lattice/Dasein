@@ -52,6 +52,7 @@ public class EmailSettings {
     public static final String PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT = "SUCCESS - Segment Export - %s ";
     public static final String PLS_METADATA_SEGMENT_EXPORT_ERROR_SUBJECT = "FAILURE - Segment Export - %s ";
     public static final String PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT = "IN PROGRESS - Segment Export - %s ";
+    public static final String PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT = "DEACTIVATED - Always On for Campaign - %s ";
     public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_SUCCESS_SUBJECT = "SUCCESS - %s Export";
     public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_ERROR_SUBJECT = "FAILURE - %s Export";
     public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT = "IN PROGRESS - %s Export";

@@ -138,7 +138,7 @@ public class DanteLeadNotionObject {
         timestamp = lastModified;
     }
 
-    public DanteLeadNotionObject(List<DanteTalkingPointValue> danteTalkingPoints) {
+    public DanteLeadNotionObject(List<DanteTalkingPointValue> danteTalkingPoints, Play play) {
         baseExternalId = "testLeadForPreview";
         notionName = danteLeadNotionName;
         displayName = "Demo Lead for Preview";
@@ -153,18 +153,20 @@ public class DanteLeadNotionObject {
         likelihoodBucketOffset = 3;
         modelId = UUID.randomUUID().toString();
         percentile = 83;
-        playDescription = "Play Description comes here";
-        playDisplayName = "Play DisplayName";
-        playID = "play External ID";
+        playDescription = play.getDescription() != null ? play.getDescription() : "Play Description comes here";
+        playDisplayName = play.getDisplayName() != null ? play.getDisplayName() : "Play DisplayName";
+        playID = play.getName() != null ? play.getName() : "play External ID";
         playSolutionType = "PlaySolutionType";
         playTargetProductName = "TargetProductName";
-        playType = "PlayType";
+        playType = play.getPlayType() != null && play.getPlayType().getDisplayName() != null
+                ? play.getPlayType().getDisplayName()
+                : "PlayType";
         probability = 0.70;
         rank = 2;
         recommendationID = 42;
         theme = "Theme comes here";
         talkingPoints = danteTalkingPoints;
-        userRoleDisplayName = "Play Creator";
+        userRoleDisplayName = play.getCreatedBy() != null ? play.getCreatedBy() : "Play Creator";
         headerName = "Some Header";
         timestamp = lastLaunched;
     }

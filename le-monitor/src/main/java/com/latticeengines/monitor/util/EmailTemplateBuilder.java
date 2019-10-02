@@ -78,10 +78,11 @@ public class EmailTemplateBuilder {
         mp.addBodyPart(logoPart);
     }
 
-    public void addCustomImagesToMultipart(Multipart mp, String imgSrc, String imgType, String cid) throws IOException, MessagingException {
+    public void addCustomImagesToMultipart(Multipart mp, String imgSrc, String imgType, String cid)
+            throws IOException, MessagingException {
         MimeBodyPart customPart = new MimeBodyPart();
-        DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(imgSrc), imgType);
+        DataSource fds = new ByteArrayDataSource(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(imgSrc), imgType);
         customPart.setDisposition(MimeBodyPart.INLINE);
         customPart.setDataHandler(new DataHandler(fds));
         customPart.setHeader("Content-ID", "<" + cid + ">");
@@ -100,17 +101,16 @@ public class EmailTemplateBuilder {
         PD_EXISITING_EXTERNAL_USER("pd_old_external_user.html"), //
         PLS_DEPLOYMENT_STEP_SUCCESS("pls_deployment_step_success.html"), //
         PLS_DEPLOYMENT_STEP_ERROR("pls_deployment_step_error.html"), //
-        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"), SECURITY_GLOBALAUTH_EMAIL_TEMPLATE(
-                "security_globalauth_email_template.html"), //
+        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"), //
+        SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html"), //
         PLS_JOB_SUCCESS("pls_job_success.html"), //
-        PLS_JOB_ERROR("pls_job_error.html"), PLS_JOB_SUCCESS_INTERNAL(
-                "pls_job_success_internal.html"), PLS_JOB_ERROR_INTERNAL(
-                        "pls_job_error_internal.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS(
-                                "pls_internal_attribute_enrich_success.html"), //
-        PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR(
-                "pls_internal_attribute_enrich_error.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS_INTERNAL(
-                        "pls_internal_attribute_enrich_success_internal.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL(
-                                "pls_internal_attribute_enrich_error_internal.html"), //
+        PLS_JOB_ERROR("pls_job_error.html"), //
+        PLS_JOB_SUCCESS_INTERNAL("pls_job_success_internal.html"), //
+        PLS_JOB_ERROR_INTERNAL("pls_job_error_internal.html"), //
+        PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS("pls_internal_attribute_enrich_success.html"), //
+        PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR("pls_internal_attribute_enrich_error.html"), //
+        PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS_INTERNAL("pls_internal_attribute_enrich_success_internal.html"), //
+        PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL("pls_internal_attribute_enrich_error_internal.html"), //
 
         PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), //
         PLS_EXPORT_SEGMENT_ERROR("pls_export_segment_error.html"), //
@@ -119,15 +119,20 @@ public class EmailTemplateBuilder {
         PLS_EXPORT_ORPHAN_RUNNING("pls_export_orphan_running.html"), //
         PLS_EXPORT_ORPHAN_SUCCESS("pls_export_orphan_success.html"), //
 
-        PLS_CANCEL_ACTION_SUCCESS("pls_cancel_action_success.html"),
-        CDL_JOB_SUCCESS("cdl_job_success.html"), CDL_JOB_ERROR("cdl_job_error.html"), //
+        PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION("pls_always_on_campaign_expiration.html"), //
+
+        PLS_CANCEL_ACTION_SUCCESS("pls_cancel_action_success.html"), //
+        CDL_JOB_SUCCESS("cdl_job_success.html"), //
+        CDL_JOB_ERROR("cdl_job_error.html"), //
         TENANT_STATE_NOTICE("poc_state_notice.html"), //
         TENANT_RIGHT_NOTIFY_DAYS("tenant_right_notify_days.html"), //
         TENANT_RIGHT_DELETE("tenant_right_delete.html"), //
-        S3_CREDENTIALS("s3_credentials.html"), S3_EMPTY_CREDENTIALS("s3_empty_credentials.html"), //
-        CDL_INGESTION_ERROR("cdl_ingestion_error.html"), CDL_INGESTION_SUCCESS(
-                "cdl_ingestion_success.html"), CDL_INGESTION_IN_PROCESS("cdl_ingestion_in_progress.html"),
-        S3_TEMPLATE_UPDATE("s3_template_update.html"),
+        S3_CREDENTIALS("s3_credentials.html"), //
+        S3_EMPTY_CREDENTIALS("s3_empty_credentials.html"), //
+        CDL_INGESTION_ERROR("cdl_ingestion_error.html"), //
+        CDL_INGESTION_SUCCESS("cdl_ingestion_success.html"), //
+        CDL_INGESTION_IN_PROCESS("cdl_ingestion_in_progress.html"), //
+        S3_TEMPLATE_UPDATE("s3_template_update.html"), //
         S3_TEMPLATE_CREATE("s3_template_create.html");
 
         private static final String templateRoot = "com/latticeengines/monitor/";

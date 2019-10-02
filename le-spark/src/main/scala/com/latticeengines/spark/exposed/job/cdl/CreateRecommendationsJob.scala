@@ -327,6 +327,8 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     } else {
       // generate dataframe for csv file exporter
       val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendations, accountTable, playLaunchContext, joinKey)
+      logDataFrame("orderedRec", orderedRec, "ACCOUNT_ID", Seq("ACCOUNT_ID", "COMPANY_NAME"), limit = 100)
+      logDataFrame("userConfiguredDataFrame", userConfiguredDataFrame, "AccountId", Seq("AccountId", "CompanyName"), limit = 100)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
     }
   }
@@ -408,7 +410,6 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     if (userConfiguredDataFrame.columns.contains(joinKey)) {
       userConfiguredDataFrame = userConfiguredDataFrame.drop(joinKey).withColumnRenamed("CUSTOMER_ACCOUNT_ID", joinKey)
     }
-
     userConfiguredDataFrame
   }
 
@@ -424,7 +425,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    processedAggrContacts.printSchema
 	    logSpark("----- END SCRIPT OUTPUT -----")
-
+    
       processedAggrContacts
   }
 
