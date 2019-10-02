@@ -73,7 +73,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
-                                   Collection<String> bccRecipients) {
+            Collection<String> bccRecipients) {
         if (emailEnabled) {
             EmailUtils.sendMultiPartEmail(subject, content, recipients, bccRecipients, emailsettings);
         }
@@ -231,13 +231,13 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendPlsForgetPasswordConfirmationEmail(String userEmail, String hostport) {
         try {
-            EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_FORGET_PASSWORD_CONFIRMATION);
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_FORGET_PASSWORD_CONFIRMATION);
 
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(EmailSettings.PLS_FORGET_PASSWORD_EMAIL_SUBJECT, mp,
-                    Collections.singleton(userEmail));
+            sendMultiPartEmail(EmailSettings.PLS_FORGET_PASSWORD_EMAIL_SUBJECT, mp, Collections.singleton(userEmail));
             log.info("Sending forget password email " + userEmail + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send forget password email to " + userEmail + " " + e.getMessage());
@@ -450,7 +450,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsCreateModelCompletionEmail(User user, String hostport, String tenantName, String modelName,
-                                                  boolean internal) {
+            boolean internal) {
         try {
             log.info("Sending PLS create model (" + modelName + ") complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -482,7 +482,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsCreateModelErrorEmail(User user, String hostport, String tenantName, String modelName,
-                                             boolean internal) {
+            boolean internal) {
         try {
             log.info("Sending PLS create model (" + modelName + ") error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -513,7 +513,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsScoreCompletionEmail(User user, String hostport, String tenantName, String modelName,
-                                            boolean internal) {
+            boolean internal) {
         try {
             log.info("Sending PLS scoring (" + modelName + ") complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -545,7 +545,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsScoreErrorEmail(User user, String hostport, String tenantName, String modelName,
-                                       boolean internal) {
+            boolean internal) {
         try {
             log.info("Sending PLS scoring (" + modelName + ") error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
@@ -599,7 +599,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
-                                               String emailAddress, EmailSettings settings) {
+            String emailAddress, EmailSettings settings) {
         try {
             log.info("Sending global auth forget creds email to " + emailAddress + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -623,7 +623,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsEnrichInternalAttributeCompletionEmail(User user, String hostport, String tenantName,
-                                                              String modelName, boolean internal, List<String> internalAttributes) {
+            String modelName, boolean internal, List<String> internalAttributes) {
         try {
             log.info("Sending PLS enrich internal attribute (" + modelName + ") complete email to " + user.getEmail()
                     + " started.");
@@ -641,7 +641,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsEnrichInternalAttributeErrorEmail(User user, String hostport, String tenantName,
-                                                         String modelName, boolean internal, List<String> internalAttributes) {
+            String modelName, boolean internal, List<String> internalAttributes) {
         try {
             log.info("Sending PLS enrich internal attribute (" + modelName + ") error email to " + user.getEmail()
                     + " started.");
@@ -671,12 +671,12 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-segment-instructions.png",
                     "image/png", "instruction");
-            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT, exportID),
-                    mp, Collections.singleton(user.getEmail()));
+            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT, exportID), mp,
+                    Collections.singleton(user.getEmail()));
             log.info(String.format("Sending PLS segment export complete email to %s succeeded.", user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send PLS segment export complete email to %s. Exception message=%s",
-                    user.getEmail(), e.getMessage());
+            log.error("Failed to send PLS segment export complete email to %s. Exception message=%s", user.getEmail(),
+                    e.getMessage());
         }
     }
 
@@ -716,6 +716,39 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void sendPlsAlwaysOnCampaignExpirationEmail(User creator, User lastUpdater, String playDisplayName) {
+        try {
+            log.info(
+                    String.format("Sending PLS Always On expiration email to creator %s started.", creator.getEmail()));
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION);
+            builder.replaceToken("{{firstname}}", creator.getFirstName());
+            builder.replaceToken("{{playDisplayName}}", playDisplayName);
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(String.format(EmailSettings.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT, playDisplayName),
+                    mp, Collections.singleton(creator.getEmail()));
+            log.info(String.format("Sending PLS Always On expiration email to %s succeeded.", creator.getEmail()));
+
+            if (lastUpdater.isActive() && !creator.getEmail().equals(lastUpdater.getEmail())) {
+                log.info(String.format("Sending PLS Always On expiration email to Last Updater %s started.",
+                        creator.getEmail()));
+                builder = new EmailTemplateBuilder(Template.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION);
+                builder.replaceToken("{{firstname}}", lastUpdater.getFirstName());
+                builder.replaceToken("{{playDisplayName}}", playDisplayName);
+                mp = builder.buildMultipartWithoutWelcomeHeader();
+                sendMultiPartEmail(
+                        String.format(EmailSettings.PLS_ALWAYS_ON_CAMPAIGN_EXPIRATION_SUBJECT, playDisplayName), mp,
+                        Collections.singleton(lastUpdater.getEmail()));
+                log.info(String.format("Sending PLS Always On expiration email to %s succeeded.",
+                        lastUpdater.getEmail()));
+            }
+
+        } catch (Exception e) {
+            log.error(String.format("Failed to send PLS export segment in-progress email to %s. Exception message=%s",
+                    creator.getEmail(), e.getMessage()));
+        }
+    }
+
+    @Override
     public void sendPlsExportOrphanRecordsRunningEmail(User user, String exportID, String type) {
         try {
             log.info(String.format("Sending %s export in-progress email to %s started.", type, user.getEmail()));
@@ -723,18 +756,19 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{requestType}}", type);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT, type),
-                    mp, Collections.singleton(user.getEmail()));
+            sendMultiPartEmail(
+                    String.format(EmailSettings.PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT, type), mp,
+                    Collections.singleton(user.getEmail()));
             log.info(String.format("Sending %s export in-progress email to %s succeeded.", type, user.getEmail()));
         } catch (Exception e) {
-            log.error(String.format("Failed to send %s export in-progress email to %s. Exception message=%s",
-                    type, user.getEmail(), e.getMessage()));
+            log.error(String.format("Failed to send %s export in-progress email to %s. Exception message=%s", type,
+                    user.getEmail(), e.getMessage()));
         }
     }
 
     @Override
     public void sendPlsExportOrphanRecordsSuccessEmail(User user, String tenantName, String hostport, String url,
-                                                       String exportID, String type) {
+            String exportID, String type) {
         try {
             log.info(String.format("Sending %s export complete email to %s started.", type, user.getEmail()));
             EmailTemplateBuilder builder = new EmailTemplateBuilder(Template.PLS_EXPORT_ORPHAN_SUCCESS);
@@ -753,14 +787,14 @@ public class EmailServiceImpl implements EmailService {
                     mp, Collections.singleton(user.getEmail()));
             log.info(String.format("Sending %s export complete email to %s succeeded.", type, user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send %s export complete email to %s. Exception message=%s",
-                    type, user.getEmail(), e.getMessage());
+            log.error("Failed to send %s export complete email to %s. Exception message=%s", type, user.getEmail(),
+                    e.getMessage());
         }
     }
 
     private void sendEmailForEnrichInternalAttribute(User user, String hostport, String tenantName, String modelName,
-                                                     boolean internal, List<String> internalAttributes, Template internalEmailTemplate, Template emailTemplate,
-                                                     String emailSubject) throws IOException, MessagingException {
+            boolean internal, List<String> internalAttributes, Template internalEmailTemplate, Template emailTemplate,
+            String emailSubject) throws IOException, MessagingException {
         EmailTemplateBuilder builder;
         if (internal) {
             builder = new EmailTemplateBuilder(internalEmailTemplate);
@@ -866,12 +900,12 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.TENANT_STATE_NOTICE_EMAIL_SUBJECT, mp,
                     Collections.singleton(user.getEmail()));
-            log.info(
-                    "Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
+            log.info("Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName()
+                    + " succeeded.");
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on " + tenant.getName()
-                    + " " + e.getMessage());
+            log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on "
+                    + tenant.getName() + " " + e.getMessage());
         }
     }
 
@@ -892,14 +926,13 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{days}}", String.valueOf(days));
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(EmailSettings.TENANT_RIGHT_NOTICE_SUBJECT, mp,
-                    Collections.singleton(user.getEmail()));
-            log.info(
-                    "Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
+            sendMultiPartEmail(EmailSettings.TENANT_RIGHT_NOTICE_SUBJECT, mp, Collections.singleton(user.getEmail()));
+            log.info("Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName()
+                    + " succeeded.");
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on " + tenant.getName()
-                    + " " + e.getMessage());
+            log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on "
+                    + tenant.getName() + " " + e.getMessage());
         }
     }
 
@@ -931,10 +964,11 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, S3ImportEmailInfo emailInfo) {
+    public void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status,
+            S3ImportEmailInfo emailInfo) {
         try {
-            log.info("Sending cdl ingestion status " + status + " to " + user.getEmail() + " on " + tenant.getName() + " " +
-                    "started.");
+            log.info("Sending cdl ingestion status " + status + " to " + user.getEmail() + " on " + tenant.getName()
+                    + " " + "started.");
             EmailTemplateBuilder builder;
             if ("Success".equalsIgnoreCase(status)) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.CDL_INGESTION_SUCCESS);
@@ -963,11 +997,10 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{url}}", hostport);
             builder.replaceToken("{{apppublicurl}}", hostport);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(
-                    String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(), emailInfo.getTemplateName()), mp,
-                    Collections.singleton(user.getEmail()));
-            log.info("Sending cdl ingestion status " + status + " email to " + user.getEmail() + " on " + tenant.getName()
-                    + " succeeded.");
+            sendMultiPartEmail(String.format(EmailSettings.CDL_INGESTION_STATUS_SUBJECT, status.toUpperCase(),
+                    emailInfo.getTemplateName()), mp, Collections.singleton(user.getEmail()));
+            log.info("Sending cdl ingestion status " + status + " email to " + user.getEmail() + " on "
+                    + tenant.getName() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send cdl ingestion status email to " + user.getEmail() + " on " + tenant.getName()
                     + " " + e.getMessage());
@@ -1025,9 +1058,10 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo) {
+    public void sendPlsActionCancelSuccessEmail(User user, String hostport,
+            CancelActionEmailInfo cancelActionEmailInfo) {
         try {
-            if(user != null) {
+            if (user != null) {
                 log.info("Sending PLS action cancel success email to " + user.getEmail() + " started.");
                 EmailTemplateBuilder builder = new EmailTemplateBuilder(
                         EmailTemplateBuilder.Template.PLS_CANCEL_ACTION_SUCCESS);
@@ -1040,13 +1074,11 @@ public class EmailServiceImpl implements EmailService {
 
                 Multipart mp = builder.buildMultipart();
                 sendMultiPartEmail(String.format(EmailSettings.PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT,
-                        cancelActionEmailInfo.getTenantName()), mp,
-                        Collections.singleton(user.getEmail()));
+                        cancelActionEmailInfo.getTenantName()), mp, Collections.singleton(user.getEmail()));
                 log.info("Sending PLS action cancel success email to " + user.getEmail() + " succeeded.");
             }
         } catch (Exception e) {
-            log.error(
-                    "Failed to send PLS action cancel success email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS action cancel success email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 }

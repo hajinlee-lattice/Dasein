@@ -19,7 +19,7 @@ public interface EmailService {
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients);
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients,
-                            Collection<String> bccRecipients);
+            Collection<String> bccRecipients);
 
     void sendPlsNewInternalUserEmail(Tenant tenant, User user, String password, String hostport);
 
@@ -54,25 +54,25 @@ public interface EmailService {
     void sendPlsValidateMetadataErrorEmail(User user, String hostport);
 
     void sendPlsCreateModelCompletionEmail(User user, String hostport, String tenantName, String modelName,
-                                           boolean internal);
+            boolean internal);
 
     void sendPlsCreateModelErrorEmail(User user, String hostport, String tenantName, String modelName,
-                                      boolean internal);
+            boolean internal);
 
     void sendPlsScoreCompletionEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
     void sendPlsEnrichInternalAttributeErrorEmail(User user, String hostport, String tenantName, String modelName,
-                                                  boolean internal, List<String> internalAttributes);
+            boolean internal, List<String> internalAttributes);
 
     void sendPlsEnrichInternalAttributeCompletionEmail(User user, String hostport, String tenantName, String modelName,
-                                                       boolean internal, List<String> internalAttributes);
+            boolean internal, List<String> internalAttributes);
 
     void sendPlsScoreErrorEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
     void sendPlsOnetimeSfdcAccessTokenEmail(User user, String tenantId, String accessToken);
 
     void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
-                                        String emailAddress, EmailSettings settings);
+            String emailAddress, EmailSettings settings);
 
     void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String exportType);
 
@@ -83,7 +83,9 @@ public interface EmailService {
     void sendPlsExportOrphanRecordsRunningEmail(User user, String exportID, String type);
 
     void sendPlsExportOrphanRecordsSuccessEmail(User user, String tenantName, String hostport, String url,
-                                                String exportID, String type);
+            String exportID, String type);
+
+    void sendPlsAlwaysOnCampaignExpirationEmail(User creator, User lastUpdater, String playDisplayName);
 
     void sendCDLProcessAnalyzeCompletionEmail(User user, Tenant tenant, String appPublicUrl);
 
@@ -95,7 +97,8 @@ public interface EmailService {
 
     void sendS3CredentialEmail(User user, Tenant tenant, GrantDropBoxAccessResponse response, String initiator);
 
-    void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status, S3ImportEmailInfo emailInfo);
+    void sendIngestionStatusEmail(User user, Tenant tenant, String hostport, String status,
+            S3ImportEmailInfo emailInfo);
 
     void sendS3TemplateCreateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo);
 

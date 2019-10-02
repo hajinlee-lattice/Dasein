@@ -1,28 +1,20 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import static com.latticeengines.domain.exposed.metadata.DataCollection.Version.Blue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.dao.DataCollectionDao;
-import com.latticeengines.apps.cdl.dao.PlayDao;
-import com.latticeengines.apps.cdl.dao.PlayTypeDao;
-import com.latticeengines.apps.cdl.dao.SegmentDao;
+import com.latticeengines.apps.cdl.entitymgr.PlayTypeEntityMgr;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.service.TalkingPointService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -36,21 +28,19 @@ import com.latticeengines.domain.exposed.pls.PlayType;
 
 public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private TalkingPointService talkingPointService;
 
-    @Autowired
-    private PlayDao playDao;
+    @Inject
+    private PlayTypeEntityMgr playTypeEntityMgr;
 
-    @Autowired
-    private PlayTypeDao playTypeDao;
+    @Inject
+    private SegmentService segmentService;
 
-    @Autowired
-    private SegmentDao metadataSegmentDao;
+    @Inject
+    private DataCollectionService dataCollectionService;
 
-    @Autowired
-    private DataCollectionDao dataCollectionDao;
-
+    @Inject
     private PlayService playService;
 
     private static final String PLAY_DISPLAY_NAME = "Test TP Plays hard";
@@ -65,12 +55,9 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         setupTestEnvironment();
         testPlayType = createTestPlayType();
         testPlay = createTestPlay();
-        playService = spy(new PlayServiceImpl());
-        ((TalkingPointServiceImpl) talkingPointService).setPlayService(playService);
-        doReturn(testPlay).when(playService).getFullPlayByName(testPlay.getName(), false);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = "testEmptyTalkingPointsSave")
     public void testTalkingPointsOperations() {
         List<TalkingPointDTO> tps = new ArrayList<>();
 
@@ -141,7 +128,9 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
         Assert.assertEquals(tps.get(0).getName(), dtps.get(0).getName());
+        Assert.assertEquals(tps.get(0).getPlayDisplayName(), testPlay.getDisplayName());
         Assert.assertEquals(tps.get(1).getName(), dtps.get(1).getName());
+        Assert.assertEquals(tps.get(1).getPlayDisplayName(), testPlay.getDisplayName());
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
@@ -204,6 +193,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         TalkingPointPreview preview = talkingPointService.getPreview(tp.getPlayName());
         Assert.assertNotNull(preview);
         Assert.assertNotNull(preview.getNotionObject());
+        Assert.assertEquals(preview.getNotionObject().getPlayDisplayName(), testPlay.getDisplayName());
         Assert.assertNotNull(preview.getNotionObject().getTalkingPoints());
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().size(), tps.size());
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), testtp.getName());
@@ -235,14 +225,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private void deletePlay(Play play) {
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                playDao.delete(play);
-            }
-        });
+        playService.deleteByName(play.getName(), true);
     }
 
     private Play createTestPlay() {
@@ -259,15 +242,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         play.setPlayType(testPlayType);
         play.setTargetSegment(targetSegment);
 
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                playDao.create(play);
-            }
-        });
-        return play;
+        return playService.createOrUpdate(play, mainTestTenant.getId());
     }
 
     private MetadataSegment createSegment(String segmentName) {
@@ -276,35 +251,27 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         segment.setName(NamingUtils.timestamp("testseg"));
         segment.setTenant(MultiTenantContext.getTenant());
         segment.setDataCollection(createDataCollection());
-
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                metadataSegmentDao.create(segment);
-            }
-        });
-
-        return segment;
+        return segmentService.createOrUpdateSegment(segment);
     }
 
     private DataCollection createDataCollection() {
-        DataCollection dc = new DataCollection();
-        dc.setName(NamingUtils.timestamp("DC"));
-        dc.setVersion(Blue);
+        return dataCollectionService.createDefaultCollection();
+        // DataCollection dc = new DataCollection();
+        // dc.setName(NamingUtils.timestamp("DC"));
+        // dc.setVersion(Blue);
+        //
+        // dc.setTenant(MultiTenantContext.getTenant());
+        // PlatformTransactionManager ptm =
+        // applicationContext.getBean("transactionManager",
+        // PlatformTransactionManager.class);
+        // TransactionTemplate tx = new TransactionTemplate(ptm);
+        // tx.execute(new TransactionCallbackWithoutResult() {
+        // public void doInTransactionWithoutResult(TransactionStatus status) {
+        // dataCollectionDao.create(dc);
+        // }
+        // });
 
-        dc.setTenant(MultiTenantContext.getTenant());
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                dataCollectionDao.create(dc);
-            }
-        });
-
-        return dc;
+        // return dc;
     }
 
     private PlayType createTestPlayType() {
@@ -317,15 +284,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         playType.setUpdated(new Date());
         playType.setCreated(new Date());
         playType.setId(PlayType.generateId());
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                playTypeDao.create(playType);
-            }
-        });
+        playTypeEntityMgr.create(playType);
 
-        return playType;
+        return playTypeEntityMgr.findById(playType.getId());
     }
 }

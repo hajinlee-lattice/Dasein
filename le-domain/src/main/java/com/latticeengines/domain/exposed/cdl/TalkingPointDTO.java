@@ -41,6 +41,7 @@ public class TalkingPointDTO {
         pid = tp.getPid();
         name = tp.getName();
         playName = tp.getPlay().getName();
+        playDisplayName = tp.getPlay().getDisplayName();
         title = tp.getTitle();
         content = tp.getContent();
         offset = tp.getOffset();
