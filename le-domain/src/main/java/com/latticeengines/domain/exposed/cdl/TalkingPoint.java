@@ -31,8 +31,8 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 @Table(name = "DANTE_TALKINGPOINT")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
-    public static final String TALKING_POINT_NAME_PREFIX = "TP";
-    public static final String TALKING_POINT_NAME_FORMAT = "%s_%s";
+    private final String TALKING_POINT_NAME_PREFIX = "TP";
+    private final String TALKING_POINT_NAME_FORMAT = "%s_%s";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -49,16 +49,16 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     private Play play;
 
     @JsonProperty("title")
-    @Column(name = "TITLE", nullable = true)
+    @Column(name = "TITLE")
     private String title;
 
     @JsonProperty("content")
-    @Column(name = "CONTENT", nullable = true)
+    @Column(name = "CONTENT")
     @Type(type = "text")
     private String content;
 
     @JsonProperty("offset")
-    @Column(name = "OFFSET", nullable = true)
+    @Column(name = "OFFSET")
     private int offset;
 
     @JsonProperty("created")
@@ -147,9 +147,8 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
         this.updated = updated;
     }
 
-    public String generateNameStr() {
-        return String.format(TALKING_POINT_NAME_FORMAT, TALKING_POINT_NAME_PREFIX,
-                UUID.randomUUID().toString());
+    private String generateNameStr() {
+        return String.format(TALKING_POINT_NAME_FORMAT, TALKING_POINT_NAME_PREFIX, UUID.randomUUID().toString());
     }
 
     public Set<AttributeLookup> getTPAttributes() {
