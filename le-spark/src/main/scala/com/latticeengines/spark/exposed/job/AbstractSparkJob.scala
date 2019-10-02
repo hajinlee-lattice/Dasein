@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.livy.scalaapi.ScalaJobContext
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -109,6 +110,13 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
 
   def logSpark(message: String): Unit = {
     println(s"[$applicationId]: $message")
+  }
+  
+  def logDataFrame(dfName: String, df: DataFrame, sortKey: String, selection: Seq[String], limit: Int) = {
+    logSpark("==========" + dfName + "==========")
+    logSpark(selection mkString ",")
+    df.orderBy(sortKey).select(selection map col: _*).limit(limit).collect().foreach(r => logSpark(r.toString))
+    logSpark("==========" + dfName + "==========")
   }
 
   def setPartitionTargets(index: Int, list: Seq[String], lattice: LatticeContext[C]): Unit = {
