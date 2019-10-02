@@ -661,17 +661,15 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     @DataProvider
     public Object[][] destinationProvider() {
-        // return new Object[][] { //
-        // { CDLExternalSystemName.Salesforce, false }, //
-        // { CDLExternalSystemName.Salesforce, true }, //
-        // { CDLExternalSystemName.Marketo, false }, //
-        // { CDLExternalSystemName.AWS_S3, false }, //
-        // { CDLExternalSystemName.LinkedIn, false }, //
-        // { CDLExternalSystemName.GoogleAds, false }, //
-        // { CDLExternalSystemName.Facebook, false } //
-        // };
         return new Object[][] { //
-                { CDLExternalSystemName.AWS_S3, false } };
+                { CDLExternalSystemName.Salesforce, false }, //
+                { CDLExternalSystemName.Salesforce, true }, //
+                { CDLExternalSystemName.Marketo, false }, //
+                { CDLExternalSystemName.AWS_S3, false }, //
+                { CDLExternalSystemName.GoogleAds, false }, //
+                { CDLExternalSystemName.Facebook, false }, //
+                { CDLExternalSystemName.LinkedIn, false } //
+        };
     }
 
 }
