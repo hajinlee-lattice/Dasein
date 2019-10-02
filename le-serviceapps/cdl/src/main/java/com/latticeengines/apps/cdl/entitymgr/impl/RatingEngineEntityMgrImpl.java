@@ -14,7 +14,6 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
@@ -271,7 +270,7 @@ public class RatingEngineEntityMgrImpl //
 
             retrievedRatingEngine.addRatingEngineNote(ratingEngineNote);
         }
-        if (MapUtils.isNotEmpty(ratingEngine.getCountsAsMap())) {
+        if (ratingEngine.getCountsAsMap() != null) {
             retrievedRatingEngine.setCountsByMap(ratingEngine.getCountsAsMap());
         }
         if (ratingEngine.getAdvancedRatingConfig() != null) {
