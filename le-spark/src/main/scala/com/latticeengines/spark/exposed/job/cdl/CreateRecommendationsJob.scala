@@ -15,7 +15,7 @@ import org.apache.spark.sql.functions.{col, count, lit, sum, when}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 //import collection.mutable._
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 
 object CreateRecommendationsJob {
 
@@ -61,7 +61,7 @@ object CreateRecommendationsJob {
     val description: String = playLaunchContext.getPlayDescription
     val ratingModelId: String = playLaunchContext.getModelId
     val modelSummaryId: String = playLaunchContext.getModelSummaryId
-    
+
     var synchronizationDestination: String = null
     var destinationOrgId: String = null
     var destinationSysType: String = null
@@ -199,6 +199,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 	  val listSize = lattice.input.size
 	  logSpark(s"input size is: $listSize")
     val accountTable: DataFrame = lattice.input.head
+    logDataFrame("accountTable", accountTable, joinKey, Seq(joinKey), limit = 30)
 
     // Manipulate Account Table with PlayLaunchContext
     val bos: ByteArrayOutputStream = new ByteArrayOutputStream
@@ -234,63 +235,65 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       "TENANT_ID", //
       "DELETED")
 
-    var limitedAccountTable = derivedAccounts
-    if (topNCount != null) {
-      logSpark(s"topNCount is: $topNCount")
-      limitedAccountTable = derivedAccounts.limit(topNCount.toString.toInt)
-    }
+    val limitedAccountTable = if (topNCount != null) {
+        logSpark(s"topNCount is: $topNCount")
+        derivedAccounts.sort(joinKey).limit(topNCount.toString.toInt)
+    } else {
+        derivedAccounts
+    }.checkpoint(eager = true)
+
     // add log
     logSpark("Before joining, the limitedAccountTable is:")
-    limitedAccountTable.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
-    
+    logDataFrame("limitedAccountTable", limitedAccountTable, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
+
     val limitedAccountTableSize = limitedAccountTable.count()
     logSpark(s"limitedAccountTableSize is: $limitedAccountTableSize")
 
     // Manipulate Contact Table
     var finalRecommendations: DataFrame = null
     var finalOutput: String = null
-    
+
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
       // calculate the total number of contact
-      limitedAccountTable.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
+      logSpark("Check again before joining, the limitedAccountTable is:")
+      logDataFrame("limitedAccountTable", limitedAccountTable, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
       val selectedContactNum = contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").count()
       logSpark(f"selectedContactNum=$selectedContactNum%d")
-      limitedAccountTable.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
+      logSpark("Check again after joining, the limitedAccountTable is:")
+      logDataFrame("limitedAccountTable", limitedAccountTable, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
       // add log
-      contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
-      
-      
+      logSpark("Right after joining, the contactTable is is:")
+      logDataFrame("contact join account", contactTable.join(limitedAccountTable, joinKey :: Nil, "inner"),
+        joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
+
       val selectedAccountList =  contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").select(joinKey).distinct()
       // add log
-      selectedAccountList.orderBy((joinKey)).show(100)
+      selectedAccountList.orderBy((joinKey)).collect().foreach(r => logSpark(r.toString))
       val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
 //      val aggregatedContacts = aggregateContacts(selctedContacts, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
       val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
-      
+
       // join
       val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey :: Nil, "left")
       //recommendations.rdd.saveAsTextFile("/tmp/recommendations.txt")
       logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    recommendations.printSchema
 	    logSpark("----- END SCRIPT OUTPUT -----")
-      
-      // add log
-      recommendations.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID", "CONTACT_NUM").show(100)
-      
+
       val contactCount = recommendations.agg( //
     	  sum("CONTACT_NUM")
       ).first.get(0)
-    
+
       logSpark(f"playLaunch_Id=$playLaunchId%s")
-      recommendations.select(joinKey, "CONTACT_NUM").show(100)
+      logDataFrame("recommendations", recommendations, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID", "CONTACT_NUM"), limit = 100)
       finalRecommendations = recommendations//
         .withColumnRenamed(joinKey,"ACCOUNT_ID") //
         .drop("CONTACT_NUM")
-     
+
       // add log
-      finalRecommendations.orderBy(("ACCOUNT_ID")).select("ACCOUNT_ID", "CUSTOMER_ACCOUNT_ID").show(100)
-        
+      logDataFrame("finalRecommendations", finalRecommendations, "ACCOUNT_ID", Seq("ACCOUNT_ID", "CUSTOMER_ACCOUNT_ID"), limit = 100)
+
       if (contactCount != null) {
         finalOutput = contactCount.toString
         // add log
@@ -304,19 +307,19 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       finalRecommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
       finalOutput = "0"
     }
-        
+
     lattice.outputStr = finalOutput
-    
+
     // 1. drop the internal account id (ACCOUNT_ID) and rename "CUSTOMER_ACCOUNT_ID" to "ACCOUNT_ID"
     // 2. make sure the order is the same as Recommendation table
     val orderedRec = finalRecommendations.drop("ACCOUNT_ID").withColumnRenamed("CUSTOMER_ACCOUNT_ID", "ACCOUNT_ID").select("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID",
         "DESCRIPTION", "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID",
         "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "CONTACTS",
         "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
-    
+
     // add log
-    orderedRec.select("ACCOUNT_ID").show(100)
-    
+    logDataFrame("orderedRec", orderedRec, "ACCOUNT_ID", Seq("ACCOUNT_ID"), limit = 100)
+
     // No user configured field mapping is provided. Only generate Recommendation DF
     if (accountColsRecIncluded.isEmpty //
         && accountColsRecNotIncludedStd.isEmpty //
@@ -326,10 +329,12 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     } else {
       // generate dataframe for csv file exporter
       val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendations, accountTable, playLaunchContext, joinKey)
+      logDataFrame("orderedRec", orderedRec, "ACCOUNT_ID", Seq("ACCOUNT_ID", "COMPANY_NAME"), limit = 100)
+      logDataFrame("userConfiguredDataFrame", userConfiguredDataFrame, "AccountId", Seq("AccountId", "CompanyName"), limit = 100)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
     }
   }
-  
+
   private def generateUserConfiguredDataFrame(finalRecommendations: DataFrame, accountTable: DataFrame, playLaunchContext: PlayLaunchSparkContext, joinKey: String): DataFrame = {
     val accountColsRecIncluded: Seq[String] = if (playLaunchContext.getAccountColsRecIncluded != null ) playLaunchContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
     val accountColsRecNotIncludedStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedStd != null) playLaunchContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
@@ -338,24 +343,24 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     logSpark("Four categories of column metadata are as follows:")
     println(accountColsRecIncluded)
     println(accountColsRecNotIncludedStd)
-    println(accountColsRecNotIncludedNonStd)     
+    println(accountColsRecNotIncludedNonStd)
     println(contactCols)
-    
+
     // add log
     finalRecommendations.orderBy(("ACCOUNT_ID")).select("ACCOUNT_ID", "CUSTOMER_ACCOUNT_ID").show(100)
-    
+
     // 1. combine Recommendation-contained columns (including Contacts column if required)
     // with Recommendation-not-contained standard columns
     var userConfiguredDataFrame: DataFrame = null
     var recContainedCombinedWithStd: DataFrame = null
-    
+
     val needContactsColumn = contactCols.nonEmpty
     val containsJoinKey = accountColsRecIncluded.contains(joinKey)
     // internal accountId and customer accountId always come hand in hand
     val joinKeyCol: Option[Seq[String]] = if (!containsJoinKey) Some(Seq(joinKey, "CUSTOMER_ACCOUNT_ID")) else Some(Seq("CUSTOMER_ACCOUNT_ID"))
     val contactsCol: Option[String] = if (needContactsColumn) Some(RecommendationColumnName.CONTACTS.name) else None
     var internalAppendedCols: Seq[String] = Seq.empty[String]
-    
+
     if (accountColsRecNotIncludedStd.nonEmpty) {
       internalAppendedCols = (accountColsRecIncluded ++ joinKeyCol.toSeq.flatten ++ contactsCol).toSeq
     } else if (accountColsRecIncluded.nonEmpty && accountColsRecNotIncludedStd.isEmpty) {
@@ -363,7 +368,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     } else {
       internalAppendedCols = Seq(RecommendationColumnName.CONTACTS.name)
     }
-    
+
     // map internal column names to Recommendation column names
     val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
     // add log
@@ -378,7 +383,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val selectedRecTableTranslated = selectedRecTable.select(recColsToInternalNameMap.map(x => col(x._1).alias(x._2)).toList : _*)
     // add log
     selectedRecTableTranslated.orderBy((joinKey)).select(joinKey, "CUSTOMER_ACCOUNT_ID").show(100)
-    
+
     if (accountColsRecNotIncludedStd.nonEmpty) {
       // 2. need to add joinKey to the accountColsRecNotIncludedStd for the purpose of join
       val selectedAccTable = accountTable.select((accountColsRecNotIncludedStd.:+(joinKey)).map(name => col(name)) : _*)
@@ -392,7 +397,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     } else {
       recContainedCombinedWithStd = selectedRecTableTranslated
     }
-    
+
     // 3. Combine result of 1 with Recommendation-not-contained non-standard columns
     userConfiguredDataFrame = recContainedCombinedWithStd
     if (accountColsRecNotIncludedNonStd.nonEmpty) {
@@ -414,16 +419,16 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     if (!needContactsColumn) {
       userConfiguredDataFrame = userConfiguredDataFrame.drop(RecommendationColumnName.CONTACTS.name)
     }
-    
+
     // 5. Rename "CUSTOMER_ACCOUNT_ID" Id column to AccountId column if present
     if (userConfiguredDataFrame.columns.contains(joinKey)) {
       userConfiguredDataFrame = userConfiguredDataFrame.drop(joinKey).withColumnRenamed("CUSTOMER_ACCOUNT_ID", joinKey)
     }
     // add log
     userConfiguredDataFrame.orderBy((joinKey)).select(joinKey).show(100)
-    return userConfiguredDataFrame
+    userConfiguredDataFrame
   }
-  
+
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], joinKey: String, getUseEntityMatch: Boolean): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
       val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, getUseEntityMatch)
@@ -436,11 +441,11 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    processedAggrContacts.printSchema
 	    logSpark("----- END SCRIPT OUTPUT -----")
-      
+
       // add log
       processedAggrContacts.orderBy((joinKey)).select(joinKey, "CONTACT_NUM").show(100)
-      
-      return processedAggrContacts
+
+      processedAggrContacts
   }
-  
+
 }
