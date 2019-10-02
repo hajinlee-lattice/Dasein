@@ -68,7 +68,6 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
     @Override
     public List<TalkingPointDTO> createOrUpdate(List<TalkingPointDTO> tps) {
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         if (tps == null || tps.size() < 1) {
             log.info("Attempted to update or create empty set of talking points");
             return new ArrayList<>();
@@ -84,9 +83,9 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
         Play play;
         try {
-            play = playService.getFullPlayByName(tps.get(0).getPlayName(), false);
+            play = playService.getPlayByName(tps.get(0).getPlayName(), false);
             if (play == null) {
-                throw new LedpException(LedpCode.LEDP_38012, new String[]{tps.get(0).getPlayName()});
+                throw new LedpException(LedpCode.LEDP_38012, new String[] { tps.get(0).getPlayName() });
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38013, e);
@@ -190,7 +189,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
             List<DanteTalkingPointValue> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
                     .sorted(Comparator.comparingInt(TalkingPoint::getOffset)).map(DanteTalkingPointValue::new)
                     .collect(Collectors.toList());
-            return new TalkingPointPreview(dtps);
+            Play play = playService.getPlayByName(playName, false);
+            return new TalkingPointPreview(dtps, play);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38015, e, new String[] { playName, customerSpace });
         }
@@ -204,7 +204,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                 talkingPointEntityMgr.delete(tp);
             }
 
-            Play play = playService.getFullPlayByName(playName, false);
+            Play play = playService.getPlayByName(playName, false);
 
             for (PublishedTalkingPoint ptp : publishedTalkingPointEntityMgr.findAllByPlayName(playName)) {
                 talkingPointEntityMgr.create(convertFromPublished(ptp, play));

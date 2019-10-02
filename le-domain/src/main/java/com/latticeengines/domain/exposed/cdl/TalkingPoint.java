@@ -38,31 +38,39 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
+
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
+
     @JsonProperty("play")
     @ManyToOne
     @JoinColumn(name = "PLAY_ID", nullable = false)
     private Play play;
+
     @JsonProperty("title")
     @Column(name = "TITLE", nullable = true)
     private String title;
+
     @JsonProperty("content")
     @Column(name = "CONTENT", nullable = true)
     @Type(type = "text")
     private String content;
+
     @JsonProperty("offset")
     @Column(name = "OFFSET", nullable = true)
     private int offset;
+
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
+
     @JsonProperty("updated")
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
+
     @JsonProperty("talkingpoint_attributes")
     @Transient
     private Set<AttributeLookup> tpAttributes;
