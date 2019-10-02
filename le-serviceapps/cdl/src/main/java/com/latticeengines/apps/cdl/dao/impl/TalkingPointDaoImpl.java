@@ -29,7 +29,7 @@ public class TalkingPointDaoImpl extends BaseDaoImpl<TalkingPoint> implements Ta
                 getEntityClass().getSimpleName());
         Query<TalkingPoint> query = session.createQuery(queryStr);
         query.setParameter("playName", playName);
-        return (List<TalkingPoint>) query.list();
+        return query.list();
     }
 
 }

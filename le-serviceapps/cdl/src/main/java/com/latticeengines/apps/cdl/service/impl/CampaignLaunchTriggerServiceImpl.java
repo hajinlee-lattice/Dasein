@@ -89,7 +89,7 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
         while (i < maxToLaunch && iterator.hasNext()) {
             PlayLaunch launch = iterator.next();
-            MultiTenantContext.setTenant(launch.getTenant());
+
             if (launch.getPlayLaunchChannel() == null) {
                 log.info(String.format("No play channel for this play launch %s", launch.getId()));
                 continue;
@@ -114,7 +114,9 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                 log.error(String.format("Failed to kick off Campaign launch workflow for launchId: %s due to ",
                         launch.getLaunchId()), e);
             }
+            MultiTenantContext.setTenant(launch.getTenant());
             playLaunchService.update(launch);
+            MultiTenantContext.clearTenant();
             i++;
         }
         return true;
@@ -181,7 +183,9 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                 if (launchState != null) {
                     l.setLaunchState(launchState);
                 }
+                MultiTenantContext.setTenant(l.getTenant());
                 playLaunchService.update(l);
+                MultiTenantContext.clearTenant();
             });
             return true;
         }

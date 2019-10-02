@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.pls.Play;
 
 public class TalkingPointPreview {
     private static final String defaultContextValue = "lpipreview";
@@ -20,8 +21,8 @@ public class TalkingPointPreview {
     public TalkingPointPreview() {
     }
 
-    public TalkingPointPreview(List<DanteTalkingPointValue> talkingPoints) {
-        notionObject = new DanteLeadNotionObject(talkingPoints);
+    public TalkingPointPreview(List<DanteTalkingPointValue> talkingPoints, Play play) {
+        notionObject = new DanteLeadNotionObject(talkingPoints, play);
     }
 
     public String getContext() {

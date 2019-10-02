@@ -30,6 +30,6 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
                 getEntityClass().getSimpleName());
         Query<PublishedTalkingPoint> query = session.createQuery(queryStr);
         query.setParameter("playName", playName);
-        return (List<PublishedTalkingPoint>) query.list();
+        return query.list();
     }
 }
