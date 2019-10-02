@@ -311,7 +311,8 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         String recordName = "Input" + seq;
         String dirPath = getWorkspace() + "/" + recordName;
         try {
-            AvroUtils.uploadAvro(yarnConfiguration, data, columns, recordName, dirPath);
+            // AvroUtils.uploadAvro(yarnConfiguration, data, columns,
+            // recordName, dirPath);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload avro to hdfs.", e);
         }
