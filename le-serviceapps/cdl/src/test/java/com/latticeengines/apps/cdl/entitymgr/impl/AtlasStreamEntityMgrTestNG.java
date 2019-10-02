@@ -24,6 +24,7 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironmentWithDataCollection();
+        prepareDataFeed();
     }
 
     @Test(groups = "functional")

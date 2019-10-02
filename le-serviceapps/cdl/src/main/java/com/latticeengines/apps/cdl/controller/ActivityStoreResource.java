@@ -8,13 +8,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Preconditions;
-import com.latticeengines.apps.cdl.service.CatalogService;
+import com.latticeengines.apps.cdl.service.ActivityStoreService;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 public class ActivityStoreResource {
 
     @Inject
-    private CatalogService catalogService;
+    private ActivityStoreService activityStoreService;
 
     @PostMapping("/catalogs")
     @ResponseBody
@@ -34,7 +38,8 @@ public class ActivityStoreResource {
             @RequestBody CreateCatalogRequest request) {
         Preconditions.checkArgument(request != null && StringUtils.isNotBlank(request.getCatalogName()),
                 "Request should contains non-blank catalog name");
-        return catalogService.create(customerSpace, request.getCatalogName(), request.getDataFeedTaskUniqueId());
+        return activityStoreService.createCatalog(customerSpace, request.getCatalogName(),
+                request.getDataFeedTaskUniqueId());
     }
 
     @RequestMapping(value = "/catalogs/{catalogName}", method = RequestMethod.GET)
@@ -43,6 +48,39 @@ public class ActivityStoreResource {
     public Catalog findCatalogByName( //
             @PathVariable(value = "customerSpace") String customerSpace, //
             @PathVariable(value = "catalogName") String catalogName) {
-        return catalogService.findByTenantAndName(customerSpace, catalogName);
+        return activityStoreService.findCatalogByTenantAndName(customerSpace, catalogName);
+    }
+
+    @PostMapping("/streams")
+    @ResponseBody
+    @ApiOperation("Create a stream under current tenant")
+    public AtlasStream createStream( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @RequestBody AtlasStream stream) {
+        return activityStoreService.createStream(customerSpace, stream);
+    }
+
+    @RequestMapping(value = "/streams/{streamName}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation("Find stream by name")
+    public AtlasStream findStreamByName( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @PathVariable(value = "streamName") String streamName, //
+            @RequestParam(value = "includeDimensions", required = false) boolean includeDimensions) {
+        return activityStoreService.findStreamByTenantAndName(customerSpace, streamName, includeDimensions);
+    }
+
+    @RequestMapping(value = "/streams/{streamName}/dimensions/{dimensionName}", method = RequestMethod.PUT)
+    @ResponseBody
+    @ApiOperation("Update stream dimension dimension")
+    public SimpleBooleanResponse update( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @PathVariable(value = "streamName") String streamName, //
+            @PathVariable(value = "dimensionName") String dimensionName, //
+            @RequestBody StreamDimension dimension) {
+        Preconditions.checkArgument(dimension.getName().equals(dimensionName),
+                "Dimension name should match the one in update dimension object");
+        activityStoreService.updateStreamDimension(customerSpace, streamName, dimension);
+        return SimpleBooleanResponse.successResponse();
     }
 }
