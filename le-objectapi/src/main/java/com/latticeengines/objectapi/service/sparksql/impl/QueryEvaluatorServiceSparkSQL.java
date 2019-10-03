@@ -45,13 +45,13 @@ public class QueryEvaluatorServiceSparkSQL extends QueryEvaluatorService {
         log.info("Created QueryEvaluatorService with SparkSession");
     }
 
-    public void setLivySession(LivySession livySession) {
+    void setLivySession(LivySession livySession) {
         if (livySession != null) {
             log.info("Link " + getClass().getSimpleName() + " to livy session " //
-                    + livySession.getSessionId() + "[" + livySession.getAppId() + "]");
+                    + livySession.getSessionId() + " [" + livySession.getAppId() + "]");
         } else if (this.livySession != null){
             log.info("Detach " + getClass().getSimpleName() + " from livy session " //
-                    + this.livySession.getSessionId() + "[" + this.livySession.getAppId() + "]");
+                    + this.livySession.getSessionId() + " [" + this.livySession.getAppId() + "]");
         }
         this.livySession = livySession;
     }
