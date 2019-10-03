@@ -88,12 +88,12 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         String sql = entityQueryServiceSparkSQL.getQueryStr(frontEndQuery, DataCollection.Version.Blue,
                 SPARK_BATCH_USER, true);
-        System.out.println(sql);
+        log.info("spark sql query is: {}" + sql);
         long count = entityQueryServiceSparkSQL.getCount(frontEndQuery, DataCollection.Version.Blue,
                 SPARK_BATCH_USER);
         Assert.assertEquals(count, 25958L);
         sql = entityQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
-        System.out.println(sql);
+        log.info("redshift query is: {}" + sql);
         long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue,
                 SEGMENT_USER);
         Assert.assertEquals(count2, count);
@@ -131,10 +131,12 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         String sql = entityQueryServiceSparkSQL.getQueryStr(frontEndQuery, DataCollection.Version.Blue,
                 SPARK_BATCH_USER, true);
-        System.out.println(sql);
+        log.info("spark sql query is: {}" + sql);
         long count = entityQueryServiceSparkSQL.getCount(frontEndQuery, DataCollection.Version.Blue,
                 SPARK_BATCH_USER);
         Assert.assertEquals(count, 30256L);
+        sql = entityQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
+        log.info("redshift query is: {}" + sql);
         long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue,
                 SEGMENT_USER);
         Assert.assertEquals(count, count2);
