@@ -23,6 +23,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -70,7 +71,7 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
     private Tenant tenant;
 
     // dimension is for which stream
-    @JsonProperty("stream")
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_STREAM_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)

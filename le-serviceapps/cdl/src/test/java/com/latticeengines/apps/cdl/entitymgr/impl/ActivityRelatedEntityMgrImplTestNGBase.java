@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -54,6 +55,7 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
     // catalog name -> datafeed task
     protected Map<String, DataFeedTask> taskMap = new HashMap<>();
     protected Table importTemplate;
+    protected DataFeedTask sharedTask;
     // catalog name -> catalog
     protected Map<String, Catalog> catalogs = new HashMap<>();
     // stream name -> stream
@@ -80,6 +82,10 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
             task.setImportTemplate(importTemplate);
             taskMap.put(name, task);
         }
+        sharedTask = testFeedTask();
+        sharedTask.setDataFeed(feed);
+        sharedTask.setImportTemplate(importTemplate);
+        feed.addTask(sharedTask);
         datafeedEntityMgr.create(feed);
     }
 
@@ -110,10 +116,11 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
         AtlasStream stream = new AtlasStream();
         stream.setName(name);
         stream.setTenant(mainTestTenant);
+        stream.setDataFeedTask(sharedTask);
         stream.setMatchEntities(MATCH_ENTITIES);
         stream.setAggrEntities(AGGR_ENTITIES);
         stream.setDateAttribute(InterfaceName.WebVisitDate.name());
-        stream.setPeriods(PERIODS);
+        stream.setPeriods(PERIODS.stream().map(Enum::name).collect(Collectors.toList()));
         stream.setRetentionDays(1000);
         stream.setAttributeDerivers(attrDerivers);
         streamEntityMgr.create(stream);

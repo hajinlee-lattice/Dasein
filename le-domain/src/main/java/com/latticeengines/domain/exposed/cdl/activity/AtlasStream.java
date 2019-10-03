@@ -27,12 +27,13 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
@@ -65,6 +66,12 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "`FK_TASK_ID`", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private DataFeedTask dataFeedTask;
+
     @JsonProperty("match_entities")
     @Type(type = "json")
     @Column(name = "MATCH_ENTITIES", columnDefinition = "'JSON'", nullable = false)
@@ -82,13 +89,14 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
     @JsonProperty("periods")
     @Type(type = "json")
     @Column(name = "PERIODS", columnDefinition = "'JSON'", nullable = false)
-    private List<PeriodStrategy.Template> periods;
+    private List<String> periods;
 
     // if not provided, never delete
     @JsonProperty("retention_days")
     @Column(name = "RETENTION_DAYS")
     private Integer retentionDays;
 
+    @JsonProperty("dimensions")
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "stream")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SUBSELECT)
@@ -136,6 +144,28 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         this.tenant = tenant;
     }
 
+    public DataFeedTask getDataFeedTask() {
+        return dataFeedTask;
+    }
+
+    public void setDataFeedTask(DataFeedTask dataFeedTask) {
+        this.dataFeedTask = dataFeedTask;
+    }
+
+    @JsonProperty("task_unique_id")
+    public void setDataFeedTaskUniqueId(String uniqueId) {
+        if (dataFeedTask == null) {
+            // dummy object
+            dataFeedTask = new DataFeedTask();
+        }
+        dataFeedTask.setUniqueId(uniqueId);
+    }
+
+    @JsonProperty("task_unique_id")
+    public String getDataFeedTaskUniqueId() {
+        return dataFeedTask == null ? null : dataFeedTask.getUniqueId();
+    }
+
     public List<String> getMatchEntities() {
         return matchEntities;
     }
@@ -160,11 +190,11 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         this.dateAttribute = dateAttribute;
     }
 
-    public List<PeriodStrategy.Template> getPeriods() {
+    public List<String> getPeriods() {
         return periods;
     }
 
-    public void setPeriods(List<PeriodStrategy.Template> periods) {
+    public void setPeriods(List<String> periods) {
         this.periods = periods;
     }
 
@@ -174,6 +204,10 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
 
     public void setRetentionDays(Integer retentionDays) {
         this.retentionDays = retentionDays;
+    }
+
+    public void setDimensions(List<StreamDimension> dimensions) {
+        this.dimensions = dimensions;
     }
 
     public List<StreamDimension> getDimensions() {

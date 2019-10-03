@@ -13,17 +13,19 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -54,15 +56,11 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
     private ActivityStoreProxy activityStoreProxy;
 
     private String templateFeedType;
+    private DataFeedTask webVisitStreamTask;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
-    }
-
-    @AfterClass(groups = "deployment-app")
-    private void tearDown() {
-        testBed.deleteTenant(mainTestTenant);
     }
 
     @Test(groups = "deployment-app")
@@ -70,21 +68,24 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         EntityType type = EntityType.WebVisit;
         SimpleTemplateMetadata metadata = prepareMetadata(type,
                 Arrays.asList(InterfaceName.City.name(), InterfaceName.WebVisitPageUrl.name()));
-        DataFeedTask dataFeedTask = createTemplate(metadata, type);
+        webVisitStreamTask = createTemplate(metadata, type);
 
         // verification
-        Assert.assertNotNull(dataFeedTask);
-        templateFeedType = dataFeedTask.getFeedType();
-        Table template = dataFeedTask.getImportTemplate();
+        Assert.assertNotNull(webVisitStreamTask);
+        templateFeedType = webVisitStreamTask.getFeedType();
+        Table template = webVisitStreamTask.getImportTemplate();
         Assert.assertNotNull(template);
         Assert.assertNotNull(template.getAttribute(InterfaceName.WebVisitPageUrl));
         Assert.assertNull(template.getAttribute(InterfaceName.City));
         Assert.assertNotNull(template.getAttribute("user_CustomerAttr1"));
         Attribute attribute = template.getAttribute(InterfaceName.CompanyName);
         Assert.assertEquals(attribute.getDisplayName(), "CustomerName");
+
+        // verify stream is created correctly
+        verifyWebVisitStream(webVisitStreamTask, false);
     }
 
-    @Test(groups = "deployment-app")
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateWebVisitTemplate" })
     private void testCreateWebVisitPatternTemplate() {
         EntityType type = EntityType.WebVisitPathPattern;
         SimpleTemplateMetadata metadata = prepareMetadata(type,
@@ -107,6 +108,29 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         Assert.assertNotNull(catalog);
         Assert.assertNotNull(catalog.getDataFeedTask());
         Assert.assertEquals(catalog.getDataFeedTask().getUniqueId(), dataFeedTask.getUniqueId());
+
+        // verify catalog is attached to stream dimension
+        verifyWebVisitStream(webVisitStreamTask, true);
+    }
+
+    private void verifyWebVisitStream(@NotNull DataFeedTask dataFeedTask, boolean pathPatternCatalogAttached) {
+        AtlasStream stream = activityStoreProxy.findStreamByName(mainCustomerSpace, EntityType.WebVisit.name(), true);
+        Assert.assertNotNull(stream);
+        Assert.assertEquals(stream.getName(), EntityType.WebVisit.name());
+        Assert.assertNotNull(stream.getDataFeedTaskUniqueId());
+        Assert.assertEquals(stream.getDataFeedTaskUniqueId(), dataFeedTask.getUniqueId());
+        // verify dimension
+        Assert.assertNotNull(stream.getDimensions());
+        Assert.assertEquals(stream.getDimensions().size(), 1);
+        StreamDimension dimension = stream.getDimensions().get(0);
+        Assert.assertNotNull(dimension);
+        Assert.assertEquals(dimension.getName(), InterfaceName.PathPatternId.name());
+        if (pathPatternCatalogAttached) {
+            Assert.assertNotNull(dimension.getCatalog());
+        } else {
+            Assert.assertNull(dimension.getCatalog(),
+                    "Should not have any catalog attached to dimension before path pattern template is created");
+        }
     }
 
     private DataFeedTask createTemplate(SimpleTemplateMetadata metadata, EntityType type) {

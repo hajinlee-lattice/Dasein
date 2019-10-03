@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,11 +28,15 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -51,6 +55,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -67,20 +72,24 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final String TEMPLATE_NAME = "cdlImportCSV_template.csv";
 
     private static final String WEBVISIT_NAME = "cdlImportWebVisit.csv";
+    private static final String WEBVISIT_PATH_PTN_NAME = "cdlImportWebVisitPathPattern.csv";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     private CDLService cdlService;
 
-    @Autowired
+    @Inject
     private ModelingFileMetadataService modelingFileMetadataService;
 
-    @Autowired
+    @Inject
+    private ActivityStoreProxy activityStoreProxy;
+
+    @Inject
     private WorkflowProxy workflowProxy;
 
     @Inject
@@ -91,6 +100,8 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private SourceFile data;
 
     private Tenant tenant;
+
+    private DataFeedTask webVisitTask;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -157,30 +168,73 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                         false));
     }
 
+    /*-
+     * Create WebVisitPathPattern template first and then WebVisit
+     */
+
     @Test(groups = "deployment", dependsOnMethods = "testS3ImportSystem")
+    private void testWebVisitPathPatternTemplate() throws FileNotFoundException {
+        String feedType = "Default_Website_System_WebVisitPathPattern";
+        DataFeedTask dataFeedTask = createTemplate(WEBVISIT_PATH_PTN_NAME, feedType, EntityType.WebVisitPathPattern,
+                Arrays.asList(InterfaceName.PathPatternName, InterfaceName.PathPattern));
+
+        // verify path pattern catalog is there
+        Catalog catalog = activityStoreProxy.findCatalogByName(tenant.getId(), EntityType.WebVisitPathPattern.name());
+        Assert.assertNotNull(catalog);
+        Assert.assertNotNull(catalog.getDataFeedTask());
+        Assert.assertEquals(catalog.getDataFeedTask().getUniqueId(), dataFeedTask.getUniqueId());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testWebVisitPathPatternTemplate")
     public void testWebVisitTemplate() throws FileNotFoundException {
+        String feedType = "Default_Website_System_WebVisitData";
+        webVisitTask = createTemplate(WEBVISIT_NAME, feedType, EntityType.WebVisit,
+                Arrays.asList(InterfaceName.WebVisitPageUrl, InterfaceName.WebVisitDate));
+        verifyWebVisitStream(webVisitTask);
+    }
+
+    /*-
+     * create template from import file and return the created task
+     */
+    private DataFeedTask createTemplate(String importFileName, String feedType, EntityType entityType,
+            List<InterfaceName> expectedAttrs) throws FileNotFoundException {
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getName());
         File templateFile = new File(
-                ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/" + WEBVISIT_NAME).getPath());
-        boolean result = cdlService.createWebVisitTemplate(customerSpace.toString(), EntityType.WebVisit,
+                ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/" + importFileName).getPath());
+        boolean result = cdlService.createWebVisitTemplate(customerSpace.toString(), entityType,
                 new FileInputStream(templateFile));
         Assert.assertTrue(result);
         List<S3ImportTemplateDisplay> s3Templates = cdlService.getS3ImportTemplate(customerSpace.toString(), "");
         Assert.assertNotNull(s3Templates);
         Assert.assertTrue(s3Templates.size() > 1);
-        Optional<S3ImportTemplateDisplay> display =
-                s3Templates.stream().filter(s3Template -> s3Template.getFeedType().equals(
-                "Default_Website_System_WebVisitData")).findAny();
+        Optional<S3ImportTemplateDisplay> display = s3Templates.stream() //
+                .filter(s3Template -> s3Template.getFeedType().equals(feedType)) //
+                .findAny();
         Assert.assertTrue(display.isPresent());
-
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "File",
                 display.get().getFeedType());
         Assert.assertNotNull(dataFeedTask);
         Table template = dataFeedTask.getImportTemplate();
         Assert.assertNotNull(template);
-        Assert.assertNotNull(template.getAttribute(InterfaceName.WebVisitPageUrl));
-        Assert.assertNotNull(template.getAttribute(InterfaceName.WebVisitDate));
+        expectedAttrs.forEach(attr -> Assert.assertNotNull(template.getAttribute(attr)));
+        return dataFeedTask;
+    }
+
+    private void verifyWebVisitStream(@NotNull DataFeedTask dataFeedTask) {
+        AtlasStream stream = activityStoreProxy.findStreamByName(tenant.getId(), EntityType.WebVisit.name(), true);
+        Assert.assertNotNull(stream);
+        Assert.assertEquals(stream.getName(), EntityType.WebVisit.name());
+        Assert.assertNotNull(stream.getDataFeedTaskUniqueId());
+        Assert.assertEquals(stream.getDataFeedTaskUniqueId(), dataFeedTask.getUniqueId());
+        // verify dimension
+        Assert.assertNotNull(stream.getDimensions());
+        Assert.assertEquals(stream.getDimensions().size(), 1);
+        StreamDimension dimension = stream.getDimensions().get(0);
+        Assert.assertNotNull(dimension);
+        Assert.assertEquals(dimension.getName(), InterfaceName.PathPatternId.name());
+        // catalog should be attached since path pattern template is created first
+        Assert.assertNotNull(dimension.getCatalog());
     }
 
     @Test(groups = "manual")

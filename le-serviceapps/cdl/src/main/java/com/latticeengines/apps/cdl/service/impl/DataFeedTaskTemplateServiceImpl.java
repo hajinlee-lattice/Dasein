@@ -18,22 +18,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -41,6 +47,8 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("dataFeedTaskTemplateService")
@@ -59,6 +67,12 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     @Inject
     private CatalogEntityMgr catalogEntityMgr;
+
+    @Inject
+    protected AtlasStreamEntityMgr streamEntityMgr;
+
+    @Inject
+    protected StreamDimensionEntityMgr dimensionEntityMgr;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -118,18 +132,50 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dataFeedTask.setTemplateDisplayName(dataFeedTask.getFeedType());
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
 
+        Tenant tenant = websiteSystem.getTenant();
         if (EntityType.WebVisitPathPattern == entityType) {
             // create ptn catalog
             Catalog catalog = new Catalog();
-            catalog.setTenant(websiteSystem.getTenant());
+            catalog.setTenant(tenant);
             catalog.setName(EntityType.WebVisitPathPattern.name());
             catalog.setDataFeedTask(dataFeedTask);
             catalogEntityMgr.create(catalog);
             log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
                     customerSpace, catalog, dataFeedTask.getUniqueId());
+            attachPathPatternCatalog(tenant, catalog);
+        } else {
+            Catalog pathPtnCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitPathPattern.name(),
+                    tenant);
+            AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(tenant, dataFeedTask);
+            streamEntityMgr.create(webVisitStream);
+            log.info("Create WebVisit activity stream for tenant {}. stream PID = {}, dataFeedTaskUniqueId = {}",
+                    tenant.getId(), webVisitStream.getPid(), dataFeedTask.getUniqueId());
+            dimensionEntityMgr.create(WebVisitUtils.newWebVisitDimension(webVisitStream, pathPtnCatalog));
+            log.info("Create PathPatternId stream dimension for tenant {}. PathPatternCatalog = {}",
+                    webVisitStream.getTenant().getId(), pathPtnCatalog);
         }
 
         return true;
+    }
+
+    private void attachPathPatternCatalog(@NotNull Tenant tenant, @NotNull Catalog catalog) {
+        AtlasStream stream = streamEntityMgr.findByNameAndTenant(EntityType.WebVisit.name(), tenant);
+        if (stream == null) {
+            log.info("No WebVisit activity stream created for tenant {} yet, ignore attaching path pattern catalog",
+                    tenant);
+            return;
+        }
+
+        StreamDimension pathPatternDimension = dimensionEntityMgr
+                .findByNameAndTenantAndStream(InterfaceName.PathPatternId.name(), tenant, stream);
+        Preconditions.checkNotNull(pathPatternDimension,
+                String.format("Must have path pattern dimension created with WebVisit stream. Tenant=%s, Stream=%s",
+                        tenant.getId(), stream.getPid()));
+
+        pathPatternDimension.setCatalog(catalog);
+        dimensionEntityMgr.update(pathPatternDimension);
+        log.info("Attach path pattern catalog {} to WebVisit stream = {}, PathPatternId dimension = {}", catalog,
+                stream.getPid(), pathPatternDimension.getPid());
     }
 
     private Table generateTemplate(Table standardTable, SimpleTemplateMetadata simpleTemplateMetadata) {
