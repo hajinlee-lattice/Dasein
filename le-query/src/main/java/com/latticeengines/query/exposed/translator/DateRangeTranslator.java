@@ -1,5 +1,7 @@
 package com.latticeengines.query.exposed.translator;
 
+import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,6 +11,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.SubQuery;
@@ -20,7 +23,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 
 public class DateRangeTranslator extends TranslatorCommon {
@@ -29,16 +31,55 @@ public class DateRangeTranslator extends TranslatorCommon {
 
     public static Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository, String sqlUser) {
-        SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository, sqlUser, //
-                Boolean.TRUE.equals(txnRestriction.isNegate()));
-        RestrictionBuilder builder = Restriction.builder() //
-                .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                .inSubquery(subQuery);
-        return builder.build();
+        if (SPARK_BATCH_USER.equals(sqlUser)) {
+            // use exists for spark
+            return constructExists(txnRestriction, queryFactory, repository, sqlUser, //
+                    Boolean.TRUE.equals(txnRestriction.isNegate()));
+        } else {
+            // use sub-query for redshift
+            SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository, sqlUser);
+            RestrictionBuilder builder = Restriction.builder() //
+                    .let(BusinessEntity.Account, InterfaceName.AccountId.name());
+            if (txnRestriction.isNegate()) {
+                builder = builder.notInSubquery(subQuery);
+            } else {
+                builder = builder.inSubquery(subQuery);
+            }
+            return builder.build();
+        }
+    }
+
+    private static ExistsRestriction constructExists(TransactionRestriction txnRestriction, QueryFactory queryFactory,
+                                                               AttributeRepository repository, String sqlUser, boolean negate) {
+        StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
+        String tableAlias = TranslatorUtils.generateAlias("txn");
+        BooleanExpression joinPredicate = getJoinPredicate(tableAlias);
+        BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
+        BooleanExpression datePredicate = getDatePredicate(txnRestriction.getTimeFilter());
+        BooleanExpression validPurchasePredicate = makeValidPurchase(txnRestriction);
+        BooleanExpression predicate = joinPredicate.and(productPredicate);
+        if (datePredicate != null) {
+            predicate = predicate.and(datePredicate);
+        }
+        if (validPurchasePredicate != null) {
+            predicate = predicate.and(validPurchasePredicate);
+        }
+        SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
+                .select(Expressions.asNumber(1)) //
+                .from(table.as(tableAlias)) //
+                .where(predicate);
+        BooleanExpression aggPredicate = getAggPredicate(txnRestriction);
+        if (aggPredicate != null) {
+            query = query.groupBy(accountId).having(aggPredicate);
+        }
+        ExistsRestriction restriction = new ExistsRestriction();
+        restriction.setSubQueryExpression(query);
+        restriction.setNegate(negate);
+        return restriction;
     }
 
     private static SubQuery constructSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
-            AttributeRepository repository, String sqlUser, boolean negate) {
+            AttributeRepository repository, String sqlUser) {
         StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
         BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
         BooleanExpression datePredicate = getDatePredicate(txnRestriction.getTimeFilter());
@@ -54,35 +95,13 @@ public class DateRangeTranslator extends TranslatorCommon {
 
         SQLQuery<?> query;
         SubQuery subQuery = new SubQuery();
-        if (!negate) {
-            query = queryFactory.getQuery(repository, sqlUser) //
-                    .select(accountId) //
-                    .from(table) //
-                    .where(predicate);
-            if (aggPredicate != null) {
-                query = query.groupBy(accountId).having(aggPredicate);
-            }
-        } else {
-            StringPath lhsPath = Expressions.stringPath(TranslatorUtils.generateAlias("lhs"));
-            StringPath lhsId = Expressions.stringPath(lhsPath, InterfaceName.AccountId.name());
-            StringPath rhsPath = Expressions.stringPath(TranslatorUtils.generateAlias("rhs"));
-            StringPath rhsId = Expressions.stringPath(rhsPath, InterfaceName.AccountId.name());
-            SQLQuery<?> rhsQry = SQLExpressions //
-                    .select(accountId) //
-                    .from(table) //
-                    .where(predicate);
-            if (aggPredicate != null) {
-                rhsQry = rhsQry.groupBy(accountId).having(aggPredicate);
-            }
-            StringPath accountTable = AttrRepoUtils.getTablePath(repository, BusinessEntity.Account);
-            query = SQLExpressions //
-                    .select(lhsId) //
-                    .from(accountTable.as(lhsPath)) //
-                    .leftJoin(rhsQry, rhsPath) //
-                    .on(lhsId.eq(rhsId)) //
-                    .where(rhsId.isNull());
+        query = queryFactory.getQuery(repository, sqlUser) //
+                .select(accountId) //
+                .from(table) //
+                .where(predicate);
+        if (aggPredicate != null) {
+            query = query.groupBy(accountId).having(aggPredicate);
         }
-
         subQuery.setSubQueryExpression(query);
         return subQuery;
     }
@@ -96,6 +115,14 @@ public class DateRangeTranslator extends TranslatorCommon {
             return amtAgg.gt(Expressions.asNumber(0)).or(qtyAgg.gt(Expressions.asNumber(0)));
         }
         return null;
+    }
+
+    private static BooleanExpression getJoinPredicate(String innerAlias) {
+        String accId = InterfaceName.AccountId.name();
+        String outerAlias = BusinessEntity.Account.name();
+        StringPath outerId = Expressions.stringPath(Expressions.stringPath(outerAlias), accId);
+        StringPath innerId = Expressions.stringPath(Expressions.stringPath(innerAlias), accId);
+        return outerId.equalsIgnoreCase(innerId);
     }
 
     private static BooleanExpression getProductPredicate(String productId) {

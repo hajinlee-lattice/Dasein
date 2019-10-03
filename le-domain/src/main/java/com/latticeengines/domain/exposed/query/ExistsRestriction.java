@@ -9,6 +9,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,6 +35,9 @@ public class ExistsRestriction extends Restriction {
     @JsonProperty("restriction")
     private Restriction restriction;
 
+    @JsonIgnore
+    private Object subQueryExpression; // to be cased to query dsl SQLQuery<?>
+
     @Deprecated
     public ExistsRestriction(SchemaInterpretation objectType, boolean negate) {
         this.negate = negate;
@@ -53,9 +57,7 @@ public class ExistsRestriction extends Restriction {
         this.restriction = restriction;
     }
 
-    // for jackson
-    @SuppressWarnings("unused")
-    private ExistsRestriction() {
+    public ExistsRestriction() {
     }
 
     public BusinessEntity getEntity() {
@@ -80,6 +82,14 @@ public class ExistsRestriction extends Restriction {
 
     public void setRestriction(Restriction restriction) {
         this.restriction = restriction;
+    }
+
+    public Object getSubQueryExpression() {
+        return subQueryExpression;
+    }
+
+    public void setSubQueryExpression(Object subQueryExpression) {
+        this.subQueryExpression = subQueryExpression;
     }
 
     @Override
