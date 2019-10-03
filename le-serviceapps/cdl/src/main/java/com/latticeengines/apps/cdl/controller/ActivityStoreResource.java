@@ -66,8 +66,8 @@ public class ActivityStoreResource {
     public AtlasStream findStreamByName( //
             @PathVariable(value = "customerSpace") String customerSpace, //
             @PathVariable(value = "streamName") String streamName, //
-            @RequestParam(value = "includeDimensions", required = false) boolean includeDimensions) {
-        return activityStoreService.findStreamByTenantAndName(customerSpace, streamName, includeDimensions);
+            @RequestParam(value = "inflateDimensions", required = false) boolean inflateDimensions) {
+        return activityStoreService.findStreamByTenantAndName(customerSpace, streamName, inflateDimensions);
     }
 
     @RequestMapping(value = "/streams/{streamName}/dimensions/{dimensionName}", method = RequestMethod.PUT)

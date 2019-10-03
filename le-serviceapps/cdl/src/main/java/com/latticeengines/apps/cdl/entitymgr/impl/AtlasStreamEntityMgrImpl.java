@@ -36,7 +36,7 @@ public class AtlasStreamEntityMgrImpl extends JpaEntityMgrRepositoryImpl<AtlasSt
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public AtlasStream findByNameAndTenant(String name, Tenant tenant, boolean includeDimensions) {
+    public AtlasStream findByNameAndTenant(String name, Tenant tenant, boolean inflateDimensions) {
         Preconditions.checkNotNull(name, "Name should not be null");
         Preconditions.checkNotNull(tenant, "Tenant should not be null");
         List<AtlasStream> streams = readerRepository.findByNameAndTenant(name, tenant);
@@ -46,7 +46,7 @@ public class AtlasStreamEntityMgrImpl extends JpaEntityMgrRepositoryImpl<AtlasSt
         Preconditions.checkArgument(streams.size() == 1, String.format(
                 "Stream %s should be unique for tenant %s, got %d instead", name, tenant.getId(), streams.size()));
         AtlasStream stream = streams.get(0);
-        if (includeDimensions) {
+        if (inflateDimensions) {
             HibernateUtils.inflateDetails(stream.getDimensions());
         }
         return stream;

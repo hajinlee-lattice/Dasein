@@ -48,7 +48,7 @@ public interface ActivityStoreService {
      * check tenant with target customerSpace exists
      */
     AtlasStream findStreamByTenantAndName(@NotNull String customerSpace, @NotNull String streamName,
-            boolean includeDimensions);
+            boolean inflateDimensions);
 
     /**
      * Wrapper for {@link StreamDimensionEntityMgr#update(Object)}

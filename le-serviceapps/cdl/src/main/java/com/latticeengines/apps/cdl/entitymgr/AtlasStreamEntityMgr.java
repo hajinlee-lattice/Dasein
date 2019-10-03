@@ -27,11 +27,11 @@ public interface AtlasStreamEntityMgr extends BaseEntityMgrRepository<AtlasStrea
      *            target Stream name
      * @param tenant
      *            target tenant
-     * @param includeDimensions
+     * @param inflateDimensions
      *            whether to fetch all associated {@link StreamDimension}s
      * @return matching Stream object, {@code null} if no such Stream exists
      */
-    AtlasStream findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant, boolean includeDimensions);
+    AtlasStream findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant, boolean inflateDimensions);
 
     /**
      * Retrieve all Stream in target tenant

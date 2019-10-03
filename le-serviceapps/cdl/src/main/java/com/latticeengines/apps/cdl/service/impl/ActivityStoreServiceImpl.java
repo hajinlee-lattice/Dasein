@@ -78,12 +78,12 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     @Override
     public AtlasStream findStreamByTenantAndName(@NotNull String customerSpace, @NotNull String streamName,
-            boolean includeDimensions) {
+            boolean inflateDimensions) {
         Preconditions.checkArgument(StringUtils.isNotBlank(streamName),
                 String.format("StreamName %s should not be blank", streamName));
         Tenant tenant = MultiTenantContext.getTenant();
-        AtlasStream stream = streamEntityMgr.findByNameAndTenant(streamName, tenant, includeDimensions);
-        if (!includeDimensions && stream != null) {
+        AtlasStream stream = streamEntityMgr.findByNameAndTenant(streamName, tenant, inflateDimensions);
+        if (!inflateDimensions && stream != null) {
             // set empty list to prevent lazy loading uninitialized proxy
             stream.setDimensions(Collections.emptyList());
         }
