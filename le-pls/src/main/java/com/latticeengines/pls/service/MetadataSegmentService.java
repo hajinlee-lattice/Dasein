@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface MetadataSegmentService {
     List<MetadataSegment> getSegments();
@@ -17,6 +18,8 @@ public interface MetadataSegmentService {
     MetadataSegmentDTO getSegmentDTOByName(String name, boolean shouldTransateForFrontend);
 
     MetadataSegment createOrUpdateSegment(MetadataSegment segment);
+
+    Map<BusinessEntity, Long> updateSegmentCounts(String segmentName);
 
     void deleteSegmentByName(String name, boolean hardDelete);
 
