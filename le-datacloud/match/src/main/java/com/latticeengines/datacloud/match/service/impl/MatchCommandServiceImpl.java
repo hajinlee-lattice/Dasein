@@ -144,6 +144,11 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     @Override
+    public MatchBlock rerunBlock(String blockOperationUid, ApplicationId applicationId) {
+        return updateBlock(blockOperationUid).rerun(applicationId).commit();
+    }
+
+    @Override
     public MatchBlock updateBlockByApplicationReport(String blockOperationUid, ApplicationReport report) {
         FinalApplicationStatus status = report.getFinalApplicationStatus();
         MatchBlockUpdaterImpl matchBlockUpdater = updateBlock(blockOperationUid).status(
@@ -383,6 +388,15 @@ public class MatchCommandServiceImpl implements MatchCommandService {
             matchBlock.setApplicationState(YarnApplicationState.NEW);
             matchBlock.setProgress(0f);
             matchBlock.setNumRetries(matchBlock.getNumRetries() + 1);
+            return this;
+        }
+
+        // re-run w/o incrementing retry count
+        public MatchBlockUpdaterImpl rerun(ApplicationId appId) {
+            matchBlock.setApplicationId(appId.toString());
+            matchBlock.setApplicationState(YarnApplicationState.NEW);
+            matchBlock.setProgress(0f);
+            matchBlock.setNumRetries(matchBlock.getNumRetries());
             return this;
         }
 
