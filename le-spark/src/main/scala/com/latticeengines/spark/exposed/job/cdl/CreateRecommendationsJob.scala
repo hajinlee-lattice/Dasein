@@ -202,12 +202,23 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val accountTable: DataFrame = lattice.input.head
     logDataFrame("accountTable", accountTable, joinKey, Seq(joinKey), limit = 30)
 
+    val limitedAccountTable = if (topNCount != null) {
+        logSpark(s"topNCount is: $topNCount")
+        if (ratingId != null) {
+          accountTable.sort(asc(ratingId), asc(joinKey)).limit(topNCount.toString.toInt)
+        } else {
+          accountTable.sort(asc(joinKey)).limit(topNCount.toString.toInt)
+        }
+    } else {
+        accountTable
+    }.checkpoint(eager = true)
+    
     // Manipulate Account Table with PlayLaunchContext
     val bos: ByteArrayOutputStream = new ByteArrayOutputStream
     KryoUtils.write(bos, playLaunchContext)
     val serializedCtx = JsonUtils.serialize(playLaunchContext)
     val createRecFunc = (account: Row) => CreateRecommendationsJob.createRec(account, serializedCtx)
-    val accountAndPlayLaunch = accountTable.rdd.map(createRecFunc)
+    val accountAndPlayLaunch = limitedAccountTable.rdd.map(createRecFunc)
 
     val derivedAccounts = spark.createDataFrame(accountAndPlayLaunch) //
       .toDF("PID", //
@@ -236,23 +247,12 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       "TENANT_ID", //
       "DELETED")
 
-    val limitedAccountTable = if (topNCount != null) {
-        logSpark(s"topNCount is: $topNCount")
-        if (ratingId != null) {
-          derivedAccounts.sort(asc(ratingId), asc(joinKey)).limit(topNCount.toString.toInt)
-        } else {
-          derivedAccounts.sort(asc(joinKey)).limit(topNCount.toString.toInt)
-        }
-    } else {
-        derivedAccounts
-    }.checkpoint(eager = true)
-
     // add log
-    logSpark("Before joining, the limitedAccountTable is:")
-    logDataFrame("limitedAccountTable", limitedAccountTable, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
+    logSpark("Before joining, the derivedAccounts is:")
+    logDataFrame("derivedAccounts", derivedAccounts, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
 
-    val limitedAccountTableSize = limitedAccountTable.count()
-    logSpark(s"limitedAccountTableSize is: $limitedAccountTableSize")
+    val derivedAccountsSize = derivedAccounts.count()
+    logSpark(s"derivedAccountsSize is: $derivedAccountsSize")
 
     // Manipulate Contact Table
     var finalRecommendations: DataFrame = null
@@ -261,22 +261,22 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     if (listSize == 2) {
       val contactTable: DataFrame = lattice.input(1)
       // calculate the total number of contact
-      logSpark("Check again before joining, the limitedAccountTable is:")
-      logDataFrame("limitedAccountTable", limitedAccountTable, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
-      val selectedContactNum = contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").count()
+      logSpark("Check again before joining, the derivedAccounts is:")
+      logDataFrame("derivedAccounts", derivedAccounts, joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
+      val selectedContactNum = contactTable.join(derivedAccounts, joinKey :: Nil, "inner").count()
       logSpark(f"selectedContactNum=$selectedContactNum%d")
 
       logSpark("Right after joining, the contactTable is is:")
-      logDataFrame("contact join account", contactTable.join(limitedAccountTable, joinKey :: Nil, "inner"),
+      logDataFrame("contact join account", contactTable.join(derivedAccounts, joinKey :: Nil, "inner"),
         joinKey, Seq(joinKey, "CUSTOMER_ACCOUNT_ID"), limit = 100)
 
-//      val selectedAccountList =  contactTable.join(limitedAccountTable, joinKey :: Nil, "inner").select(joinKey).distinct()
+//      val selectedAccountList =  contactTable.join(derivedAccounts, joinKey :: Nil, "inner").select(joinKey).distinct()
 //      val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
 //      val aggregatedContacts = aggregateContacts(selctedContacts, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
       val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey, playLaunchContext.getUseEntityMatch)
 
       // join
-      val recommendations = limitedAccountTable.join(aggregatedContacts, joinKey :: Nil, "left")
+      val recommendations = derivedAccounts.join(aggregatedContacts, joinKey :: Nil, "left")
       //recommendations.rdd.saveAsTextFile("/tmp/recommendations.txt")
       logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    recommendations.printSchema
@@ -304,7 +304,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       }
     } else {
       // join
-      val recommendations = limitedAccountTable.withColumn("CONTACTS", lit("[]").cast(StringType))
+      val recommendations = derivedAccounts.withColumn("CONTACTS", lit("[]").cast(StringType))
       finalRecommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
       finalOutput = "0"
     }
@@ -327,8 +327,6 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     } else {
       // generate dataframe for csv file exporter
       val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendations, accountTable, playLaunchContext, joinKey)
-      logDataFrame("orderedRec", orderedRec, "ACCOUNT_ID", Seq("ACCOUNT_ID", "COMPANY_NAME"), limit = 100)
-      logDataFrame("userConfiguredDataFrame", userConfiguredDataFrame, "AccountId", Seq("AccountId", "CompanyName"), limit = 100)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
     }
   }
