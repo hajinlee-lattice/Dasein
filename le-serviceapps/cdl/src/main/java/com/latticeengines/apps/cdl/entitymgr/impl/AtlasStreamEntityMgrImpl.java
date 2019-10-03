@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.repository.jpa.writer.AtlasStreamWriterRepository;
 import com.latticeengines.apps.cdl.repository.reader.AtlasStreamReaderRepository;
+import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -30,6 +31,12 @@ public class AtlasStreamEntityMgrImpl extends JpaEntityMgrRepositoryImpl<AtlasSt
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public AtlasStream findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant) {
+        return findByNameAndTenant(name, tenant, false);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public AtlasStream findByNameAndTenant(String name, Tenant tenant, boolean inflateDimensions) {
         Preconditions.checkNotNull(name, "Name should not be null");
         Preconditions.checkNotNull(tenant, "Tenant should not be null");
         List<AtlasStream> streams = readerRepository.findByNameAndTenant(name, tenant);
@@ -38,7 +45,11 @@ public class AtlasStreamEntityMgrImpl extends JpaEntityMgrRepositoryImpl<AtlasSt
         }
         Preconditions.checkArgument(streams.size() == 1, String.format(
                 "Stream %s should be unique for tenant %s, got %d instead", name, tenant.getId(), streams.size()));
-        return streams.get(0);
+        AtlasStream stream = streams.get(0);
+        if (inflateDimensions) {
+            HibernateUtils.inflateDetails(stream.getDimensions());
+        }
+        return stream;
     }
 
     @Override

@@ -36,7 +36,9 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -61,6 +63,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
+import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
@@ -658,6 +661,42 @@ public class CDLServiceImpl implements CDLService {
                     taskId);
             log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
                     customerSpace, catalog, taskId);
+
+            // check if webvisit stream is created
+            AtlasStream webVisitStream = activityStoreProxy.findStreamByName(customerSpace, EntityType.WebVisit.name(),
+                    true);
+            if (webVisitStream != null) {
+                Preconditions.checkNotNull(webVisitStream.getDimensions());
+                Preconditions.checkArgument(webVisitStream.getDimensions().size() == 1);
+
+                // get path pattern dimension and attach catalog
+                StreamDimension dimension = webVisitStream.getDimensions().get(0);
+                dimension.setCatalog(catalog);
+                log.info("Attach path pattern catalog {} to WebVisit stream = {}, PathPatternId dimension = {}",
+                        catalog, webVisitStream.getPid(), dimension.getPid());
+                activityStoreProxy.updateDimension(customerSpace, webVisitStream.getName(), dimension);
+            } else {
+                log.info("No WebVisit activity stream created for tenant {} yet, ignore attaching path pattern catalog",
+                        customerSpace);
+            }
+        } else {
+            Catalog pathPtnCatalog = activityStoreProxy.findCatalogByName(customerSpace,
+                    EntityType.WebVisitPathPattern.name());
+            // dummy task only to provide unique ID
+            DataFeedTask task = new DataFeedTask();
+            task.setUniqueId(taskId);
+            AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(MultiTenantContext.getTenant(), task);
+            StreamDimension dimension = WebVisitUtils.newWebVisitDimension(webVisitStream, pathPtnCatalog);
+            webVisitStream.setDimensions(Collections.singletonList(dimension));
+            webVisitStream = activityStoreProxy.createStream(customerSpace, webVisitStream);
+
+            Preconditions.checkNotNull(webVisitStream);
+            Preconditions.checkArgument(CollectionUtils.isNotEmpty(webVisitStream.getDimensions()));
+            Preconditions.checkArgument(webVisitStream.getDimensions().size() == 1);
+            dimension = webVisitStream.getDimensions().get(0);
+            log.info(
+                    "Create WebVisit activity stream for tenant {}. stream PID = {}, dimension PID = {}, dataFeedTaskUniqueId = {}",
+                    customerSpace, webVisitStream.getPid(), dimension.getPid(), taskId);
         }
         return true;
     }

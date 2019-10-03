@@ -58,6 +58,8 @@ public class StreamAttributeDeriver implements Serializable {
     }
 
     public enum Calculation {
+        // number of rows with unique composition of source attrs
+        DISTINCT_COUNT("DistinctCount"), //
         // number of rows in the group
         COUNT("Count"), //
         // sum of input attribute (only accept single input attribute)

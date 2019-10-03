@@ -857,7 +857,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
             return true;
         } catch (Exception e) {
-            log.warn("cannot retry this tenant {}, error: {}", tenantId, e);
+            log.error("cannot retry this tenant {}, error: {}", tenantId, e);
             return false;
         }
     }
