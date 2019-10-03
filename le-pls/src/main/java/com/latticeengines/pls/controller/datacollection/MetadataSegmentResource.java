@@ -27,6 +27,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -93,6 +94,14 @@ public class MetadataSegmentResource {
         }
         metadataSegment.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return metadataSegmentService.createOrUpdateSegment(metadataSegment);
+    }
+
+    @PutMapping(value = "/{segmentName}/counts")
+    @ResponseBody
+    @ApiOperation(value = "Update counts for a segment")
+    public Map<BusinessEntity, Long> updateSegmentCounts(@PathVariable String customerSpace,
+            @PathVariable String segmentName) {
+        return metadataSegmentService.updateSegmentCounts(segmentName);
     }
 
     @DeleteMapping("/{segmentName}/modelAndView")
