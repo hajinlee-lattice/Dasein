@@ -3,6 +3,7 @@ package com.latticeengines.playmaker.util;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 
 public class LoggerInterceptor extends HandlerInterceptorAdapter {
 
@@ -24,14 +25,16 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
                     "/playmaker/contactextensionschema", //
                     "/playmaker/plays");
 
+    @Inject
+    private OAuthUserEntityMgr oAuthUserEntityMgr;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (loggingForUris.stream().anyMatch(str -> request.getRequestURI().matches(str))) {
-
+            String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
             long startTime = System.currentTimeMillis();
-            Tenant tenant = MultiTenantContext.getTenant();
             log.info("Playmaker Request URL:" + request.getRequestURL().toString() + " Start Time=" + startTime
-                    + " Tenant=" + tenant.getName());
+                    + " Tenant=" + tenantName);
             request.setAttribute(START_TIME, startTime);
         }
         return true;
@@ -41,10 +44,10 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
             Exception ex) {
         if (loggingForUris.stream().anyMatch(str -> request.getRequestURI().matches(str))) {
+            String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
             long startTime = (Long) request.getAttribute(START_TIME);
-            Tenant tenant = MultiTenantContext.getTenant();
             log.info("Playmaker Request URL:" + request.getRequestURL().toString() + " Time Taken="
-                    + (System.currentTimeMillis() - startTime) + "ms" + " Tenant=" + tenant.getName());
+                    + (System.currentTimeMillis() - startTime) + "ms" + " Tenant=" + tenantName);
         }
     }
 }
