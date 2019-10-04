@@ -81,13 +81,6 @@ public class WebVisitUtils {
         visitCount.setTargetAttribute(InterfaceName.TotalVisits.name());
         visitCount.setCalculation(StreamAttributeDeriver.Calculation.COUNT);
         derivers.add(visitCount);
-
-        // number of unique accounts visit target path
-        StreamAttributeDeriver uniqueAccountVisitCount = new StreamAttributeDeriver();
-        uniqueAccountVisitCount.setSourceAttributes(Collections.singletonList(InterfaceName.AccountId.name()));
-        uniqueAccountVisitCount.setTargetAttribute(InterfaceName.TotalUniqueAccountVisits.name());
-        uniqueAccountVisitCount.setCalculation(StreamAttributeDeriver.Calculation.DISTINCT_COUNT);
-        derivers.add(uniqueAccountVisitCount);
         return derivers;
     }
 }

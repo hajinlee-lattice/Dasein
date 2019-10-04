@@ -51,8 +51,9 @@ public interface ActivityStoreService {
             boolean inflateDimensions);
 
     /**
-     * Wrapper for {@link StreamDimensionEntityMgr#update(Object)}
+     * Wrapper for {@link StreamDimensionEntityMgr#update(Object)}, return the
+     * updated dimension
      */
-    void updateStreamDimension(@NotNull String customerSpace, @NotNull String streamName,
+    StreamDimension updateStreamDimension(@NotNull String customerSpace, @NotNull String streamName,
             @NotNull StreamDimension dimension);
 }

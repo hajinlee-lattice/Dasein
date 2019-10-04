@@ -91,7 +91,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     }
 
     @Override
-    public void updateStreamDimension(@NotNull String customerSpace, @NotNull String streamName,
+    public StreamDimension updateStreamDimension(@NotNull String customerSpace, @NotNull String streamName,
             @NotNull StreamDimension dimension) {
         Preconditions.checkNotNull(dimension, "dimension to be updated should not be null");
         Preconditions.checkNotNull(dimension.getName());
@@ -108,6 +108,9 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
         dimension.setStream(stream);
         dimensionEntityMgr.update(dimension);
+
+        // return the updated version
+        return dimensionEntityMgr.findByNameAndTenantAndStream(dimension.getName(), tenant, stream);
     }
 
     private DataFeedTask getDataFeedTask(@NotNull Tenant tenant, String taskId) {
