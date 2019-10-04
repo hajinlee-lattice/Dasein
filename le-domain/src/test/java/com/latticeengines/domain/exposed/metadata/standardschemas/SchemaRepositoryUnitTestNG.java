@@ -39,6 +39,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumb
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PostalCode;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Quantity;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMedium;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SpendAnalyticsSegment;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Title;
@@ -103,8 +104,8 @@ public class SchemaRepositoryUnitTestNG {
             .map(attr -> ENTITY_MATCH_ATTR_MAP.getOrDefault(attr, attr)) //
             .collect(Collectors.toList());
 
-    private static final List<InterfaceName> WEBVISIT_ATTRS = Arrays.asList(WebVisitPageUrl, WebVisitDate, UserId,
-            CompanyName, City, State, Country, DUNS);
+    private static final List<InterfaceName> WEBVISIT_ATTRS = Arrays.asList(WebVisitPageUrl, WebVisitDate, UserId, //
+            SourceMedium, CompanyName, City, State, Country, DUNS);
 
     private static final List<InterfaceName> WEBVISIT_PATHPATTERN_ATTRS = Arrays.asList(PathPatternName, PathPattern);
     /**
