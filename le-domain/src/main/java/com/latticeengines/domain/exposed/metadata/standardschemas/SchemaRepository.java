@@ -1611,8 +1611,8 @@ public class SchemaRepository {
                 schemaTable = getProductSchema();
                 break;
             case WebVisit:
-                attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrWebVisitDate(), attrUserId(), attrCompanyName(),
-                        attrCity(), attrState(), attrCountry(), attrDUNS()));
+                attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrWebVisitDate(), attrUserId(), //
+                        attrSourceMedium(), attrCompanyName(), attrCity(), attrState(), attrCountry(), attrDUNS()));
                 schemaTable = createTable(SchemaInterpretation.WebVisit);
                 schemaTable.addAttributes(attrs);
                 break;
@@ -1654,6 +1654,17 @@ public class SchemaRepository {
                 .required()
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.UserId) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrSourceMedium() {
+        return attr(InterfaceName.SourceMedium.name())
+                .allowedDisplayNames(Arrays.asList("SOURCE_MEDIUM", "SOURCEMEDIUM"))
+                .required()
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.SourceMedium) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
