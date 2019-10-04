@@ -31,8 +31,8 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 @Table(name = "DANTE_TALKINGPOINT")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
-    private final String TALKING_POINT_NAME_PREFIX = "TP";
-    private final String TALKING_POINT_NAME_FORMAT = "%s_%s";
+    private static final String TALKING_POINT_NAME_PREFIX = "TP";
+    private static final String TALKING_POINT_NAME_FORMAT = "%s_%s";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
