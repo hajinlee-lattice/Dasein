@@ -2,13 +2,17 @@ package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PrepareMatchDataConfiguration extends SparkJobStepConfiguration {
+public class PrepareMatchDataFlowConfiguration extends BaseCoreDataFlowStepConfiguration {
 
     @JsonProperty("input_table_name")
     private String inputTableName;
 
     @JsonProperty("match_group_id")
     private String matchGroupId;
+
+    public PrepareMatchDataFlowConfiguration() {
+        setBeanName("prepareMatchDataflow");
+    }
 
     public String getInputTableName() {
         return inputTableName;
@@ -25,4 +29,5 @@ public class PrepareMatchDataConfiguration extends SparkJobStepConfiguration {
     public void setMatchGroupId(String matchGroupId) {
         this.matchGroupId = matchGroupId;
     }
+
 }

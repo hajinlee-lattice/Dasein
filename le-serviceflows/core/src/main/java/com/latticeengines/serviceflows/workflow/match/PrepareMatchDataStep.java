@@ -20,14 +20,14 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.PrepareMatchDataParameters;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.PrepareMatchDataConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.PrepareMatchDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("prepareMatchDataStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class PrepareMatchDataStep extends RunDataFlow<PrepareMatchDataConfiguration> {
+public class PrepareMatchDataStep extends RunDataFlow<PrepareMatchDataFlowConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PrepareMatchDataStep.class);
 
