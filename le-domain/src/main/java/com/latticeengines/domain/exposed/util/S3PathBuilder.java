@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.query.EntityType;
 
 public final class S3PathBuilder {
@@ -51,4 +54,27 @@ public final class S3PathBuilder {
         return systemName + SPLIT_CHART + entityObjectName;
     }
 
+    public static void setS3Bucket(S3DataUnit s3DataUnit) {
+        String s3Url = s3DataUnit.getLinkedDir();
+        Matcher matcher = Pattern.compile("^(s3a|s3n|s3)://(?<bucket>[^/]+)/(?<prefix>.*)").matcher(s3Url);
+        if (matcher.matches()) {
+            String bucket = matcher.group("bucket");
+            String prefix = matcher.group("prefix");
+            s3DataUnit.setBucketName(bucket);
+            // if prefix end with a file, then extract path
+            if (Pattern.compile(".*/.*\\..*$").matcher(prefix).matches()) {
+                prefix = prefix.substring(0, prefix.lastIndexOf("/"));
+            }
+            s3DataUnit.setPrefix(prefix);
+        }
+    }
+
+    public static void main(String[] args) {
+        String linkedDir = "s3a://" + "test" + "/" + "test1/a.txt";
+        S3DataUnit s3DataUnit = new S3DataUnit();
+        s3DataUnit.setLinkedDir(linkedDir);
+        setS3Bucket(s3DataUnit);
+        System.out.println(s3DataUnit.getBucketName());
+        System.out.println(s3DataUnit.getPrefix());
+    }
 }

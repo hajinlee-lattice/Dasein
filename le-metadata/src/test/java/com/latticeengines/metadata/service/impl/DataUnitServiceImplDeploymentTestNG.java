@@ -22,6 +22,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
@@ -99,6 +100,7 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
     private void prepareTestDataForS3() {
         String ingestionDir = S3PathBuilder.getUiDisplayS3Dir(s3Bucket, "tests3",
                 S3FOLDERNAME);
+        String prefix = ingestionDir;
         log.info("ingestionDir is :" + ingestionDir);
         String content = "create test s3 data";
         InputStream is = new ByteArrayInputStream(content.getBytes());
@@ -111,6 +113,13 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
         s3DataUnit.setLinkedDir(linkedDir);
         s3DataUnit.setName("testS3");
         dataUnitService.createOrUpdateByNameAndStorageType(s3DataUnit);
+        S3DataUnit s3DataUnit2 = (S3DataUnit) dataUnitService.findByNameTypeFromReader(s3DataUnit.getName(), DataUnit.StorageType.S3);
+        Assert.assertNull(s3DataUnit2.getLinkedDir());
+        Assert.assertEquals(s3DataUnit2.getBucketName(), s3Bucket);
+        Assert.assertEquals(s3DataUnit2.getPrefix(), prefix);
+        Assert.assertEquals(s3DataUnit2.getFullPath("s3a"), "s3a://" + s3Bucket + "/" + prefix);
+        s3DataUnit2.setLinkedDir(linkedDir);
+        Assert.assertEquals(s3DataUnit2.getFullPath("s3a"), "s3a://" + s3Bucket + "/" + prefix);
     }
 
     private void prepareTestDataForHdfs() {

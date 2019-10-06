@@ -5,11 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.DataRuleDao;
@@ -496,18 +496,17 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     }
                 } else if (DataUnit.StorageType.S3.equals(unit.getStorageType())) {
                     S3DataUnit s3DataUnit = (S3DataUnit) unit;
-                    String s3Url = s3DataUnit.getLinkedDir();
-                    Matcher matcher = Pattern.compile("^(s3a|s3n|s3)://(?<bucket>[^/]+)" //
-                            + "/(?<prefix>.*)").matcher(s3Url);
-                    if (matcher.matches()) {
-                        String bucket = matcher.group("bucket");
-                        String prefix = matcher.group("prefix");
-                        if (prefix.endsWith(".avro")) {
-                            prefix = prefix.substring(0, prefix.lastIndexOf("/"));
-                        }
+                    String bucket = s3DataUnit.getBucketName();
+                    if (StringUtils.isNotEmpty(bucket)) {
+                        String prefix = s3DataUnit.getPrefix();
                         s3Service.cleanupPrefix(bucket, prefix);
                     } else {
-                        log.warn("s3 data unit " + unit.getName() + " has an invalid url " + s3Url);
+                        S3PathBuilder.setS3Bucket(s3DataUnit);
+                        if (StringUtils.isNotEmpty(s3DataUnit.getBucketName())) {
+                            s3Service.cleanupPrefix(s3DataUnit.getBucketName(), s3DataUnit.getPrefix());
+                        } else {
+                            log.warn("s3 data unit " + unit.getName() + " has an invalid url " + s3DataUnit.getLinkedDir());
+                        }
                     }
                 }
             }

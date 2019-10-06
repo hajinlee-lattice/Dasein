@@ -17,6 +17,8 @@ import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.documentdb.entity.DataUnitEntity;
 import com.latticeengines.documentdb.entitymgr.impl.BaseDocumentEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.repository.document.reader.DataUnitReaderRepository;
 import com.latticeengines.metadata.repository.document.writer.DataUnitWriterRepository;
@@ -60,16 +62,32 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         return convertList(entities);
     }
 
+    private void updateS3DataUnit(DataUnit dataUnit) {
+        if (dataUnit instanceof S3DataUnit) {
+            S3DataUnit s3DataUnit = (S3DataUnit) dataUnit;
+            if (StringUtils.isNotEmpty(s3DataUnit.getLinkedDir())) {
+                S3PathBuilder.setS3Bucket(s3DataUnit);
+                if (StringUtils.isNotEmpty(s3DataUnit.getBucketName())) {
+                    s3DataUnit.setLinkedDir(null);
+                    log.info(String.format("S3 data unit will be saved with bucket name %s and prefix %s.",
+                            s3DataUnit.getBucketName(), s3DataUnit.getPrefix()));
+                }
+            }
+        }
+    }
+
     private DataUnit createNewDataUnit(String tenantId, DataUnit dataUnit) {
         DataUnitEntity newEntity = new DataUnitEntity();
         newEntity.setTenantId(tenantId);
         newEntity.setUuid(UUID.randomUUID().toString());
+        updateS3DataUnit(dataUnit);
         newEntity.setDocument(dataUnit);
         DataUnitEntity saved = repository.save(newEntity);
         return saved.getDocument();
     }
 
     private DataUnit updateExistingDataUnit(DataUnit toUpdate, DataUnitEntity existing) {
+        updateS3DataUnit(toUpdate);
         existing.setDocument(toUpdate);
         DataUnitEntity saved = repository.save(existing);
         return saved.getDocument();
