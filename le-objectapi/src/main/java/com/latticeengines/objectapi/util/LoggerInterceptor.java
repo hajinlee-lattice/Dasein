@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -50,7 +51,7 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
             long startTime = System.currentTimeMillis();
             Tenant tenant = MultiTenantContext.getTenant();
             log.info("ObjectAPI Request URL:" + request.getRequestURL().toString() + " Start Time=" + startTime
-                    + " Tenant=" + tenant.getName());
+                    + " Tenant=" + tenant.getName() + " Referrer=" + request.getHeader(HttpHeaders.REFERER));
             request.setAttribute(START_TIME, startTime);
         }
         return true;
@@ -63,7 +64,8 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
             long startTime = (Long) request.getAttribute(START_TIME);
             Tenant tenant = MultiTenantContext.getTenant();
             log.info("ObjectAPI Request URL:" + request.getRequestURL().toString() + " Time Taken="
-                    + (System.currentTimeMillis() - startTime) + "ms" + " Tenant=" + tenant.getName());
+                    + (System.currentTimeMillis() - startTime) + "ms" + " Tenant=" + tenant.getName() + " Referrer="
+                    + request.getHeader(HttpHeaders.REFERER));
         }
     }
 }
