@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -143,8 +145,14 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         Assert.assertEquals(stream.getDataFeedTaskUniqueId(), dataFeedTask.getUniqueId());
         // verify dimension
         Assert.assertNotNull(stream.getDimensions());
-        Assert.assertEquals(stream.getDimensions().size(), 1);
-        StreamDimension dimension = stream.getDimensions().get(0);
+        Assert.assertEquals(stream.getDimensions().size(), 3);
+        Optional<StreamDimension> result = stream.getDimensions() //
+                .stream() //
+                .filter(Objects::nonNull) //
+                .filter(dim -> InterfaceName.PathPatternId.name().equals(dim.getName())) //
+                .findFirst();
+        Assert.assertTrue(result.isPresent(), "Dimensions should contain path pattern dimension");
+        StreamDimension dimension = result.get();
         Assert.assertNotNull(dimension);
         Assert.assertEquals(dimension.getName(), InterfaceName.PathPatternId.name());
         if (pathPatternCatalogAttached) {

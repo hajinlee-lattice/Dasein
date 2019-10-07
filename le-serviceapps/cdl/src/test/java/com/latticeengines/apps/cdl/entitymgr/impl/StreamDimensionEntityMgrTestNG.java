@@ -8,6 +8,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatte
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
@@ -109,7 +111,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         if (STREAM_WEBVISIT.equals(dimension.getStream().getName())) {
             Assert.assertTrue(dimension.getCalculator() instanceof DimensionCalculatorRegexMode);
         } else {
-            Assert.assertTrue(dimension.getCalculator() instanceof DimensionCalculator);
+            Assert.assertNotNull(dimension.getCalculator());
         }
     }
 
@@ -120,6 +122,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_WEBVISIT));
         dimension.setCatalog(catalogs.get(CATALOG_WEBVISIT));
+        dimension.setUsages(Collections.singleton(StreamDimension.Usage.Pivot));
 
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(PathPatternName.name());
@@ -143,6 +146,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_OPP));
         dimension.setCatalog(catalogs.get(STREAM_OPP));
+        dimension.setUsages(Sets.newHashSet(StreamDimension.Usage.Pivot, StreamDimension.Usage.Filter));
 
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(LeadSource.name());
@@ -164,6 +168,8 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_OPP));
         dimension.setCatalog(catalogs.get(STREAM_OPP));
+        dimension.setUsages(Sets.newHashSet(StreamDimension.Usage.Pivot, StreamDimension.Usage.Filter,
+                StreamDimension.Usage.Dedup));
 
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(IsClosed.name());

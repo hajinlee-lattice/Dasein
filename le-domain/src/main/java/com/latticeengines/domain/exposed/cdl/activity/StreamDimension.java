@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -96,6 +97,11 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
     @Column(name = "CALCULATOR", columnDefinition = "'JSON'", nullable = false)
     private DimensionCalculator calculator;
 
+    @JsonProperty("usages")
+    @Type(type = "json")
+    @Column(name = "USAGES", columnDefinition = "'JSON'", nullable = false)
+    private Set<Usage> usages;
+
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty("created")
@@ -172,6 +178,14 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
         this.calculator = calculator;
     }
 
+    public Set<Usage> getUsages() {
+        return usages;
+    }
+
+    public void setUsages(Set<Usage> usages) {
+        this.usages = usages;
+    }
+
     @Override
     public Date getCreated() {
         return created;
@@ -192,4 +206,10 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
         this.updated = updated;
     }
 
+    /*
+     * what types of processing dimension will be used
+     */
+    public enum Usage {
+        Pivot, Dedup, Filter
+    }
 }

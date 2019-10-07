@@ -36,6 +36,7 @@ BEGIN
         `GENERATOR`     json                                    NOT NULL,
         `NAME`          varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
         `UPDATED`       datetime                                NOT NULL,
+        `USAGES`        json                                    NOT NULL,
         `FK_CATALOG_ID` bigint(20) DEFAULT NULL,
         `FK_STREAM_ID`  bigint(20)                              NOT NULL,
         `FK_TENANT_ID`  bigint(20)                              NOT NULL,
