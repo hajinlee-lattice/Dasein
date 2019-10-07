@@ -79,7 +79,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
     private PlayLaunch playLaunch1;
     private PlayLaunch playLaunch2;
 
-    List<PlayType> types;
+    private List<PlayType> types;
 
     private String orgId1 = "org1";
     private String orgName1 = "salesforce_org";

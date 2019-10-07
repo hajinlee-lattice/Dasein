@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -65,7 +64,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private PlayLaunchChannel channel1;
     private PlayLaunchChannel channel2;
 
-    List<PlayType> types;
+    private List<PlayType> types;
 
     private String orgId1 = "org1";
     private String orgName1 = "salesforce_org";
