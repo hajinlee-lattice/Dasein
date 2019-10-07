@@ -12,6 +12,8 @@ public interface PlayLaunchChannelService {
 
     PlayLaunchChannel update(String playName, PlayLaunchChannel playLaunchChannel);
 
+    PlayLaunchChannel update(PlayLaunchChannel playLaunchChannel);
+
     void deleteByChannelId(String channelId, boolean hardDelete);
 
     List<PlayLaunchChannel> findByIsAlwaysOnTrue();

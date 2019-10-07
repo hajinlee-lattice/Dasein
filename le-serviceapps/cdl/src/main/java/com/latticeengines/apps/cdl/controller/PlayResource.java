@@ -186,6 +186,18 @@ public class PlayResource {
         return playLaunchChannelService.getPlayLaunchChannels(playName, includeUnlaunchedChannels);
     }
 
+    @GetMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get the play launch channel by the given play id and channel id")
+    public PlayLaunchChannel getPlayLaunchChannelById(@PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("channelId") String channelId) {
+        if (StringUtils.isEmpty(channelId)) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank channel Id" });
+        }
+        return playLaunchChannelService.findById(channelId);
+    }
+
     @PostMapping(value = "/{playName}/channels", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create play launch channel")
@@ -214,18 +226,6 @@ public class PlayResource {
                     playLaunchChannel.getId(), launch.getLaunchId()));
         }
         return playLaunchChannel;
-    }
-
-    @GetMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get the play launch channel by the given play id and channel id")
-    public PlayLaunchChannel getPlayLaunchChannelById(@PathVariable String customerSpace, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("channelId") String channelId) {
-        if (StringUtils.isEmpty(channelId)) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank channel Id" });
-        }
-        return playLaunchChannelService.findById(channelId);
     }
 
     @PutMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
@@ -280,7 +280,8 @@ public class PlayResource {
         } else {
             channel.setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(channel));
         }
-        channel = playLaunchChannelService.update(play.getName(), channel);
+        channel = playLaunchChannelService.update(channel);
+
         return channel;
     }
 

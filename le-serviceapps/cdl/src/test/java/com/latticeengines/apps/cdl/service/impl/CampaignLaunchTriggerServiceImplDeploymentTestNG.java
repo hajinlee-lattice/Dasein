@@ -93,7 +93,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
     private String DISPLAY_NAME = "play Harder";
     private String CREATED_BY = "lattice@lattice-engines.com";
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
         MultiTenantContext.setTenant(mainTestTenant);
@@ -148,7 +148,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
 
     }
 
-    @Test(groups = "deployment", retryAnalyzer = SimpleRetryPolicy.class)
+    @Test(groups = "deployment-app", retryAnalyzer = SimpleRetryPolicy.class)
     public void testTriggerQueuedLaunches() throws InterruptedException {
         TestRetryUtils.retryForAssertionError(() -> {
             List<String> queuedPlayLaunchesIdList = //
@@ -211,7 +211,7 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
         });
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment-app")
     public void teardown() {
         if (playLaunch1 != null && playLaunch1.getLaunchId() != null) {
             MultiTenantContext.setTenant(playLaunch1.getTenant());

@@ -101,13 +101,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
-        playLaunchChannel.setPlay(play);
-        playLaunchChannel = update(playLaunchChannel);
-        playLaunchChannel.setPlay(play); // ensure play exists if used in resource
-        return playLaunchChannel;
-    }
-
-    private PlayLaunchChannel update(PlayLaunchChannel playLaunchChannel) {
         PlayLaunchChannel retrievedPlayLaunchChannel = findById(playLaunchChannel.getId());
         if (retrievedPlayLaunchChannel == null) {
             throw new NullPointerException("Cannot find Play Launch Channel for given play channel id");
@@ -116,9 +109,16 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             throw new LedpException(LedpCode.LEDP_18225, new String[] { retrievedPlayLaunchChannel.getPlay().getName(),
                     playLaunchChannel.getPlay().getName() });
         }
-        playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
 
+        playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
+        retrievedPlayLaunchChannel.setPlay(play); // ensure play exists if used in resource
         return retrievedPlayLaunchChannel;
+    }
+
+    @Override
+    public PlayLaunchChannel update(PlayLaunchChannel channel) {
+        playLaunchChannelEntityMgr.update(channel);
+        return channel;
     }
 
     @Override
