@@ -402,7 +402,12 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     blockUuidMap.remove(appId.toString());
                     blockUuidMap.put(newAppId.toString(), jobConfiguration.getBlockOperationUid());
                     applicationIds.add(newAppId);
-                    matchCommandService.retryBlock(blockUid, newAppId);
+                    if (report.getDiagnostics().contains("lost node")) {
+                        log.info("Failed due to lost node. Re-run block without incrementing the retry count.");
+                        matchCommandService.rerunBlock(blockUid, newAppId);
+                    } else {
+                        matchCommandService.retryBlock(blockUid, newAppId);
+                    }
                     log.info("Submit a match block to application id " + newAppId);
                 }
             }

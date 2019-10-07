@@ -27,6 +27,8 @@ public interface MatchCommandService {
 
     MatchBlock retryBlock(String blockOperationUid, ApplicationId applicationId);
 
+    MatchBlock rerunBlock(String blockOperationUid, ApplicationId applicationId); // re-run w/o incrementing retry count
+
     List<MatchBlock> getBlocks(String rootOperationUid);
 
 }
