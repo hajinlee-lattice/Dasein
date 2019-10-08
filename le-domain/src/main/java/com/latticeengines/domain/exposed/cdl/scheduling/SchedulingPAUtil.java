@@ -84,8 +84,8 @@ public class SchedulingPAUtil {
         schedulingPAQueues.add(retrySchedulingPAQueue);
         schedulingPAQueues.add(scheduleNowSchedulingPAQueue);
         schedulingPAQueues.add(autoScheduleSchedulingPAQueue);
-        schedulingPAQueues.add(dataCloudRefreshSchedulingPAQueue);
         schedulingPAQueues.add(nonCustomerScheduleNowSchedulingPAQueue);
+        schedulingPAQueues.add(dataCloudRefreshSchedulingPAQueue);
         schedulingPAQueues.add(nonCustomerAutoScheduleSchedulingPAQueue);
         schedulingPAQueues.add(nonDataCloudRefreshSchedulingPAQueue);
         return schedulingPAQueues;
