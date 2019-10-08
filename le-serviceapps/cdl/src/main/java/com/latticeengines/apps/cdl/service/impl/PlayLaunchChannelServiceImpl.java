@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,6 +10,8 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +53,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("playLaunchChannelService")
 public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
+
+    private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
     @Inject
     private PlayService playService;
@@ -116,8 +121,27 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public PlayLaunchChannel update(PlayLaunchChannel channel) {
+    public PlayLaunchChannel updateNextScheduledDate(String playId, String channelId) {
+        Play play = playService.getPlayByName(playId, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playId });
+        }
+        PlayLaunchChannel channel = findById(channelId);
+        if (channel == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Channel found with id: " + channelId });
+        }
+        channel.setPlay(play);
+        Date nextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel);
+        if (nextLaunchDate.after(channel.getExpirationDate())) {
+            log.info(String.format(
+                    "Channel: %s has expired turning auto launches off (Expiration Date: %s, Next Scheduled Launch Date: %s)",
+                    channel.getId(), channel.getExpirationDate().toString(), nextLaunchDate.toString()));
+            channel.setIsAlwaysOn(false);
+        } else {
+            channel.setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(channel));
+        }
         playLaunchChannelEntityMgr.update(channel);
+
         return channel;
     }
 

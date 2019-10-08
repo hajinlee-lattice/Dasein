@@ -225,13 +225,13 @@ public class PlayLaunchChannelEntityMgrImpl
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Id cannot be empty for the provided LookupIdMap" });
             }
-            LookupIdMap lookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(updatedChannel.getLookupIdMap().getId());
+            LookupIdMap lookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(existingPlayLaunchChannel.getLookupIdMap().getId());
             if (lookupIdMap == null) {
                 throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] { "No lookupIdMap found by Id: " + updatedChannel.getLookupIdMap().getId() });
+                        new String[] { "No lookupIdMap found by Id: " + existingPlayLaunchChannel.getLookupIdMap().getId() });
             }
             verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, updatedChannel);
-            updatedChannel.setLookupIdMap(lookupIdMap);
+
             if (existingPlayLaunchChannel.getChannelConfig() != null) {
                 existingPlayLaunchChannel.setChannelConfig(
                         existingPlayLaunchChannel.getChannelConfig().copyConfig(updatedChannel.getChannelConfig()));

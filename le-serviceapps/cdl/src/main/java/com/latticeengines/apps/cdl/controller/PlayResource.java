@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -256,33 +255,13 @@ public class PlayResource {
         return playLaunchChannel;
     }
 
-    @PatchMapping(value = "/{playName}/channels/{channelId}", headers = "Accept=application/json")
+    @PatchMapping(value = "/{playName}/channels/{channelId}/next-scheduled-date", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update next schedule date for play launch channel for a given play and channel id")
     public PlayLaunchChannel updatePlayLaunchChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
-        Play play = playService.getPlayByName(playName, false);
-        if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
-        }
-        PlayLaunchChannel channel = playLaunchChannelService.findById(channelId);
-        if (channel == null) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Channel found with id: " + channelId });
-        }
-        channel.setPlay(play);
-        Date nextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel);
-        if (nextLaunchDate.after(channel.getExpirationDate())) {
-            log.info(String.format(
-                    "Channel: %s has expired turning auto launches off (Expiration Date: %s, Next Scheduled Launch Date: %s)",
-                    channelId, channel.getExpirationDate().toString(), nextLaunchDate.toString()));
-            channel.setIsAlwaysOn(false);
-        } else {
-            channel.setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(channel));
-        }
-        channel = playLaunchChannelService.update(channel);
-
-        return channel;
+        return playLaunchChannelService.updateNextScheduledDate(playName, channelId);
     }
 
     @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
