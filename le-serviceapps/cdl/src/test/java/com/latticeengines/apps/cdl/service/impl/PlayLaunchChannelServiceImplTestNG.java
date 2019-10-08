@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -82,7 +81,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
     private String CREATED_BY = "lattice@lattice-engines.com";
     private String CRON_EXPRESSION = "0 0 12 ? * WED *";
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainCustomerSpace,
@@ -127,19 +126,20 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         playLaunchChannel2 = createPlayLaunchChannel(play, lookupIdMap2);
 
         playLaunchChannel1.setIsAlwaysOn(true);
+        playLaunchChannel1.setExpirationPeriodString("P3M");
         playLaunchChannel2.setIsAlwaysOn(false);
         playLaunchChannel1.setChannelConfig(new SalesforceChannelConfig());
         playLaunchChannel2.setChannelConfig(new MarketoChannelConfig());
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testGetPreCreate() {
         List<PlayLaunchChannel> channels = playLaunchChannelService.getPlayLaunchChannels(play.getName(), false);
         Assert.assertNotNull(channels);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testGetPreCreate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateChannel() throws InterruptedException {
         playLaunchChannelService.create(play.getName(), playLaunchChannel1);
         Thread.sleep(1000);
@@ -153,7 +153,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(playLaunchChannel2.getId());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreateChannel" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateChannel" })
     public void testBasicOperations() {
 
         PlayLaunchChannel retrieved = playLaunchChannelService.findById(playLaunchChannel1.getId());
@@ -186,7 +186,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testBasicOperations" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testBasicOperations" })
     public void testCreateFromChannel() {
         PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel1.getPid());
         Assert.assertNull(retrievedLaunch);
@@ -198,7 +198,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreateFromChannel" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateFromChannel" })
     public void testUpdate() throws InterruptedException {
         playLaunchChannel1.setIsAlwaysOn(false);
         PlayLaunchChannel retrieved = playLaunchChannelService.update(play.getName(), playLaunchChannel2);
@@ -216,18 +216,18 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         playLaunchChannelService.deleteByChannelId(playLaunchChannel1.getId(), true);
         playLaunchChannelService.deleteByChannelId(playLaunchChannel2.getId(), true);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testDelete" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testDelete" })
     public void testPostDelete() {
         try {
             Thread.sleep(TimeUnit.SECONDS.toMillis(10L));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("Sleep Inturrupted: " + e.getMessage());
         }
         PlayLaunchChannel retrieved = playLaunchChannelService.findById(playLaunchChannel1.getId());
         Assert.assertNull(retrieved);
@@ -235,7 +235,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(retrieved);
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment-app")
     public void teardown() {
         if (playLaunchChannel1 != null && playLaunchChannel1.getId() != null) {
             playLaunchChannelService.deleteByChannelId(playLaunchChannel1.getId(), true);
@@ -259,7 +259,6 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         playLaunchChannel.setLaunchType(LaunchType.FULL);
         playLaunchChannel.setId(NamingUtils.randomSuffix("pl", 16));
         playLaunchChannel.setCronScheduleExpression(CRON_EXPRESSION);
-        playLaunchChannel.setExpirationDate(Date.from(new Date().toInstant().plus(Duration.ofHours(2))));
         return playLaunchChannel;
     }
 

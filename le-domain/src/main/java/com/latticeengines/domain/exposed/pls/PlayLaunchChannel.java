@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -125,6 +129,10 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "NEXT_SCHEDULED_LAUNCH")
     private Date nextScheduledLaunch;
 
+    @JsonProperty("expirationPeriodString")
+    @Transient
+    private String expirationPeriodString;
+
     @JsonProperty("expirationDate")
     @Column(name = "EXPIRATION_DATE")
     private Date expirationDate;
@@ -150,8 +158,8 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     private PlayLaunch lastLaunch;
 
     @JsonProperty("isAlwaysOn")
-    @Column(name = "ALWAYS_ON")
-    private Boolean isAlwaysOn = Boolean.FALSE;
+    @Column(name = "ALWAYS_ON", nullable = false, columnDefinition = "boolean default false")
+    private Boolean isAlwaysOn = false;
 
     @JsonProperty("deleted")
     @Column(name = "DELETED", nullable = false)
@@ -341,6 +349,14 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.nextScheduledLaunch = nextScheduledLaunch;
     }
 
+    public String getExpirationPeriodString() {
+        return expirationPeriodString;
+    }
+
+    public void setExpirationPeriodString(String expirationPeriodString) {
+        this.expirationPeriodString = expirationPeriodString;
+    }
+
     public Date getExpirationDate() {
         return expirationDate;
     }
@@ -383,6 +399,19 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { String.format("Invalid Cron Schedule %s in Channel for channel id: %s",
                             channel.getCronScheduleExpression(), channel.getId()) });
+        }
+    }
+
+    public static Date getExpirationDateFromExpirationPeriodString(PlayLaunchChannel channel) {
+        try {
+            Period expirationPeriod = Period.parse(channel.getExpirationPeriodString());
+            return Date.from(Instant.now().atOffset(ZoneOffset.UTC).plus(expirationPeriod).toInstant());
+        } catch (DateTimeParseException exp) {
+            // TODO: PLS-14902: Remove once UI is ready
+            return Date.from(Instant.now().atOffset(ZoneOffset.UTC).plus(Period.ofMonths(5)).toInstant());
+            // throw new LedpException(LedpCode.LEDP_32000, new String[] {
+            // "Unable to parse the provided ExpirationPeriod: " +
+            // channel.getExpirationPeriodString() });
         }
     }
 
