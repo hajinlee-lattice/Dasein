@@ -80,14 +80,8 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         @SuppressWarnings("unused")
         DataCollection.Version version = input.getDataCollectionVersion();
         // TODO: get metadata by version
-        BusinessEntity[] entities = { //
-                BusinessEntity.Account, //
-                BusinessEntity.CuratedAccount, //
-                BusinessEntity.Rating, //
-                BusinessEntity.PurchaseHistory //
-        };
         List<ColumnMetadata> cms = new ArrayList<>();
-        for (BusinessEntity entity : entities) {
+        for (BusinessEntity entity : BusinessEntity.ACCOUNT_MATCH_ENTITIES) {
             List<ColumnMetadata> list = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, entity);
             if (CollectionUtils.isNotEmpty(list)) {
                 cms.addAll(list);
@@ -139,7 +133,8 @@ public class CDLLookupServiceImpl implements CDLLookupService {
                 TableRoleInCollection.ConsolidatedAccount, //
                 TableRoleInCollection.PivotedRating, //
                 TableRoleInCollection.CalculatedPurchaseHistory, //
-                TableRoleInCollection.CalculatedCuratedAccountAttribute //
+                TableRoleInCollection.CalculatedCuratedAccountAttribute, //
+                TableRoleInCollection.WebVisitProfile //
         };
         return dataCollectionProxy.getDynamoDataUnits(customerSpace, version, Arrays.asList(tableRoles));
     }

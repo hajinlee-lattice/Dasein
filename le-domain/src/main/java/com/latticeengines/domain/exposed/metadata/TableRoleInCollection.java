@@ -40,6 +40,8 @@ public enum TableRoleInCollection {
     AccountFeatures, //
     AccountExport, //
 
+    WebVisitProfile, //
+
     AccountMaster;
 
     static {

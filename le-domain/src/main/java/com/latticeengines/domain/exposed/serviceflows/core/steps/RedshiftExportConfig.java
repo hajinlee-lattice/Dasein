@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -22,6 +23,9 @@ public class RedshiftExportConfig {
 
     @JsonProperty("dist_key")
     private String distKey;
+
+    @JsonProperty("dist_style")
+    private RedshiftTableConfiguration.DistStyle distStyle;
 
     @JsonProperty("sort_keys")
     private List<String> sortKeys;
@@ -51,6 +55,14 @@ public class RedshiftExportConfig {
 
     public void setDistKey(String distKey) {
         this.distKey = distKey;
+    }
+
+    public RedshiftTableConfiguration.DistStyle getDistStyle() {
+        return distStyle;
+    }
+
+    public void setDistStyle(RedshiftTableConfiguration.DistStyle distStyle) {
+        this.distStyle = distStyle;
     }
 
     public List<String> getSortKeys() {

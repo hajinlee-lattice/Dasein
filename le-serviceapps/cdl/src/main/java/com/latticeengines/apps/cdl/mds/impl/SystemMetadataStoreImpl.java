@@ -7,10 +7,14 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.mds.ActivityMetricsDecoratorFac;
+import com.latticeengines.apps.cdl.mds.AccountAttrsDecoratorFac;
+import com.latticeengines.apps.cdl.mds.ActivityMetricDecoratorFac;
+import com.latticeengines.apps.cdl.mds.ContactAttrsDecoratorFac;
 import com.latticeengines.apps.cdl.mds.CuratedAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
+import com.latticeengines.apps.cdl.mds.RawSystemMetadataStore;
+import com.latticeengines.apps.cdl.mds.SpendAnalyticMetricsDecoratorFac;
 import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -35,13 +39,14 @@ public class SystemMetadataStoreImpl extends
 
     @Inject
     public SystemMetadataStoreImpl( //
-            RawSystemMetadataStoreImpl rawSystemMetadataStore, //
-            AccountAttrsDecoratorFacImpl accountAttrsDecorator, //
-            ContactAttrsDecoratorFacImpl contactAttrsDecorator, //
-            ActivityMetricsDecoratorFac activityMetricsDecorator, //
-            RatingDisplayMetadataStore ratingDisplayMetadataStore, //
-            ExternalSystemMetadataStore externalSystemMetadataStore, //
-            CuratedAttrsMetadataStore derivedAttrsMetadataStore) {
+                                    RawSystemMetadataStore rawSystemMetadataStore, //
+                                    AccountAttrsDecoratorFac accountAttrsDecorator, //
+                                    ContactAttrsDecoratorFac contactAttrsDecorator, //
+                                    SpendAnalyticMetricsDecoratorFac activityMetricsDecorator, //
+                                    RatingDisplayMetadataStore ratingDisplayMetadataStore, //
+                                    ExternalSystemMetadataStore externalSystemMetadataStore, //
+                                    CuratedAttrsMetadataStore derivedAttrsMetadataStore,
+                                    ActivityMetricDecoratorFac activityMetricDecorator) {
         super(rawSystemMetadataStore, //
                 getDecoratorChain(//
                         accountAttrsDecorator, //
@@ -49,17 +54,19 @@ public class SystemMetadataStoreImpl extends
                         activityMetricsDecorator, //
                         ratingDisplayMetadataStore, //
                         externalSystemMetadataStore, //
-                        derivedAttrsMetadataStore //
+                        derivedAttrsMetadataStore, //
+                        activityMetricDecorator //
                 ));
     }
 
     private static ChainedDecoratorFactory<Namespace2<BusinessEntity, DataCollection.Version>> getDecoratorChain(
-            AccountAttrsDecoratorFacImpl accountAttrsDecorator, //
-            ContactAttrsDecoratorFacImpl contactAttrsDecorator, //
-            ActivityMetricsDecoratorFac activityMetricsDecorator, //
+            AccountAttrsDecoratorFac accountAttrsDecorator, //
+            ContactAttrsDecoratorFac contactAttrsDecorator, //
+            SpendAnalyticMetricsDecoratorFac activityMetricsDecorator, //
             RatingDisplayMetadataStore ratingDisplayMetadataStore, //
             ExternalSystemMetadataStore externalSystemMetadataStore, //
-            CuratedAttrsMetadataStore curatedAttrsMetadataStore) {
+            CuratedAttrsMetadataStore curatedAttrsMetadataStore, //
+            ActivityMetricDecoratorFac activityMetricDecorator) {
         DecoratorFactory<Namespace1<String>> ratingDisplayDecorator = //
                 MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
         DecoratorFactory<Namespace2<String, BusinessEntity>> lookupIdDecorator = //
@@ -77,6 +84,7 @@ public class SystemMetadataStoreImpl extends
                 apsAttrDecorator, //
                 ratingDisplayDecorator, //
                 curatedAttrsDecorator, //
+                activityMetricDecorator, //
                 postRenderDecorator //
         );
 
@@ -94,6 +102,8 @@ public class SystemMetadataStoreImpl extends
                 Namespace curatedNs = Namespace.as(//
                         BusinessEntity.CuratedAccount.equals(entity) ? tenantId : "", //
                         namespace.getCoord2());
+                Namespace activityMetricNs = Namespace.as(BusinessEntity.ACTIVITY_METRIC_SERVING_ENTITIES.contains(entity) //
+                        ? tenantId : "");
                 Namespace lookupIdNs = Namespace.as(tenantId, entity);
                 // order in sync with getDecoratorChain()
                 return Arrays.asList( //
@@ -104,6 +114,7 @@ public class SystemMetadataStoreImpl extends
                         Namespace0.NS, //
                         ratingNs, //
                         curatedNs, //
+                        activityMetricNs, //
                         Namespace0.NS //
                 );
             }
