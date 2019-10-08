@@ -47,6 +47,6 @@ ssh -t ${STACK_IP} "sudo mkdir -p /etc/ledp && sudo chmod 777 /etc/ledp"
 for f in "latticeengines.properties" "log4j.properties" "log4j2-yarn.xml"; do
     F_PATH=${WSHOME}/le-config/conf/env/devcluster/${f}
     hdfs dfs -put -f ${F_PATH} hdfs://${EMR_HOST_NAME}/app/${STACK_NAME}/$(leversion)/conf
-    scp ${F_PATH} ${STACK_IP}:/tmp
-    ssh -t ${STACK_IP} "sudo mv -f /tmp/${f} /etc/ledp/${f} && chmod 777 /etc/ledp/${f}"
+    scp -o StrictHostKeyChecking=no ${F_PATH} ${STACK_IP}:/tmp
+    ssh -o StrictHostKeyChecking=no -t ${STACK_IP} "sudo mv -f /tmp/${f} /etc/ledp/${f} && chmod 777 /etc/ledp/${f}"
 done
