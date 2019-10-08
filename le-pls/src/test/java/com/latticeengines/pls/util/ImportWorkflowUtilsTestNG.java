@@ -231,7 +231,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(customField);
         customField.setFieldType(UserDefinedType.TEXT);
         ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
-                , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
+                , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), null,null,resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
         checkGeneratedResult(response, ImportWorkflowUtils.CUSTOM_FIELDS, "Earnings", FieldValidationMessage.MessageLevel.WARNING);
 
@@ -242,7 +242,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(IDDefinition);
         IDDefinition.setFieldType(UserDefinedType.INTEGER);
         response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap, autoDetectionResultsMap,
-                        importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
+                        importWorkflowSpec.getFieldDefinitionsRecordsMap(), null,null,resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
         checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.ERROR);
 
@@ -285,7 +285,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNull(earningsAttr);
     }
 
-    private static void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
+    public static void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
                                       FieldValidationMessage.MessageLevel messageLevel) {
         Map<String, List<FieldValidationMessage>> validationMap = response.getFieldValidationMessagesMap();
         Assert.assertNotNull(validationMap);

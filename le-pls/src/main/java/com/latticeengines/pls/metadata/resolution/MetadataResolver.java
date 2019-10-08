@@ -726,6 +726,7 @@ public class MetadataResolver {
 
             }
         }
+        boolean flag = true;
         if (nonConformingTimeZoneCount > 0) {
             if (isISO8601) {
                 warningMessage.append("Time zone should be part of value but is not.");
@@ -733,6 +734,7 @@ public class MetadataResolver {
                 warningMessage.append(String.format("Time zone set to %s. Value should not contain time " +
                         "zone setting.", timezone));
             }
+            flag = false;
         }
         if (conformingDateCount < dateThreshold) {
             if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
@@ -744,9 +746,9 @@ public class MetadataResolver {
                 warningMessage.append(String.format("%s is set as %s which can't parse the %s from uploaded file.",
                         columnHeaderName, userFormat, errorValue));
             }
-            return false;
+            flag = false;
         }
-        return true;
+        return flag;
     }
 
     /*
