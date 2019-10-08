@@ -451,8 +451,8 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayLaunchChannel setNextScheduledTimeForChannel(String customerSpace, String playName, String channelId) {
-        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}", shortenCustomerSpace(customerSpace),
-                playName, channelId);
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/next-scheduled-date",
+                shortenCustomerSpace(customerSpace), playName, channelId);
         log.info("url is " + url);
         return patch("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunchChannel.class);
     }

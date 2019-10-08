@@ -356,8 +356,7 @@ public enum LedpCode {
     LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"),
     LEDP_18230("{0} Field Definition Request has invalid body: {1}"),
     LEDP_18231("No attributes can be exported for export type: {0}."),
-    LEDP_18232("Expiration Date {0} for PlayLaunchChannel is greater than allowed time of 6 months."),
-    LEDP_18233("Expiration Date {0} for PlayLaunchChannel occured in the past."),
+    LEDP_18232("Expiration Date {0} for PlayLaunchChannel is greater than allowed time of {1} months."),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -678,7 +677,7 @@ public enum LedpCode {
     LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     // Generic Errors
-    LEDP_32000("Validations failed: {0}"), //
+    LEDP_32000("Validation Error: {0}"), //
     LEDP_32001("Unsupported Operation: {0}"), //
 
     // le-saml
