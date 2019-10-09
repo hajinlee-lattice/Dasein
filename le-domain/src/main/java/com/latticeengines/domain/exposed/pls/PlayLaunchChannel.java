@@ -158,7 +158,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     private PlayLaunch lastLaunch;
 
     @JsonProperty("isAlwaysOn")
-    @Column(name = "ALWAYS_ON", nullable = false, columnDefinition = "boolean default false")
+    @Column(name = "ALWAYS_ON", nullable = false, columnDefinition = "'BIT DEFAULT 0'")
     private Boolean isAlwaysOn = false;
 
     @JsonProperty("deleted")
