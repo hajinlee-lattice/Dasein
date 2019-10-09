@@ -68,6 +68,7 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
         List<String> contactTemplates = new ArrayList<>();
         List<String> transactionTemplates = new ArrayList<>();
         dataFeedTasks.forEach(dataFeedTask -> {
+            cdlProxy.backupTemplate(customerSpace.toString(), dataFeedTask.getUniqueId());
             switch (BusinessEntity.getByName(dataFeedTask.getEntity())) {
                 case Account:
                     accountTemplates.add(dataFeedTask.getImportTemplate().getName());
