@@ -13,7 +13,7 @@ public class MySQLPostProcessor extends PostProcessor {
 
     static class FixCustomColumnDefinition implements PostProcessor.LineProcessor {
 
-        private static final Pattern REGEX = Pattern.compile("`'.*?(GENERATED|JSON).*?'`");
+        private static final Pattern REGEX = Pattern.compile("`'.*?(GENERATED|JSON|DEFAULT).*?'`");
 
         @Override
         public List<String> processLine(String line) {
@@ -31,6 +31,5 @@ public class MySQLPostProcessor extends PostProcessor {
             return Collections.singletonList(line);
         }
     }
-
 
 }
