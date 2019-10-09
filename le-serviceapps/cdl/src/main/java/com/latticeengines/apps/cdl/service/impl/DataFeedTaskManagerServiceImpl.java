@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import static com.latticeengines.domain.exposed.cdl.CDLConstants.DEFAULT_S3_USER;
+import static com.latticeengines.domain.exposed.cdl.CDLConstants.DEFAULT_SYSTEM_USER;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -412,7 +412,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         importConfig.setJobIdentifier(dataFeedTask.getUniqueId());
         importConfig.setFileSource("S3");
         CSVImportFileInfo csvImportFileInfo = new CSVImportFileInfo();
-        csvImportFileInfo.setFileUploadInitiator(DEFAULT_S3_USER);
+        csvImportFileInfo.setFileUploadInitiator(DEFAULT_SYSTEM_USER);
         csvImportFileInfo.setReportFileName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFilePath(backupPath);
