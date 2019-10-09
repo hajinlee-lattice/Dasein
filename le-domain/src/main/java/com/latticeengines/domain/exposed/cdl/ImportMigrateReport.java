@@ -69,6 +69,9 @@ public class ImportMigrateReport {
     @JsonProperty("transaction_data_tables")
     private List<String> transactionDataTables;
 
+    @JsonProperty("backup_template_list")
+    private List<BackupInfo> backupTemplateList;
+
     public String getSystemName() {
         return systemName;
     }
@@ -219,5 +222,38 @@ public class ImportMigrateReport {
 
     public void setTransactionDataTables(List<String> transactionDataTables) {
         this.transactionDataTables = transactionDataTables;
+    }
+
+    public List<BackupInfo> getBackupTemplateList() {
+        return backupTemplateList;
+    }
+
+    public void setBackupTemplateList(List<BackupInfo> backupTemplateList) {
+        this.backupTemplateList = backupTemplateList;
+    }
+
+    public static class BackupInfo {
+
+        @JsonProperty("task_id")
+        private String taskId;
+
+        @JsonProperty("backup_name")
+        private String backupName;
+
+        public String getTaskId() {
+            return taskId;
+        }
+
+        public void setTaskId(String taskId) {
+            this.taskId = taskId;
+        }
+
+        public String getBackupName() {
+            return backupName;
+        }
+
+        public void setBackupName(String backupName) {
+            this.backupName = backupName;
+        }
     }
 }

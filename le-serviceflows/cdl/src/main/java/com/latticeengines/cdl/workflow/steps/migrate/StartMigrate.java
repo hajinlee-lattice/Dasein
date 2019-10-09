@@ -67,8 +67,13 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
         List<String> accountTemplates = new ArrayList<>();
         List<String> contactTemplates = new ArrayList<>();
         List<String> transactionTemplates = new ArrayList<>();
+        List<ImportMigrateReport.BackupInfo> backupInfoList = new ArrayList<>();
         dataFeedTasks.forEach(dataFeedTask -> {
-            cdlProxy.backupTemplate(customerSpace.toString(), dataFeedTask.getUniqueId());
+            String backupName = cdlProxy.backupTemplate(customerSpace.toString(), dataFeedTask.getUniqueId());
+            ImportMigrateReport.BackupInfo backupInfo = new ImportMigrateReport.BackupInfo();
+            backupInfo.setTaskId(dataFeedTask.getUniqueId());
+            backupInfo.setBackupName(backupName);
+            backupInfoList.add(backupInfo);
             switch (BusinessEntity.getByName(dataFeedTask.getEntity())) {
                 case Account:
                     accountTemplates.add(dataFeedTask.getImportTemplate().getName());
@@ -86,6 +91,7 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
         report.setInputAccountTemplates(accountTemplates);
         report.setInputContactTemplates(contactTemplates);
         report.setInputTransactionTemplates(transactionTemplates);
+        report.setBackupTemplateList(backupInfoList);
         migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTrackingPid, report);
 
         // create or update import system.
