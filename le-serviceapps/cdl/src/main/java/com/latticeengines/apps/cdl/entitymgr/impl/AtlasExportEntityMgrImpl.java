@@ -20,6 +20,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -87,6 +88,7 @@ public class AtlasExportEntityMgrImpl
         export.setStatus(MetadataSegmentExport.Status.RUNNING);
         export.setUuid(NamingUtils.uuid(UUID_PREFIX));
         export.setScheduled(true);
+        export.setCreatedBy(CDLConstants.DEFAULT_SYSTEM_USER);
         export.setSegmentName(DATA_DUMP_NAME);
         export.setDatePrefix(exportDateFormat.format(new Date()));
         export.setCleanupBy(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(30)));
