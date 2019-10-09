@@ -1,13 +1,31 @@
 package com.latticeengines.apps.cdl.service;
 
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface DataFeedTaskTemplateService {
 
     /**
-     * @param customerSpace
+     * @param customerSpace target tenant
      * @param simpleTemplateMetadata Template description.
      * @return true if success.
      */
     boolean setupWebVisitTemplate(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata);
+
+    /**
+     *
+     * @param customerSpace target tenant.
+     * @param uniqueTaskId DataFeedTask unique Id to be backup.
+     * @return filename that has the backup data.
+     */
+    String backupTemplate(String customerSpace, String uniqueTaskId);
+
+    /**
+     *
+     * @param customerSpace target tenant.
+     * @param uniqueTaskId DataFeedTask unique Id to be restore.
+     * @param backupName Name from backupTemplate
+     * @return A table object from the backup file. / Null if file not exists.
+     */
+    Table getTableFromBackup(String customerSpace, String uniqueTaskId, String backupName);
 }

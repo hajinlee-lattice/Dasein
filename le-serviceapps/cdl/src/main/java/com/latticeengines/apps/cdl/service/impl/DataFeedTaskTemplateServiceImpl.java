@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -12,9 +14,11 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
@@ -25,7 +29,9 @@ import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -48,6 +54,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -84,7 +91,16 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private BatonService batonService;
 
     @Inject
+    private S3Service s3Service;
+
+    @Inject
     private MetadataProxy metadataProxy;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customerBucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     @Override
     public boolean setupWebVisitTemplate(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
@@ -156,6 +172,53 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
 
         return true;
+    }
+
+    @Override
+    public String backupTemplate(String customerSpace, String uniqueTaskId) {
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);
+        if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
+            log.warn("There's no template to backup for task: " + uniqueTaskId);
+            return StringUtils.EMPTY;
+        }
+        Table template = dataFeedTask.getImportTemplate();
+        String templateBackup = JsonUtils.serialize(template);
+        InputStream backupStream;
+        try {
+            backupStream = IOUtils.toInputStream(templateBackup, "UTF-8");
+        } catch (IOException e) {
+            log.error("Cannot backup template: " + uniqueTaskId);
+            return StringUtils.EMPTY;
+        }
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String backupPath = pathBuilder.getS3AtlasTableBackupPrefix(CustomerSpace.parse(customerSpace).getTenantId(),
+                uniqueTaskId);
+        if (!backupPath.endsWith("/")) {
+            backupPath += "/";
+        }
+        String backupName = template.getName() + "_" + System.currentTimeMillis() + ".json";
+        s3Service.uploadInputStream(customerBucket, backupPath + backupName, backupStream, true);
+        return backupName;
+    }
+
+    @Override
+    public Table getTableFromBackup(String customerSpace, String uniqueTaskId, String backupName) {
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String backupPath = pathBuilder.getS3AtlasTableBackupPrefix(CustomerSpace.parse(customerSpace).getTenantId(),
+                uniqueTaskId);
+        if (!backupPath.endsWith("/")) {
+            backupPath += "/";
+        }
+        if (!s3Service.objectExist(customerBucket, backupPath + backupName)) {
+            return null;
+        }
+        InputStream backupStream = s3Service.readObjectAsStream(customerBucket, backupPath + backupName);
+        try {
+            return JsonUtils.deserialize(backupStream, Table.class);
+        } catch (Exception e) {
+            log.error("Cannot get table for task {}, backup file {}", uniqueTaskId, backupName);
+            return null;
+        }
     }
 
     private void attachPathPatternCatalog(@NotNull Tenant tenant, @NotNull Catalog catalog) {

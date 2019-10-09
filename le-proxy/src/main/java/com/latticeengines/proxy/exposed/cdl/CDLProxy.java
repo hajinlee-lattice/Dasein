@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
@@ -515,6 +516,32 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return responseDoc.getResult();
         } else {
             return false;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public String backupTemplate(String customerSpace, String uniqueTaskId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/backup/{uniqueTaskId}",
+                shortenCustomerSpace(customerSpace), uniqueTaskId);
+        ResponseDocument<String> responseDoc = post("backup template", url, null, ResponseDocument.class);
+        if (responseDoc.isSuccess()) {
+            return responseDoc.getResult();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+//    @SuppressWarnings("unchecked")
+    public Table getTableFromBackup(String customerSpace, String uniqueTaskId, String backupName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/restore/{uniqueTaskId}",
+                shortenCustomerSpace(customerSpace), uniqueTaskId);
+        String json = post("get table from backup file", url, backupName,
+                String.class);
+        ResponseDocument<Table> responseDoc = ResponseDocument.generateFromJSON(json, Table.class);
+        if (responseDoc != null && responseDoc.isSuccess()) {
+            return responseDoc.getResult();
+        } else {
+            return null;
         }
     }
 
