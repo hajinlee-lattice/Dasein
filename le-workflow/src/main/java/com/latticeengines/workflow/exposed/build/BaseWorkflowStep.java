@@ -138,7 +138,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String AI_RAW_RATING_TABLE_NAME = "AI_RAW_RATING_TABLE_NAME";
     protected static final String PIVOTED_RATINGS_TABLE_NAME = "PIVOTED_RATINGS_TABLE_NAME";
     protected static final String RATING_ITERATION_RESULT_TABLE_NAME = "RATING_ITERATION_RESULT_TABLE_NAME";
-    protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
+    public static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
     protected static final String CDL_COLLECTION_STATUS = "CDL_COLLECTION_STATUS";
     public static final String SYSTEM_ACTION_IDS = "SYSTEM_ACTION_IDS";
@@ -160,7 +160,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String BUCKETED_SCORE_SUMMARIES_AGG = "BUCKETED_SCORE_SUMMARIES_AGG";
     protected static final String BUCKET_METADATA_MAP_AGG = "BUCKET_METADATA_MAP_AGG";
     protected static final String MODEL_GUID_ENGINE_ID_MAP_AGG = "MODEL_GUID_ENGINE_ID_MAP_AGG";
-    protected static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
+    public static final String SKIP_PUBLISH_PA_TO_S3 = "SKIP_PUBLISH_PA_TO_S3";
     protected static final String ATLAS_EXPORT_DATA_UNIT = "ATLAS_EXPORT_DATA_UNIT";
     protected static final String ATLAS_EXPORT_DELETE_PATH = "ATLAS_EXPORT_DELETE_PATH";
     protected static final String PRIMARY_IMPORT_SYSTEM = "PRIMARY_IMPORT_SYSTEM";

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,9 +18,9 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("DateMap")
     private Map<String, Long> dateMap;
 
-    // catalogName -> original file name used to build catalog store
+    // catalogName -> list of original file name used to build catalog store
     @JsonProperty("OrigCatalogFileMap")
-    private Map<String, String> origCatalogFileMap;
+    private Map<String, List<String>> origCatalogFileMap;
 
     @JsonProperty("MinTxnDate")
     private Integer minTxnDate = 0;
@@ -161,11 +162,11 @@ public class DataCollectionStatusDetail implements Serializable {
         this.dateMap = dateMap;
     }
 
-    public Map<String, String> getOrigCatalogFileMap() {
+    public Map<String, List<String>> getOrigCatalogFileMap() {
         return origCatalogFileMap;
     }
 
-    public void setOrigCatalogFileMap(Map<String, String> origCatalogFileMap) {
+    public void setOrigCatalogFileMap(Map<String, List<String>> origCatalogFileMap) {
         this.origCatalogFileMap = origCatalogFileMap;
     }
 }

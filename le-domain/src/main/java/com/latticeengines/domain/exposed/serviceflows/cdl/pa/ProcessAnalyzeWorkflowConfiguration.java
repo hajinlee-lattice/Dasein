@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
@@ -234,6 +235,16 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder catalogTables(Map<String, String> catalogTables) {
             processCatalogWorkflowBuilder.catalogTables(catalogTables);
+            return this;
+        }
+
+        public Builder catalogIngestionBehaivors(Map<String, DataFeedTask.IngestionBehavior> ingestionBehaviors) {
+            processCatalogWorkflowBuilder.catalogIngestionBehaviors(ingestionBehaviors);
+            return this;
+        }
+
+        public Builder catalogPrimaryKeyColumns(Map<String, String> primaryKeyColumns) {
+            processCatalogWorkflowBuilder.catalogPrimaryKeyColumns(primaryKeyColumns);
             return this;
         }
 

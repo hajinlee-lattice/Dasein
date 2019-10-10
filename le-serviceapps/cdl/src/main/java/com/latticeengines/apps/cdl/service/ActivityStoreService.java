@@ -21,9 +21,12 @@ public interface ActivityStoreService {
      *            catalog name, must be provided
      * @param taskUniqueId
      *            unique id for associated {@link DataFeedTask}, can be optional
+     * @param primaryKeyColumn
+     *            column name used to uniquely identify catalog entry
      * @return created catalog, will not be {@code null}
      */
-    Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId);
+    Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId,
+            String primaryKeyColumn);
 
     /**
      * Wrapper for {@link CatalogEntityMgr#findByNameAndTenant(String, Tenant)} to

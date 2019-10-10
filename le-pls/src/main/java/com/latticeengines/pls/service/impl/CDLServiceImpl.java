@@ -663,7 +663,7 @@ public class CDLServiceImpl implements CDLService {
         if (EntityType.WebVisitPathPattern == entityType) {
             // create ptn catalog
             Catalog catalog = activityStoreProxy.createCatalog(customerSpace, EntityType.WebVisitPathPattern.name(),
-                    taskId);
+                    taskId, InterfaceName.PathPatternName.name());
             log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
                     customerSpace, catalog, taskId);
 

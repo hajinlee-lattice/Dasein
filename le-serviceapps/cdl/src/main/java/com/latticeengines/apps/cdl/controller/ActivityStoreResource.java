@@ -38,7 +38,7 @@ public class ActivityStoreResource {
         Preconditions.checkArgument(request != null && StringUtils.isNotBlank(request.getCatalogName()),
                 "Request should contains non-blank catalog name");
         return activityStoreService.createCatalog(customerSpace, request.getCatalogName(),
-                request.getDataFeedTaskUniqueId());
+                request.getDataFeedTaskUniqueId(), request.getPrimaryKeyColumn());
     }
 
     @RequestMapping(value = "/catalogs/{catalogName}", method = RequestMethod.GET)

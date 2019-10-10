@@ -24,10 +24,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         super(hostPort, ROOT_PATH);
     }
 
-    public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId) {
+    public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId,
+            String primaryKeyColumn) {
         String url = constructUrl("/customerspaces/{customerSpace}/activities/catalogs",
                 shortenCustomerSpace(customerSpace));
-        CreateCatalogRequest request = new CreateCatalogRequest(catalogName, taskUniqueId);
+        CreateCatalogRequest request = new CreateCatalogRequest(catalogName, taskUniqueId, primaryKeyColumn);
         return post("create_catalog", url, request, Catalog.class);
     }
 
