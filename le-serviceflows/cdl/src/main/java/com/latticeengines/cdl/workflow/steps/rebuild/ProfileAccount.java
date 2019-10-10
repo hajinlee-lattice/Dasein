@@ -300,6 +300,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         if (existingValueMap != null) {
             existingCount = existingValueMap.get(BusinessEntity.Account);
         }
+        if (existingCount == null || existingCount == 0) {
+            return true;
+        }
         Map<BusinessEntity, Long> newValueMap = getMapObjectFromContext(BaseWorkflowStep.NEW_RECORDS,
                 BusinessEntity.class, Long.class);
         if (newValueMap != null) {
