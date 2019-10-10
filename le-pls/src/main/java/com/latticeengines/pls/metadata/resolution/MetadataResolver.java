@@ -729,10 +729,11 @@ public class MetadataResolver {
         boolean flag = true;
         if (nonConformingTimeZoneCount > 0) {
             if (isISO8601) {
-                warningMessage.append("Time zone should be part of value but is not.");
+                warningMessage.append(String.format("Time zone should be part of value but is not for column %s.",
+                        columnHeaderName));
             } else {
                 warningMessage.append(String.format("Time zone set to %s. Value should not contain time " +
-                        "zone setting.", timezone));
+                        "zone setting for column %s.", timezone, columnHeaderName));
             }
             flag = false;
         }
