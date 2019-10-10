@@ -182,7 +182,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             return StringUtils.EMPTY;
         }
         Table template = dataFeedTask.getImportTemplate();
-        String templateBackup = JsonUtils.serialize(template);
+        String templateBackup = JsonUtils.serialize(dataFeedTask);
         InputStream backupStream;
         try {
             backupStream = IOUtils.toInputStream(templateBackup, "UTF-8");
@@ -202,7 +202,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public Table getTableFromBackup(String customerSpace, String uniqueTaskId, String backupName) {
+    public Table restoreTemplate(String customerSpace, String uniqueTaskId, String backupName, boolean onlyGetTable) {
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         String backupPath = pathBuilder.getS3AtlasTableBackupPrefix(CustomerSpace.parse(customerSpace).getTenantId(),
                 uniqueTaskId);
@@ -214,7 +214,14 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
         InputStream backupStream = s3Service.readObjectAsStream(customerBucket, backupPath + backupName);
         try {
-            return JsonUtils.deserialize(backupStream, Table.class);
+            DataFeedTask backupTask = JsonUtils.deserialize(backupStream, DataFeedTask.class);
+            if (!onlyGetTable) {
+                DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);
+                if (dataFeedTask == null) {
+                    dataFeedTaskService.createDataFeedTask(customerSpace, backupTask);
+                }
+            }
+            return backupTask.getImportTemplate();
         } catch (Exception e) {
             log.error("Cannot get table for task {}, backup file {}", uniqueTaskId, backupName);
             return null;

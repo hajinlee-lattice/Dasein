@@ -531,12 +531,11 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
-//    @SuppressWarnings("unchecked")
-    public Table getTableFromBackup(String customerSpace, String uniqueTaskId, String backupName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/restore/{uniqueTaskId}",
-                shortenCustomerSpace(customerSpace), uniqueTaskId);
-        String json = post("get table from backup file", url, backupName,
-                String.class);
+    public Table restoreTemplate(String customerSpace, String uniqueTaskId, String backupName, boolean onlyGetTable) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/restore/{uniqueTaskId}?onlyGetTable={onlyGetTable}",
+                shortenCustomerSpace(customerSpace), uniqueTaskId, String.valueOf(onlyGetTable));
+        String json = post("get table from backup file", url, backupName, String.class);
         ResponseDocument<Table> responseDoc = ResponseDocument.generateFromJSON(json, Table.class);
         if (responseDoc != null && responseDoc.isSuccess()) {
             return responseDoc.getResult();

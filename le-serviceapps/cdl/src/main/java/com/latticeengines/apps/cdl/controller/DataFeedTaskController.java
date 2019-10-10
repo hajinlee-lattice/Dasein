@@ -181,12 +181,13 @@ public class DataFeedTaskController {
     @PostMapping(value = "/restore/{uniqueTaskId}")
     @ResponseBody
     @ApiOperation(value = "Read table from backup file")
-    public ResponseDocument<Table> getTableFromBackup(@PathVariable String customerSpace,
-                                                      @PathVariable String uniqueTaskId,
-                                                      @RequestBody String backupName) {
+    public ResponseDocument<Table> restoreTemplate(@PathVariable String customerSpace,
+                                  @PathVariable String uniqueTaskId,
+                                  @RequestParam(value = "onlyGetTable", required = false, defaultValue = "true") boolean onlyGetTable,
+                                  @RequestBody String backupName) {
         try {
             return ResponseDocument.successResponse(
-                    dataFeedTaskTemplateService.getTableFromBackup(customerSpace, uniqueTaskId, backupName));
+                    dataFeedTaskTemplateService.restoreTemplate(customerSpace, uniqueTaskId, backupName, onlyGetTable));
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }

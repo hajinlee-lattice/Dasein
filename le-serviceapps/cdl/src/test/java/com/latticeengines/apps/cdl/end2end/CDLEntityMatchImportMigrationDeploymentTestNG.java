@@ -101,9 +101,11 @@ public class CDLEntityMatchImportMigrationDeploymentTestNG extends CDLEnd2EndDep
         List<ImportMigrateReport.BackupInfo> backupInfos = importMigrateTracking.getReport().getBackupTemplateList();
         Assert.assertNotNull(backupInfos);
         for (ImportMigrateReport.BackupInfo backupInfo : backupInfos) {
-            Table backupTable = cdlProxy.getTableFromBackup(mainCustomerSpace, backupInfo.getTaskId(),
-                    backupInfo.getBackupName());
+            Table backupTable = cdlProxy.restoreTemplate(mainCustomerSpace, backupInfo.getTaskId(),
+                    backupInfo.getBackupName(), false);
             Assert.assertNotNull(backupTable);
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, backupInfo.getTaskId());
+            Assert.assertNotNull(dataFeedTask);
         }
         Assert.assertTrue(dataFeed.getTasks().stream().map(DataFeedTask::getUniqueId).collect(Collectors.toSet()).containsAll(migratedDataFeedTasks));
 

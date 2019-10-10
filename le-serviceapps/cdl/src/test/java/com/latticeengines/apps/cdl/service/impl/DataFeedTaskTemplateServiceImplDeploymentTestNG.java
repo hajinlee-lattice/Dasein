@@ -119,7 +119,7 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         String backupName = cdlProxy.backupTemplate(mainCustomerSpace, webVisitStreamTask.getUniqueId());
         Assert.assertFalse(StringUtils.isEmpty(backupName));
 
-        Table restore = cdlProxy.getTableFromBackup(mainCustomerSpace, webVisitStreamTask.getUniqueId(), backupName);
+        Table restore = cdlProxy.restoreTemplate(mainCustomerSpace, webVisitStreamTask.getUniqueId(), backupName, true);
         Assert.assertNotNull(restore);
 
         Assert.assertEquals(restore.getAttributes().size(), webVisitStreamTask.getImportTemplate().getAttributes().size());

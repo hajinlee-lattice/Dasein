@@ -25,7 +25,8 @@ public interface DataFeedTaskTemplateService {
      * @param customerSpace target tenant.
      * @param uniqueTaskId DataFeedTask unique Id to be restore.
      * @param backupName Name from backupTemplate
+     * @param onlyGetTable if true, only return the template table, won't restore datafeedtask.
      * @return A table object from the backup file. / Null if file not exists.
      */
-    Table getTableFromBackup(String customerSpace, String uniqueTaskId, String backupName);
+    Table restoreTemplate(String customerSpace, String uniqueTaskId, String backupName, boolean onlyGetTable);
 }
