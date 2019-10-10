@@ -99,8 +99,7 @@ public class MetadataSegmentResource {
     @PutMapping(value = "/{segmentName}/counts")
     @ResponseBody
     @ApiOperation(value = "Update counts for a segment")
-    public Map<BusinessEntity, Long> updateSegmentCounts(@PathVariable String customerSpace,
-            @PathVariable String segmentName) {
+    public Map<BusinessEntity, Long> updateSegmentCounts(@PathVariable String segmentName) {
         return metadataSegmentService.updateSegmentCounts(segmentName);
     }
 
