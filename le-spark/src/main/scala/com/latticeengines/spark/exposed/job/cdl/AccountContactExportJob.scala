@@ -26,6 +26,8 @@ class AccountContactExportJob extends AbstractSparkJob[AccountContactExportConfi
       // left join
       val contactJoinKey = AccountContactExportConfig.CONTACT_ATTR_PREFIX + joinKey;
       var joinResult: DataFrame = accountTable.join(contactTable, accountTable(joinKey) === contactTable(contactJoinKey), "left")
+      // drop the join key
+      joinResult = joinResult.drop(contactJoinKey)
       lattice.output = joinResult :: Nil
     }
   }
