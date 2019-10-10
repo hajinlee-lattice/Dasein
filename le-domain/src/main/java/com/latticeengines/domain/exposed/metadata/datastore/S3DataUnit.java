@@ -1,9 +1,11 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.util.S3PathBuilder;
 
 public class S3DataUnit extends DataUnit {
 
@@ -11,8 +13,8 @@ public class S3DataUnit extends DataUnit {
     @JsonProperty("LinkedDir")
     private String linkedDir;
 
-    @JsonProperty("BucketName")
-    private String bucketName;
+    @JsonProperty("Bucket")
+    private String bucket;
 
     @JsonProperty("Prefix")
     private String prefix;
@@ -27,18 +29,12 @@ public class S3DataUnit extends DataUnit {
         String protocolStart = "://";
         String slash = "/";
         StringBuffer fullPath = new StringBuffer();
-        if (StringUtils.isNotEmpty(bucketName)) {
-            fullPath.append(protocol).append(protocolStart).append(bucketName).append(slash).append(prefix);
+        fixBucketAndPrefix();
+        if (StringUtils.isNotEmpty(bucket)) {
+            fullPath.append(protocol).append(protocolStart).append(bucket).append(slash).append(prefix);
             return fullPath.toString();
         } else {
-            // use old link dir to construct full path
-            S3PathBuilder.setS3Bucket(this);
-            if (StringUtils.isNotEmpty(bucketName)) {
-                fullPath.append(protocol).append(protocolStart).append(bucketName).append(slash).append(prefix);
-                return fullPath.toString();
-            } else {
-                throw new RuntimeException("Invalid link dir, can't get full path.");
-            }
+            throw new RuntimeException("Invalid link dir, can't get full path.");
         }
     }
 
@@ -50,12 +46,12 @@ public class S3DataUnit extends DataUnit {
         this.linkedDir = linkedDir;
     }
 
-    public String getBucketName() {
-        return bucketName;
+    public String getBucket() {
+        return bucket;
     }
 
-    public void setBucketName(String bucketName) {
-        this.bucketName = bucketName;
+    public void setBucket(String bucket) {
+        this.bucket = bucket;
     }
 
     public String getPrefix() {
@@ -64,5 +60,21 @@ public class S3DataUnit extends DataUnit {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    public void fixBucketAndPrefix() {
+        if (StringUtils.isNotEmpty(linkedDir)) {
+            Matcher matcher = Pattern.compile("^(s3a|s3n|s3)://(?<bucket>[^/]+)/(?<prefix>.*)").matcher(linkedDir);
+            if (matcher.matches()) {
+                String bucket = matcher.group("bucket");
+                String prefix = matcher.group("prefix");
+                this.bucket = bucket;
+                // if prefix end with a file, then extract path
+                if (Pattern.compile(".*/.*\\..*$").matcher(prefix).matches()) {
+                    prefix = prefix.substring(0, prefix.lastIndexOf("/"));
+                }
+                this.prefix = prefix;
+            }
+        }
     }
 }

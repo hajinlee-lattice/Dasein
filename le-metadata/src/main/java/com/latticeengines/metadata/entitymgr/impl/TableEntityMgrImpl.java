@@ -43,7 +43,6 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.DataRuleDao;
@@ -496,17 +495,11 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     }
                 } else if (DataUnit.StorageType.S3.equals(unit.getStorageType())) {
                     S3DataUnit s3DataUnit = (S3DataUnit) unit;
-                    String bucket = s3DataUnit.getBucketName();
-                    if (StringUtils.isNotEmpty(bucket)) {
-                        String prefix = s3DataUnit.getPrefix();
-                        s3Service.cleanupPrefix(bucket, prefix);
+                    s3DataUnit.fixBucketAndPrefix();
+                    if (StringUtils.isNotEmpty(s3DataUnit.getBucket())) {
+                        s3Service.cleanupPrefix(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
                     } else {
-                        S3PathBuilder.setS3Bucket(s3DataUnit);
-                        if (StringUtils.isNotEmpty(s3DataUnit.getBucketName())) {
-                            s3Service.cleanupPrefix(s3DataUnit.getBucketName(), s3DataUnit.getPrefix());
-                        } else {
-                            log.warn("s3 data unit " + unit.getName() + " has an invalid url " + s3DataUnit.getLinkedDir());
-                        }
+                        log.warn("s3 data unit " + unit.getName() + " has an invalid url " + s3DataUnit.getLinkedDir());
                     }
                 }
             }

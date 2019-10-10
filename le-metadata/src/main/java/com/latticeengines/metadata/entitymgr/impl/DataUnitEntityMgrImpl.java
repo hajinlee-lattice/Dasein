@@ -3,6 +3,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -13,12 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.documentdb.entity.DataUnitEntity;
 import com.latticeengines.documentdb.entitymgr.impl.BaseDocumentEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
-import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.repository.document.reader.DataUnitReaderRepository;
 import com.latticeengines.metadata.repository.document.writer.DataUnitWriterRepository;
@@ -38,6 +39,10 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     public BaseJpaRepository<DataUnitEntity, String> getRepository() {
         return repository;
     }
+
+    private static final int NUM_THREADS = 8;
+
+    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", NUM_THREADS);
 
     @Override
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {
@@ -63,14 +68,14 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     private void updateS3DataUnit(DataUnit dataUnit) {
-        if (dataUnit instanceof S3DataUnit) {
+        if (DataUnit.StorageType.S3.equals(dataUnit.getStorageType())) {
             S3DataUnit s3DataUnit = (S3DataUnit) dataUnit;
             if (StringUtils.isNotEmpty(s3DataUnit.getLinkedDir())) {
-                S3PathBuilder.setS3Bucket(s3DataUnit);
-                if (StringUtils.isNotEmpty(s3DataUnit.getBucketName())) {
+                s3DataUnit.fixBucketAndPrefix();
+                if (StringUtils.isNotEmpty(s3DataUnit.getBucket())) {
                     s3DataUnit.setLinkedDir(null);
                     log.info(String.format("S3 data unit will be saved with bucket name %s and prefix %s.",
-                            s3DataUnit.getBucketName(), s3DataUnit.getPrefix()));
+                            s3DataUnit.getBucket(), s3DataUnit.getPrefix()));
                 }
             }
         }

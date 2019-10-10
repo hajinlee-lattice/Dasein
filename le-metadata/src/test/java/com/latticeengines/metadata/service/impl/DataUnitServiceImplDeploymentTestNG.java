@@ -30,14 +30,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.metadata.service.DataUnitService;
-import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataUnitServiceImplDeploymentTestNG.class);
 
-    @Inject
-    private DropBoxProxy dropBoxProxy;
     @Inject
     private S3Service s3Service;
     @Inject
@@ -115,7 +112,7 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
         dataUnitService.createOrUpdateByNameAndStorageType(s3DataUnit);
         S3DataUnit s3DataUnit2 = (S3DataUnit) dataUnitService.findByNameTypeFromReader(s3DataUnit.getName(), DataUnit.StorageType.S3);
         Assert.assertNull(s3DataUnit2.getLinkedDir());
-        Assert.assertEquals(s3DataUnit2.getBucketName(), s3Bucket);
+        Assert.assertEquals(s3DataUnit2.getBucket(), s3Bucket);
         Assert.assertEquals(s3DataUnit2.getPrefix(), prefix);
         Assert.assertEquals(s3DataUnit2.getFullPath("s3a"), "s3a://" + s3Bucket + "/" + prefix);
         s3DataUnit2.setLinkedDir(linkedDir);
