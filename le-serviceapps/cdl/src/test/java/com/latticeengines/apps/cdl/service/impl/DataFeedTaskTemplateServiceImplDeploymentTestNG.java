@@ -12,6 +12,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.datanucleus.util.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -113,6 +114,27 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         verifyWebVisitStream(webVisitStreamTask, true);
     }
 
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateWebVisitPatternTemplate" })
+    private void testBackupTemplateAndRestore() {
+        String backupName = cdlProxy.backupTemplate(mainCustomerSpace, webVisitStreamTask.getUniqueId());
+        Assert.assertFalse(StringUtils.isEmpty(backupName));
+
+        Table restore = cdlProxy.restoreTemplate(mainCustomerSpace, webVisitStreamTask.getUniqueId(), backupName, true);
+        Assert.assertNotNull(restore);
+
+        Assert.assertEquals(restore.getAttributes().size(), webVisitStreamTask.getImportTemplate().getAttributes().size());
+        Assert.assertEquals(restore.getName(), webVisitStreamTask.getImportTemplate().getName());
+        for (Attribute webVisitAttr : webVisitStreamTask.getImportTemplate().getAttributes()) {
+            Attribute restoreAttr = restore.getAttribute(webVisitAttr.getName());
+            Assert.assertNotNull(restoreAttr);
+            Assert.assertEquals(restoreAttr.getName(), webVisitAttr.getName());
+            Assert.assertEquals(restoreAttr.getDisplayName(), webVisitAttr.getDisplayName());
+            Assert.assertEquals(restoreAttr.getPhysicalDataType(), webVisitAttr.getPhysicalDataType());
+            Assert.assertEquals(restoreAttr.getRequired(), webVisitAttr.getRequired());
+        }
+
+    }
+
     private void verifyWebVisitStream(@NotNull DataFeedTask dataFeedTask, boolean pathPatternCatalogAttached) {
         AtlasStream stream = activityStoreProxy.findStreamByName(mainCustomerSpace, EntityType.WebVisit.name(), true);
         Assert.assertNotNull(stream);
@@ -170,7 +192,7 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         return metadata;
     }
 
-    @Test(groups = "manual", dependsOnMethods = "testCreateWebVisitTemplate")
+    @Test(groups = "manual", dependsOnMethods = "testCreateWebVisitTemplate", enabled = false)
     public void testS3Import() {
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         Assert.assertNotNull(dropBoxSummary);
