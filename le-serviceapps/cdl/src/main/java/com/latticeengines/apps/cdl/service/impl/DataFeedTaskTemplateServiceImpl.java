@@ -219,6 +219,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);
                 if (dataFeedTask == null) {
                     dataFeedTaskService.createDataFeedTask(customerSpace, backupTask);
+                } else {
+                    dataFeedTask.setImportTemplate(backupTask.getImportTemplate());
+                    dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask);
                 }
             }
             return backupTask.getImportTemplate();
