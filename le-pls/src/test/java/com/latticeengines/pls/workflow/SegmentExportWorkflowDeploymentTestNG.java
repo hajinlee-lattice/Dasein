@@ -6,17 +6,20 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import javax.inject.Inject;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -25,16 +28,16 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
@@ -42,19 +45,22 @@ public class SegmentExportWorkflowDeploymentTestNG extends PlsDeploymentTestNGBa
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportWorkflowDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private TestMetadataSegmentProxy testMetadataSegmentProxy;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
-    @Autowired
+    @Inject
     private JobProxy jobProxy;
 
-    @Autowired
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    @Inject
     private MetadataSegmentExportService metadataSegmentExportService;
 
-    @Autowired
+    @Inject
     private S3Service s3Service;
 
     @Value("${aws.customer.s3.bucket}")
@@ -65,6 +71,8 @@ public class SegmentExportWorkflowDeploymentTestNG extends PlsDeploymentTestNGBa
     private CustomerSpace customerSpace;
 
     private HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+
+    private static final Set<JobStatus> TERMINATED_STATUSES = new HashSet<>(Arrays.asList(JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED, JobStatus.SKIPPED));
 
 
     @BeforeClass(groups = "deployment")
@@ -85,22 +93,17 @@ public class SegmentExportWorkflowDeploymentTestNG extends PlsDeploymentTestNGBa
         Assert.assertNotNull(segmentExport.getApplicationId());
         Assert.assertNotNull(segmentExport.getExportId());
         JobStatus status;
-        int maxTries = 60 * 12; // Wait maximum 2 hours
+        int maxTries = 60 * 12;
         int i = 0;
         do {
-            status = jobProxy.getJobStatus(segmentExport.getApplicationId());
+            status = workflowProxy.getWorkflowJobFromApplicationId(segmentExport.getApplicationId(), tenant.getId()).getJobStatus();
             try {
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
                 log.info(e.getMessage());
             }
-            i++;
-            if (i == maxTries) {
-                break;
-            }
-        } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
-        Assert.assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
+        } while (++i < maxTries && status != null && !status.isTerminated());
+        Assert.assertEquals(status, JobStatus.COMPLETED);
         verifyTest(segmentExport.getExportId());
     }
 
