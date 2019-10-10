@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.ImportMigrateReport;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
@@ -62,6 +64,9 @@ public class CDLEntityMatchImportMigrationDeploymentTestNG extends CDLEnd2EndDep
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
@@ -92,6 +97,15 @@ public class CDLEntityMatchImportMigrationDeploymentTestNG extends CDLEnd2EndDep
         }
         if (StringUtils.isNotEmpty(importMigrateTracking.getReport().getOutputTransactionTaskId())) {
             migratedDataFeedTasks.add(importMigrateTracking.getReport().getOutputTransactionTaskId());
+        }
+        List<ImportMigrateReport.BackupInfo> backupInfos = importMigrateTracking.getReport().getBackupTemplateList();
+        Assert.assertNotNull(backupInfos);
+        for (ImportMigrateReport.BackupInfo backupInfo : backupInfos) {
+            Table backupTable = cdlProxy.restoreTemplate(mainCustomerSpace, backupInfo.getTaskId(),
+                    backupInfo.getBackupName(), false);
+            Assert.assertNotNull(backupTable);
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, backupInfo.getTaskId());
+            Assert.assertNotNull(dataFeedTask);
         }
         Assert.assertTrue(dataFeed.getTasks().stream().map(DataFeedTask::getUniqueId).collect(Collectors.toSet()).containsAll(migratedDataFeedTasks));
 

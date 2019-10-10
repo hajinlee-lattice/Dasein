@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -153,12 +154,40 @@ public class DataFeedTaskController {
 
     @PostMapping(value = "/setup/webvisit")
     @ResponseBody
-    @ApiOperation(value = "Create a WebVist template")
+    @ApiOperation(value = "Create a WebVisit template")
     public ResponseDocument<Boolean> createWebVisitTemplate(@PathVariable String customerSpace,
                                                             @RequestBody SimpleTemplateMetadata simpleTemplateMetadata) {
         try {
             return ResponseDocument.successResponse(
                     dataFeedTaskTemplateService.setupWebVisitTemplate(customerSpace, simpleTemplateMetadata));
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/backup/{uniqueTaskId}")
+    @ResponseBody
+    @ApiOperation(value = "Back up template to S3")
+    public ResponseDocument<String> backupTemplate(@PathVariable String customerSpace,
+                                                   @PathVariable String uniqueTaskId) {
+        try {
+            return ResponseDocument.successResponse(
+                    dataFeedTaskTemplateService.backupTemplate(customerSpace, uniqueTaskId));
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/restore/{uniqueTaskId}")
+    @ResponseBody
+    @ApiOperation(value = "Read table from backup file")
+    public ResponseDocument<Table> restoreTemplate(@PathVariable String customerSpace,
+                                  @PathVariable String uniqueTaskId,
+                                  @RequestParam(value = "onlyGetTable", required = false, defaultValue = "true") boolean onlyGetTable,
+                                  @RequestBody String backupName) {
+        try {
+            return ResponseDocument.successResponse(
+                    dataFeedTaskTemplateService.restoreTemplate(customerSpace, uniqueTaskId, backupName, onlyGetTable));
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }
