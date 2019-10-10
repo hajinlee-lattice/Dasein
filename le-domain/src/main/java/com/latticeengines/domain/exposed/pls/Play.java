@@ -110,6 +110,10 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Transient
     private LaunchHistory launchHistory;
 
+    @JsonProperty("playLaunchChannels")
+    @Transient
+    private List<PlayLaunchChannel> playLaunchChannels;
+
     @JsonProperty("talkingPoints")
     @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -363,6 +367,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     public void setPlayGroups(Set<PlayGroup> playGroups) {
         this.playGroups = playGroups;
+    }
+
+    public List<PlayLaunchChannel> getPlayLaunchChannels() {
+        return playLaunchChannels;
+    }
+
+    public void setPlayLaunchChannels(List<PlayLaunchChannel> playLaunchChannels) {
+        this.playLaunchChannels = playLaunchChannels;
     }
 
     @Override
