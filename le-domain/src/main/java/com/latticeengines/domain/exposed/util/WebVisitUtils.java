@@ -45,9 +45,9 @@ public class WebVisitUtils {
         dim.setDisplayName(dim.getName());
         dim.setTenant(stream.getTenant());
         dim.setStream(stream);
-        dim.setUsages(Collections.singleton(StreamDimension.Usage.Pivot));
+        dim.addUsages(StreamDimension.Usage.Pivot);
 
-        // hash source medium TODO or just use the original value?
+        // hash source medium
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(InterfaceName.SourceMedium.name());
         generator.setFromCatalog(false);
@@ -70,7 +70,7 @@ public class WebVisitUtils {
         dim.setDisplayName(dim.getName());
         dim.setTenant(stream.getTenant());
         dim.setStream(stream);
-        dim.setUsages(Collections.singleton(StreamDimension.Usage.Dedup));
+        dim.addUsages(StreamDimension.Usage.Dedup);
 
         // use the original value
         DimensionGenerator generator = new DimensionGenerator();
@@ -96,7 +96,7 @@ public class WebVisitUtils {
         dim.setTenant(stream.getTenant());
         dim.setStream(stream);
         dim.setCatalog(pathPtnCatalog);
-        dim.setUsages(Collections.singleton(StreamDimension.Usage.Pivot));
+        dim.addUsages(StreamDimension.Usage.Pivot);
 
         // standardize and hash ptn name for dimension
         DimensionGenerator generator = new DimensionGenerator();

@@ -41,6 +41,9 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
+/*-
+ * dpltc deploy -a pls,admin,cdl,lp,metadata
+ */
 public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject

@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Basic;
@@ -176,6 +178,25 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
 
     public void setCalculator(DimensionCalculator calculator) {
         this.calculator = calculator;
+    }
+
+    @JsonIgnore
+    public void addUsages(Usage... usages) {
+        if (usages == null) {
+            return;
+        }
+        if (this.usages == null) {
+            this.usages = new HashSet<>();
+        }
+        this.usages.addAll(Arrays.asList(usages));
+    }
+
+    @JsonIgnore
+    public void removeUsages(Usage... usages) {
+        if (this.usages == null || usages == null) {
+            return;
+        }
+        this.usages.removeAll(Arrays.asList(usages));
     }
 
     public Set<Usage> getUsages() {
