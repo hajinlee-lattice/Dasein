@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
@@ -34,7 +35,8 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
             String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
             long startTime = System.currentTimeMillis();
             log.info("Playmaker Request URL:" + request.getRequestURL().toString() + " Start Time=" + startTime
-                    + " Tenant=" + tenantName);
+                    + " Tenant=" + tenantName + " Referrer=" + request.getHeader(HttpHeaders.REFERER));
+
             request.setAttribute(START_TIME, startTime);
         }
         return true;
@@ -47,7 +49,8 @@ public class LoggerInterceptor extends HandlerInterceptorAdapter {
             String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
             long startTime = (Long) request.getAttribute(START_TIME);
             log.info("Playmaker Request URL:" + request.getRequestURL().toString() + " Time Taken="
-                    + (System.currentTimeMillis() - startTime) + "ms" + " Tenant=" + tenantName);
+                    + (System.currentTimeMillis() - startTime) + "ms" + " Tenant=" + tenantName + " Referrer="
+                    + request.getHeader(HttpHeaders.REFERER));
         }
     }
 }
