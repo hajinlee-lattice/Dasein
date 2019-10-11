@@ -100,31 +100,6 @@ public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImpl
     }
 
     @Test(groups = SPARK_TEST_GROUP)
-    public void testBooleanFilter() {
-        AttributeLookup attrLp = new AttributeLookup(BusinessEntity.Account, "ISDELETED");
-        Bucket bkt1 = Bucket.valueBkt("Yes");
-        BucketRestriction bktRes1 = new BucketRestriction(attrLp, bkt1);
-        Bucket bkt2 = Bucket.valueBkt("No");
-        BucketRestriction bktRes2 = new BucketRestriction(attrLp, bkt2);
-        Restriction logical = Restriction.builder().or(bktRes1, bktRes2).build();
-
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setAccountRestriction(new FrontEndRestriction(logical));
-
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
-        String sql = entityQueryServiceSparkSQL.getQueryStr(frontEndQuery, DataCollection.Version.Blue,
-                SPARK_BATCH_USER, true);
-        System.out.println(sql);
-        long count = entityQueryServiceSparkSQL.getCount(frontEndQuery, DataCollection.Version.Blue,
-                SPARK_BATCH_USER);
-        Assert.assertEquals(count, 14L);
-        long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue,
-                SEGMENT_USER);
-        Assert.assertEquals(count, count2);
-    }
-
-    @Test(groups = SPARK_TEST_GROUP)
     public void testNestedNegativeInSpark() {
         // account
         AttributeLookup attrLp = new AttributeLookup(BusinessEntity.Account, "Industry");
