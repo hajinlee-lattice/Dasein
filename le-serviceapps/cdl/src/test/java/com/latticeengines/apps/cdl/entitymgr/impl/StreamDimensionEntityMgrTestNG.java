@@ -109,7 +109,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         if (STREAM_WEBVISIT.equals(dimension.getStream().getName())) {
             Assert.assertTrue(dimension.getCalculator() instanceof DimensionCalculatorRegexMode);
         } else {
-            Assert.assertTrue(dimension.getCalculator() instanceof DimensionCalculator);
+            Assert.assertNotNull(dimension.getCalculator());
         }
     }
 
@@ -120,6 +120,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_WEBVISIT));
         dimension.setCatalog(catalogs.get(CATALOG_WEBVISIT));
+        dimension.addUsages(StreamDimension.Usage.Pivot);
 
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(PathPatternName.name());
@@ -143,6 +144,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_OPP));
         dimension.setCatalog(catalogs.get(STREAM_OPP));
+        dimension.addUsages(StreamDimension.Usage.Pivot, StreamDimension.Usage.Filter);
 
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(LeadSource.name());
@@ -164,6 +166,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimension.setTenant(mainTestTenant);
         dimension.setStream(streams.get(STREAM_OPP));
         dimension.setCatalog(catalogs.get(STREAM_OPP));
+        dimension.addUsages(StreamDimension.Usage.Pivot, StreamDimension.Usage.Filter, StreamDimension.Usage.Dedup);
 
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(IsClosed.name());

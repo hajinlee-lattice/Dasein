@@ -5,7 +5,6 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
@@ -52,11 +51,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         return get("find_stream_by_name", url, AtlasStream.class);
     }
 
-    public void updateDimension(@NotNull String customerSpace, @NotNull String streamName,
+    public StreamDimension updateDimension(@NotNull String customerSpace, @NotNull String streamName,
             @NotNull StreamDimension dimension) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/activities/streams/{streamName}/dimensions/{dimensionName}",
                 shortenCustomerSpace(customerSpace), streamName, dimension.getName());
-        put("update_stream_dimension", url, dimension, SimpleBooleanResponse.class);
+        return put("update_stream_dimension", url, dimension, StreamDimension.class);
     }
 }

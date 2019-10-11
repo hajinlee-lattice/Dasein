@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -667,10 +670,16 @@ public class CDLServiceImpl implements CDLService {
                     true);
             if (webVisitStream != null) {
                 Preconditions.checkNotNull(webVisitStream.getDimensions());
-                Preconditions.checkArgument(webVisitStream.getDimensions().size() == 1);
+                Preconditions.checkArgument(webVisitStream.getDimensions().size() > 1);
 
                 // get path pattern dimension and attach catalog
-                StreamDimension dimension = webVisitStream.getDimensions().get(0);
+                Optional<StreamDimension> pathPtnDimension = webVisitStream.getDimensions().stream() //
+                        .filter(Objects::nonNull) //
+                        .filter(dim -> InterfaceName.PathPatternId.name().equals(dim.getName())) //
+                        .findFirst();
+                Preconditions.checkArgument(pathPtnDimension.isPresent(),
+                        "Path pattern dimension should be created with WebVisit stream");
+                StreamDimension dimension = pathPtnDimension.get();
                 dimension.setCatalog(catalog);
                 log.info("Attach path pattern catalog {} to WebVisit stream = {}, PathPatternId dimension = {}",
                         catalog, webVisitStream.getPid(), dimension.getPid());
@@ -686,17 +695,16 @@ public class CDLServiceImpl implements CDLService {
             DataFeedTask task = new DataFeedTask();
             task.setUniqueId(taskId);
             AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(MultiTenantContext.getTenant(), task);
-            StreamDimension dimension = WebVisitUtils.newWebVisitDimension(webVisitStream, pathPtnCatalog);
-            webVisitStream.setDimensions(Collections.singletonList(dimension));
+            List<StreamDimension> dimensions = WebVisitUtils.newWebVisitDimensions(webVisitStream, pathPtnCatalog);
+            webVisitStream.setDimensions(dimensions);
             webVisitStream = activityStoreProxy.createStream(customerSpace, webVisitStream);
 
             Preconditions.checkNotNull(webVisitStream);
             Preconditions.checkArgument(CollectionUtils.isNotEmpty(webVisitStream.getDimensions()));
-            Preconditions.checkArgument(webVisitStream.getDimensions().size() == 1);
-            dimension = webVisitStream.getDimensions().get(0);
+            Preconditions.checkArgument(webVisitStream.getDimensions().size() > 1);
             log.info(
-                    "Create WebVisit activity stream for tenant {}. stream PID = {}, dimension PID = {}, dataFeedTaskUniqueId = {}",
-                    customerSpace, webVisitStream.getPid(), dimension.getPid(), taskId);
+                    "Create WebVisit activity stream for tenant {}. stream PID = {}, dataFeedTaskUniqueId = {}",
+                    customerSpace, webVisitStream.getPid(), taskId);
         }
         return true;
     }

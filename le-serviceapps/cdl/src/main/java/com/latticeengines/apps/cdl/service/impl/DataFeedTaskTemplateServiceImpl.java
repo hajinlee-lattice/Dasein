@@ -166,7 +166,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             streamEntityMgr.create(webVisitStream);
             log.info("Create WebVisit activity stream for tenant {}. stream PID = {}, dataFeedTaskUniqueId = {}",
                     tenant.getId(), webVisitStream.getPid(), dataFeedTask.getUniqueId());
-            dimensionEntityMgr.create(WebVisitUtils.newWebVisitDimension(webVisitStream, pathPtnCatalog));
+            List<StreamDimension> dimensions = WebVisitUtils.newWebVisitDimensions(webVisitStream, pathPtnCatalog);
+            dimensions.forEach(dimensionEntityMgr::create);
             log.info("Create PathPatternId stream dimension for tenant {}. PathPatternCatalog = {}",
                     webVisitStream.getTenant().getId(), pathPtnCatalog);
         }
