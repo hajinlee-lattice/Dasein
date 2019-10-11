@@ -101,6 +101,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         newSegment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
 
         MetadataSegment returned = testSegmentProxy.createOrUpdate(newSegment);
+
         Assert.assertNotNull(returned);
         Assert.assertNotNull(returned.getName());
         Assert.assertEquals(returned.getName(), segmentName);

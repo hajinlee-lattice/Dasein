@@ -190,7 +190,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testWebVisitTemplate() throws FileNotFoundException {
         String feedType = "Default_Website_System_WebVisitData";
         webVisitTask = createTemplate(WEBVISIT_NAME, feedType, EntityType.WebVisit,
-                Arrays.asList(InterfaceName.WebVisitPageUrl, InterfaceName.WebVisitDate));
+                Arrays.asList(InterfaceName.WebVisitPageUrl, InterfaceName.SourceMedium, InterfaceName.WebVisitDate));
         verifyWebVisitStream(webVisitTask);
     }
 
