@@ -213,7 +213,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             backupPath += "/";
         }
         if (!s3Service.objectExist(customerBucket, backupPath + backupName)) {
-            return null;
+            log.error("Backup file {} not exists!", backupPath + backupName);
+            throw new LedpException(LedpCode.LEDP_40072, new String[]{uniqueTaskId, backupName});
         }
         InputStream backupStream = s3Service.readObjectAsStream(customerBucket, backupPath + backupName);
         try {
@@ -229,7 +230,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             }
             return backupTask.getImportTemplate();
         } catch (Exception e) {
-            log.error("Cannot get template for task {}, backup file {}", uniqueTaskId, backupName);
+            log.error("Cannot deserialize backup file for task {}, backup file {}", uniqueTaskId, backupName);
             throw new LedpException(LedpCode.LEDP_40072, new String[]{uniqueTaskId, backupName});
         }
     }
