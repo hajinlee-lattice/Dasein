@@ -83,7 +83,13 @@ public class SegmentServiceImpl implements SegmentService {
         }
 
         if (persistedSegment != null) {
-            updateSegmentCounts(persistedSegment);
+            try {
+                Map<BusinessEntity, Long> counts = updateSegmentCounts(persistedSegment);
+                persistedSegment.setAccounts(counts.getOrDefault(BusinessEntity.Account, 0L));
+                persistedSegment.setContacts(counts.getOrDefault(BusinessEntity.Contact, 0L));
+            } catch (Exception e) {
+                log.warn("Failed to update segment counts.", e);
+            }
         }
         return persistedSegment;
     }
