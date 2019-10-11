@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.match;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,10 @@ public class MatchDataCloudWorkflow extends AbstractWorkflow<MatchDataCloudWorkf
     private PrepareMatchConfig preMatchConfigStep;
 
     @Inject
-    private PrepareMatchDataStep prepareMatchData;
+    private PrepareMatchDataStep prepareMatchDataLegacy;
+
+    @Inject
+    private PrepareMatchData prepareMatchData;
 
     @Inject
     private BulkMatchWorkflow bulkMatchWorkflow;
@@ -27,10 +31,13 @@ public class MatchDataCloudWorkflow extends AbstractWorkflow<MatchDataCloudWorkf
     @Inject
     private ProcessMatchResult processMatchResult;
 
+    @Value("${cdl.datacloud.match.prepare.use.spark}")
+    private boolean prepareMatchWithSpark;
+
     @Override
     public Workflow defineWorkflow(MatchDataCloudWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
-                .next(prepareMatchData) //
+                .next(prepareMatchWithSpark ? prepareMatchData : prepareMatchDataLegacy) //
                 .next(preMatchConfigStep) //
                 .next(bulkMatchWorkflow) //
                 .next(processMatchResult) //

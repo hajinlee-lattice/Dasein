@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.PrepareMatchDataConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.PrepareMatchDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -26,7 +27,9 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
     }
 
     public static class Builder {
-        PrepareMatchDataConfiguration prepareMatchDataConfiguration = new PrepareMatchDataConfiguration();
+        // TODO legacy dataflow config, remove when spark version is stable
+        PrepareMatchDataFlowConfiguration prepareMatchDataFlowConfiguration = new PrepareMatchDataFlowConfiguration();
+        private PrepareMatchDataConfiguration prepareMatchDataConfiguration = new PrepareMatchDataConfiguration();
         private MatchDataCloudWorkflowConfiguration configuration = new MatchDataCloudWorkflowConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private BulkMatchWorkflowConfiguration.Builder bulkMatchWorkflowConfigurationBuilder = new BulkMatchWorkflowConfiguration.Builder();
@@ -37,6 +40,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(match);
             configuration.add(prepareMatchDataConfiguration);
+            configuration.add(prepareMatchDataFlowConfiguration);
             configuration.add(bulkMatchWorkflowConfigurationBuilder.build());
             configuration.add(matchResult);
             return configuration;
@@ -45,7 +49,8 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
-            prepareMatchDataConfiguration.setCustomerSpace(customerSpace);
+            prepareMatchDataFlowConfiguration.setCustomerSpace(customerSpace);
+            prepareMatchDataConfiguration.setCustomer(customerSpace.toString());
             bulkMatchWorkflowConfigurationBuilder.customer(customerSpace);
             matchResult.setCustomer(customerSpace.toString());
             return this;
@@ -53,12 +58,13 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             match.setMicroServiceHostPort(microServiceHostPort);
-            prepareMatchDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            prepareMatchDataFlowConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             match.setInternalResourceHostPort(internalResourceHostPort);
+            prepareMatchDataFlowConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             prepareMatchDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             matchResult.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -66,6 +72,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
 
         public Builder matchInputTableName(String tableName) {
             match.setInputTableName(tableName);
+            prepareMatchDataFlowConfiguration.setInputTableName(tableName);
             prepareMatchDataConfiguration.setInputTableName(tableName);
             return this;
         }
@@ -143,6 +150,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
 
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             match.setSkipStep(skipMatchingStep);
+            prepareMatchDataFlowConfiguration.setSkipStep(skipMatchingStep);
             prepareMatchDataConfiguration.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);
             return this;
@@ -174,6 +182,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         }
 
         public Builder matchGroupId(String matchGroupId) {
+            prepareMatchDataFlowConfiguration.setMatchGroupId(matchGroupId);
             prepareMatchDataConfiguration.setMatchGroupId(matchGroupId);
             matchResult.setMatchGroupId(matchGroupId);
             return this;
