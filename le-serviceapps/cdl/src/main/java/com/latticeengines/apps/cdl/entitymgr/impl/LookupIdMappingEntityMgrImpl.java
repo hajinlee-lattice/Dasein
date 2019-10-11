@@ -123,7 +123,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
         if (lookupIdMap.getExternalAuthentication() != null) {
             if (StringUtils.isBlank(lookupIdMap.getExternalAuthentication().getId())) {
-                throw new LedpException(LedpCode.LEDP_40051);
+                throw new LedpException(LedpCode.LEDP_40071);
             }
             ExternalSystemAuthentication updatedAuth = //
                     extSysAuthenticationDao.updateAuthentication(lookupIdMap.getExternalAuthentication());
