@@ -246,11 +246,7 @@ public class RestrictionUtils {
         if (vals.length == 1) {
             return Restriction.builder().let(attr).eq(vals[0]).build();
         } else {
-            Restriction[] children = new Restriction[vals.length];
-            for (int i = 0; i < vals.length; i++) {
-                children[i] = Restriction.builder().let(attr).eq(vals[i]).build();
-            }
-            return Restriction.builder().or(children).build();
+            return Restriction.builder().let(attr).inCollection(Arrays.asList(vals)).build();
         }
     }
 
@@ -258,11 +254,7 @@ public class RestrictionUtils {
         if (vals.length == 1) {
             return Restriction.builder().let(attr).neq(vals[0]).build();
         } else {
-            Restriction[] children = new Restriction[vals.length];
-            for (int i = 0; i < vals.length; i++) {
-                children[i] = Restriction.builder().let(attr).neq(vals[i]).build();
-            }
-            return Restriction.builder().and(children).build();
+            return Restriction.builder().let(attr).notInCollection(Arrays.asList(vals)).build();
         }
     }
 
