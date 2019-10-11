@@ -3,12 +3,21 @@ package com.latticeengines.domain.exposed.serviceflows.scoring.steps;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
 public class CombineInputTableWithScoreDataFlowConfiguration
-        extends BaseScoringDataFlowStepConfiguration {
+        extends SparkJobStepConfiguration {
+
+    @JsonProperty("score_results_table_name")
+    @SourceTableName
+    private String scoreResultsTableName;
+
+    @JsonProperty("input_table_name")
+    @SourceTableName
+    private String inputTableName;
 
     @JsonProperty
     private List<BucketMetadata> bucketMetadata;
@@ -32,8 +41,6 @@ public class CombineInputTableWithScoreDataFlowConfiguration
     private String idColumnName = InterfaceName.InternalId.name();
 
     public CombineInputTableWithScoreDataFlowConfiguration() {
-        setBeanName("combineInputTableWithScore");
-        setTargetTableName(NamingUtils.uuid("CombineInputTableWithScore"));
     }
 
     public boolean isCdlModel() {
@@ -90,6 +97,22 @@ public class CombineInputTableWithScoreDataFlowConfiguration
 
     public void setIdColumnName(String idColumnName) {
         this.idColumnName = idColumnName;
+    }
+
+    public String getScoreResultsTableName() {
+        return scoreResultsTableName;
+    }
+
+    public void setScoreResultsTableName(String scoreResultsTableName) {
+        this.scoreResultsTableName = scoreResultsTableName;
+    }
+
+    public String getInputTableName() {
+        return inputTableName;
+    }
+
+    public void setInputTableName(String inputTableName) {
+        this.inputTableName = inputTableName;
     }
 
 }

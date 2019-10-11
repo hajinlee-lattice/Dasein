@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,33 @@ public class BucketMetadataUtils {
         bucket.setRightBoundScore(rightBoundScore);
         bucket.setBucket(bucketName);
         return bucket;
+    }
+
+    public static String bucketScore(List<BucketMetadata> bucketMetadata, double score) {
+        BucketName bucketName;
+        if (CollectionUtils.isNotEmpty(bucketMetadata)) {
+            bucketName = BucketMetadataUtils.bucketMetadata(bucketMetadata, score).getBucket();
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");
+            }
+            if (score < BucketName.C.getDefaultLowerBound()) {
+                if (score < BucketName.D.getDefaultLowerBound()) {
+                    log.warn(String.format("%f is less than minimum bound, setting to %s", score, BucketName.D.name()));
+                }
+                bucketName = BucketName.D;
+            } else if (score < BucketName.B.getDefaultLowerBound()) {
+                bucketName = BucketName.C;
+            } else if (score < BucketName.A.getDefaultLowerBound()) {
+                bucketName = BucketName.B;
+            } else {
+                if (score > BucketName.A.getDefaultUpperBound()) {
+                    log.warn(String.format("%f is more than maximum bound, setting to %s", score, BucketName.A.name()));
+                }
+                bucketName = BucketName.A;
+            }
+        }
+        return bucketName == null ? null : bucketName.toValue();
     }
 
 }
