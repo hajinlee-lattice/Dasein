@@ -201,14 +201,15 @@ public class PlayLaunchChannelEntityMgrImpl
         // changed
         else if (updatedChannel.getIsAlwaysOn() != null && updatedChannel.getIsAlwaysOn()
                 && existingPlayLaunchChannel.getIsAlwaysOn()) {
-            if (!updatedChannel.getCronScheduleExpression()
-                    .equals(existingPlayLaunchChannel.getCronScheduleExpression())) {
+            if (StringUtils.isNotBlank(updatedChannel.getCronScheduleExpression()) && !updatedChannel
+                    .getCronScheduleExpression().equals(existingPlayLaunchChannel.getCronScheduleExpression())) {
                 existingPlayLaunchChannel.setCronScheduleExpression(updatedChannel.getCronScheduleExpression());
                 existingPlayLaunchChannel
                         .setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(updatedChannel));
             }
-            if (!updatedChannel.getExpirationPeriodString()
-                    .equals(existingPlayLaunchChannel.getExpirationPeriodString())
+            if (StringUtils.isNotBlank(updatedChannel.getExpirationPeriodString())
+                    && !updatedChannel.getExpirationPeriodString()
+                            .equals(existingPlayLaunchChannel.getExpirationPeriodString())
                     && validateAlwaysOnExpiration(updatedChannel)) {
                 existingPlayLaunchChannel.setExpirationDate(
                         PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(updatedChannel));
@@ -225,10 +226,11 @@ public class PlayLaunchChannelEntityMgrImpl
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Id cannot be empty for the provided LookupIdMap" });
             }
-            LookupIdMap lookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(existingPlayLaunchChannel.getLookupIdMap().getId());
+            LookupIdMap lookupIdMap = lookupIdMappingEntityMgr
+                    .getLookupIdMap(existingPlayLaunchChannel.getLookupIdMap().getId());
             if (lookupIdMap == null) {
-                throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] { "No lookupIdMap found by Id: " + existingPlayLaunchChannel.getLookupIdMap().getId() });
+                throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                        "No lookupIdMap found by Id: " + existingPlayLaunchChannel.getLookupIdMap().getId() });
             }
             verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, updatedChannel);
 
@@ -309,8 +311,8 @@ public class PlayLaunchChannelEntityMgrImpl
         }
         if (StringUtils.isBlank(channel.getExpirationPeriodString())) {
             // TODO: PLS-14902: Uncomment once UI is ready
-//            throw new LedpException(LedpCode.LEDP_32000,
-//                    new String[] { "Need an expiration period if a Channel is Always On" });
+            // throw new LedpException(LedpCode.LEDP_32000,
+            // new String[] { "Need an expiration period if a Channel is Always On" });
         }
         Date expirationDate = PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(channel);
         if (Instant.now().atOffset(ZoneOffset.UTC).plusMonths(maxExpirationMonths)
