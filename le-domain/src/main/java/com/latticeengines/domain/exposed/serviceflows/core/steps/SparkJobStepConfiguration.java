@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({ //
+        @JsonSubTypes.Type(value = PrepareMatchDataConfiguration.class, name = "PrepareMatchDataConfiguration"), //
         @JsonSubTypes.Type(value = ProcessMatchResultConfiguration.class, name = "ProcessMatchResultConfiguration"), //
         @JsonSubTypes.Type(value = ScoreAggregateFlowConfiguration.class, name = "ScoreAggregateFlowConfiguration") //
 })

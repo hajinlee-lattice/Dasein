@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({
-        @Type(value = PrepareMatchDataConfiguration.class, name = "PrepareMatchDataConfiguration"), })
+        @Type(value = PrepareMatchDataFlowConfiguration.class, name = "PrepareMatchDataFlowConfiguration"), })
 public class BaseCoreDataFlowStepConfiguration extends DataFlowStepConfiguration {
 
     @Override
