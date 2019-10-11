@@ -82,6 +82,8 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
                     mergeAndUpsertCatalogImports(catalogName, importTableNames, steps);
                 });
         if (CollectionUtils.isEmpty(steps)) {
+            log.info("No import for catalog, copying existing tables in active version");
+            buildCatalogBatchStore();
             return null;
         }
 
@@ -171,7 +173,8 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
      * Otherwise use the existing table (link from active version)
      */
     private List<String> buildCatalogBatchStore() {
-        if (MapUtils.isEmpty(finalCatalogTablePrefixes)) {
+        if (MapUtils.isEmpty(finalCatalogTablePrefixes) && MapUtils.isEmpty(configuration.getCatalogTables())) {
+            // no import and no existing batch store
             return Collections.emptyList();
         }
 

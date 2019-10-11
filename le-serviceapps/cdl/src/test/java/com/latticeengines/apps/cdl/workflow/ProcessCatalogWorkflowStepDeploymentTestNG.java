@@ -99,7 +99,7 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
 
         // verify inactive tables
         Map<String, String> tableNamesFirstRun = dataCollectionProxy.getTableNamesWithSignatures(mainCustomerSpace,
-                ConsolidatedCatalog, inactive, Arrays.asList(CATALOG_1, CATALOG_2, CATALOG_3));
+                ConsolidatedCatalog, inactive, CATALOGS);
         log.info("Catalog batch store tables in first run {}, inactive version = {}", tableNamesFirstRun,
                 inactive.name());
         Assert.assertNotNull(tableNamesFirstRun);
@@ -129,7 +129,7 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
 
         // verify
         Map<String, String> tableNamesSecondRun = dataCollectionProxy.getTableNamesWithSignatures(mainCustomerSpace,
-                ConsolidatedCatalog, inactive, Arrays.asList(CATALOG_1, CATALOG_2, CATALOG_3));
+                ConsolidatedCatalog, inactive, CATALOGS);
         log.info("Catalog batch store tables in second run {}, inactive version = {}", tableNamesSecondRun,
                 inactive.name());
         Assert.assertNotNull(tableNamesSecondRun);
@@ -146,6 +146,19 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
         // catalog2 is replace so should contain NUM_ACCOUNTS_FILE1
         Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(CATALOG_2)), NUM_ACCOUNTS_FILE1);
         Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(CATALOG_3)), NUM_ACCOUNTS_FILE1);
+
+        /*-
+         * No imports for all catalog, make sure existing tables are copied
+         */
+        swapCDLVersions();
+        clearAllTables(inactive);
+        catalogImports.clear();
+        importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, tableNamesSecondRun);
+
+        // verify tables are linked to inactive version
+        Map<String, String> tableNamesNoImportRun = dataCollectionProxy.getTableNamesWithSignatures(mainCustomerSpace,
+                ConsolidatedCatalog, inactive, CATALOGS);
+        Assert.assertEquals(tableNamesNoImportRun, tableNamesSecondRun);
     }
 
     @Override
