@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -219,6 +220,76 @@ public class RestrictionUtils {
             }
         }
         return restriction;
+    }
+
+    public static Restriction convertUnencodedBooleanBucketRestriction(BucketRestriction bucketRestriction, ColumnMetadata cm) {
+        Bucket bkt = bucketRestriction.getBkt();
+        if (ComparisonType.EQUAL.equals(bkt.getComparisonType())) {
+            if ("Yes".equals(bkt.getValues().get(0))) {
+                return equalsAny(bucketRestriction.getAttr(), getTrueVals(cm.getJavaClass()));
+            } else {
+                return equalsAny(bucketRestriction.getAttr(), getFalseVals(cm.getJavaClass()));
+            }
+        } else if (ComparisonType.NOT_EQUAL.equals(bkt.getComparisonType())) {
+            if ("Yes".equals(bkt.getValues().get(0))) {
+                return notEqualsAny(bucketRestriction.getAttr(), getTrueVals(cm.getJavaClass()));
+            } else {
+                return notEqualsAny(bucketRestriction.getAttr(), getFalseVals(cm.getJavaClass()));
+            }
+        } else {
+            log.warn("Unknown boolean operator " + bkt.getComparisonType() + ", keep the bucket restriction as is.");
+        }
+        return bucketRestriction;
+    }
+
+    private static Restriction equalsAny(AttributeLookup attr, Object... vals) {
+        if (vals.length == 1) {
+            return Restriction.builder().let(attr).eq(vals[0]).build();
+        } else {
+            Restriction[] children = new Restriction[vals.length];
+            for (int i = 0; i < vals.length; i++) {
+                children[i] = Restriction.builder().let(attr).eq(vals[i]).build();
+            }
+            return Restriction.builder().or(children).build();
+        }
+    }
+
+    private static Restriction notEqualsAny(AttributeLookup attr, Object... vals) {
+        if (vals.length == 1) {
+            return Restriction.builder().let(attr).neq(vals[0]).build();
+        } else {
+            Restriction[] children = new Restriction[vals.length];
+            for (int i = 0; i < vals.length; i++) {
+                children[i] = Restriction.builder().let(attr).neq(vals[i]).build();
+            }
+            return Restriction.builder().and(children).build();
+        }
+    }
+
+    private static Object[] getTrueVals(String javaClz) {
+        if ("String".equalsIgnoreCase(javaClz)) {
+            return new String[]{ "Yes", "Y", "True", "T", "1" };
+        } else if ("Boolean".equalsIgnoreCase(javaClz)) {
+            return new Object[]{ true };
+        } else if ("Integer".equalsIgnoreCase(javaClz) || "Short".equalsIgnoreCase(javaClz)) {
+            return new Object[]{ 1 };
+        } else {
+            log.warn("Unknown data type for boolean attribute: " + javaClz);
+            return new String[]{ "Yes", "Y", "True", "T", "1" };
+        }
+    }
+
+    private static Object[] getFalseVals(String javaClz) {
+        if ("String".equalsIgnoreCase(javaClz)) {
+            return new String[]{ "No", "N", "False", "F", "0" };
+        } else if ("Boolean".equalsIgnoreCase(javaClz)) {
+            return new Object[]{ false };
+        } else if ("Integer".equalsIgnoreCase(javaClz) || "Short".equalsIgnoreCase(javaClz)) {
+            return new Object[]{ 0 };
+        } else {
+            log.warn("Unknown data type for boolean attribute: " + javaClz);
+            return new String[]{ "Yes", "Y", "True", "T", "1" };
+        }
     }
 
     public static Restriction convertConcreteRestriction(ConcreteRestriction concreteRestriction) {
@@ -479,7 +550,15 @@ public class RestrictionUtils {
         }
     }
 
-    public static <T> List<Object> convertNumericalValues(List<Object> vals, Class<T> attrClz) {
+    public static <T> List<Object> convertNumericalOrBooleanValues(List<Object> vals, Class<T> attrClz) {
+        if (Boolean.class.equals(attrClz)) {
+            return convertBooleanValues(vals);
+        } else {
+            return convertNumericalValues(vals, attrClz);
+        }
+    }
+
+    private static <T> List<Object> convertNumericalValues(List<Object> vals, Class<T> attrClz) {
         if (CollectionUtils.isNotEmpty(vals)) {
             List<Object> newVals = new ArrayList<>();
             vals.forEach(val -> {
@@ -509,6 +588,42 @@ public class RestrictionUtils {
         } else {
             return vals;
         }
+    }
+
+    private static List<Object> convertBooleanValues(List<Object> vals) {
+        if (CollectionUtils.isNotEmpty(vals)) {
+            List<Object> newVals = new ArrayList<>();
+            vals.forEach(val -> {
+                Object newVal;
+                if (val == null) {
+                    newVal = null;
+                } else if (Boolean.class.equals(val.getClass())) {
+                    newVal = val;
+                } else if (Number.class.isAssignableFrom(val.getClass())) {
+                    newVal = Integer.parseInt(val.toString()) == 1;
+                } else if (val instanceof String) {
+                    String strVal = val.toString();
+                    if (Arrays.asList("yes", "y", "true", "t", "1").contains(strVal.toLowerCase())) {
+                        newVal = true;
+                    } else if (Arrays.asList("no", "n", "false", "f", "0").contains(strVal.toLowerCase())) {
+                        newVal = false;
+                    } else {
+                        throw new UnsupportedOperationException("Cannot cast value " + val + " to boolean.");
+                    }
+                } else {
+                    throw new IllegalArgumentException("Cannot make the operand " + val //
+                            + " compatible with attribute type boolean");
+                }
+                newVals.add(newVal);
+            });
+            return newVals;
+        } else {
+            return vals;
+        }
+    }
+
+    public static boolean isUnencodedBoolean(ColumnMetadata cm) {
+        return cm != null && "Boolean".equalsIgnoreCase(cm.getJavaClass()) && cm.getBitOffset() == null;
     }
 
     public static Set<AttributeLookup> getRestrictionDependingAttributes(Restriction restriction) {

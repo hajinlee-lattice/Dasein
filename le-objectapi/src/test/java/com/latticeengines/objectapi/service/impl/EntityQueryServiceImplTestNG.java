@@ -1,6 +1,7 @@
 package com.latticeengines.objectapi.service.impl;
 
 import static com.latticeengines.domain.exposed.util.RestrictionUtils.TRANSACTION_LOOKUP;
+import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -60,6 +62,9 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Inject
     private EventQueryService eventQueryService;
 
+    @Resource(name = "entityQueryServiceSparkSQL")
+    private EntityQueryService entityQueryServiceSparkSQL;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestData(3);
@@ -111,6 +116,31 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     private Restriction getTxnRestriction(Bucket.Transaction txn) {
         Bucket bucket = Bucket.txnBkt(txn);
         return new BucketRestriction(TRANSACTION_LOOKUP, bucket);
+    }
+
+    @Test(groups = "functional")
+    public void testBooleanFilter() {
+        AttributeLookup attrLp = new AttributeLookup(BusinessEntity.Account, "ISDELETED");
+        Bucket bkt1 = Bucket.valueBkt("Yes");
+        BucketRestriction bktRes1 = new BucketRestriction(attrLp, bkt1);
+        Bucket bkt2 = Bucket.valueBkt("No");
+        BucketRestriction bktRes2 = new BucketRestriction(attrLp, bkt2);
+        Restriction logical = Restriction.builder().or(bktRes1, bktRes2).build();
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(logical));
+
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        String sql = entityQueryService.getQueryStr(frontEndQuery, DataCollection.Version.Blue,
+                SPARK_BATCH_USER, true);
+        System.out.println(sql);
+        String sql2 = entityQueryServiceSparkSQL.getQueryStr(frontEndQuery, DataCollection.Version.Blue,
+                SPARK_BATCH_USER, true);
+        System.out.println(sql2);
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue,
+                SEGMENT_USER);
+        Assert.assertEquals(count, 2555L);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")

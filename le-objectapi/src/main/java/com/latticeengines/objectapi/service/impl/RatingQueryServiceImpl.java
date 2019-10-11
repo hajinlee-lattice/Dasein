@@ -74,7 +74,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery,
                     timeTranslator);
             preprocess(map, attrRepo, timeTranslator);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, true, timeTranslator, sqlUser);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, attrRepo, true, timeTranslator, sqlUser);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -121,7 +121,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateRatingQuery(frontEndQuery, false, timeTranslator, sqlUser);
+        Query query = queryTranslator.translateRatingQuery(frontEndQuery, attrRepo, false, timeTranslator, sqlUser);
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
@@ -135,10 +135,9 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            if (QueryServiceUtils.getQueryLoggingConfig()){
+            if (QueryServiceUtils.getQueryLoggingConfig()) {
                 log.info("getData using query: {}",
-                        getQueryStr(frontEndQuery, version, sqlUser)
-                        .replaceAll("\\r\\n|\\r|\\n", " "));
+                        getQueryStr(frontEndQuery, version, sqlUser).replaceAll("\\r\\n|\\r|\\n", " "));
             }
             return queryEvaluatorService.getDataFlux(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -222,15 +221,14 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                     queryEvaluatorService);
             preprocess(map, attrRepo, timeTranslator);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, true, timeTranslator, sqlUser);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, attrRepo, true, timeTranslator, sqlUser);
             query.setPageFilter(null);
             query.setSort(null);
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(), //
-                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, //
-                        timeTranslator, sqlUser);
+                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(), attrRepo,
+                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, timeTranslator, sqlUser);
                 AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
                 query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();
