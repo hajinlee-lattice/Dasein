@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -229,8 +230,14 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(stream.getDataFeedTaskUniqueId(), dataFeedTask.getUniqueId());
         // verify dimension
         Assert.assertNotNull(stream.getDimensions());
-        Assert.assertEquals(stream.getDimensions().size(), 1);
-        StreamDimension dimension = stream.getDimensions().get(0);
+        Assert.assertEquals(stream.getDimensions().size(), 3);
+        Optional<StreamDimension> result = stream.getDimensions() //
+                .stream() //
+                .filter(Objects::nonNull) //
+                .filter(dim -> InterfaceName.PathPatternId.name().equals(dim.getName())) //
+                .findFirst();
+        Assert.assertTrue(result.isPresent(), "Dimensions should contain path pattern dimension");
+        StreamDimension dimension = result.get();
         Assert.assertNotNull(dimension);
         Assert.assertEquals(dimension.getName(), InterfaceName.PathPatternId.name());
         // catalog should be attached since path pattern template is created first

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.ActivityStoreService;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
@@ -73,14 +72,13 @@ public class ActivityStoreResource {
     @RequestMapping(value = "/streams/{streamName}/dimensions/{dimensionName}", method = RequestMethod.PUT)
     @ResponseBody
     @ApiOperation("Update stream dimension dimension")
-    public SimpleBooleanResponse update( //
+    public StreamDimension update( //
             @PathVariable(value = "customerSpace") String customerSpace, //
             @PathVariable(value = "streamName") String streamName, //
             @PathVariable(value = "dimensionName") String dimensionName, //
             @RequestBody StreamDimension dimension) {
         Preconditions.checkArgument(dimension.getName().equals(dimensionName),
                 "Dimension name should match the one in update dimension object");
-        activityStoreService.updateStreamDimension(customerSpace, streamName, dimension);
-        return SimpleBooleanResponse.successResponse();
+        return activityStoreService.updateStreamDimension(customerSpace, streamName, dimension);
     }
 }
