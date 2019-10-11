@@ -842,6 +842,7 @@ public enum LedpCode {
     LEDP_40068("Cannot find Export Field Metadata Service for CDL External System Name {0}."),
     LEDP_40069("Cannot find attribute name {0} in Export Field Metadata Defaults for {1} or in serving store."),
     LEDP_40070("Cannot restrict by account ID if no account ID is selected for this Connection"),
+    LEDP_40071("Cannot create External System Authentication, because connection with the same orgId and system type already exists"),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."),
