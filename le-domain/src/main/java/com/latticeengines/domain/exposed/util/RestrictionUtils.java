@@ -288,7 +288,7 @@ public class RestrictionUtils {
             return new Object[]{ 0 };
         } else {
             log.warn("Unknown data type for boolean attribute: " + javaClz);
-            return new String[]{ "Yes", "Y", "True", "T", "1" };
+            return new String[]{ "No", "N", "False", "F", "0" };
         }
     }
 
