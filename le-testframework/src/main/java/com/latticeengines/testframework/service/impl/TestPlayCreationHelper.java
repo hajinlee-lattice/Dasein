@@ -155,7 +155,8 @@ public class TestPlayCreationHelper {
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
-    // Todo 1: Remove testCrud from here, this class should only be a helper class no testing
+    // Todo 1: Remove testCrud from here, this class should only be a helper class
+    // no testing
     // Todo 2: Make it stateless
     // Todo 3: Make it less monolithic
 
@@ -177,7 +178,7 @@ public class TestPlayCreationHelper {
         }
     }
 
-    public void useExistingTenant(String tenantName) {
+    private void useExistingTenant(String tenantName) {
         log.info("Reusing Existing Tenant and Data from Redshift: " + tenantName);
         Tenant tenant = deploymentTestBed.useExistingTenantAsMain(tenantName);
         postInitializeTenantCreation(tenant.getId());
@@ -472,31 +473,30 @@ public class TestPlayCreationHelper {
                 .filter(ch -> ch.getDestinationSystemType() == channel.getLookupIdMap().getExternalSystemType()
                         && ch.getDestinationSystemName() == channel.getLookupIdMap().getExternalSystemName())
                 .findFirst();
-        TestPlayChannelConfig channelConfig = oConfig.isPresent() ? oConfig.get()
-                : new TestPlayChannelConfig.Builder().build();
+        TestPlayChannelConfig channelConfig = oConfig.orElseGet(() -> new TestPlayChannelConfig.Builder().build());
 
         switch (channel.getLookupIdMap().getExternalSystemName()) {
-            case Salesforce:
-                channel.setChannelConfig(new SalesforceChannelConfig());
-                break;
-            case Marketo:
-                channel.setChannelConfig(new MarketoChannelConfig());
-                break;
-            case AWS_S3:
-                channel.setChannelConfig(new S3ChannelConfig());
-                break;
-            case Eloqua:
-                channel.setChannelConfig(new EloquaChannelConfig());
-                break;
-            case Facebook:
-                channel.setChannelConfig(new FacebookChannelConfig());
-                break;
-            case LinkedIn:
-                channel.setChannelConfig(new LinkedInChannelConfig());
-                break;
-            default:
-                channel.setChannelConfig(new SalesforceChannelConfig());
-                break;
+        case Salesforce:
+            channel.setChannelConfig(new SalesforceChannelConfig());
+            break;
+        case Marketo:
+            channel.setChannelConfig(new MarketoChannelConfig());
+            break;
+        case AWS_S3:
+            channel.setChannelConfig(new S3ChannelConfig());
+            break;
+        case Eloqua:
+            channel.setChannelConfig(new EloquaChannelConfig());
+            break;
+        case Facebook:
+            channel.setChannelConfig(new FacebookChannelConfig());
+            break;
+        case LinkedIn:
+            channel.setChannelConfig(new LinkedInChannelConfig());
+            break;
+        default:
+            channel.setChannelConfig(new SalesforceChannelConfig());
+            break;
         }
         channel.setTenant(tenant);
         channel.setTenantId(tenant.getPid());
@@ -508,7 +508,10 @@ public class TestPlayCreationHelper {
         channel.setBucketsToLaunch(channelConfig.getBucketsToLaunch());
         channel.setCronScheduleExpression(
                 StringUtils.isNotBlank(channelConfig.getCronSchedule()) ? channelConfig.getCronSchedule()
-                        : "0 0 12 ? * THU *");
+                        : TestPlayChannelConfig.DEFAULT_CRON_EXPRESSION);
+        channel.setExpirationPeriodString(StringUtils.isNotBlank(channelConfig.getExpirationPeriodString())
+                ? channelConfig.getExpirationPeriodString()
+                : TestPlayChannelConfig.DEFAULT_EXPIRATION);
         playProxy.createPlayLaunchChannel(tenant.getId(), play.getName(), channel, false);
 
     }

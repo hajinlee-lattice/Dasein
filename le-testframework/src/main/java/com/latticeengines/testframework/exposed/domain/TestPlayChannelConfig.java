@@ -32,7 +32,12 @@ public class TestPlayChannelConfig {
 
     private String cronSchedule;
 
+    private String expirationPeriodString;
+
     private LaunchType launchType;
+
+    public static final String DEFAULT_CRON_EXPRESSION = "0 0 12 ? * THU *";
+    public static final String DEFAULT_EXPIRATION = "P4W";
 
     public static class Builder {
         private TestPlayChannelConfig testPlayChannelSetupConfig = new TestPlayChannelConfig();
@@ -84,6 +89,11 @@ public class TestPlayChannelConfig {
 
         public TestPlayChannelConfig.Builder cronSchedule(String cronSchedule) {
             testPlayChannelSetupConfig.cronSchedule = cronSchedule;
+            return this;
+        }
+
+        public TestPlayChannelConfig.Builder expirationPeriodString(String expirationPeriodString) {
+            testPlayChannelSetupConfig.expirationPeriodString = expirationPeriodString;
             return this;
         }
 
@@ -140,6 +150,10 @@ public class TestPlayChannelConfig {
 
     public String getCronSchedule() {
         return cronSchedule;
+    }
+
+    public String getExpirationPeriodString() {
+        return expirationPeriodString;
     }
 
     public void setAudienceId(String audienceId) {
