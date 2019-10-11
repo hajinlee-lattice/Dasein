@@ -106,6 +106,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playName });
         }
+        playLaunchChannel.setPlay(play);
         PlayLaunchChannel retrievedPlayLaunchChannel = findById(playLaunchChannel.getId());
         if (retrievedPlayLaunchChannel == null) {
             throw new NullPointerException("Cannot find Play Launch Channel for given play channel id");
@@ -132,7 +133,10 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         }
         channel.setPlay(play);
         Date nextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel);
-        if (nextLaunchDate.after(channel.getExpirationDate())) {
+        if (channel.getExpirationDate() == null)
+            log.warn(String.format("Expiration Date Null for Channel: %s", channel.getId()));
+        if (channel.getExpirationDate() != null && nextLaunchDate.after(channel.getExpirationDate())) {
+
             log.info(String.format(
                     "Channel: %s has expired turning auto launches off (Expiration Date: %s, Next Scheduled Launch Date: %s)",
                     channel.getId(), channel.getExpirationDate().toString(), nextLaunchDate.toString()));

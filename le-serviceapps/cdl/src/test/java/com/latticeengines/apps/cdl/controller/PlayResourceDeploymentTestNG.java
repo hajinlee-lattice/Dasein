@@ -86,7 +86,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
-    public void mimicManualPlayLaunchByChannel() throws InterruptedException {
+    public void testManualLaunchByChannel() throws InterruptedException {
         String testuser = "testuser@lattice-engines.com";
         play = playCreationHelper.getPlay();
         PlayLaunchChannel channel = playProxy
@@ -114,8 +114,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
                 testPlayLaunch.getLaunchId(), true);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "mimicManualPlayLaunchByChannel" })
-    public void mimicAutomaticPlayLaunchByChannel() {
+    @Test(groups = "deployment-app", dependsOnMethods = { "testManualLaunchByChannel" })
+    public void testAutomaticLaunchByChannel() {
         play = playCreationHelper.getPlay();
         PlayLaunchChannel channel = playProxy
                 .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
@@ -136,7 +136,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
                 testPlayLaunch.getLaunchId(), true);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testCrud", "mimicAutomaticPlayLaunchByChannel" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCrud", "testAutomaticLaunchByChannel" })
     public void createPlayLaunch() {
         playCreationHelper.createPlayLaunch(testPlaySetupConfig);
         play = playCreationHelper.getPlay();
@@ -151,7 +151,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         totalRatedAccounts = playLaunch.getAccountsSelected();
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "createPlayLaunch", "mimicAutomaticPlayLaunchByChannel" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "createPlayLaunch", "testAutomaticLaunchByChannel" })
     private void searchPlayLaunch() {
         List<PlayLaunch> launchList = playProxy.getPlayLaunches(mainTestTenant.getId(), playName,
                 Collections.singletonList(LaunchState.Failed));
@@ -254,11 +254,11 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(playList.size(), 1);
     }
 
-    public void deletePlay(String playName) {
+    private void deletePlay(String playName) {
         playProxy.deletePlay(mainTestTenant.getId(), playName, false);
     }
 
-    public void deletePlayLaunch(String playName, String playLaunchId) {
+    private void deletePlayLaunch(String playName, String playLaunchId) {
         playProxy.deletePlayLaunch(mainTestTenant.getId(), playName, playLaunchId, false);
     }
 
