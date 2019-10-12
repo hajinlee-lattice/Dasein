@@ -84,7 +84,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         return false;
     }
 
-    private void tryReformatS3DataUnit(List<DataUnitEntity> dataUnitEntities) {
+    private void asycReformatS3DataUnit(List<DataUnitEntity> dataUnitEntities) {
         List<DataUnitEntity> formattedS3DataUnitEntities = new ArrayList<>();
         Runnable runnable = () -> {
             dataUnitEntities.forEach(dataUnitEntity -> {
@@ -137,7 +137,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     public DataUnit findByNameTypeFromReader(String tenantId, String name, DataUnit.StorageType storageType) {
         DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (entity != null) {
-            tryReformatS3DataUnit(Collections.singletonList(entity));
+            asycReformatS3DataUnit(Collections.singletonList(entity));
             return entity.getDocument();
         } else {
             return null;
@@ -184,7 +184,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         List<DataUnit> units = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(entities)) {
             if (reformat) {
-                tryReformatS3DataUnit(entities);
+                asycReformatS3DataUnit(entities);
             }
             entities.forEach(dataUnitEntity -> units.add(dataUnitEntity.getDocument()));
         }
