@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionSectionName;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
@@ -226,18 +227,20 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         // change customer field's type
         Map<String, FieldDefinition> customNameToFieldDefinition =
-                fieldDefinitionMap.getOrDefault(ImportWorkflowUtils.CUSTOM_FIELDS, new ArrayList<>()).stream().collect(Collectors.toMap(FieldDefinition::getColumnName, field -> field));
+                fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(), new ArrayList<>()).stream()
+                        .collect(Collectors.toMap(FieldDefinition::getColumnName, field -> field));
         FieldDefinition customField = customNameToFieldDefinition.get("Earnings");
         Assert.assertNotNull(customField);
         customField.setFieldType(UserDefinedType.TEXT);
         ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
                 , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), null,null,resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
-        checkGeneratedResult(response, ImportWorkflowUtils.CUSTOM_FIELDS, "Earnings", FieldValidationMessage.MessageLevel.WARNING);
+        checkGeneratedResult(response, FieldDefinitionSectionName.Custom_Fields.getName(), "Earnings", FieldValidationMessage.MessageLevel.WARNING);
 
         // change field type for lattice field
         Map<String, FieldDefinition> IDNameToFieldDefinition =
-                fieldDefinitionMap.getOrDefault("Unique ID", new ArrayList<>()).stream().collect(Collectors.toMap(FieldDefinition::getFieldName, field -> field));
+                fieldDefinitionMap.getOrDefault("Unique ID", new ArrayList<>()).stream()
+                        .collect(Collectors.toMap(FieldDefinition::getFieldName, field -> field));
         FieldDefinition IDDefinition = IDNameToFieldDefinition.get("CustomerContactId");
         Assert.assertNotNull(IDDefinition);
         IDDefinition.setFieldType(UserDefinedType.INTEGER);
@@ -291,7 +294,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(validationMap);
         List<FieldValidationMessage> validationMessages = validationMap.get(section);
         Assert.assertNotNull(validationMessages);
-        if (ImportWorkflowUtils.CUSTOM_FIELDS.equals(section)) {
+        if (FieldDefinitionSectionName.Custom_Fields.getName().equals(section)) {
             FieldValidationMessage validation =
                     validationMessages.stream().filter(message -> name.equals(message.getColumnName())
                             && messageLevel.equals(message.getMessageLevel())).findFirst().orElse(null);
