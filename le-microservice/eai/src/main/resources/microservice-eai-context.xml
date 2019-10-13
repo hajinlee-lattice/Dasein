@@ -10,6 +10,16 @@
     <import resource="classpath:eai-context.xml"/>
     <context:component-scan base-package="com.latticeengines.eai.controller, com.latticeengines.microservice.eai" />
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>eai</value>
+            </list>
+        </property>
+    </bean>
+
     <bean id="eaiHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="eai-microservice" />
     </bean>

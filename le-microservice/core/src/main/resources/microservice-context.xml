@@ -24,6 +24,16 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
+    <mvc:interceptors>
+        <bean class="io.opentracing.contrib.spring.web.interceptor.TracingHandlerInterceptor">
+            <constructor-arg ref="tracer"/>
+        </bean>
+    </mvc:interceptors>
+
+    <bean id="tracingFilter" class="io.opentracing.contrib.web.servlet.filter.TracingFilter">
+        <constructor-arg ref="tracer"/>
+    </bean>
+
     <bean id="apiVersionManager"
           class="com.latticeengines.common.exposed.version.VersionManager">
         <constructor-arg name="currentVersion" value="4.20.0-SNAPSHOT"/>

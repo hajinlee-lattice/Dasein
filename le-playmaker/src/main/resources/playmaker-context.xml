@@ -24,7 +24,27 @@
     <import resource="classpath:oauth2db-auth-mgr-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
-    
+
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>playmaker</value>
+            </list>
+        </property>
+    </bean>
+
+    <mvc:interceptors>
+        <bean class="io.opentracing.contrib.spring.web.interceptor.TracingHandlerInterceptor">
+            <constructor-arg ref="tracer"/>
+        </bean>
+    </mvc:interceptors>
+
+    <bean id="tracingFilter" class="io.opentracing.contrib.web.servlet.filter.TracingFilter">
+        <constructor-arg ref="tracer"/>
+    </bean>
+
     <bean id="batonService" 
         class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl"/>
     <mvc:interceptors>

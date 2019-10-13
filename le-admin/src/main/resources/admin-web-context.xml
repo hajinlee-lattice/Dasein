@@ -12,6 +12,16 @@
     <import resource="classpath:admin-security-context.xml"/>
     <bean class="com.latticeengines.admin.swagger.SwaggerConfig" />
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>admin</value>
+            </list>
+        </property>
+    </bean>
+
     <mvc:annotation-driven>
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
@@ -19,6 +29,16 @@
             <bean class="com.latticeengines.common.exposed.converter.KryoHttpMessageConverter"/>
         </mvc:message-converters>
     </mvc:annotation-driven>
+
+    <mvc:interceptors>
+        <bean class="io.opentracing.contrib.spring.web.interceptor.TracingHandlerInterceptor">
+            <constructor-arg ref="tracer"/>
+        </bean>
+    </mvc:interceptors>
+
+    <bean id="tracingFilter" class="io.opentracing.contrib.web.servlet.filter.TracingFilter">
+        <constructor-arg ref="tracer"/>
+    </bean>
 
     <bean id="adminHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="admin" />

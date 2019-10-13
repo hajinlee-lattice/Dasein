@@ -27,6 +27,16 @@
         <property name="maxUploadSize" value="1000000000"/>
     </bean>
 
+    <mvc:interceptors>
+        <bean class="io.opentracing.contrib.spring.web.interceptor.TracingHandlerInterceptor">
+            <constructor-arg ref="tracer"/>
+        </bean>
+    </mvc:interceptors>
+
+    <bean id="tracingFilter" class="io.opentracing.contrib.web.servlet.filter.TracingFilter">
+        <constructor-arg ref="tracer"/>
+    </bean>
+
     <bean id="plsHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="pls"/>
     </bean>

@@ -21,6 +21,16 @@
         com.latticeengines.datacloud.collection.quartz"
     />
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>datacloudapi</value>
+            </list>
+        </property>
+    </bean>
+
     <bean id="datacloudapiHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="datacloudapi-microservice" />
     </bean>
