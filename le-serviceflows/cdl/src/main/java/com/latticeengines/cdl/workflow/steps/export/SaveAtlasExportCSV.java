@@ -95,8 +95,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     @Resource(name = "redshiftSegmentJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
-    private List<String> filesToDelete;
-
     @Override
     protected CustomerSpace parseCustomerSpace(EntityExportStepConfiguration stepConfiguration) {
         return stepConfiguration.getCustomerSpace();
@@ -130,7 +128,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             config.setWorkspace(getRandomWorkspace());
             config.setCompress(configuration.isCompressResult());
             if (configuration.isAddExportTimestamp()) {
-                config.setExportTimeAttr(InterfaceName.AtlasExportTime.name());
+                config.setExportTimeAttr(InterfaceName.LatticeExportTime.name());
             }
             log.info("Submit spark job to convert " + exportEntity + " csv.");
             SparkJobResult result = sparkJobService.runJob(session, getJobClz(), config);
@@ -173,7 +171,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             }
         });
         if (configuration.isAddExportTimestamp()) {
-            dateFmtMap.put(InterfaceName.AtlasExportTime.name(), ISO_8601);
+            dateFmtMap.put(InterfaceName.LatticeExportTime.name(), ISO_8601);
         }
         return dateFmtMap;
     }
@@ -209,6 +207,17 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
     }
 
+    private List<ColumnMetadata> getAccountIdColumnMetadata(Map<BusinessEntity, List> schemaMap) {
+        List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(BusinessEntity.Account, Collections.emptyList());
+        List<ColumnMetadata> accountIdColumnMetadata = new ArrayList<>();
+        cms.forEach(cm -> {
+            if (InterfaceName.AccountId.name().equals(cm.getAttrName()) || InterfaceName.CustomerAccountId.name().equals(cm.getAttrName())) {
+                accountIdColumnMetadata.add(cm);
+            }
+        });
+        return accountIdColumnMetadata;
+    }
+
     @SuppressWarnings("unchecked")
     private List<ColumnMetadata> getExportSchema(ExportEntity exportEntity) {
         Map<BusinessEntity, List> schemaMap =
@@ -220,6 +229,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
                     .getOrDefault(BusinessEntity.Contact, Collections.emptyList());
             schema.addAll(cms);
+            schema.addAll(getAccountIdColumnMetadata(schemaMap));
         } else if (ExportEntity.AccountContact.equals(exportEntity)) {
             setAccountSchema(schemaMap, schema);
             List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
@@ -228,6 +238,15 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         } else {
             throw new UnsupportedOperationException("Unknown export entity " + exportEntity);
         }
+        schema.sort((cm1, cm2) -> {
+            if (cm1.getCategory() == null) {
+                return -1;
+            }
+            if (cm2.getCategory() == null) {
+                return 1;
+            }
+            return cm1.getCategory().getOrder().compareTo(cm2.getCategory().getOrder());
+        });
         return schema;
     }
 
