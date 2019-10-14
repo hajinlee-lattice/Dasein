@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -138,6 +139,8 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
             Assert.assertEquals(restoreAttr.getRequired(), webVisitAttr.getRequired());
         }
 
+        Assert.expectThrows(LedpException.class, () -> cdlProxy.restoreTemplate(mainCustomerSpace, "ErrorId",
+                "RandomName.json", true));
     }
 
     private void verifyWebVisitStream(@NotNull DataFeedTask dataFeedTask, boolean pathPatternCatalogAttached) {

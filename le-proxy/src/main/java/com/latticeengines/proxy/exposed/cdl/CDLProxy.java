@@ -540,7 +540,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc != null && responseDoc.isSuccess()) {
             return responseDoc.getResult();
         } else {
-            return null;
+            throw new LedpException(LedpCode.LEDP_40072, new String[]{uniqueTaskId, backupName});
         }
     }
 
