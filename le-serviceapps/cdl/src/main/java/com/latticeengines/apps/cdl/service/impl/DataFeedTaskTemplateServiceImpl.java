@@ -42,6 +42,8 @@ import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -211,7 +213,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             backupPath += "/";
         }
         if (!s3Service.objectExist(customerBucket, backupPath + backupName)) {
-            return null;
+            log.error("Backup file {} not exists!", backupPath + backupName);
+            throw new LedpException(LedpCode.LEDP_40072, new String[]{uniqueTaskId, backupName});
         }
         InputStream backupStream = s3Service.readObjectAsStream(customerBucket, backupPath + backupName);
         try {
@@ -227,8 +230,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             }
             return backupTask.getImportTemplate();
         } catch (Exception e) {
-            log.error("Cannot get table for task {}, backup file {}", uniqueTaskId, backupName);
-            return null;
+            log.error("Cannot deserialize backup file for task {}, backup file {}", uniqueTaskId, backupName);
+            throw new LedpException(LedpCode.LEDP_40072, new String[]{uniqueTaskId, backupName});
         }
     }
 
