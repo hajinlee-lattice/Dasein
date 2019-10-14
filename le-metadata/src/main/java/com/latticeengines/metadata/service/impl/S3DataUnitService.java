@@ -2,6 +2,7 @@ package com.latticeengines.metadata.service.impl;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,14 +29,11 @@ public class S3DataUnitService extends AbstractDataUnitRuntimeServiceImpl<S3Data
     @Override
     public Boolean delete(DataUnit dataUnit) {
         S3DataUnit s3DataUnit = (S3DataUnit) dataUnit;
-        String linkDir = s3DataUnit.getLinkedDir();
-        log.info("LinkDir is " + linkDir);
-        linkDir = linkDir.replaceAll("s3a://", "");
-        String bucketName = linkDir.substring(0, linkDir.indexOf('/'));
-        log.info("bucketName is " + bucketName);
-        String prefix = linkDir.substring(linkDir.indexOf('/') + 1);
-        log.info("prefix is " + prefix);
-        s3Service.cleanupPrefix(bucketName, prefix);
+        s3DataUnit.fixBucketAndPrefix();
+        if (StringUtils.isNotEmpty(s3DataUnit.getBucket())) {
+            log.info(String.format("S3 data unit bucket name is %s, prefix is %s.", s3DataUnit.getBucket(), s3DataUnit.getPrefix()));
+            s3Service.cleanupPrefix(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
+        }
         return true;
     }
 
