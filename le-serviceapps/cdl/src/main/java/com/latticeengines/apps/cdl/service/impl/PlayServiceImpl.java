@@ -342,7 +342,12 @@ public class PlayServiceImpl implements PlayService {
             setBucketMetadata(tenant, play);
             updateLastRefreshedDate(ratingEngine, lastRefreshedDate);
         }
+        populatePlayLaunchChannels(play);
         return play;
+    }
+
+    private void populatePlayLaunchChannels(Play play) {
+        play.setPlayLaunchChannels(playLaunchChannelService.getPlayLaunchChannels(play.getName(), true));
     }
 
     private LaunchHistory updatePlayLaunchHistory(Play play) {
