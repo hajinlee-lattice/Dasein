@@ -43,7 +43,7 @@ public class EntityExportWorkflowWithEMDeploymentTestNG extends EntityExportWork
         Assert.assertTrue(headerMap.containsKey("CEO Name"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Test Date"), "Header map: " + JsonUtils.serialize(headerMap));
         Assert.assertTrue(headerMap.containsKey("Has Oracle Commerce"), "Header map: " + JsonUtils.serialize(headerMap));
-        Assert.assertTrue(headerMap.containsKey(InterfaceName.AtlasExportTime.name()), "Header map: " + JsonUtils.serialize(headerMap));
+        Assert.assertTrue(headerMap.containsKey(InterfaceName.LatticeExportTime.name()), "Header map: " + JsonUtils.serialize(headerMap));
     }
 
 }

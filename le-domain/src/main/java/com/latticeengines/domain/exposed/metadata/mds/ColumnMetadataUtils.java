@@ -50,9 +50,6 @@ public final class ColumnMetadataUtils {
         if (overwriter.getFundamentalType() != null) {
             overwritee.setFundamentalType(overwriter.getFundamentalType());
         }
-        if (overwriter.getEntity() != null) {
-            overwritee.setEntity(overwriter.getEntity());
-        }
 
         if (overwriter.getAttrState() != null) {
             overwritee.setAttrState(overwriter.getAttrState());

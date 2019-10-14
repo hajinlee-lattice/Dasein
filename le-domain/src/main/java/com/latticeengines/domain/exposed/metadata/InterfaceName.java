@@ -112,7 +112,7 @@ public enum InterfaceName {
 
     CDLCreatedTime, // creation timestamp of CDL entities
     CDLUpdatedTime, // update timestamp of CDL entities
-    AtlasExportTime, // timestamp for csv export
+    LatticeExportTime, // timestamp for csv export
 
     ConsolidateReport, //
 

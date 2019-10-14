@@ -50,5 +50,4 @@ public final class S3PathBuilder {
         }
         return systemName + SPLIT_CHART + entityObjectName;
     }
-
 }

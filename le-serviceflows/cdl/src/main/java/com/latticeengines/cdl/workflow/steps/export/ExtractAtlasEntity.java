@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -217,76 +218,93 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return attrRepo;
     }
 
-    private void addAcoountId(BusinessEntity businessEntity, List<Lookup> lookups, String accountId) {
-        AttributeLookup idLookup = new AttributeLookup(businessEntity, accountId);
-        if (!lookups.contains(idLookup)) {
-            lookups.add(idLookup);
-        }
+    private void addAcoountId(BusinessEntity businessEntity, List<List<ColumnMetadata>> metadataList, String accountId) {
+        ColumnMetadata columnMetadata = new ColumnMetadata();
+        columnMetadata.setCategory(Category.ACCOUNT_ATTRIBUTES);
+        columnMetadata.setAttrName(accountId);
+        columnMetadata.setDisplayName(accountId);
+        columnMetadata.setEntity(businessEntity);
+        metadataList.get(Category.ACCOUNT_ATTRIBUTES.getOrder()).add(columnMetadata);
     }
 
-    private void addContactId(BusinessEntity businessEntity, List<Lookup> lookups, String contactId) {
-        AttributeLookup idLookup = new AttributeLookup(businessEntity, contactId);
-        if (!lookups.contains(idLookup)) {
-            lookups.add(idLookup);
-        }
+    private void addContactId(BusinessEntity businessEntity, List<List<ColumnMetadata>> metadataList, String contactId) {
+        ColumnMetadata columnMetadata = new ColumnMetadata();
+        columnMetadata.setCategory(Category.CONTACT_ATTRIBUTES);
+        columnMetadata.setAttrName(contactId);
+        columnMetadata.setDisplayName(contactId);
+        columnMetadata.setEntity(businessEntity);
+        metadataList.get(Category.CONTACT_ATTRIBUTES.getOrder()).add(columnMetadata);
+    }
+
+    private List<Lookup> convertToLookup(List<List<ColumnMetadata>> columnMetadataList) {
+        List<Lookup> lookups = new ArrayList<>();
+        columnMetadataList.stream().forEach(cms -> cms.forEach(cm -> {
+            lookups.add(new AttributeLookup(cm.getEntity(), cm.getAttrName()));
+        }));
+        return lookups;
     }
 
     private List<Lookup> getAccountLookup() {
-        List<Lookup> lookups = new ArrayList<>();
+        List<List<ColumnMetadata>> columnMetadataList = new ArrayList<>();
+        Arrays.stream(Category.values()).forEach(category -> columnMetadataList.add(new ArrayList<>()));
+        boolean hasAccountId = false;
+        String accountId = entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
         for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
             if (!BusinessEntity.Contact.equals(entity)) {
                 List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
-                cms.forEach(cm -> lookups.add(new AttributeLookup(entity, cm.getAttrName())));
+                for (ColumnMetadata cm : cms) {
+                    if (accountId.equals(cm.getAttrName())) {
+                        hasAccountId = true;
+                    }
+                    columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
+                }
             }
         }
-        // when the export type is ACCOUNT_AND_CONTACT, needs to set the join used by AccountContactExportJob
-        boolean hasAccountId = false;
-        String accountId = entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
-        if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType())) {
-            hasAccountId = true;
-            addAcoountId(BusinessEntity.Account, lookups, accountId);
-        }
         if (!hasAccountId) {
-            addAcoountId(BusinessEntity.Account, lookups, accountId);
+            addAcoountId(BusinessEntity.Account, columnMetadataList, accountId);
         }
-        sortAttribute(lookups, accountId);
-        return lookups;
+        sortAttribute(columnMetadataList);
+        return convertToLookup(columnMetadataList);
     }
 
     private List<Lookup> getContactLookup() {
+        List<List<ColumnMetadata>> columnMetadataList = new ArrayList<>();
+        Arrays.stream(Category.values()).forEach(category -> columnMetadataList.add(new ArrayList<>()));
         List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
-        List<Lookup> lookups = new ArrayList<>();
         boolean hasAccountId = false;
+        boolean hasContactId = false;
         String accountId = entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
         String contactId = entityMatchEnabled ? InterfaceName.CustomerContactId.name() : InterfaceName.ContactId.name();
-        if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
-            cms.forEach(cm -> lookups.add(new AttributeLookup(BusinessEntity.Contact, cm.getAttrName())));
-            // needs to add account id for left join operation later
-            hasAccountId = true;
-            addAcoountId(BusinessEntity.Contact, lookups, accountId);
-        } else {
-            cms.forEach(cm -> lookups.add(new AttributeLookup(BusinessEntity.Contact, cm.getAttrName())));
+        for (ColumnMetadata cm : cms) {
+            if (accountId.equals(cm.getAttrName())) {
+                hasAccountId = true;
+            }
+            if (contactId.equals(cm.getAttrName())) {
+                hasContactId = true;
+            }
+            columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
         }
         if (!hasAccountId) {
-            addAcoountId(BusinessEntity.Contact, lookups, accountId);
+            addAcoountId(BusinessEntity.Contact, columnMetadataList, accountId);
         }
-        addContactId(BusinessEntity.Contact, lookups, contactId);
-        sortAttribute(lookups, contactId);
-        return lookups;
+        if (!hasContactId) {
+            addContactId(BusinessEntity.Contact, columnMetadataList, contactId);
+        }
+        sortAttribute(columnMetadataList);
+        return convertToLookup(columnMetadataList);
     }
 
-    private void sortAttribute(List<Lookup> lookups, String idName){
-        lookups.sort((lookup1, lookup2) -> {
-            AttributeLookup attributeLookup1 = (AttributeLookup) lookup1;
-            if (idName.equals(attributeLookup1.getAttribute())) {
+    // sort display name for look up
+    private void sortAttribute(List<List<ColumnMetadata>> columnMetadataList) {
+        columnMetadataList.stream().forEach(cms -> cms.sort((cm1, cm2) -> {
+            if (StringUtils.isEmpty(cm1.getDisplayName())) {
                 return -1;
             }
-            AttributeLookup attributeLookup2 = (AttributeLookup) lookup2;
-            if (idName.equals(attributeLookup2.getAttribute())) {
+            if (StringUtils.isEmpty(cm2.getDisplayName())) {
                 return 1;
             }
-            return attributeLookup1.getAttribute().compareTo(attributeLookup2.getAttribute());
-        });
+            return cm1.getDisplayName().compareTo(cm2.getDisplayName());
+        }));
     }
 
     private HdfsDataUnit exportOneEntity(ExportEntity exportEntity, FrontEndQuery frontEndQuery) {
