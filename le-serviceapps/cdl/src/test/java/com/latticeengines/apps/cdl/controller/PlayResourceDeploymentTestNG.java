@@ -219,6 +219,13 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         List<Play> retrievedFullPlayList = playProxy.getPlays(mainTestTenant.getId(), null, null);
         Assert.assertNotNull(retrievedFullPlayList);
         Assert.assertEquals(retrievedFullPlayList.size(), 2);
+        Assert.assertNotNull(retrievedFullPlayList.get(0).getPlayLaunchChannels());
+
+        Play retrievedPlay = retrievedFullPlayList.get(0);
+        PlayLaunchChannel retrievedChannel = playProxy
+                .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), retrievedPlay.getName(), false).get(0);
+        Assert.assertEquals(retrievedPlay.getPlayLaunchChannels().get(0).getId(),
+                retrievedChannel.getId());
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testGetFullPlays" })
