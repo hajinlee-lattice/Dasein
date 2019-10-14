@@ -305,7 +305,7 @@ abstract class QueryTranslator {
         } else {
             ColumnMetadata cm = attrRepo.getColumnMetadata(bucket.getAttr());
             if (RestrictionUtils.isUnencodedBoolean(cm)) {
-                translated = RestrictionUtils.convertUnencodedBooleanBucketRestriction(bucket, cm);
+                translated = RestrictionUtils.convertUnencodedBooleanBucketRestriction(bucket, cm, translatePriorOnly);
             } else {
                 translated = RestrictionUtils.convertBucketRestriction(bucket, translatePriorOnly);
             }

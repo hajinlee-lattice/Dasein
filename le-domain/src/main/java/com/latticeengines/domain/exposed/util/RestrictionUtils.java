@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -222,24 +223,27 @@ public class RestrictionUtils {
         return restriction;
     }
 
-    public static Restriction convertUnencodedBooleanBucketRestriction(BucketRestriction bucketRestriction, ColumnMetadata cm) {
+    public static Restriction convertUnencodedBooleanBucketRestriction(BucketRestriction bucketRestriction,
+            ColumnMetadata cm, boolean translatePriorOnly) {
         Bucket bkt = bucketRestriction.getBkt();
-        if (ComparisonType.EQUAL.equals(bkt.getComparisonType())) {
-            if ("Yes".equals(bkt.getValues().get(0))) {
-                return equalsAny(bucketRestriction.getAttr(), getTrueVals(cm.getJavaClass()));
+        if (bkt.getTransaction() != null) {
+            if (ComparisonType.EQUAL.equals(bkt.getComparisonType())) {
+                if ("Yes".equals(bkt.getValues().get(0))) {
+                    return equalsAny(bucketRestriction.getAttr(), getTrueVals(cm.getJavaClass()));
+                } else {
+                    return equalsAny(bucketRestriction.getAttr(), getFalseVals(cm.getJavaClass()));
+                }
+            } else if (ComparisonType.NOT_EQUAL.equals(bkt.getComparisonType())) {
+                if ("Yes".equals(bkt.getValues().get(0))) {
+                    return notEqualsAny(bucketRestriction.getAttr(), getTrueVals(cm.getJavaClass()));
+                } else {
+                    return notEqualsAny(bucketRestriction.getAttr(), getFalseVals(cm.getJavaClass()));
+                }
             } else {
-                return equalsAny(bucketRestriction.getAttr(), getFalseVals(cm.getJavaClass()));
+                log.warn("Unknown boolean operator " + bkt.getComparisonType() + ", keep the bucket restriction as is.");
             }
-        } else if (ComparisonType.NOT_EQUAL.equals(bkt.getComparisonType())) {
-            if ("Yes".equals(bkt.getValues().get(0))) {
-                return notEqualsAny(bucketRestriction.getAttr(), getTrueVals(cm.getJavaClass()));
-            } else {
-                return notEqualsAny(bucketRestriction.getAttr(), getFalseVals(cm.getJavaClass()));
-            }
-        } else {
-            log.warn("Unknown boolean operator " + bkt.getComparisonType() + ", keep the bucket restriction as is.");
         }
-        return bucketRestriction;
+        return convertBucketRestriction(bucketRestriction, translatePriorOnly);
     }
 
     private static Restriction equalsAny(AttributeLookup attr, Object... vals) {
@@ -615,7 +619,8 @@ public class RestrictionUtils {
     }
 
     public static boolean isUnencodedBoolean(ColumnMetadata cm) {
-        return cm != null && "Boolean".equalsIgnoreCase(cm.getJavaClass()) && cm.getBitOffset() == null;
+        return cm != null && cm.getBitOffset() == null && ("Boolean".equalsIgnoreCase(cm.getJavaClass())
+                || FundamentalType.BOOLEAN.equals(cm.getFundamentalType()));
     }
 
     public static Set<AttributeLookup> getRestrictionDependingAttributes(Restriction restriction) {
