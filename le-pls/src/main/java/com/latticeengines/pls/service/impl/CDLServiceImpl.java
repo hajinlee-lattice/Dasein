@@ -386,12 +386,8 @@ public class CDLServiceImpl implements CDLService {
         return sourceFile;
     }
 
-    /*
-     * logic provide 5 display by default if drop folder is empty then generate
-     * template according to data feed task
-     */
     @Override
-    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace, String sortBy) {
+    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace, String sortBy, Set<EntityType> excludeTypes) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
         List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
         log.info("folderNames is : " + folderNames.toString());
@@ -408,6 +404,9 @@ public class CDLServiceImpl implements CDLService {
             if (task == null) {
                 EntityType entityType =
                         EntityType.fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
+                if (CollectionUtils.isNotEmpty(excludeTypes) && excludeTypes.contains(entityType)) {
+                    continue;
+                }
                 if (entityType != null) {
                     S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
                     display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
@@ -431,6 +430,9 @@ public class CDLServiceImpl implements CDLService {
                 // get from data feed task
                 display.setTemplateName(task.getTemplateDisplayName());
                 EntityType entityType = EntityType.fromDataFeedTask(task);
+                if (CollectionUtils.isNotEmpty(excludeTypes) && excludeTypes.contains(entityType)) {
+                    continue;
+                }
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
                 display.setEntity(entityType.getEntity());

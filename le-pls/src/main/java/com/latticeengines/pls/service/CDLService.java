@@ -2,6 +2,7 @@ package com.latticeengines.pls.service;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
@@ -42,7 +43,7 @@ public interface CDLService {
 
     void replaceData(String customerSpace, SchemaInterpretation schemaInterpretation);
 
-    List<S3ImportTemplateDisplay> getS3ImportTemplate(String string, String sortBy);
+    List<S3ImportTemplateDisplay> getS3ImportTemplate(String string, String sortBy, Set<EntityType> excludeTypes);
 
     List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter);
 

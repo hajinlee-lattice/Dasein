@@ -26,6 +26,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -205,10 +206,10 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         boolean result = cdlService.createWebVisitTemplate(customerSpace.toString(), entityType,
                 new FileInputStream(templateFile));
         Assert.assertTrue(result);
-        List<S3ImportTemplateDisplay> s3Templates = cdlService.getS3ImportTemplate(customerSpace.toString(), "");
+        List<S3ImportTemplateDisplay> s3Templates = cdlService.getS3ImportTemplate(customerSpace.toString(), "", null);
         Assert.assertNotNull(s3Templates);
         Assert.assertTrue(s3Templates.size() > 1);
-        Optional<S3ImportTemplateDisplay> display = s3Templates.stream() //
+        Optional<S3ImportTemplateDisplay> display = s3Templates.stream()
                 .filter(s3Template -> s3Template.getFeedType().equals(feedType)) //
                 .findAny();
         Assert.assertTrue(display.isPresent());
@@ -223,6 +224,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private void verifyWebVisitStream(@NotNull DataFeedTask dataFeedTask) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getName());
         AtlasStream stream = activityStoreProxy.findStreamByName(tenant.getId(), EntityType.WebVisit.name(), true);
         Assert.assertNotNull(stream);
         Assert.assertEquals(stream.getName(), EntityType.WebVisit.name());
@@ -242,6 +244,15 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(dimension.getName(), InterfaceName.PathPatternId.name());
         // catalog should be attached since path pattern template is created first
         Assert.assertNotNull(dimension.getCatalog());
+
+        List<S3ImportTemplateDisplay> s3Templates =
+                cdlService.getS3ImportTemplate(customerSpace.toString(), "", ImmutableSet.of(EntityType.WebVisit, EntityType.WebVisitPathPattern));
+        Assert.assertNotNull(s3Templates);
+        Assert.assertTrue(s3Templates.size() > 1);
+        Optional<S3ImportTemplateDisplay> display = s3Templates.stream()
+                .filter(s3Template -> s3Template.getFeedType().equals("Default_Website_System_WebVisitData"))
+                .findAny();
+        Assert.assertFalse(display.isPresent());
     }
 
     @Test(groups = "manual")
