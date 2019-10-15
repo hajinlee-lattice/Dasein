@@ -180,7 +180,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 ConvertCSVToAvro convertCSVToAvro = new ConvertCSVToAvro(csvFilePrinter, dataFileWriter);
                 while (true) {
                     try {
-                        RecordLine recordLine = recordQueue.poll(30, TimeUnit.SECONDS);
+                        RecordLine recordLine = recordQueue.poll(10, TimeUnit.SECONDS);
                         if (recordLine != null) {
                             convertCSVToAvro.process(recordLine.csvRecord, recordLine.lineNum);
                         }
