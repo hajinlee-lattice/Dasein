@@ -101,13 +101,9 @@ def rebuildLinks(tenant, dataCollection, tablesMapping):
             storage.new(link)
 
 
-def rollbackTenant(tenant):
-    migrationTrack = tenant.migrationTrack
-    targetVersion = migrationTrack.version
-
+def restoreDataCollection(tenant, migrationTrack, targetVersion):
     dataCollection = migrationTrack.metadataDataCollection
     dataCollection.version = targetVersion
-
     if len(dataCollection.activeMetadataDataCollectionStatus):
         dataCollection.activeMetadataDataCollectionStatus[0].version = targetVersion
         dataCollection.activeMetadataDataCollectionStatus[0].detail = migrationTrack.collectionStatusDetail
@@ -120,19 +116,13 @@ def rollbackTenant(tenant):
         dataCollectionStatus.fkCollectionId = dataCollection.pid
         dataCollectionStatus.tenantId = tenant.tenantPid
         storage.new(dataCollectionStatus)
+    return dataCollection
 
+
+def restoreMetadataStats(tenant, migrationTrack):
     stats = tenant.activeMetadataStatistics[0]
     stats.cubesData = migrationTrack.statsCubesData
     stats.name = migrationTrack.statsName
-
-    rebuildLinks(tenant, dataCollection, migrationTrack.curActiveTable)
-    try:
-        importMigrateTracking = migrationTrack.importMigrateTracking
-        deleteActions(importMigrateTracking)
-        deleteTables(importMigrateTracking)
-    except Exception as e:
-        print('Error encountered while deleting imports and actions')
-        print(e)
 
 
 def deleteActions(importMigrateTracking):
@@ -165,10 +155,43 @@ def deleteTables(importMigrateTracking):
             res = requests.delete('https://{}/metadata/customerspaces/{}/tables/{}'.format(API, customerSpace, table),
                                   headers=headers, verify=False)
             if not res.ok:
+                print(res.json())
                 raise Exception('Request returns with an unsuccessful status code')
         except Exception as e:
             print('Unable to delete table {}'.format(table))
             print(e)
+
+
+def restoreTemplates(tenant):
+    headers = {'MagicAuthentication': 'Security through obscurity!', 'Content-Type': 'application/json'}
+    print('Restoring templates for tenant {}'.format(tenant.tenantId))
+    res = requests.post('https://{}/metadata/migration/tenants/{}/restoreAllTemplates'.format(API, tenant.tenantId),
+                          headers=headers, verify=False)
+    if not res.ok:
+        print(res.json())
+        raise Exception('Request returns with an unsuccessful status code')
+
+
+def rollbackTenant(tenant):
+    migrationTrack = tenant.migrationTrack
+    targetVersion = migrationTrack.version
+
+    dataCollection = restoreDataCollection(tenant, migrationTrack, targetVersion)
+    restoreMetadataStats(tenant, migrationTrack)
+    rebuildLinks(tenant, dataCollection, migrationTrack.curActiveTable)
+
+    try:
+        importMigrateTracking = migrationTrack.importMigrateTracking
+        deleteActions(importMigrateTracking)
+        deleteTables(importMigrateTracking)
+    except Exception as e:
+        print('Error encountered while deleting imports and actions')
+        print(e)
+    try:
+        restoreTemplates(tenant)
+    except Exception as e:
+        print('Error encountered while restoring templates')
+        print(e)
 
 
 if __name__ == '__main__':
