@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,51 +14,81 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
-import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
+import com.latticeengines.spark.exposed.job.score.CombineInputTableWithScoreJob;
 
 @Component("combineInputTableWithScoreDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInputTableWithScoreDataFlowConfiguration> {
+public class CombineInputTableWithScoreDataFlow
+        extends RunSparkJob<CombineInputTableWithScoreDataFlowConfiguration, CombineInputTableWithScoreJobConfig> {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(CombineInputTableWithScoreDataFlow.class);
 
+    private Table scoreResultTable;
+    private Table inputTable;
+
     @Override
-    public void execute() {
-        setupDataFlow();
-        super.execute();
+    protected Class<CombineInputTableWithScoreJob> getJobClz() {
+        return CombineInputTableWithScoreJob.class;
     }
 
     @Override
-    public void onExecutionCompleted() {
-        putStringValueInContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME, configuration.getTargetTableName());
-        // putStringValueInContext(COMPUTE_LIFT_INPUT_TABLE_NAME,
-        // configuration.getTargetTableName());
-        putStringValueInContext(PIVOT_SCORE_INPUT_TABLE_NAME, configuration.getTargetTableName());
-        putStringValueInContext(AI_RAW_RATING_TABLE_NAME, configuration.getTargetTableName());
-    }
+    protected CombineInputTableWithScoreJobConfig configureJob(
+            CombineInputTableWithScoreDataFlowConfiguration stepConfiguration) {
 
-    private void setupDataFlow() {
-        CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
-                getScoreResultTableName(), getInputTableName(), getBucketMetadata(), getModelType(),
-                configuration.getIdColumnName());
+        CombineInputTableWithScoreJobConfig jobConfig = new CombineInputTableWithScoreJobConfig();
+        jobConfig.bucketMetadata = getBucketMetadata();
+        jobConfig.modelType = getModelType();
+        jobConfig.idColumn = configuration.getIdColumnName();
         if (configuration.isCdlMultiModel()) {
-            setCdlMultiModelParams(params);
+            setCdlMultiModelParams(jobConfig);
         }
-        configuration.setDataFlowParams(params);
-        configuration.setJobProperties(initJobProperties());
+
+        scoreResultTable = metadataProxy.getTable(customerSpace.toString(), getScoreResultTableName());
+        List<DataUnit> inputUnits = new ArrayList<>();
+        inputTable = metadataProxy.getTable(customerSpace.toString(), getInputTableName());
+        inputUnits.add(inputTable.toHdfsDataUnit("inputResult"));
+        inputUnits.add(scoreResultTable.toHdfsDataUnit("scoreResult"));
+        jobConfig.setInput(inputUnits);
+        return jobConfig;
     }
 
-    private void setCdlMultiModelParams(CombineInputTableWithScoreParameters params) {
+    @Override
+    protected void postJobExecution(SparkJobResult result) {
+        String customer = configuration.getCustomer();
+        String targetTableName = NamingUtils.uuid("CombineInputTableWithScore");
+        Table targetTable = toTable(targetTableName, result.getTargets().get(0));
+        overlayMetadata(targetTable);
+        metadataProxy.createTable(customer, targetTableName, targetTable);
+
+        putStringValueInContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME, targetTableName);
+        putStringValueInContext(PIVOT_SCORE_INPUT_TABLE_NAME, targetTableName);
+        putStringValueInContext(AI_RAW_RATING_TABLE_NAME, targetTableName);
+    }
+
+    private void overlayMetadata(Table targetTable) {
+        Map<String, Attribute> attributeMap = new HashMap<>();
+        inputTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
+        scoreResultTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
+        super.overlayTableSchema(targetTable, attributeMap);
+    }
+
+    private void setCdlMultiModelParams(CombineInputTableWithScoreJobConfig jobConfig) {
         if (!configuration.isCdlMultiModel())
             return;
 
@@ -68,27 +99,24 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         Map<String, List<BucketMetadata>> bucketMetadataMap = new HashMap<>();
 
         containers.forEach(container -> {
-            CombineInputTableWithScoreParameters singleModelParams = getSingleModelParams(container);
+            List<BucketMetadata> bucketMetadata = getSingleModelBucketMetadata(container);
             String modelGuid = ((AIModel) container.getModel()).getModelSummaryId();
-            bucketMetadataMap.put(modelGuid, singleModelParams.getBucketMetadata());
+            bucketMetadataMap.put(modelGuid, bucketMetadata);
         });
 
-        params.setBucketMetadataMap(bucketMetadataMap);
-        params.setScoreFieldName(InterfaceName.Score.name());
-        params.setIdColumn(InterfaceName.__Composite_Key__.toString());
-        params.setModelIdField(ScoreResultField.ModelId.displayName);
+        jobConfig.bucketMetadataMap = bucketMetadataMap;
+        jobConfig.scoreFieldName = InterfaceName.Score.name();
+        jobConfig.idColumn = InterfaceName.__Composite_Key__.toString();
+        jobConfig.modelIdField = ScoreResultField.ModelId.displayName;
     }
 
-    private CombineInputTableWithScoreParameters getSingleModelParams(RatingModelContainer container) {
-        CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
-                getScoreResultTableName(), getInputTableName());
+    private List<BucketMetadata> getSingleModelBucketMetadata(RatingModelContainer container) {
         AIModel aiModel = (AIModel) container.getModel();
         List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
         if (CollectionUtils.isEmpty(bucketMetadata)) {
             throw new IllegalArgumentException("AI model " + aiModel.getId() + " does not have bucket metadata.");
         }
-        params.setBucketMetadata(bucketMetadata);
-        return params;
+        return bucketMetadata;
     }
 
     private List<RatingModelContainer> getModelContainers() {
@@ -106,7 +134,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     private String getInputTableName() {
         String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
         if (StringUtils.isBlank(inputTableName)) {
-            inputTableName = getDataFlowParams().getInputTableName();
+            inputTableName = getConfiguration().getInputTableName();
         }
         return inputTableName;
     }
@@ -114,13 +142,9 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     private String getScoreResultTableName() {
         String scoreResultTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
         if (scoreResultTableName == null) {
-            scoreResultTableName = getDataFlowParams().getScoreResultsTableName();
+            scoreResultTableName = getConfiguration().getScoreResultsTableName();
         }
         return scoreResultTableName;
-    }
-
-    private CombineInputTableWithScoreParameters getDataFlowParams() {
-        return (CombineInputTableWithScoreParameters) configuration.getDataFlowParams();
     }
 
     private List<BucketMetadata> getBucketMetadata() {

@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportScoreTrainingFileStepConfiguration;
@@ -42,7 +41,7 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
             matchDataCloudWorkflowBuilder.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
-            combineInputWithScores.setCustomerSpace(customerSpace);
+            combineInputWithScores.setCustomer(customerSpace.toString());
             combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             return this;
@@ -68,8 +67,7 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             matchDataCloudWorkflowBuilder.matchInputTableName(tableName);
             // result table name is set during execution
             score.setInputTableName(tableName);
-            combineInputWithScores
-                    .setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            combineInputWithScores.setInputTableName(tableName);
             return this;
         }
 
@@ -176,7 +174,6 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             configuration.setContainerConfiguration("rtsBulkScoreWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             score.microserviceStepConfiguration(microserviceStepConfiguration);
-            combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             combineMatchDebugWithScores
                     .microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);

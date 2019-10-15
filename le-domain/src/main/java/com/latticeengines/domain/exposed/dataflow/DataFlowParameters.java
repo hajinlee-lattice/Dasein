@@ -34,7 +34,6 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.dataflow.DedupEve
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculatePredictedRevenuePercentileParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineFilterTableParameters;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMatchDebugWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
@@ -44,7 +43,6 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Recalcula
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = CombineFilterTableParameters.class, name = "combineFilterTableParameters"), //
-        @JsonSubTypes.Type(value = CombineInputTableWithScoreParameters.class, name = "combineInputTableWithScoreParameters"), //
         @JsonSubTypes.Type(value = CombineMatchDebugWithScoreParameters.class, name = "combineMatchDebugWithScoreParameters"), //
         @JsonSubTypes.Type(value = DedupEventTableParameters.class, name = "dedupEventTableParameters"), //
         @JsonSubTypes.Type(value = AddStandardAttributesParameters.class, name = "addStandardAttributesParameters"), //
