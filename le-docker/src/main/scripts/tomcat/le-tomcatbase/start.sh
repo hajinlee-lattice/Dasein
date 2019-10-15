@@ -117,6 +117,8 @@ fi
 
 echo ${CATALINA_OPTS}
 
+export HADOOP_USER_NAME=yarn
+
 mkdir /var/log/ledp
 chmod a+w /var/log/ledp
 

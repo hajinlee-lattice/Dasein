@@ -75,8 +75,7 @@ public class PeriodResource {
 
     @GetMapping(value = "/daterange/{year}")
     @ApiOperation(value = "Get start date and end date")
-    public List<String> getStartEndDate(@PathVariable String customerSpace,
-                                                      @PathVariable int year) {
+    public List<String> getStartEndDate(@PathVariable String customerSpace, @PathVariable Integer year) {
         String yearString = String.valueOf(year);
         // convert year from "18" to "2018"
         if (yearString.length() == 2) {
