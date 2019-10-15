@@ -1,22 +1,12 @@
 [
    {
-      "attrName":"PID",
-      "displayName":"PID",
-      "entity":"Account",
-      "javaClass":"Long",
-      "externalSystemName":"Outreach",
-      "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true
-   },
-   {
       "attrName":"EXTERNAL_ID",
       "displayName":"Recommendation ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Outreach",
       "standardField":false,
-      "exportEnabled":false,
+      "exportEnabled":true,
       "historyEnabled":true
    },
    {
@@ -120,26 +110,6 @@
       "historyEnabled":true
    },
    {
-     "attrName":"SFDC_ACCOUNT_ID",
-     "displayName":"LookupId",
-      "entity":"Account",
-      "javaClass":"String",
-      "externalSystemName":"Outreach",
-      "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":true
-   },
-   {
-      "attrName":"PRIORITY_ID",
-      "displayName":"Lattice Rating",
-      "entity":"Account",
-      "javaClass":"String",
-      "externalSystemName":"Outreach",
-      "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":true
-   },
-   {
       "attrName":"PRIORITY_DISPLAY_NAME",
       "displayName":"Lattice Rating",
       "entity":"Account",
@@ -176,26 +146,6 @@
       "javaClass":"String",
       "externalSystemName":"Outreach",
       "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":true
-   },
-   {
-      "attrName":"MODEL_SUMMARY_ID",
-      "displayName":"MODEL_SUMMARY_ID",
-      "entity":"Account",
-      "javaClass":"String",
-      "externalSystemName":"Outreach",
-      "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true
-   },
-   {
-      "attrName":"SYNC_DESTINATION",
-      "displayName":"SYNC_DESTINATION",
-      "entity":"Account",
-      "javaClass":"String",
-      "externalSystemName":"Outreach",
-      "standardField":false,
       "exportEnabled":false,
       "historyEnabled":true
    },
@@ -214,16 +164,6 @@
       "displayName":"Campaign Launch System Type",
       "entity":"Account",
       "javaClass":"String",
-      "externalSystemName":"Outreach",
-      "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true
-   },
-   {
-      "attrName":"TENANT_ID",
-      "displayName":"TENANT_ID",
-      "entity":"Account",
-      "javaClass":"Long",
       "externalSystemName":"Outreach",
       "standardField":false,
       "exportEnabled":false,
@@ -341,7 +281,7 @@
    },
    {
       "attrName":"PostalCode",
-      "displayName":"Contact ZipCode",
+      "displayName":"Contact Zip Code",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Outreach",
@@ -360,16 +300,6 @@
       "historyEnabled":true
    },
    {
-      "attrName":"SFDC_CONTACT_ID",
-      "displayName":"LookupId",
-      "entity":"Contact",
-      "javaClass":"String",
-      "externalSystemName":"Outreach",
-      "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":true
-   },
-   {
       "attrName":"City",
       "displayName":"Contact City",
       "entity":"Contact",
@@ -380,13 +310,13 @@
       "historyEnabled":true
    },
    {
-      "attrName":"ContactID",
+      "attrName":"ContactId",
       "displayName":"Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Outreach",
       "standardField":true,
-      "exportEnabled":false,
+      "exportEnabled":true,
       "historyEnabled":true
    },
    {
@@ -416,6 +346,26 @@
       "javaClass":"String",
       "externalSystemName":"Outreach",
       "standardField":true,
+      "exportEnabled":true,
+      "historyEnabled":false
+   },
+   {
+      "attrName":"SFDC_CONTACT_ID",
+      "displayName":"Contact SFDC ID",
+      "entity":"Contact",
+      "javaClass":"String",
+      "externalSystemName":"Outreach",
+      "standardField":false,
+      "exportEnabled":true,
+      "historyEnabled":false
+   },
+   {
+      "attrName":"SFDC_ACCOUNT_ID",
+      "displayName":"SFDC Account ID",
+      "entity":"Account",
+      "javaClass":"String",
+      "externalSystemName":"Outreach",
+      "standardField":false,
       "exportEnabled":true,
       "historyEnabled":false
    }

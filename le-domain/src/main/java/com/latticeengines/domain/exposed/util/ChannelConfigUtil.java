@@ -18,6 +18,7 @@ public class ChannelConfigUtil {
         switch (destinationSystemName) {
         case Marketo:
         case GoogleAds:
+        case Outreach:
             return true;
         case LinkedIn:
             if (channelConfig == null) {
