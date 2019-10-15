@@ -336,7 +336,7 @@ public class WorkflowResource {
     @GetMapping(value = "/jobs/{customerSpace}/{workflowPid}", headers = "Accept=application/json")
     @ApiOperation("Get workflowJob object by PID")
     public Job getJobByWorkflowJobPid(@PathVariable String customerSpace, @PathVariable Long workflowPid,
-            @RequestParam(value = "includeDetails", required = false) Boolean includeDetails) {
+            @RequestParam(value = "includeDetails", required = false) boolean includeDetails) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         Job job = workflowJobService.getJobByWorkflowPid(customerSpace, workflowPid, includeDetails);
         if (job == null) {

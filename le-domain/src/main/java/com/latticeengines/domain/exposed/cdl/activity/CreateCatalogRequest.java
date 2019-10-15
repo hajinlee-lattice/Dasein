@@ -16,13 +16,16 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 public class CreateCatalogRequest {
     private final String catalogName;
     private final String dataFeedTaskUniqueId;
+    private final String primaryKeyColumn;
 
     @JsonCreator
     public CreateCatalogRequest(@NotNull @JsonProperty("CatalogName") String catalogName, //
-            @JsonProperty("TaskId") String dataFeedTaskUniqueId) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(catalogName), "");
+            @JsonProperty("TaskId") String dataFeedTaskUniqueId,
+            @JsonProperty("PrimaryKeyColumn") String primaryKeyColumn) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(catalogName), "Catalog name should not be blank");
         this.catalogName = catalogName;
         this.dataFeedTaskUniqueId = dataFeedTaskUniqueId;
+        this.primaryKeyColumn = primaryKeyColumn;
     }
 
     @JsonProperty("CatalogName")
@@ -33,5 +36,10 @@ public class CreateCatalogRequest {
     @JsonProperty("TaskId")
     public String getDataFeedTaskUniqueId() {
         return dataFeedTaskUniqueId;
+    }
+
+    @JsonProperty("PrimaryKeyColumn")
+    public String getPrimaryKeyColumn() {
+        return primaryKeyColumn;
     }
 }

@@ -115,6 +115,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
+        if (entityImportsMap == null) {
+            return;
+        }
 
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
         if (CollectionUtils.isNotEmpty(imports)) {

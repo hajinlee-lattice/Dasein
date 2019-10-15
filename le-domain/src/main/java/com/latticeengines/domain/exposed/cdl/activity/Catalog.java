@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
+import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.IngestionBehavior.Upsert;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -34,6 +36,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @UniqueConstraint(columnNames = { "FK_TASK_ID", "FK_TENANT_ID" }) })
 public class Catalog implements HasPid, Serializable, HasAuditingFields {
 
+    public static final DataFeedTask.IngestionBehavior DEFAULT_INGESTION_BEHAVIOR = Upsert;
     private static final long serialVersionUID = -8455242959058500143L;
 
     @Id
@@ -46,6 +49,10 @@ public class Catalog implements HasPid, Serializable, HasAuditingFields {
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
+
+    @JsonProperty("primary_key_column")
+    @Column(name = "PRIMARY_KEY_COLUMN")
+    private String primaryKeyColumn; // column name used to uniquely identify catalog entry
 
     @JsonProperty("tenant")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
@@ -86,6 +93,14 @@ public class Catalog implements HasPid, Serializable, HasAuditingFields {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPrimaryKeyColumn() {
+        return primaryKeyColumn;
+    }
+
+    public void setPrimaryKeyColumn(String primaryKeyColumn) {
+        this.primaryKeyColumn = primaryKeyColumn;
     }
 
     public Tenant getTenant() {
