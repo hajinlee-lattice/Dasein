@@ -201,7 +201,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
     private AvroInputBuffer inputBuffer(Table preMatchEventTable) {
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
 
-        String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);
+        String avroDir = ExtractUtils.getSingleExtractRawPath(preMatchEventTable);
+        log.info("Extract path for match input is {}", avroDir);
         inputBuffer.setAvroDir(avroDir);
         inputBuffer.setTableName(preMatchEventTable.getName());
 
