@@ -150,6 +150,28 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
+    public PlayLaunchChannel updateLastDeltaWorkflowId(String playId, String channelId, Long workflowPid) {
+        if (workflowPid == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Unable to update null workflowPid" });
+        }
+
+        Play play = playService.getPlayByName(playId, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playId });
+        }
+
+        PlayLaunchChannel channel = findById(channelId);
+        if (channel == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Channel found with id: " + channelId });
+        }
+
+        channel.setPlay(play);
+        channel.setLastDeltaWorkflowId(workflowPid);
+        playLaunchChannelEntityMgr.update(channel);
+        return channel;
+    }
+
+    @Override
     public List<PlayLaunchChannel> findByIsAlwaysOnTrue() {
         return playLaunchChannelEntityMgr.findByIsAlwaysOnTrue();
     }

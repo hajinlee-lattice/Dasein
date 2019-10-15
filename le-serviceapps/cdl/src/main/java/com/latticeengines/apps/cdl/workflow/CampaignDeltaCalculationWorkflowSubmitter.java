@@ -15,9 +15,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("campaignDeltaCalculationWorkflowSubmitter")
 public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter {
@@ -27,7 +30,10 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
     @Inject
     private DataCollectionService dataCollectionService;
 
-    public ApplicationId submit(String customerSpace, String playId, String channelId) {
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    public Long submit(String customerSpace, String playId, String channelId) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignDeltaCalculationWorkflow");
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
@@ -40,6 +46,14 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
                 .channelId(channelId) //
                 .executionId(UUID.randomUUID().toString()) //
                 .build();
-        return workflowJobService.submit(configuration);
+        ApplicationId appId = workflowJobService.submit(configuration);
+
+        if (FakeApplicationId.isFakeApplicationId(appId.toString())) {
+            return FakeApplicationId.toWorkflowJobPid(appId.toString());
+        } else {
+            Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
+            return job.getPid();
+        }
+
     }
 }

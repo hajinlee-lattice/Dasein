@@ -14,6 +14,8 @@ public interface PlayLaunchChannelService {
 
     PlayLaunchChannel updateNextScheduledDate(String playName, String playLaunchChannel);
 
+    PlayLaunchChannel updateLastDeltaWorkflowId(String playName, String playLaunchChannel, Long workflowPid);
+
     void deleteByChannelId(String channelId, boolean hardDelete);
 
     List<PlayLaunchChannel> findByIsAlwaysOnTrue();

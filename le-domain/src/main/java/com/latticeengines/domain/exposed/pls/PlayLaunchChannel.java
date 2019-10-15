@@ -137,6 +137,14 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "EXPIRATION_DATE")
     private Date expirationDate;
 
+    @JsonProperty("lastDeltaCalculationWorkflow")
+    @Column(name = "FK_WORKFLOW_ID")
+    private Long lastDeltaWorkflowId;
+
+    @JsonProperty("resetDeltaCalculationData")
+    @Column(name = "RESET_DELTA_CALCULATION_DATA")
+    private Boolean resetDeltaCalculationData;
+
     @JsonProperty("channelConfig")
     @Column(name = "CHANNEL_CONFIG")
     @Lob
@@ -355,6 +363,16 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setExpirationPeriodString(String expirationPeriodString) {
         this.expirationPeriodString = expirationPeriodString;
+    }
+
+    public Long getLastDeltaWorkflowId() { return lastDeltaWorkflowId; }
+
+    public void setLastDeltaWorkflowId(Long lastDeltaWorkflowId) { this.lastDeltaWorkflowId = lastDeltaWorkflowId; }
+
+    public Boolean getResetDeltaCalculationData() { return resetDeltaCalculationData; }
+
+    public void setResetDeltaCalculationData(Boolean resetDeltaCalculationData) {
+        this.resetDeltaCalculationData = resetDeltaCalculationData;
     }
 
     public Date getExpirationDate() {
