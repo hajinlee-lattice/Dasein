@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFl
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculateExpectedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculatePredictedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
@@ -86,7 +85,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             calculatePredictedRevenuePercentile.setCustomerSpace(customerSpace);
             calculateExpectedRevenuePercentile.setCustomerSpace(customerSpace);
             scoreAgg.setCustomer(customerSpace.toString());
-            combineInputWithScores.setCustomerSpace(customerSpace);
+            combineInputWithScores.setCustomer(customerSpace.toString());
             computeLift.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
             return this;
@@ -102,7 +101,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             recalculateExpectedRevenue.setMicroServiceHostPort(microServiceHostPort);
             calculatePredictedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
             calculateExpectedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
-            combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -193,7 +191,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder inputTableName(String tableName) {
             match.matchInputTableName(tableName);
-            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            combineInputWithScores.setInputTableName(tableName);
             return this;
         }
 
