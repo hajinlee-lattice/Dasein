@@ -27,6 +27,11 @@
             <classifier>intf</classifier>
         </dependency>
         <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>${freemarker.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-model</artifactId>
             <version>${jpmml.version}</version>

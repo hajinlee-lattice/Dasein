@@ -65,9 +65,9 @@ public class RestrictionUtilsUnitTestNG {
     @Test(groups = "unit", dataProvider = "numericalBuckets")
     public void testConvertNumericalBucketRestriction(List<Object> vals, Class<?> attrClz, boolean exception) {
         if (exception) {
-            Assert.assertThrows(() -> RestrictionUtils.convertNumericalValues(vals, attrClz));
+            Assert.assertThrows(() -> RestrictionUtils.convertNumericalOrBooleanValues(vals, attrClz));
         } else {
-            List<Object> newVals = RestrictionUtils.convertNumericalValues(vals, attrClz);
+            List<Object> newVals = RestrictionUtils.convertNumericalOrBooleanValues(vals, attrClz);
             for (Object val: newVals) {
                 Assert.assertTrue(Number.class.isAssignableFrom(val.getClass()), JsonUtils.serialize(vals));
             }

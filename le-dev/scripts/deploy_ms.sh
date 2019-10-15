@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # using artifacts build on local to deploy remote workstation (a ministack)
 
 # Expand aliases

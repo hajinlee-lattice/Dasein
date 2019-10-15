@@ -1,5 +1,5 @@
-#This script is only to create hive table for datacloud source
 #!/bin/bash
+#This script is only to create hive table for datacloud source
 
 SOURCE=$1
 VERSION=$2

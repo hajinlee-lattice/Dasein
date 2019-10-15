@@ -1,4 +1,4 @@
-I#!/usr/bin/env bash
+#!/usr/bin/env bash
 
 function printUsage
 {

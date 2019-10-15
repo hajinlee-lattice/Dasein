@@ -23,7 +23,7 @@ public class EntityQueryTranslator extends QueryTranslator {
         super(queryFactory, repository);
     }
 
-    public Query translateEntityQuery(FrontEndQuery frontEndQuery, boolean isCountQuery, //
+    public Query translateEntityQuery(FrontEndQuery frontEndQuery, AttributeRepository attrRepo, boolean isCountQuery, //
             TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
@@ -31,7 +31,7 @@ public class EntityQueryTranslator extends QueryTranslator {
             return translateProductQuery(frontEndQuery, isCountQuery);
         }
 
-        Restriction restriction = translateEntityQueryRestriction(frontEndQuery, timeTranslator, sqlUser);
+        Restriction restriction = translateEntityQueryRestriction(frontEndQuery, attrRepo, timeTranslator, sqlUser);
         QueryBuilder queryBuilder = Query.builder();
         queryBuilder.from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
