@@ -38,12 +38,14 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     private StreamDimensionEntityMgr dimensionEntityMgr;
 
     @Override
-    public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId) {
+    public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId,
+            String primaryKeyColumn) {
         Preconditions.checkArgument(StringUtils.isNotBlank(catalogName), "catalog name should not be blank");
         Tenant tenant = MultiTenantContext.getTenant();
         Catalog catalog = new Catalog();
         catalog.setName(catalogName);
         catalog.setTenant(tenant);
+        catalog.setPrimaryKeyColumn(primaryKeyColumn);
         catalog.setDataFeedTask(getDataFeedTask(tenant, taskUniqueId));
         catalogEntityMgr.create(catalog);
         return catalog;

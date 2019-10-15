@@ -273,10 +273,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     /**
      * Retrieve table names for all catalogs in current active version
      *
-     * @param customerSpace
-     *            target tenant
-     * @param catalogs
-     *            list of catalogs in current tenant
      * @return a map of catalogName -> tableName, will not be {@code null}
      */
     private Map<String, String> getActiveCatalogTables(@NotNull String customerSpace, List<Catalog> catalogs) {
@@ -293,6 +289,48 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ConsolidatedCatalog, null, catalogNames);
         log.info("Current catalog tables for tenant {} are {}. CatalogsNames={}", customerSpace, tables, catalogNames);
         return tables;
+    }
+
+    /**
+     * Retrieve primary key columns for all catalogs
+     *
+     * @return a map of catalogName -> primaryKeyColumn, will not be {@code null}
+     */
+    private Map<String, String> getCatalogPrimaryKeyColumns(@NotNull String customerSpace, List<Catalog> catalogs) {
+        if (CollectionUtils.isEmpty(catalogs)) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> primaryKeyCols = catalogs.stream()
+                .filter(catalog -> catalog != null && StringUtils.isNotBlank(catalog.getPrimaryKeyColumn()))
+                .collect(Collectors.toMap(Catalog::getName, Catalog::getPrimaryKeyColumn));
+        log.info("Catalog primary keys for tenant {} are {}", customerSpace, primaryKeyCols);
+        return primaryKeyCols;
+    }
+
+    /**
+     * Retrieve ingestion behavior for all catalogs
+     *
+     * @return a map of catalogName -> ingestionBehavior, will not be {@code null}
+     */
+    private Map<String, DataFeedTask.IngestionBehavior> getCatalogIngestionBehavior(@NotNull String customerSpace,
+            List<Catalog> catalogs) {
+        if (CollectionUtils.isEmpty(catalogs)) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, DataFeedTask.IngestionBehavior> behaviors = catalogs.stream() //
+                .map(catalog -> {
+                    DataFeedTask.IngestionBehavior behavior = Catalog.DEFAULT_INGESTION_BEHAVIOR;
+                    if (catalog.getDataFeedTask() != null && catalog.getDataFeedTask().getIngestionBehavior() != null) {
+                        behavior = catalog.getDataFeedTask().getIngestionBehavior();
+                    }
+                    return Pair.of(catalog.getName(), behavior);
+                }) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+
+        log.info("Catalog ingestion behaviors for tenant {} are {}", customerSpace, behaviors);
+        return behaviors;
     }
 
     /**
@@ -602,6 +640,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .apsRollingPeriod(apsRollingPeriod) //
                 .apsImputationEnabled(apsImputationEnabled) //
                 .catalogTables(getActiveCatalogTables(customerSpace, catalogs)) //
+                .catalogPrimaryKeyColumns(getCatalogPrimaryKeyColumns(customerSpace, catalogs)) //
+                .catalogIngestionBehaivors(getCatalogIngestionBehavior(customerSpace, catalogs)) //
                 .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
                 .systemIdMap(systemIdMaps.getRight()) //
                 .defaultSystemIdMap(systemIdMaps.getLeft()) //

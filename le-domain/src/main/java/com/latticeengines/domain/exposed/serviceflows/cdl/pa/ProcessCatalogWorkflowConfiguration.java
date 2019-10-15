@@ -1,14 +1,23 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BuildCatalogStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class ProcessCatalogWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return Arrays.asList(SoftwareLibrary.Scoring.getName(), SoftwareLibrary.CDL.getName());
+    }
 
     public static class Builder {
         private ProcessCatalogWorkflowConfiguration configuration = new ProcessCatalogWorkflowConfiguration();
@@ -34,6 +43,16 @@ public class ProcessCatalogWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder catalogTables(Map<String, String> catalogTables) {
             buildCatalogConfig.setCatalogTables(catalogTables);
+            return this;
+        }
+
+        public Builder catalogIngestionBehaviors(Map<String, DataFeedTask.IngestionBehavior> ingestionBehaviors) {
+            buildCatalogConfig.setIngestionBehaviors(ingestionBehaviors);
+            return this;
+        }
+
+        public Builder catalogPrimaryKeyColumns(Map<String, String> primaryKeyColumns) {
+            buildCatalogConfig.setPrimaryKeyColumns(primaryKeyColumns);
             return this;
         }
 

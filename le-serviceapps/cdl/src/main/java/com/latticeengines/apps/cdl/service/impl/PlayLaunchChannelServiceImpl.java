@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -245,6 +246,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             playLaunch.setAudienceId(channelConfig.getAudienceId());
             playLaunch.setAudienceName(channelConfig.getAudienceName());
             channelConfig.setAudienceType(channelConfig.getAudienceType());
+        }else if (playLaunchChannel.getChannelConfig() instanceof OutreachChannelConfig) {
+            OutreachChannelConfig channelConfig = (OutreachChannelConfig) playLaunchChannel.getChannelConfig();
+            playLaunch.setAudienceId(channelConfig.getAudienceId());
+            playLaunch.setAudienceName(channelConfig.getAudienceName());
+            playLaunch.setFolderName(channelConfig.getFolderName());
         }
         playLaunch.setChannelConfig(playLaunchChannel.getChannelConfig());
 

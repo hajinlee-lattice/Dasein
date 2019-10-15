@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Basic;
@@ -265,12 +266,12 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     }
 
     @JsonProperty("OrigCatalogFileMap")
-    public Map<String, String> getOrigCatalogFileMap() {
+    public Map<String, List<String>> getOrigCatalogFileMap() {
         return this.detail.getOrigCatalogFileMap();
     }
 
     @JsonProperty("OrigCatalogFileMap")
-    public void setOrigCatalogFileMap(Map<String, String> origCatalogFileMap) {
+    public void setOrigCatalogFileMap(Map<String, List<String>> origCatalogFileMap) {
         this.detail.setOrigCatalogFileMap(origCatalogFileMap);
     }
 

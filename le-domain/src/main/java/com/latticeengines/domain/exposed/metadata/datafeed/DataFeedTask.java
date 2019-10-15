@@ -94,6 +94,11 @@ public class DataFeedTask implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(name = "INGESTION_BEHAVIOR")
+    @JsonProperty("ingestion_behavior")
+    @Enumerated(EnumType.STRING)
+    private IngestionBehavior ingestionBehavior;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "START_TIME", nullable = false)
     @JsonProperty("start_time")
@@ -202,6 +207,14 @@ public class DataFeedTask implements HasPid, Serializable {
         this.status = status;
     }
 
+    public IngestionBehavior getIngestionBehavior() {
+        return ingestionBehavior;
+    }
+
+    public void setIngestionBehavior(IngestionBehavior ingestionBehavior) {
+        this.ingestionBehavior = ingestionBehavior;
+    }
+
     public String getActiveJob() {
         return activeJob;
     }
@@ -283,6 +296,10 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public enum IngestionBehavior {
+        Append, Upsert, Replace
     }
 
     public enum Status {
