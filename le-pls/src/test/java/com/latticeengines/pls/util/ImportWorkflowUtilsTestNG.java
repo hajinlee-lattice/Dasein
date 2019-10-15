@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+
 
 public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     private static Logger log = LoggerFactory.getLogger(ImportWorkflowUtilsTestNG.class);
@@ -246,7 +248,44 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
     }
 
-    private void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
+    @Test(groups = "functional")
+    public void testIgnoredFlag() throws Exception {
+        FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+        // Generate Spec Java class from resource file
+        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-contact-spec.json", ImportWorkflowSpec.class);
+
+        actualResponse.setImportWorkflowSpec(importWorkflowSpec);
+
+        // load csv and generate auto-detected field definitions
+        MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
+        Map<String, FieldDefinition> autodetectionResultsMap =
+                ImportWorkflowUtils.generateAutodetectionResultsMap(resolver);
+
+        actualResponse.setAutodetectionResultsMap(autodetectionResultsMap);
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(actualResponse);
+
+        FieldDefinitionsRecord currentRecord = actualResponse.getCurrentFieldDefinitionsRecord();
+        List<FieldDefinition> customFieldDefinitions = currentRecord.getFieldDefinitionsRecordsMap().getOrDefault(
+                "Custom Fields", new ArrayList<>());
+
+        Assert.assertNotNull(customFieldDefinitions);
+        Map<String, FieldDefinition> customNameToFieldDefinition =
+                customFieldDefinitions.stream().collect(Collectors.toMap(FieldDefinition::getColumnName,
+                        field -> field));
+        FieldDefinition earningsDefinition = customNameToFieldDefinition.get("Earnings");
+        Assert.assertNotNull(earningsDefinition);
+        earningsDefinition.setIgnored(Boolean.TRUE);
+        Table result = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(currentRecord, true);
+
+        List<Attribute> attrs = result.getAttributes();
+        Attribute earningsAttr =
+                attrs.stream().filter(attr -> "Earnings".equals(attr.getDisplayName())).findFirst().orElse(null);
+
+        Assert.assertNull(earningsAttr);
+    }
+
+    private static void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
                                       FieldValidationMessage.MessageLevel messageLevel) {
         Map<String, List<FieldValidationMessage>> validationMap = response.getFieldValidationMessagesMap();
         Assert.assertNotNull(validationMap);
