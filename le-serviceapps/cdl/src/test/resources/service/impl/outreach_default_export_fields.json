@@ -361,7 +361,7 @@
    },
    {
       "attrName":"SFDC_ACCOUNT_ID",
-      "displayName":"SFDC Account ID",
+      "displayName":"LookupId",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Outreach",
