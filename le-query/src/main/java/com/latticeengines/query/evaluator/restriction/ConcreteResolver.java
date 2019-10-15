@@ -93,17 +93,18 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             // if not bit encoded, need to cast the type of operands
             AttributeLookup attrLookup = (AttributeLookup) lhs;
             ColumnMetadata cm = getAttrRepo().getColumnMetadata(attrLookup);
-            Class<?> javaClz = parseNumericalJavaClass(cm.getJavaClass());
+            Class<?> javaClz = parseNumericalOrBooleanJavaClass(cm.getJavaClass());
             if (javaClz != null) {
                 if (rhs instanceof CollectionLookup) {
                     Collection<Object> vals = ((CollectionLookup) rhs).getValues();
                     if (CollectionUtils.isNotEmpty(vals)) {
-                        List<Object> newVals = RestrictionUtils.convertNumericalValues(new ArrayList<>(vals), javaClz);
+                        List<Object> newVals = RestrictionUtils.convertNumericalOrBooleanValues(new ArrayList<>(vals),
+                                javaClz);
                         ((CollectionLookup) rhs).setValues(newVals);
                     }
                 } else if (rhs instanceof ValueLookup) {
                     Object val = ((ValueLookup) rhs).getValue();
-                    List<Object> newVals = RestrictionUtils.convertNumericalValues( //
+                    List<Object> newVals = RestrictionUtils.convertNumericalOrBooleanValues( //
                             Collections.singletonList(val), javaClz);
                     ((ValueLookup) rhs).setValue(newVals.get(0));
                 }
@@ -485,7 +486,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         }
     }
 
-    private Class<?> parseNumericalJavaClass(String javaClzName) {
+    private Class<?> parseNumericalOrBooleanJavaClass(String javaClzName) {
         Class<?> javaClz = null;
         if (StringUtils.isNotBlank(javaClzName)) {
             try {
@@ -494,7 +495,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 log.error("Cannot parse java class " + javaClzName);
             }
         }
-        if (javaClz != null && Number.class.isAssignableFrom(javaClz)) {
+        if (javaClz != null && (Boolean.class.equals(javaClz) || Number.class.isAssignableFrom(javaClz))) {
             return javaClz;
         } else {
             return null;

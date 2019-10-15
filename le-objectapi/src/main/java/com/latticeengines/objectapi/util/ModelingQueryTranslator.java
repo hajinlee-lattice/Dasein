@@ -39,8 +39,8 @@ public class ModelingQueryTranslator extends QueryTranslator {
         super(queryFactory, repository);
     }
 
-    public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, EventType eventType,
-            TimeFilterTranslator timeTranslator, String sqlUser) {
+    public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, AttributeRepository attrRepo, //
+            EventType eventType, TimeFilterTranslator timeTranslator, String sqlUser) {
 
         if (restrictionNotSpecified(frontEndQuery) && restrictionNotSpecified(frontEndQuery.getSegmentQuery())) {
             throw new IllegalArgumentException("No restriction specified for event query");
@@ -52,8 +52,8 @@ public class ModelingQueryTranslator extends QueryTranslator {
         EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
         QueryBuilder queryBuilder = Query.builder();
         boolean useDepivotedPhTable = !SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
-        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, false, useDepivotedPhTable);
-        restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction, useDepivotedPhTable);
+        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, attrRepo, false, useDepivotedPhTable);
+        restriction = translateInnerRestriction(frontEndQuery, attrRepo, BusinessEntity.Account, restriction, useDepivotedPhTable);
 
         setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
 
@@ -61,7 +61,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
         case Scoring:
             if (frontEndQuery.getSegmentQuery() != null) {
                 Restriction segmentRestriction = RestrictionOptimizer.optimize( //
-                        translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(), timeTranslator,
+                        translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(), attrRepo, timeTranslator,
                                 sqlUser));
                 QueryBuilder segmentQryBldr = Query.builder();
                 Query segmentQry = segmentQryBldr.from(BusinessEntity.Account) //

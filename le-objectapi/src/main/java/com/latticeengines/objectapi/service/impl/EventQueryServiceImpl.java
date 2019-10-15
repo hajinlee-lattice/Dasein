@@ -143,7 +143,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
             }
             preprocess(map, attrRepo, timeTranslator);
         }
-        return queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator, getBatchUser());
+        return queryTranslator.translateModelingEvent(frontEndQuery, attrRepo, eventType, timeTranslator, getBatchUser());
     }
 
     public String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, DataCollection.Version version, //

@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttr
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportScoreTrainingFileStepConfiguration;
@@ -49,7 +48,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
             match.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
-            combineInputWithScores.setCustomerSpace(customerSpace);
+            combineInputWithScores.setCustomer(customerSpace.toString());
             combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomer(customerSpace.toString());
@@ -75,8 +74,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         public Builder inputTableName(String tableName) {
             match.setInputTableName(tableName);
             // result table name is set during execution
-            combineInputWithScores
-                    .setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            combineInputWithScores.setInputTableName(tableName);
             return this;
         }
 
@@ -205,7 +203,6 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
-            combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             combineMatchDebugWithScores
                     .microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);

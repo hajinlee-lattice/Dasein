@@ -21,7 +21,9 @@ public class ValueResolver<T extends ValueLookup> extends BaseLookupResolver<T> 
     public List<ComparableExpression<? extends Comparable<?>>> resolveForCompare(ValueLookup lookup) {
         Object val = lookup.getValue();
         ComparableExpression<? extends Comparable<?>> expression;
-        if (val instanceof Integer) {
+        if (val instanceof Boolean) {
+            expression = Expressions.asComparable((Boolean) val);
+        } else if (val instanceof Integer) {
             expression = Expressions.asComparable((Integer) val);
         } else if (val instanceof Long) {
             expression = Expressions.asComparable((Long) val);
