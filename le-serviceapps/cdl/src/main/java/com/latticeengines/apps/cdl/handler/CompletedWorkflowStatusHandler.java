@@ -94,6 +94,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         switch (systemName) {
         case Marketo:
         case GoogleAds:
+        case Outreach:
             return audienceType == AudienceType.CONTACTS;
         case LinkedIn:
             LinkedInChannelConfig linkedInconfig = (LinkedInChannelConfig) channelConfig;
