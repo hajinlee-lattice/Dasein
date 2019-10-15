@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -102,6 +103,12 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     @JsonProperty("javaClass")
     @Column(name = "JAVA_CLASS", nullable = false)
     private String javaClass;
+
+    @JsonProperty("nullImputation")
+    @Column(name = "NULL_IMP", nullable = false)
+    @Enumerated(EnumType.STRING)
+    // for handling null values in metrics attributes
+    private NullMetricsImputation nullImputation;
 
     // TODO - define filter class
 
@@ -219,5 +226,13 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
 
     public void setJavaClass(String javaClass) {
         this.javaClass = javaClass;
+    }
+
+    public NullMetricsImputation getNullImputation() {
+        return nullImputation;
+    }
+
+    public void setNullImputation(NullMetricsImputation nullImputation) {
+        this.nullImputation = nullImputation;
     }
 }

@@ -21,13 +21,13 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "timeFilterProvider")
     public void testTimeFilterToTimeRangeInGroupId(TimeFilter timeFilter, String expected) {
-        String generated = ActivityMetricsGroupUtils.timeFilterToTimeRangeInGroupId(timeFilter);
+        String generated = ActivityMetricsGroupUtils.timeFilterToTimeRangeTemplate(timeFilter);
         Assert.assertEquals(generated, expected);
     }
 
     @Test(groups = "unit", dataProvider = "timeFilterDescriptionProvider")
-    public void testTimeFilterToDescription(String timeFilter, String expected) {
-        String generated = ActivityMetricsGroupUtils.timeRangeInGroupIdToDescription(timeFilter);
+    public void testTimeFilterToDescription(String timeFilter, String tmpl, String expected) {
+        String generated = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeFilter, tmpl);
         Assert.assertEquals(generated, expected);
     }
 
@@ -48,26 +48,25 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
 
     @DataProvider(name = "timeFilterProvider")
     public Object[][] timeFilterProvider() {
-        return new Object[][]{
-                {new TimeFilter(ComparisonType.LAST, PeriodStrategy.Template.Week.toString(),
-                        Collections.singletonList(2)), "l_2_w"},
-                {new TimeFilter(ComparisonType.LAST, PeriodStrategy.Template.Week.toString(),
-                        Collections.singletonList(10)), "l_10_w"}};
+        return new Object[][] {
+                { new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(),
+                        Collections.singletonList(2)), "w_2_w" },
+                { new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(),
+                        Collections.singletonList(10)), "w_10_w" } };
     }
 
     @DataProvider(name = "timeFilterDescriptionProvider")
     public Object[][] timeFilterDescriptionProvider() {
-        return new Object[][]{
-                {"l_2_week", "in last 2 week"}, //
-                {"l_10_week", "in last 10 week"}
-        };
+        return new Object[][] {
+                { "w_2_w", "${operator} ${params?join(\"_\")} ${period}", "in last 2 week" },
+                { "b_2_4_w", "${operator} ${params?join(\" and \")} ${period}", "between 2 and 4 week" } };
     }
 
     @DataProvider(name = "sourceMediumProvider")
     public Object[][] sourceMediumProvider() {
         return new Object[][]{
-                {"l_2_w", Collections.singletonMap("SourceMedium", "__others__"), "Visit l_2_w by all other sources"}, //
-                {"l_2_w", Collections.singletonMap("SourceMedium", "w.le.c"), "Visit l_2_w from w.le.c"}
+                {"in last 2 week", Collections.singletonMap("SourceMedium", "__others__"), "Visit in last 2 week by all other sources"}, //
+                {"in last 2 week", Collections.singletonMap("SourceMedium", "w.le.c"), "Visit in last 2 week from w.le.c"}
         };
     }
 }

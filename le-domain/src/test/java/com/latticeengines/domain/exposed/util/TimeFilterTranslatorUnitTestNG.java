@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -17,9 +18,10 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 public class TimeFilterTranslatorUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "timeFilterProvider")
-    public void test(TimeFilter timeFilter, Pair<String, String> expected) {
+    public void testTranslateRangeToDate(TimeFilter timeFilter, Pair<String, String> expected) {
         TimeFilterTranslator translator = getTranslator();
-        Pair<String, String> actual = translator.translateRange(timeFilter);
+        Pair<String, String> actual = translator.periodIdRangeToDateRange(timeFilter.getPeriod(), translator.translateRange(timeFilter));
+        System.out.println(actual);
         if (expected == null) {
             Assert.assertNull(actual);
         } else {
@@ -40,6 +42,13 @@ public class TimeFilterTranslatorUnitTestNG {
         Assert.assertNotNull(tf.getValues());
         Assert.assertEquals(tf.getValues().size(), 2);
         System.out.println(tf.getValues());
+    }
+
+    @Test(groups = "unit", dataProvider = "timeRangeAndTimeFilterProvider")
+    public void testTranslateRangeToPeriodId(TimeFilter timeFilter, Pair<Integer, Integer> expected) {
+        TimeFilterTranslator translator = getTranslator();
+        Pair<Integer, Integer> actual = translator.translateRange(timeFilter);
+        Assert.assertEquals(actual, expected);
     }
 
     @DataProvider(name = "timeFilterProvider")
@@ -74,30 +83,45 @@ public class TimeFilterTranslatorUnitTestNG {
         TimeFilter last1DayV2 = TimeFilter.last(1, null);
         TimeFilter last7DaysV2 = TimeFilter.last(7, PeriodStrategy.Template.Day.name());
 
-        return new Object[][] { //
-                { TimeFilter.ever(), null }, //
-                { TimeFilter.isEmpty(), null }, //
-                { TimeFilter.latestDay(), null }, //
-                { currentMonth, Pair.of("2018-02-01", "2018-02-28") }, //
-                { within1Month, Pair.of("2018-01-01", "2018-01-31") }, //
-                { within3Month, Pair.of("2017-11-01", "2018-01-31") }, //
-                { within2Quarter, Pair.of("2017-07-01", "2017-12-31") }, //
-                { within2QuarterIncludeCurrent, Pair.of("2017-07-01", "2018-03-31") }, //
-                { prior1Month, Pair.of(null, "2017-12-31") }, //
-                { prior3Month, Pair.of(null, "2017-10-31") }, //
-                { between1And3Month, Pair.of("2017-11-01", "2018-01-31") }, //
-                { betweenDates, Pair.of("2018-02-01", "2019-01-01") }, //
-                { beforeDate, Pair.of(null, "2018-02-01") }, //
-                { afterDate, Pair.of("2018-02-01", null) }, //
-                { last1Day, Pair.of("2018-02-17", "2018-02-17") }, //
-                { last7Days, Pair.of("2018-02-11", "2018-02-17") }, //
-                { last1DayV2, Pair.of("2018-02-17", "2018-02-17") }, //
-                { last7DaysV2, Pair.of("2018-02-11", "2018-02-17") }, //
+        return new Object[][]{ //
+                {TimeFilter.ever(), null}, //
+                {TimeFilter.isEmpty(), null}, //
+                {TimeFilter.latestDay(), null}, //
+                {currentMonth, Pair.of("2018-02-01", "2018-02-28")}, //
+                {within1Month, Pair.of("2018-01-01", "2018-01-31")}, //
+                {within3Month, Pair.of("2017-11-01", "2018-01-31")}, //
+                {within2Quarter, Pair.of("2017-07-01", "2017-12-31")}, //
+                {within2QuarterIncludeCurrent, Pair.of("2017-07-01", "2018-03-31")}, //
+                {prior1Month, Pair.of(null, "2017-12-31")}, //
+                {prior3Month, Pair.of(null, "2017-10-31")}, //
+                {between1And3Month, Pair.of("2017-11-01", "2018-01-31")}, //
+                {betweenDates, Pair.of("2018-02-01", "2019-01-01")}, //
+                {beforeDate, Pair.of(null, "2018-02-01")}, //
+                {afterDate, Pair.of("2018-02-01", null)}, //
+                {last1Day, Pair.of("2018-02-17", "2018-02-17")}, //
+                {last7Days, Pair.of("2018-02-11", "2018-02-17")}, //
+                {last1DayV2, Pair.of("2018-02-17", "2018-02-17")}, //
+                {last7DaysV2, Pair.of("2018-02-11", "2018-02-17")}, //
+        };
+    }
+
+    @DataProvider(name = "timeRangeAndTimeFilterProvider")
+    public Object[][] timeRangeAndTimeFilterProvider() {
+        TimeFilter last7Day = new TimeFilter(//
+                ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(7));
+        TimeFilter last1Day = new TimeFilter(//
+                ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(1));
+        TimeFilter betweenDates = new TimeFilter(//
+                ComparisonType.BETWEEN_DATE, PeriodStrategy.Template.Date.name(),
+                Arrays.asList("2018-02-01", "2019-01-01"));
+        return new Object[][]{
+                {last7Day, Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-11"), DateTimeUtils.dateToDayPeriod("2018-02-17"))}, //
+                {last1Day, Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-17"), DateTimeUtils.dateToDayPeriod("2018-02-17"))}, //
+                {betweenDates, Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-01"), DateTimeUtils.dateToDayPeriod("2019-01-01"))}
         };
     }
 
     private TimeFilterTranslator getTranslator() {
         return new TimeFilterTranslator(PeriodStrategy.NATURAL_PERIODS, "2018-02-17");
     }
-
 }
