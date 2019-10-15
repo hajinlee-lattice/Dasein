@@ -1,14 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,21 +16,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
-import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -53,9 +43,6 @@ import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("campaignLaunchProcessor")
 public class CampaignLaunchProcessor {
@@ -72,31 +59,7 @@ public class CampaignLaunchProcessor {
     private LookupIdMappingProxy lookupIdMappingProxy;
 
     @Autowired
-    private SqoopProxy sqoopProxy;
-
-    @Autowired
     private RatingEngineProxy ratingEngineProxy;
-
-    @Autowired
-    private JobService jobService;
-
-    @Value("${datadb.datasource.driver}")
-    private String dataDbDriver;
-
-    @Value("${datadb.datasource.sqoop.url}")
-    private String dataDbUrl;
-
-    @Value("${datadb.datasource.user}")
-    private String dataDbUser;
-
-    @Value("${datadb.datasource.password.encrypted}")
-    private String dataDbPassword;
-
-    @Value("${datadb.datasource.dialect}")
-    private String dataDbDialect;
-
-    @Value("${datadb.datasource.type}")
-    private String dataDbType;
 
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
@@ -117,60 +80,6 @@ public class CampaignLaunchProcessor {
         applyFiltersToQueries(playLaunchContext);
         handleLookupIdBasedSuppression(playLaunchContext);
         return result;
-    }
-
-    public void runSqoopExportRecommendations(Tenant tenant, PlayLaunchContext playLaunchContext,
-            Long currentTimeMillis, String recAvroHdfsFilePath) throws IOException {
-
-        String extractPath = PathUtils.toAvroGlob(recAvroHdfsFilePath);
-        log.info("extractPath: " + extractPath);
-        Extract extract = new Extract();
-        extract.setExtractionTimestamp(currentTimeMillis);
-        extract.setName("recommendationGeneration");
-        extract.setPath(extractPath);
-        extract.setTable(playLaunchContext.getRecommendationTable());
-        extract.setTenant(tenant);
-        playLaunchContext.getRecommendationTable().addExtract(extract);
-        metadataProxy.updateTable(tenant.getId(), playLaunchContext.getPlayLaunch().getTableName(),
-                playLaunchContext.getRecommendationTable());
-
-        if (!export(playLaunchContext, recAvroHdfsFilePath)) {
-            throw new LedpException(LedpCode.LEDP_18168);
-        }
-    }
-
-    private boolean export(PlayLaunchContext playLaunchContext, String avroPath) {
-        String queue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
-        String tenant = playLaunchContext.getTenant().getId();
-
-        log.info("Trying to submit sqoop job for exporting recommendations from " + avroPath);
-        DbCreds.Builder credsBldr = new DbCreds.Builder();
-        String connector = dataDbUrl.contains("?") ? "&" : "?";
-        credsBldr.user(dataDbUser).dbType(dataDbType).driverClass(dataDbDriver)
-                .jdbcUrl(dataDbUrl + connector + "user=" + dataDbUser + "&password=" + dataDbPassword);
-
-        DbCreds dataDbCreds = new DbCreds(credsBldr);
-
-        SqoopExporter exporter = new SqoopExporter.Builder() //
-                .setQueue(queue)//
-                .setTable("Recommendation") //
-                .setSourceDir(avroPath) //
-                .setDbCreds(dataDbCreds) //
-                .setCustomer(tenant) //
-                .addHadoopArg("-Dmapreduce.job.running.map.limit=8") //
-                .addHadoopArg("-Dmapreduce.tasktracker.map.tasks.maximum=8") //
-                .build();
-
-        log.info("exporter is " + JsonUtils.serialize(exporter));
-        String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
-        log.info("Submitted sqoop jobs: " + appId);
-
-        FinalApplicationStatus sqoopJobStatus = jobService
-                .waitFinalJobStatus(appId, (Long.valueOf(TimeUnit.MINUTES.toSeconds(60L))).intValue()).getStatus();
-
-        log.info("Sqoop job final status: " + sqoopJobStatus.name());
-
-        return sqoopJobStatus == FinalApplicationStatus.SUCCEEDED;
     }
 
     private void handleLookupIdBasedSuppression(PlayLaunchContext playLaunchContext) {
@@ -207,8 +116,7 @@ public class CampaignLaunchProcessor {
             contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForContactQuery));
         }
 
-        if (ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName,
-                launch.getChannelConfig())) {
+        if (ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName, launch.getChannelConfig())) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newAccountRestrictionForAccountQuery = applyAccountNameOrWebsiteFilterToAccountRestriction(
                     accountFrontEndQuery.getAccountRestriction().getRestriction());
@@ -355,48 +263,8 @@ public class CampaignLaunchProcessor {
     }
 
     @VisibleForTesting
-    void setSqoopProxy(SqoopProxy sqoopProxy) {
-        this.sqoopProxy = sqoopProxy;
-    }
-
-    @VisibleForTesting
     void setRatingEngineProxy(RatingEngineProxy ratingEngineProxy) {
         this.ratingEngineProxy = ratingEngineProxy;
-    }
-
-    @VisibleForTesting
-    void setJobService(JobService jobService) {
-        this.jobService = jobService;
-    }
-
-    @VisibleForTesting
-    void setDataDbDriver(String dataDbDriver) {
-        this.dataDbDriver = dataDbDriver;
-    }
-
-    @VisibleForTesting
-    void setDataDbUrl(String dataDbUrl) {
-        this.dataDbUrl = dataDbUrl;
-    }
-
-    @VisibleForTesting
-    void setDataDbUser(String dataDbUser) {
-        this.dataDbUser = dataDbUser;
-    }
-
-    @VisibleForTesting
-    void setDataDbPassword(String dataDbPassword) {
-        this.dataDbPassword = dataDbPassword;
-    }
-
-    @VisibleForTesting
-    void setDataDbDialect(String dataDbDialect) {
-        this.dataDbDialect = dataDbDialect;
-    }
-
-    @VisibleForTesting
-    void setDataDbType(String dataDbType) {
-        this.dataDbType = dataDbType;
     }
 
     public static class ProcessedFieldMappingMetadata {

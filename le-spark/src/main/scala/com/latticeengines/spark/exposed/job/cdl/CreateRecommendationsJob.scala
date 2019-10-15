@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.pls.{PlayLaunchSparkContext, RatingBuck
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
-import org.apache.spark.sql.functions.{col, count, lit, sum, when}
+import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_date, from_unixtime}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.asc
@@ -329,6 +329,33 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendations, accountTable, playLaunchContext, joinKey)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
     }
+    
+    exportToRecommendationTable(playLaunchContext, orderedRec)
+  }
+  
+  private def exportToRecommendationTable(playLaunchContext: PlayLaunchSparkContext, orderedRec: DataFrame) = {
+    val driver = playLaunchContext.getDataDbDriver()
+    val url = playLaunchContext.getDataDbUrl()
+    val user = playLaunchContext.getDataDbUser()
+    val pw = playLaunchContext.getDataDbPassword()
+    val prop = new java.util.Properties
+    prop.setProperty("driver", driver)
+    prop.setProperty("user", user)
+    prop.setProperty("password", pw) 
+    val table = "Recommendation"
+    
+    //write data from spark dataframe to database
+    val orderedRecToDate = transformFromTimestampToDate(orderedRec)
+    orderedRecToDate.write.mode("append").jdbc(url, table, prop)
+  }
+  
+  private def transformFromTimestampToDate(orderedRec: DataFrame): DataFrame = {
+    return orderedRec.withColumn("LAUNCH_DATE_DATE",  to_date(from_unixtime(col("LAUNCH_DATE")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
+                     .withColumn("LAST_UPDATED_TIMESTAMP_DATE", to_date(from_unixtime(col("LAST_UPDATED_TIMESTAMP")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
+                     .drop("LAUNCH_DATE") //
+                     .drop("LAST_UPDATED_TIMESTAMP") //
+                     .withColumnRenamed("LAUNCH_DATE_DATE", "LAUNCH_DATE") //
+                     .withColumnRenamed("LAST_UPDATED_TIMESTAMP_DATE", "LAST_UPDATED_TIMESTAMP")
   }
 
   private def generateUserConfiguredDataFrame(finalRecommendations: DataFrame, accountTable: DataFrame, playLaunchContext: PlayLaunchSparkContext, joinKey: String): DataFrame = {
