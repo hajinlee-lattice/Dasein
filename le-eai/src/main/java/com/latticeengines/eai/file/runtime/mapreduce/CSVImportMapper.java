@@ -3,14 +3,16 @@ package com.latticeengines.eai.file.runtime.mapreduce;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -18,8 +20,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Pattern;
 
@@ -40,17 +45,12 @@ import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -90,8 +90,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
     private static final Set<String> VAL_TRUE = Sets.newHashSet("true", "t", "1", "yes", "y");
     private static final Set<String> VAL_FALSE = Sets.newHashSet("false", "f", "0", "no", "n");
-    private static final Set<String> EMPTY_SET = Sets.newHashSet("none", "null", "na", "N/A", "Blank",
-            "empty");
+    private static final Set<String> EMPTY_SET = Sets.newHashSet("none", "null", "na", "N/A", "Blank", "empty");
+    private final BlockingQueue<RecordLine> recordQueue = new LinkedBlockingQueue<>(1000);
 
     private static final int MAX_STRING_LENGTH = 1000;
 
@@ -104,12 +104,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private Configuration conf;
 
     private String idColumnName;
-
-    private String id;
-
-    private long gigaByte = 1073741824l;
-
-    private long csvFilekSize;
 
     private final String ERROR_FILE_NAME = "error";
 
@@ -130,6 +124,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private LongAdder rowErrorVal = new LongAdder();
 
+    private Set<String> headers;
+
+    private String avroFile;
+
+    private ExecutorService service;
+
+    private volatile boolean finishReading = false;
+
+    private volatile boolean uploadErrorRecord = false;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
@@ -147,8 +151,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
-        FileSplit fileSplit = (FileSplit) context.getInputSplit();
-        csvFilekSize = fileSplit.getLength();
     }
 
     @Override
@@ -167,58 +169,104 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         return stringBuffer.toString();
     }
 
+    private void handleProcess(int index, Context context) throws IOException {
+        DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
+        String avroFileName = getFileName(avroFile, ".avro", index);
+        boolean uploadAvroRecord = false;
+        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
+            dataFileWriter.create(schema, new File(avroFileName));
+            try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(getFileName("error", ".csv", index)),
+                    LECSVFormat.format.withHeader((String[]) null))) {
+                ConvertCSVToAvro convertCSVToAvro = new ConvertCSVToAvro(csvFilePrinter, dataFileWriter);
+                while (true) {
+                    try {
+                        RecordLine recordLine = recordQueue.poll(30, TimeUnit.SECONDS);
+                        if (recordLine != null) {
+                            convertCSVToAvro.process(recordLine.csvRecord, recordLine.lineNum);
+                        }
+                        if (finishReading && recordQueue.isEmpty()) {
+                            // only finish reading and queue is empty
+                            LOG.info(String.format("finish parse thread, index is %d", index));
+                            break;
+                        }
+                    } catch (InterruptedException e) {
+                        LOG.info("Record queue was interrupted");
+                    }
+                }
+                if (convertCSVToAvro.hasAvroRecord) {
+                    uploadAvroRecord = true;
+                }
+                if (convertCSVToAvro.hasErrorRecord) {
+                    uploadErrorRecord = true;
+                }
+            }
+        }
+        if (uploadAvroRecord) {
+            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
+        }
+    }
+
     private void process(Context context) throws IOException {
         String csvFileName = getCSVFilePath(context.getCacheFiles());
         if (csvFileName == null) {
             throw new RuntimeException("Not able to find csv file from localized files");
         }
-        String avroFile;
         if (StringUtils.isEmpty(table.getName())) {
             avroFile = "file";
         } else {
             avroFile = table.getName();
         }
-        if (csvFilekSize <= gigaByte) {
-            String ERROR_FILE = ImportProperty.ERROR_FILE;
-            CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
-                    LECSVFormat.format.withHeader(ImportProperty.ERROR_HEADER));
-            String avroFileName = getFileName(avroFile, ".avro", 0);
-            ConvertCSVToAvro convertCSVToAvro = new ConvertCSVToAvro(0, csvFilekSize, csvFileName, avroFileName, ERROR_FILE, csvFilePrinter, context);
-            convertCSVToAvro.process();
-        } else {
-            int cores = conf.getInt("mapreduce.map.cpu.vcores", 1);
-            LOG.info(String.format("CPU cores for import mapper is %d", cores));
-            long splitSize = csvFilekSize / cores;
-            ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", cores);
-            int index = 0;
-            List<Triple<Integer, Long, Long>> splits = new ArrayList<>();
-            while (index < cores) {
-                long start = index * splitSize;
-                if (index == cores - 1) {
-                    splits.add(new ImmutableTriple<>(index, start, csvFilekSize - start));
-                } else {
-                    splits.add(new ImmutableTriple<>(index, start, splitSize));
+        long lineNum = 2;
+        int cores = conf.getInt("mapreduce.map.cpu.vcores", 1);
+        CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
+        try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
+                new BOMInputStream(new FileInputStream(csvFileName), false, ByteOrderMark.UTF_8,
+                        ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                        ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
+            headers = Sets.newHashSet(new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[]{}));
+            Iterator<CSVRecord> iter = parser.iterator();
+            String ERROR_FILE = getFileName("error", ".csv", 0);
+            try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
+                    LECSVFormat.format.withHeader((String[]) null))) {
+                service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", cores);
+                List<CompletableFuture<?>> futures = new ArrayList<>();
+                for (int i = 1; i <= cores; i++) {
+                    int index = i;
+                    futures.add(CompletableFuture.runAsync(() -> {
+                        try {
+                            handleProcess(index, context);
+                        } catch (IOException e) {
+                            LOG.info(String.format("IOException %s happened when process csv record.", e.getMessage()));
+                        }
+                    }, service));
                 }
-                index++;
+                while (true) {
+                    // capture IO exception produced during dealing with line
+                    try {
+                        CSVRecord csvRecord = iter.next();
+                        recordQueue.put(new RecordLine(csvRecord, lineNum));
+                        lineNum++;
+                    } catch (IllegalStateException ex) {
+                        LOG.warn(ex.getMessage(), ex);
+                        rowErrorVal.increment();
+                        ignoredRecords.increment();
+                        Map<String, String> errorMap = new HashMap<>();
+                        errorMap.put(String.valueOf(lineNum), String.format("CSV parser can't parse this line due to %s", ex.getMessage()));
+                        csvFilePrinter.printRecord(lineNum, null, errorMap.values().toString());
+                        csvFilePrinter.flush();
+                        errorMap.clear();
+                        uploadErrorRecord = true;
+                    } catch (NoSuchElementException e) {
+                        break;
+                    }
+                }
+                finishReading = true;
+                // wait for all the threads done
+                CompletableFuture.allOf(futures.stream().toArray(CompletableFuture[]::new)).join();
+                service.shutdown();
             }
-            // need to use multi thread to do it
-            CompletableFuture[] results = splits.stream().map(split -> CompletableFuture
-                    .runAsync(() -> handleProcess(split, avroFile, csvFileName, context), service)).toArray(CompletableFuture[]::new);
-            CompletableFuture.allOf(results).join();
-        }
-    }
-
-    private void handleProcess(Triple<Integer, Long, Long> split, String avroFile, String csvFileName, Context context) {
-        try {
-            String ERROR_FILE = getFileName("error", ".csv", split.getLeft());
-            CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
-                    LECSVFormat.format.withHeader((String[]) null));
-            String avroFileName = getFileName(avroFile, ".avro", split.getLeft());
-            ConvertCSVToAvro convertCSVToAvro = new ConvertCSVToAvro(split.getMiddle(), split.getRight(), csvFileName,
-                    avroFileName, ERROR_FILE, csvFilePrinter, context);
-            convertCSVToAvro.process();
-        } catch (IOException e) {
-            LOG.info(String.format("IOException %s happened when process csv file", e.getMessage()));
+        } catch (Exception e) {
+            LOG.warn(e.getMessage(), e);
         }
     }
 
@@ -313,34 +361,48 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         if (context.getCounter(RecordImportCounter.ROW_ERROR).getValue() == 0) {
             context.getCounter(RecordImportCounter.ROW_ERROR).setValue(0);
         }
-        mergeErrorFile();
+        mergeErrorFile(context);
     }
 
-    private void mergeErrorFile() {
-        String outputPathStr = outputPath.toString();
-        String errorFile = outputPathStr + "/" + ImportProperty.ERROR_FILE;
-        try (FileSystem fs = HdfsUtils.getFileSystem(conf, errorFile)) {
-            Path path = new Path(errorFile);
-            // if the error file doesn't exist, need to merge it
-            if (!fs.exists(path)) {
-                HdfsUtils.HdfsFilenameFilter hdfsFilenameFilter = filename -> filename.startsWith(ERROR_FILE_NAME);
-                List<String> errorPaths = HdfsUtils.getFilesForDir(conf, outputPathStr, hdfsFilenameFilter);
-                errorPaths.sort(String::compareTo);
-                LOG.info("Generated error file list is {}", errorPaths);
-                try (FSDataOutputStream fsDataOutputStream = fs.create(path)) {
-                    fsDataOutputStream.writeBytes(StringUtils.join(ImportProperty.ERROR_HEADER, ","));
-                    fsDataOutputStream.writeBytes(CRLF);
-                    for (String errorPath : errorPaths) {
-                        try (InputStream inputStream = HdfsUtils.getInputStream(conf, errorPath)) {
-                            IOUtils.copy(inputStream, fsDataOutputStream);
-                        }
-                        fs.delete(new Path(errorPath), false);
+    private void mergeErrorFile(Context context) {
+        if (uploadErrorRecord) {
+            File directory = new File(".");
+            FilenameFilter filenameFilter = (file, name) -> name.startsWith(ERROR_FILE_NAME);
+            File[] errorFiles = directory.listFiles(filenameFilter);
+            if (errorFiles != null) {
+                File errorFileToUpload = new File(ImportProperty.ERROR_FILE);
+                try {
+                    if (!errorFileToUpload.exists()) {
+                        errorFileToUpload.createNewFile();
                     }
+                    try (FileOutputStream fileOutputStream = new FileOutputStream(errorFileToUpload)) {
+                        fileOutputStream.write(StringUtils.join(ImportProperty.ERROR_HEADER, ",").getBytes());
+                        fileOutputStream.write(CRLF.getBytes());
+                        Arrays.asList(errorFiles).sort(File::compareTo);
+                        for (File errorFile : errorFiles) {
+                            try (FileInputStream inputStream = new FileInputStream(errorFile)) {
+                                IOUtils.copy(inputStream, fileOutputStream);
+                            }
+                        }
+                        HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ImportProperty.ERROR_FILE, outputPath + "/" + ImportProperty.ERROR_FILE);
+                    }
+                } catch (IOException e) {
+                    LOG.error(String.format("IOException happened during the process for merge file: %s.", e.getMessage()));
                 }
             }
-        } catch (IOException e) {
-            LOG.error(String.format("IOException happened during the process for merge file: %s.", e.getMessage()));
         }
+    }
+
+    private class RecordLine {
+
+        RecordLine(CSVRecord csvRecord, long lineNum) {
+            this.csvRecord = csvRecord;
+            this.lineNum = lineNum;
+        }
+
+        private CSVRecord csvRecord;
+
+        private long lineNum;
     }
 
     private class ConvertCSVToAvro {
@@ -351,8 +413,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         private CSVPrinter csvFilePrinter;
 
-        private String avroFileName;
-
         private boolean missingRequiredColValue = Boolean.FALSE;
 
         private boolean fieldMalFormed = Boolean.FALSE;
@@ -361,122 +421,35 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         private GenericRecord avroRecord;
 
-        private String ERROR_FILE;
+        private String id;
+
+        private DataFileWriter<GenericRecord> dataFileWriter;
 
         private boolean hasAvroRecord = false;
 
         private boolean hasErrorRecord = false;
 
-        private Context context;
-
-        private String csvFileName;
-
-        private long lineNum = 2;
-
-        private long start;
-
-        private long length;
-
-        ConvertCSVToAvro(long start, long length, String csvFileName, String avroFileName,
-                         String ERROR_FILE,
-                         CSVPrinter csvFilePrinter, Context context) {
-            this.start = start;
-            this.length = length;
+        ConvertCSVToAvro(CSVPrinter csvFilePrinter, DataFileWriter dataFileWriter) {
             this.avroRecord = new GenericData.Record(schema);
-            this.csvFileName = csvFileName;
-            this.avroFileName = avroFileName;
-            this.ERROR_FILE = ERROR_FILE;
             this.csvFilePrinter = csvFilePrinter;
-            this.context = context;
+            this.dataFileWriter = dataFileWriter;
         }
 
-        private void process() throws IOException {
-            String[] headers;
-            DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
-            try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
-                dataFileWriter.create(schema, new File(avroFileName));
-                CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
-                try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
-                        new BOMInputStream(new FileInputStream(csvFileName), false, ByteOrderMark.UTF_8,
-                                ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
-                                ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
-                    headers = new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[]{});
-                    Iterator<CSVRecord> iter = parser.iterator();
-                    CSVRecord csvRecord = iter.next();
-                    if (start > 0) {
-                        // need to handle line which is not the real start of the line, sometimes csv one record can
-                        // contain multi lines.
-                        while (start > csvRecord.getCharacterPosition()) {
-                            try {
-                                csvRecord = iter.next();
-                                lineNum++;
-                            } catch (NoSuchElementException e) {
-                                LOG.warn(String.format("No records for split file start: %s, length: %s.", start, length));
-                                return;
-                            } catch (Exception e) {
-                                LOG.warn(String.format("Exception %s happened when skipped csv file ", e.getMessage()));
-                            }
-                        }
-                    }
-                    long endPosition = start + length - 1l;
-                    if (endPosition < csvRecord.getCharacterPosition()) {
-                        // the split size is less than one record length or start position is greater than the last
-                        // record start position, so just skip this parse thread.
-                        LOG.warn(String.format("Skip file split start: %s, length: %s, since split size is less than" +
-                                " one SCV record size.", start, length));
-                        return;
-                    }
-                    boolean firstRecord = true;
-                    while (true) {
-                        // capture IO exception produced during dealing with line
-                        try {
-                            beforeEachRecord();
-                            GenericRecord currentAvroRecord;
-                            if (firstRecord) {
-                                firstRecord = false;
-                            } else {
-                                csvRecord = iter.next();
-                            }
-                            if (endPosition < csvRecord.getCharacterPosition()) {
-                                // reach the end of split file
-                                LOG.warn(String.format("Reach the end of split file start: %s, length: %s.", start, length));
-                                break;
-                            }
-                            currentAvroRecord = toGenericRecord(Sets.newHashSet(headers), csvRecord);
-                            if (errorMap.size() == 0 && duplicateMap.size() == 0) {
-                                dataFileWriter.append(currentAvroRecord);
-                                importedRecords.increment();
-                                hasAvroRecord = true;
-                            } else {
-                                if (errorMap.size() > 0) {
-                                    handleError(lineNum);
-                                }
-                                if (duplicateMap.size() > 0) {
-                                    handleDuplicate(lineNum);
-                                }
-                            }
-                            lineNum++;
-                        } catch (IllegalStateException ex) {
-                            LOG.warn(ex.getMessage(), ex);
-                            rowError = true;
-                            errorMap.put(String.valueOf(lineNum),
-                                    String.format("CSV parser can't parse this line due to %s", ex.getMessage()));
-                            handleError(lineNum);
-                        } catch (NoSuchElementException e) {
-                            break;
-                        }
-
-                    }
-                } catch (Exception e) {
-                    LOG.warn(e.getMessage(), e);
+        private void process(CSVRecord csvRecord, long lineNum) throws IOException {
+            // capture IO exception produced during dealing with line
+            beforeEachRecord();
+            GenericRecord currentAvroRecord = toGenericRecord(csvRecord, lineNum);
+            if (errorMap.size() == 0 && duplicateMap.size() == 0) {
+                hasAvroRecord = true;
+                dataFileWriter.append(currentAvroRecord);
+                importedRecords.increment();
+            } else {
+                if (errorMap.size() > 0) {
+                    handleError(lineNum);
                 }
-            }
-            csvFilePrinter.close();
-            if (hasAvroRecord) {
-                HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
-            }
-            if (hasErrorRecord) {
-                HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
+                if (duplicateMap.size() > 0) {
+                    handleDuplicate(lineNum);
+                }
             }
         }
 
@@ -503,7 +476,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             }
         }
 
-        private GenericRecord toGenericRecord(Set<String> headers, CSVRecord csvRecord) {
+        private GenericRecord toGenericRecord(CSVRecord csvRecord, long lineNum) {
             for (Attribute attr : table.getAttributes()) {
                 Object avroFieldValue = null;
                 String csvColumnName = attr.getDisplayName();
@@ -702,9 +675,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             csvFilePrinter.printRecord(lineNumber, id, duplicateMap.values().toString());
             csvFilePrinter.flush();
             duplicateMap.clear();
+            hasErrorRecord = true;
         }
 
-        private void beforeEachRecord() {
+        public void beforeEachRecord() {
             id = null;
             missingRequiredColValue = Boolean.FALSE;
             fieldMalFormed = Boolean.FALSE;
@@ -713,7 +687,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 avroRecord.put(i, null);
             }
         }
-
     }
 
 }

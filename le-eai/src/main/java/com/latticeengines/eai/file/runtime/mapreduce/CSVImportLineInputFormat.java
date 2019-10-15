@@ -27,6 +27,8 @@ public class CSVImportLineInputFormat extends FileInputFormat<LongWritable, Text
 
     private static final Logger logger = LoggerFactory.getLogger(CSVImportLineInputFormat.class);
 
+    private long gigaByte = 1073741824l;
+
     public CSVImportLineInputFormat() {
     }
 
@@ -52,7 +54,7 @@ public class CSVImportLineInputFormat extends FileInputFormat<LongWritable, Text
         } else {
             long totalLength = status.getLen();
             int cores = job.getConfiguration().getInt("mapreduce.map.cpu.vcores", 1);
-            if (totalLength > 1073741824l) {
+            if (totalLength > gigaByte) {
                 cores = job.getConfiguration().getInt(CSVFileImportProperty.CSV_FILE_MAPPER_CORES.name(), 1);
                 job.getConfiguration().setInt("mapreduce.map.cpu.vcores", cores);
             }
