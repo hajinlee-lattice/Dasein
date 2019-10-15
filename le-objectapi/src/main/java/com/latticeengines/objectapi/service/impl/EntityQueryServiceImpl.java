@@ -127,7 +127,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         }
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, isCountQuery, timeTranslator, sqlUser);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, attrRepo, isCountQuery, timeTranslator, sqlUser);
         if (isCountQuery && !Boolean.TRUE.equals(frontEndQuery.getDistinct())) {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         } else {
@@ -250,7 +250,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                 frontEndQuery);
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, true, timeTranslator, sqlUser);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, attrRepo,true, timeTranslator, sqlUser);
         query.setPageFilter(null);
         query.setSort(null);
         AttributeLookup ratingLookup = new AttributeLookup(BusinessEntity.Rating, ratingField);
