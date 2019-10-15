@@ -265,7 +265,17 @@ public class DataFeedTaskImportListener extends LEJobListener {
             Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid))
                     .get(0);
             if (action != null) {
-                action.setActionConfiguration(importActionConfiguration);
+                if (action.getActionConfiguration() == null) {
+                    action.setActionConfiguration(importActionConfiguration);
+                } else {
+                    ImportActionConfiguration actionConfiguration =
+                            (ImportActionConfiguration) action.getActionConfiguration();
+                    actionConfiguration.setWorkflowId(importActionConfiguration.getWorkflowId());
+                    actionConfiguration.setDataFeedTaskId(importActionConfiguration.getDataFeedTaskId());
+                    actionConfiguration.setImportCount(importActionConfiguration.getImportCount());
+                    actionConfiguration.setRegisteredTables(importActionConfiguration.getRegisteredTables());
+                    action.setActionConfiguration(actionConfiguration);
+                }
                 actionProxy.updateAction(job.getTenant().getId(), action);
             } else {
                 log.warn(String.format("Action with pid=%d cannot be found", pid));
