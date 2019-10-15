@@ -194,6 +194,7 @@ public class PlayLaunchChannelEntityMgrImpl
             existingPlayLaunchChannel.setIsAlwaysOn(updatedChannel.getIsAlwaysOn());
             existingPlayLaunchChannel
                     .setNextScheduledLaunch(PlayLaunchChannel.getNextDateFromCronExpression(updatedChannel));
+            existingPlayLaunchChannel.setExpirationPeriodString(updatedChannel.getExpirationPeriodString());
             existingPlayLaunchChannel
                     .setExpirationDate(PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(updatedChannel));
         }
@@ -211,6 +212,7 @@ public class PlayLaunchChannelEntityMgrImpl
                     && !updatedChannel.getExpirationPeriodString()
                             .equals(existingPlayLaunchChannel.getExpirationPeriodString())
                     && validateAlwaysOnExpiration(updatedChannel)) {
+                existingPlayLaunchChannel.setExpirationPeriodString(updatedChannel.getExpirationPeriodString());
                 existingPlayLaunchChannel.setExpirationDate(
                         PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(updatedChannel));
             }
