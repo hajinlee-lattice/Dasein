@@ -122,7 +122,12 @@ public abstract class CDLWorkflowFrameworkDeploymentTestNGBase extends CDLWorkfl
                         applicationId, pid, MAX_WORKFLOW_RUNTIME_IN_HOURS));
             }
             Thread.sleep(20000L);
-            status = workflowProxy.getJobStatusByWorkflowJobPid(mainCustomerSpace, pid);
+            job = workflowProxy.getJobByWorkflowJobPid(mainCustomerSpace, pid);
+            if (job != null) {
+                // update job status & applicationId (in case of workflow being queued)
+                status = job.getJobStatus();
+                applicationId = job.getApplicationId();
+            }
         }
         log.info("Job (appId={},PID={}) finishes with duration={}, status={}", applicationId, pid,
                 Duration.between(start, Instant.now()), status);
