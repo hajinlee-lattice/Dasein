@@ -49,6 +49,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -503,6 +505,15 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         boolean containsContact =
                 transactionTemplate.getAttribute(InterfaceName.ContactId) != null ^ transactionTemplate.getAttribute(InterfaceName.CustomerContactId) != null;
         Assert.assertTrue(containsContact);
+        List<Action> importActions = actionProxy.getActions(customerSpace).stream()
+                .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
+                .collect(Collectors.toList());
+        Assert.assertEquals(importActions.size(), 3);
+        for (Action action : importActions) {
+            Assert.assertNotNull(action.getActionConfiguration());
+            ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+            Assert.assertNotNull(importActionConfiguration.getOriginalFilename());
+        }
     }
 
     @Test(groups = "deployment", dependsOnMethods = "verifyBase")
