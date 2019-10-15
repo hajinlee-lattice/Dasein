@@ -464,11 +464,4 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         log.info("getPlayLaunchChannel url is " + url);
         return get("getPlayLaunchChannelFromPlayLaunch ", url, PlayLaunchChannel.class);
     }
-
-    public String kickoffDeltaCalculation(String customerSpace, String playName, String channelId) {
-        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/kickoff-delta-calculation",
-                shortenCustomerSpace(customerSpace), playName, channelId);
-        log.info("url is " + url);
-        return post("Kicking off delta calculation", url, null, String.class);
-    }
 }

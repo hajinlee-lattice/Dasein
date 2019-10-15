@@ -303,10 +303,11 @@ abstract class QueryTranslator {
                 bucket.getBkt().getTransaction() == null) {
             translated = MetricTranslator.convert(bucket, useDepivotedPhTable);
         } else {
-            ColumnMetadata cm = attrRepo.getColumnMetadata(bucket.getAttr());
+            ColumnMetadata cm = attrRepo == null ? null : attrRepo.getColumnMetadata(bucket.getAttr());
             if (RestrictionUtils.isUnencodedBoolean(cm)) {
                 translated = RestrictionUtils.convertUnencodedBooleanBucketRestriction(bucket, cm, translatePriorOnly);
-            } else {
+            }
+            else {
                 translated = RestrictionUtils.convertBucketRestriction(bucket, translatePriorOnly);
             }
         }

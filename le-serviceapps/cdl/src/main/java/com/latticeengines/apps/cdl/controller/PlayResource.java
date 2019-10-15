@@ -311,10 +311,18 @@ public class PlayResource {
     @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-delta-calculation", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
-    public String schedule(@PathVariable String customerSpace, //
+    public Long schedule(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
-        return campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId).toString();
+        try {
+            Long workflowPid = campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId);
+            playLaunchChannelService.updateLastDeltaWorkflowId(playName, channelId, workflowPid);
+            return workflowPid;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18182,
+                    new String[] { "Delta Calculation job for channel: " + channelId, e.getMessage() });
+        }
+
     }
 
     // -------------
