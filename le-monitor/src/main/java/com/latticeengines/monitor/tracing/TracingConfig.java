@@ -27,13 +27,19 @@ public class TracingConfig {
     private static final Logger log = LoggerFactory.getLogger(TracingConfig.class);
     private static final String DEFAULT_SERVICE = "default";
     private static final String TEST_CLIENT_SERVICE = "test-client";
-    private static final String YARN_CONTAINER_SERVICE = "yarn-container";
+    private static final String YARN_CONTAINER_SERVICE = "yarn-am";
 
     @Value("${common.le.stack}")
     private String leStack;
 
     @Value("${monitor.tracing.enabled}")
     private boolean tracingEnabled;
+
+    @Value("${monitor.tracing.jaeger.agent.host}")
+    private String jaegerAgentHost;
+
+    @Value("${monitor.tracing.jaeger.agent.port}")
+    private Integer jaegerAgentPort;
 
     /*
      * Tracer, need to wait for bean environment for current env and service name
@@ -45,6 +51,13 @@ public class TracingConfig {
             log.info("Tracing not enabled on stack {}, creating noop tracer", leStack);
             return NoopTracerFactory.create();
         }
+        /*-
+         * configure jaeger connection, using UDP sender for now
+         * TODO configure max queue size and flush interval, maybe add tracer level tags
+         */
+        System.setProperty(io.jaegertracing.Configuration.JAEGER_AGENT_HOST, jaegerAgentHost);
+        System.setProperty(io.jaegertracing.Configuration.JAEGER_AGENT_PORT, String.valueOf(jaegerAgentPort));
+
         /*-
          * sample 100% for now
          */
@@ -64,8 +77,8 @@ public class TracingConfig {
         // register global
         GlobalTracer.registerIfAbsent(tracer);
         // TODO add jaeger connection info, sampling info
-        log.info("Instantiating jaeger tracer. stack={}, beanEnv={}, serviceName={}", leStack,
-                BeanFactoryEnvironment.getEnvironment(), service);
+        log.info("Instantiating jaeger tracer. stack={}, beanEnv={}, serviceName={}, agent={}:{}", leStack,
+                BeanFactoryEnvironment.getEnvironment(), service, jaegerAgentHost, jaegerAgentPort);
         return tracer;
     }
 
