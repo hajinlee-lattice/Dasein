@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 public class OutreachChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.Outreach;
+    private static final AudienceType audienceType = AudienceType.CONTACTS;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
@@ -75,6 +76,11 @@ public class OutreachChannelConfig implements ChannelConfig {
 
     public void setFolderName(String folderName) {
         this.folderName = folderName;
+    }
+
+    @Override
+    public AudienceType getAudienceType() {
+        return audienceType;
     }
 
     @Override
