@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -341,11 +340,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables) {
             convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
-            return this;
-        }
-
-        public Builder setServingVersions(EntityMatchVersion entityMatchVersion) {
-            processStepConfiguration.setServingVersion(entityMatchVersion);
             return this;
         }
 

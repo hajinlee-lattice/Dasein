@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -24,6 +25,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+
+import io.micrometer.core.instrument.util.StringUtils;
 
 @Component(MatchContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -76,14 +79,27 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
         int concatenateStep = 1;
-
+        String convertBatchStoreTableName = getConvertBatchStoreTableName();
         Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
-        TransformationStepConfig merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight());
+        TransformationStepConfig merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
+                null, -1);
         TransformationStepConfig concatenate = concatenateContactName(mergeStep, null);
-        TransformationStepConfig entityMatch = match(concatenateStep, matchTargetTablePrefix);
+        // if we have convertBatchStore, we should merge and match new import first
+        // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
+        if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
+            TransformationStepConfig entityMatch = match(concatenateStep++, null, null);
+            steps.add(merge);
+            steps.add(concatenate);
+            steps.add(entityMatch);
+            merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
+                    convertBatchStoreTableName, concatenateStep++);
+            concatenate = concatenateContactName(concatenateStep++, null);
+        }
+        TransformationStepConfig entityMatch = match(concatenateStep, matchTargetTablePrefix, convertBatchStoreTableName);
         steps.add(merge);
         steps.add(concatenate);
         steps.add(entityMatch);
+        log.info("steps is {}.", steps);
         return steps;
     }
 
@@ -112,22 +128,28 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         return step;
     }
 
-    private TransformationStepConfig match(int inputStep, String targetTableName) {
+    private TransformationStepConfig match(int inputStep, String targetTableName, String convertBatchStoreTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         setTargetTable(step, targetTableName);
         step.setTransformer(TRANSFORMER_MATCH);
         String configStr;
+        // combine columns from all imports
+        Set<String> columnNames = getInputTableColumnNames();
+        boolean hasConvertBatchStoreTableName = org.apache.commons.lang3.StringUtils.isNotEmpty(convertBatchStoreTableName);
         MatchInput matchInput = getBaseMatchInput();
-        setServingVersionForEntityMatchTenant(matchInput);
+        if (hasConvertBatchStoreTableName) {
+            columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
+            setServingVersionForEntityMatchTenant(matchInput);
+        }
         if (configuration.isEntityMatchGAOnly()) {
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
-                    getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
-                    getSystemIds(BusinessEntity.Contact), null);
+                    columnNames, getSystemIds(BusinessEntity.Account),
+                    getSystemIds(BusinessEntity.Contact), null, hasConvertBatchStoreTableName);
         } else {
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
-                    getInputTableColumnNames(), getSystemIds(BusinessEntity.Account),
-                    getSystemIds(BusinessEntity.Contact), newAccountTableName);
+                    columnNames, getSystemIds(BusinessEntity.Account),
+                    getSystemIds(BusinessEntity.Contact), newAccountTableName, hasConvertBatchStoreTableName);
         }
         step.setConfiguration(configStr);
         return step;

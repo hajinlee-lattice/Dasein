@@ -232,7 +232,7 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
 
     private ProcessAnalyzeWorkflowSubmitter mockSubmitter(S3ImportSystemService s3ImportSystemService) {
         return new ProcessAnalyzeWorkflowSubmitter(null, null, null, null, null, null, null, null, null, null, null,
-                s3ImportSystemService, null);
+                s3ImportSystemService);
     }
 
     private Catalog catalog(String catalogId, String dataFeedTaskUniqueId) {

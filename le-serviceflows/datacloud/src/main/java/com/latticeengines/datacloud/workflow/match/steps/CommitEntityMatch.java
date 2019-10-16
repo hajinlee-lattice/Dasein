@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -107,8 +108,10 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
             setStats(entity, stats.getSeedCount(), stats.getLookupCount());
         } catch(Exception e) {
             if (versionMap != null) {//Increase next version, avoid next PA reuse current next version number.
-                entityMatchVersionService.bumpNextVersion(EntityMatchEnvironment.SERVING, tenant);
+                int nextVersion = entityMatchVersionService.bumpNextVersion(EntityMatchEnvironment.SERVING, tenant);
+                log.info("entity {} commit failed, the next version be changed to {}", entity, nextVersion);
             }
+            throw e;
         }
     }
 
@@ -182,6 +185,15 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                 EntityMatchVersion.class);
         versionMap.put(EntityMatchEnvironment.SERVING, entityMatchVersion.getNextVersion());
         return versionMap;
+    }
+
+    private void updateDataCollectionStatusVersion(Map<EntityMatchEnvironment, Integer> versionMap) {
+        if (versionMap == null || versionMap.get(EntityMatchEnvironment.SERVING) == null) {
+            return;
+        }
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        detail.setServingStoreVersion(versionMap.get(EntityMatchEnvironment.SERVING));
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
     }
 
 }

@@ -261,7 +261,7 @@
 
     <bean name="adminCleanupErrorTenantJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="adminCleanupErrorTenantJob"/>
-        <property name="cronTrigger" value="${quartz.admin.cleanuptenant.job.cron:0 0 2 * * ?}"/>
+        <property name="cronTrigger" value="${quartz.admin.cleanuptenant.job.cron:0 0 0/2 * * ?}"/>
         <property name="destUrl" value="${quartz.admin.predefined.job.primary.url:}"/>
         <property name="secondaryDestUrl" value="${quartz.admin.predefined.job.secondary.url:}"/>
         <property name="queryApi" value="${quartz.admin.predefined.job.query.api:}"/>

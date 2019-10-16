@@ -178,12 +178,15 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     TransformationStepConfig concatImports(String targetTablePrefix, String[][] cloneSrcFlds,
-            String[][] renameSrcFlds) {
+            String[][] renameSrcFlds, String convertBatchStoreTableName, int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
-        inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
+        if (inputStep == -1) {
+            inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
+        } else {
+            step.setInputSteps(Collections.singletonList(inputStep));
+        }
 
-        String convertBatchStoreTableName = getConvertBatchStoreTableName();
         if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
             addBaseTables(step, convertBatchStoreTableName);
         }
@@ -233,11 +236,13 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected TransformationStepConfig mergeInputs(ConsolidateDataTransformerConfig config,
-            String targetTableNamePrefix, ETLEngineLoad engineLoad) {
+            String targetTableNamePrefix, ETLEngineLoad engineLoad, String convertBatchStoreTableName, int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
-        inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
-
-        String convertBatchStoreTableName = getConvertBatchStoreTableName();
+        if (inputStep == -1) {
+            inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
+        } else {
+            step.setInputSteps(Collections.singletonList(inputStep));
+        }
         if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
             addBaseTables(step, convertBatchStoreTableName);
         }
@@ -438,10 +443,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     protected String getConvertBatchStoreTableName() {
         Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
-        if (rematchTables == null) {
-            return null;
-        }
-        return rematchTables.get(configuration.getMainEntity().name());
+        return (rematchTables != null) && rematchTables.get(configuration.getMainEntity().name()) != null ?
+                rematchTables.get(configuration.getMainEntity().name()) : null;
     }
 
 }

@@ -60,8 +60,6 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -91,7 +89,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -151,8 +148,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final DataFeedTaskService dataFeedTaskService;
 
-    private final MatchProxy matchProxy;
-
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
                                            DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
@@ -160,7 +155,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                                            AtlasStreamEntityMgr streamEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy,
-                                           S3ImportSystemService s3ImportSystemService, MatchProxy matchProxy) {
+                                           S3ImportSystemService s3ImportSystemService) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
@@ -173,7 +168,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
         this.s3ImportSystemService = s3ImportSystemService;
         this.dataFeedTaskService = dataFeedTaskService;
-        this.matchProxy = matchProxy;
     }
 
     @WithWorkflowJobPid
@@ -607,9 +601,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
         log.info("Submitting PA: FeatureFlags={}, tenant={}, entityMatchEnabled={}, workflowPid={}", flags,
                 customerSpace, entityMatchEnabled, workflowPid);
-        if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
-            throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
-        }
         boolean apsImputationEnabled = FeatureFlagUtils.isApsImputationEnabled(flags);
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
@@ -637,22 +628,28 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
         boolean skipReMatchFlag = true;
-        if (entityMatchEnabled && request.getFullRematch() && CollectionUtils.isEmpty(needDeletedEntities)) {
+        if (entityMatchEnabled && request.getFullRematch()) {
             skipReMatchFlag = false;
         }
-        Set<BusinessEntity> needSkipConvertEntities;
+        Set<BusinessEntity> needSkipConvertEntities = new HashSet<>();
         HashMap<TableRoleInCollection, Table> needConvertBatchStoreMap = new HashMap<>();
         if (skipReMatchFlag) {
-            needSkipConvertEntities = new HashSet<>();
             needSkipConvertEntities.add(BusinessEntity.Account);
             needSkipConvertEntities.add(BusinessEntity.Contact);
             needSkipConvertEntities.add(BusinessEntity.Transaction);
         } else {
-            needSkipConvertEntities = getNonBatchStoreEntities(customerSpace, needConvertBatchStoreMap);
+            if (CollectionUtils.isNotEmpty(needDeletedEntities)) {
+                needSkipConvertEntities.addAll(needDeletedEntities);
+            }
+            needSkipConvertEntities.addAll(getNonBatchStoreEntities(customerSpace, needConvertBatchStoreMap));
         }
-        //entityMatchVersion is using to bumpVersion when we Rematch entityMatch tenant.
-        EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace,
-                EntityMatchEnvironment.SERVING, false);
+        log.info("needSkipConvertEntities is {}.", needSkipConvertEntities);
+        if (!skipReMatchFlag) {
+            Set<BusinessEntity> rebuildEntities = request.getRebuildEntities();
+            rebuildEntities.add(BusinessEntity.Account);
+            rebuildEntities.add(BusinessEntity.Contact);
+            rebuildEntities.add(BusinessEntity.Transaction);
+        }
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -693,7 +690,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
                 .skipEntityMatchRematch(needSkipConvertEntities)
                 .setConvertServiceConfig(needConvertBatchStoreMap)
-                .setServingVersions(entityMatchVersion)
                 .build();
     }
 
@@ -1038,7 +1034,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             tableRoleInCollection = TableRoleInCollection.ConsolidatedRawTransaction;
         }
         List<Table> masterTable = dataCollectionService.getTables(customerSpace, null,
-                BusinessEntity.Account.getBatchStore(), null);
+                tableRoleInCollection, null);
         if (masterTable == null || masterTable.isEmpty()) {
             entities.add(entity);
         } else {

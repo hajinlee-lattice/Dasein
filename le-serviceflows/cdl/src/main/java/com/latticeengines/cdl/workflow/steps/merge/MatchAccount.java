@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,20 +43,30 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             return null;
         }
 
-        List<TransformationStepConfig> steps = new ArrayList<>();
+    List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
         TransformationStepConfig merge;
+        String convertBatchStoreTableName = getConvertBatchStoreTableName();
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
             Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
-            merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight());
+            merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(), null, -1);
+            // if we have convertBatchStore, we should merge and match new import first
+            // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
+            if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
+                TransformationStepConfig match = match(mergeStep++, null, null);
+                steps.add(merge);
+                steps.add(match);
+                merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
+                        convertBatchStoreTableName, mergeStep++);
+            }
         } else {
             merge = dedupAndConcatImports(InterfaceName.AccountId.name());
         }
-        TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix);
+        TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix, convertBatchStoreTableName);
         steps.add(merge);
         steps.add(match);
-
+        log.info("steps is {}.", steps);
         request.setSteps(steps);
         return request;
     }
@@ -96,25 +107,29 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
     }
 
-    private TransformationStepConfig match(int inputStep, String matchTargetTable) {
+    private TransformationStepConfig match(int inputStep, String matchTargetTable, String convertBatchStoreTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {
             setTargetTable(step, matchTargetTable);
         }
         step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getMatchConfig());
+        step.setConfiguration(getMatchConfig(convertBatchStoreTableName));
         return step;
     }
 
-    private String getMatchConfig() {
+    private String getMatchConfig(String convertBatchStoreTableName) {
         MatchInput matchInput = getBaseMatchInput();
         if (configuration.isEntityMatchEnabled()) {
             // combine columns from all imports
             Set<String> columnNames = getInputTableColumnNames();
-            setServingVersionForEntityMatchTenant(matchInput);
+            boolean hasConvertBatchStoreTableName = StringUtils.isNotEmpty(convertBatchStoreTableName);
+            if (hasConvertBatchStoreTableName) {
+                columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
+                setServingVersionForEntityMatchTenant(matchInput);
+            }
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    getSystemIds(BusinessEntity.Account), null);
+                    getSystemIds(BusinessEntity.Account), null, hasConvertBatchStoreTableName);
         } else {
             // for non-entity match, schema for all imports are the same (only one
             // template). thus checking the first table is enough

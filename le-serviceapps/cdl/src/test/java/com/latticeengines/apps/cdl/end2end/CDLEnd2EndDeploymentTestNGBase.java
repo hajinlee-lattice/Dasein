@@ -623,8 +623,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         } else {
             templateFileName = String.format("%s_%s.json", entity.name(), feedType);
         }
+        log.info("template file name is: {}", templateFileName);
         InputStream templateIs = testArtifactService.readTestArtifactAsStream(S3_AVRO_DIR, getAvroFileVersion(),
                 templateFileName);
+        log.info("inputStream is : {} ", templateIs);
         ObjectMapper om = new ObjectMapper();
         try {
             return om.readValue(templateIs, Table.class);

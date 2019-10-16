@@ -33,6 +33,8 @@ import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -65,6 +67,7 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -89,6 +92,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private ActionProxy actionProxy;
+
+    @Inject
+    private MatchProxy matchProxy;
 
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
@@ -151,7 +157,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             putLongValueInContext(NEW_RECORD_CUT_OFF_TIME, System.currentTimeMillis());
         }
 
-        putObjectInContext(ENTITY_MATCH_SERVING_VERSION, configuration.getServingVersion());
+        //entityMatchVersion is using to bumpVersion when we Rematch entityMatch tenant.
+        EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace.toString(),
+                EntityMatchEnvironment.SERVING, false);
+        log.info("entityMatchVersion is {}.", entityMatchVersion);
+        putObjectInContext(ENTITY_MATCH_SERVING_VERSION, entityMatchVersion);
+
         putObjectInContext(SKIP_PUBLISH_PA_TO_S3, configuration.isSkipPublishToS3());
 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());

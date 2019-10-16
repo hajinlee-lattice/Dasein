@@ -9,8 +9,4 @@ public class ProcessProductStepConfiguration extends BaseProcessEntityStepConfig
         return BusinessEntity.Product;
     }
 
-    public Long getDataQuotaLimit() {
-        return null;
-    }
-
 }

@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.CDLEntityMatch
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ContactImportsMigrateWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ConvertBatchStoreToImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.TransactionImportsMigrateWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ConvertBatchStoreToDataTableWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
@@ -33,6 +34,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateProductWorkfl
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateTransactionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertAccountWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertContactWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertTransactionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
@@ -84,6 +88,11 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlAccountWorkflowConfiguration"),
         @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
         @Type(value = OrphanRecordsExportWorkflowConfiguration.class, name = "OrphanRecordsExportWorkflowConfiguration"),
+
+        @Type(value = ConvertBatchStoreToDataTableWorkflowConfiguration.class, name = "ConvertBatchStoreToDataTableWorkflowConfiguration"),
+        @Type(value = ConvertAccountWorkflowConfiguration.class, name = "ConvertAccountWorkflowConfiguration"),
+        @Type(value = ConvertContactWorkflowConfiguration.class, name = "ConvertContactWorkflowConfiguration"),
+        @Type(value = ConvertTransactionWorkflowConfiguration.class, name = "ConvertTransactionWorkflowConfiguration"),
 
         @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration") })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {

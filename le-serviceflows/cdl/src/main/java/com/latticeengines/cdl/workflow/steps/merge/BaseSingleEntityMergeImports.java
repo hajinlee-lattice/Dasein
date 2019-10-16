@@ -194,7 +194,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        if (!Boolean.TRUE.equals(configuration.getNeedReplace())) {
+        boolean isEntityMatchRematch =
+                configuration.isEntityMatchEnabled() && Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
+        if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
@@ -316,7 +318,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return getTableColumnNames(tableName);
     }
 
-    private Set<String> getTableColumnNames(String... tableNames) {
+    Set<String> getTableColumnNames(String... tableNames) {
         // TODO add a batch retrieve API to optimize this
         return Arrays.stream(tableNames) //
                 .flatMap(tableName -> metadataProxy //

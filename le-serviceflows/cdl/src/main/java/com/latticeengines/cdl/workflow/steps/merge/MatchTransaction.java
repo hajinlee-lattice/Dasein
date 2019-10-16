@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
@@ -44,14 +46,24 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
         TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                ETLEngineLoad.LIGHT);
+                ETLEngineLoad.LIGHT, null, -1);
         steps.add(merge);
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
-            TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix);
+            String convertBatchStoreTableName = getConvertBatchStoreTableName();
+            // if we have convertBatchStore, we should merge and match new import first
+            // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
+            if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
+                TransformationStepConfig match = match(mergeStep++, null, null);
+                merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+                        ETLEngineLoad.LIGHT, convertBatchStoreTableName, mergeStep++);
+                steps.add(match);
+                steps.add(merge);
+            }
+            TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix, convertBatchStoreTableName);
             steps.add(match);
         }
-
+        log.info("steps is {}.", steps);
         request.setSteps(steps);
         return request;
     }
@@ -69,27 +81,34 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         }
     }
 
-    private TransformationStepConfig match(int inputStep, String matchTargetTable) {
+    private TransformationStepConfig match(int inputStep, String matchTargetTable, String convertBatchStoreTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {
             setTargetTable(step, matchTargetTable);
         }
         step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getMatchConfig());
+        step.setConfiguration(getMatchConfig(convertBatchStoreTableName));
         return step;
     }
 
-    private String getMatchConfig() {
+    private String getMatchConfig(String convertBatchStoreTableName) {
         // NOTE get all imports just to be safe, currently txn should only have one
         // template
         Set<String> columnNames = getInputTableColumnNames();
+        MatchInput matchInput = getBaseMatchInput();
+        boolean hasConvertBatchStoreTableName = StringUtils.isNotEmpty(convertBatchStoreTableName);
+        if (hasConvertBatchStoreTableName) {
+            columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
+            setServingVersionForEntityMatchTenant(matchInput);
+        }
+        log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {
-            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), null);
+            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
+                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), null, hasConvertBatchStoreTableName);
         } else {
-            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(), columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName);
+            return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
+                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName, hasConvertBatchStoreTableName);
         }
     }
 

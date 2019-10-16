@@ -63,6 +63,9 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("ApsRollingPeriod")
     private String apsRollingPeriod;
 
+    @JsonProperty("ServingStoreVersion")
+    private int servingStoreVersion;
+
     public Integer getMinTxnDate() {
         return minTxnDate;
     }
@@ -181,5 +184,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
         this.activityStreamMap = activityStreamMap;
+    }
+
+    public int getServingStoreVersion() {
+        return servingStoreVersion;
+    }
+
+    public void setServingStoreVersion(int servingStoreVersion) {
+        this.servingStoreVersion = servingStoreVersion;
     }
 }

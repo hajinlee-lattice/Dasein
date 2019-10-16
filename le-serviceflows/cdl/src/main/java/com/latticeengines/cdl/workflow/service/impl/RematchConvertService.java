@@ -11,11 +11,14 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -27,6 +30,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 @Component("rematchConvertService")
 @Lazy(value = false)
 public class RematchConvertService extends ConvertBatchStoreService<RematchConvertServiceConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(RematchConvertService.class);
 
     @Inject
     private ConvertBatchStoreInfoProxy convertBatchStoreInfoProxy;
@@ -88,7 +93,11 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
                 dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace,
                         config.getEntity().name());
         if (CollectionUtils.isEmpty(dataFeedTaskList)) {
-            throw new RuntimeException(String.format("Cannot find the dataFeedTask in tenant %s, entity: %s.: " + customerSpace,
+            log.error("Cannot find the dataFeedTask in tenant {}, entity: {}. ",
+                    customerSpace,
+                    config.getEntity());
+            throw new RuntimeException(String.format("Cannot find the dataFeedTask in tenant %s, entity: %s. ",
+                    customerSpace,
                     config.getEntity()));
         }
         Set<Attribute> attributeSet = new HashSet<>();
@@ -96,13 +105,21 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
             templateTable = dataFeedTask.getImportTemplate();
             attributeSet.addAll(templateTable.getAttributes());
         }
-        return attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
+        List<String> attributeNameList = attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
+        if (!attributeNameList.contains(InterfaceName.AccountId.name())) {
+            attributeNameList.add(InterfaceName.AccountId.name());
+        }
+        if (!attributeNameList.contains(InterfaceName.ContactId.name())) {
+            attributeNameList.add(InterfaceName.ContactId.name());
+        }
+        return attributeNameList;
     }
 
     @Override
     public Table getMasterTable(String customerSpace,
                                 TableRoleInCollection batchStore, RematchConvertServiceConfiguration config) {
         HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables = config.getNeedConvertBatchStoreTables();
+        log.info("needConvertBatchStoreTables is {}.", needConvertBatchStoreTables);
         if (needConvertBatchStoreTables == null) {
             return null;
         }
