@@ -121,6 +121,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         if (existingLookupIdMap != null) {
             if (lookupIdMap != null) {
                 existingLookupIdMap.setAccountId(lookupIdMap.getAccountId());
+                existingLookupIdMap.setProspectOwner(lookupIdMap.getProspectOwner());
                 existingLookupIdMap.setDescription(lookupIdMap.getDescription());
                 existingLookupIdMap.setExternalAuthentication(lookupIdMap.getExternalAuthentication());
                 existingLookupIdMap.setExportFieldMappings(lookupIdMap.getExportFieldMetadataMappings());
