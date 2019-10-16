@@ -130,7 +130,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     private Date nextScheduledLaunch;
 
     @JsonProperty("expirationPeriodString")
-    @Transient
+    @Column(name = "EXPIRATION_PERIOD_STRING")
     private String expirationPeriodString;
 
     @JsonProperty("expirationDate")
@@ -365,11 +365,17 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.expirationPeriodString = expirationPeriodString;
     }
 
-    public Long getLastDeltaWorkflowId() { return lastDeltaWorkflowId; }
+    public Long getLastDeltaWorkflowId() {
+        return lastDeltaWorkflowId;
+    }
 
-    public void setLastDeltaWorkflowId(Long lastDeltaWorkflowId) { this.lastDeltaWorkflowId = lastDeltaWorkflowId; }
+    public void setLastDeltaWorkflowId(Long lastDeltaWorkflowId) {
+        this.lastDeltaWorkflowId = lastDeltaWorkflowId;
+    }
 
-    public Boolean getResetDeltaCalculationData() { return resetDeltaCalculationData; }
+    public Boolean getResetDeltaCalculationData() {
+        return resetDeltaCalculationData;
+    }
 
     public void setResetDeltaCalculationData(Boolean resetDeltaCalculationData) {
         this.resetDeltaCalculationData = resetDeltaCalculationData;
