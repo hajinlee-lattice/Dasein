@@ -1,21 +1,5 @@
 package com.latticeengines.metadata.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.inject.Inject;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.aws.s3.S3Service;
@@ -28,12 +12,26 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
-import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
+import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.DataUnitService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestNGBase {
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-    private static final Logger log = LoggerFactory.getLogger(DataUnitServiceImplDeploymentTestNG.class);
+public class DataUnitServiceImplFunctionalTestNG extends MetadataFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DataUnitServiceImplFunctionalTestNG.class);
 
     @Inject
     private S3Service s3Service;
@@ -63,16 +61,16 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
     private String s3Key;
     private String hdfsPath;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "functional")
     public void setup() {
-        deploymentTestBed.bootstrap(1);
-        Tenant testTenant = deploymentTestBed.getMainTestTenant();
+        functionalTestBed.bootstrap(1);
+        Tenant testTenant = functionalTestBed.getMainTestTenant();
         MultiTenantContext.setTenant(testTenant);
         customerSpace = CustomerSpace.parse(testTenant.getId()).toString();
         testTenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "functional")
     public void testCleanupByTenant() throws InterruptedException {
         prepareTestData();
         Thread.sleep(2000L);
