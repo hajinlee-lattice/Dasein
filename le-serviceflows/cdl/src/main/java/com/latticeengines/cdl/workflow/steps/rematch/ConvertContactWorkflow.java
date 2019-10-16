@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.migrate.ConvertBatchStoreToImport;
+import com.latticeengines.cdl.workflow.steps.migrate.ConvertBatchStoreToImportWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertContactWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -19,12 +19,12 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class ConvertContactWorkflow extends AbstractWorkflow<ConvertContactWorkflowConfiguration> {
 
     @Inject
-    private ConvertBatchStoreToImport convertBatchStoreToImport;
+    private ConvertBatchStoreToImportWrapper convertBatchStoreToImportWrapper;
 
     @Override
     public Workflow defineWorkflow(ConvertContactWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
-                .next(convertBatchStoreToImport)
+                .next(convertBatchStoreToImportWrapper)
                 .build();
     }
 }

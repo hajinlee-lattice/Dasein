@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -105,14 +104,7 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
             templateTable = dataFeedTask.getImportTemplate();
             attributeSet.addAll(templateTable.getAttributes());
         }
-        List<String> attributeNameList = attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
-        if (!attributeNameList.contains(InterfaceName.AccountId.name())) {
-            attributeNameList.add(InterfaceName.AccountId.name());
-        }
-        if (!attributeNameList.contains(InterfaceName.ContactId.name())) {
-            attributeNameList.add(InterfaceName.ContactId.name());
-        }
-        return attributeNameList;
+        return attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
     }
 
     @Override
