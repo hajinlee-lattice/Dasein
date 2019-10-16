@@ -8,12 +8,25 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class ExtractUtils {
     private static final Logger log = LoggerFactory.getLogger(ExtractUtils.class);
+
+    /*-
+     * Make sure the table only contains one {@link Extract} and return extract path
+     */
+    public static String getSingleExtractRawPath(@NotNull Table table) {
+        Preconditions.checkNotNull(table);
+        Preconditions.checkNotNull(table.getExtracts());
+        Preconditions.checkArgument(table.getExtracts().size() == 1, String.format(
+                "Table %s should only have one extract, got %d instead", table.getName(), table.getExtracts().size()));
+        return table.getExtracts().get(0).getPath();
+    }
 
     /**
      * For cases in which we want to assert that there is a single extract path
