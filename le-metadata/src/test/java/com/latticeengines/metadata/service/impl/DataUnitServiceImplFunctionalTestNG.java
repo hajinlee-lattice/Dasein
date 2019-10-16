@@ -86,13 +86,13 @@ public class DataUnitServiceImplFunctionalTestNG extends MetadataFunctionalTestN
         Assert.assertFalse(fileExisted);
     }
 
-    private void prepareTestData() {
+    private void prepareTestData() throws InterruptedException {
         prepareTestDataForS3();
         prepareTestDataForHdfs();
         prepareTestDataForDynamo();
     }
 
-    private void prepareTestDataForS3() {
+    private void prepareTestDataForS3() throws InterruptedException {
         String ingestionDir = S3PathBuilder.getUiDisplayS3Dir(s3Bucket, "tests3",
                 S3FOLDERNAME);
         String prefix = ingestionDir;
@@ -108,6 +108,7 @@ public class DataUnitServiceImplFunctionalTestNG extends MetadataFunctionalTestN
         s3DataUnit.setLinkedDir(linkedDir);
         s3DataUnit.setName("testS3");
         dataUnitService.createOrUpdateByNameAndStorageType(s3DataUnit);
+        Thread.sleep(2000L);
         S3DataUnit s3DataUnit2 = (S3DataUnit) dataUnitService.findByNameTypeFromReader(s3DataUnit.getName(), DataUnit.StorageType.S3);
         Assert.assertNull(s3DataUnit2.getLinkedDir());
         Assert.assertEquals(s3DataUnit2.getBucket(), s3Bucket);
