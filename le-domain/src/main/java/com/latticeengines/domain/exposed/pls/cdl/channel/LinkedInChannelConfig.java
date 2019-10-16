@@ -83,6 +83,7 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.audienceName = audienceName;
     }
 
+    @Override
     public AudienceType getAudienceType() {
         return audienceType;
     }

@@ -10,15 +10,16 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 public class MarketoChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.Marketo;
+    private static final AudienceType audienceType = AudienceType.CONTACTS;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
 
-    @JsonProperty("supressContactsWithoutEmails")
-    private Boolean supressContactsWithoutEmails = false;
+    @JsonProperty("suppressContactsWithoutEmails")
+    private Boolean suppressContactsWithoutEmails = false;
 
-    @JsonProperty("supressAccountWithoutContacts")
-    private Boolean supressAccountWithoutContacts = false;
+    @JsonProperty("suppressAccountWithoutContacts")
+    private Boolean suppressAccountWithoutContacts = false;
 
     @JsonProperty("audienceId")
     private String audienceId;
@@ -38,19 +39,19 @@ public class MarketoChannelConfig implements ChannelConfig {
     }
 
     public Boolean isSupressContactsWithoutEmails() {
-        return supressContactsWithoutEmails;
+        return suppressContactsWithoutEmails;
     }
 
-    public void setSupressContactsWithoutEmails(boolean supressContactsWithoutEmails) {
-        this.supressContactsWithoutEmails = supressContactsWithoutEmails;
+    public void setSuppressContactsWithoutEmails(boolean suppressContactsWithoutEmails) {
+        this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
     public Boolean isSupressAccountWithoutContacts() {
-        return supressAccountWithoutContacts;
+        return suppressAccountWithoutContacts;
     }
 
-    public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
-        this.supressAccountWithoutContacts = supressAccountWithoutContacts;
+    public void setSuppressAccountWithoutContacts(boolean suppressAccountWithoutContacts) {
+        this.suppressAccountWithoutContacts = suppressAccountWithoutContacts;
     }
 
     public String getAudienceId() {
@@ -78,6 +79,11 @@ public class MarketoChannelConfig implements ChannelConfig {
     }
 
     @Override
+    public AudienceType getAudienceType() {
+        return audienceType;
+    }
+
+    @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
     }
@@ -87,9 +93,9 @@ public class MarketoChannelConfig implements ChannelConfig {
         MarketoChannelConfig marketoChannelConfig = this;
         MarketoChannelConfig newMarketoChannelConfig = (MarketoChannelConfig) config;
         marketoChannelConfig.setContactLimit(newMarketoChannelConfig.getContactLimit());
-        marketoChannelConfig.setSupressContactsWithoutEmails(newMarketoChannelConfig.isSupressContactsWithoutEmails());
+        marketoChannelConfig.setSuppressContactsWithoutEmails(newMarketoChannelConfig.isSupressContactsWithoutEmails());
         marketoChannelConfig
-                .setSupressAccountWithoutContacts(newMarketoChannelConfig.isSupressAccountWithoutContacts());
+                .setSuppressAccountWithoutContacts(newMarketoChannelConfig.isSupressAccountWithoutContacts());
         marketoChannelConfig.setAudienceId(newMarketoChannelConfig.getAudienceId());
         marketoChannelConfig.setAudienceName(newMarketoChannelConfig.getAudienceName());
         marketoChannelConfig.setFolderName(newMarketoChannelConfig.getFolderName());

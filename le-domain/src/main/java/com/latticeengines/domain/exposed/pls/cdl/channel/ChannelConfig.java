@@ -18,12 +18,14 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
         @Type(value = S3ChannelConfig.class, name = "aws_s3"), //
         @Type(value = LinkedInChannelConfig.class, name = "linkedin"), //
         @Type(value = FacebookChannelConfig.class, name = "facebook"), //
-        @Type(value = FacebookChannelConfig.class, name = "outreach") //
+        @Type(value = OutreachChannelConfig.class, name = "outreach") //
 })
 public interface ChannelConfig {
 
     ChannelConfig copyConfig(ChannelConfig config);
 
     CDLExternalSystemName getSystemName();
+
+    AudienceType getAudienceType();
 
 }

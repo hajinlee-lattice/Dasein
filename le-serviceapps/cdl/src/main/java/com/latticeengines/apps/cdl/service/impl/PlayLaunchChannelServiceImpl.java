@@ -245,8 +245,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             FacebookChannelConfig channelConfig = (FacebookChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setAudienceId(channelConfig.getAudienceId());
             playLaunch.setAudienceName(channelConfig.getAudienceName());
-            channelConfig.setAudienceType(channelConfig.getAudienceType());
-        }else if (playLaunchChannel.getChannelConfig() instanceof OutreachChannelConfig) {
+        } else if (playLaunchChannel.getChannelConfig() instanceof OutreachChannelConfig) {
             OutreachChannelConfig channelConfig = (OutreachChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setAudienceId(channelConfig.getAudienceId());
             playLaunch.setAudienceName(channelConfig.getAudienceName());
