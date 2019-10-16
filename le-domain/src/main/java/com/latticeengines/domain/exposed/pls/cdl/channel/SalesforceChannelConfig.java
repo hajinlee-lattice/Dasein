@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 public class SalesforceChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.Salesforce;
+    private static final AudienceType audienceType = AudienceType.ACCOUNTS;
 
     @JsonProperty("accountLimit")
     private Long accountLimit;
@@ -32,6 +33,9 @@ public class SalesforceChannelConfig implements ChannelConfig {
     public void setSupressAccountsWithoutLookupId(boolean supressAccountsWithoutLookupId) {
         this.supressAccountsWithoutLookupId = supressAccountsWithoutLookupId;
     }
+
+    @Override
+    public AudienceType getAudienceType() { return audienceType; }
 
     @Override
     public CDLExternalSystemName getSystemName() {

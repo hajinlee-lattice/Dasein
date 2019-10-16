@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 public class FacebookChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.Facebook;
+    private static final AudienceType audienceType = AudienceType.CONTACTS;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
@@ -29,8 +30,6 @@ public class FacebookChannelConfig implements ChannelConfig {
     @JsonProperty("folderName")
     private String folderName;
 
-    @JsonProperty("audienceType")
-    private AudienceType audienceType;
 
     public Long getContactLimit() {
         return contactLimit;
@@ -76,10 +75,6 @@ public class FacebookChannelConfig implements ChannelConfig {
         return audienceType;
     }
 
-    public void setAudienceType(AudienceType audienceType) {
-        this.audienceType = audienceType;
-    }
-
     public String getFolderName() {
         return folderName;
     }
@@ -106,7 +101,6 @@ public class FacebookChannelConfig implements ChannelConfig {
         facebookChannelConfig.setAudienceId(newFacebookChannelConfig.getAudienceId());
         facebookChannelConfig.setAudienceName(newFacebookChannelConfig.getAudienceName());
         facebookChannelConfig.setFolderName(newFacebookChannelConfig.getFolderName());
-        facebookChannelConfig.setAudienceType(newFacebookChannelConfig.getAudienceType());
         return this;
 
     }

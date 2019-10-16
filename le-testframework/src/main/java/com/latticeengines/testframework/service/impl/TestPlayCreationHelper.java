@@ -373,7 +373,6 @@ public class TestPlayCreationHelper {
             break;
         case Facebook:
             config = new FacebookChannelConfig();
-            ((FacebookChannelConfig) config).setAudienceType(testPlayChannelConfig.getAudienceType());
             break;
         case LinkedIn:
             config = new LinkedInChannelConfig();

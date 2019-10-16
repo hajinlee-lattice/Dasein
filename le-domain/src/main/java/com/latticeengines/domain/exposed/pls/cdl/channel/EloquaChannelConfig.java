@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 public class EloquaChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.Eloqua;
+    private static final AudienceType audienceType = AudienceType.CONTACTS;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
@@ -43,6 +44,9 @@ public class EloquaChannelConfig implements ChannelConfig {
     public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
         this.supressAccountWithoutContacts = supressAccountWithoutContacts;
     }
+
+    @Override
+    public AudienceType getAudienceType() { return audienceType; }
 
     @Override
     public CDLExternalSystemName getSystemName() {
