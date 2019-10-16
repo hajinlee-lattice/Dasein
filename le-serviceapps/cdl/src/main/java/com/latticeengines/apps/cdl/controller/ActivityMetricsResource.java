@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActivityMetricsWithAction;
@@ -27,6 +29,9 @@ import io.swagger.annotations.ApiOperation;
 public class ActivityMetricsResource {
     @Inject
     private ActivityMetricsService metricsService;
+
+    @Inject
+    private ActivityMetricsGroupService activityMetricsGroupService;
 
     // For P&A profiling purchase history
     @GetMapping(value = "/{type}")
@@ -51,5 +56,16 @@ public class ActivityMetricsResource {
         List<ActivityMetrics> saved = metricsService.save(type, metrics);
         Action action = ActionContext.getAction();
         return new ActivityMetricsWithAction(saved, action);
+    }
+
+    @PostMapping(value = "/setupDefaultWebVisitProfile")
+    @ApiOperation(value = "Setup default web visit metric groups for total visit and source medium")
+    public Boolean setupDefaultWebVisitProfile(@PathVariable String customerSpace,
+            @RequestBody String streamName) {
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(customerSpace, streamName);
+        if (defaultGroups.size() != 1) {
+            throw new IllegalStateException(String.format("Failed to setup default web visit metric groups for tenant %s", customerSpace));
+        }
+        return true;
     }
 }

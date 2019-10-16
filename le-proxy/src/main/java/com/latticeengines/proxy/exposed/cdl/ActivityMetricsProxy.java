@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.ActivityMetricsWithAction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
@@ -39,4 +40,8 @@ public class ActivityMetricsProxy extends MicroserviceRestApiProxy {
         return post("Save metrics for specific activity type", url, metrics, ActivityMetricsWithAction.class);
     }
 
+    public boolean setupDefaultWebVisitProfile(String customerSpace, AtlasStream stream) {
+        String url = constructUrl("/customerspaces/{customerSpace}/metrics/setupDefaultWebVisitProfile", customerSpace);
+        return post("setup default web visit metric groups", url, stream.getName(), Boolean.class);
+    }
 }

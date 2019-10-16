@@ -159,7 +159,7 @@ public class DataFeedTaskController {
                                                             @RequestBody SimpleTemplateMetadata simpleTemplateMetadata) {
         try {
             return ResponseDocument.successResponse(
-                    dataFeedTaskTemplateService.setupWebVisitTemplate(customerSpace, simpleTemplateMetadata));
+                    dataFeedTaskTemplateService.setupWebVisitProfile(customerSpace, simpleTemplateMetadata));
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }
