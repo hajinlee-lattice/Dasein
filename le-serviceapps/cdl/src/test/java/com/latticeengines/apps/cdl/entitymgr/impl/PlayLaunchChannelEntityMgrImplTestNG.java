@@ -106,6 +106,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         lookupIdMap1.setOrgName(orgName1);
         lookupIdMap1 = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap1);
         Assert.assertNotNull(lookupIdMap1);
+
         lookupIdMap2 = new LookupIdMap();
         lookupIdMap2.setExternalSystemType(CDLExternalSystemType.MAP);
         lookupIdMap2.setExternalSystemName(CDLExternalSystemName.Marketo);
@@ -185,6 +186,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         playLaunchChannelEntityMgr.createPlayLaunchChannel(channel1);
         Assert.assertNotNull(channel1.getExpirationDate());
         Assert.assertNotNull(channel1.getNextScheduledLaunch());
+        Assert.assertEquals(channel1.getExpirationPeriodString(), "P3M");
 
         Thread.sleep(1000);
         playLaunchChannelEntityMgr.createPlayLaunchChannel(channel2);
@@ -253,6 +255,8 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         // Assert.assertEquals(retrieved.getCronScheduleExpression(),
         // channel1.getCronScheduleExpression());
         // Assert.assertNotEquals(retrieved.getExpirationDate(), testDate);
+        // Assert.assertEquals(retrieved.getExpirationPeriodString(), "P4M");
+        //
         //
         // channel1.setIsAlwaysOn(false);
         // retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved,
@@ -278,6 +282,13 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     public void testUpdate() throws InterruptedException {
 
         PlayLaunchChannel retrieved = playLaunchChannelEntityMgr.findById(channel1.getId());
+
+        channel1.setExpirationPeriodString("P3W");
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getId(), channel1.getId());
+        Assert.assertEquals(retrieved.getExpirationPeriodString(), channel1.getExpirationPeriodString());
+
         channel1.setIsAlwaysOn(false);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
         Thread.sleep(1000);
