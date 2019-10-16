@@ -236,6 +236,15 @@ public class PlayLaunchChannelEntityMgrImpl
             }
             verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, updatedChannel);
 
+            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
+                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
+            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
+                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
+            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
+                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
+            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
+                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
+
             if (existingPlayLaunchChannel.getChannelConfig() != null) {
                 existingPlayLaunchChannel.setChannelConfig(
                         existingPlayLaunchChannel.getChannelConfig().copyConfig(updatedChannel.getChannelConfig()));
@@ -270,6 +279,7 @@ public class PlayLaunchChannelEntityMgrImpl
                                 + updatedChannel.getCurrentLaunchedAccountUniverseTable() });
             }
         }
+
         existingPlayLaunchChannel.setUpdatedBy(updatedChannel.getUpdatedBy());
 
         playLaunchChannelDao.update(existingPlayLaunchChannel);

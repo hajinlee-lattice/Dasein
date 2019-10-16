@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls.cdl.channel;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -100,10 +102,22 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.folderName = folderName;
     }
 
-
     @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
+    }
+
+    @Override
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        if (!(channelConfig instanceof LinkedInChannelConfig)) {
+            return false;
+        }
+        LinkedInChannelConfig updatedConfig = (LinkedInChannelConfig) channelConfig;
+
+        return (this.audienceType == null ? updatedConfig.audienceType != null //
+                : !this.audienceType.equals(updatedConfig.audienceType)) //
+                || (StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
+                : !this.audienceName.equals(updatedConfig.audienceName));
     }
 
     @Override
@@ -111,7 +125,8 @@ public class LinkedInChannelConfig implements ChannelConfig {
         LinkedInChannelConfig linkedinChannelConfig = this;
         LinkedInChannelConfig newLinkedInChannelConfig = (LinkedInChannelConfig) config;
         linkedinChannelConfig.setContactLimit(newLinkedInChannelConfig.getContactLimit());
-        linkedinChannelConfig.setSupressContactsWithoutEmails(newLinkedInChannelConfig.isSupressContactsWithoutEmails());
+        linkedinChannelConfig
+                .setSupressContactsWithoutEmails(newLinkedInChannelConfig.isSupressContactsWithoutEmails());
         linkedinChannelConfig
                 .setSupressAccountWithoutContacts(newLinkedInChannelConfig.isSupressAccountWithoutContacts());
         linkedinChannelConfig.setAudienceId(newLinkedInChannelConfig.getAudienceId());
@@ -119,6 +134,6 @@ public class LinkedInChannelConfig implements ChannelConfig {
         linkedinChannelConfig.setFolderName(newLinkedInChannelConfig.getFolderName());
         linkedinChannelConfig.setAudienceType(newLinkedInChannelConfig.getAudienceType());
         return this;
-
     }
+
 }

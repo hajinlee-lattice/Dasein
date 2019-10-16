@@ -35,11 +35,18 @@ public class SalesforceChannelConfig implements ChannelConfig {
     }
 
     @Override
-    public AudienceType getAudienceType() { return audienceType; }
+    public AudienceType getAudienceType() {
+        return audienceType;
+    }
 
     @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
+    }
+
+    @Override
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        return false;
     }
 
     @Override

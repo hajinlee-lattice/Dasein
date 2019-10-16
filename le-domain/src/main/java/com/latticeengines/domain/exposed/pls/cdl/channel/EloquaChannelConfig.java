@@ -46,11 +46,18 @@ public class EloquaChannelConfig implements ChannelConfig {
     }
 
     @Override
-    public AudienceType getAudienceType() { return audienceType; }
+    public AudienceType getAudienceType() {
+        return audienceType;
+    }
 
     @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
+    }
+
+    @Override
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        return false;
     }
 
     @Override
@@ -61,7 +68,5 @@ public class EloquaChannelConfig implements ChannelConfig {
         eloquaChannelConfig.setSupressContactsWithoutEmails(newEloquaChannelConfig.isSupressContactsWithoutEmails());
         eloquaChannelConfig.setSupressAccountWithoutContacts(newEloquaChannelConfig.isSupressAccountWithoutContacts());
         return this;
-
     }
-
 }
