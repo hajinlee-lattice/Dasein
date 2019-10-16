@@ -26,6 +26,7 @@ import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -219,7 +220,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 playLaunchSparkContext.setDataDbDriver(dataDbDriver);
                 playLaunchSparkContext.setDataDbUrl(dataDbUrl);
                 playLaunchSparkContext.setDataDbUser(dataDbUser);
-                playLaunchSparkContext.setDataDbPassword(dataDbPassword);
+                playLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword));
 
                 return executeSparkJob(CreateRecommendationsJob.class,
                         generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));

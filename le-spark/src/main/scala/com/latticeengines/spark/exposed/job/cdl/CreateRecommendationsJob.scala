@@ -3,7 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
-import com.latticeengines.common.exposed.util.{JsonUtils, KryoUtils}
+import com.latticeengines.common.exposed.util.{JsonUtils, KryoUtils, CipherUtils}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
 import com.latticeengines.domain.exposed.playmakercore.{NonStandardRecColumnName, RecommendationColumnName}
@@ -341,7 +341,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val prop = new java.util.Properties
     prop.setProperty("driver", driver)
     prop.setProperty("user", user)
-    prop.setProperty("password", pw) 
+    prop.setProperty("password", CipherUtils.decrypt(pw)) 
     val table = "Recommendation"
     
     //write data from spark dataframe to database

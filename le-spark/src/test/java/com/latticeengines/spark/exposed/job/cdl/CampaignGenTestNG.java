@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -555,22 +556,13 @@ public class CampaignGenTestNG extends TestJoinTestNGBase {
                 .dataDbDriver(dataDbDriver) //
                 .dataDbUrl(dataDbUrl) //
                 .dataDbUser(dataDbUser) //
-                .dataDbPassword(dataDbPassword) //
+                .dataDbPassword(CipherUtils.encrypt(dataDbPassword)) //
                 .build();
         return sparkContext;
     }
 
     @DataProvider
     public Object[][] destinationProvider() {
-        // return new Object[][] { //
-        // { CDLExternalSystemName.Salesforce, false }, //
-        // { CDLExternalSystemName.Salesforce, true }, //
-        // { CDLExternalSystemName.Marketo, false }, //
-        // { CDLExternalSystemName.AWS_S3, false }, //
-        // { CDLExternalSystemName.GoogleAds, false }, //
-        // { CDLExternalSystemName.Facebook, false }, //
-        // { CDLExternalSystemName.LinkedIn, false } //
-        // };
         return new Object[][] { //
                 { CDLExternalSystemName.AWS_S3, false } };
     }

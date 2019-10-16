@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -660,7 +661,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 .dataDbDriver(dataDbDriver) //
                 .dataDbUrl(dataDbUrl) //
                 .dataDbUser(dataDbUser) //
-                .dataDbPassword(dataDbPassword) //
+                .dataDbPassword(CipherUtils.encrypt(dataDbPassword)) //
                 .build();
         return sparkContext;
     }
