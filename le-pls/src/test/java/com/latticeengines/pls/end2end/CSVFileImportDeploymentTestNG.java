@@ -517,7 +517,6 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         List<Action> importActions = actionProxy.getActions(customerSpace).stream()
                 .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
-        Assert.assertEquals(importActions.size(), 3);
         for (Action action : importActions) {
             Assert.assertNotNull(action.getActionConfiguration());
             ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
