@@ -47,10 +47,14 @@ public class CipherUtils {
     private static final String CHARSET_UTF8 = "UTF-8";
 
     public static String encrypt(final String str) {
+        return encrypt(str, KEY);
+    }
+
+    public static String encrypt(final String str, final String key) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
             byte[] salt = generateSalt();
-            cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), new IvParameterSpec(salt));
+            cipher.init(Cipher.ENCRYPT_MODE, strToKey(key), new IvParameterSpec(salt));
             byte[] secret = cipher.doFinal(str.getBytes(CHARSET_UTF8));
             byte[] bytes = Arrays.copyOf(SALT_HINT_BYTES, SALT_HINT_BYTES.length);
             if ((secret.length / 16) % 2 == 1) {
@@ -68,7 +72,7 @@ public class CipherUtils {
         }
     }
 
-    public static String decrypt(final String str) {
+    public static String decrypt(final String str, final String key) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
             byte[] bytes = Base64.decodeBase64(str);
@@ -85,15 +89,19 @@ public class CipherUtils {
                     salt = Arrays.copyOfRange(bytes, SALT_HINT_BYTES.length, SALT_HINT_BYTES.length + 16);
                     secret = Arrays.copyOfRange(bytes, SALT_HINT_BYTES.length + 16, bytes.length);
                 }
-                cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), new IvParameterSpec(salt));
+                cipher.init(Cipher.DECRYPT_MODE, strToKey(key), new IvParameterSpec(salt));
                 return new String(cipher.doFinal(secret), CHARSET_UTF8);
             } else {
-                return decryptWithEmptySalt(str);
+                return decryptWithEmptySalt(str, key);
             }
         } catch (Exception e) {
             // fall back to old decryptor
-            return decryptWithEmptySalt(str);
+            return decryptWithEmptySalt(str, key);
         }
+    }
+
+    public static String decrypt(final String str) {
+        return decrypt(str, KEY);
     }
 
     /*
@@ -123,10 +131,10 @@ public class CipherUtils {
         return defaultValue;
     }
 
-    private static String decryptWithEmptySalt(final String str) {
+    public static String decryptWithEmptySalt(final String str, final String key) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), getLegacyIVSpec(str));
+            cipher.init(Cipher.DECRYPT_MODE, strToKey(key), getLegacyIVSpec(str));
             return new String(cipher.doFinal(Base64.decodeBase64(str)), CHARSET_UTF8);
         } catch (Exception e) {
             throw new RuntimeException(e);
