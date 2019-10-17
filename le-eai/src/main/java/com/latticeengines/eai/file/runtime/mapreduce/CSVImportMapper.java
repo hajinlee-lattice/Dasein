@@ -574,7 +574,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         fieldCsvValue = fieldCsvValue.trim().replaceFirst("(\\s{2,})",
                 TimeStampConvertUtils.SYSTEM_DELIMITER);
         if (StringUtils.isNotBlank(fieldCsvValue) && StringUtils.isNotBlank(timeZone)) {
-            boolean isISO8601 = TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE.equals(timeZone);
+            boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timeZone);
             boolean matchTZ = TimeStampConvertUtils.isIso8601TandZFromDateTime(fieldCsvValue);
             if (isISO8601 && !matchTZ) {
                 // time zone is in ISO-8601, validate its value using T&Z

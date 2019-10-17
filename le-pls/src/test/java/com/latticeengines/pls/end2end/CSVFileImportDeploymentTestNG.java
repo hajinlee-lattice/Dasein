@@ -150,6 +150,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         String dateFormatString3 = "YYYY-MMM-DD";
         String timeFormatString3 = "00:00 12H";
         String timezone3 = "America/Chicago";
+        String dateFormatString4 = "YYYY-MM-DD";
+        String timeFormatString4 = "00:00:00 24H";
+        String timezone4 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE;
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             if (mapping.getUserField().equals("TestDate1")) {
                 mapping.setFieldType(UserDefinedType.DATE);
@@ -169,6 +172,12 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 mapping.setDateFormatString(dateFormatString3);
                 mapping.setTimeFormatString(timeFormatString3);
                 mapping.setTimezone(timezone3);
+            } else if (mapping.getUserField().equals("TestTZDate")) {
+                // this verify the TZ date can be validated through import workflow
+                Assert.assertEquals(UserDefinedType.DATE, mapping.getFieldType());
+                Assert.assertEquals(dateFormatString4, mapping.getDateFormatString());
+                Assert.assertEquals(timeFormatString4, mapping.getTimeFormatString());
+                Assert.assertEquals(timezone4, mapping.getTimezone());
             }
         }
 
