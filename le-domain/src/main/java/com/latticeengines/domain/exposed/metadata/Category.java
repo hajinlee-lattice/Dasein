@@ -35,7 +35,8 @@ public enum Category {
     ACCOUNT_INFORMATION("Account Information", 12), //
     LEAD_INFORMATION("Lead Information", 13), //
     DEFAULT("Default", 14), //
-    AI_INSIGHTS("AI Insights", 15);
+    AI_INSIGHTS("AI Insights", 15), //
+    WEB_VISIT_PROFILE("My Website Profile", 16); //
 
     private static Map<String, Category> nameMap;
     private static Set<String> values;
