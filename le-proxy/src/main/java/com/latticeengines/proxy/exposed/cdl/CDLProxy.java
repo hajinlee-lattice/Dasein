@@ -485,7 +485,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             throw new RuntimeException("Cannot update all import system priority!");
         }
         if (!responseDoc.isSuccess()) {
-            throw new LedpException(LedpCode.LEDP_40064, responseDoc.getErrors().toArray());
+            throw new RuntimeException(responseDoc.getErrors().get(0));
         }
     }
 

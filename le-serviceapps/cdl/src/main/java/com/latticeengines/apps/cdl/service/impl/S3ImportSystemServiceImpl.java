@@ -84,9 +84,9 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             for (S3ImportSystem system : currentSystems) {
                 if (system.getPriority() == 1) {
                     if (system.isMapToLatticeAccount()) {
-                        throw new LedpException(LedpCode.LEDP_40061,
-                                new String[] {String.format("System %s already set map to lattice Account!",
-                                        system.getDisplayName())});
+                        throw new RuntimeException(
+                                String.format("%s is setup as your primary system. This system has the highest priority and cannot be modified.",
+                                        system.getDisplayName()));
                     }
                 }
             }
@@ -178,9 +178,9 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         if (primarySystem.isPresent() && newPrimarySystem.isPresent()) {
             if (!primarySystem.get().getName().equals(newPrimarySystem.get().getName())
                     && (primarySystem.get().isMapToLatticeAccount())) {
-                throw new LedpException(LedpCode.LEDP_40061,
-                        new String[] {String.format("System %s already set map to lattice Account!",
-                                primarySystem.get().getDisplayName())});
+                throw new RuntimeException(
+                        String.format("%s is setup as your primary system. This system has the highest priority and cannot be modified.",
+                                primarySystem.get().getDisplayName()));
             }
         }
 
