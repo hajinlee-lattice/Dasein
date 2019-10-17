@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls.cdl.channel;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -89,11 +91,23 @@ public class OutreachChannelConfig implements ChannelConfig {
     }
 
     @Override
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        if (!(channelConfig instanceof OutreachChannelConfig)) {
+            return false;
+        }
+        OutreachChannelConfig updatedConfig = (OutreachChannelConfig) channelConfig;
+
+        return StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
+                : !this.audienceName.equals(updatedConfig.audienceName);
+    }
+
+    @Override
     public ChannelConfig copyConfig(ChannelConfig config) {
         OutreachChannelConfig outreachChannelConfig = this;
         OutreachChannelConfig newOutreachChannelConfig = (OutreachChannelConfig) config;
         outreachChannelConfig.setContactLimit(newOutreachChannelConfig.getContactLimit());
-        outreachChannelConfig.setSupressContactsWithoutEmails(newOutreachChannelConfig.isSupressContactsWithoutEmails());
+        outreachChannelConfig
+                .setSupressContactsWithoutEmails(newOutreachChannelConfig.isSupressContactsWithoutEmails());
         outreachChannelConfig
                 .setSupressAccountWithoutContacts(newOutreachChannelConfig.isSupressAccountWithoutContacts());
         outreachChannelConfig.setAudienceId(newOutreachChannelConfig.getAudienceId());

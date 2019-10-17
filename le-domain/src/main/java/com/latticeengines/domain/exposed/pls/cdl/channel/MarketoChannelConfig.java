@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls.cdl.channel;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -89,6 +91,28 @@ public class MarketoChannelConfig implements ChannelConfig {
     }
 
     @Override
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        if (!(channelConfig instanceof MarketoChannelConfig)) {
+            return false;
+        }
+        MarketoChannelConfig updatedConfig = (MarketoChannelConfig) channelConfig;
+
+        boolean a = StringUtils.isBlank(this.audienceId) ? StringUtils.isNotBlank(updatedConfig.audienceId) //
+                : !this.audienceId.equals(updatedConfig.audienceId);
+        boolean b = StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
+                : !this.audienceName.equals(updatedConfig.audienceName);
+        boolean c = StringUtils.isBlank(this.folderName) ? StringUtils.isNotBlank(updatedConfig.folderName) //
+                : !this.folderName.equals(updatedConfig.folderName);
+
+        return (StringUtils.isBlank(this.audienceId) ? StringUtils.isNotBlank(updatedConfig.audienceId) //
+                : !this.audienceId.equals(updatedConfig.audienceId)) //
+                || (StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
+                        : !this.audienceName.equals(updatedConfig.audienceName)) //
+                || (StringUtils.isBlank(this.folderName) ? StringUtils.isNotBlank(updatedConfig.folderName) //
+                        : !this.folderName.equals(updatedConfig.folderName));
+    }
+
+    @Override
     public ChannelConfig copyConfig(ChannelConfig config) {
         MarketoChannelConfig marketoChannelConfig = this;
         MarketoChannelConfig newMarketoChannelConfig = (MarketoChannelConfig) config;
@@ -100,6 +124,5 @@ public class MarketoChannelConfig implements ChannelConfig {
         marketoChannelConfig.setAudienceName(newMarketoChannelConfig.getAudienceName());
         marketoChannelConfig.setFolderName(newMarketoChannelConfig.getFolderName());
         return this;
-
     }
 }

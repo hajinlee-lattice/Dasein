@@ -87,6 +87,11 @@ public class S3ChannelConfig implements ChannelConfig {
     }
 
     @Override
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        return false;
+    }
+
+    @Override
     public ChannelConfig copyConfig(ChannelConfig config) {
         S3ChannelConfig s3ChannelConfig = this;
         S3ChannelConfig newS3ChannelConfig = (S3ChannelConfig) config;
@@ -98,4 +103,5 @@ public class S3ChannelConfig implements ChannelConfig {
         s3ChannelConfig.setSupressAccountWithoutContacts(newS3ChannelConfig.isSupressAccountWithoutContacts());
         return this;
     }
+
 }
