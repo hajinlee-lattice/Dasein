@@ -84,9 +84,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             for (S3ImportSystem system : currentSystems) {
                 if (system.getPriority() == 1) {
                     if (system.isMapToLatticeAccount()) {
-                        throw new LedpException(LedpCode.LEDP_40061,
-                                new String[] {String.format("System %s already set map to lattice Account!",
-                                        system.getDisplayName())});
+                        throw new LedpException(LedpCode.LEDP_40061, new String[] {system.getDisplayName()});
                     }
                 }
             }
@@ -95,9 +93,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         if (importSystem.isMapToLatticeContact()) {
             for (S3ImportSystem system : currentSystems) {
                 if (!system.getName().equals(importSystem.getName()) && Boolean.TRUE.equals(system.isMapToLatticeContact())) {
-                    throw new LedpException(LedpCode.LEDP_40061,
-                            new String[] {String.format("System %s already set map to lattice Contact!",
-                                    system.getDisplayName())});
+                    throw new LedpException(LedpCode.LEDP_40061, new String[] {system.getDisplayName()});
                 }
             }
         }
@@ -178,9 +174,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         if (primarySystem.isPresent() && newPrimarySystem.isPresent()) {
             if (!primarySystem.get().getName().equals(newPrimarySystem.get().getName())
                     && (primarySystem.get().isMapToLatticeAccount())) {
-                throw new LedpException(LedpCode.LEDP_40061,
-                        new String[] {String.format("System %s already set map to lattice Account!",
-                                primarySystem.get().getDisplayName())});
+                throw new LedpException(LedpCode.LEDP_40061, new String[] {primarySystem.get().getDisplayName()});
             }
         }
 
