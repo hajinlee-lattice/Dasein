@@ -69,8 +69,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Value("${cache.local.redis}")
     private boolean localRedis;
 
-    @Value("${eai.import.csv.num.mappers}")
-    private int csvImportNumMappers;
+    @Value("${eai.import.csv.mappers.cores}")
+    private int csvImportMapperCores;
 
     @Inject
     private ElasticCacheService elastiCacheService;
@@ -109,7 +109,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     public Properties getProperties(ImportContext ctx, Table table) {
         Properties props = new Properties();
         props.put("errorLineNumber", errorLineNumber + "");
-        props.put(CSVFileImportProperty.CSV_FILE_NUM_MAPPERS.name(), csvImportNumMappers + "");
+        props.put(CSVFileImportProperty.CSV_FILE_MAPPER_CORES.name(), csvImportMapperCores + "");
         props.put("yarn.mr.hdfs.class.path",
                 String.format("/app/%s/eai/lib", versionManager.getCurrentVersionInStack(stackName)));
         props.put(MapReduceProperty.CUSTOMER.name(), ctx.getProperty(ImportProperty.CUSTOMER, String.class));
