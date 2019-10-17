@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
         @Type(value = ProcessProductStepConfiguration.class, name = "ProcessProductStepConfiguration"),
         @Type(value = ProcessTransactionStepConfiguration.class, name = "ProcessTransactionStepConfiguration"),
         @Type(value = BuildCatalogStepConfiguration.class, name = "BuildCatalogStepConfiguration"),
+        @Type(value = ProcessActivityStreamStepConfiguration.class, name = "ProcessActivityStreamStepConfiguration"),
         @Type(value = CuratedAccountAttributesStepConfiguration.class, name = "CuratedAccountAttributesStepConfiguration"),
         @Type(value = ProcessRatingStepConfiguration.class, name = "ProcessRatingStepConfiguration"), })
 public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStepConfiguration {

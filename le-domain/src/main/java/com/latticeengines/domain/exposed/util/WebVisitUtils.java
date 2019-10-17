@@ -39,7 +39,7 @@ public class WebVisitUtils {
     /*
      * Source medium profile
      */
-    private static StreamDimension sourceMediumDimension(@NotNull AtlasStream stream) {
+    public static StreamDimension sourceMediumDimension(@NotNull AtlasStream stream) {
         StreamDimension dim = new StreamDimension();
         dim.setName(InterfaceName.SourceMediumId.name());
         dim.setDisplayName(dim.getName());
@@ -64,7 +64,7 @@ public class WebVisitUtils {
     /*
      * Calculate # of unique user visits
      */
-    private static StreamDimension userIdDimension(@NotNull AtlasStream stream) {
+    public static StreamDimension userIdDimension(@NotNull AtlasStream stream) {
         StreamDimension dim = new StreamDimension();
         dim.setName(InterfaceName.UserId.name());
         dim.setDisplayName(dim.getName());
@@ -89,7 +89,7 @@ public class WebVisitUtils {
     /*-
      * PathPatternId dimension for web visit
      */
-    private static StreamDimension pathPtnDimension(@NotNull AtlasStream stream, Catalog pathPtnCatalog) {
+    public static StreamDimension pathPtnDimension(@NotNull AtlasStream stream, Catalog pathPtnCatalog) {
         StreamDimension dim = new StreamDimension();
         dim.setName(InterfaceName.PathPatternId.name());
         dim.setDisplayName(dim.getName());

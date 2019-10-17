@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
+import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.IngestionBehavior.Append;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +50,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
 
     private static final long serialVersionUID = 7473595458075796126L;
+    private static final DataFeedTask.IngestionBehavior DEFAULT_INGESTION_BEHAVIOR = Append;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -152,12 +155,23 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         this.dataFeedTask = dataFeedTask;
     }
 
+    @JsonProperty("task_ingestion_behavior")
+    public void setDataFeedTaskIngestionBehavior(DataFeedTask.IngestionBehavior behavior) {
+        instantiateTaskIfNull();
+        dataFeedTask.setIngestionBehavior(behavior);
+    }
+
+    @JsonProperty("task_ingestion_behavior")
+    public DataFeedTask.IngestionBehavior getDataFeedTaskIngestionBehavior() {
+        if (dataFeedTask == null || dataFeedTask.getIngestionBehavior() == null) {
+            return DEFAULT_INGESTION_BEHAVIOR;
+        }
+        return dataFeedTask.getIngestionBehavior();
+    }
+
     @JsonProperty("task_unique_id")
     public void setDataFeedTaskUniqueId(String uniqueId) {
-        if (dataFeedTask == null) {
-            // dummy object
-            dataFeedTask = new DataFeedTask();
-        }
+        instantiateTaskIfNull();
         dataFeedTask.setUniqueId(uniqueId);
     }
 
@@ -220,6 +234,13 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
 
     public void setAttributeDerivers(List<StreamAttributeDeriver> attributeDerivers) {
         this.attributeDerivers = attributeDerivers;
+    }
+
+    private void instantiateTaskIfNull() {
+        if (dataFeedTask == null) {
+            // dummy object
+            dataFeedTask = new DataFeedTask();
+        }
     }
 
     @Override

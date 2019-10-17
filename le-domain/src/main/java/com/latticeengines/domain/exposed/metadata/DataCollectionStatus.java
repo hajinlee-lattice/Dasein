@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -273,6 +274,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     @JsonProperty("OrigCatalogFileMap")
     public void setOrigCatalogFileMap(Map<String, List<String>> origCatalogFileMap) {
         this.detail.setOrigCatalogFileMap(origCatalogFileMap);
+    }
+
+    @JsonProperty("ActivityStreamMap")
+    public Map<String, AtlasStream> getActivityStreamMap() {
+        return this.detail.getActivityStreamMap();
+    }
+
+    @JsonProperty("ActivityStreamMap")
+    public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
+        this.detail.setActivityStreamMap(activityStreamMap);
     }
 
     @Override

@@ -7,11 +7,16 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatte
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -19,11 +24,13 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
@@ -40,6 +47,8 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
     private static final String DIM_IS_CLOSED = IsClosed.name();
 
     private Map<String, StreamDimension> dimensions = new HashMap<>();
+    // stream name -> associated lsit of dimensions
+    private Map<String, List<StreamDimension>> dimensionMap = new HashMap<>();
 
     @Override
     protected List<String> getCatalogNames() {
@@ -64,6 +73,10 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimensionEntityMgr.create(dimension);
         dimensions.put(dimension.getName(), dimension);
         Assert.assertNotNull(dimension.getPid());
+
+        String streamName = dimension.getStream().getName();
+        dimensionMap.putIfAbsent(streamName, new ArrayList<>());
+        dimensionMap.get(streamName).add(dimension);
     }
 
     // [ Name + Stream + Tenant ] need to be unique
@@ -74,7 +87,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         dimensionEntityMgr.create(dimension);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreate")
+    @Test(groups = "functional", dependsOnMethods = "testCreate", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testFind() {
         for (StreamDimension d : dimensions.values()) {
             StreamDimension dimension = dimensionEntityMgr.findByNameAndTenantAndStream(d.getName(), mainTestTenant,
@@ -82,6 +95,24 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
             validateDimension(dimension);
         }
         Assert.assertEquals(dimensionEntityMgr.findByTenant(mainTestTenant).size(), dimensions.size());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCreate", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testDimensionInflation() {
+        List<AtlasStream> streams = streamEntityMgr.findByTenant(mainTestTenant, true);
+        Assert.assertNotNull(streams);
+        Set<String> streamNames = streams.stream().map(AtlasStream::getName).collect(Collectors.toSet());
+        Assert.assertEquals(streamNames, new HashSet<>(getStreamNames()));
+
+        streams.forEach(stream -> {
+            if (dimensionMap.containsKey(stream.getName())) {
+                Assert.assertNotNull(stream.getDimensions());
+                Assert.assertEquals(stream.getDimensions().size(), dimensionMap.get(stream.getName()).size(),
+                        String.format("Stream %s should have one dimension", stream.getName()));
+            } else {
+                Assert.assertTrue(CollectionUtils.isEmpty(stream.getDimensions()));
+            }
+        });
     }
 
     @DataProvider(name = "Dimensions")

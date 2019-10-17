@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
@@ -55,6 +56,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -128,6 +130,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final CatalogEntityMgr catalogEntityMgr;
 
+    private final AtlasStreamEntityMgr streamEntityMgr;
+
     private final ColumnMetadataProxy columnMetadataProxy;
 
     private final ActionService actionService;
@@ -143,15 +147,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private final DataFeedTaskService dataFeedTaskService;
 
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
-                                           DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
-                                           WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
-                                           ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
-                                           CDLAttrConfigProxy cdlAttrConfigProxy, S3ImportSystemService s3ImportSystemService) {
+    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService, DataCollectionService dataCollectionService,
+            DataFeedTaskService dataFeedTaskService, WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
+            AtlasStreamEntityMgr streamEntityMgr, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
+            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy,
+            S3ImportSystemService s3ImportSystemService) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
         this.catalogEntityMgr = catalogEntityMgr;
+        this.streamEntityMgr = streamEntityMgr;
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
         this.batonService = batonService;
@@ -614,6 +619,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Catalog> catalogs = catalogEntityMgr.findByTenant(tenant);
         log.info("Catalogs for tenant {} are {}", customerSpace, catalogs);
 
+        Map<String, AtlasStream> streams = streamEntityMgr.findByTenant(tenant, true).stream()
+                .collect(Collectors.toMap(AtlasStream::getName, stream -> stream));
+        log.info("ActivityStreams for tenant {} are {}", customerSpace, JsonUtils.serialize(streams));
+
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
@@ -643,6 +652,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .catalogPrimaryKeyColumns(getCatalogPrimaryKeyColumns(customerSpace, catalogs)) //
                 .catalogIngestionBehaivors(getCatalogIngestionBehavior(customerSpace, catalogs)) //
                 .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
+                .activityStreams(streams) //
                 .systemIdMap(systemIdMaps.getRight()) //
                 .defaultSystemIdMap(systemIdMaps.getLeft()) //
                 .entityMatchEnabled(entityMatchEnabled) //

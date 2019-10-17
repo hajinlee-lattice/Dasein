@@ -25,6 +25,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -157,5 +158,23 @@ public class Catalog implements HasPid, Serializable, HasAuditingFields {
     public String toString() {
         return "Catalog{" + "pid=" + pid + ", name='" + name + '\'' + ", tenant=" + tenant + ", dataFeedTask="
                 + dataFeedTask + ", created=" + created + ", updated=" + updated + '}';
+    }
+
+    // check PID only for now
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Catalog catalog = (Catalog) o;
+        return Objects.equal(pid, catalog.pid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(pid);
     }
 }

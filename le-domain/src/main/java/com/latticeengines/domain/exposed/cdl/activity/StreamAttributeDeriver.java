@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.cdl.activity;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -75,8 +75,7 @@ public class StreamAttributeDeriver implements Serializable {
             for (Calculation generator : Calculation.values()) {
                 nameMap.put(generator.getName(), generator);
             }
-            values = new HashSet<>(
-                    Arrays.stream(values()).map(Calculation::name).collect(Collectors.toSet()));
+            values = Arrays.stream(values()).map(Calculation::name).collect(Collectors.toSet());
         }
 
         private final String name;
@@ -106,5 +105,23 @@ public class StreamAttributeDeriver implements Serializable {
         public String getName() {
             return this.name;
         }    
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        StreamAttributeDeriver that = (StreamAttributeDeriver) o;
+        return Objects.equal(targetAttribute, that.targetAttribute)
+                && Objects.equal(sourceAttributes, that.sourceAttributes) && calculation == that.calculation;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(targetAttribute, sourceAttributes, calculation);
     }
 }

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -232,5 +233,24 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
      */
     public enum Usage {
         Pivot, Dedup, Filter
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        StreamDimension dimension = (StreamDimension) o;
+        return Objects.equal(pid, dimension.pid) && Objects.equal(name, dimension.name)
+                && Objects.equal(catalog, dimension.catalog) && Objects.equal(generator, dimension.generator)
+                && Objects.equal(calculator, dimension.calculator) && Objects.equal(usages, dimension.usages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name, generator, calculator, usages);
     }
 }

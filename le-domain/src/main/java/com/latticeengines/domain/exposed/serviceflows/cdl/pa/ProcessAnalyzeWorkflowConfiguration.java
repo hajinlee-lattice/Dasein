@@ -10,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -51,6 +52,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ProcessProductWorkflowConfiguration.Builder processProductWorkflowBuilder = new ProcessProductWorkflowConfiguration.Builder();
         private ProcessTransactionWorkflowConfiguration.Builder processTransactionWorkflowBuilder = new ProcessTransactionWorkflowConfiguration.Builder();
         private ProcessCatalogWorkflowConfiguration.Builder processCatalogWorkflowBuilder = new ProcessCatalogWorkflowConfiguration.Builder();
+        private ProcessActivityStreamWorkflowConfiguration.Builder processActivityStreamWorkflowBuilder = new ProcessActivityStreamWorkflowConfiguration.Builder();
         private CuratedAttributesWorkflowConfiguration.Builder curatedAttributesWorkflowBuilder = new CuratedAttributesWorkflowConfiguration.Builder();
         private ProcessRatingWorkflowConfiguration.Builder processRatingWorkflowBuilder = new ProcessRatingWorkflowConfiguration.Builder();
         private CommitEntityMatchWorkflowConfiguration.Builder commitEntityWorkflowBuilder = new CommitEntityMatchWorkflowConfiguration.Builder();
@@ -76,6 +78,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processProductWorkflowBuilder.customer(customerSpace);
             processTransactionWorkflowBuilder.customer(customerSpace);
             processCatalogWorkflowBuilder.customer(customerSpace);
+            processActivityStreamWorkflowBuilder.customer(customerSpace);
             curatedAttributesWorkflowBuilder.customer(customerSpace);
             processRatingWorkflowBuilder.customer(customerSpace);
             commitEntityWorkflowBuilder.customer(customerSpace);
@@ -108,6 +111,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processProductWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processCatalogWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            processActivityStreamWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             curatedAttributesWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             commitEntityWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -253,6 +257,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder activityStreams(Map<String, AtlasStream> streams) {
+            processActivityStreamWorkflowBuilder.activityStreams(streams);
+            return this;
+        }
+
         public Builder systemIdMap(Map<String, List<String>> systemIds) {
             matchEntityWorkflowBuilder.systemIdMap(systemIds);
             return this;
@@ -270,6 +279,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processCatalogWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            processActivityStreamWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
@@ -326,6 +336,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processProductWorkflowBuilder.build());
             configuration.add(processTransactionWorkflowBuilder.build());
             configuration.add(processCatalogWorkflowBuilder.build());
+            configuration.add(processActivityStreamWorkflowBuilder.build());
             configuration.add(curatedAttributesWorkflowBuilder.build());
             configuration.add(processRatingWorkflowBuilder.build());
             configuration.add(commitEntityWorkflowBuilder.build());
