@@ -238,12 +238,6 @@ public class PlayLaunchChannelEntityMgrImpl
 
             existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
                     .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
-            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
-                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
-            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
-                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
-            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
-                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
 
             if (existingPlayLaunchChannel.getChannelConfig() != null) {
                 existingPlayLaunchChannel.setChannelConfig(
