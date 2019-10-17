@@ -23,9 +23,9 @@ import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
+@Listeners({GlobalAuthCleanupTestListener.class})
+@TestExecutionListeners({DirtiesContextTestExecutionListener.class})
+@ContextConfiguration(locations = {"classpath:test-pls-context.xml"})
 public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
@@ -56,13 +56,10 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
         metadataSegmentExport.setPath("some/path");
         metadataSegmentExport.setCreatedBy(CREATED_BY);
         metadataSegmentExport.setCleanupBy(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
-
-        metadataSegmentExport = metadataSegmentExportService.createSegmentExportJob(metadataSegmentExport, false);
+        metadataSegmentExport = metadataSegmentExportService.createSegmentExportJob(metadataSegmentExport);
 
         Assert.assertNotNull(metadataSegmentExport.getPid());
         Assert.assertNotNull(metadataSegmentExport.getExportId());
-        System.out.println("ExportId=" + metadataSegmentExport.getExportId());
-
         String exportId = metadataSegmentExport.getExportId();
 
         MetadataSegmentExport retrievedMetadataSegmentExport = metadataSegmentExportService
@@ -70,12 +67,7 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
         Assert.assertNotNull(retrievedMetadataSegmentExport);
         Assert.assertNotNull(retrievedMetadataSegmentExport.getPid());
         Assert.assertNotNull(retrievedMetadataSegmentExport.getExportId());
-        Assert.assertTrue(retrievedMetadataSegmentExport.getFileName().startsWith(SEGMENT_NAME));
-
-        metadataSegmentExport =
-                metadataSegmentExportService.getSegmentExportByExportId(metadataSegmentExport.getExportId());
-        Assert.assertNotNull(metadataSegmentExport.getPid());
-        Assert.assertNotNull(metadataSegmentExport.getExportId());
+        Assert.assertNull(retrievedMetadataSegmentExport.getFileName());
 
         AtlasExport atlasExport = createAtlasExport(AtlasExportType.ACCOUNT);
         metadataSegmentExport =
