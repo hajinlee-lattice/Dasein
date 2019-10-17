@@ -223,6 +223,9 @@ public class SchemaRepository {
         case DeleteTransactionTemplate:
             table = getDeleteTransactionTemplateSchema(enableEntityMatch);
             break;
+        case RegisterDeleteDataTemplate:
+            table = getDeleteAccountTemplateSchema(false);
+            break;
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }

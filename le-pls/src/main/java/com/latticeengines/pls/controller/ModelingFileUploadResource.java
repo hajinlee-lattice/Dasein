@@ -230,7 +230,8 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
         if (schemaInterpretation != SchemaInterpretation.DeleteAccountTemplate
                 && schemaInterpretation != SchemaInterpretation.DeleteContactTemplate
-                && schemaInterpretation != SchemaInterpretation.DeleteTransactionTemplate) {
+                && schemaInterpretation != SchemaInterpretation.DeleteTransactionTemplate
+                && schemaInterpretation != SchemaInterpretation.RegisterDeleteDataTemplate) {
             throw new LedpException(LedpCode.LEDP_18173, new String[] { schemaInterpretation.name() });
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();

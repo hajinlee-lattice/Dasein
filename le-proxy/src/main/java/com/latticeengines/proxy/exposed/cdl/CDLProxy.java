@@ -432,6 +432,25 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
+    public ApplicationId registerDeleteData(String customerSpace, String user, String filename, boolean hardDelete) {
+
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/registerDeleteData" +
+                        "?user={user}&filename={filename}&hardDelete={hardDelete}",
+                customerSpace, user, filename, String.valueOf(hardDelete));
+
+        ResponseDocument<String> responseDoc = post("Register delete data", url, null, ResponseDocument.class);
+
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
+        } else {
+            throw new RuntimeException("Failed to register delete data: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public void createS3ImportSystem(String customerSpace, S3ImportSystem system) {
         String url = constructUrl("/customerspaces/{customerSpace}/s3import/system", shortenCustomerSpace(customerSpace));
         ResponseDocument<String> responseDoc = post("create s3 import system", url, system, ResponseDocument.class);

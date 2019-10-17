@@ -15,11 +15,13 @@ public class RegisterDeleteDataWorkflowConfiguration extends BaseCDLWorkflowConf
         private DeleteFileUploadStepConfiguration deleteFileUploadStepConfiguration = new DeleteFileUploadStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
+            configuration.setCustomerSpace(customerSpace);
             deleteFileUploadStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
+            configuration.setInternalResourceHostPort(internalResourceHostPort);
             deleteFileUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }

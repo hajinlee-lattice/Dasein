@@ -59,6 +59,7 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
         }
         DeleteActionConfiguration deleteActionConfiguration = new DeleteActionConfiguration();
         deleteActionConfiguration.setDeleteDataTable(tableName);
+        action.setActionConfiguration(deleteActionConfiguration);
         action.setTenant(tenant);
         if (tenant.getPid() != null) {
             MultiTenantContext.setTenant(tenant);
@@ -72,6 +73,8 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
                                                                    String filePath, Long actionPid) {
         return new RegisterDeleteDataWorkflowConfiguration.Builder()
                 .customer(customerSpace)
+                .internalResourceHostPort(internalResourceHostPort) //
+                .microServiceHostPort(microserviceHostPort) //
                 .tableName(tableName)
                 .filePath(filePath)
                 .inputProperties(ImmutableMap.<String, String>builder() //

@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = CDLImportWorkflowConfiguration.class, name = "CDLImportWorkflowConfiguration"),
         @Type(value = CdlModelWorkflowConfiguration.class, name = "CdlMatchAndModelWorkflowConfiguration"),
         @Type(value = CDLOperationWorkflowConfiguration.class, name = "CDLOperationWorkflowConfiguration"),
+        @Type(value = RegisterDeleteDataWorkflowConfiguration.class, name = "RegisterDeleteDataWorkflowConfiguration"),
         @Type(value = CustomEventMatchWorkflowConfiguration.class, name = "CustomEventMatchWorkflowConfiguration"),
         @Type(value = CustomEventModelingWorkflowConfiguration.class, name = "CustomEventModelingWorkflowConfiguration"),
         @Type(value = GenerateRatingWorkflowConfiguration.class, name = "GenerateRatingWorkflowConfiguration"),
