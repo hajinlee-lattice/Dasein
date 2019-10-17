@@ -139,7 +139,7 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Create a segment export job")
     public MetadataSegmentExport createSegmentExportJob(@RequestBody MetadataSegmentExport metadataSegmentExportJob,
                                                         @RequestParam(required = false) Boolean useSpark) {
-        return metadataSegmentExportService.createSegmentExportJob(metadataSegmentExportJob);
+        return metadataSegmentExportService.createSegmentExportJob(metadataSegmentExportJob, useSpark);
     }
 
     @GetMapping("/export")

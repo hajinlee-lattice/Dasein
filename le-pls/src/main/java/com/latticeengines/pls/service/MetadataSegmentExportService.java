@@ -12,7 +12,7 @@ public interface MetadataSegmentExportService {
 
     MetadataSegmentExport getSegmentExportByExportId(String exportId);
 
-    MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport segmentExport);
+    MetadataSegmentExport createSegmentExportJob(MetadataSegmentExport segmentExport, Boolean useSparkFromRestApi);
 
     MetadataSegmentExport updateSegmentExportJob(MetadataSegmentExport segmentExport);
 

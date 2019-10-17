@@ -87,7 +87,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
-                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA);
+                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA, LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
         Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //
@@ -115,7 +115,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.PROTOTYPE_FEATURE, //
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
-                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT);
+                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
+                LatticeFeatureFlag.ENABLE_EXPORT_WITH_SPARK_SQL);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);
