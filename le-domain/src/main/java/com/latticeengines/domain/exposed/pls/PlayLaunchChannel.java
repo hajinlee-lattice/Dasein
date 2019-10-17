@@ -142,8 +142,8 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     private Long lastDeltaWorkflowId;
 
     @JsonProperty("resetDeltaCalculationData")
-    @Column(name = "RESET_DELTA_CALCULATION_DATA")
-    private Boolean resetDeltaCalculationData;
+    @Column(name = "RESET_DELTA_CALCULATION_DATA", nullable = false, columnDefinition = "'BIT DEFAULT 0'")
+    private boolean resetDeltaCalculationData = false;
 
     @JsonProperty("channelConfig")
     @Column(name = "CHANNEL_CONFIG")
@@ -373,11 +373,11 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.lastDeltaWorkflowId = lastDeltaWorkflowId;
     }
 
-    public Boolean getResetDeltaCalculationData() {
+    public boolean getResetDeltaCalculationData() {
         return resetDeltaCalculationData;
     }
 
-    public void setResetDeltaCalculationData(Boolean resetDeltaCalculationData) {
+    public void setResetDeltaCalculationData(boolean resetDeltaCalculationData) {
         this.resetDeltaCalculationData = resetDeltaCalculationData;
     }
 

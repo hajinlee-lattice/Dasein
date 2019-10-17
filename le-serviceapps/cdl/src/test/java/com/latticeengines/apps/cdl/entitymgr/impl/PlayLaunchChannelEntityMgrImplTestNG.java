@@ -112,6 +112,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         lookupIdMap2.setExternalSystemName(CDLExternalSystemName.Marketo);
         lookupIdMap2.setOrgId(orgId2);
         lookupIdMap2.setOrgName(orgName2);
+
         lookupIdMap2 = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap2);
         Assert.assertNotNull(lookupIdMap2);
 
@@ -121,8 +122,10 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel1.setIsAlwaysOn(true);
         channel2.setIsAlwaysOn(false);
         channel1.setChannelConfig(new SalesforceChannelConfig());
-        channel2.setChannelConfig(new MarketoChannelConfig());
 
+        MarketoChannelConfig config = new MarketoChannelConfig();
+        config.setAudienceName("something");
+        channel2.setChannelConfig(config);
     }
 
     @Test(groups = "functional")
@@ -298,6 +301,15 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertFalse(retrieved.getIsAlwaysOn());
         Assert.assertNull(retrieved.getExpirationDate());
 
+        retrieved = playLaunchChannelEntityMgr.findById(channel2.getId());
+        MarketoChannelConfig config = ((MarketoChannelConfig) channel2.getChannelConfig());
+        config.setAudienceName("somethingElse");
+        channel2.setChannelConfig(config);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel2);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getId(), channel2.getId());
+        Assert.assertEquals(((MarketoChannelConfig) retrieved.getChannelConfig()).getAudienceName(), "somethingElse");
+        Assert.assertTrue(retrieved.getResetDeltaCalculationData());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })

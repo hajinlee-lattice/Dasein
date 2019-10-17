@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls.cdl.channel;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +31,6 @@ public class FacebookChannelConfig implements ChannelConfig {
 
     @JsonProperty("folderName")
     private String folderName;
-
 
     public Long getContactLimit() {
         return contactLimit;
@@ -83,10 +84,20 @@ public class FacebookChannelConfig implements ChannelConfig {
         this.folderName = folderName;
     }
 
-
     @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
+    }
+
+    @Override
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        if (!(channelConfig instanceof FacebookChannelConfig)) {
+            return false;
+        }
+        FacebookChannelConfig updatedConfig = (FacebookChannelConfig) channelConfig;
+
+        return StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
+                : !this.audienceName.equals(updatedConfig.audienceName);
     }
 
     @Override
@@ -102,6 +113,6 @@ public class FacebookChannelConfig implements ChannelConfig {
         facebookChannelConfig.setAudienceName(newFacebookChannelConfig.getAudienceName());
         facebookChannelConfig.setFolderName(newFacebookChannelConfig.getFolderName());
         return this;
-
     }
+
 }

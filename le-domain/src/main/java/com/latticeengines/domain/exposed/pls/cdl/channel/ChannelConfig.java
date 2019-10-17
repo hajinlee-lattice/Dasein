@@ -28,4 +28,6 @@ public interface ChannelConfig {
 
     AudienceType getAudienceType();
 
+    boolean shouldResetDeltaCalculations(ChannelConfig channelConfig);
+
 }

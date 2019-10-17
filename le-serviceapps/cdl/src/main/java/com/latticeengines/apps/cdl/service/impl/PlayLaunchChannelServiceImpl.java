@@ -116,10 +116,13 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             throw new LedpException(LedpCode.LEDP_18225, new String[] { retrievedPlayLaunchChannel.getPlay().getName(),
                     playLaunchChannel.getPlay().getName() });
         }
-
         playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
         retrievedPlayLaunchChannel.setPlay(play); // ensure play exists if used in resource
         return retrievedPlayLaunchChannel;
+    }
+
+    private void resetDeltaCalculations() {
+
     }
 
     @Override
