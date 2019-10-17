@@ -111,6 +111,11 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18128, new String[] { modelId });
         }
 
+        String outputScoredFilename = "/"
+                + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
+                + "_scored_" + DateTime.now().getMillis();
+        String mergedOutputScoredFilename = StringUtils.appendIfMissing(outputScoredFilename, ".csv");
+
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
@@ -130,9 +135,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                         .getBoolean(ProvenancePropertyName.ExcludePropdataColumns) && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.SCORING) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/"
-                        + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
-                        + "_scored_" + DateTime.now().getMillis()) //
+                .outputFilename(outputScoredFilename) //
+                .mergeOutputFile(mergedOutputScoredFilename) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
                 .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup))//

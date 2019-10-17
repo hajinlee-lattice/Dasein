@@ -12,7 +12,10 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -52,6 +55,8 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(RTSBulkScoreWorkflowDeploymentTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -176,6 +181,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, SCORED_FILE_DIR);
         Assert.assertEquals(files.size(), 1);
         Assert.assertNotNull(HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0)));
+        log.info("Scored csv filename = {}", files.get(0));
         // assert the ordering of the header
         try (CSVReader reader = new CSVReader(
                 new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration, files.get(0))))) {
@@ -220,12 +226,13 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         modelSummary.setModelType(ModelType.PYTHONMODEL.getModelType());
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
 
+        String inputDataDir = FilenameUtils.concat(TEST_INPUT_DATA_DIR, AVRO_FILE_SUFFIX);
         Table metadataTable = new Table();
         Extract extract = new Extract();
         extract.setName("ExtractTable");
         extract.setProcessedRecords(100L);
         extract.setTenantId(tenant.getPid());
-        extract.setPath(TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX + AVRO_FILE);
+        extract.setPath(FilenameUtils.concat(inputDataDir, AVRO_FILE));
         extract.setExtractionTimestamp(12345L);
         extract.setTable(metadataTable);
 
@@ -270,7 +277,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
                 modelConfiguration.getEventTable(), modelConfiguration.getModelVersion(),
                 modelConfiguration.getParsedApplicationId());
         enhancementsDir = artifactBaseDir + Model.HDFS_ENHANCEMENTS_DIR;
-        String inputDataDir = TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX;
+        String inputDataDir = FilenameUtils.concat(TEST_INPUT_DATA_DIR, AVRO_FILE_SUFFIX);
+        log.info("Input data directory = {}", inputDataDir);
 
         URL dataCompositionUrl = ClassLoader
                 .getSystemResource(modelConfiguration.getLocalModelPath() + Model.DATA_COMPOSITION_FILENAME);
