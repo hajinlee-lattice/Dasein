@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,12 +118,14 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                     verifyCols(accountCols, accountExpectedCols.getLeft(), accountExpectedCols.getRight());
                     ObjectMapper jsonParser = new ObjectMapper();
                     try {
-                        JsonNode jsonObject = jsonParser.readTree(contacts);
-                        Assert.assertTrue(jsonObject.isArray());
-                        List<String> contactCols = new ArrayList<>();
-                        if (jsonObject.size() > 0) {
-                            jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
-                            verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight());
+                        if (StringUtils.isNotBlank(contacts)) {
+                            JsonNode jsonObject = jsonParser.readTree(contacts);
+                            Assert.assertTrue(jsonObject.isArray());
+                            List<String> contactCols = new ArrayList<>();
+                            if (jsonObject.size() > 0) {
+                                jsonObject.get(0).fieldNames().forEachRemaining(col -> contactCols.add(col));
+                                verifyCols(contactCols, contactExpectedCols.getLeft(), contactExpectedCols.getRight());
+                            }
                         }
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
