@@ -833,7 +833,7 @@ public enum LedpCode {
     LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"),
     LEDP_40059("{0} error when validating with input file, please reference {1} for details."),
     LEDP_40060("Invalid business calendar"),
-    LEDP_40061("Cannot update Import System: {0}"),
+    LEDP_40061("{0} is setup as your primary system. This system has the highest priority and cannot be modified."),
     LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."),
     LEDP_40063("Cannot update All System Priority, missing system: {0}."),
     LEDP_40064("Cannot update All System Priority: {0}"),

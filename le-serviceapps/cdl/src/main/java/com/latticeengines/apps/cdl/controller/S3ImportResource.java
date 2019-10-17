@@ -94,7 +94,7 @@ public class S3ImportResource {
         try {
             s3ImportSystemService.updateAllS3ImportSystemPriority(customerSpace, systemList);
             return ResponseDocument.successResponse(Boolean.TRUE);
-        } catch (RuntimeException e) {
+        } catch (LedpException e) {
             return ResponseDocument.failedResponse(e);
         }
     }
