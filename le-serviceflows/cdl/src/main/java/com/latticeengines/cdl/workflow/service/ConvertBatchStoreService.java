@@ -147,10 +147,11 @@ public abstract class ConvertBatchStoreService<T extends BaseConvertBatchStoreSe
      *
      * @param customerSpace identity tenant
      * @param templateTable tenant templateTable
+     * @param masterTable the batchStore table we need convert
      * @param config config convert service configuration
      * @return template Table attribute list
      */
-    public abstract List<String> getAttributes(String customerSpace, Table templateTable, T config);
+    public abstract List<String> getAttributes(String customerSpace, Table templateTable, Table masterTable, T config);
 
     /**
      *

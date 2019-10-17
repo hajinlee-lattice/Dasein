@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.RematchConvertServiceConfiguration;
 import com.latticeengines.proxy.exposed.cdl.ConvertBatchStoreInfoProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -87,24 +86,12 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
     }
 
     @Override
-    public List<String> getAttributes(String customerSpace, Table templateTable, RematchConvertServiceConfiguration config) {
-        List<DataFeedTask> dataFeedTaskList =
-                dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace,
-                        config.getEntity().name());
-        if (CollectionUtils.isEmpty(dataFeedTaskList)) {
-            log.error("Cannot find the dataFeedTask in tenant {}, entity: {}. ",
-                    customerSpace,
-                    config.getEntity());
-            throw new RuntimeException(String.format("Cannot find the dataFeedTask in tenant %s, entity: %s. ",
-                    customerSpace,
-                    config.getEntity()));
-        }
-        Set<Attribute> attributeSet = new HashSet<>();
-        for (DataFeedTask dataFeedTask : dataFeedTaskList) {
-            templateTable = dataFeedTask.getImportTemplate();
-            attributeSet.addAll(templateTable.getAttributes());
-        }
-        return attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
+    public List<String> getAttributes(String customerSpace, Table templateTable,
+                                      Table masterTable, RematchConvertServiceConfiguration config) {
+        Set<Attribute> attributeSet = new HashSet<>(masterTable.getAttributes());
+        List<String> attributeNameList = attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
+        attributeNameList.removeAll(getNeedDropColumn());
+        return attributeNameList;
     }
 
     @Override
@@ -116,5 +103,15 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
             return null;
         }
         return needConvertBatchStoreTables.get(batchStore);
+    }
+
+    //remove some unused column fron Table, when we fake templateTable
+    private Set<String> getNeedDropColumn() {
+        Set<String> needDropColumnSet = new HashSet<>();
+        needDropColumnSet.add(InterfaceName.LatticeAccountId.name());
+        needDropColumnSet.add(InterfaceName.CDLUpdatedTime.name());
+        needDropColumnSet.add(InterfaceName.InternalId.name());
+        needDropColumnSet.add(InterfaceName.EntityId.name());
+        return needDropColumnSet;
     }
 }

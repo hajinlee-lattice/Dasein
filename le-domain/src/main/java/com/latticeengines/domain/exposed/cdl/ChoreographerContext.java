@@ -44,6 +44,9 @@ public class ChoreographerContext {
     @JsonProperty
     private boolean fullRematch;
 
+    @JsonProperty
+    private boolean entityMatchEnabled;
+
     public Set<BusinessEntity> getEntitiesRebuildDueToActions() {
         return entitiesRebuildDueToActions;
     }
@@ -122,5 +125,13 @@ public class ChoreographerContext {
 
     public void setFullRematch(boolean fullRematch) {
         this.fullRematch = fullRematch;
+    }
+
+    public boolean isEntityMatchEnabled() {
+        return entityMatchEnabled;
+    }
+
+    public void setEntityMatchEnabled(boolean entityMatchEnabled) {
+        this.entityMatchEnabled = entityMatchEnabled;
     }
 }

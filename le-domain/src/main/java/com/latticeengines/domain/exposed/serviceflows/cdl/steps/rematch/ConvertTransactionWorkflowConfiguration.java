@@ -23,11 +23,6 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public ConvertTransactionWorkflowConfiguration.Builder setEntity() {
-            convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Transaction);
-            return this;
-        }
-
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             convertBatchStoreStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
@@ -50,6 +45,7 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
         public ConvertTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("convertTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Transaction);
             configuration.add(convertBatchStoreStepConfiguration);
             return configuration;
         }

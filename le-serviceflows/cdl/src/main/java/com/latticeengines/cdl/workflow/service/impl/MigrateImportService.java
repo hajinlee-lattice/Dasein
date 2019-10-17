@@ -211,7 +211,8 @@ public class MigrateImportService
     }
 
     @Override
-    public List<String> getAttributes(String customerSpace, Table templateTable, MigrateImportServiceConfiguration config) {
+    public List<String> getAttributes(String customerSpace, Table templateTable, 
+                                      Table masterTable, MigrateImportServiceConfiguration config) {
         return null;
     }
 

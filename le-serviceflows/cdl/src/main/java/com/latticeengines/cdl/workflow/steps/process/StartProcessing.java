@@ -174,6 +174,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         setupDataCollectionStatus(evaluationDate);
 
+        grapherContext.setEntityMatchEnabled(Boolean.TRUE.equals(configuration.isEntityMatchEnabled()));
+
         updateDataFeed();
 
         createReportJson();

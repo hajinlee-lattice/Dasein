@@ -123,7 +123,7 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         EntityMatchImportMigrateConfig config = new EntityMatchImportMigrateConfig();
         config.setTransformer(TRANSFORMER);
         config.setRetainFields(convertBatchStoreService.getAttributes(customerSpace.toString(), templateTable,
-                convertServiceConfig));
+                masterTable, convertServiceConfig));
         config.setDuplicateMap(convertBatchStoreService.getDuplicateMap(customerSpace.toString(), convertServiceConfig));
         config.setRenameMap(convertBatchStoreService.getRenameMap(customerSpace.toString(), convertServiceConfig));
 

@@ -76,7 +76,8 @@ public class ProcessMatchEntityChoreographer extends BaseChoreographer {
     private boolean checkShouldRematch(AbstractStep<? extends BaseStepConfiguration> step) {
         ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
-        return grapherContext.isFullRematch();
+        //if this tenant is entityMatchTenant, skip RematchAccount step
+        return grapherContext.isFullRematch() && !grapherContext.isEntityMatchEnabled();
     }
 
 }

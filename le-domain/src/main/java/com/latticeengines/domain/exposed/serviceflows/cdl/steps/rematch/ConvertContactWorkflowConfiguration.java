@@ -23,11 +23,6 @@ public class ConvertContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder setEntity() {
-            convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Contact);
-            return this;
-        }
-
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             convertBatchStoreStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
@@ -50,6 +45,7 @@ public class ConvertContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public ConvertContactWorkflowConfiguration build() {
             configuration.setContainerConfiguration("convertContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Contact);
             configuration.add(convertBatchStoreStepConfiguration);
             return configuration;
         }

@@ -119,7 +119,8 @@ public class BaseConvertToImportService
     }
 
     @Override
-    public List<String> getAttributes(String customerSpace, Table templateTable, ConvertBatchStoreToImportServiceConfiguration config) {
+    public List<String> getAttributes(String customerSpace, Table templateTable, 
+                                      Table masterTable, ConvertBatchStoreToImportServiceConfiguration config) {
         return templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList());
     }
 
