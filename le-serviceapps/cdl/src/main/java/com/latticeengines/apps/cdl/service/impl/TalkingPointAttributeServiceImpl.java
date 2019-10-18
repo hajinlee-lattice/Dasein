@@ -3,11 +3,8 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,25 +27,17 @@ import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("talkingPointAttributesService")
 public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeService {
 
     private static final Logger log = LoggerFactory.getLogger(TalkingPointAttributeServiceImpl.class);
-    private final ColumnSelection.Predefined TalkingPointAttributeGroup = ColumnSelection.Predefined.TalkingPoint;
     private final String accountAttributePrefix = "Account.";
 
     @Inject
     private ServingStoreService servingStoreService;
-
-    @Inject
-    private EntityProxy entityProxy;
 
     @VisibleForTesting
     void setServingStoreService(ServingStoreService servingStoreService) {
@@ -60,47 +49,8 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
         String customerSpace = MultiTenantContext.getShortTenantId();
         log.info("Attempting to find Account attributes for customer space : " + customerSpace);
         try {
-            List<ColumnMetadata> allAttrs = new ArrayList<>();
-            List<ColumnMetadata> accountAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.Account);
-            if (CollectionUtils.isNotEmpty(accountAttrs)) {
-                accountAttrs = accountAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
-                        .collect(Collectors.toList());
-                allAttrs.addAll(accountAttrs);
-            }
-            List<ColumnMetadata> ratingAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.Rating);
-            if (CollectionUtils.isNotEmpty(ratingAttrs)) {
-                ratingAttrs = ratingAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup))
-                        .collect(Collectors.toList());
-                allAttrs.addAll(ratingAttrs);
-            }
-            List<ColumnMetadata> phAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.PurchaseHistory);
-            if (CollectionUtils.isNotEmpty(phAttrs)) {
-                DataPage dataPage = entityProxy.getProducts(customerSpace);
-                Map<String, String> productNameMap = new HashMap<>();
-                if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
-                    dataPage.getData()
-                            .forEach(map -> productNameMap.put( //
-                                    map.get(InterfaceName.ProductId.name()).toString(), //
-                                    map.get(InterfaceName.ProductName.name()).toString() //
-                    ));
-                }
-                phAttrs = phAttrs.stream().filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup)).peek(cm -> {
-                    String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
-                    String productName = productNameMap.get(productId);
-                    cm.setDisplayName(productName + ": " + cm.getDisplayName());
-                }).collect(Collectors.toList());
-                allAttrs.addAll(phAttrs);
-            }
-            List<ColumnMetadata> curatedAccountAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.CuratedAccount);
-            if (CollectionUtils.isNotEmpty(curatedAccountAttrs)) {
-                curatedAccountAttrs = curatedAccountAttrs.stream()
-                        .filter(cm -> cm.isEnabledFor(TalkingPointAttributeGroup)).collect(Collectors.toList());
-                allAttrs.addAll(curatedAccountAttrs);
-            }
+            List<ColumnMetadata> allAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
+                    BusinessEntity.TALKING_POINT_ENTITIES, ColumnSelection.Predefined.TalkingPoint, true);
 
             if (CollectionUtils.isEmpty(allAttrs)) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });

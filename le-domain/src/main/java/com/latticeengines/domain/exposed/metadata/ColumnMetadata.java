@@ -5,11 +5,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -500,6 +502,17 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public boolean isEnabledFor(ColumnSelection.Predefined group) {
         return MapUtils.isNotEmpty(groups) && groups.getOrDefault(group, false);
+    }
+
+    public boolean isEnabledForAny(Collection<ColumnSelection.Predefined> groups) {
+        if (CollectionUtils.isNotEmpty(groups)) {
+            for (ColumnSelection.Predefined group: new ArrayList<>(groups)) {
+                if (isEnabledFor(group)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // for backward compatible to list-format groups

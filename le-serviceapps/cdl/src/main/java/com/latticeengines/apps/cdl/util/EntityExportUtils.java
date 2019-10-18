@@ -23,15 +23,15 @@ public class EntityExportUtils {
         List<ColumnMetadata> cms = new ArrayList<>();
         if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(exportType)) {
             cms = servingStoreService.getDecoratedMetadata(customerSpace,
-                    ImmutableList.copyOf(BusinessEntity.EXPORT_ENTITIES), version, groups);
+                    ImmutableList.copyOf(BusinessEntity.EXPORT_ENTITIES), version, groups, true);
         } else if (AtlasExportType.ACCOUNT.equals(exportType)) {
             List<BusinessEntity> businessEntities = BusinessEntity.EXPORT_ENTITIES.stream().collect(Collectors.toList());
             businessEntities.remove(BusinessEntity.Contact);
-            cms = servingStoreService.getDecoratedMetadata(customerSpace, businessEntities, version, groups);
+            cms = servingStoreService.getDecoratedMetadata(customerSpace, businessEntities, version, groups, true);
         } else if (AtlasExportType.CONTACT.equals(exportType)) {
             List<BusinessEntity> businessEntities = new ArrayList<>();
             businessEntities.add(BusinessEntity.Contact);
-            cms = servingStoreService.getDecoratedMetadata(customerSpace, businessEntities, version, groups);
+            cms = servingStoreService.getDecoratedMetadata(customerSpace, businessEntities, version, groups, true);
         }
         if (cms.size() == 0) {
             throw new LedpException(LedpCode.LEDP_18231, new String[]{exportType.name()});

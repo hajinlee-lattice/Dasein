@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -45,13 +43,15 @@ public class ServingStoreResource {
         return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups);
     }
 
-    @PostMapping(value = "/decoratedmetadata")
+    @GetMapping(value = "/decoratedmetadata")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata with entity list")
-    public List<ColumnMetadata> getDecoratedMetadata(@PathVariable String customerSpace, @RequestBody List<BusinessEntity> entities,
-                                                     @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups,
-                                                     @RequestParam(name = "version", required = false) DataCollection.Version version) {
-        return servingStoreService.getDecoratedMetadata(customerSpace, entities, version, groups);
+    public List<ColumnMetadata> getDecoratedMetadata(@PathVariable String customerSpace,
+            @RequestParam(name = "entities", required = false) List<BusinessEntity> entities,
+            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups,
+            @RequestParam(name = "version", required = false) DataCollection.Version version,
+            @RequestParam(name = "deflate-display-names", required = false, defaultValue = "0") boolean deflateDisplayName) {
+        return servingStoreService.getDecoratedMetadata(customerSpace, entities, version, groups, deflateDisplayName);
     }
 
     @GetMapping(value = "/systemmetadata")

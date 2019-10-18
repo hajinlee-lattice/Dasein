@@ -70,9 +70,12 @@ public enum BusinessEntity implements GraphNode {
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount);
     public static final Set<BusinessEntity> EXPORT_ENTITIES = //
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount);
+    public static final Set<BusinessEntity> TALKING_POINT_ENTITIES = //
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
+    public static final Set<BusinessEntity> COMPANY_PROFILE_ENTITIES = //
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
+    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME= ImmutableSet.of(PurchaseHistory);
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
-    public static final Set<BusinessEntity> COMPANY_PROFILE_ENTITIES = ImmutableSet.of(Account, PurchaseHistory, Rating,
-            CuratedAccount);
     public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
 
     static {

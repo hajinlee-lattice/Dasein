@@ -126,23 +126,25 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     }
 
     private void checkExportAttribute(MetadataSegmentExport metadataSegmentExport, String customerSpace,
-                                      DataCollection.Version version) {
+            DataCollection.Version version) {
         List<ColumnSelection.Predefined> groups = Collections.singletonList(ColumnSelection.Predefined.Enrichment);
         List<ColumnMetadata> cms = new ArrayList<>();
         if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(metadataSegmentExport.getType())) {
-            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, ImmutableList.copyOf(BusinessEntity.EXPORT_ENTITIES), groups, version);
+            cms = servingStoreProxy.getDecoratedMetadata(customerSpace,
+                    ImmutableList.copyOf(BusinessEntity.EXPORT_ENTITIES), groups, version, true);
         } else if (AtlasExportType.ACCOUNT.equals(metadataSegmentExport.getType())) {
-            List<BusinessEntity> businessEntities =
-                    BusinessEntity.EXPORT_ENTITIES.stream().filter(businessEntity -> !BusinessEntity.Contact.equals(businessEntity)).collect(Collectors.toList());
-            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version);
+            List<BusinessEntity> businessEntities = BusinessEntity.EXPORT_ENTITIES.stream()
+                    .filter(businessEntity -> !BusinessEntity.Contact.equals(businessEntity))
+                    .collect(Collectors.toList());
+            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version, true);
         } else if (AtlasExportType.CONTACT.equals(metadataSegmentExport.getType())) {
             List<BusinessEntity> businessEntities = new ArrayList<>();
             businessEntities.add(BusinessEntity.Contact);
-            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version);
+            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version, true);
         }
         log.info("Total attributes for export = " + cms.size());
         if (cms.size() == 0) {
-            throw new LedpException(LedpCode.LEDP_18231, new String[]{metadataSegmentExport.getType().name()});
+            throw new LedpException(LedpCode.LEDP_18231, new String[] { metadataSegmentExport.getType().name() });
         }
     }
 

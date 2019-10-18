@@ -3,8 +3,11 @@ package com.latticeengines.proxy.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -44,6 +47,40 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         return cacheService.getServingTableColumns(customerSpace, entity);
     }
 
+    /**
+     * deflateDisplayName means prepend sub-category in front of display name
+     * In "My Data" page we can use sub-category to show hierarchical display name of attributes
+     * But in other cases, such as TalkingPoint, we have to concatenate sub-category and display name together
+     */
+    @Override
+    public List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, Collection<BusinessEntity> entities,
+                                                              Collection<ColumnSelection.Predefined> groups,
+                                                              boolean deflateDisplayNames) {
+        List<ColumnMetadata> allAttrs = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(entities)) {
+            for (BusinessEntity entity : entities) {
+                List<ColumnMetadata> entityAttrs = getDecoratedMetadataFromCache(customerSpace, entity);
+                if (CollectionUtils.isNotEmpty(entityAttrs)) {
+                    Stream<ColumnMetadata> stream = entityAttrs.stream();
+                    if (groups != null) {
+                        stream = stream.filter(cm -> cm.isEnabledForAny(groups));
+                    }
+                    if (deflateDisplayNames && BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
+                        stream = stream.peek(cm -> {
+                            String subCategory = cm.getSubcategory();
+                            if (StringUtils.isNotBlank(subCategory) && !"Others".equalsIgnoreCase(subCategory)) {
+                                String displayName = cm.getDisplayName();
+                                cm.setDisplayName(subCategory + ": " + displayName);
+                            }
+                        });
+                    }
+                    allAttrs.addAll(stream.collect(Collectors.toList()));
+                }
+            }
+        }
+        return allAttrs;
+    }
+
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             List<ColumnSelection.Predefined> groups) {
@@ -74,7 +111,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         }
     }
 
-    private String getVersionGroupParm(DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+    private String getVersionGroupParm(DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
         StringBuffer url = new StringBuffer();
         if (version != null) {
             url.append("?version=" + version.toString());
@@ -90,12 +127,25 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     @Override
-    public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities,
-                                                     List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+    public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, Collection<BusinessEntity> entities, //
+                                                     Collection<ColumnSelection.Predefined> groups, DataCollection.Version version, //
+                                                     boolean deflateDisplayName) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace));
         url += getVersionGroupParm(version, groups);
-        List<?> list = post("serving store metadata", url, entities, List.class);
+        if (url.contains("?")) {
+            url += "&";
+        } else {
+            url += "?";
+        }
+        url += "entities=" + StringUtils.join(entities, ",");
+        if (url.contains("?")) {
+            url += "&deflate-display-names=";
+        } else {
+            url += "?deflate-display-names";
+        }
+        url += deflateDisplayName ? "1" : "0";
+        List<?> list = get("serving store metadata", url, List.class);
         return JsonUtils.convertList(list, ColumnMetadata.class);
     }
 

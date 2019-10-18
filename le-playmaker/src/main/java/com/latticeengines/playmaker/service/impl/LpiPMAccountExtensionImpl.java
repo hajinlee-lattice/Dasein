@@ -37,7 +37,6 @@ import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.AccountExtensionUtil;
-import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -369,24 +368,9 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     }
 
     private List<Map<String, Object>> getSchema(String customerSpace, BusinessEntity entity) {
-        List<ColumnMetadata> cms = servingStoreProxy
-                .getDecoratedMetadata(customerSpace, entity, filterByPredefinedSelection).collectList().block();
+        List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadata(customerSpace, Collections.singleton(entity),
+                filterByPredefinedSelection, null, true);
         if (CollectionUtils.isNotEmpty(cms)) {
-            if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                DataPage dataPage = entityProxy.getProducts(customerSpace);
-                Map<String, String> productNameMap = new HashMap<>();
-                if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
-                    dataPage.getData().forEach(map -> productNameMap.put( //
-                            map.get(InterfaceName.ProductId.name()).toString(), //
-                            map.get(InterfaceName.ProductName.name()).toString() //
-                    ));
-                }
-                cms.forEach(cm -> {
-                    String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
-                    String productName = productNameMap.get(productId);
-                    cm.setDisplayName(productName + ": " + cm.getDisplayName());
-                });
-            }
             Flux<Map<String, Object>> flux = Flux.fromIterable(cms) //
                     .map(metadata -> {
                         Map<String, Object> metadataInfoMap = new HashMap<>();
