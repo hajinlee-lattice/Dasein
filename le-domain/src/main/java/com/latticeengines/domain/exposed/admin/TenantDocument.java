@@ -1,8 +1,11 @@
 package com.latticeengines.domain.exposed.admin;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -75,4 +78,24 @@ public class TenantDocument {
     public void setBootstrapState(BootstrapState bootstrapState1) {
         this.bootstrapState = bootstrapState1;
     }
+
+    @JsonIgnore
+    public FeatureFlagValueMap getFeatureFlags() {
+        CustomerSpaceInfo spaceInfo = getSpaceInfo();
+        if (spaceInfo != null) {
+            return JsonUtils.deserialize(spaceInfo.featureFlags, FeatureFlagValueMap.class);
+        } else {
+            return new FeatureFlagValueMap();
+        }
+    }
+
+    @JsonIgnore
+    public void setFeatureFlags(FeatureFlagValueMap featureFlags) {
+        CustomerSpaceInfo spaceInfo = getSpaceInfo();
+        if (spaceInfo == null) {
+            spaceInfo = new CustomerSpaceInfo();
+        }
+        spaceInfo.featureFlags = JsonUtils.serialize(featureFlags);
+    }
+
 }
