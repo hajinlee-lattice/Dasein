@@ -156,6 +156,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             Catalog catalog = new Catalog();
             catalog.setTenant(tenant);
             catalog.setName(EntityType.WebVisitPathPattern.name());
+            catalog.setCatalogId(Catalog.generateId());
             catalog.setDataFeedTask(dataFeedTask);
             catalogEntityMgr.create(catalog);
             log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",

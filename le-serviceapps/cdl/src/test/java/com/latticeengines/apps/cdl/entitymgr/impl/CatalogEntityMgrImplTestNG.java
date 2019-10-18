@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomUtils;
@@ -49,6 +50,8 @@ public class CatalogEntityMgrImplTestNG extends ActivityRelatedEntityMgrImplTest
             catalog.setTenant(mainTestTenant);
             catalog.setDataFeedTask(taskMap.get(name));
             catalog.setName(name);
+            // add name make ID unique only in test
+            catalog.setCatalogId(Catalog.generateId() + "_" + name);
             catalogEntityMgr.create(catalog);
 
             Assert.assertNotNull(catalog.getPid(), "PID should not be null");
@@ -64,13 +67,31 @@ public class CatalogEntityMgrImplTestNG extends ActivityRelatedEntityMgrImplTest
      */
     @Test(groups = "functional", dependsOnMethods = "testCreate", expectedExceptions = {
             DataIntegrityViolationException.class })
-    private void testCreateConflict() {
+    private void testNameConflict() {
         // all of these catalog names should already be created
         String name = CATALOG_NAMES.get(RandomUtils.nextInt(0, CATALOG_NAMES.size()));
         Catalog catalog = new Catalog();
         catalog.setTenant(mainTestTenant);
         catalog.setDataFeedTask(taskMap.get(name));
         catalog.setName(name);
+        // make ID different so only name is the same
+        catalog.setCatalogId(UUID.randomUUID().toString());
+        catalogEntityMgr.create(catalog);
+    }
+
+    /*-
+     * [ CatalogId + Tenant ] need to be unique
+     */
+    @Test(groups = "functional", dependsOnMethods = "testCreate", expectedExceptions = {
+            DataIntegrityViolationException.class })
+    private void testCatalogIdConflict() {
+        String name = CATALOG_NAMES.get(RandomUtils.nextInt(0, CATALOG_NAMES.size()));
+        Catalog catalog = new Catalog();
+        catalog.setTenant(mainTestTenant);
+        catalog.setDataFeedTask(taskMap.get(name));
+        // make name different so only ID is the same
+        catalog.setName(UUID.randomUUID().toString());
+        catalog.setCatalogId(catalogs.get(name).getCatalogId());
         catalogEntityMgr.create(catalog);
     }
 
@@ -95,6 +116,16 @@ public class CatalogEntityMgrImplTestNG extends ActivityRelatedEntityMgrImplTest
         Catalog notExistingCatalog = catalogEntityMgr.findByNameAndTenant(notExistingCatalogName, mainTestTenant);
         Assert.assertNull(notExistingCatalog, String.format("Catalog %s should not exist in tenant %s",
                 notExistingCatalogName, notExistTenant.getId()));
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryListener.class, dependsOnMethods = "testCreate")
+    private void testFindByCatalogIdAndTenant() {
+        for (String name : CATALOG_NAMES) {
+            Catalog catalog = catalogs.get(name);
+            String catalogId = catalog.getCatalogId();
+            Catalog queryResult = catalogEntityMgr.findByCatalogIdAndTenant(catalogId, mainTestTenant);
+            assertEqual(queryResult, catalog);
+        }
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryListener.class, dependsOnMethods = "testCreate")

@@ -49,7 +49,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
     private static final String CATALOG_MERGED_IMPORT_TABLE_PREFIX_FORMAT = "Catalog_MergedImports_%s";
     private static final String CATALOG_TABLE_PREFIX_FORMAT = "Catalog_%s";
 
-    // catalogName -> final catalog batch store table name prefix
+    // catalogId -> final catalog batch store table name prefix
     private Map<String, String> finalCatalogTablePrefixes = new HashMap<>();
 
     @Override
@@ -76,10 +76,10 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         // store exists
         List<TransformationStepConfig> steps = new ArrayList<>();
         configuration.getCatalogImports() //
-                .forEach((catalogName, catalogImports) -> {
+                .forEach((catalogId, catalogImports) -> {
                     List<String> importTableNames = catalogImports.stream().map(CatalogImport::getTableName)
                             .collect(Collectors.toList());
-                    mergeAndUpsertCatalogImports(catalogName, importTableNames, steps);
+                    mergeAndUpsertCatalogImports(catalogId, importTableNames, steps);
                 });
         if (CollectionUtils.isEmpty(steps)) {
             log.info("No import for catalog, copying existing tables in active version");
@@ -91,43 +91,43 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         return request;
     }
 
-    private void mergeAndUpsertCatalogImports(@NotNull String catalogName, @NotNull List<String> importTables,
+    private void mergeAndUpsertCatalogImports(@NotNull String catalogId, @NotNull List<String> importTables,
             @NotNull List<TransformationStepConfig> steps) {
         if (CollectionUtils.isEmpty(importTables)) {
             return;
         }
-        DataFeedTask.IngestionBehavior behavior = configuration.getIngestionBehaviors().get(catalogName);
-        String primaryKey = configuration.getPrimaryKeyColumns().get(catalogName);
-        String activeCatalogTable = configuration.getCatalogTables().get(catalogName);
+        DataFeedTask.IngestionBehavior behavior = configuration.getIngestionBehaviors().get(catalogId);
+        String primaryKey = configuration.getPrimaryKeyColumns().get(catalogId);
+        String activeCatalogTable = configuration.getCatalogTables().get(catalogId);
         // check ingestion behavior and primary key
         if (behavior != Upsert && behavior != Replace) {
-            log.error("Unsupported ingestion behavior {} for catalog {}", behavior, catalogName);
+            log.error("Unsupported ingestion behavior {} for catalog {}", behavior, catalogId);
             throw new UnsupportedOperationException(
                     String.format("Do not support ingestion behavior %s in catalog", behavior));
         }
         if (behavior == Upsert && StringUtils.isBlank(primaryKey)) {
             throw new IllegalArgumentException(
-                    String.format("Primary key column should be set when catalog %s is in Upsert mode", catalogName));
+                    String.format("Primary key column should be set when catalog %s is in Upsert mode", catalogId));
         }
 
         // generate merge & upsert configs
-        String mergedImportTablePrefix = String.format(CATALOG_MERGED_IMPORT_TABLE_PREFIX_FORMAT, catalogName);
+        String mergedImportTablePrefix = String.format(CATALOG_MERGED_IMPORT_TABLE_PREFIX_FORMAT, catalogId);
         TransformationStepConfig mergeImportStep = mergeImports(importTables, mergedImportTablePrefix, primaryKey);
         steps.add(mergeImportStep);
 
         log.info(
                 "Merging catalog imports (prefix={}). CatalogName={}, ImportTables={}, IngestionBehavior={}, PrimaryKey={}, ActiveTable={}",
-                mergedImportTablePrefix, catalogName, importTables, behavior, primaryKey, activeCatalogTable);
+                mergedImportTablePrefix, catalogId, importTables, behavior, primaryKey, activeCatalogTable);
 
         if (StringUtils.isNotBlank(activeCatalogTable) && behavior == Upsert) {
-            String catalogTablePrefix = tableName(catalogName);
+            String catalogTablePrefix = tableName(catalogId);
             // has active batch store, need to upsert table
             steps.add(upsertBatchStore(steps.size() - 1, activeCatalogTable, catalogTablePrefix, primaryKey));
-            finalCatalogTablePrefixes.put(catalogName, catalogTablePrefix);
-            log.info("Upsert catalog {} to master, prefix={}", catalogName, catalogTablePrefix);
+            finalCatalogTablePrefixes.put(catalogId, catalogTablePrefix);
+            log.info("Upsert catalog {} to master, prefix={}", catalogId, catalogTablePrefix);
         } else {
             // merged import table is the final result
-            finalCatalogTablePrefixes.put(catalogName, mergedImportTablePrefix);
+            finalCatalogTablePrefixes.put(catalogId, mergedImportTablePrefix);
         }
     }
 
@@ -204,10 +204,10 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
             return;
         }
 
-        // catalogName -> list of original import filenames
+        // catalogId -> list of original import filenames
         Map<String, List<String>> originalInputFiles = new HashMap<>();
         configuration.getCatalogImports()
-                .forEach((catalogName, catalogImports) -> originalInputFiles.put(catalogName, catalogImports.stream() //
+                .forEach((catalogId, catalogImports) -> originalInputFiles.put(catalogId, catalogImports.stream() //
                         .filter(Objects::nonNull) //
                         .map(CatalogImport::getOriginalFilename) //
                         .filter(StringUtils::isNotBlank) //

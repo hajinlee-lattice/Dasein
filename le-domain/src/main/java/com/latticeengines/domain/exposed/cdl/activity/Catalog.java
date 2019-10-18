@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.I
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -26,6 +27,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -34,11 +37,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "ATLAS_CATALOG", uniqueConstraints = { //
         @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID" }), //
+        @UniqueConstraint(columnNames = { "CATALOG_ID", "FK_TENANT_ID" }), //
         @UniqueConstraint(columnNames = { "FK_TASK_ID", "FK_TENANT_ID" }) })
 public class Catalog implements HasPid, Serializable, HasAuditingFields {
 
     public static final DataFeedTask.IngestionBehavior DEFAULT_INGESTION_BEHAVIOR = Upsert;
     private static final long serialVersionUID = -8455242959058500143L;
+    private static final String CATALOG_ID_PREFIX = "ctl_";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +51,10 @@ public class Catalog implements HasPid, Serializable, HasAuditingFields {
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
+
+    @JsonProperty("catalog_id")
+    @Column(name = "CATALOG_ID", nullable = false)
+    private String catalogId;
 
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
@@ -86,6 +95,14 @@ public class Catalog implements HasPid, Serializable, HasAuditingFields {
     @JsonIgnore
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+
+    public String getCatalogId() {
+        return catalogId;
+    }
+
+    public void setCatalogId(String catalogId) {
+        this.catalogId = catalogId;
     }
 
     public String getName() {
@@ -176,5 +193,14 @@ public class Catalog implements HasPid, Serializable, HasAuditingFields {
     @Override
     public int hashCode() {
         return Objects.hashCode(pid);
+    }
+
+    public static String generateId() {
+        String uuid;
+        do {
+            // try until uuid does not start with catalog prefix
+            uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        } while (uuid.startsWith(CATALOG_ID_PREFIX));
+        return CATALOG_ID_PREFIX + uuid;
     }
 }

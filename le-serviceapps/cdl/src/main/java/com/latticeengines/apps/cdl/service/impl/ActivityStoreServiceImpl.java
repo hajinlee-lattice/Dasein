@@ -40,10 +40,12 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId,
             String primaryKeyColumn) {
+        // TODO retry on catalogId conflict
         Preconditions.checkArgument(StringUtils.isNotBlank(catalogName), "catalog name should not be blank");
         Tenant tenant = MultiTenantContext.getTenant();
         Catalog catalog = new Catalog();
         catalog.setName(catalogName);
+        catalog.setCatalogId(Catalog.generateId());
         catalog.setTenant(tenant);
         catalog.setPrimaryKeyColumn(primaryKeyColumn);
         catalog.setDataFeedTask(getDataFeedTask(tenant, taskUniqueId));
@@ -57,6 +59,14 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
                 String.format("CatalogName %s should not be blank", catalogName));
         Tenant tenant = MultiTenantContext.getTenant();
         return catalogEntityMgr.findByNameAndTenant(catalogName, tenant);
+    }
+
+    @Override
+    public Catalog findCatalogByIdAndName(String customerSpace, String catalogId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(catalogId),
+                String.format("CatalogId %s should not be blank", catalogId));
+        Tenant tenant = MultiTenantContext.getTenant();
+        return catalogEntityMgr.findByCatalogIdAndTenant(catalogId, tenant);
     }
 
     @Override

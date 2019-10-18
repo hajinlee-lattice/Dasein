@@ -278,28 +278,28 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     /**
      * Retrieve table names for all catalogs in current active version
      *
-     * @return a map of catalogName -> tableName, will not be {@code null}
+     * @return a map of catalogId -> tableName, will not be {@code null}
      */
     private Map<String, String> getActiveCatalogTables(@NotNull String customerSpace, List<Catalog> catalogs) {
         if (CollectionUtils.isEmpty(catalogs)) {
             return Collections.emptyMap();
         }
 
-        List<String> catalogNames = catalogs.stream() //
+        List<String> catalogIds = catalogs.stream() //
                 .filter(Objects::nonNull) //
-                .map(Catalog::getName) //
+                .map(Catalog::getCatalogId) //
                 .filter(StringUtils::isNotBlank) //
                 .collect(Collectors.toList());
         Map<String, String> tables = dataCollectionService.getTableNamesWithSignatures(customerSpace, null,
-                ConsolidatedCatalog, null, catalogNames);
-        log.info("Current catalog tables for tenant {} are {}. CatalogsNames={}", customerSpace, tables, catalogNames);
+                ConsolidatedCatalog, null, catalogIds);
+        log.info("Current catalog tables for tenant {} are {}. CatalogIds={}", customerSpace, tables, catalogIds);
         return tables;
     }
 
     /**
      * Retrieve primary key columns for all catalogs
      *
-     * @return a map of catalogName -> primaryKeyColumn, will not be {@code null}
+     * @return a map of catalogId -> primaryKeyColumn, will not be {@code null}
      */
     private Map<String, String> getCatalogPrimaryKeyColumns(@NotNull String customerSpace, List<Catalog> catalogs) {
         if (CollectionUtils.isEmpty(catalogs)) {
@@ -308,7 +308,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         Map<String, String> primaryKeyCols = catalogs.stream()
                 .filter(catalog -> catalog != null && StringUtils.isNotBlank(catalog.getPrimaryKeyColumn()))
-                .collect(Collectors.toMap(Catalog::getName, Catalog::getPrimaryKeyColumn));
+                .collect(Collectors.toMap(Catalog::getCatalogId, Catalog::getPrimaryKeyColumn));
         log.info("Catalog primary keys for tenant {} are {}", customerSpace, primaryKeyCols);
         return primaryKeyCols;
     }
@@ -316,7 +316,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     /**
      * Retrieve ingestion behavior for all catalogs
      *
-     * @return a map of catalogName -> ingestionBehavior, will not be {@code null}
+     * @return a map of catalogId -> ingestionBehavior, will not be {@code null}
      */
     private Map<String, DataFeedTask.IngestionBehavior> getCatalogIngestionBehavior(@NotNull String customerSpace,
             List<Catalog> catalogs) {
@@ -330,7 +330,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                     if (catalog.getDataFeedTask() != null && catalog.getDataFeedTask().getIngestionBehavior() != null) {
                         behavior = catalog.getDataFeedTask().getIngestionBehavior();
                     }
-                    return Pair.of(catalog.getName(), behavior);
+                    return Pair.of(catalog.getCatalogId(), behavior);
                 }) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
@@ -348,7 +348,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
      *            list of completed actions
      * @param catalogs
      *            list of catalogs in current tenant
-     * @return map of CatalogName -> List({@link CatalogImport}), will not be
+     * @return map of CatalogId -> List({@link CatalogImport}), will not be
      *         {@code null}
      */
     @VisibleForTesting
@@ -365,9 +365,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             return Collections.emptyMap();
         }
 
-        // DataFeedTask unique id -> catalogName
-        Map<String, String> taskCatalogName = catalogs.stream() //
-                .map(catalog -> Pair.of(catalog.getDataFeedTask().getUniqueId(), catalog.getName())) //
+        // DataFeedTask unique id -> catalog
+        Map<String, Catalog> taskCatalog = catalogs.stream() //
+                .map(catalog -> Pair.of(catalog.getDataFeedTask().getUniqueId(), catalog)) //
                 .filter(pair -> StringUtils.isNotBlank(pair.getLeft())) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
@@ -378,18 +378,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             }
 
             ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
-            if (taskCatalogName.containsKey(config.getDataFeedTaskId())) {
+            if (taskCatalog.containsKey(config.getDataFeedTaskId())) {
                 // this action is for catalog import
-                String catalogName = taskCatalogName.get(config.getDataFeedTaskId());
-                catalogTableNames.putIfAbsent(catalogName, new ArrayList<>());
+                Catalog catalog = taskCatalog.get(config.getDataFeedTaskId());
+                catalogTableNames.putIfAbsent(catalog.getCatalogId(), new ArrayList<>());
                 if (CollectionUtils.isNotEmpty(config.getRegisteredTables())) {
                     String filename = config.getOriginalFilename();
                     List<CatalogImport> imports = config.getRegisteredTables() //
                             .stream() //
-                            .map(tableName -> new CatalogImport(catalogName, tableName,
+                            .map(tableName -> new CatalogImport(catalog.getCatalogId(), catalog.getName(), tableName,
                                     filename == null ? "" : filename)) //
                             .collect(Collectors.toList());
-                    catalogTableNames.get(catalogName).addAll(imports);
+                    catalogTableNames.get(catalog.getCatalogId()).addAll(imports);
                 }
             }
         }

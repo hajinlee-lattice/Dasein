@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class BuildCatalogStepConfiguration extends BaseProcessEntityStepConfiguration {
 
     /*-
-     * catalogName -> tableName in current active version
+     * catalogId -> tableName in current active version
      */
     @JsonProperty("catalog_tables")
     private Map<String, String> catalogTables;

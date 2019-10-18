@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.service;
 
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -28,11 +27,13 @@ public interface ActivityStoreService {
     Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId,
             String primaryKeyColumn);
 
-    /**
-     * Wrapper for {@link CatalogEntityMgr#findByNameAndTenant(String, Tenant)} to
-     * check tenant with target customerSpace exists
+    /*-
+     * Wrappers to check tenant with target customerSpace exists
      */
+
     Catalog findCatalogByTenantAndName(@NotNull String customerSpace, @NotNull String catalogName);
+
+    Catalog findCatalogByIdAndName(@NotNull String customerSpace, @NotNull String catalogId);
 
     /**
      * Create given stream and attached dimensions.
