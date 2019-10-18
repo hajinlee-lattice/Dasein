@@ -8,20 +8,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DeleteActionConfiguration extends ActionConfiguration {
-//
-//    @JsonProperty("hard_delete")
-//    private boolean hardDelete;
 
     @JsonProperty("delete_data_table")
     private String deleteDataTable;
-
-//    public boolean isHardDelete() {
-//        return hardDelete;
-//    }
-//
-//    public void setHardDelete(boolean hardDelete) {
-//        this.hardDelete = hardDelete;
-//    }
 
     public String getDeleteDataTable() {
         return deleteDataTable;
