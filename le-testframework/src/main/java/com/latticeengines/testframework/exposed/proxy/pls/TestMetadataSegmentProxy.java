@@ -32,8 +32,8 @@ public class TestMetadataSegmentProxy extends PlsRestApiProxyBase {
         put("updateSegmentCounts", constructUrl("/{segmentName}/counts", segmentName), null);
     }
 
-    public MetadataSegmentExport createSegmentExport(MetadataSegmentExport metadataSegmentExport, Boolean useSpark) {
-        return post("createSegmentExport", constructUrl("/export?useSpark={useSpark}", useSpark), metadataSegmentExport,
+    public MetadataSegmentExport createSegmentExport(MetadataSegmentExport metadataSegmentExport) {
+        return post("createSegmentExport", constructUrl("/export"), metadataSegmentExport,
                 MetadataSegmentExport.class);
     }
 

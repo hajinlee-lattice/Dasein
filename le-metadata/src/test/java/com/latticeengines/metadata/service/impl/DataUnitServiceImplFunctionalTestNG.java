@@ -28,12 +28,12 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
-import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
+import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.DataUnitService;
 
-public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestNGBase {
+public class DataUnitServiceImplFunctionalTestNG extends MetadataFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(DataUnitServiceImplDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DataUnitServiceImplFunctionalTestNG.class);
 
     @Inject
     private S3Service s3Service;
@@ -63,16 +63,16 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
     private String s3Key;
     private String hdfsPath;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "functional")
     public void setup() {
-        deploymentTestBed.bootstrap(1);
-        Tenant testTenant = deploymentTestBed.getMainTestTenant();
+        functionalTestBed.bootstrap(1);
+        Tenant testTenant = functionalTestBed.getMainTestTenant();
         MultiTenantContext.setTenant(testTenant);
         customerSpace = CustomerSpace.parse(testTenant.getId()).toString();
         testTenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "functional")
     public void testCleanupByTenant() throws InterruptedException {
         prepareTestData();
         Thread.sleep(2000L);
@@ -88,13 +88,13 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
         Assert.assertFalse(fileExisted);
     }
 
-    private void prepareTestData() {
+    private void prepareTestData() throws InterruptedException {
         prepareTestDataForS3();
         prepareTestDataForHdfs();
         prepareTestDataForDynamo();
     }
 
-    private void prepareTestDataForS3() {
+    private void prepareTestDataForS3() throws InterruptedException {
         String ingestionDir = S3PathBuilder.getUiDisplayS3Dir(s3Bucket, "tests3",
                 S3FOLDERNAME);
         String prefix = ingestionDir;
@@ -110,6 +110,7 @@ public class DataUnitServiceImplDeploymentTestNG extends MetadataDeploymentTestN
         s3DataUnit.setLinkedDir(linkedDir);
         s3DataUnit.setName("testS3");
         dataUnitService.createOrUpdateByNameAndStorageType(s3DataUnit);
+        Thread.sleep(2000L);
         S3DataUnit s3DataUnit2 = (S3DataUnit) dataUnitService.findByNameTypeFromReader(s3DataUnit.getName(), DataUnit.StorageType.S3);
         Assert.assertNull(s3DataUnit2.getLinkedDir());
         Assert.assertEquals(s3DataUnit2.getBucket(), s3Bucket);
