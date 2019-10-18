@@ -26,7 +26,7 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
-    private static final long inAcessPeriod = TimeUnit.DAYS.toMillis(120);
+    private static final long inAcessPeriod = TimeUnit.DAYS.toMillis(30);
     private static final long emailPeriod = TimeUnit.DAYS.toMillis(14);
     private static final List<String> userLevels = AccessLevel.getInternalAccessLevel().stream()
             .map(accessLevel -> accessLevel.toString())
