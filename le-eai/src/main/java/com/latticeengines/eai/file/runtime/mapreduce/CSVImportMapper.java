@@ -202,7 +202,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             }
         }
         if (uploadAvroRecord) {
-            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
+            LOG.info(String.format("Upload avro file %s to hdfs %s", avroFileName, outputPath));
+            HdfsUtils.copyInputStreamToHdfs(context.getConfiguration(), new FileInputStream(new File(avroFileName)), outputPath + "/" + avroFileName);
         }
     }
 
