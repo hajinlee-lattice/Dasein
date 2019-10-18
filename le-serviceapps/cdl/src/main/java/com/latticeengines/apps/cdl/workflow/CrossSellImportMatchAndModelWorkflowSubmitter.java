@@ -207,6 +207,7 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
                 + InterfaceName.Target.name() + ";" //
                 + ScoreResultField.Percentile.displayName + ";" //
                 + ScoreResultField.Rating.displayName + ";" //
+                + ScoreResultField.PredictedRevenue.displayName + ";" //
                 + ScoreResultField.ExpectedRevenue.displayName;
     }
 
