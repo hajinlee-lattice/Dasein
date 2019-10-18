@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.workflow;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedCatalog;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,7 +50,6 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
     private static final String CATALOG_1 = "Catalog1";
     private static final String CATALOG_2 = "Catalog2";
     private static final String CATALOG_3 = "Catalog3";
-    private static final List<String> CATALOGS = Arrays.asList(CATALOG_1, CATALOG_2, CATALOG_3);
 
     @Inject
     private ActivityStoreProxy activityStoreProxy;
@@ -95,22 +95,28 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
                 InterfaceName.CustomerAccountId.name()));
         catalogImports.put(CATALOG_3, prepareCatalogImports(CATALOG_3, new int[] { 1 }, IngestionBehavior.Upsert,
                 InterfaceName.CustomerAccountId.name()));
-        importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, Collections.emptyMap());
+        // catalogName -> catalogId
+        Map<String, String> catalogIdMap = catalogImports.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0).getCatalogId()));
+        ArrayList<String> catalogIds = new ArrayList<>(catalogIdMap.values());
+        importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, Collections.emptyMap(), catalogIdMap);
 
         // verify inactive tables
         Map<String, String> tableNamesFirstRun = dataCollectionProxy.getTableNamesWithSignatures(mainCustomerSpace,
-                ConsolidatedCatalog, inactive, CATALOGS);
+                ConsolidatedCatalog, inactive, catalogIds);
         log.info("Catalog batch store tables in first run {}, inactive version = {}", tableNamesFirstRun,
                 inactive.name());
         Assert.assertNotNull(tableNamesFirstRun);
-        CATALOGS.forEach(catalogName -> Assert.assertNotNull(tableNamesFirstRun.get(catalogName),
+        catalogIds.forEach(catalogId -> Assert.assertNotNull(tableNamesFirstRun.get(catalogId),
                 String.format("Should have catalog batch store table for catalog %s in inactive version %s",
-                        catalogName, inactive.name())));
+                        catalogId, inactive.name())));
         // make sure records are merged correctly
-        Assert.assertEquals(countRecordsInTable(tableNamesFirstRun.get(CATALOG_1)), NUM_ACCOUNTS_FILE1);
-        Assert.assertEquals(countRecordsInTable(tableNamesFirstRun.get(CATALOG_2)),
+        Assert.assertEquals(countRecordsInTable(tableNamesFirstRun.get(catalogIdMap.get(CATALOG_1))),
+                NUM_ACCOUNTS_FILE1);
+        Assert.assertEquals(countRecordsInTable(tableNamesFirstRun.get(catalogIdMap.get(CATALOG_2))),
                 NUM_ACCOUNTS_FILE1 + NUM_ACCOUNTS_FILE3);
-        Assert.assertEquals(countRecordsInTable(tableNamesFirstRun.get(CATALOG_3)), NUM_ACCOUNTS_FILE1);
+        Assert.assertEquals(countRecordsInTable(tableNamesFirstRun.get(catalogIdMap.get(CATALOG_3))),
+                NUM_ACCOUNTS_FILE1);
 
         /*-
          * switch version and clear inactive,
@@ -125,27 +131,33 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
                 InterfaceName.CustomerAccountId.name()));
         catalogImports.put(CATALOG_2, prepareCatalogImports(CATALOG_2, new int[] { 1 }, IngestionBehavior.Replace,
                 InterfaceName.CustomerAccountId.name()));
-        importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, tableNamesFirstRun);
+        importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, tableNamesFirstRun, catalogIdMap);
 
         // verify
         Map<String, String> tableNamesSecondRun = dataCollectionProxy.getTableNamesWithSignatures(mainCustomerSpace,
-                ConsolidatedCatalog, inactive, CATALOGS);
+                ConsolidatedCatalog, inactive, catalogIds);
         log.info("Catalog batch store tables in second run {}, inactive version = {}", tableNamesSecondRun,
                 inactive.name());
         Assert.assertNotNull(tableNamesSecondRun);
-        CATALOGS.forEach(catalogName -> Assert.assertNotNull(tableNamesSecondRun.get(catalogName),
+        catalogIds.forEach(catalogId -> Assert.assertNotNull(tableNamesSecondRun.get(catalogId),
                 String.format("Should have catalog batch store table for catalog %s in inactive version %s",
-                        catalogName, inactive.name())));
-        Assert.assertNotEquals(tableNamesFirstRun.get(CATALOG_1), tableNamesSecondRun.get(CATALOG_1));
-        Assert.assertNotEquals(tableNamesFirstRun.get(CATALOG_2), tableNamesSecondRun.get(CATALOG_2));
-        Assert.assertEquals(tableNamesFirstRun.get(CATALOG_3), tableNamesSecondRun.get(CATALOG_3),
+                        catalogId, inactive.name())));
+        Assert.assertNotEquals(tableNamesFirstRun.get(catalogIdMap.get(CATALOG_1)),
+                tableNamesSecondRun.get(catalogIdMap.get(CATALOG_1)));
+        Assert.assertNotEquals(tableNamesFirstRun.get(catalogIdMap.get(CATALOG_2)),
+                tableNamesSecondRun.get(catalogIdMap.get(CATALOG_2)));
+        Assert.assertEquals(tableNamesFirstRun.get(catalogIdMap.get(CATALOG_3)),
+                tableNamesSecondRun.get(catalogIdMap.get(CATALOG_3)),
                 String.format("Catalog %s has no import and should be linked with table in old version", CATALOG_3));
 
         // make sure records are merged correctly
-        Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(CATALOG_1)), NUM_ACCOUNTS_FILE1);
+        Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(catalogIdMap.get(CATALOG_1))),
+                NUM_ACCOUNTS_FILE1);
         // catalog2 is replace so should contain NUM_ACCOUNTS_FILE1
-        Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(CATALOG_2)), NUM_ACCOUNTS_FILE1);
-        Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(CATALOG_3)), NUM_ACCOUNTS_FILE1);
+        Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(catalogIdMap.get(CATALOG_2))),
+                NUM_ACCOUNTS_FILE1);
+        Assert.assertEquals(countRecordsInTable(tableNamesSecondRun.get(catalogIdMap.get(CATALOG_3))),
+                NUM_ACCOUNTS_FILE1);
 
         /*-
          * No imports for all catalog, make sure existing tables are copied
@@ -153,11 +165,11 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
         swapCDLVersions();
         clearAllTables(inactive);
         catalogImports.clear();
-        importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, tableNamesSecondRun);
+        importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, tableNamesSecondRun, catalogIdMap);
 
         // verify tables are linked to inactive version
         Map<String, String> tableNamesNoImportRun = dataCollectionProxy.getTableNamesWithSignatures(mainCustomerSpace,
-                ConsolidatedCatalog, inactive, CATALOGS);
+                ConsolidatedCatalog, inactive, catalogIds);
         Assert.assertEquals(tableNamesNoImportRun, tableNamesSecondRun);
     }
 
@@ -170,17 +182,24 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
 
     private void importCatalogAndBuildBatchStore(@NotNull Map<String, IngestionBehavior> behaviors,
             @NotNull Map<String, String> primaryKeys, @NotNull Map<String, List<CatalogImport>> catalogImports,
-            @NotNull Map<String, String> activeBatchStoreTables) throws Exception {
+            @NotNull Map<String, String> activeBatchStoreTables, @NotNull Map<String, String> catalogIdMap)
+            throws Exception {
         ProcessCatalogWorkflowConfiguration config = new ProcessCatalogWorkflowConfiguration.Builder() //
                 .customer(mainTestCustomerSpace) //
-                .catalogIngestionBehaviors(behaviors) //
+                .catalogIngestionBehaviors(changeKeyFromNameToId(behaviors, catalogIdMap)) //
                 .catalogTables(activeBatchStoreTables) //
-                .catalogPrimaryKeyColumns(primaryKeys) //
-                .catalogImports(catalogImports) //
+                .catalogPrimaryKeyColumns(changeKeyFromNameToId(primaryKeys, catalogIdMap)) //
+                .catalogImports(changeKeyFromNameToId(catalogImports, catalogIdMap)) //
                 .build();
         setCDLVersions(config, active);
         skipPublishToS3(config);
         runWorkflowRemote(config);
+    }
+
+    private <V> Map<String, V> changeKeyFromNameToId(@NotNull Map<String, V> nameMap,
+            @NotNull Map<String, String> nameIdMap) {
+        return nameMap.entrySet().stream()
+                .collect(Collectors.toMap(entry -> nameIdMap.get(entry.getKey()), Map.Entry::getValue));
     }
 
     private List<CatalogImport> prepareCatalogImports(@NotNull String catalogName, @NotNull int[] fileIndices,
@@ -211,11 +230,13 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
             catalog = activityStoreProxy.createCatalog(mainCustomerSpace, catalogName, dataFeedTask.getUniqueId(),
                     primaryKeyColumn);
         }
+        String catalogId = catalog.getCatalogId();
 
         List<CatalogImport> catalogImports = tables.stream() //
                 .map(tableName -> {
                     CatalogImport catalogImport = new CatalogImport();
                     catalogImport.setCatalogName(catalogName);
+                    catalogImport.setCatalogId(catalogId);
                     catalogImport.setTableName(tableName);
                     catalogImport.setOriginalFilename(tableName + ".csv");
                     return catalogImport;

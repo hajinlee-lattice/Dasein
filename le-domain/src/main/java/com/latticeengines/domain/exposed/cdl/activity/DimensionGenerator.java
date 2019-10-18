@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 
 /**
  * This class is to configure how to generate activity dimension value universe
@@ -111,5 +112,23 @@ public class DimensionGenerator {
         public String getName() {
             return this.name;
         }    
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DimensionGenerator generator = (DimensionGenerator) o;
+        return fromCatalog == generator.fromCatalog && Objects.equal(attribute, generator.attribute)
+                && option == generator.option;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(attribute, fromCatalog, option);
     }
 }

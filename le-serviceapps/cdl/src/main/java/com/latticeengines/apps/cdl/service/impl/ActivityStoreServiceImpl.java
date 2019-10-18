@@ -40,10 +40,12 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId,
             String primaryKeyColumn) {
+        // TODO retry on catalogId conflict
         Preconditions.checkArgument(StringUtils.isNotBlank(catalogName), "catalog name should not be blank");
         Tenant tenant = MultiTenantContext.getTenant();
         Catalog catalog = new Catalog();
         catalog.setName(catalogName);
+        catalog.setCatalogId(Catalog.generateId());
         catalog.setTenant(tenant);
         catalog.setPrimaryKeyColumn(primaryKeyColumn);
         catalog.setDataFeedTask(getDataFeedTask(tenant, taskUniqueId));
@@ -60,12 +62,24 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     }
 
     @Override
+    public Catalog findCatalogByIdAndName(String customerSpace, String catalogId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(catalogId),
+                String.format("CatalogId %s should not be blank", catalogId));
+        Tenant tenant = MultiTenantContext.getTenant();
+        return catalogEntityMgr.findByCatalogIdAndTenant(catalogId, tenant);
+    }
+
+    @Override
     public AtlasStream createStream(@NotNull String customerSpace, @NotNull AtlasStream stream) {
+        // TODO retry on streamId conflict
         Preconditions.checkNotNull(stream, "stream to be created should not be null");
         Preconditions.checkNotNull(stream.getDataFeedTaskUniqueId(), "stream should contains data feed task unique ID");
+        Preconditions.checkNotNull(stream.getStreamId(),
+                "stream should not contain streamId field which is auto generated");
         Tenant tenant = MultiTenantContext.getTenant();
 
         stream.setDataFeedTask(getDataFeedTask(tenant, stream.getDataFeedTaskUniqueId()));
+        stream.setStreamId(AtlasStream.generateId());
         streamEntityMgr.create(stream);
 
         // create attached dimensions

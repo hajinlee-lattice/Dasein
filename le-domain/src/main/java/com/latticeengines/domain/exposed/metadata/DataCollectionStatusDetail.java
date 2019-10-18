@@ -7,6 +7,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -21,6 +22,10 @@ public class DataCollectionStatusDetail implements Serializable {
     // catalogName -> list of original file name used to build catalog store
     @JsonProperty("OrigCatalogFileMap")
     private Map<String, List<String>> origCatalogFileMap;
+
+    // streamId -> stream object
+    @JsonProperty("ActivityStreamMap")
+    private Map<String, AtlasStream> activityStreamMap;
 
     @JsonProperty("MinTxnDate")
     private Integer minTxnDate = 0;
@@ -168,5 +173,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setOrigCatalogFileMap(Map<String, List<String>> origCatalogFileMap) {
         this.origCatalogFileMap = origCatalogFileMap;
+    }
+
+    public Map<String, AtlasStream> getActivityStreamMap() {
+        return activityStreamMap;
+    }
+
+    public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
+        this.activityStreamMap = activityStreamMap;
     }
 }

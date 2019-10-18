@@ -115,6 +115,7 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
     protected AtlasStream createStream(String name) {
         AtlasStream stream = new AtlasStream();
         stream.setName(name);
+        stream.setStreamId(AtlasStream.generateId());
         stream.setTenant(mainTestTenant);
         stream.setDataFeedTask(sharedTask);
         stream.setMatchEntities(MATCH_ENTITIES);

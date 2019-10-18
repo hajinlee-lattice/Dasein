@@ -1,8 +1,11 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
+import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.IngestionBehavior.Append;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -31,6 +34,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -40,7 +45,8 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 @Entity
 @Table(name = "ATLAS_STREAM", uniqueConstraints = { //
-        @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID" }) })
+        @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID" }), //
+        @UniqueConstraint(columnNames = { "STREAM_ID", "FK_TENANT_ID" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
@@ -48,6 +54,9 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
 
     private static final long serialVersionUID = 7473595458075796126L;
+    private static final DataFeedTask.IngestionBehavior DEFAULT_INGESTION_BEHAVIOR = Append;
+
+    private static final String STREAM_ID_PREFIX = "as_";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,6 +64,10 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
+
+    @JsonProperty("stream_id")
+    @Column(name = "STREAM_ID", nullable = false)
+    private String streamId;
 
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
@@ -128,6 +141,14 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         this.pid = pid;
     }
 
+    public String getStreamId() {
+        return streamId;
+    }
+
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
+    }
+
     public String getName() {
         return name;
     }
@@ -152,12 +173,23 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         this.dataFeedTask = dataFeedTask;
     }
 
+    @JsonProperty("task_ingestion_behavior")
+    public void setDataFeedTaskIngestionBehavior(DataFeedTask.IngestionBehavior behavior) {
+        instantiateTaskIfNull();
+        dataFeedTask.setIngestionBehavior(behavior);
+    }
+
+    @JsonProperty("task_ingestion_behavior")
+    public DataFeedTask.IngestionBehavior getDataFeedTaskIngestionBehavior() {
+        if (dataFeedTask == null || dataFeedTask.getIngestionBehavior() == null) {
+            return DEFAULT_INGESTION_BEHAVIOR;
+        }
+        return dataFeedTask.getIngestionBehavior();
+    }
+
     @JsonProperty("task_unique_id")
     public void setDataFeedTaskUniqueId(String uniqueId) {
-        if (dataFeedTask == null) {
-            // dummy object
-            dataFeedTask = new DataFeedTask();
-        }
+        instantiateTaskIfNull();
         dataFeedTask.setUniqueId(uniqueId);
     }
 
@@ -222,6 +254,13 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         this.attributeDerivers = attributeDerivers;
     }
 
+    private void instantiateTaskIfNull() {
+        if (dataFeedTask == null) {
+            // dummy object
+            dataFeedTask = new DataFeedTask();
+        }
+    }
+
     @Override
     public Date getCreated() {
         return created;
@@ -242,4 +281,12 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         this.updated = updated;
     }
 
+    public static String generateId() {
+        String uuid;
+        do {
+            // try until uuid does not start with catalog prefix
+            uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        } while (uuid.startsWith(STREAM_ID_PREFIX));
+        return STREAM_ID_PREFIX + uuid;
+    }
 }

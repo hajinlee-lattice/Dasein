@@ -60,6 +60,18 @@ public class AtlasStreamEntityMgrImpl extends JpaEntityMgrRepositoryImpl<AtlasSt
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AtlasStream> findByTenant(@NotNull Tenant tenant, boolean inflateDimensions) {
+        Preconditions.checkNotNull(tenant, "Tenant should not be null");
+
+        List<AtlasStream> streams = readerRepository.findByTenant(tenant);
+        if (CollectionUtils.isNotEmpty(streams) && inflateDimensions) {
+            streams.forEach(stream -> HibernateUtils.inflateDetails(stream.getDimensions()));
+        }
+        return streams;
+    }
+
+    @Override
     public BaseJpaRepository<AtlasStream, Long> getRepository() {
         return writerRepository;
     }

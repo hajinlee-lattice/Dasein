@@ -8,6 +8,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface CatalogRepository extends BaseJpaRepository<Catalog, Long> {
 
+    List<Catalog> findByCatalogIdAndTenant(String catalogId, Tenant tenant);
+
     List<Catalog> findByNameAndTenant(String name, Tenant tenant);
 
     List<Catalog> findByTenant(Tenant tenant);
