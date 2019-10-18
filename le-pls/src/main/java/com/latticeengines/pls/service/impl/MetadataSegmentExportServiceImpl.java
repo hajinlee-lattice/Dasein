@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableList;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
@@ -35,7 +33,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
@@ -127,22 +124,16 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     private void checkExportAttribute(MetadataSegmentExport metadataSegmentExport, String customerSpace,
             DataCollection.Version version) {
-        List<ColumnSelection.Predefined> groups = Collections.singletonList(ColumnSelection.Predefined.Enrichment);
         List<ColumnMetadata> cms = new ArrayList<>();
         if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(metadataSegmentExport.getType())) {
-            cms = servingStoreProxy.getDecoratedMetadata(customerSpace,
-                    ImmutableList.copyOf(BusinessEntity.EXPORT_ENTITIES), groups, version, true);
+            cms = servingStoreProxy.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version);
+            cms.addAll(servingStoreProxy.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version));
         } else if (AtlasExportType.ACCOUNT.equals(metadataSegmentExport.getType())) {
-            List<BusinessEntity> businessEntities = BusinessEntity.EXPORT_ENTITIES.stream()
-                    .filter(businessEntity -> !BusinessEntity.Contact.equals(businessEntity))
-                    .collect(Collectors.toList());
-            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version, true);
+            cms = servingStoreProxy.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version);
         } else if (AtlasExportType.CONTACT.equals(metadataSegmentExport.getType())) {
-            List<BusinessEntity> businessEntities = new ArrayList<>();
-            businessEntities.add(BusinessEntity.Contact);
-            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, businessEntities, groups, version, true);
+            cms = servingStoreProxy.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version);
         }
-        log.info("Total attributes for export = " + cms.size());
+        log.info("Total attributes for export = " + CollectionUtils.size(cms));
         if (cms.size() == 0) {
             throw new LedpException(LedpCode.LEDP_18231, new String[] { metadataSegmentExport.getType().name() });
         }

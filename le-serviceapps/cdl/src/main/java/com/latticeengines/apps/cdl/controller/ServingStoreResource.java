@@ -43,17 +43,6 @@ public class ServingStoreResource {
         return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups);
     }
 
-    @GetMapping(value = "/decoratedmetadata")
-    @ResponseBody
-    @ApiOperation(value = "Get decorated serving store metadata with entity list")
-    public List<ColumnMetadata> getDecoratedMetadata(@PathVariable String customerSpace,
-            @RequestParam(name = "entities", required = false) List<BusinessEntity> entities,
-            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups,
-            @RequestParam(name = "version", required = false) DataCollection.Version version,
-            @RequestParam(name = "deflate-display-names", required = false, defaultValue = "0") boolean deflateDisplayName) {
-        return servingStoreService.getDecoratedMetadata(customerSpace, entities, version, groups, deflateDisplayName);
-    }
-
     @GetMapping(value = "/systemmetadata")
     @ResponseBody
     @ApiOperation(value = "Get system metadata attributes")

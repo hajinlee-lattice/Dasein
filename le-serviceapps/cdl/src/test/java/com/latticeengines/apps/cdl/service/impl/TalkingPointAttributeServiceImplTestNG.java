@@ -66,16 +66,12 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
-            public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId,
-                    Collection<BusinessEntity> entities, //
-                    ColumnSelection.Predefined groups, boolean deflateDisplayNames) {
+            public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, Collection<BusinessEntity> entities,
-                    DataCollection.Version version, Collection<ColumnSelection.Predefined> groups,
-                    boolean deflateDisplayNames) {
+            public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version) {
                 return null;
             }
 

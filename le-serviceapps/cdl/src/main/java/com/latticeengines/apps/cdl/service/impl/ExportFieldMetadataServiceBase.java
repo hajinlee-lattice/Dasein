@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
@@ -142,10 +141,17 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     protected Flux<ColumnMetadata> getServingMetadata(String customerSpace, List<BusinessEntity> entities) {
         Flux<ColumnMetadata> cms = Flux.empty();
         if (entities != null && !entities.isEmpty()) {
-            List<ColumnMetadata> cmList = servingStoreService.getDecoratedMetadata(customerSpace, entities, null,
-                    Collections.singletonList(Predefined.Enrichment), true);
+            List<ColumnMetadata> cmList;
+            if (entities.contains(BusinessEntity.Contact)) {
+                cmList = servingStoreService.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
+                        null);
+            } else {
+                cmList = servingStoreService.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
+                        null);
+            }
             if (CollectionUtils.isNotEmpty(cmList)) {
-                cms = Flux.fromIterable(cmList).filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));
+                cms = Flux.fromIterable(cmList).filter(
+                        cm -> entities.contains(cm.getEntity()) && !AttrState.Inactive.equals(cm.getAttrState()));
             }
         }
         return cms;

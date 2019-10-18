@@ -175,7 +175,9 @@ public class FrontEndQueryCreator {
                 fieldMaps.get(entity).add(new AttributeLookup(entity, md.getAttrName()));
             });
             // check to see if the entities are eligible for export
-            if (!BusinessEntity.EXPORT_ENTITIES.containsAll(fieldMaps.keySet())) {
+            Collection<BusinessEntity> entities = new HashSet<>(BusinessEntity.EXPORT_ACCOUNT_ENTITIES);
+            entities.add(BusinessEntity.Contact);
+            if (!entities.containsAll(fieldMaps.keySet())) {
                 throw new RuntimeException("Not every entity is eligible for export " + fieldMaps.keySet());
             }
 
@@ -186,9 +188,7 @@ public class FrontEndQueryCreator {
             if (userConfiguredAccountLookups != null) {
                 while (accountIterator.hasNext()) {
                     Lookup accLookup = accountIterator.next();
-                    if (userConfiguredAccountLookups.contains(accLookup)) {
-                        userConfiguredAccountLookups.remove(accLookup);
-                    }
+                    userConfiguredAccountLookups.remove(accLookup);
                 }
                 accountLookups.addAll(userConfiguredAccountLookups);
                 fieldMaps.remove(BusinessEntity.Account);
@@ -196,9 +196,7 @@ public class FrontEndQueryCreator {
             if (userConfiguredContactLookups != null) {
                 while (contactIterator.hasNext()) {
                     Lookup conLookup = contactIterator.next();
-                    if (userConfiguredContactLookups.contains(conLookup)) {
-                        userConfiguredContactLookups.remove(conLookup);
-                    }
+                    userConfiguredContactLookups.remove(conLookup);
                 }
                 contactLookups.addAll(userConfiguredContactLookups);
                 fieldMaps.remove(BusinessEntity.Contact);

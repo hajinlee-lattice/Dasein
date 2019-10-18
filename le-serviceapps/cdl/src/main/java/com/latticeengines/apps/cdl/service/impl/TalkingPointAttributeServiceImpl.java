@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("talkingPointAttributesService")
 public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeService {
@@ -49,8 +48,7 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
         String customerSpace = MultiTenantContext.getShortTenantId();
         log.info("Attempting to find Account attributes for customer space : " + customerSpace);
         try {
-            List<ColumnMetadata> allAttrs = servingStoreService.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.TALKING_POINT_ENTITIES, ColumnSelection.Predefined.TalkingPoint, true);
+            List<ColumnMetadata> allAttrs = servingStoreService.getAccountMetadata(customerSpace, ColumnSelection.Predefined.TalkingPoint, null);
 
             if (CollectionUtils.isEmpty(allAttrs)) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });

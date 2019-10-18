@@ -1,6 +1,5 @@
 package com.latticeengines.proxy.exposed.cdl;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -21,22 +20,21 @@ public interface ServingStoreProxy {
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             List<ColumnSelection.Predefined> groups, DataCollection.Version version);
 
-    List<ColumnMetadata> getDecoratedMetadata(String customerSpace, Collection<BusinessEntity> entities,
-            Collection<ColumnSelection.Predefined> groups, DataCollection.Version version, boolean deflateDisplayNames);
+    List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version);
+
+    List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version);
     // ========== END: Get Metadata Not From Cache ==========
 
     // ========== BEGIN: Get Metadata From Cache ==========
     // only use cache when you have performance needs.
     // otherwise using above non-cached apis gives more up-to-date info.
-
-    // groups=null means for all groups
-    List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, Collection<BusinessEntity> entities,
-            Collection<ColumnSelection.Predefined> groups, boolean deflateDisplayNames);
-
-    // a short-hand of above method: groups=null, deflateDisplayNames=false
     List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity);
 
     Set<String> getServingStoreColumnsFromCache(String customerSpace, BusinessEntity entity);
+
+    List<ColumnMetadata> getAccountMetadataFromCache(String customerSpace, ColumnSelection.Predefined group);
     // ========== END: Get Metadata From Cache ==========
 
     // ========== BEGIN: Modeling Attributes ==========

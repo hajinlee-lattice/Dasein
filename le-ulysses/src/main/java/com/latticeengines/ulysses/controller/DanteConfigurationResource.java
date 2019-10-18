@@ -3,7 +3,6 @@ package com.latticeengines.ulysses.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
@@ -83,9 +81,8 @@ public class DanteConfigurationResource {
                     commonResourcePath + widgetConfigurationDocumentPath);
             MetadataDocument metadataDocument = JsonUtils.deserialize(
                     getStaticDocument(commonResourcePath + metadataDocumentTemplatePath), MetadataDocument.class);
-            List<ColumnMetadata> allAttrs = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace,
-                    BusinessEntity.TALKING_POINT_ENTITIES,
-                    Collections.singleton(ColumnSelection.Predefined.TalkingPoint), true);
+            List<ColumnMetadata> allAttrs = servingStoreProxy.getAccountMetadataFromCache(customerSpace,
+                    ColumnSelection.Predefined.TalkingPoint);
             if (CollectionUtils.isEmpty(allAttrs)) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
             }

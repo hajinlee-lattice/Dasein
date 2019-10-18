@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -67,32 +66,6 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, Collection<BusinessEntity> entities,
-            ColumnSelection.Predefined group, boolean deflateDisplayNames) {
-        List<ColumnMetadata> allAttrs = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(entities)) {
-            for (BusinessEntity entity : entities) {
-                List<ColumnMetadata> entityAttrs = getDecoratedMetadataFromCache(tenantId, entity);
-                if (CollectionUtils.isNotEmpty(entityAttrs)) {
-                    Stream<ColumnMetadata> stream = entityAttrs.stream() //
-                            .filter(cm -> cm.isEnabledFor(group));
-                    if (deflateDisplayNames && BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
-                        stream = stream.peek(cm -> {
-                            String subCategory = cm.getSubcategory();
-                            if (StringUtils.isNotBlank(subCategory) && !"Others".equalsIgnoreCase(subCategory)) {
-                                String displayName = cm.getDisplayName();
-                                cm.setDisplayName(subCategory + ": " + displayName);
-                            }
-                        });
-                    }
-                    allAttrs.addAll(stream.collect(Collectors.toList()));
-                }
-            }
-        }
-        return allAttrs;
-    }
-
-    @Override
     @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|md_in_svc\", #tenantId, #entity)", unless="#result == null")
     public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
@@ -135,8 +108,22 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, Collection<BusinessEntity> entities,
-            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, boolean deflateDisplayNames) {
+    public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                BusinessEntity.getAccountExportEntities(group), version, Collections.singleton(group));
+    }
+
+    @Override
+    public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                Collections.singletonList(BusinessEntity.Contact), version, Collections.singleton(group));
+    }
+
+    private List<ColumnMetadata> getDecoratedMetadataWithDeflatedDisplayName(String customerSpace,
+            Collection<BusinessEntity> entities, DataCollection.Version version,
+            Collection<ColumnSelection.Predefined> groups) {
         List<ColumnMetadata> columnMetadataList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
         Map<BusinessEntity, List<ColumnMetadata>> map = entities.stream().parallel()
@@ -144,7 +131,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                     MultiTenantContext.setTenant(tenant);
                     List<ColumnMetadata> cms = getDecoratedMetadata(customerSpace, entity, version, groups)
                             .collectList().block();
-                    if (CollectionUtils.isNotEmpty(cms) && deflateDisplayNames
+                    if (CollectionUtils.isNotEmpty(cms)
                             && BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
                         cms.forEach(cm -> {
                             String subCategory = cm.getSubcategory();

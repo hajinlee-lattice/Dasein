@@ -18,18 +18,14 @@ public interface ServingStoreService {
 
     ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version);
 
-    List<ColumnMetadata> getDecoratedMetadata(String customerSpace, Collection<BusinessEntity> entities,
-            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, boolean deflateDisplayNames);
-
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups);
+
+    List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version);
+    List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version);
     // ========== END: Get Metadata Not From Cache ==========
 
     // ========== BEGIN: Get Metadata From Cache ==========
-    List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, Collection<BusinessEntity> entities, //
-            ColumnSelection.Predefined groups, boolean deflateDisplayNames);
-
-    // below are all short-hand method of the generic method above
     List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity);
     // ========== END: Get Metadata From Cache ==========
 

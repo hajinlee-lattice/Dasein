@@ -176,37 +176,36 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         return dateFmtMap;
     }
 
+    @SuppressWarnings("unchecked")
     private void setAccountSchema(Map<BusinessEntity, List> schemaMap, List<ColumnMetadata> schema) {
-        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
-            if (!BusinessEntity.Contact.equals(entity)) {
-                List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
-                        .getOrDefault(entity, Collections.emptyList());
-                if (CollectionUtils.isNotEmpty(cms)) {
-                    if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                        CustomerSpace customerSpace = parseCustomerSpace(configuration);
-                        DataCollection.Version version = configuration.getDataCollectionVersion();
-                        String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                                TableRoleInCollection.SortedProduct, version);
-                        if (StringUtils.isBlank(tblName)) {
-                            throw new RuntimeException("Cannot find sorted product table, " + //
-                                    "while is exporting purchase history attributes.");
-                        }
-                        for (ColumnMetadata cm : cms) {
-                            String attrName = cm.getAttrName();
-                            String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
-                            String productName = getProductNameFromRedshift(tblName, productId);
-                            String displayName = cm.getDisplayName();
-                            if (!displayName.startsWith(productName)) {
-                                cm.setDisplayName(productName + ": " + displayName);
-                            }
+        for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
+            List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(entity, Collections.emptyList());
+            if (CollectionUtils.isNotEmpty(cms)) {
+                if (BusinessEntity.PurchaseHistory.equals(entity)) {
+                    CustomerSpace customerSpace = parseCustomerSpace(configuration);
+                    DataCollection.Version version = configuration.getDataCollectionVersion();
+                    String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                            TableRoleInCollection.SortedProduct, version);
+                    if (StringUtils.isBlank(tblName)) {
+                        throw new RuntimeException("Cannot find sorted product table, " + //
+                                "while is exporting purchase history attributes.");
+                    }
+                    for (ColumnMetadata cm : cms) {
+                        String attrName = cm.getAttrName();
+                        String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
+                        String productName = getProductNameFromRedshift(tblName, productId);
+                        String displayName = cm.getDisplayName();
+                        if (!displayName.startsWith(productName)) {
+                            cm.setDisplayName(productName + ": " + displayName);
                         }
                     }
-                    schema.addAll(cms);
                 }
+                schema.addAll(cms);
             }
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<ColumnMetadata> getAccountIdColumnMetadata(Map<BusinessEntity, List> schemaMap) {
         List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(BusinessEntity.Account, Collections.emptyList());
         List<ColumnMetadata> accountIdColumnMetadata = new ArrayList<>();
