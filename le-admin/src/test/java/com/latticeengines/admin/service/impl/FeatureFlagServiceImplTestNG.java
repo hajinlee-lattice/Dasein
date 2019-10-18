@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -13,8 +15,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.FeatureFlagService;
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
@@ -23,11 +28,15 @@ import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 
 public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private FeatureFlagService featureFlagService;
+
+    @Inject
+    private TenantService tenantService;
 
     private static FeatureFlagDefinition definition = newFlagDefinition();
     private static final String FLAG_ID = "TestFlag";
+    private static final String FLAG2_ID = "TestFlag2";
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
@@ -233,6 +242,36 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         flags = featureFlagService.getFlags(TestTenantId);
         Assert.assertTrue(flags.containsKey(FLAG_ID), "TestFlag should be defined.");
         Assert.assertTrue(flags.get(FLAG_ID), "TestFlag should have been set.");
+    }
+
+    @Test(groups = "functional")
+    public void testDefaultTrueFlag() {
+        FeatureFlagDefinition definition = newFlagDefinition();
+        featureFlagService.undefineFlag(FLAG2_ID);
+
+        featureFlagService.defineFlag(FLAG2_ID, definition);
+        FeatureFlagValueMap flags = featureFlagService.getFlags(TestTenantId);
+        Assert.assertFalse(flags.containsKey(FLAG2_ID), "TestFlag should have not been set.");
+
+        CustomerSpace customerSpace = CustomerSpace.parse(TestTenantId);
+        TenantDocument tenantDocument = tenantService.getTenant(customerSpace.getContractId(), customerSpace.getTenantId());
+        FeatureFlagValueMap ffMap = tenantDocument.getFeatureFlags();
+        Assert.assertTrue(ffMap.get(FLAG2_ID));
+
+        featureFlagService.undefineFlag(FLAG2_ID);
+    }
+
+    protected static FeatureFlagDefinition newFlagDefinition() {
+        FeatureFlagDefinition definition = new FeatureFlagDefinition();
+        definition.setDisplayName(FLAG2_ID);
+        definition.setDocumentation("This flag is for functional test.");
+        Set<LatticeProduct> testProdSet = new HashSet<>();
+        testProdSet.add(LatticeProduct.LPA3);
+        testProdSet.add(LatticeProduct.CG);
+        definition.setAvailableProducts(testProdSet);
+        definition.setConfigurable(true);
+        definition.setDefaultValue(true);
+        return definition;
     }
 
 }

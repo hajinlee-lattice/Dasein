@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
+import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.ServiceConfigService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
@@ -61,6 +63,8 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapPropertyConstant;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -103,6 +107,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private Oauth2RestApiProxy oauthProxy;
+
+    @Inject
+    private FeatureFlagService featureFlagService;
 
     @Value("${common.pls.url}")
     private String plsEndHost;
@@ -424,6 +431,7 @@ public class TenantServiceImpl implements TenantService {
         if (doc == null) {
             return null;
         }
+        doc.setFeatureFlags(overlayDefaultValues(doc.getFeatureFlags()));
         doc.setBootstrapState(getTenantOverallState(contractId, tenantId, doc));
         return doc;
     }
@@ -614,6 +622,19 @@ public class TenantServiceImpl implements TenantService {
         Set<LatticeProduct> productsBelongTo = new HashSet<>(latticeComponent.getAssociatedProducts());
         productsBelongTo.retainAll(products);
         return !productsBelongTo.isEmpty();
+    }
+
+    private FeatureFlagValueMap overlayDefaultValues(FeatureFlagValueMap flagValueMap) {
+        FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
+        FeatureFlagValueMap newValueMap = new FeatureFlagValueMap();
+        definitionMap.forEach((flagId, flagDef) -> {
+            boolean defaultVal = flagDef.getDefaultValue();
+            newValueMap.put(flagId, defaultVal);
+        });
+        if (flagValueMap != null) {
+            newValueMap.putAll(flagValueMap);
+        }
+        return newValueMap;
     }
 
     public static class ProductAndExternalAdminInfo {
