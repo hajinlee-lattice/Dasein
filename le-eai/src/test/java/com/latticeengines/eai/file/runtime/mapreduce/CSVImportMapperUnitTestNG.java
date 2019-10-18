@@ -95,7 +95,7 @@ public class CSVImportMapperUnitTestNG {
             Assert.fail("should not have thrown Exception");
         }
         try {
-            mapper.checkTimeZoneValidity(dateStr, TimeStampConvertUtils.SYSTEM_JAVA_TIME_ZONE);
+            mapper.checkTimeZoneValidity(dateStr, TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
         } catch(Exception e) {
             if (isISOValue) {
                 Assert.fail("Should not have thrown Exception");

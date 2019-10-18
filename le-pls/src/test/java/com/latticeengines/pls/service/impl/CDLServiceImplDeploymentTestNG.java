@@ -203,7 +203,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getName());
         File templateFile = new File(
                 ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/" + importFileName).getPath());
-        boolean result = cdlService.createWebVisitTemplate(customerSpace.toString(), entityType,
+        boolean result = cdlService.createWebVisitProfile(customerSpace.toString(), entityType,
                 new FileInputStream(templateFile));
         Assert.assertTrue(result);
         List<S3ImportTemplateDisplay> s3Templates = cdlService.getS3ImportTemplate(customerSpace.toString(), "", null);

@@ -493,7 +493,7 @@ public class CDLResource {
         }
 
         try {
-            return cdlService.createWebVisitTemplate(customerSpace.toString(), entityType, file.getInputStream());
+            return cdlService.createWebVisitProfile(customerSpace.toString(), entityType, file.getInputStream());
         } catch (IOException e) {
             log.error("Cannot open csv file as stream! {}", e.getMessage());
             return false;
