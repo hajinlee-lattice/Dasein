@@ -14,11 +14,13 @@ BEGIN
         `NAME`              varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
         `PERIODS`           json                                    NOT NULL,
         `RETENTION_DAYS`    int(11) DEFAULT NULL,
+        `STREAM_ID`         varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
         `UPDATED`           datetime                                NOT NULL,
         `FK_TASK_ID`        bigint(20)                              NOT NULL,
         `FK_TENANT_ID`      bigint(20)                              NOT NULL,
         PRIMARY KEY (`PID`),
         UNIQUE KEY `UKlp9f8nse09hyel7myetcxst50` (`NAME`, `FK_TENANT_ID`),
+        UNIQUE KEY `UK8qhd4n6ljqg2r3cv58ln56wdt` (`STREAM_ID`, `FK_TENANT_ID`),
         KEY `FK_ATLASSTREAM_FKTASKID_DATAFEEDTASK` (`FK_TASK_ID`),
         KEY `FK_ATLASSTREAM_FKTENANTID_TENANT` (`FK_TENANT_ID`),
         CONSTRAINT `FK_ATLASSTREAM_FKTASKID_DATAFEEDTASK` FOREIGN KEY (`FK_TASK_ID`) REFERENCES `DATAFEED_TASK` (`PID`) ON DELETE CASCADE,
@@ -85,7 +87,9 @@ BEGIN
         ADD COLUMN `INGESTION_BEHAVIOR` varchar(50) DEFAULT NULL AFTER `STATUS`;
 
     ALTER TABLE `ATLAS_CATALOG`
-        ADD COLUMN `PRIMARY_KEY_COLUMN` varchar(255) DEFAULT NULL AFTER `NAME`;
+        ADD COLUMN `CATALOG_ID` varchar(100) NOT NULL AFTER `PID`,
+        ADD COLUMN `PRIMARY_KEY_COLUMN` varchar(255) DEFAULT NULL AFTER `NAME`,
+        ADD UNIQUE KEY `UK23y98pa5pxcy4f25xk51qq2w0` (`CATALOG_ID`, `FK_TENANT_ID`);
 
     ALTER TABLE PLS_MultiTenant.LOOKUP_ID_MAP
         ADD COLUMN PROSPECT_OWNER VARCHAR(255) DEFAULT null AFTER ACCOUNT_ID;

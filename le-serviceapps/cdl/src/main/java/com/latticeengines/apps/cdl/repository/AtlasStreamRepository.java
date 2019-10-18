@@ -8,6 +8,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface AtlasStreamRepository extends BaseJpaRepository<AtlasStream, Long> {
 
+    List<AtlasStream> findByStreamIdAndTenant(String streamId, Tenant tenant);
+
     List<AtlasStream> findByNameAndTenant(String name, Tenant tenant);
 
     List<AtlasStream> findByTenant(Tenant tenant);

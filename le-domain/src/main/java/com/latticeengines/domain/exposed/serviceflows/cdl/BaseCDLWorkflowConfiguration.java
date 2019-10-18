@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.MatchEntityWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessActivityStreamWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessCatalogWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessContactWorkflowConfiguration;
@@ -72,6 +73,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = RebuildTransactionWorkflowConfiguration.class, name = "RebuildTransactionWorkflowConfiguration"),
 
         @Type(value = ProcessCatalogWorkflowConfiguration.class, name = "ProcessCatalogWorkflowConfiguration"),
+        @Type(value = ProcessActivityStreamWorkflowConfiguration.class, name = "ProcessActivityStreamWorkflowConfiguration"),
 
         @Type(value = CuratedAttributesWorkflowConfiguration.class, name = "CuratedAttributesWorkflowConfiguration"),
         @Type(value = ProcessRatingWorkflowConfiguration.class, name = "ProcessRatingWorkflowConfiguration"),

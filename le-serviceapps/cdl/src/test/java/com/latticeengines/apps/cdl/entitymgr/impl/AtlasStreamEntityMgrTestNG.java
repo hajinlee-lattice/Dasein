@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
@@ -56,6 +57,16 @@ public class AtlasStreamEntityMgrTestNG extends ActivityRelatedEntityMgrImplTest
         Tenant tenant2 = notExistTenant();
         Assert.assertNull(streamEntityMgr.findByNameAndTenant(STREAM_WEBVISIT, tenant2));
         Assert.assertTrue(CollectionUtils.isEmpty(streamEntityMgr.findByTenant(tenant2)));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCreate", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testFindAllWithDimensionInflation() {
+        // make sure inflation work with null dimensions
+        List<AtlasStream> streams = streamEntityMgr.findByTenant(mainTestTenant, true);
+        Assert.assertNotNull(streams);
+        Assert.assertEquals(streams.size(), STREAM_NAMES.size());
+        streams.forEach(stream -> Assert.assertTrue(CollectionUtils.isEmpty(stream.getDimensions()),
+                String.format("Should have empty dimensions in stream %s", stream.getName())));
     }
 
     private void validateStream(AtlasStream stream) {

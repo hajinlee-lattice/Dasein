@@ -21,6 +21,17 @@ public interface CatalogEntityMgr extends BaseEntityMgrRepository<Catalog, Long>
     Catalog findByNameAndTenant(@NotNull String name, @NotNull Tenant tenant);
 
     /**
+     * Find the unique {@link Catalog} with target catalogId in specified tenant.
+     *
+     * @param catalogId
+     *            target catalog unique id
+     * @param tenant
+     *            target tenant
+     * @return matching catalog object, {@code null} if no such catalog exists
+     */
+    Catalog findByCatalogIdAndTenant(@NotNull String catalogId, @NotNull Tenant tenant);
+
+    /**
      * Retrieve all catalog in target tenant
      *
      * @param tenant

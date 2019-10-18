@@ -38,7 +38,23 @@ public class CatalogEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Catalog, Lo
             return null;
         }
         Preconditions.checkArgument(catalogs.size() == 1, String.format(
-                "Catalog %s should be unique for tenant %s, got %d instead", name, tenant.getId(), catalogs.size()));
+                "Catalog (name=%s) should be unique for tenant %s, got %d instead", name, tenant.getId(),
+                catalogs.size()));
+        return catalogs.get(0);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Catalog findByCatalogIdAndTenant(@NotNull String catalogId, @NotNull Tenant tenant) {
+        Preconditions.checkNotNull(catalogId, "CatalogId should not be null");
+        Preconditions.checkNotNull(tenant, "Tenant should not be null");
+        List<Catalog> catalogs = readerRepository.findByCatalogIdAndTenant(catalogId, tenant);
+        if (CollectionUtils.isEmpty(catalogs)) {
+            return null;
+        }
+        Preconditions.checkArgument(catalogs.size() == 1,
+                String.format("Catalog (ID=%s) should be unique for tenant %s, got %d instead", catalogId,
+                        tenant.getId(), catalogs.size()));
         return catalogs.get(0);
     }
 

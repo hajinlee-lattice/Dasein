@@ -64,6 +64,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ProcessCatalogWorkflow processCatalogWorkflow;
 
     @Inject
+    private ProcessActivityStreamWorkflow processActivityStreamWorkflow;
+
+    @Inject
     private ProcessRatingWorkflow processRatingWorkflow;
 
     @Inject
@@ -111,6 +114,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processProductWorkflow) //
                 .next(processTransactionWorkflow) //
                 .next(processCatalogWorkflow) //
+                .next(processActivityStreamWorkflow) //
                 .next(apsStep) //
                 .next(curatedAttributesWorkflow) //
                 .next(combineStatistics) //

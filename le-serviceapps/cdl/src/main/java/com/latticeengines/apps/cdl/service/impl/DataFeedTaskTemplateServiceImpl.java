@@ -156,6 +156,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             Catalog catalog = new Catalog();
             catalog.setTenant(tenant);
             catalog.setName(EntityType.WebVisitPathPattern.name());
+            catalog.setCatalogId(Catalog.generateId());
             catalog.setDataFeedTask(dataFeedTask);
             catalogEntityMgr.create(catalog);
             log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
@@ -165,9 +166,11 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             Catalog pathPtnCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitPathPattern.name(),
                     tenant);
             AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(tenant, dataFeedTask);
+            webVisitStream.setStreamId(AtlasStream.generateId());
             streamEntityMgr.create(webVisitStream);
-            log.info("Create WebVisit activity stream for tenant {}. stream PID = {}, dataFeedTaskUniqueId = {}",
-                    tenant.getId(), webVisitStream.getPid(), dataFeedTask.getUniqueId());
+            log.info(
+                    "Create WebVisit activity stream for tenant {}. stream PID = {}, streamId={}, dataFeedTaskUniqueId = {}",
+                    tenant.getId(), webVisitStream.getPid(), webVisitStream.getStreamId(), dataFeedTask.getUniqueId());
             List<StreamDimension> dimensions = WebVisitUtils.newWebVisitDimensions(webVisitStream, pathPtnCatalog);
             dimensions.forEach(dimensionEntityMgr::create);
             log.info("Create PathPatternId stream dimension for tenant {}. PathPatternCatalog = {}",

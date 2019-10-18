@@ -5,6 +5,7 @@ package com.latticeengines.domain.exposed.cdl.activity;
  */
 public class CatalogImport {
 
+    private String catalogId;
     private String catalogName;
     private String tableName;
     private String originalFilename;
@@ -12,10 +13,19 @@ public class CatalogImport {
     public CatalogImport() {
     }
 
-    public CatalogImport(String catalogName, String tableName, String originalFilename) {
+    public CatalogImport(String catalogId, String catalogName, String tableName, String originalFilename) {
+        this.catalogId = catalogId;
         this.catalogName = catalogName;
         this.tableName = tableName;
         this.originalFilename = originalFilename;
+    }
+
+    public void setCatalogId(String catalogId) {
+        this.catalogId = catalogId;
+    }
+
+    public String getCatalogId() {
+        return catalogId;
     }
 
     public String getCatalogName() {
@@ -44,7 +54,7 @@ public class CatalogImport {
 
     @Override
     public String toString() {
-        return "CatalogImport{" + "catalogName='" + catalogName + '\'' + ", tableName='" + tableName + '\''
-                + ", originalFilename='" + originalFilename + '\'' + '}';
+        return "CatalogImport{" + "catalogId='" + catalogId + '\'' + ", catalogName='" + catalogName + '\''
+                + ", tableName='" + tableName + '\'' + ", originalFilename='" + originalFilename + '\'' + '}';
     }
 }
