@@ -10,7 +10,7 @@ public interface DataFeedTaskTemplateService {
      * @param simpleTemplateMetadata Template description.
      * @return true if success.
      */
-    boolean setupWebVisitTemplate(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata);
+    boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata);
 
     /**
      *

@@ -21,7 +21,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -71,6 +70,7 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -115,16 +115,20 @@ public class CDLServiceImpl implements CDLService {
     @Inject
     private FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private ActivityMetricsProxy activityMetricsProxy;
+
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
 
-    private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Lattice Field Name", "Data Type");
+    private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Lattice Field Name",
+            "Data Type");
 
     private static final String CUSTOM = "Custom";
     private static final String STANDARD = "Standard";
@@ -144,7 +148,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId submitCSVImport(String customerSpace, String templateFileName, String dataFileName,
-                                         String source, String entity, String feedType) {
+            String source, String entity, String feedType) {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, dataFileName, email);
@@ -157,14 +161,14 @@ public class CDLServiceImpl implements CDLService {
         }
         String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, "", metaData);
         if (StringUtils.isEmpty(taskId)) {
-            throw new LedpException(LedpCode.LEDP_18162, new String[]{entity, source, feedType});
+            throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
         }
         return cdlProxy.submitImportJob(customerSpace, taskId, metaData);
     }
 
     @Override
     public String createS3Template(String customerSpace, String templateFileName, String source, String entity,
-                                   String feedType, String subType, String displayName) {
+            String feedType, String subType, String displayName) {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
@@ -186,10 +190,11 @@ public class CDLServiceImpl implements CDLService {
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
-            throw new IllegalArgumentException(String.format("Cannot find DataFeedTask %s or template is null!", taskId));
+            throw new IllegalArgumentException(
+                    String.format("Cannot find DataFeedTask %s or template is null!", taskId));
         }
-        CSVImportConfig metaData = generateDataOnlyImportConfig(customerSpace, dataFeedTask.getImportTemplate().getName(),
-                dataFileName, email);
+        CSVImportConfig metaData = generateDataOnlyImportConfig(customerSpace,
+                dataFeedTask.getImportTemplate().getName(), dataFileName, email);
         return cdlProxy.submitImportJob(customerSpace, taskId, true, metaData);
     }
 
@@ -204,26 +209,26 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
-                            CleanupOperationType cleanupOperationType) {
+            CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
         UIAction uiAction = new UIAction();
         switch (schemaInterpretation) {
-            case DeleteAccountTemplate:
-                entity = BusinessEntity.Account;
-                break;
-            case DeleteContactTemplate:
-                entity = BusinessEntity.Contact;
-                break;
-            case DeleteTransactionTemplate:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
-                uiAction.setTitle(DELETE_FAIL_TITLE);
-                uiAction.setView(View.Modal);
-                uiAction.setStatus(Status.Error);
-                uiAction.setMessage(generateDeleteResultMsg(String
-                        .format("<p>Cleanup operation does not support schema: %s </p>", schemaInterpretation.name())));
-                throw new UIActionException(uiAction, LedpCode.LEDP_18182);
+        case DeleteAccountTemplate:
+            entity = BusinessEntity.Account;
+            break;
+        case DeleteContactTemplate:
+            entity = BusinessEntity.Contact;
+            break;
+        case DeleteTransactionTemplate:
+            entity = BusinessEntity.Transaction;
+            break;
+        default:
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(generateDeleteResultMsg(String
+                    .format("<p>Cleanup operation does not support schema: %s </p>", schemaInterpretation.name())));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
         }
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile == null) {
@@ -268,14 +273,14 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
-                                            SchemaInterpretation schemaInterpretation) {
+            SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
-            case Transaction:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
-                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        case Transaction:
+            entity = BusinessEntity.Transaction;
+            break;
+        default:
+            throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
         }
         String email = MultiTenantContext.getEmailAddress();
         try {
@@ -289,17 +294,17 @@ public class CDLServiceImpl implements CDLService {
     public ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
-            case Account:
-                entity = BusinessEntity.Account;
-                break;
-            case Contact:
-                entity = BusinessEntity.Contact;
-                break;
-            case Transaction:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
-                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        case Account:
+            entity = BusinessEntity.Account;
+            break;
+        case Contact:
+            entity = BusinessEntity.Contact;
+            break;
+        case Transaction:
+            entity = BusinessEntity.Transaction;
+            break;
+        default:
+            throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
         }
         String email = MultiTenantContext.getEmailAddress();
         return cdlProxy.cleanupAllData(customerSpace, entity, email);
@@ -309,17 +314,17 @@ public class CDLServiceImpl implements CDLService {
     public void replaceData(String customerSpace, SchemaInterpretation schemaInterpretation) {
         BusinessEntity entity;
         switch (schemaInterpretation) {
-            case Account:
-                entity = BusinessEntity.Account;
-                break;
-            case Contact:
-                entity = BusinessEntity.Contact;
-                break;
-            case Transaction:
-                entity = BusinessEntity.Transaction;
-                break;
-            default:
-                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        case Account:
+            entity = BusinessEntity.Account;
+            break;
+        case Contact:
+            entity = BusinessEntity.Contact;
+            break;
+        case Transaction:
+            entity = BusinessEntity.Transaction;
+            break;
+        default:
+            throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
         }
         String email = MultiTenantContext.getEmailAddress();
         cdlProxy.cleanupAllByAction(customerSpace, entity, email);
@@ -327,7 +332,7 @@ public class CDLServiceImpl implements CDLService {
 
     @VisibleForTesting
     CSVImportConfig generateImportConfig(String customerSpace, String templateFileName, String dataFileName,
-                                         String email) {
+            String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         SourceFile templateSourceFile = getSourceFile(templateFileName);
         SourceFile dataSourceFile = getSourceFile(dataFileName);
@@ -356,7 +361,7 @@ public class CDLServiceImpl implements CDLService {
     }
 
     private CSVImportConfig generateDataOnlyImportConfig(String customerSpace, String templateTableName,
-                                                         String dataFileName, String email) {
+            String dataFileName, String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         SourceFile dataSourceFile = getSourceFile(dataFileName);
         if (StringUtils.isEmpty(templateTableName)) {
@@ -387,7 +392,8 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace, String sortBy, Set<EntityType> excludeTypes) {
+    public List<S3ImportTemplateDisplay> getS3ImportTemplate(String customerSpace, String sortBy,
+            Set<EntityType> excludeTypes) {
         List<S3ImportTemplateDisplay> templates = new ArrayList<>();
         List<String> folderNames = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
         log.info("folderNames is : " + folderNames.toString());
@@ -402,22 +408,22 @@ public class CDLServiceImpl implements CDLService {
         for (String folderName : folderNames) {
             DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
             if (task == null) {
-                EntityType entityType =
-                        EntityType.fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
+                EntityType entityType = EntityType
+                        .fromFeedTypeName(S3PathBuilder.getFolderNameFromFeedType(folderName));
                 if (CollectionUtils.isNotEmpty(excludeTypes) && excludeTypes.contains(entityType)) {
                     continue;
                 }
                 if (entityType != null) {
                     S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
-                    display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
-                            folderName));
+                    display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(),
+                            dropBoxSummary.getDropBox(), folderName));
                     display.setExist(Boolean.FALSE);
                     display.setTemplateName(entityType.getDefaultFeedTypeName());
                     display.setEntity(entityType.getEntity());
                     display.setObject(entityType.getDisplayName());
                     display.setFeedType(folderName);
-                    display.setS3ImportSystem(getS3ImportSystem(customerSpace,
-                            S3PathBuilder.getSystemNameFromFeedType(folderName)));
+                    display.setS3ImportSystem(
+                            getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
                     display.setImportStatus(DataFeedTask.S3ImportStatus.Pause);
                     templates.add(display);
                 }
@@ -436,26 +442,28 @@ public class CDLServiceImpl implements CDLService {
                 display.setObject(entityType.getDisplayName());
                 display.setFeedType(task.getFeedType());
                 display.setEntity(entityType.getEntity());
-                display.setS3ImportSystem(getS3ImportSystem(customerSpace,
-                        S3PathBuilder.getSystemNameFromFeedType(folderName)));
-                display.setImportStatus(task.getS3ImportStatus() == null ?
-                        DataFeedTask.S3ImportStatus.Pause : task.getS3ImportStatus());
+                display.setS3ImportSystem(
+                        getS3ImportSystem(customerSpace, S3PathBuilder.getSystemNameFromFeedType(folderName)));
+                display.setImportStatus(task.getS3ImportStatus() == null ? DataFeedTask.S3ImportStatus.Pause
+                        : task.getS3ImportStatus());
                 templates.add(display);
             }
         }
 
         if (StringUtils.isNotEmpty(sortBy)) {
-            Comparator<S3ImportTemplateDisplay> compareBySystemType =
-                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? "" :
-                            s.getS3ImportSystem().getSystemType().name());
-            Comparator<S3ImportTemplateDisplay> compareBySystemName =
-                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? "" :
-                            s.getS3ImportSystem().getDisplayName() == null ? "" : s.getS3ImportSystem().getDisplayName());
-            Comparator<S3ImportTemplateDisplay> compareBySystem = compareBySystemType.thenComparing(compareBySystemName);
+            Comparator<S3ImportTemplateDisplay> compareBySystemType = Comparator
+                    .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? ""
+                            : s.getS3ImportSystem().getSystemType().name());
+            Comparator<S3ImportTemplateDisplay> compareBySystemName = Comparator
+                    .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? ""
+                            : s.getS3ImportSystem().getDisplayName() == null ? ""
+                                    : s.getS3ImportSystem().getDisplayName());
+            Comparator<S3ImportTemplateDisplay> compareBySystem = compareBySystemType
+                    .thenComparing(compareBySystemName);
 
-            Comparator<S3ImportTemplateDisplay> compareBySystemPriority =
-                    Comparator.comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? -1 :
-                            s.getS3ImportSystem().getPriority());
+            Comparator<S3ImportTemplateDisplay> compareBySystemPriority = Comparator
+                    .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? -1
+                            : s.getS3ImportSystem().getPriority());
             if (sortBy.equalsIgnoreCase("SystemDisplay")) {
                 templates.sort(compareBySystem);
             } else if (sortBy.equalsIgnoreCase("SystemPriority")) {
@@ -472,7 +480,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public void createS3ImportSystem(String customerSpace, String systemDisplayName,
-                                     S3ImportSystem.SystemType systemType, Boolean primary) {
+            S3ImportSystem.SystemType systemType, Boolean primary) {
         S3ImportSystem s3ImportSystem = new S3ImportSystem();
         String systemName = AvroUtils.getAvroFriendlyString(systemDisplayName);
         s3ImportSystem.setSystemType(systemType);
@@ -501,16 +509,19 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable) {
-        List<TemplateFieldPreview> templatePreview =
-                templateTable.getAttributes().stream().map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
-        List<TemplateFieldPreview> standardPreview =
-                standardTable.getAttributes().stream().map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
-        Set<String> standardAttrNames = standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
+    public List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable,
+            Table standardTable) {
+        List<TemplateFieldPreview> templatePreview = templateTable.getAttributes().stream()
+                .map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
+        List<TemplateFieldPreview> standardPreview = standardTable.getAttributes().stream()
+                .map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
+        Set<String> standardAttrNames = standardTable.getAttributes().stream().map(Attribute::getName)
+                .collect(Collectors.toSet());
         for (TemplateFieldPreview fieldPreview : templatePreview) {
             if (standardAttrNames.contains(fieldPreview.getNameInTemplate())) {
                 fieldPreview.setFieldCategory(FieldCategory.LatticeField);
-                standardPreview.removeIf(preview -> preview.getNameInTemplate().equals(fieldPreview.getNameInTemplate()));
+                standardPreview
+                        .removeIf(preview -> preview.getNameInTemplate().equals(fieldPreview.getNameInTemplate()));
             } else {
                 fieldPreview.setFieldCategory(FieldCategory.CustomField);
             }
@@ -536,8 +547,8 @@ public class CDLServiceImpl implements CDLService {
 
     // append field type for the file
     private void appendFieldType(StringBuffer fileContent, Attribute attribute) {
-        UserDefinedType userDefinedType =
-                MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType());
+        UserDefinedType userDefinedType = MetadataResolver
+                .getFieldTypeFromPhysicalType(attribute.getPhysicalDataType());
         if (userDefinedType.equals(UserDefinedType.DATE)) {
             StringBuffer formatStr = new StringBuffer();
             if (!StringUtils.isBlank(attribute.getDateFormatString())) {
@@ -570,8 +581,8 @@ public class CDLServiceImpl implements CDLService {
         }
         fileContent.deleteCharAt(fileContent.length() - 1);
         fileContent.append("\n");
-        Map<String, Attribute> standardAttrMap =
-                standardTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, Attribute -> Attribute));
+        Map<String, Attribute> standardAttrMap = standardTable.getAttributes().stream()
+                .collect(Collectors.toMap(Attribute::getName, Attribute -> Attribute));
         for (Attribute attribute : templateTable.getAttributes()) {
             if (standardAttrMap.containsKey(attribute.getName())) {
                 standardAttrMap.remove(attribute.getName());
@@ -622,7 +633,7 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public boolean createWebVisitTemplate(String customerSpace, EntityType entityType, InputStream inputStream) {
+    public boolean createWebVisitProfile(String customerSpace, EntityType entityType, InputStream inputStream) {
         if (!EntityType.WebVisit.equals(entityType) && !EntityType.WebVisitPathPattern.equals(entityType)) {
             throw new RuntimeException("Cannot create template for: " + entityType.getDisplayName());
         }
@@ -634,8 +645,7 @@ public class CDLServiceImpl implements CDLService {
                 throw new RuntimeException("Already created template for: " + entityType.getDisplayName());
             }
         } else {
-            createS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM,
-                    S3ImportSystem.SystemType.Website,false);
+            createS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM, S3ImportSystem.SystemType.Website, false);
             websiteSystem = getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
         }
         SourceFile templateFile;
@@ -704,9 +714,12 @@ public class CDLServiceImpl implements CDLService {
             Preconditions.checkNotNull(webVisitStream);
             Preconditions.checkArgument(CollectionUtils.isNotEmpty(webVisitStream.getDimensions()));
             Preconditions.checkArgument(webVisitStream.getDimensions().size() > 1);
-            log.info(
-                    "Create WebVisit activity stream for tenant {}. stream PID = {}, dataFeedTaskUniqueId = {}",
+            log.info("Create WebVisit activity stream for tenant {}. stream PID = {}, dataFeedTaskUniqueId = {}",
                     customerSpace, webVisitStream.getPid(), taskId);
+            if (!activityMetricsProxy.setupDefaultWebVisitProfile(customerSpace, webVisitStream)) {
+                throw new IllegalStateException(
+                        String.format("Failed to create default web visit groups for tenant %s.", customerSpace));
+            }
         }
         return true;
     }

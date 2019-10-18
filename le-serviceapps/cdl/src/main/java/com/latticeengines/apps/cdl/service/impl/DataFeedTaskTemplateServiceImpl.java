@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
+import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
@@ -39,6 +40,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
@@ -98,6 +100,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private ActivityMetricsGroupService activityMetricsGroupService;
+
     @Value("${aws.customer.s3.bucket}")
     private String customerBucket;
 
@@ -105,7 +110,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private Boolean useEmr;
 
     @Override
-    public boolean setupWebVisitTemplate(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
+    public boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         EntityType entityType = simpleTemplateMetadata.getEntityType();
         if (!EntityType.WebVisit.equals(entityType) && !EntityType.WebVisitPathPattern.equals(entityType)) {
@@ -175,6 +180,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             dimensions.forEach(dimensionEntityMgr::create);
             log.info("Create PathPatternId stream dimension for tenant {}. PathPatternCatalog = {}",
                     webVisitStream.getTenant().getId(), pathPtnCatalog);
+            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(tenant.getId(), webVisitStream.getName());
+            if (defaultGroups.size() != 1) {
+                throw new IllegalStateException(String.format("Failed to setup default web visit metric groups for tenant %s", customerSpace));
+            }
         }
 
         return true;
@@ -291,7 +300,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     private List<Attribute> generateCustomerAttributes(List<SimpleTemplateMetadata.SimpleTemplateAttribute> simpleCustomerAttrs) {
         List<Attribute> customerAttributes = new ArrayList<>();
-        for (SimpleTemplateMetadata.SimpleTemplateAttribute simpleTemplateAttr :  simpleCustomerAttrs) {
+        for (SimpleTemplateMetadata.SimpleTemplateAttribute simpleTemplateAttr : simpleCustomerAttrs) {
             Attribute attribute = new Attribute();
             attribute.setDisplayName(simpleTemplateAttr.getDisplayName());
             attribute.setNullable(Boolean.TRUE);
@@ -357,10 +366,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         allApprovedUsages.add(ApprovedUsage.MODEL_ALLINSIGHTS);
         if (CollectionUtils.isNotEmpty(approvedUsages)) {
             for (String approvedUsage : approvedUsages) {
-                 ApprovedUsage approvedUsage1 = ApprovedUsage.fromName(approvedUsage);
-                 if (!ApprovedUsage.NONE.equals(approvedUsage1)) {
-                     allApprovedUsages.add(approvedUsage1);
-                 }
+                ApprovedUsage approvedUsage1 = ApprovedUsage.fromName(approvedUsage);
+                if (!ApprovedUsage.NONE.equals(approvedUsage1)) {
+                    allApprovedUsages.add(approvedUsage1);
+                }
             }
         }
         return new ArrayList<>(allApprovedUsages);
