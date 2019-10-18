@@ -18,6 +18,7 @@ import static org.testng.collections.Sets.newHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -81,9 +82,9 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
         Assert.assertNotNull(result);
 
         Map<String, Set<String>> tableNames = result.entrySet().stream().map(entry -> {
-            String catalogName = entry.getKey();
+            String catalogId = entry.getKey();
             Set<String> tables = entry.getValue().stream().map(CatalogImport::getTableName).collect(Collectors.toSet());
-            return Pair.of(catalogName, tables);
+            return Pair.of(catalogId, tables);
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         Assert.assertEquals(tableNames, expectedResult,
                 String.format(
@@ -234,9 +235,10 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
                 s3ImportSystemService);
     }
 
-    private Catalog catalog(String catalogName, String dataFeedTaskUniqueId) {
+    private Catalog catalog(String catalogId, String dataFeedTaskUniqueId) {
         Catalog catalog = new Catalog();
-        catalog.setName(catalogName);
+        catalog.setName(UUID.randomUUID().toString());
+        catalog.setCatalogId(catalogId);
         DataFeedTask task = new DataFeedTask();
         task.setUniqueId(dataFeedTaskUniqueId);
         catalog.setDataFeedTask(task);
