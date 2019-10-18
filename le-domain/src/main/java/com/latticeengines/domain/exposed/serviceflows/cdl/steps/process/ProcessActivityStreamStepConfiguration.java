@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ProcessActivityStreamStepConfiguration extends BaseProcessEntityStepConfiguration {
 
+    // streamId -> stream object
     @JsonProperty("activity_stream_map")
     private Map<String, AtlasStream> activityStreamMap;
 

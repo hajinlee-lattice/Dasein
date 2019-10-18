@@ -39,6 +39,7 @@ public class PrepareForActivityStreamUnitTestNG {
     private static final List<String> DEFAULT_AGGR_ENTITIES = singletonList(Account.name());
     private static final String DEFAULT_DATE_ATTR = InterfaceName.CreatedDate.name();
     private static final String DEFAULT_STREAM_NAME = "test_stream";
+    private static final String DEFAULT_STREAM_ID = "test_stream_id";
     private static final String DEFAULT_TASK_ID = UUID.randomUUID().toString();
 
     @Test(groups = "unit", dataProvider = "streamsNeedRebuild")
@@ -163,6 +164,7 @@ public class PrepareForActivityStreamUnitTestNG {
     private AtlasStream defaultStream() {
         AtlasStream stream = new AtlasStream();
         stream.setName(DEFAULT_STREAM_NAME);
+        stream.setStreamId(DEFAULT_STREAM_ID);
         stream.setMatchEntities(DEFAULT_MATCH_ENTITIES);
         stream.setAggrEntities(DEFAULT_AGGR_ENTITIES);
         stream.setAttributeDerivers(getDefaultAttrDerivers());

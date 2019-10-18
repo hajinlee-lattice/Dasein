@@ -619,8 +619,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Catalog> catalogs = catalogEntityMgr.findByTenant(tenant);
         log.info("Catalogs for tenant {} are {}", customerSpace, catalogs);
 
+        // streamId -> stream obj
         Map<String, AtlasStream> streams = streamEntityMgr.findByTenant(tenant, true).stream()
-                .collect(Collectors.toMap(AtlasStream::getName, stream -> stream));
+                .collect(Collectors.toMap(AtlasStream::getStreamId, stream -> stream));
         log.info("ActivityStreams for tenant {} are {}", customerSpace, JsonUtils.serialize(streams));
 
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,

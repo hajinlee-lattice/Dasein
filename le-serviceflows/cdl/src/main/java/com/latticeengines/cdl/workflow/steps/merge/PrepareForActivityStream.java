@@ -83,32 +83,35 @@ public class PrepareForActivityStream extends BaseWorkflowStep<ProcessActivitySt
     boolean requireRebuild(@NotNull AtlasStream previous, @NotNull AtlasStream current) {
         Preconditions.checkNotNull(previous);
         Preconditions.checkNotNull(current);
-        Preconditions.checkArgument(previous.getName().equals(current.getName()), "Stream names should be the same");
+        Preconditions.checkArgument(previous.getStreamId().equals(current.getStreamId()),
+                "Stream names should be the same");
 
-        String name = previous.getName();
+        String streamId = previous.getStreamId();
+        log.info("Checking whether stream (PID={}, streamId={}, prevStreamName={}, currStreamName={}) should rebuild",
+                previous.getPid(), streamId, previous.getName(), current.getName());
         if (current.getDataFeedTaskIngestionBehavior() == DataFeedTask.IngestionBehavior.Replace) {
-            log.info("Ingestion behavior for stream {} is replace, require rebuild", name);
+            log.info("Ingestion behavior for stream {} is replace, require rebuild", streamId);
             return true;
         }
         if (!distinctEquals(previous.getMatchEntities(), current.getMatchEntities())) {
-            logStreamChanged("match entities", name, previous.getAggrEntities(), current.getAggrEntities());
+            logStreamChanged("match entities", streamId, previous.getAggrEntities(), current.getAggrEntities());
             return true;
         }
         if (!distinctEquals(previous.getAggrEntities(), current.getAggrEntities())) {
-            logStreamChanged("aggregate entities", name, previous.getAggrEntities(), current.getAggrEntities());
+            logStreamChanged("aggregate entities", streamId, previous.getAggrEntities(), current.getAggrEntities());
             return true;
         }
         if (!StringUtils.equals(previous.getDateAttribute(), current.getDateAttribute())) {
-            logStreamChanged("date attribute", name, previous.getDateAttribute(), current.getDateAttribute());
+            logStreamChanged("date attribute", streamId, previous.getDateAttribute(), current.getDateAttribute());
             return true;
         }
         if (!distinctEquals(previous.getDimensions(), current.getDimensions())) {
-            logStreamChanged("dimensions", name, JsonUtils.serialize(previous.getDimensions()),
+            logStreamChanged("dimensions", streamId, JsonUtils.serialize(previous.getDimensions()),
                     JsonUtils.serialize(current.getDimensions()));
             return true;
         }
         if (!distinctEquals(previous.getAttributeDerivers(), current.getAttributeDerivers())) {
-            logStreamChanged("attribute derivers", name, previous.getAttributeDerivers(),
+            logStreamChanged("attribute derivers", streamId, previous.getAttributeDerivers(),
                     current.getAttributeDerivers());
             return true;
         }
@@ -117,9 +120,9 @@ public class PrepareForActivityStream extends BaseWorkflowStep<ProcessActivitySt
         return false;
     }
 
-    private void logStreamChanged(@NotNull String varName, @NotNull String streamName, Object previousVal,
+    private void logStreamChanged(@NotNull String varName, @NotNull String streamId, Object previousVal,
             Object currentVal) {
-        log.info("{} changed for stream {}, require rebuild. previous={}, current={}", varName, streamName, previousVal,
+        log.info("{} changed for stream {}, require rebuild. previous={}, current={}", varName, streamId, previousVal,
                 currentVal);
     }
 

@@ -71,11 +71,15 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     @Override
     public AtlasStream createStream(@NotNull String customerSpace, @NotNull AtlasStream stream) {
+        // TODO retry on streamId conflict
         Preconditions.checkNotNull(stream, "stream to be created should not be null");
         Preconditions.checkNotNull(stream.getDataFeedTaskUniqueId(), "stream should contains data feed task unique ID");
+        Preconditions.checkNotNull(stream.getStreamId(),
+                "stream should not contain streamId field which is auto generated");
         Tenant tenant = MultiTenantContext.getTenant();
 
         stream.setDataFeedTask(getDataFeedTask(tenant, stream.getDataFeedTaskUniqueId()));
+        stream.setStreamId(AtlasStream.generateId());
         streamEntityMgr.create(stream);
 
         // create attached dimensions

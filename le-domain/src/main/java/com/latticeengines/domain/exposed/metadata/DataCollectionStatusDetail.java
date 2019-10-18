@@ -23,7 +23,7 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("OrigCatalogFileMap")
     private Map<String, List<String>> origCatalogFileMap;
 
-    // streamName -> stream object
+    // streamId -> stream object
     @JsonProperty("ActivityStreamMap")
     private Map<String, AtlasStream> activityStreamMap;
 
