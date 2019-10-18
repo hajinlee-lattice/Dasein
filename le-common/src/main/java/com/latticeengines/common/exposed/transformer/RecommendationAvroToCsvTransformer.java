@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -36,9 +35,9 @@ public class RecommendationAvroToCsvTransformer implements AvroToCsvTransformer 
 
     @Override
     public List<String> getFieldNames(Schema schema) {
-        accountFields = accountDisplayNames.keySet().stream().collect(Collectors.toList());
-        List<String> fieldNames = accountDisplayNames.values().stream().collect(Collectors.toList());
-        contactFields = contactDisplayNames.keySet().stream().collect(Collectors.toList());
+        accountFields = new ArrayList<>(accountDisplayNames.keySet());
+        List<String> fieldNames = new ArrayList<>(accountDisplayNames.values());
+        contactFields = new ArrayList<>(contactDisplayNames.keySet());
         fieldNames.addAll(contactDisplayNames.values());
         log.info("Fields: " + String.join(", ", fieldNames));
         return fieldNames;
