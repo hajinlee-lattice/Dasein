@@ -304,7 +304,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       }
     } else {
       // join
-      val recommendations = derivedAccounts.withColumn("CONTACTS", lit("[]").cast(StringType))
+      val recommendations = derivedAccounts.withColumn("CONTACTS", lit("").cast(StringType))
       finalRecommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
       finalOutput = "0"
     }
@@ -418,7 +418,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //
       )
-      val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("[]").cast(StringType)).otherwise(col("CONTACTS")))
+      val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("").cast(StringType)).otherwise(col("CONTACTS")))
       //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
       logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    processedAggrContacts.printSchema
