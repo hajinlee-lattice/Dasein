@@ -1,0 +1,20 @@
+package com.latticeengines.monitor.tracing;
+
+/**
+ * Tag constants for distributed tracing
+ */
+public class TracingTags {
+
+    public static class Workflow {
+        public static final String PID = "workflow.pid";
+        public static final String USER = "workflow.user";
+        public static final String WORKFLOW_ID = "workflow.id";
+        public static final String APPLICATION_ID = "workflow.app_id";
+        public static final String WORKFLOW_NAME = "workflow.name";
+        public static final String SOFTWARE_LIBRARIES = "workflow.swpkgs";
+        public static final String IS_RESTART = "workflow.restart";
+        public static final String NAMESPACE = "workflow.namespace";
+        public static final String STEP = "workflow.step";
+        public static final String STEP_SEQ = "workflow.step_seq";
+    }
+}

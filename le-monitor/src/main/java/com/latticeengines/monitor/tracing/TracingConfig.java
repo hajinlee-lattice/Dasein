@@ -76,7 +76,6 @@ public class TracingConfig {
         JaegerTracer tracer = config.getTracer();
         // register global
         GlobalTracer.registerIfAbsent(tracer);
-        // TODO add jaeger connection info, sampling info
         log.info("Instantiating jaeger tracer. stack={}, beanEnv={}, serviceName={}, agent={}:{}", leStack,
                 BeanFactoryEnvironment.getEnvironment(), service, jaegerAgentHost, jaegerAgentPort);
         return tracer;

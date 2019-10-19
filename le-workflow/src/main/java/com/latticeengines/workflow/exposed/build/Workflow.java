@@ -18,6 +18,7 @@ public class Workflow {
     private Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
     private FailingStep failingStep;
     private Map<String, String> initialContext = new HashMap<>();
+    private Map<String, String> tracingContext = new HashMap<>();
 
     public List<AbstractStep<? extends BaseStepConfiguration>> getSteps() {
         return steps;
@@ -80,4 +81,11 @@ public class Workflow {
         this.initialContext = initialContext;
     }
 
+    public Map<String, String> getTracingContext() {
+        return tracingContext;
+    }
+
+    public void setTracingContext(Map<String, String> tracingContext) {
+        this.tracingContext = tracingContext;
+    }
 }

@@ -22,6 +22,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -29,6 +31,13 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntity
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
+
+import io.opentracing.References;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @StepScope
 public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConfiguration> {
@@ -68,9 +77,86 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         if (workflowConfig.getWorkflowName() == null) {
             throw new LedpException(LedpCode.LEDP_28011, new String[] { workflowConfig.toString() });
         }
-        log.info(String.format("Running WorkflowProcessor with workflowName:%s and config:%s",
-                workflowConfig.getWorkflowName(), workflowConfig.toString()));
+
+        String workflowName = workflowConfig.getWorkflowName();
+        boolean isRestart = workflowConfig.isRestart();
+        // loading java libaries
+        log.info("Running WorkflowProcessor with workflowName:{} and config:{}", workflowName,
+                workflowConfig.toString());
         Collection<String> swpkgNames = workflowConfig.getSwpkgNames();
+        // tracer uses microsecond
+        long start = System.currentTimeMillis() * 1000;
+        loadLibraries(swpkgNames);
+        long end = System.currentTimeMillis() * 1000;
+
+        // can only start tracing after libraries is loaded
+        Tracer tracer = GlobalTracer.get();
+        SpanContext parentCtx = TracingUtils.getSpanContext(workflowConfig.getTracingContext());
+        Span workflowSpan = null;
+        try (Scope scope = startWorkflowSpan(parentCtx, workflowName, appId.toString(), start, isRestart)) {
+            workflowSpan = tracer.activeSpan();
+            traceSoftwareLibrariesLoad(start, end, swpkgNames.toString());
+
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(appId.toString());
+            if (workflowJob == null) {
+                throw new RuntimeException(String.format("No workflow job found with application id %s", appId));
+            }
+
+            workflowSpan.setTag(TracingTags.Workflow.PID, workflowJob.getPid());
+            workflowConfig.setTracingContext(TracingUtils.getActiveTracingContext());
+
+            Long submitTime = workflowJob.getStartTimeInMillis();
+            if (submitTime != null && submitTime > 0) {
+                traceYarnInstantiation(submitTime * 1000, start, parentCtx);
+            }
+
+            // start workflow and wait for it to complete
+            return startAndAwaitCompletion(workflowConfig, workflowJob, workflowSpan);
+        } finally {
+            TracingUtils.finish(workflowSpan);
+        }
+    }
+
+    // the span from workflow submission to java code being executed (mostly yarn
+    // queue & instantiate time)
+    private void traceYarnInstantiation(long submitTime, long jobStartTime, SpanContext parentContext) {
+        if (parentContext == null) {
+            return;
+        }
+
+        // only trace if there is parent span
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("Yarn Instantiation") //
+                .asChildOf(parentContext) //
+                .withStartTimestamp(submitTime) //
+                .start();
+        span.finish(jobStartTime);
+    }
+
+    private void traceSoftwareLibrariesLoad(long start, long end, String libraryNames) {
+        Tracer tracer = GlobalTracer.get();
+        Span loadLibSpan = tracer.buildSpan("loadSoftwareLibraries") //
+                .withTag(TracingTags.Workflow.SOFTWARE_LIBRARIES, libraryNames) //
+                .asChildOf(tracer.activeSpan()) //
+                .withStartTimestamp(start) //
+                .start();
+        loadLibSpan.finish(end);
+    }
+
+    private Scope startWorkflowSpan(SpanContext parentContext, String workflowName, String appId, long startTime,
+            boolean isRestart) {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("Workflow - " + workflowName) //
+                .addReference(References.FOLLOWS_FROM, parentContext) //
+                .withTag(TracingTags.Workflow.WORKFLOW_NAME, workflowName) //
+                .withTag(TracingTags.Workflow.APPLICATION_ID, appId) //
+                .withTag(TracingTags.Workflow.IS_RESTART, isRestart) //
+                .withStartTimestamp(startTime) //
+                .start();
+        return tracer.activateSpan(span);
+    }
+
+    private void loadLibraries(Collection<String> swpkgNames) {
         if (CollectionUtils.isEmpty(swpkgNames)) {
             log.info("Enriching application context with all sw packages available.");
             appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(),
@@ -80,14 +166,11 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(),
                     swpkgNames, appContext);
         }
+    }
 
-        WorkflowExecutionId workflowId;
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(appId.toString());
-        if (workflowJob == null) {
-            throw new RuntimeException(String.format("No workflow job found with application id %s", appId));
-        }
-
+    private String startAndAwaitCompletion(WorkflowConfiguration workflowConfig, WorkflowJob workflowJob, Span span) {
         try {
+            WorkflowExecutionId workflowId;
             workflowService.prepareToSleepForCompletion();
             if (workflowConfig.isRestart()) {
                 @SuppressWarnings("unchecked")
@@ -104,6 +187,10 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
                 workflowService.registerJob(workflowConfig, appContext);
                 workflowId = workflowService.start(workflowConfig, workflowJob);
             }
+
+            if (workflowId != null) {
+                span.setTag(TracingTags.Workflow.WORKFLOW_ID, workflowId.getId());
+            }
             workflowService.sleepForCompletion(workflowId);
         } catch (Exception exc) {
             workflowJob.setStatus(JobStatus.FAILED.name());
@@ -111,6 +198,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             if (workflowJob.getWorkflowId() != null) {
                 jobCacheService.evictByWorkflowIds(Collections.singletonList(workflowJob.getWorkflowId()));
             }
+            TracingUtils.logError(span, exc, "Fail when start and wait workflow completion");
 
             ErrorDetails details;
             if (exc instanceof LedpException) {
