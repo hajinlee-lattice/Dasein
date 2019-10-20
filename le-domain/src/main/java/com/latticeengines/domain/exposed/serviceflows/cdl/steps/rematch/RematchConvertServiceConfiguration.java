@@ -13,8 +13,8 @@ public class RematchConvertServiceConfiguration extends BaseConvertBatchStoreSer
     @JsonProperty("entity")
     private BusinessEntity entity;
 
-    @JsonProperty("need_convert_batchstore_tables")
-    private HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables;
+    @JsonProperty("batchstores_to_convert")
+    private HashMap<TableRoleInCollection, Table> batchstoresToConvert;
 
     public BusinessEntity getEntity() {
         return entity;
@@ -24,11 +24,11 @@ public class RematchConvertServiceConfiguration extends BaseConvertBatchStoreSer
         this.entity = entity;
     }
 
-    public HashMap<TableRoleInCollection, Table> getNeedConvertBatchStoreTables() {
-        return needConvertBatchStoreTables;
+    public HashMap<TableRoleInCollection, Table> getBatchstoresToConvert() {
+        return batchstoresToConvert;
     }
 
-    public void setNeedConvertBatchStoreTables(HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables) {
-        this.needConvertBatchStoreTables = needConvertBatchStoreTables;
+    public void setBatchstoresToConvert(HashMap<TableRoleInCollection, Table> batchstoresToConvert) {
+        this.batchstoresToConvert = batchstoresToConvert;
     }
 }

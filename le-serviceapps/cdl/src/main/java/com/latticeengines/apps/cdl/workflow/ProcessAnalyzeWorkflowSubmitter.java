@@ -1019,14 +1019,22 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     //get batchStoreTableName when we need rematch entityMatch tenant, if no rematch, this list will be empty;
     private Set<BusinessEntity> getNonBatchStoreEntities(String customerSpace,
                                                          HashMap<TableRoleInCollection, Table> needConvertBatchStoreMap) {
-        Set<BusinessEntity> entities = new HashSet<>();
-        getBatchStoreTable(customerSpace, BusinessEntity.Account, entities, needConvertBatchStoreMap);
-        getBatchStoreTable(customerSpace, BusinessEntity.Contact, entities, needConvertBatchStoreMap);
-        getBatchStoreTable(customerSpace, BusinessEntity.Transaction, entities, needConvertBatchStoreMap);
-        return entities;
+        Set<BusinessEntity> nonBatchStoreEntities = new HashSet<>();
+        getBatchStoreTable(customerSpace, BusinessEntity.Account, nonBatchStoreEntities, needConvertBatchStoreMap);
+        getBatchStoreTable(customerSpace, BusinessEntity.Contact, nonBatchStoreEntities, needConvertBatchStoreMap);
+        getBatchStoreTable(customerSpace, BusinessEntity.Transaction, nonBatchStoreEntities, needConvertBatchStoreMap);
+        return nonBatchStoreEntities;
     }
 
-    private void getBatchStoreTable(String customerSpace, BusinessEntity entity, Set<BusinessEntity> entities,
+    /**
+     *
+     * @param customerSpace identify tenant.
+     * @param entity used to find the batchStoreTable
+     * @param nonBatchStoreEntities if batchStoreTable is null, put parameter <entity> into this Set
+     * @param needConvertBatchStoreMap if batchStoreTable isn't null, put Pair<role, batchStoreTableName> into
+     *                                 this map
+     */
+    private void getBatchStoreTable(String customerSpace, BusinessEntity entity, Set<BusinessEntity> nonBatchStoreEntities,
                                     HashMap<TableRoleInCollection
             , Table> needConvertBatchStoreMap) {
         TableRoleInCollection tableRoleInCollection = entity.getBatchStore();
@@ -1036,7 +1044,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         List<Table> masterTable = dataCollectionService.getTables(customerSpace, null,
                 tableRoleInCollection, null);
         if (masterTable == null || masterTable.isEmpty()) {
-            entities.add(entity);
+            nonBatchStoreEntities.add(entity);
         } else {
             needConvertBatchStoreMap.put(tableRoleInCollection, masterTable.get(0));
         }

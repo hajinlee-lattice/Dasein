@@ -53,10 +53,10 @@ public class ConvertBatchStoreToDataTableWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
-        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables) {
-            convertAccountWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
-            convertContactWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
-            convertTransactionWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
+        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> batchStoresToConvert) {
+            convertAccountWorkflowBuilder.setConvertServiceConfig(batchStoresToConvert);
+            convertContactWorkflowBuilder.setConvertServiceConfig(batchStoresToConvert);
+            convertTransactionWorkflowBuilder.setConvertServiceConfig(batchStoresToConvert);
             return this;
         }
 

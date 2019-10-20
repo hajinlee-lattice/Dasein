@@ -97,12 +97,12 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
     @Override
     public Table getMasterTable(String customerSpace,
                                 TableRoleInCollection batchStore, RematchConvertServiceConfiguration config) {
-        HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables = config.getNeedConvertBatchStoreTables();
-        log.info("needConvertBatchStoreTables is {}.", needConvertBatchStoreTables);
-        if (needConvertBatchStoreTables == null) {
+        HashMap<TableRoleInCollection, Table> batchStoresToConvert = config.getBatchstoresToConvert();
+        log.info("batchStoresToConvert is {}.", batchStoresToConvert);
+        if (batchStoresToConvert == null) {
             return null;
         }
-        return needConvertBatchStoreTables.get(batchStore);
+        return batchStoresToConvert.get(batchStore);
     }
 
     //remove some unused column fron Table, when we fake templateTable

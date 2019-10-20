@@ -338,8 +338,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables) {
-            convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig(needConvertBatchStoreTables);
+        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> batchStoresToConvert) {
+            convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig(batchStoresToConvert);
             return this;
         }
 

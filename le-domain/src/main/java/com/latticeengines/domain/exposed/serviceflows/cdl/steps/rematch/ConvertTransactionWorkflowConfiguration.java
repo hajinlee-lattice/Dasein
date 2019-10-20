@@ -34,10 +34,10 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> needConvertBatchStoreTables) {
+        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> batchStoresToConvert) {
             RematchConvertServiceConfiguration serviceConfiguration = new RematchConvertServiceConfiguration();
             serviceConfiguration.setEntity(BusinessEntity.Transaction);
-            serviceConfiguration.setNeedConvertBatchStoreTables(needConvertBatchStoreTables);
+            serviceConfiguration.setBatchstoresToConvert(batchStoresToConvert);
             convertBatchStoreStepConfiguration.setConvertServiceConfig(serviceConfiguration);
             return this;
         }
