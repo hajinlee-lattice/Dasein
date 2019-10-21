@@ -117,6 +117,12 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("DataDbPassword")
     private String dataDbPassword;
 
+    @JsonProperty("SaltHint")
+    private String saltHint;
+
+    @JsonProperty("EncryptionKey")
+    private String encryptionKey;
+
     public PlayLaunchSparkContext() {
     }
 
@@ -125,7 +131,7 @@ public class PlayLaunchSparkContext implements Serializable {
             RatingModel publishedIteration, List<String> accountColsRecIncluded,
             List<String> accountColsRecNotIncludedStd, List<String> accountColsRecNotIncludedNonStd,
             List<String> contactCols, boolean useEntityMatch, String dataDbDriver, String dataDbUrl, String dataDbUser,
-            String dataDbPassword) {
+            String dataDbPassword, String saltHint, String encryptionKey) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
         this.tenantPid = tenant.getPid();
@@ -153,6 +159,8 @@ public class PlayLaunchSparkContext implements Serializable {
         this.dataDbUrl = dataDbUrl;
         this.dataDbUser = dataDbUser;
         this.dataDbPassword = dataDbPassword;
+        this.saltHint = saltHint;
+        this.encryptionKey = encryptionKey;
         setSyncDestination(playLaunch);
     }
 
@@ -360,6 +368,22 @@ public class PlayLaunchSparkContext implements Serializable {
         this.dataDbPassword = dataDbPassword;
     }
 
+    public String getSaltHint() {
+        return this.saltHint;
+    }
+
+    public void setSaltHint(String saltHint) {
+        this.saltHint = saltHint;
+    }
+
+    public String getEncryptionKey() {
+        return this.encryptionKey;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+
     private void setSyncDestination(PlayLaunch playLaunch) {
         String synchronizationDestination;
         String destinationSysType;
@@ -416,6 +440,8 @@ public class PlayLaunchSparkContext implements Serializable {
         private String dataDbUrl;
         private String dataDbUser;
         private String dataDbPassword;
+        private String saltHint;
+        private String encryptionKey;
 
         public PlayLaunchSparkContextBuilder tenant(Tenant tenant) {
             this.tenant = tenant;
@@ -513,12 +539,22 @@ public class PlayLaunchSparkContext implements Serializable {
             return this;
         }
 
+        public PlayLaunchSparkContextBuilder saltHint(String saltHint) {
+            this.saltHint = saltHint;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder encryptionKey(String encryptionKey) {
+            this.encryptionKey = encryptionKey;
+            return this;
+        }
+
         public PlayLaunchSparkContext build() {
             return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
                     this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId, this.publishedIteration,
                     this.accountColsRecIncluded, this.accountColsRecNotIncludedStd,
                     this.accountColsRecNotIncludedNonStd, this.contactCols, this.useEntityMatch, this.dataDbDriver,
-                    this.dataDbUrl, this.dataDbUser, this.dataDbPassword);
+                    this.dataDbUrl, this.dataDbUser, this.dataDbPassword, this.saltHint, this.encryptionKey);
         }
     }
 

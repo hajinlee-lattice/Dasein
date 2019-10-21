@@ -42,21 +42,21 @@ public class CipherUtils {
 
     // When seen this key, means the message is salted
     private static final String SALT_HINT_STR = getSecret(ENV_SALT_HINT, PROP_SALT_HINT, null);
-    private static final byte[] SALT_HINT_BYTES = Base64.decodeBase64(SALT_HINT_STR);
 
     private static final String CHARSET_UTF8 = "UTF-8";
 
     public static String encrypt(final String str) {
-        return encrypt(str, KEY);
+        return encrypt(str, KEY, SALT_HINT_STR);
     }
 
-    public static String encrypt(final String str, final String key) {
+    public static String encrypt(final String str, final String key, final String saltHint) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+            byte[] saltHintBytes = Base64.decodeBase64(saltHint);
             byte[] salt = generateSalt();
             cipher.init(Cipher.ENCRYPT_MODE, strToKey(key), new IvParameterSpec(salt));
             byte[] secret = cipher.doFinal(str.getBytes(CHARSET_UTF8));
-            byte[] bytes = Arrays.copyOf(SALT_HINT_BYTES, SALT_HINT_BYTES.length);
+            byte[] bytes = Arrays.copyOf(saltHintBytes, saltHintBytes.length);
             if ((secret.length / 16) % 2 == 1) {
                 // if length is an odd number, hint + secret + salt
                 bytes = ArrayUtils.addAll(bytes, secret);
@@ -72,22 +72,23 @@ public class CipherUtils {
         }
     }
 
-    public static String decrypt(final String str, final String key) {
+    public static String decrypt(final String str, final String key, final String saltHint) {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+            byte[] saltHintBytes = Base64.decodeBase64(saltHint);
             byte[] bytes = Base64.decodeBase64(str);
             byte[] secret;
-            if (bytes.length > (SALT_HINT_BYTES.length + 16) && SALT_HINT_STR.equals(extractHint(bytes))) {
+            if (bytes.length > (saltHintBytes.length + 16) && saltHint.equals(extractHint(bytes, saltHintBytes))) {
                 // this is a salted secret
                 byte[] salt;
-                if (((bytes.length - 16 - SALT_HINT_BYTES.length) / 16) % 2 == 1) {
+                if (((bytes.length - 16 - saltHintBytes.length) / 16) % 2 == 1) {
                     // if length is an odd number, hint + secret + salt
                     salt = Arrays.copyOfRange(bytes, bytes.length - 16, bytes.length);
-                    secret = Arrays.copyOfRange(bytes, SALT_HINT_BYTES.length, bytes.length - 16);
+                    secret = Arrays.copyOfRange(bytes, saltHintBytes.length, bytes.length - 16);
                 } else {
                     // if length is an even number, hint + salt + secret
-                    salt = Arrays.copyOfRange(bytes, SALT_HINT_BYTES.length, SALT_HINT_BYTES.length + 16);
-                    secret = Arrays.copyOfRange(bytes, SALT_HINT_BYTES.length + 16, bytes.length);
+                    salt = Arrays.copyOfRange(bytes, saltHintBytes.length, saltHintBytes.length + 16);
+                    secret = Arrays.copyOfRange(bytes, saltHintBytes.length + 16, bytes.length);
                 }
                 cipher.init(Cipher.DECRYPT_MODE, strToKey(key), new IvParameterSpec(salt));
                 return new String(cipher.doFinal(secret), CHARSET_UTF8);
@@ -101,7 +102,7 @@ public class CipherUtils {
     }
 
     public static String decrypt(final String str) {
-        return decrypt(str, KEY);
+        return decrypt(str, KEY, SALT_HINT_STR);
     }
 
     /*
@@ -154,8 +155,8 @@ public class CipherUtils {
         return new IvParameterSpec(bytes);
     }
 
-    private static String extractHint(byte[] bytes) {
-        return Base64.encodeBase64String(Arrays.copyOfRange(bytes, 0, SALT_HINT_BYTES.length)) //
+    private static String extractHint(byte[] bytes, byte[] saltHintBytes) {
+        return Base64.encodeBase64String(Arrays.copyOfRange(bytes, 0, saltHintBytes.length)) //
                 .replace("\r", "") //
                 .replace("\n", "");
     }

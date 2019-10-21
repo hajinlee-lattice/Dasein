@@ -645,6 +645,9 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         aiModel.setUpdatedBy(ratingEngine.getUpdatedBy());
         aiModel.setRatingEngine(ratingEngine);
         ratingEngine.setLatestIteration(aiModel);
+        String saltHint = CipherUtils.generateKey();
+        String key = CipherUtils.generateKey();
+        String pw = CipherUtils.encrypt(dataDbPassword, key, saltHint);
 
         PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
                 .tenant(tenant) //
@@ -661,7 +664,9 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 .dataDbDriver(dataDbDriver) //
                 .dataDbUrl(dataDbUrl) //
                 .dataDbUser(dataDbUser) //
-                .dataDbPassword(CipherUtils.encrypt(dataDbPassword)) //
+                .saltHint(saltHint) //
+                .encryptionKey(key) //
+                .dataDbPassword(pw) //
                 .build();
         return sparkContext;
     }

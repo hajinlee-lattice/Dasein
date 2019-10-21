@@ -304,7 +304,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       }
     } else {
       // join
-      val recommendations = derivedAccounts.withColumn("CONTACTS", lit("").cast(StringType))
+      val recommendations = derivedAccounts.withColumn("CONTACTS", lit(""))
       finalRecommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
       finalOutput = "0"
     }
@@ -338,10 +338,12 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val url = playLaunchContext.getDataDbUrl()
     val user = playLaunchContext.getDataDbUser()
     val pw = playLaunchContext.getDataDbPassword()
+    val saltHint = playLaunchContext.getSaltHint()
+    val encryptionKey = playLaunchContext.getEncryptionKey()
     val prop = new java.util.Properties
     prop.setProperty("driver", driver)
     prop.setProperty("user", user)
-    prop.setProperty("password", CipherUtils.decrypt(pw)) 
+    prop.setProperty("password", CipherUtils.decrypt(pw, encryptionKey, saltHint)) 
     val table = "Recommendation"
     
     //write data from spark dataframe to database
@@ -445,7 +447,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //
       )
-      val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("").cast(StringType)).otherwise(col("CONTACTS")))
+      val processedAggrContacts = aggregatedContacts.withColumn("CONTACTS", when(col("CONTACTS").isNull, lit("")).otherwise(col("CONTACTS")))
       //aggregatedContacts.rdd.saveAsTextFile("/tmp/aggregated.txt")
       logSpark("----- BEGIN SCRIPT OUTPUT -----")
 	    processedAggrContacts.printSchema

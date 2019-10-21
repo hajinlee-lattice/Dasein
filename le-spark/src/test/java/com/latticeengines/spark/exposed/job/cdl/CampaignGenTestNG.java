@@ -543,6 +543,9 @@ public class CampaignGenTestNG extends TestJoinTestNGBase {
         play.setName(UUID.randomUUID().toString());
         playLaunch.setPlay(play);
         long launchTime = new Date().getTime();
+        String saltHint = CipherUtils.generateKey();
+        String key = CipherUtils.generateKey();
+        String pw = CipherUtils.encrypt(dataDbPassword, key, saltHint);
 
         PlayLaunchSparkContext sparkContext = new PlayLaunchSparkContextBuilder()//
                 .tenant(tenant) //
@@ -556,7 +559,9 @@ public class CampaignGenTestNG extends TestJoinTestNGBase {
                 .dataDbDriver(dataDbDriver) //
                 .dataDbUrl(dataDbUrl) //
                 .dataDbUser(dataDbUser) //
-                .dataDbPassword(CipherUtils.encrypt(dataDbPassword)) //
+                .saltHint(saltHint) //
+                .encryptionKey(key) //
+                .dataDbPassword(pw) //
                 .build();
         return sparkContext;
     }

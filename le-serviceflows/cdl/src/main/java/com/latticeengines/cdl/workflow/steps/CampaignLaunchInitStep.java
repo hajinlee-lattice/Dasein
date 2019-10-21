@@ -220,7 +220,11 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 playLaunchSparkContext.setDataDbDriver(dataDbDriver);
                 playLaunchSparkContext.setDataDbUrl(dataDbUrl);
                 playLaunchSparkContext.setDataDbUser(dataDbUser);
-                playLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword));
+                String saltHint = CipherUtils.generateKey();
+                playLaunchSparkContext.setSaltHint(saltHint);
+                String encryptionKey = CipherUtils.generateKey();
+                playLaunchSparkContext.setEncryptionKey(encryptionKey);
+                playLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword, encryptionKey, saltHint));
 
                 return executeSparkJob(CreateRecommendationsJob.class,
                         generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));
