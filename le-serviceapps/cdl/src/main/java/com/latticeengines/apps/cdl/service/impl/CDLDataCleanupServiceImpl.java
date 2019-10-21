@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.RegisterDeleteDataWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -20,8 +22,10 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("cdlDataCleanupService")
@@ -34,6 +38,12 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private SourceFileProxy sourceFileProxy;
+
+    @Inject
+    private RegisterDeleteDataWorkflowSubmitter registerDeleteDataWorkflowSubmitter;
 
     private final CDLOperationWorkflowSubmitter cdlOperationWorkflowSubmitter;
 
@@ -72,6 +82,21 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         } else {
             createReplaceAction(tenant, configuration.getOperationInitiator(), businessEntity);
         }
+    }
+
+    @Override
+    public ApplicationId registerDeleteData(String customerSpace, boolean hardDelete, String sourceFileName, String user) {
+        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileName);
+        if (sourceFile == null) {
+            log.error("Cannot find SourceFile with name: {}", sourceFileName);
+            throw new RuntimeException("Cannot find SourceFile with name: " + sourceFileName);
+        }
+        if (StringUtils.isEmpty(sourceFile.getTableName())) {
+            log.error("SourceFile: {} does not have a table object!", sourceFileName);
+            throw new RuntimeException(String.format("SourceFile: %s does not have a table object!", sourceFileName));
+        }
+        return registerDeleteDataWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), hardDelete,
+                sourceFile, user, new WorkflowPidWrapper(-1L));
     }
 
     private void verifyCleanupByDataRangeConfiguration(

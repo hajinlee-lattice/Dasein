@@ -21,7 +21,10 @@ public enum ActionType {
     // Datacloud related types
     DATA_CLOUD_CHANGE("datacloudChange", "Data Cloud Refresh"), //
     DATA_REPLACE("dataReplace", "Replace"),
-    INTENT_CHANGE("intentChange", "Intent Data Refresh");
+    INTENT_CHANGE("intentChange", "Intent Data Refresh"),
+    // New clean up operation: soft / hard delete.
+    SOFT_DELETE("softDelete", "Soft Delete"),
+    HARD_DELETE("hardDelete", "Hard Delete");
 
     private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
             Arrays.asList(METADATA_CHANGE, RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE,

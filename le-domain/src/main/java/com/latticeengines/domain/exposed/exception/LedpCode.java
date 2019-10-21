@@ -845,6 +845,7 @@ public enum LedpCode {
     LEDP_40070("Cannot restrict by account ID if no account ID is selected for this Connection"),
     LEDP_40071("Cannot create External System Authentication, because connection with the same orgId and system type already exists"),
     LEDP_40072("Cannot get template for task {0}, backup file {1}"),
+    LEDP_40073("Register delete data operation should have attribute {1} in template!"),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."),
