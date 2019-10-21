@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -108,8 +109,16 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
-        return ResponseDocument.successResponse(
-                uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag));
+        SourceFile response = uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag);
+        SourceFile responseWithOutPath = new SourceFile();
+        try {
+            BeanUtils.copyProperties(responseWithOutPath, response);
+        } catch (Exception e) {
+            log.warn("Fail to clone SourceFile of response: " + e.toString(), e);
+            return ResponseDocument.successResponse(response);
+        }
+        responseWithOutPath.setPath("");
+        return ResponseDocument.successResponse(responseWithOutPath);
     }
 
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
