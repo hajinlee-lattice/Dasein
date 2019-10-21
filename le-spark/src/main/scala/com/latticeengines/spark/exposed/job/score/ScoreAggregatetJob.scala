@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{col, udf, avg, struct}
 import org.apache.spark.sql.Row
 import scala.collection.JavaConverters._
 
