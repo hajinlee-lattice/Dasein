@@ -62,6 +62,8 @@ public final class MatchConstants {
     public static final String INT_MATCHED_MATCH_GRADE = "__Matched_Match_Grade__";
     public static final String INT_MATCHED_CACHE_HIT = "__Matched_Cache_Hit__";
     public static final String INT_MATCHED_PASS_AC = "__Matched_Pass_AC__";
+    public static final String INT_MATCHED_IN_AM = "__Matched_In_AM__";
+    public static final String INT_MATCHED_OOB = "__Matched_OOB__";
     public static final String INT_MATCHED_NAME = "__Matched_Name__";
     public static final String INT_MATCHED_ADDRESS = "__Matched_Address__";
     public static final String INT_MATCHED_CITY = "__Matched_City__";
@@ -72,8 +74,8 @@ public final class MatchConstants {
 
     public static final List<String> matchDebugFields = Arrays.asList(INT_MATCHED_DUNS,
             INT_MATCHED_ORIG_DUNS, INT_MATCHED_CONFIDENCE_CODE, INT_MATCHED_MATCH_GRADE,
-            INT_MATCHED_CACHE_HIT, INT_MATCHED_PASS_AC, INT_MATCHED_NAME, INT_MATCHED_ADDRESS,
-            INT_MATCHED_CITY, INT_MATCHED_STATE, INT_MATCHED_COUNTRY_CODE, INT_MATCHED_ZIPCODE,
+            INT_MATCHED_CACHE_HIT, INT_MATCHED_PASS_AC, INT_MATCHED_IN_AM, INT_MATCHED_OOB, INT_MATCHED_NAME,
+            INT_MATCHED_ADDRESS, INT_MATCHED_CITY, INT_MATCHED_STATE, INT_MATCHED_COUNTRY_CODE, INT_MATCHED_ZIPCODE,
             INT_MATCHED_PHONE);
     // For MatchMonitorService
     public static final String REQUEST_NUM = "RequestNum";

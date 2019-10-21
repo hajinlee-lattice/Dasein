@@ -230,8 +230,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     debugValues.add(value);
                     value = matchContext.getHitWhiteCache() != null ? matchContext.getHitWhiteCache() + "" : "";
                     debugValues.add(value);
-                    value = matchContext.isPassAcceptanceCriteria() ? matchContext.isPassAcceptanceCriteria() + "" : "";
-                    debugValues.add(value);
+                    debugValues.add(matchContext.isACPassedString());
+                    debugValues.add(matchContext.isDunsInAMString());
+                    debugValues.add(matchContext.isOutOfBusinessString());
                     addNameLocationValues(debugValues, matchContext);
                     matchRecord.setDebugValues(debugValues);
                 }
