@@ -68,7 +68,7 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private Date responseTime;
 
-    private boolean passAcceptanceCriteria;
+    private Boolean acPassed;
 
     private String rootOperationUid;
 
@@ -431,12 +431,16 @@ public class DnBMatchContext implements Fact, Dimension {
         this.responseTime = responseTime;
     }
 
-    public boolean isPassAcceptanceCriteria() {
-        return passAcceptanceCriteria;
+    public Boolean isACPassed() {
+        return acPassed;
     }
 
-    public void setPassAcceptanceCriteria(boolean passAcceptanceCriteria) {
-        this.passAcceptanceCriteria = passAcceptanceCriteria;
+    public String isACPassedString() {
+        return acPassed == null ? null : String.valueOf(acPassed);
+    }
+
+    public void setACPassed(Boolean acPassed) {
+        this.acPassed = acPassed;
     }
 
     public String getRootOperationUid() {

@@ -1429,7 +1429,7 @@ public class MatchHistory implements HasId<String> {
         if (dnbMatchContext.getDnbCode() != null) {
             this.dnbReturnCode = dnbMatchContext.getDnbCode().toString();
         }
-        this.passedAcceptanceCriteria = dnbMatchContext.isPassAcceptanceCriteria();
+        this.passedAcceptanceCriteria = dnbMatchContext.isACPassed();
 
         return this;
     }
