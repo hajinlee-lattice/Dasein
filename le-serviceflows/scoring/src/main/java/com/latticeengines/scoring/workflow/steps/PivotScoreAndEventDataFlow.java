@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
@@ -35,19 +36,22 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
-import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
+import com.latticeengines.spark.exposed.job.score.PivotScoreAndEventJob;
 
 @Component("pivotScoreAndEventDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventConfiguration> {
+public class PivotScoreAndEventDataFlow
+        extends RunSparkJob<PivotScoreAndEventConfiguration, PivotScoreAndEventJobConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(PivotScoreAndEventDataFlow.class);
 
@@ -59,49 +63,89 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
-    
+
     private boolean multiModel = false;
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
     private Map<String, String> modelGuidToEngineIdMap;
     private Map<String, Boolean> modelGuidToIsEVFlagMap;
 
+    private CustomerSpace customerSpace;
+    private String targetTableName;
+
     @Override
-    public void onConfigurationInitialized() {
+    protected Class<PivotScoreAndEventJob> getJobClz() {
+        return PivotScoreAndEventJob.class;
+    }
+
+    @Override
+    protected PivotScoreAndEventJobConfig configureJob(PivotScoreAndEventConfiguration stepConfiguration) {
+
+        PivotScoreAndEventJobConfig jobConfig = new PivotScoreAndEventJobConfig();
         String scoreTableName = getStringValueFromContext(PIVOT_SCORE_INPUT_TABLE_NAME);
+        targetTableName = scoreTableName + "_pivot";
+        customerSpace = CustomerSpace.parse(configuration.getCustomer());
+
         multiModel = isMultiModel();
         modelGuidToBucketMetadataMap = getModelGuidToBucketMetadataMap();
         modelGuidToEngineIdMap = getModelGuidToEngineIdMap();
         modelGuidToIsEVFlagMap = getModelGuidToIsEVFlagMap();
 
-        PivotScoreAndEventParameters dataFlowParams = new PivotScoreAndEventParameters(scoreTableName);
         Map<String, Double> avgScores = getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class);
         if (MapUtils.isNotEmpty(avgScores)) {
-            dataFlowParams.setAvgScores(avgScores);
+            jobConfig.avgScores = avgScores;
         } else {
-            dataFlowParams.setAvgScores(ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID),
-                    getDoubleValueFromContext(SCORING_AVG_SCORE))//
+            jobConfig.avgScores = ImmutableMap
+                    .of(getStringValueFromContext(SCORING_MODEL_ID),
+                            getDoubleValueFromContext(SCORING_AVG_SCORE) //
             );
         }
         Map<String, String> scoreFieldMap = getScoreFieldsMap();
         if (MapUtils.isNotEmpty(scoreFieldMap)) {
-            dataFlowParams.setScoreFieldMap(scoreFieldMap);
+            jobConfig.scoreFieldMap = scoreFieldMap;
         } else {
             throw new RuntimeException("Cannot determine score fields.");
         }
 
         // get score derivation and fit function params for model
-        dataFlowParams.setScoreDerivationMap(
-                getScoreDerivationMap(dataFlowParams.getScoreFieldMap().keySet(), scoreFieldMap));
-        dataFlowParams.setFitFunctionParametersMap(
-                getFitFunctionParametersMap(dataFlowParams.getScoreFieldMap().keySet(), scoreFieldMap));
-        configuration.setDataFlowParams(dataFlowParams);
-        configuration.setTargetTableName(scoreTableName + "_pivot");
+        jobConfig.scoreDerivationMap = getScoreDerivationMap(jobConfig.scoreFieldMap.keySet(), scoreFieldMap);
+        jobConfig.fitFunctionParametersMap = getFitFunctionParametersMap(jobConfig.scoreFieldMap.keySet(),
+                scoreFieldMap);
+
+        Table scoreResultTable = metadataProxy.getTable(customerSpace.toString(), scoreTableName);
+        List<DataUnit> inputUnits = new ArrayList<>();
+        inputUnits.add(scoreResultTable.toHdfsDataUnit("scoreResultTable"));
+        jobConfig.setInput(inputUnits);
+
+        return jobConfig;
     }
 
+    @Override
+    protected void postJobExecution(SparkJobResult result) {
+        String customer = configuration.getCustomer();
+        Table targetTable = toTable(targetTableName, result.getTargets().get(0));
+        metadataProxy.createTable(customer, targetTableName, targetTable);
+
+        putObjectInContext(EVENT_TABLE, targetTable);
+        String targetExtractPath = targetTable.getExtracts().get(0).getPath();
+        if (!targetExtractPath.endsWith(".avro")) {
+            targetExtractPath = targetExtractPath.endsWith("/") ? targetExtractPath : targetExtractPath + "/";
+            targetExtractPath += "*.avro";
+        }
+        saveBucketedScoreSummary(targetExtractPath);
+        putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH, targetExtractPath);
+
+        upsertRatingLifts();
+
+        putStringValueInContext(EXPORT_BUCKET_TOOL_TABLE_NAME, targetTableName);
+        String scoreOutputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
+        String pivotOutputPath = StringUtils.replace(scoreOutputPath, "_scored_", "_pivoted_");
+        putStringValueInContext(EXPORT_BUCKET_TOOL_OUTPUT_PATH, pivotOutputPath);
+        saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
+    }
+    
     private Map<String, String> getScoreDerivationMap(Collection<String> modelIds, Map<String, String> scoreFieldMap) {
         ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
                 yarnConfiguration);
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> scoreDerivationMap = new HashMap<>();
         for (String modelId : modelIds) {
             String scoreDerivation = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId,
@@ -117,7 +161,6 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             Map<String, String> scoreFieldMap) {
         ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
                 yarnConfiguration);
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
         Map<String, String> fitFunctionParametersMap = new HashMap<>();
         for (String modelId : modelIds) {
             String fitFunctionParameters = scoreArtifactRetriever.getFitFunctionParameters(customerSpace, modelId,
@@ -129,29 +172,8 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         return fitFunctionParametersMap;
     }
 
-    @Override
-    public void onExecutionCompleted() {
-        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getTargetTableName());
-        putObjectInContext(EVENT_TABLE, eventTable);
-        String targetExtractPath = eventTable.getExtracts().get(0).getPath();
-        if (!targetExtractPath.endsWith(".avro")) {
-            targetExtractPath = targetExtractPath.endsWith("/") ? targetExtractPath : targetExtractPath + "/";
-            targetExtractPath += "*.avro";
-        }
-        saveBucketedScoreSummary(targetExtractPath);
-        putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH, targetExtractPath);
-
-        upsertRatingLifts();
-
-        putStringValueInContext(EXPORT_BUCKET_TOOL_TABLE_NAME, configuration.getTargetTableName());
-        String scoreOutputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
-        String pivotOutputPath = StringUtils.replace(scoreOutputPath, "_scored_", "_pivoted_");
-        putStringValueInContext(EXPORT_BUCKET_TOOL_OUTPUT_PATH, pivotOutputPath);
-        saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
-    }
-
     private void saveBucketedScoreSummary(String targetDataPath) {
+        @SuppressWarnings("deprecation")
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, targetDataPath);
         Map<String, List<GenericRecord>> pivotedRecordsMap = new HashMap<>();
         while (records.hasNext()) {
@@ -162,7 +184,6 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             }
             pivotedRecordsMap.get(modelGuid).add(record);
         }
-        String customerSpace = configuration.getCustomerSpace().toString();
 
         Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = new HashMap<>();
         pivotedRecordsMap.forEach((modelGuid, pivotedRecords) -> {
@@ -174,7 +195,8 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
                 log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
                         + JsonUtils.serialize(bucketedScoreSummary));
-                bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace, modelGuid, bucketedScoreSummary);
+                bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace.toString(), modelGuid,
+                        bucketedScoreSummary);
                 log.info("Save bucketed metadata for modelGUID=" + modelGuid + " : "
                         + JsonUtils.serialize(bucketMetadata));
                 String engineId = modelGuidToEngineIdMap.get(modelGuid);
@@ -197,14 +219,14 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         String ratingEngineId = isRatingEngine ? engineId : configuration.getRatingEngineId();
         request.setModelGuid(modelGuid);
         request.setRatingEngineId(ratingEngineId);
-        request.setLastModifiedBy(configuration.getUserId());
+        // request.setLastModifiedBy(configuration.getUserId());
         request.setBucketMetadataList(bucketMetadata);
         log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId + ": "
                 + JsonUtils.pprint(bucketMetadata));
         if (getConfiguration().isTargetScoreDerivation()) {
             request.setCreateForModel(true);
         }
-        bucketedScoreProxy.createABCDBuckets(configuration.getCustomerSpace().toString(), request);
+        bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
     }
 
     private Map<String, String> getModelGuidToEngineIdMap() {

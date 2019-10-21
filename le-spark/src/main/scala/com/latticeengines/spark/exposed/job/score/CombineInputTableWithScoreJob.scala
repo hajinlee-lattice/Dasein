@@ -11,8 +11,7 @@ import java.util.List
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql._
+import org.apache.spark.sql.functions.{udf, col}
 import scala.collection.JavaConverters._
 
 class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWithScoreJobConfig] {

@@ -87,7 +87,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             scoreAgg.setCustomer(customerSpace.toString());
             combineInputWithScores.setCustomer(customerSpace.toString());
             computeLift.setCustomerSpace(customerSpace);
-            pivotScoreAndEvent.setCustomerSpace(customerSpace);
+            pivotScoreAndEvent.setCustomer(customerSpace.toString());
             return this;
         }
 
@@ -102,7 +102,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             calculatePredictedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
             calculateExpectedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
-            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 

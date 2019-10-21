@@ -66,7 +66,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             resolveAttributes.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             rtsBulkScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
-            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
             modelExportToS3.setMicroServiceHostPort(microServiceHostPort);
@@ -97,7 +96,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             resolveAttributes.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             rtsBulkScoreWorkflowBuilder.customer(customerSpace);
-            pivotScoreAndEvent.setCustomerSpace(customerSpace);
+            pivotScoreAndEvent.setCustomer(customerSpace.toString());
             computeLift.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             modelExportToS3.setCustomerSpace(customerSpace);
