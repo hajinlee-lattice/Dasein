@@ -2,9 +2,10 @@ package com.latticeengines.domain.exposed.serviceflows.scoring.steps;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConfiguration {
+public class PivotScoreAndEventConfiguration extends SparkJobStepConfiguration {
 
     @JsonProperty("isEV")
     private boolean isEV;
@@ -25,7 +26,6 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
     private boolean targetScoreDerivation;
     
     public PivotScoreAndEventConfiguration() {
-        setBeanName("pivotScoreAndEvent");
     }
 
     public boolean isEV() {
