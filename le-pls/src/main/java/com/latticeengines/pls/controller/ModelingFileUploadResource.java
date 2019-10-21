@@ -12,7 +12,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
