@@ -82,6 +82,12 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
+        public Builder mergeOutputFile(String mergedFileName) {
+            export.setExportMergedFile(true);
+            export.setMergedFileName(mergedFileName);
+            return this;
+        }
+
         public Builder outputFileFormat(ExportFormat format) {
             export.setExportFormat(format);
             return this;

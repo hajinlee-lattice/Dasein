@@ -129,6 +129,11 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18128, new String[] { modelId });
         }
 
+        String outputScoredFilename = "/"
+                + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
+                + "_scored_" + DateTime.now().getMillis();
+        String mergedOutputScoredFilename = StringUtils.appendIfMissing(outputScoredFilename, ".csv");
+
         return new ImportMatchAndScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -151,9 +156,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                         .getBoolean(ProvenancePropertyName.ExcludePropdataColumns) && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.SCORING) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename(
-                        "/" + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
-                                ".csv") + "_scored_" + DateTime.now().getMillis()) //
+                .outputFilename(outputScoredFilename) //
+                .mergeOutputFile(mergedOutputScoredFilename) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //

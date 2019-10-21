@@ -20,6 +20,7 @@ import org.joda.time.DateTime;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -92,10 +93,7 @@ public class MetadataConverter {
             boolean skipCount) throws Exception {
         boolean isDirectory = false;
         if (HdfsUtils.isDirectory(configuration, avroPath)) {
-            if (avroPath.endsWith("/")) {
-                avroPath = avroPath.substring(0, avroPath.length() - 2);
-            }
-            avroPath = avroPath + "/*.avro";
+            avroPath = PathUtils.toAvroGlob(avroPath);
             isDirectory = true;
         }
         List<String> matches = HdfsUtils.getFilesByGlob(configuration, avroPath);
@@ -129,10 +127,7 @@ public class MetadataConverter {
                                                    boolean skipCount) throws Exception {
         boolean isDirectory = false;
         if (HdfsUtils.isDirectory(configuration, parquetPath)) {
-            if (parquetPath.endsWith("/")) {
-                parquetPath = parquetPath.substring(0, parquetPath.length() - 2);
-            }
-            parquetPath = parquetPath + "/*.parquet";
+            parquetPath = PathUtils.toParquetGlob(parquetPath);
             isDirectory = true;
         }
         List<String> matches = HdfsUtils.getFilesByGlob(configuration, parquetPath);
