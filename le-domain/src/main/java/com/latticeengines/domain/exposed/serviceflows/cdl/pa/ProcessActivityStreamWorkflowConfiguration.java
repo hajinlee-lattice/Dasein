@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
@@ -33,6 +35,11 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder activityStreams(Map<String, AtlasStream> activityStreams) {
             processStepConfiguration.setActivityStreamMap(activityStreams);
+            return this;
+        }
+
+        public Builder activityStreamImports(Map<String, List<ActivityImport>> activityStreamImports) {
+            processStepConfiguration.setStreamImports(activityStreamImports);
             return this;
         }
 

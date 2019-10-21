@@ -11,8 +11,8 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -259,13 +259,18 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder catalogImports(Map<String, List<CatalogImport>> catalogImports) {
+        public Builder catalogImports(Map<String, List<ActivityImport>> catalogImports) {
             processCatalogWorkflowBuilder.catalogImports(catalogImports);
             return this;
         }
 
         public Builder activityStreams(Map<String, AtlasStream> streams) {
             processActivityStreamWorkflowBuilder.activityStreams(streams);
+            return this;
+        }
+
+        public Builder activityStreamImports(Map<String, List<ActivityImport>> activityStreamImports) {
+            processActivityStreamWorkflowBuilder.activityStreamImports(activityStreamImports);
             return this;
         }
 
