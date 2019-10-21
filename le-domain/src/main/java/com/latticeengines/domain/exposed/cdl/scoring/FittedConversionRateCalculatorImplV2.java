@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.cdl;
+package com.latticeengines.domain.exposed.cdl.scoring;
 
 import java.io.Serializable;
 

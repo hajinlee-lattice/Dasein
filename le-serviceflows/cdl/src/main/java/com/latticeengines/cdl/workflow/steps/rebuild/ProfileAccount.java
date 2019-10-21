@@ -300,7 +300,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         if (existingValueMap != null) {
             existingCount = existingValueMap.get(BusinessEntity.Account);
         }
-        if (existingCount == null || existingCount == 0) {
+        if (!hasBatchStore()) {
             return true;
         }
         Map<BusinessEntity, Long> newValueMap = getMapObjectFromContext(BaseWorkflowStep.NEW_RECORDS,
@@ -319,6 +319,19 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             return diffRate >= 0.3;
         }
         return false;
+    }
+
+    private boolean hasBatchStore() {
+        TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
+        boolean hasBatchStore = false;
+        if (batchStore != null) {
+            DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+            String customerSpace = getObjectFromContext(CUSTOMER_SPACE, String.class);
+            String tableName = dataCollectionProxy.getTableName(customerSpace, batchStore, active);
+            hasBatchStore = StringUtils.isNotBlank(tableName);
+        }
+        log.info("hasBatchStore=" + hasBatchStore + " for " + batchStore.name());
+        return hasBatchStore;
     }
 
     private void finishing() {

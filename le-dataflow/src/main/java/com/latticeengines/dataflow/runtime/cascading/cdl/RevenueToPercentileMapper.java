@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.cdl;
 
+import com.latticeengines.domain.exposed.cdl.scoring.RawScoreToPercentileMapper;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
 public class RevenueToPercentileMapper extends RawScoreToPercentileMapper {

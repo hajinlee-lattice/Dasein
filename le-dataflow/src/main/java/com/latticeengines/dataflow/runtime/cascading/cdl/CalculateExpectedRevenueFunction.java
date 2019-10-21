@@ -4,6 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.scoring.FittedConversionRateCalculator;
+import com.latticeengines.domain.exposed.cdl.scoring.FittedConversionRateCalculatorImplV1;
+import com.latticeengines.domain.exposed.cdl.scoring.FittedConversionRateCalculatorImplV2;
 import com.latticeengines.domain.exposed.scoringapi.EVFitFunctionParameters;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 
@@ -14,7 +15,9 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = PrepareMatchDataConfiguration.class, name = "PrepareMatchDataConfiguration"), //
         @JsonSubTypes.Type(value = ProcessMatchResultConfiguration.class, name = "ProcessMatchResultConfiguration"), //
+        @JsonSubTypes.Type(value = CombineInputTableWithScoreDataFlowConfiguration.class, name = "CombineInputTableWithScoreDataFlowConfiguration"), //
         @JsonSubTypes.Type(value = ScoreAggregateFlowConfiguration.class, name = "ScoreAggregateFlowConfiguration"), //
+        @JsonSubTypes.Type(value = PivotScoreAndEventConfiguration.class, name = "PivotScoreAndEventConfiguration"), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreDataFlowConfiguration.class, name = "CombineInputTableWithScoreDataFlowConfiguration") //
 })
 public class SparkJobStepConfiguration extends BaseStepConfiguration {

@@ -3,6 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading.cdl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.scoring.FittedConversionRateCalculatorImplV1;
+import com.latticeengines.domain.exposed.cdl.scoring.FittedConversionRateCalculatorImplV2;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 
 public class FittedConversionRateCalculatorImplUnitTestNG {

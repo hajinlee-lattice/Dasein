@@ -1,4 +1,6 @@
-package com.latticeengines.dataflow.runtime.cascading.cdl;
+package com.latticeengines.domain.exposed.cdl.scoring;
+
+import java.io.Serializable;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.EVFitFunctionParameters;
@@ -6,29 +8,13 @@ import com.latticeengines.domain.exposed.scoringapi.EVScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.FitFunctionParameters;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 
-import cascading.flow.FlowProcess;
-import cascading.operation.BaseOperation;
-import cascading.operation.Function;
-import cascading.operation.FunctionCall;
-import cascading.tuple.Fields;
-import cascading.tuple.Tuple;
-import cascading.tuple.TupleEntry;
+public class CalculatePositiveEventsFunction implements FittedConversionRateCalculatorFactory, Serializable {
 
-@SuppressWarnings("rawtypes")
-public class CalculatePositiveEventsFunction extends BaseOperation
-        implements Function, FittedConversionRateCalculatorFactory {
-
-    private static final long serialVersionUID = -3505533055111984029L;
-    private String avgScoreFieldName;
-    private String totalEventFieldName;
+    private static final long serialVersionUID = 2659841538770732506L;
     private RawScoreToPercentileMapper rawScoreToPercentileMapper;
     private FittedConversionRateCalculator fittedConversionRateCalculator;
 
-    public CalculatePositiveEventsFunction(String totalPositiveEventsFieldName, String avgScoreFieldName,
-            String totalEventFieldName, String scoreDerivationStr, String fitFunctionParamsStr, boolean isEV) {
-        super(new Fields(totalPositiveEventsFieldName));
-        this.avgScoreFieldName = avgScoreFieldName;
-        this.totalEventFieldName = totalEventFieldName;
+    public CalculatePositiveEventsFunction(String scoreDerivationStr, String fitFunctionParamsStr, boolean isEV) {
         ScoreDerivation scoreDerivation;
         FitFunctionParameters fitFunctionParameters;
         if (isEV) {
@@ -43,28 +29,22 @@ public class CalculatePositiveEventsFunction extends BaseOperation
     }
 
     @Override
-    public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
-        TupleEntry arguments = functionCall.getArguments();
-        Double avgRawScore = arguments.getDouble(avgScoreFieldName);
-        long totalEvent = arguments.getLong(totalEventFieldName);
+    public double calculate(Double avgRawScore, long totalEvent) {
         int mappedPercentile = rawScoreToPercentileMapper.map(avgRawScore);
         double conversionRate = fittedConversionRateCalculator.calculate(mappedPercentile);
         double positiveEvents = conversionRate * totalEvent;
-        Tuple result = Tuple.size(1);
-        result.setDouble(0, positiveEvents);
-        functionCall.getOutputCollector().add(result);
+        return positiveEvents;
     }
 
     @Override
     public FittedConversionRateCalculator getCalculator(FitFunctionParameters params) {
         switch (params.getVersion()) {
-            case "v1":
-                return new FittedConversionRateCalculatorImplV1(params);
-            case "v2":
-                return new FittedConversionRateCalculatorImplV2(params);
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported fit function version " + params.getVersion());
+        case "v1":
+            return new FittedConversionRateCalculatorImplV1(params);
+        case "v2":
+            return new FittedConversionRateCalculatorImplV2(params);
+        default:
+            throw new IllegalArgumentException("Unsupported fit function version " + params.getVersion());
         }
     }
 
