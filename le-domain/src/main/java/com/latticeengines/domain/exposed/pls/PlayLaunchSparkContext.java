@@ -105,6 +105,24 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("UseEntityMatch")
     private boolean useEntityMatch;
 
+    @JsonProperty("DataDbDriver")
+    private String dataDbDriver;
+
+    @JsonProperty("DataDbUrl")
+    private String dataDbUrl;
+
+    @JsonProperty("DataDbUser")
+    private String dataDbUser;
+
+    @JsonProperty("DataDbPassword")
+    private String dataDbPassword;
+
+    @JsonProperty("SaltHint")
+    private String saltHint;
+
+    @JsonProperty("EncryptionKey")
+    private String encryptionKey;
+
     public PlayLaunchSparkContext() {
     }
 
@@ -112,7 +130,8 @@ public class PlayLaunchSparkContext implements Serializable {
             RatingEngine ratingEngine, MetadataSegment segment, long launchTimestampMillis, String ratingId,
             RatingModel publishedIteration, List<String> accountColsRecIncluded,
             List<String> accountColsRecNotIncludedStd, List<String> accountColsRecNotIncludedNonStd,
-            List<String> contactCols, boolean useEntityMatch) {
+            List<String> contactCols, boolean useEntityMatch, String dataDbDriver, String dataDbUrl, String dataDbUser,
+            String dataDbPassword, String saltHint, String encryptionKey) {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
         this.tenantPid = tenant.getPid();
@@ -136,6 +155,12 @@ public class PlayLaunchSparkContext implements Serializable {
         this.accountColsRecNotIncludedNonStd = accountColsRecNotIncludedNonStd;
         this.contactCols = contactCols;
         this.useEntityMatch = useEntityMatch;
+        this.dataDbDriver = dataDbDriver;
+        this.dataDbUrl = dataDbUrl;
+        this.dataDbUser = dataDbUser;
+        this.dataDbPassword = dataDbPassword;
+        this.saltHint = saltHint;
+        this.encryptionKey = encryptionKey;
         setSyncDestination(playLaunch);
     }
 
@@ -311,6 +336,54 @@ public class PlayLaunchSparkContext implements Serializable {
         return this.modelSummaryId;
     }
 
+    public String getDataDbDriver() {
+        return this.dataDbDriver;
+    }
+
+    public void setDataDbDriver(String dataDbDriver) {
+        this.dataDbDriver = dataDbDriver;
+    }
+
+    public String getDataDbUrl() {
+        return this.dataDbUrl;
+    }
+
+    public void setDataDbUrl(String dataDbUrl) {
+        this.dataDbUrl = dataDbUrl;
+    }
+
+    public String getDataDbUser() {
+        return dataDbUser;
+    }
+
+    public void setDataDbUser(String dataDbUser) {
+        this.dataDbUser = dataDbUser;
+    }
+
+    public String getDataDbPassword() {
+        return dataDbPassword;
+    }
+
+    public void setDataDbPassword(String dataDbPassword) {
+        this.dataDbPassword = dataDbPassword;
+    }
+
+    public String getSaltHint() {
+        return this.saltHint;
+    }
+
+    public void setSaltHint(String saltHint) {
+        this.saltHint = saltHint;
+    }
+
+    public String getEncryptionKey() {
+        return this.encryptionKey;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+
     private void setSyncDestination(PlayLaunch playLaunch) {
         String synchronizationDestination;
         String destinationSysType;
@@ -363,6 +436,12 @@ public class PlayLaunchSparkContext implements Serializable {
         private List<String> accountColsRecNotIncludedNonStd;
         private List<String> contactCols;
         private boolean useEntityMatch = false;
+        private String dataDbDriver;
+        private String dataDbUrl;
+        private String dataDbUser;
+        private String dataDbPassword;
+        private String saltHint;
+        private String encryptionKey;
 
         public PlayLaunchSparkContextBuilder tenant(Tenant tenant) {
             this.tenant = tenant;
@@ -440,11 +519,42 @@ public class PlayLaunchSparkContext implements Serializable {
             return this;
         }
 
+        public PlayLaunchSparkContextBuilder dataDbDriver(String dataDbDriver) {
+            this.dataDbDriver = dataDbDriver;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder dataDbUrl(String dataDbUrl) {
+            this.dataDbUrl = dataDbUrl;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder dataDbUser(String dataDbUser) {
+            this.dataDbUser = dataDbUser;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder dataDbPassword(String dataDbPassword) {
+            this.dataDbPassword = dataDbPassword;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder saltHint(String saltHint) {
+            this.saltHint = saltHint;
+            return this;
+        }
+
+        public PlayLaunchSparkContextBuilder encryptionKey(String encryptionKey) {
+            this.encryptionKey = encryptionKey;
+            return this;
+        }
+
         public PlayLaunchSparkContext build() {
             return new PlayLaunchSparkContext(this.tenant, this.playName, this.playLaunchId, this.playLaunch, this.play,
                     this.ratingEngine, this.segment, this.launchTimestampMillis, this.ratingId, this.publishedIteration,
                     this.accountColsRecIncluded, this.accountColsRecNotIncludedStd,
-                    this.accountColsRecNotIncludedNonStd, this.contactCols, this.useEntityMatch);
+                    this.accountColsRecNotIncludedNonStd, this.contactCols, this.useEntityMatch, this.dataDbDriver,
+                    this.dataDbUrl, this.dataDbUser, this.dataDbPassword, this.saltHint, this.encryptionKey);
         }
     }
 

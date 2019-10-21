@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -13,6 +14,18 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 public abstract class TestJoinTestNGBase extends SparkJobFunctionalTestNGBase {
 
     protected List<String> inputs;
+
+    @Value("${datadb.datasource.driver}")
+    protected String dataDbDriver;
+
+    @Value("${datadb.datasource.sqoop.url}")
+    protected String dataDbUrl;
+
+    @Value("${datadb.datasource.user}")
+    protected String dataDbUser;
+
+    @Value("${datadb.datasource.password.encrypted}")
+    protected String dataDbPassword;
 
     @Override
     protected void verifyOutput(String output) {
