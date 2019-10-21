@@ -2,6 +2,8 @@ package com.latticeengines.apps.lp.qbean;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.NodeReport;
 import org.apache.hadoop.yarn.api.records.NodeState;
 import org.apache.hadoop.yarn.api.records.Resource;
@@ -108,6 +111,45 @@ class YarnTracker {
         } catch (Exception e) {
             log.error("Failed to check idle task nodes in emr cluster " + emrCluster, e);
             return 0;
+        }
+    }
+
+    // calc stats TEZ and sqoop MR
+    boolean hasSpecialBlockingApps() {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            return retry.execute(ctx -> {
+                boolean hasCalcStatsTezApp = false;
+                boolean hasSqoopMrApp = false;
+                try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
+                    yarnClient.start();
+                    List<ApplicationReport> apps = //
+                            yarnClient.getApplications(EnumSet.copyOf(Arrays.asList(NON_TERMINAL_APP_STATES)));
+                    for (ApplicationReport app : apps) {
+                        if ("TEZ".equalsIgnoreCase(app.getApplicationType())) {
+                            String appName = app.getName();
+                            if (appName.contains("calculateStats")) {
+                                log.info("Found a calc stats TEZ app: " + app.getApplicationId());
+                                hasCalcStatsTezApp = true;
+                                break;
+                            }
+                        } else if ("MapReduce".equalsIgnoreCase(app.getApplicationType())) {
+                            String appName = app.getName();
+                            if (appName.contains("sqoop")) {
+                                log.info("Found a sqoop MR app: " + app.getApplicationId());
+                                hasSqoopMrApp = true;
+                                break;
+                            }
+                        }
+                    }
+                } catch (IOException | YarnException e) {
+                    throw new RuntimeException("Failed to detect special app.", e);
+                }
+                return hasCalcStatsTezApp || hasSqoopMrApp;
+            });
+        } catch (Exception e) {
+            log.warn("Failed to detect special apps. Treat it as true.", e);
+            return true;
         }
     }
 

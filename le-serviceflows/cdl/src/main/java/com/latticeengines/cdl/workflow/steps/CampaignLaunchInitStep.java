@@ -26,6 +26,7 @@ import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -81,6 +82,18 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
 
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
+
+    @Value("${datadb.datasource.driver}")
+    private String dataDbDriver;
+
+    @Value("${datadb.datasource.sqoop.url}")
+    private String dataDbUrl;
+
+    @Value("${datadb.datasource.user}")
+    private String dataDbUser;
+
+    @Value("${datadb.datasource.password.encrypted}")
+    private String dataDbPassword;
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -151,32 +164,22 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             if (launchedAccountNum <= 0L) {
                 throw new LedpException(LedpCode.LEDP_18159, new Object[] { launchedAccountNum, 0L });
             } else {
-                runScoopExport(playLaunchContext, tenant, launchedAccountNum, launchedContactNum,
-                        totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch, recHistoryTargetPath);
+                PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+                playLaunch.setAccountsLaunched(launchedAccountNum);
+                playLaunch.setContactsLaunched(launchedContactNum);
+                long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
+                playLaunch.setAccountsSuppressed(suppressedAccounts);
+                long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
+                playLaunch.setContactsSuppressed(suppressedContacts);
+                campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
+                log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
+                log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
                 successUpdates(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
             }
         } catch (Exception ex) {
             failureUpdates(customerSpace, playName, playLaunchId, ex);
             throw new LedpException(LedpCode.LEDP_18157, ex);
         }
-    }
-
-    private void runScoopExport(PlayLaunchContext playLaunchContext, Tenant tenant, //
-            long launchedAccountNum, long launchedContactNum, //
-            long totalAccountsAvailableForLaunch, long totalContactsAvailableForLaunch, String targetPath)
-            throws Exception {
-        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-        playLaunch.setAccountsLaunched(launchedAccountNum);
-        playLaunch.setContactsLaunched(launchedContactNum);
-        campaignLaunchProcessor.runSqoopExportRecommendations(tenant, playLaunchContext, System.currentTimeMillis(),
-                targetPath);
-        long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
-        playLaunch.setAccountsSuppressed(suppressedAccounts);
-        long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
-        playLaunch.setContactsSuppressed(suppressedContacts);
-        campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
-        log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
-        log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
     }
 
     private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext,
@@ -214,6 +217,14 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 ;
                 playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
                 playLaunchSparkContext.setUseEntityMatch(batonService.isEntityMatchEnabled(customerSpace));
+                playLaunchSparkContext.setDataDbDriver(dataDbDriver);
+                playLaunchSparkContext.setDataDbUrl(dataDbUrl);
+                playLaunchSparkContext.setDataDbUser(dataDbUser);
+                String saltHint = CipherUtils.generateKey();
+                playLaunchSparkContext.setSaltHint(saltHint);
+                String encryptionKey = CipherUtils.generateKey();
+                playLaunchSparkContext.setEncryptionKey(encryptionKey);
+                playLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword, encryptionKey, saltHint));
 
                 return executeSparkJob(CreateRecommendationsJob.class,
                         generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));

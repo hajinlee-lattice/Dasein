@@ -219,6 +219,8 @@ public class EMRScalingRunnable implements Runnable {
             log.info("Still in the process of scaling in, won't attempt to scale in again.");
         } else if (idle == 0) {
             log.info("There is no idle task nodes, won't attempt to scale in.");
+        } else if (getYarnTracker().hasSpecialBlockingApps()) {
+            log.info("There are special blocking apps running, won't attempt to scale in");
         } else if (attempts >= MAX_SCALE_IN_ATTEMPTS) {
             int nodesToTerminate = Math.min(idle, MAX_SCALE_IN_SIZE);
             scaleInTarget = Math.max(requested - nodesToTerminate, scaleInTarget);
