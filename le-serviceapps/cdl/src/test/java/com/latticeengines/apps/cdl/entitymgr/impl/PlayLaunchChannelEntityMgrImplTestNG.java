@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -61,8 +62,10 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     private LookupIdMap lookupIdMap1;
     private LookupIdMap lookupIdMap2;
+    private LookupIdMap lookupIdMap3;
     private PlayLaunchChannel channel1;
     private PlayLaunchChannel channel2;
+    private PlayLaunchChannel channel3;
 
     private List<PlayType> types;
 
@@ -71,6 +74,9 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     private String orgId2 = "org2";
     private String orgName2 = "marketo_org";
+
+    private String orgId3 = "org3";
+    private String orgName3 = "outreach_org";
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
@@ -126,6 +132,21 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         MarketoChannelConfig config = new MarketoChannelConfig();
         config.setAudienceName("something");
         channel2.setChannelConfig(config);
+
+        //Create Outreach
+        lookupIdMap3 = new LookupIdMap();
+        lookupIdMap3.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdMap3.setExternalSystemName(CDLExternalSystemName.Outreach);
+        lookupIdMap3.setOrgId(orgId3);
+        lookupIdMap3.setOrgName(orgName3);
+
+        lookupIdMap3 = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap3);
+        Assert.assertNotNull(lookupIdMap3);
+
+        channel3 = createPlayLaunchChannel(play, lookupIdMap3);
+        OutreachChannelConfig outreachConfig = new OutreachChannelConfig();
+        outreachConfig.setAudienceName("something");
+        channel3.setChannelConfig(outreachConfig);
     }
 
     @Test(groups = "functional")
@@ -211,6 +232,10 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         retrieved = playLaunchChannelEntityMgr.findById(channel2.getId());
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), channel2.getId());
+
+        retrieved = playLaunchChannelEntityMgr.findById(channel3.getId());
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getId(), channel3.getId());
 
         List<PlayLaunchChannel> retrievedList = playLaunchChannelEntityMgr.findByIsAlwaysOnTrue();
         Assert.assertNotNull(retrievedList);
