@@ -97,7 +97,7 @@ public class DateTimeUtils {
             int day = Integer.parseInt(dateUnits[2]);
             int dayPeriod = (year - 1900) * 13 * 32 + month * 32 + day;
             // log.info("Date to day period " + dateString + " " + dayPeriod);
-            return new Integer(dayPeriod);
+            return dayPeriod;
         } catch (Exception e) {
             log.error("Failed to convert " + dateString + " to period", e);
             return null;
