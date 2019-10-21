@@ -239,6 +239,12 @@ public class FileUploadServiceImpl implements FileUploadService {
         InterfaceName contactInterface = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;
 
         switch (schemaInterpretation) {
+            case RegisterDeleteDataTemplate:
+                if (template.getAttribute(InterfaceName.AccountId) == null) {
+                    throw new LedpException(LedpCode.LEDP_40073,
+                            new String[] { InterfaceName.AccountId.name() });
+                }
+                break;
             case DeleteAccountTemplate:
                 if (template.getAttribute(accountInterface) == null) {
                     throw new LedpException(LedpCode.LEDP_40007,
