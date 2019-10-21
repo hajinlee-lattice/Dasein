@@ -100,6 +100,11 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18128, new String[] { modelId });
         }
 
+        String outputScoredFilename = "/"
+                + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
+                + "_scored_" + DateTime.now().getMillis();
+        String mergedOutputScoredFilename = StringUtils.appendIfMissing(outputScoredFilename, ".csv");
+
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -110,9 +115,8 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .sourceSchemaInterpretation(modelSummary.getSourceSchemaInterpretation()) //
                 .inputTableName(tableToScore) //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/"
-                        + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
-                        + "_scored_" + DateTime.now().getMillis()) //
+                .outputFilename(outputScoredFilename) //
+                .mergeOutputFile(mergedOutputScoredFilename) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
                 .setScoreTestFile(false) //
