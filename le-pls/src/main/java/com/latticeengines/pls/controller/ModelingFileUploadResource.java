@@ -110,15 +110,8 @@ public class ModelingFileUploadResource {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
         SourceFile response = uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag);
-        SourceFile responseWithOutPath = new SourceFile();
-        try {
-            BeanUtils.copyProperties(responseWithOutPath, response);
-        } catch (Exception e) {
-            log.warn("Fail to clone SourceFile of response: " + e.toString(), e);
-            return ResponseDocument.successResponse(response);
-        }
-        responseWithOutPath.setPath("");
-        return ResponseDocument.successResponse(responseWithOutPath);
+        response.setPath("");
+        return ResponseDocument.successResponse(response);
     }
 
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
