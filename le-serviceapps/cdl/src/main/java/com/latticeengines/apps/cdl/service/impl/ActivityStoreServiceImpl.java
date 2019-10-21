@@ -74,7 +74,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         // TODO retry on streamId conflict
         Preconditions.checkNotNull(stream, "stream to be created should not be null");
         Preconditions.checkNotNull(stream.getDataFeedTaskUniqueId(), "stream should contains data feed task unique ID");
-        Preconditions.checkNotNull(stream.getStreamId(),
+        Preconditions.checkArgument(StringUtils.isBlank(stream.getStreamId()),
                 "stream should not contain streamId field which is auto generated");
         Tenant tenant = MultiTenantContext.getTenant();
 
