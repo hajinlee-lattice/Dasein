@@ -320,7 +320,8 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             String finalTargetPath = targetPath;
             retry.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
-                    log.info("(Retry=" + ctx.getRetryCount() + ") copy from " + csvGzFilePath + " to " + finalTargetPath);
+                    log.info("(Retry=" + ctx.getRetryCount() + ") copy from " + csvGzFilePath + " to " + finalTargetPath
+                            + ". Previous error: ", ctx.getLastThrowable());
                 }
                 if (dropFolderFlag) {
                     copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, dropFolderTag, dropFolderTagValue);
