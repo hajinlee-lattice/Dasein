@@ -233,10 +233,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), channel2.getId());
 
-        retrieved = playLaunchChannelEntityMgr.findById(channel3.getId());
-        Assert.assertNotNull(retrieved);
-        Assert.assertEquals(retrieved.getId(), channel3.getId());
-
         List<PlayLaunchChannel> retrievedList = playLaunchChannelEntityMgr.findByIsAlwaysOnTrue();
         Assert.assertNotNull(retrievedList);
         Assert.assertEquals(retrievedList.size(), 1);
