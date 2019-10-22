@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,9 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 
     @JsonProperty("match_input")
     private MatchInput matchInput;
+
+    @JsonProperty("tracing_context")
+    private Map<String, String> tracingContext;
 
     @JsonProperty("root_operation_uid")
     private String rootOperationUid;
@@ -90,6 +94,14 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 
     public void setMatchInput(MatchInput matchInput) {
         this.matchInput = matchInput;
+    }
+
+    public Map<String, String> getTracingContext() {
+        return tracingContext;
+    }
+
+    public void setTracingContext(Map<String, String> tracingContext) {
+        this.tracingContext = tracingContext;
     }
 
     @JsonProperty("input_avro_schema")

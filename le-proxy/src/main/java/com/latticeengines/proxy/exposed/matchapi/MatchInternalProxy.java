@@ -20,8 +20,4 @@ public class MatchInternalProxy extends BaseRestApiProxy implements MatchInterna
         String url = constructUrl("/yarnjobs");
         return post("submitYarnJob", url, jobConfiguration, AppSubmission.class);
     }
-
-    public void setupTracingInterceptor() {
-        instrumentTracing();
-    }
 }

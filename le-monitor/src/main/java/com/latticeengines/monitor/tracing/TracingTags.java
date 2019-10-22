@@ -17,4 +17,9 @@ public class TracingTags {
         public static final String STEP = "workflow.step";
         public static final String STEP_SEQ = "workflow.step_seq";
     }
+
+    public static class DataCloud {
+        public static final String ROOT_OPERATION_UID = "datacloud.root_operation_uid";
+        public static final String BLOCK_OPERATION_UID = "datacloud.block_operation_uid";
+    }
 }

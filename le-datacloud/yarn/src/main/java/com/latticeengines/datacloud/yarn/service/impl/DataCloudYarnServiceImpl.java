@@ -21,11 +21,18 @@ import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.DataCloudProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.yarn.exposed.service.JobService;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Component("propDataYarnService")
 public class DataCloudYarnServiceImpl implements DataCloudYarnService {
@@ -55,22 +62,38 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
     private String trustStoreJks;
 
     @Override
-    public ApplicationId submitPropDataJob(DataCloudJobConfiguration jobConfiguration) {
-        Job propDataJob = createJob(jobConfiguration);
-        ApplicationId appId = jobService.submitJob(propDataJob);
-        propDataJob.setId(appId.toString());
+    public ApplicationId submitPropDataJob(DataCloudJobConfiguration config) {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("submitDataCloudJob").asChildOf(tracer.activeSpan()).start();
+        if (config.getRootOperationUid() != null) {
+            span.setTag(TracingTags.DataCloud.ROOT_OPERATION_UID, config.getRootOperationUid());
+        }
+        if (config.getBlockOperationUid() != null) {
+            span.setTag(TracingTags.DataCloud.BLOCK_OPERATION_UID, config.getBlockOperationUid());
+        }
+        try (Scope scope = tracer.activateSpan(span)) {
+            config.setTracingContext(TracingUtils.getActiveTracingContext());
 
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        final Job job = propDataJob;
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                jobEntityMgr.create(job);
-            }
-        });
+            // TODO log am properties
+            Job propDataJob = createJob(config);
+            ApplicationId appId = jobService.submitJob(propDataJob);
+            propDataJob.setId(appId.toString());
+            span.setTag(TracingTags.Workflow.APPLICATION_ID, appId.toString());
 
-        return appId;
+            PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+                    PlatformTransactionManager.class);
+            TransactionTemplate tx = new TransactionTemplate(ptm);
+            final Job job = propDataJob;
+            tx.execute(new TransactionCallbackWithoutResult() {
+                public void doInTransactionWithoutResult(TransactionStatus status) {
+                    jobEntityMgr.create(job);
+                }
+            });
+
+            return appId;
+        } finally {
+            TracingUtils.finish(span);
+        }
     }
 
     private Job createJob(DataCloudJobConfiguration jobConfiguration) {
