@@ -66,7 +66,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix, convertBatchStoreTableName);
         steps.add(merge);
         steps.add(match);
-        log.info("steps is {}.", steps);
+        log.info("steps are {}.", steps);
         request.setSteps(steps);
         return request;
     }

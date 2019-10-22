@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-
-import io.micrometer.core.instrument.util.StringUtils;
 
 @Component(MatchContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -99,7 +98,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         steps.add(merge);
         steps.add(concatenate);
         steps.add(entityMatch);
-        log.info("steps is {}.", steps);
+        log.info("steps are {}.", steps);
         return steps;
     }
 
