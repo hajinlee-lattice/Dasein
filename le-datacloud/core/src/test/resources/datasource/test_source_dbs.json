@@ -1,7 +1,7 @@
 [
   {
-    "Url" : "jdbc:sqlserver://10.41.1.250\\\\DEVCLUSTER:55568;databaseName=CollectionDB;",
-    "Username": "DLTransfer",
-    "Password": "Q1nh4HIYGkg4OnQIEbEuiw=="
+    "Url" : "jdbc:mysql://lpi-encrypted-cluster.cluster-ro-ctigbumfbvzz.us-east-1.rds.amazonaws.com/PLS_MultiTenant?autoReconnect=true&useSSL=false",
+    "Username": "LPI",
+    "Password": "bi0mpJJNxiYpEka5C6JO4o75qVXoc80R7ma84i2eK5nKGejJiA0QY8p8RzlrlKU7"
   }
 ]
