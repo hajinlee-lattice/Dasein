@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -60,6 +61,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
@@ -394,7 +396,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
      */
     private Map<Long, ActionStat> getActionStats() {
         List<ActionStat> ingestActions = actionStatService.getNoOwnerCompletedIngestActionStats();
-        List<ActionStat> nonIngestActions = actionStatService.getNoOwnerNonIngestActionStats();
+        List<ActionStat> nonIngestActions = actionStatService.getNoOwnerActionStatsByTypes(getNonIngestAndReplaceActionType());
 
         return Stream.concat(ingestActions.stream(), nonIngestActions.stream())
                 .collect(Collectors.toMap(ActionStat::getTenantPid, stat -> stat, (s1, s2) -> {
@@ -585,5 +587,13 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.error("get redis cache fail.", e);
         }
         return paSubmitFailedMap;
+    }
+
+    private Set<ActionType> getNonIngestAndReplaceActionType() {
+        Set<ActionType> nonIngestAndReplaceActionType = new HashSet<>(Arrays.asList(ActionType.values()));
+        nonIngestAndReplaceActionType.remove(ActionType.DATA_REPLACE);
+        nonIngestAndReplaceActionType.remove(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        nonIngestAndReplaceActionType.remove(ActionType.CDL_OPERATION_WORKFLOW);
+        return nonIngestAndReplaceActionType;
     }
 }
