@@ -117,12 +117,82 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
         log.info("Full Contact Universe Query: " + contactQuery.toString());
 
+        Table previousAccountUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
+                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                        channel.getCurrentLaunchedAccountUniverseTable())
+                : null;
+
+        HdfsDataUnit previousAccountUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
+                && !channel.getResetDeltaCalculationData() && previousAccountUniverseTable != null)
+                        ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
+                        : null;
+        log.info(logHDFSDataUnit("PreviousAccountUniverse_", previousAccountUniverse));
+
+        Table previousContactUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
+                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                        channel.getCurrentLaunchedContactUniverseTable())
+                : null;
+
+        HdfsDataUnit previousContactUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
+                && !channel.getResetDeltaCalculationData() && previousContactUniverseTable != null)
+                        ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
+                        : null;
+
+        log.info(logHDFSDataUnit("PreviousContactUniverse_", previousContactUniverse));
+
         // 2) compare previous launch universe to current launch universe
 
-        SparkJobResult deltaCalculationResult = executeSparkJob(accountQuery, contactQuery, channel);
+        SparkJobResult deltaCalculationResult = executeSparkJob(accountQuery, contactQuery, channel,
+                previousAccountUniverse, previousContactUniverse);
 
         // 3) Generate Metadata tables for delta results
         processDeltaCalculationResult(deltaCalculationResult, config);
+    }
+
+    private SparkJobResult executeSparkJob(FrontEndQuery accountQuery, FrontEndQuery contactQuery,
+            PlayLaunchChannel channel, HdfsDataUnit previousAccountUniverse, HdfsDataUnit previousContactUniverse) {
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(2);
+        return retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                log.warn("Previous failure:", ctx.getLastThrowable());
+            }
+            try {
+                startSparkSQLSession(getHdfsPaths(attrRepo), false);
+
+                // 2. get DataFrame for Account and Contact
+                HdfsDataUnit accountDataUnit = getEntityQueryData(accountQuery);
+                log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
+                HdfsDataUnit contactDataUnit = null;
+                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+                if (StringUtils.isBlank(contactTableName)) {
+                    log.info("No contact table available in Redshift.");
+                } else {
+                    contactDataUnit = getEntityQueryData(contactQuery);
+                    log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
+                }
+
+                // 3. generate avro out of DataFrame with predefined format for Recommendations
+                return executeSparkJob(CalculateDeltaJob.class, //
+                        buildCalculateDeltaJobConfig(accountDataUnit, contactDataUnit, //
+                                previousAccountUniverse, previousContactUniverse));
+            } finally {
+                stopSparkSQLSession();
+            }
+        });
+
+    }
+
+    private CalculateDeltaJobConfig buildCalculateDeltaJobConfig(HdfsDataUnit accountDataUnit,
+            HdfsDataUnit contactDataUnit, HdfsDataUnit previousAccountUniverse, HdfsDataUnit previousContactUniverse) {
+        CalculateDeltaJobConfig calculateDeltaConfig = new CalculateDeltaJobConfig();
+        calculateDeltaConfig.setWorkspace(getRandomWorkspace());
+        calculateDeltaConfig.setCurrentAccountUniverse(accountDataUnit);
+        calculateDeltaConfig.setCurrentContactUniverse(contactDataUnit);
+        calculateDeltaConfig.setPreviousAccountUniverse(previousAccountUniverse);
+        calculateDeltaConfig.setPreviousContactUniverse(previousContactUniverse);
+        return calculateDeltaConfig;
     }
 
     private void processDeltaCalculationResult(SparkJobResult deltaCalculationResult,
@@ -180,81 +250,16 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
-    private SparkJobResult executeSparkJob(FrontEndQuery accountQuery, FrontEndQuery contactQuery,
-            PlayLaunchChannel channel) {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(2);
-        Table previousAccountUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
-                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                        channel.getCurrentLaunchedAccountUniverseTable())
-                : null;
-
-        HdfsDataUnit previousAccountUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
-                && previousAccountUniverseTable != null)
-                        ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
-                        : null;
-
-        Table previousContactUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
-                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                        channel.getCurrentLaunchedContactUniverseTable())
-                : null;
-
-        HdfsDataUnit previousContactUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
-                && previousContactUniverseTable != null)
-                        ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
-                        : null;
-
-        return retry.execute(ctx -> {
-            if (ctx.getRetryCount() > 0) {
-                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
-                log.warn("Previous failure:", ctx.getLastThrowable());
-            }
-            try {
-                startSparkSQLSession(getHdfsPaths(attrRepo), false);
-
-                // 2. get DataFrame for Account and Contact
-                HdfsDataUnit accountDataUnit = getEntityQueryData(accountQuery);
-                log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
-                HdfsDataUnit contactDataUnit = null;
-                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                if (StringUtils.isBlank(contactTableName)) {
-                    log.info("No contact table available in Redshift.");
-                } else {
-                    contactDataUnit = getEntityQueryData(contactQuery);
-                    log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
-                }
-
-                // 3. generate avro out of DataFrame with predefined format for Recommendations
-                return executeSparkJob(CalculateDeltaJob.class, //
-                        buildCalculateDeltaJobConfig(accountDataUnit, contactDataUnit, //
-                                previousAccountUniverse, previousContactUniverse));
-            } finally {
-                stopSparkSQLSession();
-            }
-        });
-
-    }
-
     private String logHDFSDataUnit(String tag, HdfsDataUnit dataUnit) {
         if (dataUnit == null) {
             return tag + " data set empty";
         }
         String valueSeparator = ": ";
-        String tokenSparator = ", ";
-        return tag + tokenSparator //
-                + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSparator //
-                + "Path: " + valueSeparator + dataUnit.getPath() + tokenSparator //
+        String tokenSeparator = ", ";
+        return tag + tokenSeparator //
+                + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSeparator //
+                + "Path: " + valueSeparator + dataUnit.getPath() + tokenSeparator //
                 + "Count: " + valueSeparator + dataUnit.getCount();
-    }
-
-    private CalculateDeltaJobConfig buildCalculateDeltaJobConfig(HdfsDataUnit accountDataUnit,
-            HdfsDataUnit contactDataUnit, HdfsDataUnit previousAccountUniverse, HdfsDataUnit previousContactUniverse) {
-        CalculateDeltaJobConfig calculateDeltaConfig = new CalculateDeltaJobConfig();
-        calculateDeltaConfig.setWorkspace(getRandomWorkspace());
-        calculateDeltaConfig.setCurrentAccountUniverse(accountDataUnit);
-        calculateDeltaConfig.setCurrentContactUniverse(contactDataUnit);
-        calculateDeltaConfig.setPreviousAccountUniverse(previousAccountUniverse);
-        calculateDeltaConfig.setPreviousContactUniverse(previousContactUniverse);
-        return calculateDeltaConfig;
     }
 
     @Override

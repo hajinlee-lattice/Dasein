@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.pls.cdl.rating.model;
 
 import java.util.List;
 
+import org.apache.commons.lang3.EnumUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -92,7 +94,11 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
     }
 
     public void setTransformationGroup(String transformationGroup) {
-        this.transformationGroup = transformationGroup;
+        if (EnumUtils.isValidEnum(TransformationGroup.class, transformationGroup)) {
+            this.transformationGroup = TransformationGroup.valueOf(transformationGroup).getName();
+        } else {
+            this.transformationGroup = transformationGroup;
+        }
     }
 
     @Override
