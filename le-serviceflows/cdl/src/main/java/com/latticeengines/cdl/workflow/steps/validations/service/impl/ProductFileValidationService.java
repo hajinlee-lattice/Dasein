@@ -273,7 +273,9 @@ public class ProductFileValidationService
 
             if (inputProduct.getProductBundle() == null && inputProduct.getProductCategory() == null) {
                 if (inputProduct.getProductName() == null) {
-                    String errMsg = "Product name is missing for product with id=" + inputProduct.getProductId();
+                    String errMsg = String.format(
+                            "Product name, bundle and hierarchy can't be all empty for product with id = %s",
+                            inputProduct.getProductId());
                     errorLine++;
                     csvFilePrinter.printRecord(entry.getKey(), "", errMsg);
                 }
@@ -281,7 +283,7 @@ public class ProductFileValidationService
                 // ProductId will be used in avro schema in curated metrics.
                 // Need to check validation
                 if (!AvroUtils.isValidColumn(inputProduct.getProductId())) {
-                    String errMsg = String.format("Product has invalid id=%s", inputProduct.getProductId());
+                    String errMsg = String.format("Product has invalid id = %s", inputProduct.getProductId());
                     errorLine++;
                     csvFilePrinter.printRecord(entry.getKey(), "", errMsg);
                 }

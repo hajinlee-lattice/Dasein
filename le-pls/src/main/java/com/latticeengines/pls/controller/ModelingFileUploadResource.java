@@ -108,8 +108,9 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
-        return ResponseDocument.successResponse(
-                uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag));
+        SourceFile response = uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag);
+        response.setPath("");
+        return ResponseDocument.successResponse(response);
     }
 
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)

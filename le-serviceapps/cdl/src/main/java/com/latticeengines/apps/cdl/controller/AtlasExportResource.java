@@ -1,9 +1,13 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +30,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/atlas/export")
 public class AtlasExportResource {
+
+    private static final Logger log = LoggerFactory.getLogger(AtlasExportResource.class);
 
     @Inject
     private AtlasExportService atlasExportService;
@@ -64,14 +70,22 @@ public class AtlasExportResource {
     @ApiOperation(value = "Add export file to systempath")
     public void addFileToSystemPath(@PathVariable String customerSpace, @RequestParam String uuid,
                                     @RequestParam String fileName, @RequestBody List<String> filesToDelete) {
-        atlasExportService.addFileToSystemPath(customerSpace, uuid, fileName, filesToDelete);
+        try {
+            atlasExportService.addFileToSystemPath(customerSpace, uuid, URLDecoder.decode(fileName, "utf-8"), filesToDelete);
+        } catch (UnsupportedEncodingException e) {
+            log.error(String.format("File name can't be decoded %s.", e.getMessage()));
+        }
     }
 
     @PostMapping(value = "/dropfolderfiles")
     @ApiOperation(value = "Add export file to dropfolder")
     public void addFileToDropFolder(@PathVariable String customerSpace, @RequestParam String uuid,
                                     @RequestParam String fileName, @RequestBody List<String> filesToDelete) {
-        atlasExportService.addFileToDropFolder(customerSpace, uuid, fileName, filesToDelete);
+        try {
+            atlasExportService.addFileToDropFolder(customerSpace, uuid, URLDecoder.decode(fileName, "utf-8"), filesToDelete);
+        } catch (UnsupportedEncodingException e) {
+            log.error(String.format("File name can't be decoded %s.", e.getMessage()));
+        }
     }
 
     @GetMapping(value = "/dropfolder/path")
