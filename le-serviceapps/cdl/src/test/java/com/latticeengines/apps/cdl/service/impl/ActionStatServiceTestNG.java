@@ -48,19 +48,19 @@ public class ActionStatServiceTestNG extends CDLFunctionalTestNGBase {
         actionList = new ArrayList<>();
         Action action1 = generateCDLImportAction();
         action1.setOwnerId(OWNER_ID);
-        action1.setActionConfiguration(generateActionConfig(0));
+        action1.setActionConfiguration(generateSegmentActionConfig());
         Action actionWithoutOwner1 = generateCDLImportAction();
-        actionWithoutOwner1.setActionConfiguration(generateActionConfig(1));
+        actionWithoutOwner1.setActionConfiguration(generateRatingEngineActionConfig());
         Action actionWithoutOwner2 = generateCDLImportAction();
-        actionWithoutOwner2.setActionConfiguration(generateActionConfig(2));
+        actionWithoutOwner2.setActionConfiguration(generateActivityMetricsActionConfig());
         Action actionWithoutOwner3 = generateCDLImportAction();
-        actionWithoutOwner3.setActionConfiguration(generateActionConfig(3));
+        actionWithoutOwner3.setActionConfiguration(generateAttrConfigLifeCycleChangeConfig());
         Action action2 = generateCDLImportAction();
         action2.setOwnerId(OWNER_ID);
-        action2.setActionConfiguration(generateActionConfig(0));
+        action2.setActionConfiguration(generateSegmentActionConfig());
         Action action3 = generateCDLImportAction();
         action3.setType(ActionType.CDL_OPERATION_WORKFLOW);
-        action3.setActionConfiguration(generateActionConfig(1));
+        action3.setActionConfiguration(generateRatingEngineActionConfig());
         actionList.add(action1);
         actionList.add(actionWithoutOwner1);
         actionList.add(actionWithoutOwner2);
@@ -104,36 +104,33 @@ public class ActionStatServiceTestNG extends CDLFunctionalTestNGBase {
         return action;
     }
 
-    private ActionConfiguration generateActionConfig(int n) {
-        ActionConfiguration ac;
-        switch (n) {
-            case 0:
-                ac = new SegmentActionConfiguration();
-                ((SegmentActionConfiguration) ac).setSegmentName("Segment_abc");
-                break;
-            case 1:
-                ac = new RatingEngineActionConfiguration();
-                ((RatingEngineActionConfiguration) ac).setRatingEngineId("RatingEngine_abc");
-                ((RatingEngineActionConfiguration) ac)
-                        .setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
-                ((RatingEngineActionConfiguration) ac).setModelId("RatingModel_abc");
-                break;
-            case 2:
-                ac = new ActivityMetricsActionConfiguration();
-                ((ActivityMetricsActionConfiguration) ac).setActivated(Collections.emptyList());
-                ((ActivityMetricsActionConfiguration) ac).setUpdated(Collections.emptyList());
-                ((ActivityMetricsActionConfiguration) ac).setDeactivated(Collections.emptyList());
-                break;
-            case 3:
-                ac = new AttrConfigLifeCycleChangeConfiguration();
-                ((AttrConfigLifeCycleChangeConfiguration) ac)
-                        .setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
-                ((AttrConfigLifeCycleChangeConfiguration) ac).setAttrNums(1000L);
-                ((AttrConfigLifeCycleChangeConfiguration) ac).setCategoryName("Category_abc");
-            default:
-                ac = null;
-                break;
-        }
+    private ActionConfiguration generateSegmentActionConfig() {
+        SegmentActionConfiguration ac = new SegmentActionConfiguration();
+        ac.setSegmentName("Segment_abc");
+        return ac;
+    }
+
+    private ActionConfiguration generateRatingEngineActionConfig() {
+        RatingEngineActionConfiguration ac = new RatingEngineActionConfiguration();
+        ac.setRatingEngineId("RatingEngine_abc");
+        ac.setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
+        ac.setModelId("RatingModel_abc");
+        return ac;
+    }
+
+    private ActionConfiguration generateActivityMetricsActionConfig() {
+        ActivityMetricsActionConfiguration ac = new ActivityMetricsActionConfiguration();
+        ac.setActivated(Collections.emptyList());
+        ac.setUpdated(Collections.emptyList());
+        ac.setDeactivated(Collections.emptyList());
+        return ac;
+    }
+
+    private ActionConfiguration generateAttrConfigLifeCycleChangeConfig() {
+        AttrConfigLifeCycleChangeConfiguration ac = new AttrConfigLifeCycleChangeConfiguration();
+        ac.setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
+        ac.setAttrNums(1000L);
+        ac.setCategoryName("Category_abc");
         return ac;
     }
 
