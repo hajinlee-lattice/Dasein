@@ -59,12 +59,14 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.number.NumberStyleFormatter;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -202,7 +204,19 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             }
         }
         if (uploadAvroRecord) {
-            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            retry.execute(ctx -> {
+                if (ctx.getRetryCount() > 0) {
+                    LOG.warn("Previous failure:", ctx.getLastThrowable());
+                }
+                Configuration conf = context.getConfiguration();
+                String hdfsPath = outputPath + "/" + avroFileName;
+                if (HdfsUtils.fileExists(conf, hdfsPath)) {
+                    HdfsUtils.rmdir(conf, hdfsPath);
+                }
+                HdfsUtils.copyInputStreamToHdfs(conf, new FileInputStream(new File(avroFileName)), hdfsPath);
+                return null;
+            });
         }
     }
 
