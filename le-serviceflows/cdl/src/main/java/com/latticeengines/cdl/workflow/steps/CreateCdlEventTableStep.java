@@ -231,6 +231,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         if (!getConfiguration().isExportKeyColumnsOnly()) {
             putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, eventTable.getName());
         }
+        addToListInContext(TEMPORARY_CDL_TABLES, eventTable.getName(), String.class);
     }
 
 }
