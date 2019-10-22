@@ -293,7 +293,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
         .drop("CONTACT_NUM")
 
       // add log
-      logDataFrame("finalRecommendations", finalRecommendations, "ACCOUNT_ID", Seq("ACCOUNT_ID", "CUSTOMER_ACCOUNT_ID"), limit = 100)
+      logDataFrame("finalRecommendations", finalRecommendations, "ACCOUNT_ID", Seq("ACCOUNT_ID", "CUSTOMER_ACCOUNT_ID", "EXTERNAL_ID"), limit = 100)
 
       if (contactCount != null) {
         finalOutput = contactCount.toString
@@ -308,12 +308,13 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       finalRecommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
       finalOutput = "0"
     }
-
+    val finalRecommendationsSaved = finalRecommendations.checkpoint(eager = true)
     lattice.outputStr = finalOutput
+    logDataFrame("finalRecommendationsSaved", finalRecommendationsSaved, "ACCOUNT_ID", Seq("ACCOUNT_ID", "CUSTOMER_ACCOUNT_ID", "EXTERNAL_ID"), limit = 100)
 
     // 1. drop the internal account id (ACCOUNT_ID) and rename "CUSTOMER_ACCOUNT_ID" to "ACCOUNT_ID"
     // 2. make sure the order is the same as Recommendation table
-    val orderedRec = finalRecommendations.drop("ACCOUNT_ID").withColumnRenamed("CUSTOMER_ACCOUNT_ID", "ACCOUNT_ID").select("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID",
+    val orderedRec = finalRecommendationsSaved.drop("ACCOUNT_ID").withColumnRenamed("CUSTOMER_ACCOUNT_ID", "ACCOUNT_ID").select("PID", "EXTERNAL_ID", "ACCOUNT_ID", "LE_ACCOUNT_EXTERNAL_ID", "PLAY_ID", "LAUNCH_ID",
         "DESCRIPTION", "LAUNCH_DATE", "LAST_UPDATED_TIMESTAMP", "MONETARY_VALUE", "LIKELIHOOD", "COMPANY_NAME", "SFDC_ACCOUNT_ID",
         "PRIORITY_ID", "PRIORITY_DISPLAY_NAME", "MONETARY_VALUE_ISO4217_ID", "LIFT", "RATING_MODEL_ID", "MODEL_SUMMARY_ID", "CONTACTS",
         "SYNC_DESTINATION", "DESTINATION_ORG_ID", "DESTINATION_SYS_TYPE", "TENANT_ID", "DELETED")
@@ -326,7 +327,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       lattice.output = List(orderedRec, orderedRec)
     } else {
       // generate dataframe for csv file exporter
-      val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendations, accountTable, playLaunchContext, joinKey)
+      val userConfiguredDataFrame = generateUserConfiguredDataFrame(finalRecommendationsSaved, accountTable, playLaunchContext, joinKey)
       lattice.output = List(orderedRec, userConfiguredDataFrame)
     }
     
