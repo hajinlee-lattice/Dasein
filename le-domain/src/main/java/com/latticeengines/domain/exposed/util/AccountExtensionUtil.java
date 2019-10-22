@@ -68,15 +68,15 @@ public class AccountExtensionUtil {
         if (CollectionUtils.isNotEmpty(accountIds)) {
             RestrictionBuilder accountIdRestrictionBuilder = Restriction.builder();
             if (isEntityMatchEnabled) {
-                RestrictionBuilder custAccountIdRestrictions = Restriction.builder()
+                RestrictionBuilder custAccountIdRestriction = Restriction.builder()
                         .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())
                         .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
-                accountIdRestrictionBuilder.or(custAccountIdRestrictions);
+                accountIdRestrictionBuilder.or(custAccountIdRestriction);
             }
 
-            Restriction accountIdRestriction = Restriction.builder()
+            RestrictionBuilder accountIdRestriction = Restriction.builder()
                     .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
+                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
             accountIdRestrictionBuilder.or(accountIdRestriction);
 
             idRestrictions.add(accountIdRestrictionBuilder.build());
