@@ -59,14 +59,12 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.number.NumberStyleFormatter;
-import org.springframework.retry.support.RetryTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -108,6 +106,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private String idColumnName;
 
     private final String ERROR_FILE_NAME = "error";
+
+    private final String AVRO_SUFFIX_NAME = ".avro";
 
     /**
      * RFC 4180 defines line breaks as CRLF
@@ -171,7 +171,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         return stringBuffer.toString();
     }
 
-    private void handleProcess(int index, Context context) throws IOException {
+    private void handleProcess(int index) throws IOException {
         DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
         String avroFileName = getFileName(avroFile, ".avro", index);
         boolean uploadAvroRecord = false;
@@ -203,20 +203,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             }
         }
-        if (uploadAvroRecord) {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-            retry.execute(ctx -> {
-                if (ctx.getRetryCount() > 0) {
-                    LOG.warn("Previous failure:", ctx.getLastThrowable());
-                }
-                Configuration conf = context.getConfiguration();
-                String hdfsPath = outputPath + "/" + avroFileName;
-                if (HdfsUtils.fileExists(conf, hdfsPath)) {
-                    HdfsUtils.rmdir(conf, hdfsPath);
-                }
-                HdfsUtils.copyInputStreamToHdfs(conf, new FileInputStream(new File(avroFileName)), hdfsPath);
-                return null;
-            });
+        if (!uploadAvroRecord) {
+            File file = new File(avroFileName);
+            file.delete();
         }
     }
 
@@ -248,7 +237,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     int index = i;
                     futures.add(CompletableFuture.runAsync(() -> {
                         try {
-                            handleProcess(index, context);
+                            handleProcess(index);
                         } catch (IOException e) {
                             LOG.info(String.format("IOException %s happened when process csv record.", e.getMessage()));
                         }
@@ -375,7 +364,24 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         if (context.getCounter(RecordImportCounter.ROW_ERROR).getValue() == 0) {
             context.getCounter(RecordImportCounter.ROW_ERROR).setValue(0);
         }
+        uploadAvroFile(context);
         mergeErrorFile(context);
+    }
+
+    private void uploadAvroFile(Context context) {
+        File directory = new File(".");
+        FilenameFilter filenameFilter = (file, name) -> name.endsWith(AVRO_SUFFIX_NAME);
+        File[] avroFiles = directory.listFiles(filenameFilter);
+        if (avroFiles != null) {
+            for (File avroFile2 : avroFiles) {
+                try {
+                    String avroFileName = avroFile2.getName();
+                    HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
+                } catch (IOException e) {
+                    LOG.error(String.format("IOException happened during the process for merge file: %s.", e.getMessage()));
+                }
+            }
+        }
     }
 
     private void mergeErrorFile(Context context) {
