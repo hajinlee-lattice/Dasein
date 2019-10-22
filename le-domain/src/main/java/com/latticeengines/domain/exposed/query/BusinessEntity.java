@@ -34,6 +34,7 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public enum BusinessEntity implements GraphNode {
     // Customer Data Lake
@@ -68,12 +69,15 @@ public enum BusinessEntity implements GraphNode {
 
     public static final Set<BusinessEntity> SEGMENT_ENTITIES = //
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount);
-    public static final Set<BusinessEntity> EXPORT_ENTITIES = //
-            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount);
+    public static final Set<BusinessEntity> EXPORT_ACCOUNT_ENTITIES = //
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
+    public static final Set<BusinessEntity> TALKING_POINT_ACCOUNT_ENTITIES = //
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
+    public static final Set<BusinessEntity> COMPANY_PROFILE_ACCOUNT_ENTITIES = //
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
-    public static final Set<BusinessEntity> COMPANY_PROFILE_ENTITIES = ImmutableSet.of(Account, PurchaseHistory, Rating,
-            CuratedAccount);
     public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
+    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME= ImmutableSet.of(PurchaseHistory);
 
     static {
         // Storage
@@ -190,6 +194,20 @@ public enum BusinessEntity implements GraphNode {
     @Override
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         return new HashMap<>();
+    }
+
+    public static Set<BusinessEntity> getAccountExportEntities(ColumnSelection.Predefined group) {
+        switch (group) {
+            case Enrichment:
+                return BusinessEntity.EXPORT_ACCOUNT_ENTITIES;
+            case TalkingPoint:
+                return BusinessEntity.TALKING_POINT_ACCOUNT_ENTITIES;
+            case CompanyProfile:
+                return BusinessEntity.COMPANY_PROFILE_ACCOUNT_ENTITIES;
+            default:
+                throw new UnsupportedOperationException("Only support export, " + //
+                        "talking point or company profile in this api");
+        }
     }
 
     public enum Cardinality {

@@ -3,8 +3,13 @@ package com.latticeengines.proxy.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -12,12 +17,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -45,6 +51,45 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     @Override
+    public List<ColumnMetadata> getAccountMetadataFromCache(String customerSpace, ColumnSelection.Predefined group) {
+        return getDecoratedMetadataWithDeflatedDisplayNamesFromCache(customerSpace,
+                BusinessEntity.getAccountExportEntities(group), Collections.singleton(group));
+    }
+
+    /**
+     * deflateDisplayName means prepend sub-category in front of display name In "My
+     * Data" page we can use sub-category to show hierarchical display name of
+     * attributes But in other cases, such as TalkingPoint, we have to concatenate
+     * sub-category and display name together
+     */
+    private List<ColumnMetadata> getDecoratedMetadataWithDeflatedDisplayNamesFromCache(String customerSpace,
+            Collection<BusinessEntity> entities, Collection<ColumnSelection.Predefined> groups) {
+        List<ColumnMetadata> allAttrs = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(entities)) {
+            for (BusinessEntity entity : entities) {
+                List<ColumnMetadata> entityAttrs = getDecoratedMetadataFromCache(customerSpace, entity);
+                if (CollectionUtils.isNotEmpty(entityAttrs)) {
+                    Stream<ColumnMetadata> stream = entityAttrs.stream();
+                    if (groups != null) {
+                        stream = stream.filter(cm -> cm.isEnabledForAny(groups));
+                    }
+                    if (BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
+                        stream = stream.peek(cm -> {
+                            String subCategory = cm.getSubcategory();
+                            if (StringUtils.isNotBlank(subCategory) && !"Others".equalsIgnoreCase(subCategory)) {
+                                String displayName = cm.getDisplayName();
+                                cm.setDisplayName(subCategory + ": " + displayName);
+                            }
+                        });
+                    }
+                    allAttrs.addAll(stream.collect(Collectors.toList()));
+                }
+            }
+        }
+        return allAttrs;
+    }
+
+    @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             List<ColumnSelection.Predefined> groups) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
@@ -62,7 +107,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-                                                     List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+            List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace), entity);
         url += getVersionGroupParm(version, groups);
@@ -74,7 +119,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         }
     }
 
-    private String getVersionGroupParm(DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+    private String getVersionGroupParm(DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
         StringBuffer url = new StringBuffer();
         if (version != null) {
             url.append("?version=" + version.toString());
@@ -90,13 +135,43 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     @Override
-    public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities,
-                                                     List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
-        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/decoratedmetadata", //
-                shortenCustomerSpace(customerSpace));
-        url += getVersionGroupParm(version, groups);
-        List<?> list = post("serving store metadata", url, entities, List.class);
-        return JsonUtils.convertList(list, ColumnMetadata.class);
+    public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                BusinessEntity.getAccountExportEntities(group), Collections.singleton(group), version);
+    }
+
+    @Override
+    public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                Collections.singletonList(BusinessEntity.Contact), Collections.singleton(group), version);
+    }
+
+    private List<ColumnMetadata> getDecoratedMetadataWithDeflatedDisplayName(String customerSpace,
+            Collection<BusinessEntity> entities, Collection<ColumnSelection.Predefined> groups,
+            DataCollection.Version version) {
+        List<ColumnMetadata> columnMetadataList = new ArrayList<>();
+        Tenant tenant = MultiTenantContext.getTenant();
+        Map<BusinessEntity, List<ColumnMetadata>> map = entities.stream().parallel()
+                .collect(Collectors.toMap(entity -> entity, entity -> {
+                    MultiTenantContext.setTenant(tenant);
+                    List<ColumnMetadata> cms = getDecoratedMetadata(customerSpace, entity, new ArrayList<>(groups),
+                            version).collectList().block();
+                    if (CollectionUtils.isNotEmpty(cms)
+                            && BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
+                        cms.forEach(cm -> {
+                            String subCategory = cm.getSubcategory();
+                            if (StringUtils.isNotBlank(subCategory) && !"Others".equalsIgnoreCase(subCategory)) {
+                                String displayName = cm.getDisplayName();
+                                cm.setDisplayName(subCategory + ": " + displayName);
+                            }
+                        });
+                    }
+                    return CollectionUtils.isNotEmpty(cms) ? cms : new ArrayList<>();
+                }));
+        map.values().forEach(columnMetadataList::addAll);
+        return columnMetadataList;
     }
 
     @Override

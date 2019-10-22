@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -249,15 +251,13 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         Arrays.stream(Category.values()).forEach(category -> columnMetadataList.add(new ArrayList<>()));
         boolean hasAccountId = false;
         String accountId = entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
-        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
-            if (!BusinessEntity.Contact.equals(entity)) {
-                List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
-                for (ColumnMetadata cm : cms) {
-                    if (accountId.equals(cm.getAttrName())) {
-                        hasAccountId = true;
-                    }
-                    columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
+        for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
+            List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
+            for (ColumnMetadata cm : cms) {
+                if (accountId.equals(cm.getAttrName())) {
+                    hasAccountId = true;
                 }
+                columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
             }
         }
         if (!hasAccountId) {
@@ -343,7 +343,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private Map<BusinessEntity, List<ColumnMetadata>> getExportSchema() {
         List<ColumnSelection.Predefined> groups = Collections.singletonList(ColumnSelection.Predefined.Enrichment);
         Map<BusinessEntity, List<ColumnMetadata>> schemaMap = new HashMap<>();
-        for (BusinessEntity entity : BusinessEntity.EXPORT_ENTITIES) {
+        Set<BusinessEntity> entitySet = new HashSet<>(BusinessEntity.EXPORT_ACCOUNT_ENTITIES);
+        entitySet.add(BusinessEntity.Contact);
+        for (BusinessEntity entity : entitySet) {
             List<ColumnMetadata> cms = servingStoreProxy //
                     .getDecoratedMetadata(customerSpace.toString(), entity, groups, version).collectList().block();
             if (CollectionUtils.isNotEmpty(cms)) {

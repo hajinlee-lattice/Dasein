@@ -1,8 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -65,12 +66,6 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity,
-            DataCollection.Version version) {
-        return getFullyDecoratedMetadata(entity, version).sorted(Comparator.comparing(ColumnMetadata::getAttrName));
-    }
-
-    @Override
     @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|md_in_svc\", #tenantId, #entity)", unless="#result == null")
     public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
@@ -79,7 +74,8 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         Flux<ColumnMetadata> flux;
@@ -112,15 +108,42 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities, DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+    public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                BusinessEntity.getAccountExportEntities(group), version, Collections.singleton(group));
+    }
+
+    @Override
+    public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
+            DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
+                Collections.singletonList(BusinessEntity.Contact), version, Collections.singleton(group));
+    }
+
+    private List<ColumnMetadata> getDecoratedMetadataWithDeflatedDisplayName(String customerSpace,
+            Collection<BusinessEntity> entities, DataCollection.Version version,
+            Collection<ColumnSelection.Predefined> groups) {
         List<ColumnMetadata> columnMetadataList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
-        Map<BusinessEntity, List<ColumnMetadata>> map = entities.stream().parallel().collect(Collectors.toMap(BusinessEntity -> BusinessEntity,
-                BusinessEntity -> {
+        Map<BusinessEntity, List<ColumnMetadata>> map = entities.stream().parallel()
+                .collect(Collectors.toMap(entity -> entity, entity -> {
                     MultiTenantContext.setTenant(tenant);
-                    return getDecoratedMetadata(customerSpace, BusinessEntity, version, groups).collectList().block();
+                    List<ColumnMetadata> cms = getDecoratedMetadata(customerSpace, entity, version, groups)
+                            .collectList().block();
+                    if (CollectionUtils.isNotEmpty(cms)
+                            && BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
+                        cms.forEach(cm -> {
+                            String subCategory = cm.getSubcategory();
+                            if (StringUtils.isNotBlank(subCategory) && !"Others".equalsIgnoreCase(subCategory)) {
+                                String displayName = cm.getDisplayName();
+                                cm.setDisplayName(subCategory + ": " + displayName);
+                            }
+                        });
+                    }
+                    return CollectionUtils.isNotEmpty(cms) ? cms : new ArrayList<>();
                 }));
-        map.values().forEach(list -> columnMetadataList.addAll(list));
+        map.values().forEach(columnMetadataList::addAll);
         return columnMetadataList;
     }
 
@@ -167,8 +190,8 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         return flux;
     }
 
-    public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(String tenantId, BusinessEntity entity,
-                                                                  DataCollection.Version version) {
+    private ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(String tenantId, BusinessEntity entity,
+                                                                   DataCollection.Version version) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         TableRoleInCollection role = entity.getServingStore();
         List<String> tables = dataCollectionService.getTableNames(customerSpace, "", role, version);
@@ -191,7 +214,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 }
 
                 if (AttrState.Inactive.equals(cm.getAttrState())) {
-                    // disable these useages if it is inactive attribute.
+                    // disable these usages if it is inactive attribute.
                     cm.disableGroup(ColumnSelection.Predefined.Segment);
                     cm.disableGroup(ColumnSelection.Predefined.Enrichment);
                     cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
@@ -199,7 +222,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 }
 
                 if (AttrState.Deprecated.equals(cm.getAttrState())) {
-                    // disable these useages if it is deprecated attribute.
+                    // disable these usages if it is deprecated attribute.
                     cm.disableGroup(ColumnSelection.Predefined.Enrichment);
                     cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
                 }
