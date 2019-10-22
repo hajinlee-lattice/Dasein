@@ -1,6 +1,8 @@
 package com.latticeengines.pls.end2end;
 
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
@@ -41,6 +44,8 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
     private static final String PRODUCT_BUNDLE_WITHOUT_NAME = "Product_Bundles_Without_NAME.csv";
 
+    private static final String WEB_VISIT_WITH_INVALID_URL = "WebVisitWithInvalidURL.csv";
+
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
 
@@ -53,6 +58,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
     @Test(groups = "deployment")
     public void testInvalidFile() throws IOException {
+        // account
         SourceFile accountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
                 PathBuilder
@@ -67,6 +73,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                 .getImportJobDetailByCollectionIdentifier(accountIdentifier);
         verifyEaiJobDetail(accountDetail, 3L, 47);
 
+        // contact
         SourceFile contactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
         String contactPath = String.format("%s/%s/DataFeed1/DataFeed1-Contact/Extracts",
                 PathBuilder
@@ -81,18 +88,32 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                 .getImportJobDetailByCollectionIdentifier(contactIdentifier);
         verifyEaiJobDetail(contactDetail, 3L, 47);
 
+        // product
         SourceFile productFile = uploadSourceFile(PRODUCT_HIERARCHY_SOURCE_FILE, ENTITY_PRODUCT);
         verifyFailed(productFile, ENTITY_PRODUCT);
+
+        // webvisit call separate api to create webvisit template
+        File templateFile = new File(
+                ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + WEB_VISIT_WITH_INVALID_URL).getPath());
+        cdlService.createWebVisitTemplate(customerSpace, EntityType.WebVisit, new FileInputStream(templateFile));
+        getDataFeedTask(ENTITY_ACTIVITY_STREAM);
+        EaiImportJobDetail webVisitDetail =
+                eaiJobDetailProxy.getImportJobDetailByCollectionIdentifier(webVisitDataFeedTask.getUniqueId());
+        verifyEaiJobDetail(webVisitDetail, 2L, 298);
+
+
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
         Collections.sort(reports, Comparator.comparing(Report::getCreated));
-        Assert.assertEquals(reports.size(), 3);
+        Assert.assertEquals(reports.size(), 4);
         Report accountReport = reports.get(0);
         Report contactReport = reports.get(1);
         Report productReport = reports.get(2);
+        Report webVisitReport = reports.get(3);
         verifyReport(accountReport, 3L, 3L, 47L);
         verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 0L, 2L, 0L);
+        verifyReport(webVisitReport, 0L, 2L, 298L);
     }
 
     @Test(groups = "deployment")

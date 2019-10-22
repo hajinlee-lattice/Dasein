@@ -21,7 +21,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -37,13 +36,9 @@ public class AccountFileValidationService
 
     private static Logger log = LoggerFactory.getLogger(AccountFileValidationService.class);
 
-    public AccountFileValidationService() {
-        super(AccountFileValidationConfiguration.class.getSimpleName());
-    }
-
     @Override
     public long validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration,
-            List<String> processedRecords, StringBuilder stastistics) {
+            List<String> processedRecords, StringBuilder statistics) {
 
         // check entity match, change name to transformed name
         boolean enableEntityMatch = accountFileValidationServiceConfiguration.isEnableEntityMatch();
@@ -56,19 +51,10 @@ public class AccountFileValidationService
 
         long errorLine = 0L;
         List<String> pathList = accountFileValidationServiceConfiguration.getPathList();
-        CSVFormat format = LECSVFormat.format;
+        String errorFile = getPath(pathList.get(0)) + PATH_SEPARATOR + ImportProperty.ERROR_FILE;
         // copy error file if file exists
-        String errorFile = getPath(pathList.get(0)) + "/" + ImportProperty.ERROR_FILE;
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, errorFile, ImportProperty.ERROR_FILE);
-                format = format.withSkipHeaderRecord();
-            } else {
-                format = format.withHeader(ImportProperty.ERROR_HEADER);
-            }
-        } catch (IOException e) {
-            log.info("Error when copying error file to local");
-        }
+        CSVFormat format = copyErrorFileToLocalIfExist(errorFile);
+
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             // iterate through all files, remove all illegal record row
             for (int i = 0; i < pathList.size(); i++) {
@@ -161,15 +147,7 @@ public class AccountFileValidationService
 
         // copy error file back to hdfs, remove local error.csv
         if (errorLine != 0L) {
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
-                    HdfsUtils.rmdir(yarnConfiguration, errorFile);
-                }
-                HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, errorFile);
-                FileUtils.forceDelete(new File(ImportProperty.ERROR_FILE));
-            } catch (IOException e) {
-                log.info("Error when copying file to hdfs");
-            }
+            copyErrorFileBackToHdfs(errorFile);
         }
         return errorLine;
     }

@@ -101,7 +101,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             errorLine = 0L;
         } else {
             InputFileValidationService fileValidationService = InputFileValidationService
-                    .getValidationService(fileConfiguration.getClass().getSimpleName());
+                    .getValidationService(fileConfiguration.getClass());
             errorLine = fileValidationService.validate(fileConfiguration, processedRecords, statistics);
         }
         // update eaiJobDetail if found error in validations
