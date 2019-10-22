@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +46,7 @@ public class AccountExtensionUtil {
     public static FrontEndQuery constructFrontEndQuery(String customerSpace, List<String> accountIds,
             String lookupIdColumn, Long start, boolean shouldAddLookupIdClause, boolean isEntityMatchEnabled) {
 
-        ArrayList<String> attributes = new ArrayList<String>(Arrays.asList(InterfaceName.AccountId.name()));
+        ArrayList<String> attributes = new ArrayList<>(Collections.singletonList(InterfaceName.AccountId.name()));
         return constructFrontEndQuery(customerSpace, accountIds, lookupIdColumn, attributes, start,
                 shouldAddLookupIdClause, isEntityMatchEnabled);
     }
@@ -67,20 +66,20 @@ public class AccountExtensionUtil {
         }
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
-            RestrictionBuilder accoundIdRestrictionBuilder = Restriction.builder();
+            RestrictionBuilder accountIdRestrictionBuilder = Restriction.builder();
             if (isEntityMatchEnabled) {
-                RestrictionBuilder custAccountIdRestrictions = Restriction.builder()
+                RestrictionBuilder custAccountIdRestriction = Restriction.builder()
                         .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())
                         .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
-                accoundIdRestrictionBuilder.or(custAccountIdRestrictions);
+                accountIdRestrictionBuilder.or(custAccountIdRestriction);
             }
 
-            Restriction accountIdRestriction = Restriction.builder()
+            RestrictionBuilder accountIdRestriction = Restriction.builder()
                     .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
-            accoundIdRestrictionBuilder.or(accountIdRestriction);
+                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
+            accountIdRestrictionBuilder.or(accountIdRestriction);
 
-            idRestrictions.add(accoundIdRestrictionBuilder.build());
+            idRestrictions.add(accountIdRestrictionBuilder.build());
 
             if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
                 RestrictionBuilder sfdcRestrictionBuilder = Restriction.builder()
@@ -107,13 +106,13 @@ public class AccountExtensionUtil {
         FrontEndSort sort = new FrontEndSort(sortLookups, false);
         frontEndQuery.setSort(sort);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.addLookups(BusinessEntity.Account, attributes.toArray(new String[attributes.size()]));
+        frontEndQuery.addLookups(BusinessEntity.Account, attributes.toArray(new String[0]));
 
         return frontEndQuery;
     }
 
     public static List<String> extractAccountIds(DataPage dataPage) {
-        List<String> internalAccountIds = new ArrayList<String>();
+        List<String> internalAccountIds = new ArrayList<>();
 
         if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
             internalAccountIds = dataPage.getData().stream()
@@ -304,11 +303,10 @@ public class AccountExtensionUtil {
                         final Map<String, Object> tempDataRef = new HashMap<>();
                         List<Object> values = matchOutput.getResult().get(i).getOutput();
                         IntStream.range(0, fields.size()) //
-                                .forEach(j -> {
-                                    tempDataRef.put(fields.get(j), values.get(j));
-                                });
+                                .forEach(j -> tempDataRef.put(fields.get(j), values.get(j)));
 
-                        // Overwrite AccountId value with CustomerAccountId value for EntityMatchEnabled tenants
+                        // Overwrite AccountId value with CustomerAccountId value for EntityMatchEnabled
+                        // tenants
                         if (isEntityMatchEnabled) {
                             tempDataRef.put(InterfaceName.AccountId.name(),
                                     tempDataRef.getOrDefault(InterfaceName.CustomerAccountId.name(),

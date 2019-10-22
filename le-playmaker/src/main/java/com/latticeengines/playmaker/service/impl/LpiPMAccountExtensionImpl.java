@@ -31,13 +31,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.AccountExtensionUtil;
-import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -235,10 +233,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             long rowNum = offset + 1;
 
             Map<String, Object> lastModifyTimeLookups = new HashMap<>();
-            accountInfos.stream().forEach(info -> {
-                lastModifyTimeLookups.put((String) info.get(PlaymakerConstants.AccountID),
-                        info.get(PlaymakerConstants.LastModificationDate));
-            });
+            accountInfos.forEach(info -> lastModifyTimeLookups.put((String) info.get(PlaymakerConstants.AccountID),
+                    info.get(PlaymakerConstants.LastModificationDate)));
 
             for (Map<String, Object> accExtRec : data) {
                 if (accExtRec.containsKey(InterfaceName.AccountId.name())) {
@@ -338,71 +334,51 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
     @Override
     public List<Map<String, Object>> getAccountExtensionSchema(String customerSpace) {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        BusinessEntity.COMPANY_PROFILE_ENTITIES.forEach(entity -> {
-            result.addAll(getSchema(customerSpace, entity));
-        });
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<ColumnMetadata> cms = servingStoreProxy.getAccountMetadata(customerSpace, Predefined.CompanyProfile, null);
+        if (CollectionUtils.isNotEmpty(cms)) {
+            result.addAll(parseColumnMetadata(Flux.fromIterable(cms)));
+        }
         return result;
     }
 
     @Override
     public List<Map<String, Object>> getContactExtensionSchema(String customerSpace) {
-        return getSchema(customerSpace, BusinessEntity.Contact);
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<ColumnMetadata> cms = servingStoreProxy.getContactMetadata(customerSpace, Predefined.CompanyProfile, null);
+        if (CollectionUtils.isNotEmpty(cms)) {
+            result.addAll(parseColumnMetadata(Flux.fromIterable(cms)));
+        }
+        return result;
+    }
+
+    private List<Map<String, Object>> parseColumnMetadata(Flux<ColumnMetadata> cms) {
+        if (cms != null) {
+            return cms.map(metadata -> {
+                Map<String, Object> metadataInfoMap = new HashMap<>();
+                metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
+                metadataInfoMap.put(PlaymakerConstants.Type, PlaymakerUtils.convertToSFDCFieldType(
+                        metadata.isDateAttribute() ? PlaymakerConstants.DateTime : metadata.getJavaClass()));
+                metadataInfoMap.put(PlaymakerConstants.StringLength,
+                        PlaymakerUtils.findLengthIfStringType(metadata.getJavaClass()));
+                metadataInfoMap.put(PlaymakerConstants.Field, metadata.getAttrName());
+                return metadataInfoMap;
+            }).sort(Comparator.comparing(a -> ((String) a.get(PlaymakerConstants.Field)))).collectList().block();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public int getAccountExtensionColumnCount(String customerSpace) {
-        List<ColumnMetadata> cms = servingStoreProxy
-                .getDecoratedMetadata(customerSpace, BusinessEntity.Account, filterByPredefinedSelection).collectList()
-                .block();
-
-        return cms == null ? 0 : cms.size();
+        List<Map<String, Object>> cols = getAccountExtensionSchema(customerSpace);
+        return CollectionUtils.size(cols);
     }
 
     @Override
     public int getContactExtensionColumnCount(String customerSpace) {
-        List<ColumnMetadata> cms = servingStoreProxy
-                .getDecoratedMetadata(customerSpace, BusinessEntity.Contact, filterByPredefinedSelection).collectList()
-                .block();
-
-        return cms == null ? 0 : cms.size();
-    }
-
-    private List<Map<String, Object>> getSchema(String customerSpace, BusinessEntity entity) {
-        List<ColumnMetadata> cms = servingStoreProxy
-                .getDecoratedMetadata(customerSpace, entity, filterByPredefinedSelection).collectList().block();
-        if (CollectionUtils.isNotEmpty(cms)) {
-            if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                DataPage dataPage = entityProxy.getProducts(customerSpace);
-                Map<String, String> productNameMap = new HashMap<>();
-                if (dataPage != null && CollectionUtils.isNotEmpty(dataPage.getData())) {
-                    dataPage.getData().forEach(map -> productNameMap.put( //
-                            map.get(InterfaceName.ProductId.name()).toString(), //
-                            map.get(InterfaceName.ProductName.name()).toString() //
-                    ));
-                }
-                cms.forEach(cm -> {
-                    String productId = ActivityMetricsUtils.getProductIdFromFullName(cm.getAttrName());
-                    String productName = productNameMap.get(productId);
-                    cm.setDisplayName(productName + ": " + cm.getDisplayName());
-                });
-            }
-            Flux<Map<String, Object>> flux = Flux.fromIterable(cms) //
-                    .map(metadata -> {
-                        Map<String, Object> metadataInfoMap = new HashMap<>();
-                        metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
-                        metadataInfoMap.put(PlaymakerConstants.Type, PlaymakerUtils.convertToSFDCFieldType(
-                                metadata.isDateAttribute() ? PlaymakerConstants.DateTime : metadata.getJavaClass()));
-                        metadataInfoMap.put(PlaymakerConstants.StringLength,
-                                PlaymakerUtils.findLengthIfStringType(metadata.getJavaClass()));
-                        metadataInfoMap.put(PlaymakerConstants.Field, metadata.getAttrName());
-                        return metadataInfoMap;
-                    }) //
-                    .sort(Comparator.comparing(a -> ((String) a.get(PlaymakerConstants.Field))));
-            return flux.collectList().block();
-        } else {
-            return new ArrayList<>();
-        }
+        List<Map<String, Object>> cols = getContactExtensionSchema(customerSpace);
+        return CollectionUtils.size(cols);
     }
 
     @VisibleForTesting

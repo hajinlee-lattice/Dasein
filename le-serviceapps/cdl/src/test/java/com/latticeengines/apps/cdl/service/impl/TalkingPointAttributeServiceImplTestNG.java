@@ -5,6 +5,7 @@ import static org.mockito.Mockito.spy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -42,17 +43,14 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
 
         ServingStoreService spiedServingStoreService = spy(new ServingStoreService() {
             @Override
-            public ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity, DataCollection.Version version) {
+            public ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity,
+                    DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version) {
-                return null;
-            }
-
-            @Override
-            public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity, DataCollection.Version version) {
+            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity,
+                    DataCollection.Version version) {
                 return null;
             }
 
@@ -62,27 +60,36 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
-            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                    DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
                 return null;
             }
 
             @Override
-            public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, List<BusinessEntity> entities, DataCollection.Version version, List<ColumnSelection.Predefined> groups) {
+            public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version, Boolean allCustomerAttrs) {
+            public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity,
+                    DataCollection.Version version, Boolean allCustomerAttrs) {
                 return null;
             }
 
             @Override
-            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+            public Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity,
+                    DataCollection.Version version) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity,
+                    DataCollection.Version version) {
                 return null;
             }
 
