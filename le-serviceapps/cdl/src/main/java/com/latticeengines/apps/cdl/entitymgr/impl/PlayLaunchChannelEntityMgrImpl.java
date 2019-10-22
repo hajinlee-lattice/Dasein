@@ -169,6 +169,13 @@ public class PlayLaunchChannelEntityMgrImpl
         if (updatedChannel.isLaunchUnscored()) {
             existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
         }
+        if (updatedChannel.getMaxAccountsToLaunch() != null) {
+            if (updatedChannel.getMaxAccountsToLaunch() < 0) {
+                existingPlayLaunchChannel.setMaxAccountsToLaunch(null);
+            } else {
+                existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
+            }
+        }
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
         }
@@ -249,8 +256,6 @@ public class PlayLaunchChannelEntityMgrImpl
                 existingPlayLaunchChannel.setChannelConfig(updatedChannel.getChannelConfig());
             }
         }
-        existingPlayLaunchChannel
-                .setLastLaunch(playLaunchEntityMgr.findLatestByChannel(existingPlayLaunchChannel.getPid()));
         if (StringUtils.isNotBlank(updatedChannel.getCurrentLaunchedAccountUniverseTable())) {
             Table table = tableEntityMgr.findByName(updatedChannel.getCurrentLaunchedAccountUniverseTable(), false,
                     false);

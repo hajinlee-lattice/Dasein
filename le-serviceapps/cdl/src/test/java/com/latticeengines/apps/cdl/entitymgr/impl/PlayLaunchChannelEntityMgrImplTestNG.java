@@ -84,6 +84,8 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private String DISPLAY_NAME = "play Harder";
     private String CREATED_BY = "lattice@lattice-engines.com";
     private String CRON_EXPRESSION = "0 0 12 ? * WED *";
+    private static final long MAX_ACCOUNTS_TO_LAUNCH = 20L;
+    private static final long NULL_MAX_ACCOUNTS_TO_LAUNCH = -1L;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -313,6 +315,12 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(retrieved.getId(), channel1.getId());
         Assert.assertEquals(retrieved.getExpirationPeriodString(), channel1.getExpirationPeriodString());
 
+        channel1.setMaxAccountsToLaunch(NULL_MAX_ACCOUNTS_TO_LAUNCH);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getId(), channel1.getId());
+        Assert.assertNull(retrieved.getMaxAccountsToLaunch());
+
         channel1.setIsAlwaysOn(false);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
         Thread.sleep(1000);
@@ -338,7 +346,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), channel1.getId());
         Assert.assertFalse(retrieved.isLaunchUnscored());
-
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
@@ -383,6 +390,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel.setUpdatedBy(CREATED_BY);
         channel.setLaunchType(LaunchType.FULL);
         channel.setId(NamingUtils.randomSuffix("pl", 16));
+        channel.setMaxAccountsToLaunch(MAX_ACCOUNTS_TO_LAUNCH);
         channel.setExpirationDate(Date.from(new Date().toInstant().plus(Duration.ofHours(2))));
         return channel;
     }
