@@ -118,6 +118,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         }
         playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
         retrievedPlayLaunchChannel.setPlay(play); // ensure play exists if used in resource
+        retrievedPlayLaunchChannel
+                .setLastLaunch(playLaunchEntityMgr.findLatestByChannel(retrievedPlayLaunchChannel.getPid()));
         return retrievedPlayLaunchChannel;
     }
 

@@ -201,15 +201,15 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCreateFromChannel" })
     public void testUpdate() throws InterruptedException {
         playLaunchChannel1.setIsAlwaysOn(false);
-        PlayLaunchChannel retrieved = playLaunchChannelService.update(play.getName(), playLaunchChannel2);
+        PlayLaunchChannel retrieved = playLaunchChannelService.update(play.getName(), playLaunchChannel1);
         Thread.sleep(1000);
 
         Assert.assertNotNull(retrieved);
-        Assert.assertEquals(retrieved.getId(), playLaunchChannel2.getId());
+        Assert.assertEquals(retrieved.getId(), playLaunchChannel1.getId());
         Assert.assertFalse(retrieved.getIsAlwaysOn());
         Assert.assertNull(retrieved.getExpirationDate());
 
-        PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel2.getPid());
+        PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel1.getPid());
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertNotNull(retrieved.getLastLaunch());
         Assert.assertEquals(retrieved.getLastLaunch().getId(), retrievedLaunch.getId());
