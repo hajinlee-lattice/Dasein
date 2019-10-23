@@ -14,6 +14,7 @@ public enum TableRoleInCollection {
     ConsolidatedDailyTransaction, //
     ConsolidatedPeriodTransaction, //
     ConsolidatedCatalog, //
+    ConsolidatedActivityStream, //
 
     PivotedRating, //
 
@@ -63,6 +64,8 @@ public enum TableRoleInCollection {
 
         ConsolidatedCatalog.primaryKey = InterfaceName.InternalId;
         ConsolidatedCatalog.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        ConsolidatedActivityStream.primaryKey = InterfaceName.InternalId;
+        ConsolidatedActivityStream.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);

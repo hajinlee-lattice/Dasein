@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedActivityStream;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedCatalog;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.ActivityStream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -286,18 +289,33 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
      * @return a map of catalogId -> tableName, will not be {@code null}
      */
     private Map<String, String> getActiveCatalogTables(@NotNull String customerSpace, List<Catalog> catalogs) {
-        if (CollectionUtils.isEmpty(catalogs)) {
+        return getActiveTables(customerSpace, BusinessEntity.Catalog, catalogs, Catalog::getCatalogId,
+                ConsolidatedCatalog);
+    }
+
+    /*-
+     * table names in current active version for stream
+     */
+    private Map<String, String> getActiveActivityStreamTables(@NotNull String customerSpace,
+            List<AtlasStream> streams) {
+        return getActiveTables(customerSpace, ActivityStream, streams, AtlasStream::getStreamId,
+                ConsolidatedActivityStream);
+    }
+
+    private <E> Map<String, String> getActiveTables(@NotNull String customerSpace, @NotNull BusinessEntity entity,
+            List<E> activityStoreEntities, Function<E, String> getUniqueIdFn, TableRoleInCollection role) {
+        if (CollectionUtils.isEmpty(activityStoreEntities)) {
             return Collections.emptyMap();
         }
 
-        List<String> catalogIds = catalogs.stream() //
+        List<String> uniqueIds = activityStoreEntities.stream() //
                 .filter(Objects::nonNull) //
-                .map(Catalog::getCatalogId) //
+                .map(getUniqueIdFn) //
                 .filter(StringUtils::isNotBlank) //
                 .collect(Collectors.toList());
-        Map<String, String> tables = dataCollectionService.getTableNamesWithSignatures(customerSpace, null,
-                ConsolidatedCatalog, null, catalogIds);
-        log.info("Current catalog tables for tenant {} are {}. CatalogIds={}", customerSpace, tables, catalogIds);
+        Map<String, String> tables = dataCollectionService.getTableNamesWithSignatures(customerSpace, null, role, null,
+                uniqueIds);
+        log.info("Current {} tables for tenant {} are {}. StreamIds={}", entity, customerSpace, tables, uniqueIds);
         return tables;
     }
 
@@ -386,7 +404,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .filter(Objects::nonNull) //
                 .filter(stream -> StringUtils.isNotBlank(stream.getDataFeedTaskUniqueId())) //
                 .collect(Collectors.toMap(AtlasStream::getDataFeedTaskUniqueId, AtlasStream::getStreamId));
-        Map<String, List<ActivityImport>> streamImports = getActivityImports(BusinessEntity.ActivityStream,
+        Map<String, List<ActivityImport>> streamImports = getActivityImports(ActivityStream,
                 taskIdStreamIdMap, completedActions);
         log.info("ActivityStreamImports for tenant {} are {}", tenant.getId(), streamImports);
         return streamImports;
@@ -710,6 +728,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .catalogIngestionBehaivors(getCatalogIngestionBehavior(customerSpace, catalogs)) //
                 .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
                 .activityStreams(streams) //
+                .activeRawStreamTables(getActiveActivityStreamTables(customerSpace, new ArrayList<>(streams.values()))) //
                 .activityStreamImports(
                         getActivityStreamImports(tenant, completedActions, new ArrayList<>(streams.values()))) //
                 .systemIdMap(systemIdMaps.getRight()) //

@@ -264,6 +264,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder activeRawStreamTables(Map<String, String> rawStreamTables) {
+            processActivityStreamWorkflowBuilder.activeRawStreamTables(rawStreamTables);
+            return this;
+        }
+
         public Builder activityStreams(Map<String, AtlasStream> streams) {
             processActivityStreamWorkflowBuilder.activityStreams(streams);
             return this;
@@ -298,6 +303,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder entityMatchGAOnly(boolean gaOnly) {
             matchEntityWorkflowBuilder.entityMatchGAOnly(gaOnly);
+            processActivityStreamWorkflowBuilder.entityMatchGAOnly(gaOnly);
             return this;
         }
 

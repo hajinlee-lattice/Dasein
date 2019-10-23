@@ -186,7 +186,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         configuration.getCatalogTables().forEach(finalCatalogTables::putIfAbsent);
         log.info("Building catalog tables, tables={}, pipelineVersion={}", finalCatalogTables, pipelineVersion);
 
-        // link all tables and use catalogName as signature
+        // link all tables and use catalogId as signature
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), finalCatalogTables, batchStore,
                 inactive);
         return new ArrayList<>(finalCatalogTables.values());
