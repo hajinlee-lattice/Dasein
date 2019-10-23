@@ -1,10 +1,11 @@
 package com.latticeengines.pls.end2end;
 
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,6 +25,8 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -32,6 +35,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
@@ -48,6 +52,9 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
+
+    @Inject
+    private SourceFileProxy sourceFileProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -97,14 +104,17 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                 ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + WEB_VISIT_WITH_INVALID_URL).getPath());
         cdlService.createWebVisitTemplate(customerSpace, EntityType.WebVisit, new FileInputStream(templateFile));
         getDataFeedTask(ENTITY_ACTIVITY_STREAM);
+        startCDLImportWithTemplateData(webVisitDataFeedTask);
         EaiImportJobDetail webVisitDetail =
                 eaiJobDetailProxy.getImportJobDetailByCollectionIdentifier(webVisitDataFeedTask.getUniqueId());
-        verifyEaiJobDetail(webVisitDetail, 2L, 298);
+        // 90 rows has field exceeds 1000 chars, 2 rows has invalid url
+        verifyEaiJobDetail(webVisitDetail, 92L, 208);
 
 
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
-        Collections.sort(reports, Comparator.comparing(Report::getCreated));
+        Assert.assertNotNull(reports);
+        reports.sort(Comparator.comparing(Report::getCreated));
         Assert.assertEquals(reports.size(), 4);
         Report accountReport = reports.get(0);
         Report contactReport = reports.get(1);
@@ -113,7 +123,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyReport(accountReport, 3L, 3L, 47L);
         verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 0L, 2L, 0L);
-        verifyReport(webVisitReport, 0L, 2L, 298L);
+        verifyReport(webVisitReport, 92L, 92L, 208L);
     }
 
     @Test(groups = "deployment")
@@ -144,4 +154,13 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         Assert.assertEquals(completedStatus, JobStatus.FAILED);
     }
 
+    private void startCDLImportWithTemplateData(DataFeedTask dataFeedTask) {
+        Table table = dataFeedTask.getImportTemplate();
+        Assert.assertNotNull(table);
+        SourceFile webVisitFile = sourceFileProxy.findByTableName(customerSpace, table.getName());
+        ApplicationId applicationId = cdlService.submitS3ImportWithTemplateData(customerSpace,
+                dataFeedTask.getUniqueId(), webVisitFile.getName());
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
 }
