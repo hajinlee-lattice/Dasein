@@ -29,6 +29,9 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
 
+/*
+ * dpltc deploy -a pls,admin,cdl,lp,metadata
+ */
 public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
     @Inject
@@ -86,7 +89,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
-                fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
             }
         }
@@ -120,7 +122,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
             }
             if (fieldMapping.getUserField().equals("ID")) {
-                fieldMapping.setSystemName(sfSystemName);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
                 fieldMapping.setMapToLatticeId(true);
             }
@@ -147,7 +148,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 .getFieldMappingDocumentBestEffort(otherAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, otherFeedType);
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
-                fieldMapping.setSystemName(otherSystemName);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
             }
         }
@@ -273,7 +273,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
-                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+//                fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
                 fieldMapping.setMapToLatticeId(true);
             }
@@ -334,7 +334,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         }
         Assert.assertFalse(StringUtils.isEmpty(sfSystemName));
         S3ImportSystem sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
-
+        Assert.assertNotNull(sfSystem);
         SourceFile sfContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
@@ -368,6 +368,10 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 fieldMapping.setIdType(FieldMapping.IdType.Contact);
                 fieldMapping.setMapToLatticeId(true);
             }
+            if (fieldMapping.getUserField().equals("ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                fieldMapping.setSystemName(sfSystemName);
+            }
         }
         modelingFileMetadataService.resolveMetadata(sfContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
                 sfLeadFeedType);
@@ -392,6 +396,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
         Assert.assertNotNull(sfContactTable.getAttribute(sfSystem.getContactSystemId()));
         Assert.assertNotNull(sfLeadTable.getAttribute(sfSystem.getSecondaryContactId(EntityType.Leads)));
+        Assert.assertNotNull(sfLeadTable.getAttribute(sfSystem.getContactSystemId()));
 
     }
 }
