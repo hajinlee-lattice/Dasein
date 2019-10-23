@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.CalculateDeltaSte
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.QueuePlayLaunchesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MockActivityStoreConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = EntityExportStepConfiguration.class, name = "EntityExportStepConfiguration"), //
         @Type(value = QueuePlayLaunchesStepConfiguration.class, name = "QueuePlayLaunchesStepConfiguration"), //
         @Type(value = CalculateDeltaStepConfiguration.class, name = "CalculateDeltaStepConfiguration"), //
+        @Type(value = MockActivityStoreConfiguration.class, name = "MockActivityStoreConfiguration"), //
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {

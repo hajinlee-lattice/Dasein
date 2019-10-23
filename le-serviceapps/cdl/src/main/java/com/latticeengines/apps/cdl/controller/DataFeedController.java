@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.util.PAValidationUtils;
 import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ConvertBatchStoreToImportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.MockActivityStoreWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
@@ -56,6 +57,7 @@ public class DataFeedController {
     private final EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
     private final ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter;
     private final CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter;
+    private final MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final PAValidationUtils paValidationUtils;
     private final AtlasExportService atlasExportService;
@@ -70,6 +72,7 @@ public class DataFeedController {
                               EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
                               ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter,
                               CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter,
+                              MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter,
                               DataFeedService dataFeedService, PAValidationUtils paValidationUtils,
                               AtlasExportService atlasExportService, ServingStoreService servingStoreService) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
@@ -77,13 +80,14 @@ public class DataFeedController {
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
         this.convertBatchStoreToImportWorkflowSubmitter = convertBatchStoreToImportWorkflowSubmitter;
         this.cdlEntityMatchMigrationWorkflowSubmitter = cdlEntityMatchMigrationWorkflowSubmitter;
+        this.mockActivityStoreWorkflowSubmitter = mockActivityStoreWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
         this.paValidationUtils = paValidationUtils;
         this.atlasExportService = atlasExportService;
         this.servingStoreService = servingStoreService;
     }
 
-    @PostMapping(value = "/processanalyze", headers = "Accept=application/json")
+    @PostMapping(value = "/processanalyze")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace,
@@ -111,7 +115,7 @@ public class DataFeedController {
         }
     }
 
-    @PostMapping(value = "/processanalyze/restart", headers = "Accept=application/json")
+    @PostMapping(value = "/processanalyze/restart")
     @ResponseBody
     @ApiOperation(value = "Restart a previous failed processanalyze execution")
     public ResponseDocument<String> restart(@PathVariable String customerSpace,
@@ -125,7 +129,7 @@ public class DataFeedController {
         return ResponseDocument.successResponse(appId.toString());
     }
 
-    @PostMapping(value = "/exportorphanrecords", headers = "Accept=application/json")
+    @PostMapping(value = "/exportorphanrecords")
     @ResponseBody
     @ApiOperation(value = "Invoke orphanRecordExport workflow. Returns the job id.")
     public ResponseDocument<String> orphanRecordExport(@PathVariable String customerSpace,
@@ -143,7 +147,7 @@ public class DataFeedController {
         }
     }
 
-    @PostMapping(value = "/convertbatchstoretoimport", headers = "Accept=application/json")
+    @PostMapping(value = "/convertbatchstoretoimport")
     @ResponseBody
     @ApiOperation(value = "Invoke convert batch store to import workflow. Returns the job id.")
     public ResponseDocument<String> convertBatchStoreToImport(@PathVariable String customerSpace,
@@ -164,7 +168,7 @@ public class DataFeedController {
         }
     }
 
-    @PostMapping(value = "/migrateimport", headers = "Accept=application/json")
+    @PostMapping(value = "/migrateimport")
     @ResponseBody
     @ApiOperation(value = "Invoke convert batch store to import workflow. Returns the job id.")
     public ResponseDocument<String> migrateImport(@PathVariable String customerSpace, @RequestBody String userId) {
@@ -189,7 +193,7 @@ public class DataFeedController {
         return appId;
     }
 
-    @PostMapping(value = "/entityexport", headers = "Accept=application/json")
+    @PostMapping(value = "/entityexport")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> entityExport(@PathVariable String customerSpace,
@@ -225,6 +229,20 @@ public class DataFeedController {
                 appId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
                 return ResponseDocument.successResponse(appId.toString());
             }
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/mock-activity-store")
+    @ResponseBody
+    @ApiOperation(value = "Invoke mock activity store workflow. Returns the job id.")
+    public ResponseDocument<String> mockActivityStore(@PathVariable String customerSpace) {
+        try {
+            ApplicationId appId;
+            appId = mockActivityStoreWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), //
+                    new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }

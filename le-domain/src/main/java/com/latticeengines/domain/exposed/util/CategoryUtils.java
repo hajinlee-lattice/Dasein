@@ -19,6 +19,8 @@ public final class CategoryUtils {
             return Collections.singletonList(BusinessEntity.Rating);
         case CURATED_ACCOUNT_ATTRIBUTES:
             return Collections.singletonList(BusinessEntity.CuratedAccount);
+        case WEB_VISIT_PROFILE:
+            return Collections.singletonList(BusinessEntity.WebVisitProfile);
         default:
             return Collections.singletonList(BusinessEntity.Account);
         }
@@ -42,6 +44,9 @@ public final class CategoryUtils {
             break;
         case CuratedAccount:
             category = Category.CURATED_ACCOUNT_ATTRIBUTES;
+            break;
+        case WebVisitProfile:
+            category = Category.WEB_VISIT_PROFILE;
             break;
         default:
             category = Category.DEFAULT;

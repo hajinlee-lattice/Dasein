@@ -127,18 +127,25 @@ public class ExportToRedshift extends BaseWorkflowStep<ExportToRedshiftStepConfi
                 exportConfig.setAppend(true);
             }
 
-            String distKey = config.getDistKey();
-            List<String> sortKeys = config.getSortKeys();
-            RedshiftTableConfiguration.SortKeyType sortKeyType = sortKeys.size() == 1
-                    ? RedshiftTableConfiguration.SortKeyType.Compound
-                    : RedshiftTableConfiguration.SortKeyType.Interleaved;
             String targetTable = config.getTableName();
             RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
             redshiftTableConfig.setS3Bucket(s3Bucket);
-            redshiftTableConfig.setDistStyle(RedshiftTableConfiguration.DistStyle.Key);
+
+            String distKey = config.getDistKey();
+            RedshiftTableConfiguration.DistStyle distStyle = config.getDistStyle() == null ? //
+                    RedshiftTableConfiguration.DistStyle.Key : config.getDistStyle();
+            redshiftTableConfig.setDistStyle(distStyle);
             redshiftTableConfig.setDistKey(distKey);
-            redshiftTableConfig.setSortKeyType(sortKeyType);
-            redshiftTableConfig.setSortKeys(sortKeys);
+
+            List<String> sortKeys = config.getSortKeys();
+            if (CollectionUtils.isNotEmpty(sortKeys)) {
+                RedshiftTableConfiguration.SortKeyType sortKeyType = sortKeys.size() == 1
+                        ? RedshiftTableConfiguration.SortKeyType.Compound
+                        : RedshiftTableConfiguration.SortKeyType.Interleaved;
+                redshiftTableConfig.setSortKeyType(sortKeyType);
+                redshiftTableConfig.setSortKeys(sortKeys);
+            }
+
             redshiftTableConfig.setTableName(targetTable);
             redshiftTableConfig.setJsonPathPrefix(
                     String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTable));

@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.mds.ActivityMetricsDecoratorFac;
+import com.latticeengines.apps.cdl.mds.SpendAnalyticMetricsDecoratorFac;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.aws.s3.S3KeyFilter;
@@ -63,9 +63,9 @@ import reactor.core.publisher.ParallelFlux;
 
 
 @Component("activityMetricsDecorator")
-public class ActivityMetricsDecoratorFacImpl implements ActivityMetricsDecoratorFac {
+public class SpendAnalyticMetricsDecoratorFacImpl implements SpendAnalyticMetricsDecoratorFac {
 
-    private static final Logger log = LoggerFactory.getLogger(ActivityMetricsDecoratorFacImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SpendAnalyticMetricsDecoratorFacImpl.class);
 
     // Entity match enabled or not doesn't impact activity metrics metadata
     private static final Set<String> systemAttributes = SchemaRepository //

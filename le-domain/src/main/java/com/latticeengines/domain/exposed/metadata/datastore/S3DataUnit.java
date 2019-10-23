@@ -26,7 +26,7 @@ public class S3DataUnit extends DataUnit {
     }
 
     public String getFullPath(String protocol) {
-        String protocolStart = "://";
+        String protocolStart = protocol.endsWith("://") ? "" : "://";
         String slash = "/";
         StringBuffer fullPath = new StringBuffer();
         fixBucketAndPrefix();

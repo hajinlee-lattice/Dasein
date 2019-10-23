@@ -490,4 +490,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace), exportId);
         return getGenericBinary("downloaDataCollectionArtifact", requestUrl, byte[].class);
     }
+
+    public void clearCache(String customerSpace) {
+        String requestUrl = constructUrl("/customerspaces/{customerSpace}//clearcache", shortenCustomerSpace(customerSpace));
+        delete("createDataCollectionArtifact", requestUrl);
+    }
+
 }

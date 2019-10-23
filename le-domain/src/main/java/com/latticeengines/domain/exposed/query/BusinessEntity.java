@@ -61,23 +61,28 @@ public enum BusinessEntity implements GraphNode {
 
     // Lattice Data Cloud
     LatticeAccount, //
-    ProductHierarchy,
+    ProductHierarchy, //
 
     // WebActivity
-    ActivityStream,
-    Catalog;
+    ActivityStream, //
+    Catalog, //
+    WebVisitProfile;
 
     public static final Set<BusinessEntity> SEGMENT_ENTITIES = //
-            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount);
+            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
     public static final Set<BusinessEntity> EXPORT_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
     public static final Set<BusinessEntity> TALKING_POINT_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
     public static final Set<BusinessEntity> COMPANY_PROFILE_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount);
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
+    public static final Set<BusinessEntity> ACCOUNT_MATCH_ENTITIES = //
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
     public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
-    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME= ImmutableSet.of(PurchaseHistory);
+    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME= //
+            ImmutableSet.of(PurchaseHistory, WebVisitProfile);
+    public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES= ImmutableSet.of(WebVisitProfile);
 
     static {
         // Storage
@@ -112,6 +117,9 @@ public enum BusinessEntity implements GraphNode {
 
         ProductHierarchy.setBatchStore(ConsolidatedProduct);
         ProductHierarchy.setServingStore(SortedProductHierarchy);
+
+        WebVisitProfile.setBatchStore(TableRoleInCollection.WebVisitProfile);
+        WebVisitProfile.setServingStore(TableRoleInCollection.WebVisitProfile);
 
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
