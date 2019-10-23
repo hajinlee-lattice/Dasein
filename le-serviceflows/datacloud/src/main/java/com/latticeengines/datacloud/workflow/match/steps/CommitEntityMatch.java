@@ -28,8 +28,10 @@ import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -98,10 +100,19 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     private void commitWithCommitter(Tenant tenant, String entity) {
         log.info("Committing entity {}", entity);
-        EntityPublishStatistics stats = entityMatchCommitter.commit(entity, tenant, null, null);
-        log.info("Entity {} committed. nSeeds={}, nLookups={}, nlookupNotInStaging={}", entity, stats.getSeedCount(),
-                stats.getLookupCount(), stats.getNotInStagingLookupCount());
-        setStats(entity, stats.getSeedCount(), stats.getLookupCount());
+        Map<EntityMatchEnvironment, Integer> versionMap = getVersionMap();
+        try {
+            EntityPublishStatistics stats = entityMatchCommitter.commit(entity, tenant, null, versionMap);
+            log.info("Entity {} committed. nSeeds={}, nLookups={}, nlookupNotInStaging={}", entity, stats.getSeedCount(),
+                    stats.getLookupCount(), stats.getNotInStagingLookupCount());
+            setStats(entity, stats.getSeedCount(), stats.getLookupCount());
+        } catch(Exception e) {
+            if (versionMap != null) {//Increase next version, avoid next PA reuse current next version number.
+                int nextVersion = entityMatchVersionService.bumpNextVersion(EntityMatchEnvironment.SERVING, tenant);
+                log.info("entity {} commit failed, the next version be changed to {}", entity, nextVersion);
+            }
+            throw e;
+        }
     }
 
     /*
@@ -163,6 +174,26 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         cntMap.put(ReportConstants.PUBLISH_LOOKUP, nLookups);
         entityPublishStats.put(entity, cntMap);
         putObjectInContext(ENTITY_PUBLISH_STATS, entityPublishStats);
+    }
+
+    private Map<EntityMatchEnvironment, Integer> getVersionMap() {
+        if (!Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
+            return null;
+        }
+        Map<EntityMatchEnvironment, Integer> versionMap = new HashMap<>();
+        EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
+                EntityMatchVersion.class);
+        versionMap.put(EntityMatchEnvironment.SERVING, entityMatchVersion.getNextVersion());
+        return versionMap;
+    }
+
+    private void updateDataCollectionStatusVersion(Map<EntityMatchEnvironment, Integer> versionMap) {
+        if (versionMap == null || versionMap.get(EntityMatchEnvironment.SERVING) == null) {
+            return;
+        }
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        detail.setServingStoreVersion(versionMap.get(EntityMatchEnvironment.SERVING));
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -63,6 +66,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
         private ApsGenerationStepConfiguration apsGenerationStepConfiguration = new ApsGenerationStepConfiguration();
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
+        private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder =
+                new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
@@ -82,6 +87,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             curatedAttributesWorkflowBuilder.customer(customerSpace);
             processRatingWorkflowBuilder.customer(customerSpace);
             commitEntityWorkflowBuilder.customer(customerSpace);
+            convertBatchStoreToDataTableWorkflowBuilder.customer(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             exportToRedshift.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
@@ -115,6 +121,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             curatedAttributesWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             commitEntityWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            convertBatchStoreToDataTableWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             exportToRedshift.setInternalResourceHostPort(internalResourceHostPort);
             exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
@@ -326,10 +333,21 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipEntityMatchRematch(Set<BusinessEntity> entities) {
+            convertBatchStoreToDataTableWorkflowBuilder.setSkipStep(entities);
+            return this;
+        }
+
+        public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> batchStoresToConvert) {
+            convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig(batchStoresToConvert);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(processStepConfiguration);
+            configuration.add(convertBatchStoreToDataTableWorkflowBuilder.build());
             configuration.add(matchEntityWorkflowBuilder.build());
             configuration.add(processAccountWorkflowBuilder.build());
             configuration.add(processContactWorkflowBuilder.build());

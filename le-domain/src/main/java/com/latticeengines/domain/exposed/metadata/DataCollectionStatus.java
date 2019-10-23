@@ -286,6 +286,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         this.detail.setActivityStreamMap(activityStreamMap);
     }
 
+    @JsonProperty("ServingStoreVersion")
+    public int getServingStoreVersion() {
+        return this.detail.getServingStoreVersion();
+    }
+
+    @JsonProperty("ServingStoreVersion")
+    public void setServingStoreVersion(int servingStoreVersion) {
+        this.detail.setServingStoreVersion(servingStoreVersion);
+    }
+
     @Override
     @JsonProperty("CreationTime")
     @Temporal(TemporalType.TIMESTAMP)

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -23,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -31,6 +35,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -58,6 +63,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
+    @Inject
+    private MatchProxy matchProxy;
+
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
 
@@ -72,6 +80,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
+        //bump version after entity match tenant rematch operation
+        updateServingVersionAfterEntityMatchRematch();
 
         // save data collection status history
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
@@ -248,6 +258,16 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             log.info("Updating bucket metadata for modelGUID=" + modelGuid + " : "
                     + JsonUtils.serialize(bucketMetadata));
             updateMetadata(modelGuid, bucketMetadata, true);
+        }
+    }
+
+    private void updateServingVersionAfterEntityMatchRematch() {
+        if (configuration.isEntityMatchEnabled() && configuration.isFullRematch()) {
+            Tenant tenant = new Tenant(customerSpace.getTenantId());
+            BumpVersionRequest request = new BumpVersionRequest();
+            request.setTenant(tenant);
+            request.setEnvironments(Collections.singletonList(EntityMatchEnvironment.SERVING));
+            matchProxy.bumpVersion(request);
         }
     }
 

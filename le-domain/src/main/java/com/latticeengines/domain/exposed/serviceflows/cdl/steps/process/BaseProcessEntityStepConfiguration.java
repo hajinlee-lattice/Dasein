@@ -32,6 +32,9 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
     @JsonProperty("need_replace")
     private boolean needReplace;
 
+    @JsonProperty("entity_match_enabled")
+    private boolean entityMatchEnabled;
+
     @JsonProperty("system_ids")
     private Map<String, List<String>> systemIdMap; // entity -> List<ID> used for matching
 
@@ -70,5 +73,13 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
 
     public void setNeedReplace(boolean needReplace) {
         this.needReplace = needReplace;
+    }
+
+    public boolean isEntityMatchEnabled() {
+        return entityMatchEnabled;
+    }
+
+    public void setEntityMatchEnabled(boolean entityMatchEnabled) {
+        this.entityMatchEnabled = entityMatchEnabled;
     }
 }
