@@ -297,13 +297,15 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     // sort display name for look up
     private void sortAttribute(List<List<ColumnMetadata>> columnMetadataList) {
         columnMetadataList.stream().forEach(cms -> cms.sort((cm1, cm2) -> {
-            if (StringUtils.isEmpty(cm1.getDisplayName())) {
+            String displayName1 = cm1.getDisplayName();
+            if (StringUtils.isEmpty(displayName1)) {
                 return -1;
             }
-            if (StringUtils.isEmpty(cm2.getDisplayName())) {
+            String displayName2 = cm2.getDisplayName();
+            if (StringUtils.isEmpty(displayName2)) {
                 return 1;
             }
-            return cm1.getDisplayName().compareTo(cm2.getDisplayName());
+            return displayName1.compareToIgnoreCase(displayName2);
         }));
     }
 
