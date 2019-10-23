@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -193,7 +194,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        if (!Boolean.TRUE.equals(configuration.getNeedReplace())) {
+        boolean isEntityMatchRematch =
+                configuration.isEntityMatchEnabled() && Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
+        if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
@@ -295,6 +298,14 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return matchInput;
     }
 
+    void setServingVersionForEntityMatchTenant(MatchInput matchInput) {
+        if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
+            EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
+                    EntityMatchVersion.class);
+            matchInput.setServingVersion(entityMatchVersion.getNextVersion());
+        }
+    }
+
     /*
      * get the union of all input table columns
      */
@@ -307,7 +318,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return getTableColumnNames(tableName);
     }
 
-    private Set<String> getTableColumnNames(String... tableNames) {
+    Set<String> getTableColumnNames(String... tableNames) {
         // TODO add a batch retrieve API to optimize this
         return Arrays.stream(tableNames) //
                 .flatMap(tableName -> metadataProxy //

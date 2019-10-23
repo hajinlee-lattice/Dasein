@@ -1,18 +1,31 @@
 package com.latticeengines.cdl.workflow.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreDetail;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreInfo;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreToImportServiceConfiguration;
 import com.latticeengines.proxy.exposed.cdl.ConvertBatchStoreInfoProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("baseConvertToImportService")
 @Lazy(value = false)
@@ -21,6 +34,15 @@ public class BaseConvertToImportService
 
     @Inject
     private ConvertBatchStoreInfoProxy convertBatchStoreInfoProxy;
+
+    @Inject
+    private MetadataProxy metadataProxy;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     public String getOutputDataFeedTaskId(String customerSpace, ConvertBatchStoreToImportServiceConfiguration config) {
@@ -66,6 +88,49 @@ public class BaseConvertToImportService
         // do nothing.
     }
 
+    @Override
+    public void setDataTable(String migratedImportTableName, String customerSpace, Table templateTable,
+                               ConvertBatchStoreToImportServiceConfiguration convertServiceConfig,
+                             Configuration yarnConfiguration) {
+        Table migratedImportTable = metadataProxy.getTable(customerSpace, migratedImportTableName);
+        Long importCounts = getTableDataLines(migratedImportTable, yarnConfiguration);
+        List<String> dataTables = dataFeedProxy.registerExtracts(customerSpace, getOutputDataFeedTaskId(customerSpace
+                , convertServiceConfig), templateTable.getName(), migratedImportTable.getExtracts());
+        updateConvertResult(customerSpace, convertServiceConfig, importCounts,
+                dataTables);
+    }
+
+    @Override
+    public Table verifyTenantStatus(String customerSpace,
+                                   ConvertBatchStoreToImportServiceConfiguration convertServiceConfig) {
+        String taskUniqueId = getOutputDataFeedTaskId(customerSpace, convertServiceConfig);
+        if (StringUtils.isEmpty(taskUniqueId)) {
+            throw new RuntimeException("Cannot find the target datafeed task for Account migrate!");
+        }
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskUniqueId);
+        if (dataFeedTask == null) {
+            throw new RuntimeException("Cannot find the dataFeedTask with id: " + taskUniqueId);
+        }
+        Table templateTable = dataFeedTask.getImportTemplate();
+        if (templateTable == null) {
+            throw new RuntimeException("Template is NULL for dataFeedTask: " + taskUniqueId);
+        }
+        return templateTable;
+    }
+
+    @Override
+    public List<String> getAttributes(String customerSpace, Table templateTable, 
+                                      Table masterTable, ConvertBatchStoreToImportServiceConfiguration config) {
+        return templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList());
+    }
+
+    @Override
+    public Table getMasterTable(String customerSpace,
+                                TableRoleInCollection batchStore,
+                                ConvertBatchStoreToImportServiceConfiguration config) {
+        return dataCollectionProxy.getTable(customerSpace, batchStore);
+    }
+
     private ConvertBatchStoreInfo getConvertInfo(String customerSpace,
                                                  ConvertBatchStoreToImportServiceConfiguration config) {
         if (config == null || config.getConvertInfoPid() == null) {
@@ -77,5 +142,24 @@ public class BaseConvertToImportService
             throw new RuntimeException("ConvertBatchStoreInfo record is not properly initialized!");
         }
         return convertBatchStoreInfo;
+    }
+
+    private Long getTableDataLines(Table table, Configuration yarnConfiguration) {
+        if (table == null || table.getExtracts() == null) {
+            return 0L;
+        }
+        Long lines = 0L;
+        List<String> paths = new ArrayList<>();
+        for (Extract extract : table.getExtracts()) {
+            if (!extract.getPath().endsWith("avro")) {
+                paths.add(extract.getPath() + "/*.avro");
+            } else {
+                paths.add(extract.getPath());
+            }
+        }
+        for (String path : paths) {
+            lines += AvroUtils.count(yarnConfiguration, path);
+        }
+        return lines;
     }
 }

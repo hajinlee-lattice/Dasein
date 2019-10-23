@@ -4,48 +4,36 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.EntityMatchImportMigrateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.BaseConvertBatchStoreServiceConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component(ConvertBatchStoreToImport.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertBatchStoreStepConfiguration> {
 
+    private static final Logger log = LoggerFactory.getLogger(ConvertBatchStoreToImport.class);
+
     static final String BEAN_NAME = "convertBatchStoreToImport";
 
     private static final String TRANSFORMER = "EntityMatchImportMigrateTransformer";
-
-    @Inject
-    protected DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    protected DataFeedProxy dataFeedProxy;
 
     private ConvertBatchStoreService convertBatchStoreService;
 
@@ -69,13 +57,16 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
                 TableUtils.getFullTableName(
                         convertBatchStoreService.getTargetTablePrefix(customerSpace.toString(), convertServiceConfig)
                         , pipelineVersion);
-        Table migratedImportTable = metadataProxy.getTable(customerSpace.toString(), migratedImportTableName);
-        Long importCounts = getTableDataLines(migratedImportTable);
-        List<String> dataTables = dataFeedProxy.registerExtracts(customerSpace.toString(),
-                convertBatchStoreService.getOutputDataFeedTaskId(customerSpace.toString(), convertServiceConfig),
-                templateTable.getName(), migratedImportTable.getExtracts());
-        convertBatchStoreService.updateConvertResult(customerSpace.toString(), convertServiceConfig, importCounts,
-                dataTables);
+        convertBatchStoreService.setDataTable(migratedImportTableName, customerSpace.toString(),
+                templateTable, convertServiceConfig, yarnConfiguration);
+
+        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
+        if (rematchTables == null) {
+            rematchTables = new HashMap<>();
+        }
+        rematchTables.put(configuration.getEntity().name(), migratedImportTableName);
+        log.info("rematchTables : {}, config : {}.", rematchTables, convertServiceConfig.getClass());
+        putObjectInContext(REMATCH_TABLE_NAME, rematchTables);
     }
 
     @SuppressWarnings("unchecked")
@@ -84,21 +75,11 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         convertServiceConfig = configuration.getConvertServiceConfig();
         convertBatchStoreService = ConvertBatchStoreService.getConvertService(convertServiceConfig.getClass());
 
-        String taskUniqueId = convertBatchStoreService.getOutputDataFeedTaskId(customerSpace.toString(), convertServiceConfig);
-        if (StringUtils.isEmpty(taskUniqueId)) {
-            throw new RuntimeException("Cannot find the target datafeed task for Account migrate!");
-        }
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), taskUniqueId);
-        if (dataFeedTask == null) {
-            throw new RuntimeException("Cannot find the dataFeedTask with id: " + taskUniqueId);
-        }
-        templateTable = dataFeedTask.getImportTemplate();
-        if (templateTable == null) {
-            throw new RuntimeException("Template is NULL for dataFeedTask: " + taskUniqueId);
-        }
+        templateTable = convertBatchStoreService.verifyTenantStatus(customerSpace.toString(), convertServiceConfig);
         TableRoleInCollection batchStore = convertBatchStoreService.getBatchStore(customerSpace.toString(),
                 convertServiceConfig);
-        masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);
+        masterTable = convertBatchStoreService.getMasterTable(customerSpace.toString(), batchStore,
+                convertServiceConfig);
         if (masterTable == null) {
             throw new RuntimeException(
                     String.format("master table in collection shouldn't be null when customer space %s, role %s",
@@ -141,7 +122,8 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
 
         EntityMatchImportMigrateConfig config = new EntityMatchImportMigrateConfig();
         config.setTransformer(TRANSFORMER);
-        config.setRetainFields(templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList()));
+        config.setRetainFields(convertBatchStoreService.getAttributes(customerSpace.toString(), templateTable,
+                masterTable, convertServiceConfig));
         config.setDuplicateMap(convertBatchStoreService.getDuplicateMap(customerSpace.toString(), convertServiceConfig));
         config.setRenameMap(convertBatchStoreService.getRenameMap(customerSpace.toString(), convertServiceConfig));
 
@@ -159,22 +141,4 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         return step;
     }
 
-    private Long getTableDataLines(Table table) {
-        if (table == null || table.getExtracts() == null) {
-            return 0L;
-        }
-        Long lines = 0L;
-        List<String> paths = new ArrayList<>();
-        for (Extract extract : table.getExtracts()) {
-            if (!extract.getPath().endsWith("avro")) {
-                paths.add(extract.getPath() + "/*.avro");
-            } else {
-                paths.add(extract.getPath());
-            }
-        }
-        for (String path : paths) {
-            lines += AvroUtils.count(yarnConfiguration, path);
-        }
-        return lines;
-    }
 }

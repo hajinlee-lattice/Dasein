@@ -237,6 +237,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String DATAQUOTA_LIMIT = "DATAQUOTA_LIMIT";
     public static final String ATTRIBUTE_QUOTA_LIMIT = "ATTRIBUTE_QUOTA_LIMIT";
 
+    public static final String REMATCH_TABLE_NAME = "REMATCH_TABLE_NAME";
+    public static final String ENTITY_MATCH_SERVING_VERSION = "ENTITY_MATCH_SERVING_VERSION";
+
     // tables to be carried over in restarted PA
     protected static final Set<String> TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
             ENTITY_MATCH_ACCOUNT_TARGETTABLE, //

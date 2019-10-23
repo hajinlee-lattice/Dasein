@@ -35,7 +35,7 @@ public final class MatchUtils {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setOperationalMode(OperationalMode.LDC_MATCH);
-        baseMatchInput.setKeyMap(getAccountMatchKeysAccount(columnNames, null));
+        baseMatchInput.setKeyMap(getAccountMatchKeysAccount(columnNames, null, false));
         baseMatchInput.setPartialMatchEnabled(true);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         config.setMatchInput(baseMatchInput);
@@ -43,7 +43,7 @@ public final class MatchUtils {
     }
 
     static String getAllocateIdMatchConfigForAccount(String customer, MatchInput baseMatchInput,
-            Set<String> columnNames, List<String> systemIds, String newAccountTableName) {
+            Set<String> columnNames, List<String> systemIds, String newAccountTableName, boolean hasConvertBatchStore) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
         baseMatchInput.setTargetEntity(Account.name());
@@ -57,7 +57,7 @@ public final class MatchUtils {
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
-        entityKeyMap.setKeyMap(getAccountMatchKeysAccount(columnNames, systemIds));
+        entityKeyMap.setKeyMap(getAccountMatchKeysAccount(columnNames, systemIds, hasConvertBatchStore));
         Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
         entityKeyMaps.put(Account.name(), entityKeyMap);
         baseMatchInput.setEntityKeyMaps(entityKeyMaps);
@@ -68,7 +68,7 @@ public final class MatchUtils {
 
     static String getAllocateIdMatchConfigForContact(String customer, MatchInput baseMatchInput,
             Set<String> columnNames, List<String> accountSystemIds, List<String> contactSystemIds,
-            String newAccountTableName) {
+            String newAccountTableName, boolean hasConvertBatchStore) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
         baseMatchInput.setTargetEntity(Contact.name());
@@ -82,9 +82,9 @@ public final class MatchUtils {
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
-                .fromKeyMap(getAccountMatchKeysForContact(columnNames, accountSystemIds));
+                .fromKeyMap(getAccountMatchKeysForContact(columnNames, accountSystemIds, hasConvertBatchStore));
         MatchInput.EntityKeyMap contactKeyMap = MatchInput.EntityKeyMap
-                .fromKeyMap(getContactMatchKeys(columnNames, contactSystemIds));
+                .fromKeyMap(getContactMatchKeys(columnNames, contactSystemIds, hasConvertBatchStore));
         baseMatchInput.setEntityKeyMaps(new HashMap<>(ImmutableMap.of( //
                 Account.name(), accountKeyMap, //
                 Contact.name(), contactKeyMap)));
@@ -93,17 +93,17 @@ public final class MatchUtils {
     }
 
     private static Map<MatchKey, List<String>> getAccountMatchKeysAccount(Set<String> columnNames,
-            List<String> systemIds) {
-        return getAccountMatchKeys(columnNames, systemIds, false);
+            List<String> systemIds, boolean hasConvertBatchStore) {
+        return getAccountMatchKeys(columnNames, systemIds, false, hasConvertBatchStore);
     }
 
     private static Map<MatchKey, List<String>> getAccountMatchKeysForContact(Set<String> columnNames,
-            List<String> systemIds) {
-        return getAccountMatchKeys(columnNames, systemIds, true);
+            List<String> systemIds, boolean hasConvertBatchStore) {
+        return getAccountMatchKeys(columnNames, systemIds, true, hasConvertBatchStore);
     }
 
     private static Map<MatchKey, List<String>> getAccountMatchKeys(Set<String> columnNames, List<String> systemIds,
-            boolean considerEmail) {
+            boolean considerEmail, boolean hasConvertBatchStore) {
         Map<MatchKey, List<String>> matchKeys = new HashMap<>();
         if (considerEmail) {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Domain, InterfaceName.Email.name());
@@ -116,18 +116,28 @@ public final class MatchUtils {
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Country, InterfaceName.Country.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Zipcode, InterfaceName.PostalCode.name());
+        if (hasConvertBatchStore) {
+            addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.AccountId.name());
+        } else {
+            addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.CustomerAccountId.name());
+        }
         addLegacyCustomerId(columnNames, matchKeys, systemIds, Account);
         addSystemIdsIfExist(columnNames, matchKeys, systemIds);
         log.info("Account match keys = {}", JsonUtils.serialize(matchKeys));
         return matchKeys;
     }
 
-    private static Map<MatchKey, List<String>> getContactMatchKeys(Set<String> columnNames, List<String> systemIds) {
+    private static Map<MatchKey, List<String>> getContactMatchKeys(Set<String> columnNames, List<String> systemIds, boolean hasConvertBatchStore) {
         Map<MatchKey, List<String>> matchKeys = new HashMap<>();
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Name, InterfaceName.ContactName.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Country, InterfaceName.Country.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Email, InterfaceName.Email.name());
+        if (hasConvertBatchStore) {
+            addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.ContactId.name());
+        } else {
+            addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.CustomerContactId.name());
+        }
         addLegacyCustomerId(columnNames, matchKeys, systemIds, Contact);
         addSystemIdsIfExist(columnNames, matchKeys, systemIds);
         log.info("Contact match keys = {}", JsonUtils.serialize(matchKeys));

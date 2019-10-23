@@ -63,6 +63,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -147,11 +149,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private final DataFeedTaskService dataFeedTaskService;
 
     @Inject
-    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService, DataCollectionService dataCollectionService,
-            DataFeedTaskService dataFeedTaskService, WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
-            AtlasStreamEntityMgr streamEntityMgr, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService, ZKConfigService zkConfigService, CDLAttrConfigProxy cdlAttrConfigProxy,
-            S3ImportSystemService s3ImportSystemService) {
+    public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
+                                           DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
+                                           WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
+                                           AtlasStreamEntityMgr streamEntityMgr,
+                                           ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
+                                           CDLAttrConfigProxy cdlAttrConfigProxy,
+                                           S3ImportSystemService s3ImportSystemService) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
@@ -597,9 +601,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         boolean targetScoreDerivationEnabled = FeatureFlagUtils.isTargetScoreDerivation(flags);
         log.info("Submitting PA: FeatureFlags={}, tenant={}, entityMatchEnabled={}, workflowPid={}", flags,
                 customerSpace, entityMatchEnabled, workflowPid);
-        if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
-            throw new UnsupportedOperationException("Full rematch is not supported for entity match tenants yet.");
-        }
         boolean apsImputationEnabled = FeatureFlagUtils.isApsImputationEnabled(flags);
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
@@ -626,6 +627,29 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
+        boolean skipReMatchFlag = true;
+        if (entityMatchEnabled && request.getFullRematch()) {
+            skipReMatchFlag = false;
+        }
+        Set<BusinessEntity> needSkipConvertEntities = new HashSet<>();
+        HashMap<TableRoleInCollection, Table> needConvertBatchStoreMap = new HashMap<>();
+        if (skipReMatchFlag) {
+            needSkipConvertEntities.add(BusinessEntity.Account);
+            needSkipConvertEntities.add(BusinessEntity.Contact);
+            needSkipConvertEntities.add(BusinessEntity.Transaction);
+        } else {
+            if (CollectionUtils.isNotEmpty(needDeletedEntities)) {
+                needSkipConvertEntities.addAll(needDeletedEntities);
+            }
+            needSkipConvertEntities.addAll(getNonBatchStoreEntities(customerSpace, needConvertBatchStoreMap));
+        }
+        log.info("needSkipConvertEntities is {}.", needSkipConvertEntities);
+        if (!skipReMatchFlag) {
+            Set<BusinessEntity> rebuildEntities = request.getRebuildEntities();
+            rebuildEntities.add(BusinessEntity.Account);
+            rebuildEntities.add(BusinessEntity.Contact);
+            rebuildEntities.add(BusinessEntity.Transaction);
+        }
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -664,6 +688,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .skipEntities(request.getSkipEntities()) //
                 .skipPublishToS3(Boolean.TRUE.equals(request.getSkipPublishToS3())) //
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
+                .skipEntityMatchRematch(needSkipConvertEntities)
+                .setConvertServiceConfig(needConvertBatchStoreMap)
                 .build();
     }
 
@@ -988,5 +1014,39 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         currentNeedDeletedEntity.retainAll(importedEntity);
         log.info("currentNeedDeletedEntity: {}.", JsonUtils.serialize(currentNeedDeletedEntity));
         return currentNeedDeletedEntity;
+    }
+
+    //get batchStoreTableName when we need rematch entityMatch tenant, if no rematch, this list will be empty;
+    private Set<BusinessEntity> getNonBatchStoreEntities(String customerSpace,
+                                                         HashMap<TableRoleInCollection, Table> needConvertBatchStoreMap) {
+        Set<BusinessEntity> nonBatchStoreEntities = new HashSet<>();
+        getBatchStoreTable(customerSpace, BusinessEntity.Account, nonBatchStoreEntities, needConvertBatchStoreMap);
+        getBatchStoreTable(customerSpace, BusinessEntity.Contact, nonBatchStoreEntities, needConvertBatchStoreMap);
+        getBatchStoreTable(customerSpace, BusinessEntity.Transaction, nonBatchStoreEntities, needConvertBatchStoreMap);
+        return nonBatchStoreEntities;
+    }
+
+    /**
+     *
+     * @param customerSpace identify tenant.
+     * @param entity used to find the batchStoreTable
+     * @param nonBatchStoreEntities if batchStoreTable is null, put parameter <entity> into this Set
+     * @param needConvertBatchStoreMap if batchStoreTable isn't null, put Pair<role, batchStoreTableName> into
+     *                                 this map
+     */
+    private void getBatchStoreTable(String customerSpace, BusinessEntity entity, Set<BusinessEntity> nonBatchStoreEntities,
+                                    HashMap<TableRoleInCollection
+            , Table> needConvertBatchStoreMap) {
+        TableRoleInCollection tableRoleInCollection = entity.getBatchStore();
+        if (entity.equals(BusinessEntity.Transaction)) {
+            tableRoleInCollection = TableRoleInCollection.ConsolidatedRawTransaction;
+        }
+        List<Table> masterTable = dataCollectionService.getTables(customerSpace, null,
+                tableRoleInCollection, null);
+        if (masterTable == null || masterTable.isEmpty()) {
+            nonBatchStoreEntities.add(entity);
+        } else {
+            needConvertBatchStoreMap.put(tableRoleInCollection, masterTable.get(0));
+        }
     }
 }
