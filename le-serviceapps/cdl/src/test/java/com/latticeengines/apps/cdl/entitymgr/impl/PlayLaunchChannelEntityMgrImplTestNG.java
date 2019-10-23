@@ -340,6 +340,12 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(((MarketoChannelConfig) retrieved.getChannelConfig()).getAudienceName(), "somethingElse");
         Assert.assertTrue(retrieved.getResetDeltaCalculationData());
 
+        channel1.setLaunchUnscored(false);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Thread.sleep(1000);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getId(), channel1.getId());
+        Assert.assertFalse(retrieved.isLaunchUnscored());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })

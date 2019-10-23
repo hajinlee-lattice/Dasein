@@ -179,6 +179,9 @@ public class PlayLaunchChannelEntityMgrImpl
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
         }
+        if (updatedChannel.isLaunchUnscored() != null) {
+            existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
+        }
 
         // When always-on is off and was not changed
         if (updatedChannel.getIsAlwaysOn() != null && !updatedChannel.getIsAlwaysOn()
