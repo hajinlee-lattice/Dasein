@@ -1,7 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.S3ExportFolderService;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
+import com.latticeengines.domain.exposed.cdl.export.AtlasExportFileParams;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
@@ -69,23 +70,16 @@ public class AtlasExportResource {
     @PostMapping(value = "/systemfiles")
     @ApiOperation(value = "Add export file to systempath")
     public void addFileToSystemPath(@PathVariable String customerSpace, @RequestParam String uuid,
-                                    @RequestParam String fileName, @RequestBody List<String> filesToDelete) {
-        try {
-            atlasExportService.addFileToSystemPath(customerSpace, uuid, URLDecoder.decode(fileName, "utf-8"), filesToDelete);
-        } catch (UnsupportedEncodingException e) {
-            log.error(String.format("File name can't be decoded %s.", e.getMessage()));
-        }
+                                    @RequestBody AtlasExportFileParams atlasExportFileParams) {
+        atlasExportService.addFileToSystemPath(customerSpace, uuid, atlasExportFileParams.getFileName(),
+                atlasExportFileParams.getFilesToDelete());
     }
 
     @PostMapping(value = "/dropfolderfiles")
     @ApiOperation(value = "Add export file to dropfolder")
     public void addFileToDropFolder(@PathVariable String customerSpace, @RequestParam String uuid,
-                                    @RequestParam String fileName, @RequestBody List<String> filesToDelete) {
-        try {
-            atlasExportService.addFileToDropFolder(customerSpace, uuid, URLDecoder.decode(fileName, "utf-8"), filesToDelete);
-        } catch (UnsupportedEncodingException e) {
-            log.error(String.format("File name can't be decoded %s.", e.getMessage()));
-        }
+                                    @RequestBody AtlasExportFileParams atlasExportFileParams) {
+        atlasExportService.addFileToDropFolder(customerSpace, uuid, atlasExportFileParams.getFileName(), atlasExportFileParams.getFilesToDelete());
     }
 
     @GetMapping(value = "/dropfolder/path")
@@ -118,5 +112,9 @@ public class AtlasExportResource {
     @ApiOperation(value = "Get s3 path")
     public String getS3PathWithProtocol(@PathVariable String customerSpace, @RequestBody String relativePath) {
         return s3ExportFolderService.getS3PathWithProtocol(customerSpace, relativePath);
+    }
+
+    public static void main(String[] args) throws Exception {
+       System.out.println(URLDecoder.decode(URLEncoder.encode("export test!@#$%^&*()_+ 12")));
     }
 }

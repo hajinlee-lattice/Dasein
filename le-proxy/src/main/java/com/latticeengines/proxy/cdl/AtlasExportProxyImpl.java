@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
+import com.latticeengines.domain.exposed.cdl.export.AtlasExportFileParams;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -36,16 +37,23 @@ public class AtlasExportProxyImpl extends MicroserviceRestApiProxy implements At
 
     @Override
     public void addFileToSystemPath(String customerSpace, String uuid, String fileName, List<String> pathToDelete) {
-        String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/systemfiles?uuid={uuid}&fileName={fileName}", //
-                shortenCustomerSpace(customerSpace), uuid, fileName);
-        post("Add export fileName with system path", url, pathToDelete, Void.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/systemfiles?uuid={uuid}", //
+                shortenCustomerSpace(customerSpace), uuid);
+        post("Add export fileName with system path", url, createAtlasExportFileParams(fileName, pathToDelete), Void.class);
+    }
+
+    private AtlasExportFileParams createAtlasExportFileParams(String fileName, List<String> pathToDelete){
+        AtlasExportFileParams atlasExportFileParams = new AtlasExportFileParams();
+        atlasExportFileParams.setFileName(fileName);
+        atlasExportFileParams.setFilesToDelete(pathToDelete);
+        return atlasExportFileParams;
     }
 
     @Override
     public void addFileToDropFolder(String customerSpace, String uuid, String fileName, List<String> pathToDelete) {
-        String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/dropfolderfiles?uuid={uuid}&fileName={fileName}", //
-                shortenCustomerSpace(customerSpace), uuid, fileName);
-        post("Add export fileName with dropfolder", url, pathToDelete, Void.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/atlas/export/dropfolderfiles?uuid={uuid}", //
+                shortenCustomerSpace(customerSpace), uuid);
+        post("Add export fileName with dropfolder", url, createAtlasExportFileParams(fileName, pathToDelete), Void.class);
     }
 
     @Override
