@@ -20,11 +20,13 @@ import java.util.zip.GZIPInputStream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +44,7 @@ import com.latticeengines.apps.cdl.service.S3ExportFolderService;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -75,6 +78,9 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
 
     @Inject
     private EntityExportWorkflowSubmitter entityExportWorkflowSubmitter;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Inject
     private AtlasExportService atlasExportService;
@@ -166,7 +172,18 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
         String targetPath = s3ExportFolderService.getDropFolderExportPath(mainTestCustomerSpace.toString(),
                 atlasExport.getExportType(), atlasExport.getDatePrefix(), "");
         boolean hasAccountCsv = false;
+        List<String> deletePathList = atlasExport.getFilesToDelete();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(deletePathList));
+        for (String path : deletePathList) {
+            try {
+                // make sure temp avro and csv files were deleted.
+                Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, path));
+            } catch (IOException e) {
+                log.error(String.format("Could not delete temp export path %s", e.getMessage()));
+            }
+        }
         for (String fileName : atlasExport.getFilesUnderDropFolder()) {
+
             Assert.assertTrue(s3Service.objectExist(s3Bucket, targetPath + fileName));
             List<Tag> tagList = s3Service.getObjectTags(s3Bucket, targetPath + fileName);
             Assert.assertTrue(tagList.size() > 0);
