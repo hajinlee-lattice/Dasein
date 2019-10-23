@@ -89,9 +89,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 .mainEntity(BusinessEntity.Account) //
                 .customerSpace(customerSpace) //
                 .targetSegmentRestriction(play.getTargetSegment().getAccountRestriction()) //
-                .isSupressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
+                .isSuppressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
                         && ((SalesforceChannelConfig) channel.getChannelConfig())
-                                .isSupressAccountsWithoutLookupId() == Boolean.TRUE) //
+                                .isSuppressAccountsWithoutLookupId() == Boolean.TRUE) //
+                .isSuppressAccountsWithoutContacts(channel.getChannelConfig().isSuppressAccountsWithoutContacts())
                 .bucketsToLaunch(channel.getBucketsToLaunch()) //
                 .lookupId(channel.getLookupIdMap().getAccountId()) //
                 .launchUnscored(channel.isLaunchUnscored()) //
@@ -105,9 +106,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 .mainEntity(BusinessEntity.Contact) //
                 .customerSpace(customerSpace) //
                 .targetSegmentRestriction(play.getTargetSegment().getContactRestriction()) //
-                .isSupressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
+                .isSuppressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
                         && ((SalesforceChannelConfig) channel.getChannelConfig())
-                                .isSupressAccountsWithoutLookupId() == Boolean.TRUE)
+                                .isSuppressAccountsWithoutLookupId() == Boolean.TRUE)
+                .isSuppressContactsWithoutEmails(channel.getChannelConfig().isSuppressContactsWithoutEmails())
                 .bucketsToLaunch(channel.getBucketsToLaunch()) //
                 .lookupId(channel.getLookupIdMap().getAccountId()) //
                 .launchUnscored(channel.isLaunchUnscored()) //

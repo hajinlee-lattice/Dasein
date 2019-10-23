@@ -27,7 +27,6 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -93,10 +92,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
     public void setup() throws Exception {
         String existingTenant = null;
         Map<String, Boolean> featureFlags = new HashMap<>();
-        featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION.getName(), true);
-        featureFlags.put(LatticeFeatureFlag.ALPHA_FEATURE.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName(), true);
         featureFlags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
         featureFlags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
@@ -146,11 +143,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         testPlayCreationHelper.setupTenantAndCreatePlay(marketoTestPlaySetupConfig);
         super.testBed = testPlayCreationHelper.getDeploymentTestBed();
         setMainTestTenant(super.testBed.getMainTestTenant());
-        FeatureFlagValueMap ffVMap = super.testBed.getFeatureFlags();
-        log.info("Feature Flags for Tenant: " + ffVMap);
 
-        Assert.assertTrue(ffVMap.containsKey(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
-        Assert.assertTrue(ffVMap.get(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName()));
         dropboxSummary = dropBoxProxy.getDropBox(currentTestTenant().getId());
         assertNotNull(dropboxSummary);
         log.info("Tenant DropboxSummary: {}", JsonUtils.serialize(dropboxSummary));

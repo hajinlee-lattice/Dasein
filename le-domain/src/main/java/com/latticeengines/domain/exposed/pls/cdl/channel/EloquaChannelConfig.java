@@ -15,11 +15,11 @@ public class EloquaChannelConfig implements ChannelConfig {
     @JsonProperty("contactLimit")
     private Long contactLimit;
 
-    @JsonProperty("supressContactsWithoutEmails")
-    private Boolean supressContactsWithoutEmails = false;
+    @JsonProperty("suppressContactsWithoutEmails")
+    private Boolean suppressContactsWithoutEmails = true;
 
-    @JsonProperty("supressAccountWithoutContacts")
-    private Boolean supressAccountWithoutContacts = false;
+    @JsonProperty("suppressAccountsWithoutContacts")
+    private Boolean suppressAccountsWithoutContacts = true;
 
     public Long getContactLimit() {
         return contactLimit;
@@ -29,20 +29,20 @@ public class EloquaChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
-    public Boolean isSupressContactsWithoutEmails() {
-        return supressContactsWithoutEmails;
+    public boolean isSuppressContactsWithoutEmails() {
+        return suppressContactsWithoutEmails;
     }
 
-    public void setSupressContactsWithoutEmails(boolean supressContactsWithoutEmails) {
-        this.supressContactsWithoutEmails = supressContactsWithoutEmails;
+    public void setSuppressContactsWithoutEmails(boolean suppressContactsWithoutEmails) {
+        this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
-    public Boolean isSupressAccountWithoutContacts() {
-        return supressAccountWithoutContacts;
+    public boolean isSuppressAccountsWithoutContacts() {
+        return suppressAccountsWithoutContacts;
     }
 
-    public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
-        this.supressAccountWithoutContacts = supressAccountWithoutContacts;
+    public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
+        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
     }
 
     @Override
@@ -65,8 +65,9 @@ public class EloquaChannelConfig implements ChannelConfig {
         EloquaChannelConfig eloquaChannelConfig = this;
         EloquaChannelConfig newEloquaChannelConfig = (EloquaChannelConfig) config;
         eloquaChannelConfig.setContactLimit(newEloquaChannelConfig.getContactLimit());
-        eloquaChannelConfig.setSupressContactsWithoutEmails(newEloquaChannelConfig.isSupressContactsWithoutEmails());
-        eloquaChannelConfig.setSupressAccountWithoutContacts(newEloquaChannelConfig.isSupressAccountWithoutContacts());
+        eloquaChannelConfig.setSuppressContactsWithoutEmails(newEloquaChannelConfig.isSuppressContactsWithoutEmails());
+        eloquaChannelConfig
+                .setSuppressAccountsWithoutContacts(newEloquaChannelConfig.isSuppressAccountsWithoutContacts());
         return this;
     }
 }

@@ -25,7 +25,6 @@ import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -240,7 +239,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             playLaunch.setFolderName(channelConfig.getFolderName());
         } else if (playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig) {
             SalesforceChannelConfig channelConfig = (SalesforceChannelConfig) playLaunchChannel.getChannelConfig();
-            playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSupressAccountsWithoutLookupId());
+            playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSuppressAccountsWithoutLookupId());
         } else if (playLaunchChannel.getChannelConfig() instanceof LinkedInChannelConfig) {
             LinkedInChannelConfig channelConfig = (LinkedInChannelConfig) playLaunchChannel.getChannelConfig();
             playLaunch.setAudienceId(channelConfig.getAudienceId());
@@ -300,13 +299,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private void addToListIfDoesntExist(LookupIdMap mapping, List<PlayLaunchChannel> channels) {
-        // TODO: Remove when Launch to S3 is GA
-        boolean enableS3 = batonService.isEnabled(MultiTenantContext.getCustomerSpace(),
-                LatticeFeatureFlag.ALPHA_FEATURE);
-        if (mapping.getExternalSystemName() == null
-                || (mapping.getExternalSystemName().equals(CDLExternalSystemName.AWS_S3) && !enableS3)) {
-            return;
-        }
         String configId = mapping.getId();
         for (PlayLaunchChannel channel : channels) {
             if (channel.getLookupIdMap().getId().equals(configId)) {
@@ -354,7 +346,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         }
 
         if (channel.getLookupIdMap().getExternalSystemName() == CDLExternalSystemName.Salesforce
-                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountsWithoutLookupId()
+                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSuppressAccountsWithoutLookupId()
                 && StringUtils.isBlank(channel.getLookupIdMap().getAccountId())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
                     "Cannot restrict accounts with null Ids if account id has not been set up for selected Connection" });
@@ -364,7 +356,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
         if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM)
             coverageRequest.setRestrictNullLookupId(
-                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSupressAccountsWithoutLookupId());
+                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSuppressAccountsWithoutLookupId());
         coverageRequest.setLookupId(channel.getLookupIdMap().getAccountId());
         RatingEnginesCoverageResponse coverageResponse = ratingCoverageService.getRatingCoveragesForSegment(
                 CustomerSpace.parse(tenantId).toString(), play.getTargetSegment().getName(), coverageRequest);
