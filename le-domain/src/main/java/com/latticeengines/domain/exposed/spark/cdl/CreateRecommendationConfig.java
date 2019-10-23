@@ -13,6 +13,8 @@ public class CreateRecommendationConfig extends SparkJobConfig {
 
     public static final String NAME = "createRecommendation";
 
+    public static final int NUM_TARGETS = 2;
+
     @JsonProperty("PlayLaunchSparkContext")
     private PlayLaunchSparkContext playLaunchSparkContext;
 
@@ -24,7 +26,7 @@ public class CreateRecommendationConfig extends SparkJobConfig {
 
     @Override
     public int getNumTargets() {
-        return 2;
+        return NUM_TARGETS;
     }
 
     public PlayLaunchSparkContext getPlayLaunchSparkContext() {
