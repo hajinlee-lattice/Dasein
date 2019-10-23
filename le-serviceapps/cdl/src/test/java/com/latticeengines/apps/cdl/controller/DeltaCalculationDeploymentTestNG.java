@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
@@ -62,9 +61,6 @@ public class DeltaCalculationDeploymentTestNG extends CDLDeploymentTestNGBase {
     @BeforeClass(groups = "deployment-app", enabled = false)
     public void setup() throws Exception {
         Map<String, Boolean> featureFlags = new HashMap<>();
-        featureFlags.put(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION.getName(), true);
-        featureFlags.put(LatticeFeatureFlag.ALPHA_FEATURE.getName(), true);
-        featureFlags.put(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS.getName(), true);
 
         TestPlaySetupConfig testPlaySetupConfig1 = new TestPlaySetupConfig.Builder().existingTenant("JLM_1564644778424")
                 .addChannel(new TestPlayChannelConfig.Builder().destinationSystemType(CDLExternalSystemType.CRM)

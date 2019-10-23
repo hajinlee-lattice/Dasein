@@ -18,10 +18,10 @@ public class MarketoChannelConfig implements ChannelConfig {
     private Long contactLimit;
 
     @JsonProperty("suppressContactsWithoutEmails")
-    private Boolean suppressContactsWithoutEmails = false;
+    private boolean suppressContactsWithoutEmails = true;
 
-    @JsonProperty("suppressAccountWithoutContacts")
-    private Boolean suppressAccountWithoutContacts = false;
+    @JsonProperty("suppressAccountsWithoutContacts")
+    private boolean suppressAccountsWithoutContacts = true;
 
     @JsonProperty("audienceId")
     private String audienceId;
@@ -40,7 +40,7 @@ public class MarketoChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
-    public Boolean isSupressContactsWithoutEmails() {
+    public boolean isSuppressContactsWithoutEmails() {
         return suppressContactsWithoutEmails;
     }
 
@@ -48,12 +48,12 @@ public class MarketoChannelConfig implements ChannelConfig {
         this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
-    public Boolean isSupressAccountWithoutContacts() {
-        return suppressAccountWithoutContacts;
+    public boolean isSuppressAccountsWithoutContacts() {
+        return suppressAccountsWithoutContacts;
     }
 
-    public void setSuppressAccountWithoutContacts(boolean suppressAccountWithoutContacts) {
-        this.suppressAccountWithoutContacts = suppressAccountWithoutContacts;
+    public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
+        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
     }
 
     public String getAudienceId() {
@@ -117,9 +117,10 @@ public class MarketoChannelConfig implements ChannelConfig {
         MarketoChannelConfig marketoChannelConfig = this;
         MarketoChannelConfig newMarketoChannelConfig = (MarketoChannelConfig) config;
         marketoChannelConfig.setContactLimit(newMarketoChannelConfig.getContactLimit());
-        marketoChannelConfig.setSuppressContactsWithoutEmails(newMarketoChannelConfig.isSupressContactsWithoutEmails());
         marketoChannelConfig
-                .setSuppressAccountWithoutContacts(newMarketoChannelConfig.isSupressAccountWithoutContacts());
+                .setSuppressContactsWithoutEmails(newMarketoChannelConfig.isSuppressContactsWithoutEmails());
+        marketoChannelConfig
+                .setSuppressAccountsWithoutContacts(newMarketoChannelConfig.isSuppressAccountsWithoutContacts());
         marketoChannelConfig.setAudienceId(newMarketoChannelConfig.getAudienceId());
         marketoChannelConfig.setAudienceName(newMarketoChannelConfig.getAudienceName());
         marketoChannelConfig.setFolderName(newMarketoChannelConfig.getFolderName());

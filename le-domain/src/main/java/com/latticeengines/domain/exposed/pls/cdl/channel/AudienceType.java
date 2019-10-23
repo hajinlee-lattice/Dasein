@@ -2,7 +2,8 @@ package com.latticeengines.domain.exposed.pls.cdl.channel;
 
 public enum AudienceType {
 
-    ACCOUNTS("Accounts"), CONTACTS("Contacts");
+    ACCOUNTS("Accounts"), //
+    CONTACTS("Contacts");
 
     private String type;
 
