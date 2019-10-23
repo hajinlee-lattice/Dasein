@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -116,17 +117,17 @@ public class AtlasExportServiceImpl implements AtlasExportService {
 
     private void cleanUpAtlasExport(AtlasExport atlasExport) {
         if (CollectionUtils.isNotEmpty(atlasExport.getFilesToDelete())) {
-            try {
-                for (String path : atlasExport.getFilesToDelete()) {
+            for (String path : atlasExport.getFilesToDelete()) {
+                try {
                     if (HdfsUtils.fileExists(yarnConfiguration, path)) {
                         HdfsUtils.rmdir(yarnConfiguration, path);
                     }
+                } catch (IOException ex) {
+                    log.error(String.format("Could not cleanup export job for job: %s", JsonUtils.serialize(atlasExport)), ex.getMessage());
                 }
-                atlasExportEntityMgr.deleteByExportId(atlasExport.getUuid());
-            } catch (Exception ex) {
-                log.error(String.format("Could not cleanup export job for job: %s", JsonUtils.serialize(atlasExport)), ex);
             }
         }
+        atlasExportEntityMgr.deleteByExportId(atlasExport.getUuid());
     }
 
     private class ClearExportJob implements Runnable {

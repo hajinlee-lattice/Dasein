@@ -303,10 +303,26 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
         String fileName = exportEntity + "_" + getExportName(exportRecord) + suffix;
         copyToS3(targetPath, fileName, csvGzFilePath, false);
-        atlasExportProxy.addFileToSystemPath(customerSpaceStr, exportRecord.getUuid(), fileName, getDeletePath());
+        List<String> deletePathList = getDeletePath();
+        atlasExportProxy.addFileToSystemPath(customerSpaceStr, exportRecord.getUuid(), fileName, deletePathList);
+        cleanUpTempPath(deletePathList);
     }
 
-    private String getExportName(AtlasExport atlasExport) {
+    private void cleanUpTempPath(List<String> deletePathList) {
+        if (CollectionUtils.isNotEmpty(deletePathList)) {
+            for (String path : deletePathList) {
+                try {
+                    if (HdfsUtils.fileExists(yarnConfiguration, path)) {
+                        HdfsUtils.rmdir(yarnConfiguration, path);
+                    }
+                } catch (IOException e) {
+                    log.error(String.format("Could not delete temp export path %s", e.getMessage()));
+                }
+            }
+        }
+    }
+
+   private String getExportName(AtlasExport atlasExport) {
         if (StringUtils.isEmpty(atlasExport.getSegmentName())) {
             return atlasExport.getUuid();
         }
@@ -348,7 +364,9 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         String suffix = csvGzFilePath.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
         String fileName = exportEntity + "_" + exportRecord.getUuid() + suffix;
         copyToS3(targetPath, fileName, csvGzFilePath, true);
-        atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName, getDeletePath());
+        List<String> deletePathList = getDeletePath();
+        atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName, deletePathList);
+        cleanUpTempPath(deletePathList);
     }
 
     private void copyToS3(Configuration configuration, String hdfsPath, String s3Path, String tag, String tagValue)
