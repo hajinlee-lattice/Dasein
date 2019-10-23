@@ -50,13 +50,8 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
-    public Boolean isSupressAccountWithoutContacts() {
-        return supressAccountWithoutContacts;
-    }
-
-    public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
-        this.supressAccountWithoutContacts = supressAccountWithoutContacts;
-    }
+    @JsonProperty("suppressAccountsWithoutContacts")
+    public boolean isSuppressAccountsWithoutContacts() { return audienceType != AudienceType.ACCOUNTS; }
 
     public boolean isSuppressAccountsWithoutNameOrDomain() {
         return suppressAccountsWithoutNameOrDomain;

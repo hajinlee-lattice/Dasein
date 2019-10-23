@@ -148,6 +148,31 @@ public class CampaignFrontEndQueryBuilder {
         }
     }
 
+    // TODO: Disabling for now until I get details on usability of this attribute from Jonathan
+    private void addEmptyContactsBasedSuppression() {
+        // if (mainEntity == BusinessEntity.Account) {
+        // Restriction accountRestriction =
+        // campaignFrontEndQuery.getAccountRestriction().getRestriction();
+        // Restriction noOfContactsRestriction = Restriction.builder()
+        // .let(BusinessEntity.Account,
+        // InterfaceName.NumberOfContacts.name()).gte(0).build();
+        // Restriction accountRestrictionWithNonZeroContacts = Restriction.builder()
+        // .and(accountRestriction, noOfContactsRestriction).build();
+        // campaignFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonZeroContacts);
+        // }
+    }
+
+    private void addEmailBasedSuppression() {
+        if (mainEntity == BusinessEntity.Contact) {
+            Restriction contactRestriction = campaignFrontEndQuery.getContactRestriction().getRestriction();
+            Restriction nonNullLookupIdRestriction = Restriction.builder()
+                    .let(BusinessEntity.Contact, InterfaceName.Email.name()).isNotNull().build();
+            Restriction contactRestrictionWithNonNullEmail = Restriction.builder()
+                    .and(contactRestriction, nonNullLookupIdRestriction).build();
+            campaignFrontEndQuery.getContactRestriction().setRestriction(contactRestrictionWithNonNullEmail);
+        }
+    }
+
     private void setMainEntity() {
         campaignFrontEndQuery.setMainEntity(mainEntity);
     }
