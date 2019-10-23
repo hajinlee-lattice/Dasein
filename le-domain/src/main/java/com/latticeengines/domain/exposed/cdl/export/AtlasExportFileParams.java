@@ -2,7 +2,8 @@ package com.latticeengines.domain.exposed.cdl.export;
 
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 public class AtlasExportFileParams {
 
