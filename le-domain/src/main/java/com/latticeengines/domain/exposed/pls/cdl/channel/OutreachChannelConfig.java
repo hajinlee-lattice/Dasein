@@ -17,11 +17,11 @@ public class OutreachChannelConfig implements ChannelConfig {
     @JsonProperty("contactLimit")
     private Long contactLimit;
 
-    @JsonProperty("supressContactsWithoutEmails")
-    private Boolean supressContactsWithoutEmails = true;
+    @JsonProperty("suppressContactsWithoutEmails")
+    private boolean suppressContactsWithoutEmails = true;
 
-    @JsonProperty("supressAccountWithoutContacts")
-    private Boolean supressAccountWithoutContacts = true;
+    @JsonProperty("suppressAccountsWithoutContacts")
+    private boolean suppressAccountsWithoutContacts = true;
 
     @JsonProperty("audienceId")
     private String audienceId;
@@ -40,20 +40,20 @@ public class OutreachChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
-    public Boolean isSupressContactsWithoutEmails() {
-        return supressContactsWithoutEmails;
+    public boolean isSuppressContactsWithoutEmails() {
+        return suppressContactsWithoutEmails;
     }
 
-    public void setSupressContactsWithoutEmails(boolean supressContactsWithoutEmails) {
-        this.supressContactsWithoutEmails = supressContactsWithoutEmails;
+    public void setSuppressContactsWithoutEmails(boolean suppressContactsWithoutEmails) {
+        this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
-    public Boolean isSupressAccountWithoutContacts() {
-        return supressAccountWithoutContacts;
+    public boolean isSuppressAccountsWithoutContacts() {
+        return suppressAccountsWithoutContacts;
     }
 
-    public void setSupressAccountWithoutContacts(boolean supressAccountWithoutContacts) {
-        this.supressAccountWithoutContacts = supressAccountWithoutContacts;
+    public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
+        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
     }
 
     public String getAudienceId() {
@@ -107,9 +107,9 @@ public class OutreachChannelConfig implements ChannelConfig {
         OutreachChannelConfig newOutreachChannelConfig = (OutreachChannelConfig) config;
         outreachChannelConfig.setContactLimit(newOutreachChannelConfig.getContactLimit());
         outreachChannelConfig
-                .setSupressContactsWithoutEmails(newOutreachChannelConfig.isSupressContactsWithoutEmails());
+                .setSuppressContactsWithoutEmails(newOutreachChannelConfig.isSuppressContactsWithoutEmails());
         outreachChannelConfig
-                .setSupressAccountWithoutContacts(newOutreachChannelConfig.isSupressAccountWithoutContacts());
+                .setSuppressAccountsWithoutContacts(newOutreachChannelConfig.isSuppressAccountsWithoutContacts());
         outreachChannelConfig.setAudienceId(newOutreachChannelConfig.getAudienceId());
         outreachChannelConfig.setAudienceName(newOutreachChannelConfig.getAudienceName());
         outreachChannelConfig.setFolderName(newOutreachChannelConfig.getFolderName());

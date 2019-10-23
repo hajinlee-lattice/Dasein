@@ -16,14 +16,11 @@ public class LinkedInChannelConfig implements ChannelConfig {
     @JsonProperty("contactLimit")
     private Long contactLimit;
 
-    @JsonProperty("supressContactsWithoutEmails")
-    private Boolean supressContactsWithoutEmails = false;
-
-    @JsonProperty("supressAccountWithoutContacts")
-    private Boolean supressAccountWithoutContacts = false;
+    @JsonProperty("suppressContactsWithoutEmails")
+    private boolean suppressContactsWithoutEmails = true;
 
     @JsonProperty("suppressAccountsWithoutNameOrDomain")
-    private Boolean suppressAccountsWithoutNameOrDomain = false;
+    private boolean suppressAccountsWithoutNameOrDomain = false;
 
     @JsonProperty("audienceId")
     private String audienceId;
@@ -45,12 +42,12 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
-    public Boolean isSupressContactsWithoutEmails() {
-        return supressContactsWithoutEmails;
+    public boolean isSuppressContactsWithoutEmails() {
+        return suppressContactsWithoutEmails;
     }
 
-    public void setSupressContactsWithoutEmails(boolean supressContactsWithoutEmails) {
-        this.supressContactsWithoutEmails = supressContactsWithoutEmails;
+    public void setSuppressContactsWithoutEmails(boolean suppressContactsWithoutEmails) {
+        this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
     public Boolean isSupressAccountWithoutContacts() {
@@ -61,7 +58,7 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.supressAccountWithoutContacts = supressAccountWithoutContacts;
     }
 
-    public Boolean isSuppressAccountsWithoutNameOrDomain() {
+    public boolean isSuppressAccountsWithoutNameOrDomain() {
         return suppressAccountsWithoutNameOrDomain;
     }
 
@@ -117,7 +114,7 @@ public class LinkedInChannelConfig implements ChannelConfig {
         return (this.audienceType == null ? updatedConfig.audienceType != null //
                 : !this.audienceType.equals(updatedConfig.audienceType)) //
                 || (StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
-                : !this.audienceName.equals(updatedConfig.audienceName));
+                        : !this.audienceName.equals(updatedConfig.audienceName));
     }
 
     @Override
@@ -126,9 +123,7 @@ public class LinkedInChannelConfig implements ChannelConfig {
         LinkedInChannelConfig newLinkedInChannelConfig = (LinkedInChannelConfig) config;
         linkedinChannelConfig.setContactLimit(newLinkedInChannelConfig.getContactLimit());
         linkedinChannelConfig
-                .setSupressContactsWithoutEmails(newLinkedInChannelConfig.isSupressContactsWithoutEmails());
-        linkedinChannelConfig
-                .setSupressAccountWithoutContacts(newLinkedInChannelConfig.isSupressAccountWithoutContacts());
+                .setSuppressContactsWithoutEmails(newLinkedInChannelConfig.isSuppressContactsWithoutEmails());
         linkedinChannelConfig.setAudienceId(newLinkedInChannelConfig.getAudienceId());
         linkedinChannelConfig.setAudienceName(newLinkedInChannelConfig.getAudienceName());
         linkedinChannelConfig.setFolderName(newLinkedInChannelConfig.getFolderName());

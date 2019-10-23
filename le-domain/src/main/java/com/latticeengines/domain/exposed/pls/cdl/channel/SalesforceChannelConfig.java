@@ -15,10 +15,18 @@ public class SalesforceChannelConfig implements ChannelConfig {
     @JsonProperty("accountLimit")
     private Long accountLimit;
 
-    @JsonProperty("supressAccountsWithoutLookupId")
-    private Boolean supressAccountsWithoutLookupId = false;
+    @JsonProperty("suppressAccountsWithoutLookupId")
+    private Boolean suppressAccountsWithoutLookupId = false;
 
-    public Long getAccoutLimit() {
+    @Override
+    @JsonProperty("suppressContactsWithoutEmails")
+    public boolean isSuppressContactsWithoutEmails() { return false; }
+
+    @Override
+    @JsonProperty("suppressAccountsWithoutContacts")
+    public boolean isSuppressAccountsWithoutContacts() { return false; }
+
+    public Long getAccountLimit() {
         return accountLimit;
     }
 
@@ -26,12 +34,12 @@ public class SalesforceChannelConfig implements ChannelConfig {
         this.accountLimit = accountLimit;
     }
 
-    public Boolean isSupressAccountsWithoutLookupId() {
-        return supressAccountsWithoutLookupId;
+    public Boolean isSuppressAccountsWithoutLookupId() {
+        return suppressAccountsWithoutLookupId;
     }
 
-    public void setSupressAccountsWithoutLookupId(boolean supressAccountsWithoutLookupId) {
-        this.supressAccountsWithoutLookupId = supressAccountsWithoutLookupId;
+    public void setSuppressAccountsWithoutLookupId(boolean suppressAccountsWithoutLookupId) {
+        this.suppressAccountsWithoutLookupId = suppressAccountsWithoutLookupId;
     }
 
     @Override
@@ -53,9 +61,9 @@ public class SalesforceChannelConfig implements ChannelConfig {
     public ChannelConfig copyConfig(ChannelConfig config) {
         SalesforceChannelConfig salesforceChannelConfig = this;
         SalesforceChannelConfig newSalesforceChannelConfig = (SalesforceChannelConfig) config;
-        salesforceChannelConfig.setAccountLimit(newSalesforceChannelConfig.getAccoutLimit());
+        salesforceChannelConfig.setAccountLimit(newSalesforceChannelConfig.getAccountLimit());
         salesforceChannelConfig
-                .setSupressAccountsWithoutLookupId(newSalesforceChannelConfig.isSupressAccountsWithoutLookupId());
+                .setSuppressAccountsWithoutLookupId(newSalesforceChannelConfig.isSuppressAccountsWithoutLookupId());
         return this;
 
     }

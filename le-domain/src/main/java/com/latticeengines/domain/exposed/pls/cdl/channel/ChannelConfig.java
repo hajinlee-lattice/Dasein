@@ -30,4 +30,8 @@ public interface ChannelConfig {
 
     boolean shouldResetDeltaCalculations(ChannelConfig channelConfig);
 
+    boolean isSuppressAccountsWithoutContacts();
+
+    boolean isSuppressContactsWithoutEmails();
+
 }

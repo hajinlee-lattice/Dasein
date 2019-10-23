@@ -38,7 +38,9 @@ public class CampaignFrontEndQueryBuilder {
     private Set<RatingBucketName> bucketsToLaunch;
     private boolean launchUnscored;
     private CDLExternalSystemName destinationSystemName;
-    private boolean isSupressAccountWithoutLookupId;
+    private boolean isSuppressAccountWithoutLookupId;
+    private boolean isSuppressAccountsWithoutContacts;
+    private boolean isSuppressContactsWithoutEmails;
 
     private final List<String> accountLookups = Stream
             .of(InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name()).collect(Collectors.toList());
@@ -91,8 +93,18 @@ public class CampaignFrontEndQueryBuilder {
             return this;
         }
 
-        public Builder isSupressAccountWithoutLookupId(boolean isSupressAccountWithoutLookupId) {
-            queryBuilder.isSupressAccountWithoutLookupId = isSupressAccountWithoutLookupId;
+        public Builder isSuppressAccountWithoutLookupId(boolean isSuppressAccountWithoutLookupId) {
+            queryBuilder.isSuppressAccountWithoutLookupId = isSuppressAccountWithoutLookupId;
+            return this;
+        }
+
+        public Builder isSuppressContactsWithoutEmails(boolean isSuppressContactsWithoutEmails) {
+            queryBuilder.isSuppressContactsWithoutEmails = isSuppressContactsWithoutEmails;
+            return this;
+        }
+
+        public Builder isSuppressAccountsWithoutContacts(boolean isSuppressAccountsWithoutContacts) {
+            queryBuilder.isSuppressAccountsWithoutContacts = isSuppressAccountsWithoutContacts;
             return this;
         }
 
@@ -111,8 +123,14 @@ public class CampaignFrontEndQueryBuilder {
             addModelRatingBasedRestrictions();
         }
         addChannelSpecificRestrictions();
-        if (isSupressAccountWithoutLookupId) {
+        if (isSuppressAccountWithoutLookupId) {
             addLookupIdBasedSuppression();
+        }
+        if (isSuppressAccountsWithoutContacts) {
+            addEmptyContactsBasedSuppression();
+        }
+        if (mainEntity == BusinessEntity.Contact && isSuppressContactsWithoutEmails) {
+            addEmailBasedSuppression();
         }
         addSort();
         return campaignFrontEndQuery;
