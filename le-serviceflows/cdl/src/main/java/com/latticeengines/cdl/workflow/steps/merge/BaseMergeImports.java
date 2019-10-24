@@ -171,16 +171,16 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     TransformationStepConfig dedupAndConcatImports(String joinKey) {
-        return dedupAndConcatTables(joinKey, inputTableNames);
+        return dedupAndConcatTables(joinKey, true, inputTableNames);
     }
 
-    TransformationStepConfig dedupAndConcatTables(String joinKey, List<String> tables) {
+    TransformationStepConfig dedupAndConcatTables(String joinKey, boolean dedupSrc, List<String> tables) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         tables.forEach(tblName -> addBaseTables(step, tblName));
 
         MergeImportsConfig config = new MergeImportsConfig();
-        config.setDedupSrc(true);
+        config.setDedupSrc(dedupSrc);
         config.setJoinKey(joinKey);
         config.setAddTimestamps(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));

@@ -1,8 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_APPEND_RAWSTREAM;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +31,10 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
+import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(BuildRawActivityStream.BEAN_NAME)
@@ -47,6 +52,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
     private final Map<String, Set<String>> streamImportColumnNames = new HashMap<>();
     // streamId -> table prefix of raw streams processed by transformation request
     private final Map<String, String> rawStreamTablePrefixes = new HashMap<>();
+    private final long now = Instant.now().toEpochMilli();
 
     @Override
     protected void initializeConfiguration() {
@@ -72,7 +78,9 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
                 .stream() //
                 .map(entry -> {
                     String streamId = entry.getKey();
-                    List<String> importTables = entry.getValue().stream().map(ActivityImport::getTableName)
+                    List<String> importTables = entry.getValue() //
+                            .stream() //
+                            .map(ActivityImport::getTableName) //
                             .collect(Collectors.toList());
                     if (CollectionUtils.isEmpty(importTables)) {
                         return null;
@@ -84,10 +92,61 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
                 .filter(Objects::nonNull) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-        // TODO add process steps that add date to import and merge with active table
-
+        // add date to import and append to active table
+        configuration.getActivityStreamMap().forEach((streamId, stream) -> {
+            DataFeedTask.IngestionBehavior behavior = stream.getDataFeedTaskIngestionBehavior();
+            Integer matchedStepIdx = matchedImportTableIdx.get(streamId);
+            String activeTable = configuration.getActiveRawStreamTables().get(streamId);
+            if (behavior == DataFeedTask.IngestionBehavior.Replace) {
+                // ignore active table in replace
+                log.info("Stream {} has ingestion behavior replace, ignore active table {}", streamId, activeTable);
+                activeTable = null;
+            } else if (behavior != DataFeedTask.IngestionBehavior.Append) {
+                String msg = String.format("Ingestion behavior %s for stream %s is not supported", behavior, streamId);
+                throw new UnsupportedOperationException(msg);
+            }
+            appendRawStream(steps, stream, matchedStepIdx, activeTable);
+        });
         request.setSteps(steps);
         return request;
+    }
+
+    private void appendRawStream(@NotNull List<TransformationStepConfig> steps, @NotNull AtlasStream stream,
+            Integer matchedImportIdx, String activeBatchTable) {
+        if (matchedImportIdx == null && StringUtils.isBlank(activeBatchTable)) {
+            log.info("No import and no active batch store for stream {}. Skip append raw stream step",
+                    stream.getStreamId());
+            return;
+        }
+
+        String streamId = stream.getStreamId();
+        String rawStreamTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
+        AppendRawStreamConfig config = new AppendRawStreamConfig();
+        config.dateAttr = stream.getDateAttribute();
+        config.retentionDays = stream.getRetentionDays();
+        config.currentEpochMilli = now;
+
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_APPEND_RAWSTREAM);
+        if (matchedImportIdx == null) {
+            // no import, must have active table
+            config.masterInputIdx = 0;
+            addBaseTables(step, activeBatchTable);
+        } else {
+            // has import, no necessarily has active table (first time import or replace
+            // mode)
+            config.matchedRawStreamInputIdx = 0;
+            step.setInputSteps(Collections.singletonList(matchedImportIdx));
+            if (activeBatchTable != null) {
+                config.masterInputIdx = 1;
+                addBaseTables(step, activeBatchTable);
+            }
+        }
+        setTargetTable(step, rawStreamTablePrefix);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        steps.add(step);
+
+        rawStreamTablePrefixes.put(streamId, rawStreamTablePrefix);
     }
 
     private Integer concatAndMatchStreamImports(@NotNull String streamId, @NotNull List<String> importTables,
@@ -99,18 +158,18 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
                 String.format("Stream %s does not have match entities", streamId));
 
         // concat import
-        steps.add(dedupAndConcatTables(null, importTables));
+        steps.add(dedupAndConcatTables(null, false, importTables));
         String matchConfig;
         // match entity TODO maybe support rematch and entity match GA?
         if (stream.getMatchEntities().contains(Contact.name())) {
             // contact match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
                     importTableColumns, getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
-                    null);
+                    null, false);
         } else if (stream.getMatchEntities().contains(Account.name())) {
             // account match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(),
-                    importTableColumns, getSystemIds(BusinessEntity.Account), null);
+                    importTableColumns, getSystemIds(BusinessEntity.Account), null, false);
         } else {
             log.error("Match entities {} in stream {} is not supported", stream.getMatchEntities(), streamId);
             throw new UnsupportedOperationException(

@@ -134,18 +134,17 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
     private TransformationStepConfig upsertBatchStore(int mergeStepIdx, @NotNull String activeTableName,
             @NotNull String catalogTablePrefix, @NotNull String primaryKey) {
         TransformationStepConfig step = new TransformationStepConfig();
-        setTargetTable(step, activeTableName);
+        addBaseTables(step, activeTableName);
         // use the merged imports result to upsert
         step.setInputSteps(Collections.singletonList(mergeStepIdx));
         step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
         setTargetTable(step, catalogTablePrefix);
 
-        // TODO make sure this is correct
         UpsertConfig config = new UpsertConfig();
         config.setColsFromLhs(Collections.singletonList(InterfaceName.CDLCreatedTime.name()));
         config.setNotOverwriteByNull(true);
         config.setJoinKey(primaryKey);
-        config.setSwitchSides(false);
+        config.setSwitchSides(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }

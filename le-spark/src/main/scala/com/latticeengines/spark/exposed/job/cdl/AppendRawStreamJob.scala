@@ -45,7 +45,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       lattice.input(config.masterInputIdx)
     }
     if (config.retentionDays != null) {
-      // apply retention policy and remove old data
+      // apply retention policy and remove old data (keep the entire day for now)
       df = df.filter(df.col(__StreamDateId.name).geq(getStartDateId(config.retentionDays, config.currentEpochMilli)))
     }
 
