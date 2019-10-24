@@ -6,5 +6,5 @@ import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory1;
 /**
  * TenantId
  */
-public interface ActivityMetricsDecoratorFac extends DecoratorFactory1<String> {
+public interface SpendAnalyticMetricsDecoratorFac extends DecoratorFactory1<String> {
 }

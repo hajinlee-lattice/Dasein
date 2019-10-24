@@ -89,6 +89,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
         @Type(value = OrphanRecordsExportWorkflowConfiguration.class, name = "OrphanRecordsExportWorkflowConfiguration"),
 
+        @Type(value = MockActivityStoreWorkflowConfiguration.class, name = "MockActivityStoreWorkflowConfiguration"),
+
         @Type(value = ConvertBatchStoreToDataTableWorkflowConfiguration.class, name = "ConvertBatchStoreToDataTableWorkflowConfiguration"),
         @Type(value = ConvertAccountWorkflowConfiguration.class, name = "ConvertAccountWorkflowConfiguration"),
         @Type(value = ConvertContactWorkflowConfiguration.class, name = "ConvertContactWorkflowConfiguration"),

@@ -74,11 +74,11 @@ public class AtlasExportResourceDeploymentTestNG extends CDLDeploymentTestNGBase
         files = new ArrayList<>();
         files.add("Account-" + atlasExport.getUuid() + ".csv.gz");
         atlasExportProxy.addFileToSystemPath(mainCustomerSpace, atlasExport.getUuid(),
-                "Account-Test Space" + atlasExport.getUuid() + ".csv.gz", files);
+                "Account-Test Space!@#$%^&*()_+ 12" + atlasExport.getUuid() + ".csv.gz", files);
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord.getUuid());
         Assert.assertEquals(atlasExport.getFilesUnderSystemPath().size(), 1);
         Assert.assertEquals(atlasExport.getFilesUnderSystemPath().size(), 1);
-        Assert.assertEquals(atlasExport.getFilesUnderSystemPath().get(0), "Account-Test Space" + atlasExport.getUuid() + ".csv.gz");
+        Assert.assertEquals(atlasExport.getFilesUnderSystemPath().get(0), "Account-Test Space!@#$%^&*()_+ 12" + atlasExport.getUuid() + ".csv.gz");
         Assert.assertEquals(atlasExport.getFilesToDelete().size(), 1);
         Assert.assertEquals(atlasExport.getFilesToDelete().get(0), "Account-" + atlasExport.getUuid() + ".csv.gz");
         atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord2.getUuid());

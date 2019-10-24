@@ -1,7 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,14 +81,8 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         @SuppressWarnings("unused")
         DataCollection.Version version = input.getDataCollectionVersion();
         // TODO: get metadata by version
-        BusinessEntity[] entities = { //
-                BusinessEntity.Account, //
-                BusinessEntity.CuratedAccount, //
-                BusinessEntity.Rating, //
-                BusinessEntity.PurchaseHistory //
-        };
         List<ColumnMetadata> cms = new ArrayList<>();
-        for (BusinessEntity entity : entities) {
+        for (BusinessEntity entity : BusinessEntity.ACCOUNT_MATCH_ENTITIES) {
             List<ColumnMetadata> list = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, entity);
             if (CollectionUtils.isNotEmpty(list)) {
                 cms.addAll(list);
@@ -135,13 +130,13 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     public List<DynamoDataUnit> parseCustomDynamo(MatchInput input) {
         String customerSpace = input.getTenant().getId();
         DataCollection.Version version = input.getDataCollectionVersion();
-        TableRoleInCollection[] tableRoles = { //
-                TableRoleInCollection.ConsolidatedAccount, //
-                TableRoleInCollection.PivotedRating, //
-                TableRoleInCollection.CalculatedPurchaseHistory, //
-                TableRoleInCollection.CalculatedCuratedAccountAttribute //
-        };
-        return dataCollectionProxy.getDynamoDataUnits(customerSpace, version, Arrays.asList(tableRoles));
+        List<TableRoleInCollection> servingTables = new ArrayList<>();
+        for (BusinessEntity entity : BusinessEntity.ACCOUNT_MATCH_ENTITIES) {
+            TableRoleInCollection servingTable = BusinessEntity.Account.equals(entity) ? ConsolidatedAccount
+                    : entity.getServingStore();
+            servingTables.add(servingTable);
+        }
+        return dataCollectionProxy.getDynamoDataUnits(customerSpace, version, servingTables);
     }
 
     @Override

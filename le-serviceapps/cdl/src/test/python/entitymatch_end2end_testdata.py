@@ -3,9 +3,12 @@ import csv
 import os
 import re
 import uuid
+import logging
 
 from enum import Enum
 from random import randrange
+
+_logger = logging.getLogger(__name__)
 
 ACCOUNT_FILE = 'Account_All.csv'
 CONTACT_FILE = 'Contact_All.csv'
@@ -339,6 +342,13 @@ def output(rows, file, schema):
 
 
 if __name__ == '__main__':
+    logFormatter = logging.Formatter("%(asctime)s [%(threadName)s] %(levelname)s %(name)s:%(lineno)d - %(message)s")
+    rootLogger = logging.getLogger()
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(logFormatter)
+    rootLogger.addHandler(consoleHandler)
+    rootLogger.setLevel(logging.INFO)
+
     # Account
     # dict: AID -> Account, list: Account, list: Account field names
     aid_to_account, accounts, account_schema = read_account_base(ACCOUNT_FILE)
