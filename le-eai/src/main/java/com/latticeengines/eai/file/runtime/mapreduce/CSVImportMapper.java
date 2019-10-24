@@ -59,12 +59,14 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.number.NumberStyleFormatter;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -333,7 +335,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     @Override
-    protected void cleanup(Context context) {
+    protected void cleanup(Context context) throws IOException {
         context.getCounter(RecordImportCounter.IMPORTED_RECORDS).setValue(importedRecords.longValue());
         context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(ignoredRecords.longValue());
         context.getCounter(RecordImportCounter.DUPLICATE_RECORDS).setValue(duplicateRecords.longValue());
@@ -368,18 +370,25 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         mergeErrorFile(context);
     }
 
-    private void uploadAvroFile(Context context) {
+    private void uploadAvroFile(Context context) throws IOException {
         File directory = new File(".");
         FilenameFilter filenameFilter = (file, name) -> name.endsWith(AVRO_SUFFIX_NAME);
         File[] avroFiles = directory.listFiles(filenameFilter);
         if (avroFiles != null) {
             for (File avroFile2 : avroFiles) {
-                try {
-                    String avroFileName = avroFile2.getName();
-                    HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, outputPath + "/" + avroFileName);
-                } catch (IOException e) {
-                    LOG.error(String.format("IOException happened during the process for merge file: %s.", e.getMessage()));
-                }
+                String avroFileName = avroFile2.getName();
+                RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+                retry.execute(ctx -> {
+                    if (ctx.getRetryCount() > 0) {
+                        LOG.warn("Previous failure:", ctx.getLastThrowable());
+                    }
+                    String hdfsPath = outputPath + "/" + avroFileName;
+                    if (HdfsUtils.fileExists(conf, hdfsPath)) {
+                        HdfsUtils.rmdir(conf, hdfsPath);
+                    }
+                    HdfsUtils.copyLocalToHdfs(context.getConfiguration(), avroFileName, hdfsPath);
+                    return null;
+                });
             }
         }
     }
