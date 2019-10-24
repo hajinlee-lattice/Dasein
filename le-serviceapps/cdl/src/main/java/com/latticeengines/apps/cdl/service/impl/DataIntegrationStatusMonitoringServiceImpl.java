@@ -62,6 +62,8 @@ public class DataIntegrationStatusMonitoringServiceImpl implements DataIntegrati
         log.info("Creating/updating statuses with monitoring message ");
         Map<String, Boolean> statusesUpdate = new HashMap<>();
         statuses.forEach(status -> {
+            String statusJson = JsonUtils.serialize(status);
+            log.info("STATUS SERIALIZED " + statusJson);
             DataIntegrationStatusMonitor statusMonitor = handleStatusMonitor(status);
             statusesUpdate.put(status.getWorkflowRequestId(), createNewStatusMessage(status, statusMonitor));
         });
