@@ -20,17 +20,8 @@ import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 public class QueryServiceUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(QueryServiceUtils.class);
-
     private static boolean localAttrRepoMode = false;
     private static AttributeRepository attrRepo;
-    private static boolean localQueryFlag = false;
-    private static boolean queryLogging = false;
-
-    // Sync with le-admin resources cdl_default.json and cdl_metadata.json
-    private static final String CDL = "CDL";
-    private static final String DIAGNOSTICS = "/Diagnostics";
-    private static final String ENABLE_QUERY_LOGGING = "/QueryLogging";
 
     public static AttributeRepository checkAndGetAttrRepo(CustomerSpace customerSpace,
                                                           DataCollection.Version version,
@@ -69,29 +60,6 @@ public class QueryServiceUtils {
 
     public static AttributeRepository getAttrRepo() {
         return attrRepo;
-    }
-
-    public static boolean getQueryLoggingConfig() {
-        if (!localQueryFlag) {
-            localQueryFlag = true; // only check zk first time through
-            Path path = null;
-            CustomerSpace customerSpace = null;
-            String podId = null;
-            try {
-                Camille camille = CamilleEnvironment.getCamille();
-                podId = CamilleEnvironment.getPodId();
-                CustomerSpace customer = MultiTenantContext.getCustomerSpace();
-                path = PathBuilder.buildCustomerSpaceServicePath(podId, customer, CDL)
-                        .append(DIAGNOSTICS)
-                        .append(ENABLE_QUERY_LOGGING);
-                String querySetting = camille.get(path).getData();
-                queryLogging = querySetting.equalsIgnoreCase("true");
-            } catch (Exception e) {
-                log.info("Failed to find config {} for customer {} in podId {}. Defaulting to {}.",
-                        path, podId, customerSpace, queryLogging);
-            }
-        }
-        return queryLogging;
     }
 
 }

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
+import com.latticeengines.objectapi.util.QueryDiagnostics;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
 
@@ -30,6 +33,9 @@ public abstract class BaseQueryServiceImpl {
     private static final Logger log = LoggerFactory.getLogger(BaseQueryServiceImpl.class);
 
     protected QueryEvaluatorService queryEvaluatorService;
+
+    @Inject
+    protected QueryDiagnostics queryDiagnostics;
 
     BaseQueryServiceImpl(QueryEvaluatorService queryEvaluatorService) {
         this.queryEvaluatorService = queryEvaluatorService;

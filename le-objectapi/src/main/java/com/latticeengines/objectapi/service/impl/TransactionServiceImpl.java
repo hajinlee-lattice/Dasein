@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.TransactionService;
+import com.latticeengines.objectapi.util.QueryDiagnostics;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -55,6 +56,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Inject
     private PeriodProxy periodProxy;
+
+    @Inject
+    private QueryDiagnostics queryDiagnostics;
 
     private LocalCacheManager<String, TimeFilterTranslator> timeTranslatorCache = null;
 
@@ -92,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        if (QueryServiceUtils.getQueryLoggingConfig()){
+        if (queryDiagnostics.getQueryLoggingConfig()){
             log.info("getMaxTransactionDate using query: {}",
                     queryEvaluatorService.getQueryStr(attrRepo, query, RedshiftQueryProvider.USER_SEGMENT)
                     .replaceAll("\\r\\n|\\r|\\n", " "));
@@ -187,5 +191,6 @@ public class TransactionServiceImpl implements TransactionService {
     public void setPeriodProxy(PeriodProxy periodProxy) {
         this.periodProxy = periodProxy;
     }
+
 
 }

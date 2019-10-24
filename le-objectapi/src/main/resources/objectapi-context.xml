@@ -19,7 +19,8 @@
     <import resource="classpath:security-no-controller-context.xml"/>
 
     <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
-    
+    <bean id="queryDiagnostics" class="com.latticeengines.objectapi.util.QueryDiagnostics" />
+
     <mvc:interceptors>
         <bean class="com.latticeengines.objectapi.util.LoggerInterceptor"/>
     </mvc:interceptors>
