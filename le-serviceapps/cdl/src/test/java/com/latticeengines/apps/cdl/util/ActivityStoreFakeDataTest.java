@@ -8,12 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -21,6 +16,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -34,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /**
  * This test is for manually create fake activity metric data for M32
