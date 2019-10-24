@@ -236,7 +236,7 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
             log.info("Done merging CSV files.");
             return csvFiles;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Failed to merge csv files", e);
             return Collections.emptyList();
         }
     }
