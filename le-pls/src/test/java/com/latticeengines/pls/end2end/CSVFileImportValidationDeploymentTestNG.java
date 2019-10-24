@@ -50,6 +50,8 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
     private static final String WEB_VISIT_WITH_INVALID_URL = "WebVisitWithInvalidURL.csv";
 
+    private static final String WEB_VISIT_WITH_INVALID_PATH_PATTERN = "WebVisitWithInvalidPathPattern.csv";
+
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
 
@@ -104,26 +106,37 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                 ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + WEB_VISIT_WITH_INVALID_URL).getPath());
         cdlService.createWebVisitTemplate(customerSpace, EntityType.WebVisit, new FileInputStream(templateFile));
         getDataFeedTask(ENTITY_ACTIVITY_STREAM);
-        startCDLImportWithTemplateData(webVisitDataFeedTask);
+        startCDLImportWithTemplateData(webVisitDataFeedTask, JobStatus.COMPLETED);
         EaiImportJobDetail webVisitDetail =
                 eaiJobDetailProxy.getImportJobDetailByCollectionIdentifier(webVisitDataFeedTask.getUniqueId());
         // 90 rows has field exceeds 1000 chars, 2 rows has invalid url
         verifyEaiJobDetail(webVisitDetail, 92L, 208);
+
+        // call separate api to create web visit path pattern template
+        File pathPatternTemplateFile =
+                new File(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + WEB_VISIT_WITH_INVALID_PATH_PATTERN).getPath());
+        cdlService.createWebVisitTemplate(customerSpace, EntityType.WebVisitPathPattern,
+                new FileInputStream(pathPatternTemplateFile));
+        getDataFeedTask(ENTITY_CATALOG);
+        // 11 valid url path pattern, fail the import
+        startCDLImportWithTemplateData(webVisitPathPatternDataFeedTask, JobStatus.FAILED);
 
 
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
         Assert.assertNotNull(reports);
         reports.sort(Comparator.comparing(Report::getCreated));
-        Assert.assertEquals(reports.size(), 4);
+        Assert.assertEquals(reports.size(), 5);
         Report accountReport = reports.get(0);
         Report contactReport = reports.get(1);
         Report productReport = reports.get(2);
         Report webVisitReport = reports.get(3);
+        Report webVisitPathPatternReport = reports.get(4);
         verifyReport(accountReport, 3L, 3L, 47L);
         verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 0L, 2L, 0L);
         verifyReport(webVisitReport, 92L, 92L, 208L);
+        verifyReport(webVisitPathPatternReport, 2L, 2L, 11L);
     }
 
     @Test(groups = "deployment")
@@ -154,13 +167,13 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         Assert.assertEquals(completedStatus, JobStatus.FAILED);
     }
 
-    private void startCDLImportWithTemplateData(DataFeedTask dataFeedTask) {
+    private void startCDLImportWithTemplateData(DataFeedTask dataFeedTask, JobStatus status) {
         Table table = dataFeedTask.getImportTemplate();
         Assert.assertNotNull(table);
         SourceFile webVisitFile = sourceFileProxy.findByTableName(customerSpace, table.getName());
         ApplicationId applicationId = cdlService.submitS3ImportWithTemplateData(customerSpace,
                 dataFeedTask.getUniqueId(), webVisitFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
+        assertEquals(completedStatus, status);
     }
 }

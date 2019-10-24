@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -105,19 +104,9 @@ public class ProductFileValidationService
         Table currentTable = getCurrentConsolidateProductTable(
                 productFileValidationServiceConfiguration.getCustomerSpace());
         List<Product> currentProducts = getCurrentProducts(currentTable);
-        CSVFormat format = LECSVFormat.format;
         // copy error file if file exists
         String errorFile = getPath(pathList.get(0)) + PATH_SEPARATOR + ImportProperty.ERROR_FILE;
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
-                HdfsUtils.copyHdfsToLocal(yarnConfiguration, errorFile, ImportProperty.ERROR_FILE);
-                format = format.withSkipHeaderRecord();
-            } else {
-                format = format.withHeader(ImportProperty.ERROR_HEADER);
-            }
-        } catch (IOException e) {
-            log.info("Error when copying error file to local");
-        }
+        CSVFormat format = copyErrorFileToLocalIfExist(errorFile);
 
         // append error message to error file
         long errorLine = 0L;

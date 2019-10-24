@@ -1,0 +1,14 @@
+Name,Pattern
+Customer Stories,/customer-stories/customer-stories
+Free Trial,/free-trial
+Free Trial Thank You,/free-trial-thank-you
+All Products,/products
+BIS,/products/buyer-insights
+Atlas,/products/lattice-atlas
+All Content,/resources/*
+Videos,/resources/videos
+All Solutions,/solutions/*
+ABM Solutions,/solutions/account-based-marketing
+All Products2,two
+All Products3,/amazon//*
+All Products4,/products/bundle
