@@ -5,7 +5,9 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOG
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DEELETE_ACTIONS;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -42,6 +45,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean hasSchemaChange = false;
     boolean hasActiveServingStore = false;
     boolean hasImports = false;
+    boolean hasSoftDelete = false;
+    boolean hasHardDelete = false;
     boolean hasManyUpdate = false;
     boolean rebuildDueToActions = false;
     private boolean initialized = false;
@@ -121,6 +126,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         decisions.add(enforceRebuild ? "enforceRebuild=true" : "");
         decisions.add(hasSchemaChange ? "hasSchemaChange=true" : "");
         decisions.add(hasImports ? "hasImports=true" : "");
+        decisions.add(hasSoftDelete ? "hasSoftDelete=true" : "");
+        decisions.add(hasHardDelete ? "hasHardDelete=true" : "");
         decisions.add(hasManyUpdate ? "hasManyUpdate=true" : "");
         decisions.add(hasManyUpdate ? String.format("diffRate=%f", diffRate) : "");
         decisions.add(rebuildDueToActions ? "rebuildDueToActions=true" : "");
@@ -177,6 +184,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
         checkEnforcedRebuild(step);
         checkImports(step);
+        checkSnHDelete(step);
         checkActiveServingStore(step);
         checkHasBatchStore(step);
         checkRebuildDueToActions(step);
@@ -207,6 +215,19 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("Found imports for " + mainEntity().name());
         } else {
             log.info("Found no imports for " + mainEntity().name());
+        }
+    }
+
+    private void checkSnHDelete(AbstractStep<? extends BaseStepConfiguration> step) {
+        List<Action> softDeletes = step.getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
+        List<Action> hardDeletes = step.getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
+        hasHardDelete = CollectionUtils.isNotEmpty(hardDeletes);
+        if (hasHardDelete) {
+            log.info(String.format("Found %d hard delete actions", hardDeletes.size()));
+        }
+        hasSoftDelete = !hasHardDelete && CollectionUtils.isNotEmpty(softDeletes);
+        if (hasHardDelete) {
+            log.info(String.format("Found %d soft delete actions", softDeletes.size()));
         }
     }
 
@@ -279,7 +300,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports;
+        return hasImports || (hasSoftDelete && !hasHardDelete);
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {

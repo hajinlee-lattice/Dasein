@@ -460,8 +460,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         Set<ActionType> importAndDeleteTypes = Sets.newHashSet( //
                 ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
+                ActionType.SOFT_DELETE,
+                ActionType.HARD_DELETE,
                 ActionType.CDL_OPERATION_WORKFLOW);
-        // TODO add status filter to filter out running ones
         List<String> importAndDeleteJobPidStrs = actions.stream()
                 .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null
                         && action.getActionStatus() != ActionStatus.CANCELED)

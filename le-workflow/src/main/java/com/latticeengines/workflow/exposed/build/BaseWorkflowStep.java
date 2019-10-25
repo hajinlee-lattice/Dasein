@@ -116,6 +116,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     // CDL
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
+    public static final String SOFT_DEELETE_ACTIONS = "SOFT_DEELETE_ACTIONS";
+    public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
