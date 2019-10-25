@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -131,10 +132,12 @@ public class CampaignLaunchProcessor {
     }
 
     private Restriction applyAccountNameOrWebsiteFilterToAccountRestriction(Restriction accountRestriction) {
-        Restriction filter = Restriction.builder().let(BusinessEntity.Account, InterfaceName.Website.name()).isNotNull()
-                .or(Restriction.builder().let(BusinessEntity.Account, InterfaceName.CompanyName.name()).isNotNull())
-                .build();
-        return Restriction.builder().and(accountRestriction, filter).build();
+        RestrictionBuilder websiteFilter = Restriction.builder()
+                .let(BusinessEntity.Account, InterfaceName.Website.name()).isNotNull();
+        RestrictionBuilder companyNameFilter = Restriction.builder()
+                .let(BusinessEntity.Account, InterfaceName.CompanyName.name()).isNotNull();
+        return Restriction.builder()
+                .and(accountRestriction, Restriction.builder().or(websiteFilter, companyNameFilter).build()).build();
     }
 
     public PlayLaunchContext initPlayLaunchContext(Tenant tenant, CampaignLaunchInitStepConfiguration config) {
