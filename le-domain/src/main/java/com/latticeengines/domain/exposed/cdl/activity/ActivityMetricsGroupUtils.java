@@ -59,6 +59,13 @@ public class ActivityMetricsGroupUtils {
         return TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_TIME_RANGE_DESCRIPTION, map);
     }
 
+    public static String generateSourceMediumDisplayName(String timeRange, Map<String, Object> sourceMedium) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("SourceMedium", sourceMedium);
+        map.put("TimeRange", timeRange);
+        return TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME, map);
+    }
+
     private static Object getValueFromBiMap(BiMap<?, ?> map, Object key) {
         Object value = map.get(key);
         if (value == null) {

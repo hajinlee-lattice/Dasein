@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -182,7 +183,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             log.info("Create PathPatternId stream dimension for tenant {}. PathPatternCatalog = {}",
                     webVisitStream.getTenant().getId(), pathPtnCatalog);
             List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(tenant.getId(), webVisitStream.getName());
-            if (defaultGroups.size() != 1) {
+            if (defaultGroups == null || defaultGroups.stream().anyMatch(Objects::isNull)) {
                 throw new IllegalStateException(String.format("Failed to setup default web visit metric groups for tenant %s", customerSpace));
             }
         }

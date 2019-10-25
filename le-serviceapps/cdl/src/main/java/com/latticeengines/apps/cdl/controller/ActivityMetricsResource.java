@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -63,7 +64,7 @@ public class ActivityMetricsResource {
     public Boolean setupDefaultWebVisitProfile(@PathVariable String customerSpace,
             @RequestBody String streamName) {
         List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(customerSpace, streamName);
-        if (defaultGroups.size() != 1) {
+        if (defaultGroups == null || defaultGroups.stream().anyMatch(Objects::isNull)) {
             throw new IllegalStateException(String.format("Failed to setup default web visit metric groups for tenant %s", customerSpace));
         }
         return true;
