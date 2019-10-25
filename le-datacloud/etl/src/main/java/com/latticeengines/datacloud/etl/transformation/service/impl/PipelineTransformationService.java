@@ -57,6 +57,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.monitor.SlackSettings;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.tag.Tags;
+import io.opentracing.util.GlobalTracer;
+
 /**
  * This transformation service allows parameterizing the source and target,
  * pipelining the transformation process.
@@ -399,18 +405,41 @@ public class PipelineTransformationService extends AbstractTransformationService
         List<TransformationStepReport> stepReports = new ArrayList<>();
         List<TransformationStepConfig> stepConfigs = transConf.getSteps();
 
+        // only trace transformation steps if there is an active span for now
+        Tracer tracer = GlobalTracer.get();
+        Span parent = tracer.activeSpan();
         for (int i = 0; i < steps.length; i++) {
             String slackMessage = String.format("Started step %d at %s", i, new Date().toString());
             sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
                     SlackSettings.Color.NORMAL, transConf);
             TransformStep step = steps[i];
             Transformer transformer = step.getTransformer();
-            Long startTime = System.currentTimeMillis();
+            Span stepSpan = null;
+            Scope scope = null;
+            if (parent != null) {
+                stepSpan = tracer.buildSpan(String.format("TxfmrStep[%d]-%s", i, transformer.getName())) //
+                        .withTag("stepName", step.getName()) //
+                        .withTag("transformer", transformer.getName()) //
+                        .start();
+                scope = tracer.activateSpan(stepSpan);
+            }
             boolean succeeded;
-            if (step instanceof IterativeStep) {
-                succeeded = executeIterativeStep((IterativeStep) step, transformer, progress, workflowDir);
-            } else {
-                succeeded = executeSimpleStep(step, transformer, progress, workflowDir);
+            Long startTime = System.currentTimeMillis();
+
+            try {
+                if (step instanceof IterativeStep) {
+                    succeeded = executeIterativeStep((IterativeStep) step, transformer, progress, workflowDir);
+                } else {
+                    succeeded = executeSimpleStep(step, transformer, progress, workflowDir);
+                }
+                if (!succeeded && stepSpan != null) {
+                    stepSpan.setTag(Tags.ERROR, true);
+                }
+            } finally {
+                if (stepSpan != null) {
+                    scope.close();
+                    stepSpan.finish();
+                }
             }
             long stepDuration = System.currentTimeMillis() - startTime;
             step.setElapsedTime(stepDuration / 1000);

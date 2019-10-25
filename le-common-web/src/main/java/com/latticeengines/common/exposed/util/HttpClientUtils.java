@@ -25,9 +25,12 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public class HttpClientUtils {
 
@@ -45,6 +48,11 @@ public class HttpClientUtils {
      */
     public static WebClient newWebClient() {
         return WebClient.builder().clientConnector(SSL_BLINK_HTTP_CONNECTOR).build();
+    }
+
+    public static WebClient newWebClient(@NotNull ExchangeFilterFunction fn) {
+        Preconditions.checkNotNull(fn, "Exchange filter function should not be null");
+        return WebClient.builder().clientConnector(SSL_BLINK_HTTP_CONNECTOR).filter(fn).build();
     }
 
     /**

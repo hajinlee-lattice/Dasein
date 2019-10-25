@@ -48,10 +48,16 @@ import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 /**
  * S extends SparkJobConfig: params only for the spark job
@@ -130,7 +136,9 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     protected boolean transformInternal(TransformationProgress progress, String workflowDir,
                                         TransformStep step) {
         ThreadLocal<LivySession> sessionHolder = new ThreadLocal<>();
-        try {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("startSparkJob").asChildOf(tracer.activeSpan()).start();
+        try (Scope scope = tracer.activateSpan(span)) {
             sparkJobConfig = getSparkJobConfig(step.getConfig());
 
             List<DataUnit> sparkInput = getSparkInput(step);
@@ -145,6 +153,15 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             if (MapUtils.isNotEmpty(extraProps)) {
                 sparkProps.putAll(extraProps);
             }
+
+            // log important spark configs in trace
+            Map<String, String> configs = new HashMap<>();
+            configs.put("transformerConfig", JsonUtils.serialize(configuration));
+            configs.put("sparkJobConfig", JsonUtils.serialize(sparkJobConfig));
+            configs.put("sparkInput", JsonUtils.serialize(sparkInput));
+            configs.put("sparkProps", JsonUtils.serialize(sparkProps));
+            span.log(configs);
+
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             SparkJobResult sparkJobResult = retry.execute(ctx -> {
                 log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": retry running spark job " //
@@ -154,8 +171,10 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
                     livySessionService.stopSession(sessionHolder.get());
                 }
                 sessionHolder.set(createLivySession(step, progress, sparkProps));
+                span.log(Collections.singletonMap("livySession", JsonUtils.serialize(sessionHolder.get())));
                 return sparkJobService.runJob(sessionHolder.get(), getSparkJobClz(), sparkJobConfig);
             });
+            span.log(Collections.singletonMap("sparkOutput", JsonUtils.serialize(sparkJobResult)));
 
             HdfsDataUnit output = sparkJobResult.getTargets().get(0);
             step.setCount(output.getCount());
@@ -163,11 +182,13 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             step.setTargetSchema(getTargetSchema(output, sparkJobConfig, configuration, baseSchemas));
         } catch (Exception e) {
             log.error("Failed to transform data", e);
+            TracingUtils.logError(span, e, String.format("Failed to start spark txfmr step %s", step.getName()));
             return false;
         } finally {
             if (sessionHolder.get() != null) {
                 livySessionService.stopSession(sessionHolder.get());
             }
+            TracingUtils.finish(span);
         }
         return true;
     }

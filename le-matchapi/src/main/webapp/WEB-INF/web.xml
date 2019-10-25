@@ -23,6 +23,17 @@
         <async-supported>true</async-supported>
     </servlet>
 
+    <filter>
+        <filter-name>tracingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>tracingFilter</filter-name>
+        <servlet-name>match</servlet-name>
+    </filter-mapping>
+
     <servlet-mapping>
         <servlet-name>match</servlet-name>
         <url-pattern>/match/*</url-pattern>

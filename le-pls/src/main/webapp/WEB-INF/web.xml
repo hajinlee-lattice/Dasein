@@ -29,6 +29,17 @@
         <url-pattern>/pls/*</url-pattern>
     </filter-mapping>
 
+    <filter>
+        <filter-name>tracingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>tracingFilter</filter-name>
+        <servlet-name>pls</servlet-name>
+    </filter-mapping>
+
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>

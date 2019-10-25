@@ -10,6 +10,7 @@
     <import resource="classpath:metadata-context.xml" />
     <import resource="classpath:db-context.xml" />
     <import resource="classpath:workflowapi-context.xml"/>
+    <import resource="classpath:monitor-metric-context.xml"/>
 
     <bean id="playResourceDeploymentTestNG"
         class="com.latticeengines.apps.cdl.controller.PlayResourceDeploymentTestNG">

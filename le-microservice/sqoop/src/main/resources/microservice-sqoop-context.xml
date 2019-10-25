@@ -20,4 +20,14 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>sqoop</value>
+            </list>
+        </property>
+    </bean>
+
 </beans>

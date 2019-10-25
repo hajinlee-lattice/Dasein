@@ -12,6 +12,16 @@
     <context:component-scan base-package="com.latticeengines.dataplatform.controller, com.latticeengines.microservice.modeling" />
     <context:component-scan base-package="com.latticeengines.dataplatform.mbean" />
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>modeling</value>
+            </list>
+        </property>
+    </bean>
+
     <bean id="modelingHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="modeling-microservice" />
     </bean>

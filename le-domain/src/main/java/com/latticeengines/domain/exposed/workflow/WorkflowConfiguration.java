@@ -66,6 +66,9 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     private WorkflowExecutionId workflowIdToRestart;
 
     @JsonProperty
+    private Map<String, String> tracingContext;
+
+    @JsonProperty
     private Map<String, String> inputProperties = new HashMap<>();
 
     @JsonProperty("falingStep")
@@ -152,6 +155,14 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setInputPropertyValue(String key, String value) {
         inputProperties.put(key, value);
+    }
+
+    public Map<String, String> getTracingContext() {
+        return tracingContext;
+    }
+
+    public void setTracingContext(Map<String, String> tracingContext) {
+        this.tracingContext = tracingContext;
     }
 
     public Map<String, String> getInputProperties() {
