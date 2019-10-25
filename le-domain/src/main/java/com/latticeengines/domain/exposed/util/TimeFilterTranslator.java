@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -21,7 +22,9 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
-public class TimeFilterTranslator {
+public class TimeFilterTranslator implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     private final ImmutableMap<String, PeriodBuilder> periodBuilders;
     private final ImmutableMap<String, Integer> currentPeriodIds;
@@ -107,6 +110,10 @@ public class TimeFilterTranslator {
         default:
             throw new UnsupportedOperationException("TimeFilter Operator " + operator + " is not supported.");
         }
+    }
+
+    public int dateToPeriod(String periodName, String date) {
+        return periodBuilders.get(periodName).toPeriodId(date);
     }
 
     private Pair<String, String> translateDateFilter(TimeFilter timeFilter) {
