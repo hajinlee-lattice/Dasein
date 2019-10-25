@@ -21,7 +21,6 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
@@ -31,7 +30,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -73,9 +71,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
 
     @Inject
     private PeriodProxy periodProxy;
-
-    @Inject
-    private BatonService batonService;
 
     @Inject
     protected SparkJobService sparkJobService;
@@ -149,9 +144,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info("Target HDFS path for Recommendation history table: " + recHistoryTargetPath);
             putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recHistoryTargetPath));
-            String recCsvTargetPath = batonService.isEnabled(customerSpace,
-                    LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA) ? createRecJobResult.getTargets().get(1).getPath()
-                            : recHistoryTargetPath;
+            String recCsvTargetPath = createRecJobResult.getTargets().get(1).getPath();
             log.info("Target HDFS path for csv file table: " + recCsvTargetPath);
             putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recCsvTargetPath));
@@ -216,7 +209,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                         processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
                 ;
                 playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
-                playLaunchSparkContext.setUseEntityMatch(batonService.isEntityMatchEnabled(customerSpace));
                 playLaunchSparkContext.setDataDbDriver(dataDbDriver);
                 playLaunchSparkContext.setDataDbUrl(dataDbUrl);
                 playLaunchSparkContext.setDataDbUser(dataDbUser);

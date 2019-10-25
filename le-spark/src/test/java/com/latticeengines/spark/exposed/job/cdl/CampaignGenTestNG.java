@@ -40,8 +40,6 @@ public class CampaignGenTestNG extends TestJoinTestNGBase {
     private static final String destinationAccountId = "D41000001Q3z4EAC";
     private static final int accountLimit = 25;
 
-    private boolean useEntityMatch = false;
-
     @Override
     protected String getJobName() {
         return "campaign";
@@ -180,7 +178,6 @@ public class CampaignGenTestNG extends TestJoinTestNGBase {
                 .play(play) //
                 .segment(segment) //
                 .launchTimestampMillis(launchTime) //
-                .useEntityMatch(useEntityMatch) //
                 .dataDbDriver(dataDbDriver) //
                 .dataDbUrl(dataDbUrl) //
                 .dataDbUser(dataDbUser) //

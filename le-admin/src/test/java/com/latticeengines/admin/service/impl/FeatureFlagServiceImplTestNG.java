@@ -95,8 +95,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.PROTOTYPE_FEATURE, //
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
-                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
-                LatticeFeatureFlag.ENABLE_EXPORT_FIELD_METADATA);
+                LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
         Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //
@@ -254,7 +253,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertFalse(flags.containsKey(FLAG2_ID), "TestFlag should have not been set.");
 
         CustomerSpace customerSpace = CustomerSpace.parse(TestTenantId);
-        TenantDocument tenantDocument = tenantService.getTenant(customerSpace.getContractId(), customerSpace.getTenantId());
+        TenantDocument tenantDocument = tenantService.getTenant(customerSpace.getContractId(),
+                customerSpace.getTenantId());
         FeatureFlagValueMap ffMap = tenantDocument.getFeatureFlags();
         Assert.assertTrue(ffMap.get(FLAG2_ID));
 
