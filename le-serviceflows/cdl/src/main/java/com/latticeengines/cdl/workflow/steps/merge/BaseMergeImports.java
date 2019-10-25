@@ -47,6 +47,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -214,6 +216,21 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             setTargetTable(step, targetTablePrefix);
         }
 
+        return step;
+    }
+
+    TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
+        softDeleteActions.forEach(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            addBaseTables(step, configuration.getDeleteDataTable());
+        });
+        MergeImportsConfig config = new MergeImportsConfig();
+        config.setDedupSrc(true);
+        config.setJoinKey(InterfaceName.AccountId.name());
+        config.setAddTimestamps(false);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 

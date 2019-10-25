@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
@@ -48,6 +49,7 @@ import reactor.core.publisher.Flux;
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME), //
         @JsonSubTypes.Type(value = RemoveOrphanConfig.class, name = RemoveOrphanConfig.NAME), //
+        @JsonSubTypes.Type(value = SoftDeleteConfig.class, name = SoftDeleteConfig.NAME), //
         @JsonSubTypes.Type(value = CreateRecommendationConfig.class, name = CreateRecommendationConfig.NAME), //
         @JsonSubTypes.Type(value = MergeImportsConfig.class, name = MergeImportsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeScoringTargetsConfig.class, name = MergeScoringTargetsConfig.NAME), //

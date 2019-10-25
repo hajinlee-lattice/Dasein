@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateDataTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -41,6 +43,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
@@ -203,6 +206,16 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             inputMasterTableName = masterTable.getName();
         }
         log.info("Set inputMasterTableName=" + inputMasterTableName);
+    }
+
+    TransformationStepConfig softDelete(int mergeSoftDeleteStep, int mergeStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(mergeSoftDeleteStep, mergeStep));
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setDeleteSourceIdx(0);
+        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        return step;
     }
 
     TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep) {
