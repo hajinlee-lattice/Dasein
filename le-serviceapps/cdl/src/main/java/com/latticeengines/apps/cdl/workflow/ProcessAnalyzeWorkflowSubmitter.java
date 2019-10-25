@@ -628,7 +628,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
         boolean skipReMatchFlag = true;
-        if (entityMatchEnabled && request.getFullRematch()) {
+        if (entityMatchEnabled && Boolean.TRUE.equals(request.getFullRematch())) {
             skipReMatchFlag = false;
         }
         Set<BusinessEntity> needSkipConvertEntities = new HashSet<>();
