@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.campaign.CalculateDeltaStep;
 import com.latticeengines.cdl.workflow.steps.campaign.ExportDeltaArtifactsToS3Step;
+import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchUniverseStep;
 import com.latticeengines.cdl.workflow.steps.campaign.ImportDeltaArtifactsFromS3;
 import com.latticeengines.cdl.workflow.steps.campaign.QueuePlayLaunchesStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
@@ -25,6 +26,9 @@ public class CampaignDeltaCalculationWorkflow extends AbstractWorkflow<CampaignD
     private ImportDeltaArtifactsFromS3 importDeltaArtifactsFromS3;
 
     @Inject
+    private GenerateLaunchUniverseStep generateLaunchUniverseStep;
+
+    @Inject
     private CalculateDeltaStep calculateDeltaStep;
 
     @Inject
@@ -37,6 +41,7 @@ public class CampaignDeltaCalculationWorkflow extends AbstractWorkflow<CampaignD
     public Workflow defineWorkflow(CampaignDeltaCalculationWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(importDeltaArtifactsFromS3) //
+                .next(generateLaunchUniverseStep) //
                 .next(calculateDeltaStep) //
                 .next(exportArtifactsToS3Step) //
                 .next(queuePlayLaunchesStep) //

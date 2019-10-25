@@ -7,10 +7,14 @@ import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 public class CalculateDeltaJobConfig extends SparkJobConfig {
     public static final String NAME = "calculateDelta";
 
-    private DataUnit currentAccountUniverse;
-    private DataUnit currentContactUniverse;
-    private DataUnit previousAccountUniverse;
-    private DataUnit previousContactUniverse;
+    @JsonProperty("OldData")
+    private DataUnit oldData;
+    @JsonProperty("NewData")
+    private DataUnit newData;
+    @JsonProperty("FilterJoinKeyNulls")
+    private Boolean filterJoinKeyNulls = false;
+    @JsonProperty("JoinKey")
+    private String joinKey;
 
     @Override
     @JsonProperty("Name")
@@ -18,45 +22,50 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
         return NAME;
     }
 
+    public CalculateDeltaJobConfig() {
+    }
+
+    public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String joinKey, boolean filterJoinKeyNulls) {
+        this.newData = newData;
+        this.oldData = oldData;
+        this.joinKey = joinKey;
+        this.filterJoinKeyNulls = filterJoinKeyNulls;
+    }
+
     @Override
     public int getNumTargets() {
-        return 6;
+        return 2;
     }
 
-    @JsonProperty("CurrentAccountUniverse")
-    public DataUnit getCurrentAccountUniverse() {
-        return currentAccountUniverse;
+    public DataUnit getOldData() {
+        return oldData;
     }
 
-    public void setCurrentAccountUniverse(DataUnit currentAccountUniverse) {
-        this.currentAccountUniverse = currentAccountUniverse;
+    public void setOldData(DataUnit oldData) {
+        this.oldData = oldData;
     }
 
-    @JsonProperty("CurrentContactUniverse")
-    public DataUnit getCurrentContactUniverse() {
-        return currentContactUniverse;
+    public DataUnit getNewData() {
+        return newData;
     }
 
-    public void setCurrentContactUniverse(DataUnit currentContactUniverse) {
-        this.currentContactUniverse = currentContactUniverse;
+    public void setNewData(DataUnit newData) {
+        this.newData = newData;
     }
 
-    @JsonProperty("PreviousAccountUniverse")
-    public DataUnit getPreviousAccountUniverse() {
-        return previousAccountUniverse;
+    public Boolean isFilterJoinKeyNulls() {
+        return filterJoinKeyNulls;
     }
 
-    public void setPreviousAccountUniverse(DataUnit previousAccountUniverse) {
-        this.previousAccountUniverse = previousAccountUniverse;
+    public void setFilterJoinKeyNulls(Boolean filterJoinKeyNulls) {
+        this.filterJoinKeyNulls = filterJoinKeyNulls;
     }
 
-    @JsonProperty("PreviousContactUniverse")
-    public DataUnit getPreviousContactUniverse() {
-        return previousContactUniverse;
+    public String getJoinKey() {
+        return joinKey;
     }
 
-    public void setPreviousContactUniverse(DataUnit previousContactUniverse) {
-        this.previousContactUniverse = previousContactUniverse;
+    public void setJoinKey(String joinKey) {
+        this.joinKey = joinKey;
     }
-
 }
