@@ -246,7 +246,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testDefaultTrueFlag() {
-        FeatureFlagDefinition definition = newFlagDefinition();
+        FeatureFlagDefinition definition = newFlagDefinitionWithoutLPA();
         featureFlagService.undefineFlag(FLAG2_ID);
 
         featureFlagService.defineFlag(FLAG2_ID, definition);
@@ -261,7 +261,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         featureFlagService.undefineFlag(FLAG2_ID);
     }
 
-    protected static FeatureFlagDefinition newFlagDefinition() {
+    protected static FeatureFlagDefinition newFlagDefinitionWithoutLPA() {
         FeatureFlagDefinition definition = new FeatureFlagDefinition();
         definition.setDisplayName(FLAG2_ID);
         definition.setDocumentation("This flag is for functional test.");
