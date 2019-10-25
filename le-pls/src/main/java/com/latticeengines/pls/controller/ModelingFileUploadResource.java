@@ -109,7 +109,6 @@ public class ModelingFileUploadResource {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
         SourceFile response = uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag);
-        response.setPath("");
         return ResponseDocument.successResponse(response);
     }
 
