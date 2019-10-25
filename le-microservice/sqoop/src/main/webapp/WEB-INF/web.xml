@@ -7,6 +7,17 @@
     <display-name>sqoop</display-name>
     <description>Lattice Engines Sqoop REST API</description>
 
+    <filter>
+        <filter-name>tracingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>tracingFilter</filter-name>
+        <servlet-name>sqoop</servlet-name>
+    </filter-mapping>
+
     <servlet>
         <servlet-name>sqoop</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

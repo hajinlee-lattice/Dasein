@@ -34,6 +34,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.domain.exposed.workflowapi.WorkflowLogLinks;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
@@ -47,6 +49,11 @@ import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.yarn.exposed.service.JobNameService;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.impl.JobNameServiceImpl;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Component("workflowContainerService")
 public class WorkflowContainerServiceImpl implements WorkflowContainerService {
@@ -97,11 +104,38 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     @Override
     public ApplicationId submitWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid) {
+        Tracer tracer = GlobalTracer.get();
+        String userId = workflowConfig.getUserId() == null ? WorkflowUser.DEFAULT_USER.name()
+                : workflowConfig.getUserId();
+        Span submitSpan = tracer.buildSpan("Submit workflow - " + workflowConfig.getWorkflowName()) //
+                .withTag(TracingTags.Workflow.WORKFLOW_NAME, workflowConfig.getWorkflowName()) //
+                .withTag(TracingTags.Workflow.USER, userId) //
+                .withTag(TracingTags.Workflow.IS_RESTART, workflowConfig.isRestart()) //
+                .asChildOf(tracer.activeSpan()) //
+                .start();
+        if (workflowPid != null) {
+            submitSpan.setTag(TracingTags.Workflow.PID, workflowPid);
+        } else {
+            submitSpan.log("submit with null PID");
+        }
+        if (workflowConfig.getWorkflowIdToRestart() != null) {
+            submitSpan.setTag(TracingTags.Workflow.WORKFLOW_ID, workflowConfig.getWorkflowIdToRestart().getId());
+        }
+
+        try (Scope scope = tracer.activateSpan(submitSpan)) {
+            workflowConfig.setTracingContext(TracingUtils.getActiveTracingContext());
+            return submit(workflowConfig, workflowPid);
+        } finally {
+            TracingUtils.finish(submitSpan);
+        }
+    }
+
+    private ApplicationId submit(WorkflowConfiguration workflowConfig, Long workflowPid) {
         WorkflowJob workflowJob = upsertWorkflowJob(workflowConfig, workflowPid);
 
         if (workflowJob == null) {
-            log.error(String.format("Failed to upsert workflowJob. WorkflowPid=%s, WorkflowConfig=%s",
-                    workflowPid, JsonUtils.serialize(workflowConfig)));
+            log.error("Failed to upsert workflowJob. WorkflowPid={}, WorkflowConfig={}", workflowPid,
+                    JsonUtils.serialize(workflowConfig));
             return null;
         }
         try {
@@ -137,8 +171,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             }
             workflowJob.setErrorDetails(details);
             workflowJobEntityMgr.updateErrorDetails(workflowJob);
-            log.warn("Failed to launch a YARN container. Setting status to FAILED for workflowJob, pid=" +
-                    workflowJob.getPid() + "\n" + ExceptionUtils.getStackTrace(exc));
+            log.warn("Failed to launch a YARN container. Setting status to FAILED for workflowJob, pid="
+                    + workflowJob.getPid() + "\n" + ExceptionUtils.getStackTrace(exc));
 
             return null;
         }
@@ -282,6 +316,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         if (inputContextString != null && inputContextString.length() > 3500) {
             log.warn("Workflow job's input context is too large, pid=" + workflowJob.getPid() + ", input context="
                     + inputContextString);
+
+        } else if (inputContextString != null) {
+            TracingUtils.logInActiveSpan(Collections.singletonMap("inputContext", inputContextString));
         }
     }
 

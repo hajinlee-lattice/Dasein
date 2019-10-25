@@ -102,6 +102,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.info("Inside ParallelBlockExecution execute()");
             initializeYarnClient();
 
+            Map<String, String> tracingContext = getTracingContext();
             jobConfigurations = new ArrayList<>();
             Object listObj = executionContext.get(BulkMatchContextKey.YARN_JOB_CONFIGS);
             if (listObj instanceof List) {
@@ -109,7 +110,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 List list = (List) listObj;
                 for (Object configObj : list) {
                     if (configObj instanceof DataCloudJobConfiguration) {
-                        jobConfigurations.add((DataCloudJobConfiguration) configObj);
+                        DataCloudJobConfiguration config = (DataCloudJobConfiguration) configObj;
+                        if (tracingContext != null) {
+                            config.setTracingContext(tracingContext);
+                        }
+                        jobConfigurations.add(config);
                     }
                 }
             }
@@ -118,7 +123,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
             matchErrorDir = hdfsPathBuilder.constructMatchErrorDir(rootOperationUid).toString();
             matchNewEntityDir = hdfsPathBuilder.constructMatchNewEntityDir(rootOperationUid).toString();
-            remainingJobs = new ArrayList<DataCloudJobConfiguration>(jobConfigurations);
+            remainingJobs = new ArrayList<>(jobConfigurations);
+            // TODO trace block submission
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
                 submitMatchBlocks();
                 waitForMatchBlocks();
@@ -140,6 +146,14 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     @Override
     public void onExecutionCompleted() {
         putObjectInContext(MATCH_COMMAND, matchCommandService.getByRootOperationUid(rootOperationUid));
+    }
+
+    private Map<String, String> getTracingContext() {
+        if (!hasKeyInContext(TRACING_CONTEXT)) {
+            return null;
+        }
+
+        return getMapObjectFromContext(TRACING_CONTEXT, String.class, String.class);
     }
 
     private void submitMatchBlocks() {

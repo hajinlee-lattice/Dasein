@@ -12,6 +12,16 @@
     <context:component-scan
         base-package="com.latticeengines.quartz.controller, com.latticeengines.microservice.quartz" />
 
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>quartz</value>
+            </list>
+        </property>
+    </bean>
+
     <bean id="quartzHealthCheck"
         class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="quartz-microservice" />

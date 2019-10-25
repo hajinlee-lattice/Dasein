@@ -6,6 +6,7 @@ import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P extends TransformationFlowParameters>
         extends AbstractTransformer<T> {
@@ -148,6 +154,12 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
     @Override
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
+        Tracer tracer = GlobalTracer.get();
+        // only trace if there are active parent span for now
+        Span parent = tracer.activeSpan();
+        Span preSpan = null;
+        Span dataFlowSpan = null;
+        Span postSpan = null;
         try {
             Source[] baseSources = step.getBaseSources();
             List<String> baseSourceVersions = step.getBaseVersions();
@@ -160,19 +172,41 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             // the order of base versions in the configuration
             P parameters = getParameters(progress, baseSources, baseTemplates, targetTemplate, configuration, confStr,
                     baseSourceVersions);
+            if (parent != null) {
+                Map<String, String> params = new HashMap<>();
+                params.put("config", confStr);
+                params.put("workflowDir", workflowDir);
+                params.put("parameter", JsonUtils.serialize(parameters));
+                parent.log(params);
+                preSpan = tracer.buildSpan("preProcessing").asChildOf(parent).start();
+            }
             preDataFlowProcessing(step, workflowDir, parameters, configuration);
             Map<Source, List<String>> baseSourceVersionMap = setupBaseSourceVersionMap(step, parameters, configuration);
             Map<String, Table> baseTables = setupSourceTables(baseSourceVersionMap);
             step.setBaseTables(baseTables);
+
+            if (parent != null) {
+                parent.log(Collections.singletonMap("baseTables", baseTables.keySet().toString()));
+                dataFlowSpan = tracer.buildSpan("executeDataFlow").asChildOf(parent).start();
+            }
             Table result = executeDataFlow(workflowDir, step, parameters);
             step.setCount(result.getCount());
             List<Schema> baseSchemas = getBaseSourceSchemas(step, configuration.isShouldInheritSchemaProp());
             step.setTargetSchema(getTargetSchema(result, parameters, configuration, baseSchemas));
+            if (parent != null) {
+                parent.log(Collections.singletonMap("resultTable", result.getName()));
+                postSpan = tracer.buildSpan("postProcessing").asChildOf(parent).start();
+            }
             postDataFlowProcessing(step, workflowDir, parameters, configuration);
             updateStepCount(step, workflowDir);
         } catch (Exception e) {
             log.error("Failed to transform data", e);
+            TracingUtils.logError(parent, e, String.format("Failed to transform step %s", step.getName()));
             return false;
+        } finally {
+            TracingUtils.finish(preSpan);
+            TracingUtils.finish(dataFlowSpan);
+            TracingUtils.finish(postSpan);
         }
 
         return true;

@@ -26,6 +26,9 @@ public class WorkflowBuilder {
             if (MapUtils.isNotEmpty(workflowConfig.getInitialContext())) {
                 workflow.setInitialContext(workflowConfig.getInitialContext());
             }
+            if (MapUtils.isNotEmpty(workflowConfig.getTracingContext())) {
+                workflow.setTracingContext(workflowConfig.getTracingContext());
+            }
         }
     }
 

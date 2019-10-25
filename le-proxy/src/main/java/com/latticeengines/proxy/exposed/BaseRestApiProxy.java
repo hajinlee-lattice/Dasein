@@ -47,6 +47,8 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
+import io.opentracing.contrib.spring.web.client.TracingRestTemplateInterceptor;
+import io.opentracing.util.GlobalTracer;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -70,6 +72,7 @@ public abstract class BaseRestApiProxy {
     private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset");
 
     private RestTemplate restTemplate;
+    private RestTemplate noTracingTemplate;
     private WebClient webClient;
     private String hostport;
     private String rootpath;
@@ -86,10 +89,13 @@ public abstract class BaseRestApiProxy {
     protected BaseRestApiProxy() {
         this.restTemplate = HttpClientUtils.newRestTemplate();
         this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        this.noTracingTemplate = HttpClientUtils.newRestTemplate();
+        this.noTracingTemplate.setErrorHandler(new GetResponseErrorHandler());
         this.webClient = HttpClientUtils.newWebClient();
         this.retryExceptions = DEFAULT_RETRY_EXCEPTIONS;
         this.retryMessages = DEFAULT_RETRY_MESSAGES;
         initialConfig();
+        instrumentTracing();
     }
 
     protected BaseRestApiProxy(String hostport) {
@@ -102,10 +108,14 @@ public abstract class BaseRestApiProxy {
                 : new UriTemplate(rootpath).expand(urlVariables).toString();
         this.restTemplate = HttpClientUtils.newRestTemplate();
         this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        this.noTracingTemplate = HttpClientUtils.newRestTemplate();
+        this.noTracingTemplate.setErrorHandler(new GetResponseErrorHandler());
         this.webClient = HttpClientUtils.newWebClient();
         this.retryExceptions = DEFAULT_RETRY_EXCEPTIONS;
         this.retryMessages = DEFAULT_RETRY_MESSAGES;
-        setMagicAuthHeader();
+        instrumentTracing();
+        setMagicAuthHeader(restTemplate);
+        setMagicAuthHeader(noTracingTemplate);
         initialConfig();
     }
 
@@ -199,17 +209,27 @@ public abstract class BaseRestApiProxy {
     void enforceSSLNameVerification() {
         restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
         restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        noTracingTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
+        noTracingTemplate.setErrorHandler(new GetResponseErrorHandler());
+        instrumentTracing();
         cleanupAuthHeader();
     }
 
-    void setMagicAuthHeader() {
+    protected void instrumentTracing() {
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
+        interceptors.removeIf(i -> i instanceof TracingRestTemplateInterceptor);
+        interceptors.add(new TracingRestTemplateInterceptor(GlobalTracer.get()));
+        restTemplate.setInterceptors(interceptors);
+    }
+
+    void setMagicAuthHeader(RestTemplate template) {
         MagicAuthenticationHeaderHttpRequestInterceptor authHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(
-                restTemplate.getInterceptors());
+                template.getInterceptors());
         interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
         headers.put(Constants.INTERNAL_SERVICE_HEADERNAME, Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(interceptors);
+        template.setInterceptors(interceptors);
     }
 
     void setAuthHeader(String authToken) {
@@ -220,22 +240,31 @@ public abstract class BaseRestApiProxy {
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
         restTemplate.setInterceptors(interceptors);
+        noTracingTemplate.setInterceptors(interceptors);
     }
 
     void setAuthInterceptor(AuthorizationHeaderHttpRequestInterceptor authHeader) {
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(
-                restTemplate.getInterceptors());
+        setAuthInterceptor(restTemplate, authHeader);
+        setAuthInterceptor(noTracingTemplate, authHeader);
+    }
+
+    void setAuthInterceptor(RestTemplate template, AuthorizationHeaderHttpRequestInterceptor authHeader) {
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(template.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
-        restTemplate.setInterceptors(interceptors);
+        template.setInterceptors(interceptors);
     }
 
     void cleanupAuthHeader() {
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(
-                restTemplate.getInterceptors());
+        cleanupAuthHeader(restTemplate);
+        cleanupAuthHeader(noTracingTemplate);
+    }
+
+    void cleanupAuthHeader(RestTemplate template) {
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(template.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
-        restTemplate.setInterceptors(interceptors);
+        template.setInterceptors(interceptors);
     }
 
     protected void setErrorHandler(ResponseErrorHandler handler) {
@@ -372,6 +401,10 @@ public abstract class BaseRestApiProxy {
         return JsonUtils.convertList(list, returnValueClazz);
     }
 
+    protected <T> T getNoTracing(final String method, final String url, final Class<T> returnValueClazz) {
+        return get(method, url, returnValueClazz, false, false);
+    }
+
     protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
         return get(method, url, returnValueClazz, false);
     }
@@ -381,13 +414,18 @@ public abstract class BaseRestApiProxy {
         return get(method, url, returnValueClazz, true);
     }
 
+    private <T> T get(final String method, final String url, final Class<T> returnValueClazz, boolean useKryo) {
+        // trace request by default
+        return get(method, url, returnValueClazz, useKryo, true);
+    }
+
     private <T> T get(final String method, final String url, final Class<T> returnValueClazz,
-            boolean useKryo) {
+            boolean useKryo, boolean instrumentTracing) {
         final HttpMethod verb = HttpMethod.GET;
         RetryTemplate retry = getRetryTemplate(method, verb, url, false, null);
         return retry.execute(context -> {
             logInvocation(method, url, verb, context.getRetryCount() + 1);
-            return exchange(url, verb, null, returnValueClazz, false, useKryo).getBody();
+            return exchange(url, verb, null, returnValueClazz, false, useKryo, instrumentTracing).getBody();
         });
     }
 
@@ -418,6 +456,12 @@ public abstract class BaseRestApiProxy {
 
     <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
             boolean kryoContent, boolean kryoResponse) {
+        // trace request by default
+        return exchange(url, method, payload, clz, kryoContent, kryoResponse, true);
+    }
+
+    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
+            boolean kryoContent, boolean kryoResponse, boolean instrumentTracing) {
         HttpHeaders headers = new HttpHeaders();
 
         if (clz != null) {
@@ -443,11 +487,12 @@ public abstract class BaseRestApiProxy {
         } else {
             entity = new HttpEntity<>(payload, headers);
         }
+        RestTemplate template = instrumentTracing ? restTemplate : noTracingTemplate;
         if (clz == null) {
-            restTemplate.exchange(url, method, entity, Void.class);
+            template.exchange(url, method, entity, Void.class);
             return ResponseEntity.ok(null);
         } else {
-            return restTemplate.exchange(url, method, entity, clz);
+            return template.exchange(url, method, entity, clz);
         }
     }
 

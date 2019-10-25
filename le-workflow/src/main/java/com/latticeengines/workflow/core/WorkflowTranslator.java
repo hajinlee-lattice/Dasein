@@ -1,5 +1,7 @@
 package com.latticeengines.workflow.core;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TRACING_CONTEXT;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +40,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.FailingStep;
 import com.latticeengines.domain.exposed.workflow.InjectableFailure;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -46,6 +50,12 @@ import com.latticeengines.workflow.listener.FailureReportingListener;
 import com.latticeengines.workflow.listener.FinalJobListener;
 import com.latticeengines.workflow.listener.LEJobListener;
 import com.latticeengines.workflow.listener.LogJobListener;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Configuration
 public class WorkflowTranslator {
@@ -90,6 +100,7 @@ public class WorkflowTranslator {
         log.info("Need to inject failing step " + JsonUtils.serialize(failingStep));
 
         Map<String, String> initialContext = workflow.getInitialContext();
+        Map<String, String> tracingContext = workflow.getTracingContext();
 
         Map<String, Integer> stepOccurrences = new HashMap<>();
         if (CollectionUtils.isNotEmpty(workflow.getSteps())) {
@@ -112,7 +123,7 @@ public class WorkflowTranslator {
                         log.info(String.format("Inject %s to [%d] %s", failure, i, stepName));
                     }
                 }
-                Step step = step(abstractStep, choreographer, i, failure, initialContext);
+                Step step = step(abstractStep, choreographer, i, failure, initialContext, tracingContext);
                 if (simpleJobBuilder == null) {
                     simpleJobBuilder = jobBuilderFactory.get(name).start(step);
                 } else {
@@ -129,16 +140,17 @@ public class WorkflowTranslator {
     }
 
     public Step step(AbstractStep<? extends BaseStepConfiguration> step, Choreographer choreographer, int seq,
-            InjectableFailure injectableFailure, Map<String, String> initialContext) {
+            InjectableFailure injectableFailure, Map<String, String> initialContext,
+            Map<String, String> tracingContext) {
         return stepBuilderFactory.get(step.name()) //
-                .tasklet(tasklet(step, choreographer, seq, injectableFailure, initialContext)) //
+                .tasklet(tasklet(step, choreographer, seq, injectableFailure, initialContext, tracingContext)) //
                 .allowStartIfComplete(step.isRunAgainWhenComplete()) //
                 .build();
     }
 
     private Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step, //
             Choreographer choreographer, int seq, InjectableFailure injectableFailure, //
-            Map<String, String> initialContext) {
+            Map<String, String> initialContext, Map<String, String> tracingContext) {
         return new Tasklet() {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
@@ -157,23 +169,43 @@ public class WorkflowTranslator {
                 step.setSeq(seq);
                 step.setInjectedFailure(injectableFailure);
 
-                if (!step.isDryRun()) {
-                    boolean configurationWasSet = step.setup();
-                    boolean shouldSkip = choreographer.skipStep(step, seq);
-                    if (shouldSkip) {
-                        step.skipStep();
-                        stepExecution.setExitStatus(ExitStatus.NOOP);
-                    } else {
-                        step.onConfigurationInitialized();
-                        if (configurationWasSet) {
-                            validateConfiguration(step);
-                        }
-                        step.setJobId(context.getStepContext().getStepExecution().getJobExecution().getId());
-                        step.throwFailureIfInjected(InjectableFailure.BeforeExecute);
-                        step.execute();
-                        step.onExecutionCompleted();
-                        step.throwFailureIfInjected(InjectableFailure.AfterExecute);
+                if (step.isDryRun()) {
+                    return RepeatStatus.FINISHED;
+                }
+
+                boolean configurationWasSet = step.setup();
+                boolean shouldSkip = choreographer.skipStep(step, seq);
+                if (shouldSkip) {
+                    step.skipStep();
+                    stepExecution.setExitStatus(ExitStatus.NOOP);
+                    return RepeatStatus.FINISHED;
+                }
+
+                Tracer tracer = GlobalTracer.get();
+                Span stepSpan = null;
+                try (Scope scope = startStepSpan()) {
+                    stepSpan = tracer.activeSpan();
+                    step.putObjectInContext(TRACING_CONTEXT, TracingUtils.getActiveTracingContext());
+                    stepSpan.log("config initialized");
+                    step.onConfigurationInitialized();
+                    if (configurationWasSet) {
+                        stepSpan.log("start validating config");
+                        validateConfiguration(step);
                     }
+                    step.setJobId(context.getStepContext().getStepExecution().getJobExecution().getId());
+                    step.throwFailureIfInjected(InjectableFailure.BeforeExecute);
+                    stepSpan.log("start execution");
+                    step.execute();
+                    stepSpan.log("finish execution");
+                    step.onExecutionCompleted();
+                    step.throwFailureIfInjected(InjectableFailure.AfterExecute);
+                } catch (Exception e) {
+                    TracingUtils.logError(stepSpan, e,
+                            String.format("Failed at step #%d - %s", step.getSeq(), step.name()));
+                    // rethrow
+                    throw e;
+                } finally {
+                    TracingUtils.finish(stepSpan);
                 }
 
                 return RepeatStatus.FINISHED;
@@ -185,13 +217,27 @@ public class WorkflowTranslator {
                 if (validationErrors.size() > 0) {
                     StringBuilder validationErrorStringBuilder = new StringBuilder();
                     for (AnnotationValidationError annotationValidationError : validationErrors) {
-                        validationErrorStringBuilder.append(annotationValidationError.getFieldName() + ":"
-                                + annotationValidationError.getAnnotationName() + "\n");
+                        validationErrorStringBuilder //
+                                .append(annotationValidationError.getFieldName()) //
+                                .append(":") //
+                                .append(annotationValidationError.getAnnotationName()) //
+                                .append("\n");
                     }
 
                     throw new LedpException(LedpCode.LEDP_28008, new String[] { step.getConfiguration().toString(),
                             validationErrorStringBuilder.toString() });
                 }
+            }
+
+            private Scope startStepSpan() {
+                Tracer tracer = GlobalTracer.get();
+                SpanContext workflowCtx = TracingUtils.getSpanContext(tracingContext);
+                Span span = tracer.buildSpan(step.name()) //
+                        .withTag(TracingTags.Workflow.NAMESPACE, step.getNamespace()) //
+                        .withTag(TracingTags.Workflow.STEP_SEQ, seq) //
+                        .asChildOf(workflowCtx) //
+                        .start();
+                return tracer.activateSpan(span);
             }
         };
     }
