@@ -244,21 +244,20 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         if (tables.size() > TABLE_NAME_BATCH_SIZE) {
             List<List<String>> tableBatches = Lists.partition(tables, TABLE_NAME_BATCH_SIZE);
             for (List<String> tableBatch : tableBatches) {
-                String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue?";
-                StringBuilder builder = new StringBuilder();
-                tableBatch.forEach(tableName -> builder.append(String.format("tableName=%s&", tableName)));
-                baseUrl += builder.toString();
-                String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), taskId);
-                put("addTablesToQueue", url);
+                addRestrictedTablesToQueue(customerSpace, taskId, tableBatch);
             }
         } else {
-            String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue?";
-            StringBuilder builder = new StringBuilder();
-            tables.forEach(tableName -> builder.append(String.format("tableName=%s&", tableName)));
-            baseUrl += builder.toString();
-            String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), taskId);
-            put("addTablesToQueue", url);
+            addRestrictedTablesToQueue(customerSpace, taskId, tables);
         }
+    }
+
+    private void addRestrictedTablesToQueue(String customerSpace, String taskId, List<String> tables) {
+        String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue?";
+        StringBuilder builder = new StringBuilder();
+        tables.forEach(tableName -> builder.append(String.format("tableName=%s&", tableName)));
+        baseUrl += builder.toString();
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), taskId);
+        put("addTablesToQueue", url);
     }
 
     public List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType,
