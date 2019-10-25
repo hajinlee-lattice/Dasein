@@ -13,5 +13,6 @@
 
         <import resource="classpath:common-component-context.xml" />
         <import resource="classpath:hadoop-config-context.xml" />
+        <import resource="classpath:monitor-metric-context.xml"/>
 
 </beans>
