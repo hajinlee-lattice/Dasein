@@ -87,7 +87,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                             ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
                                     channel.getCurrentLaunchedAccountUniverseTable())
                             : null;
-            previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
+            previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DELTA
                     && !channel.getResetDeltaCalculationData() && previousAccountUniverseTable != null)
                             ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
                             : null;
@@ -99,7 +99,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                                     channel.getCurrentLaunchedContactUniverseTable())
                             : null;
 
-            previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
+            previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DELTA
                     && !channel.getResetDeltaCalculationData() && previousContactUniverseTable != null)
                             ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
                             : null;
