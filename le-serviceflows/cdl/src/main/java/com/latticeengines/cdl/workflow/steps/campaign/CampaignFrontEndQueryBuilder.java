@@ -1,12 +1,12 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,20 +34,19 @@ public class CampaignFrontEndQueryBuilder {
     private CustomerSpace customerSpace;
     private String lookupId;
     private String ratingId;
-    private Restriction baseRestriction;
+    private Restriction baseAccountRestriction;
+    private Restriction baseContactRestriction;
     private Set<RatingBucketName> bucketsToLaunch;
     private boolean launchUnscored;
     private CDLExternalSystemName destinationSystemName;
-    private boolean isSuppressAccountWithoutLookupId;
+    private boolean isSuppressAccountsWithoutLookupId;
     private boolean isSuppressAccountsWithoutContacts;
     private boolean isSuppressContactsWithoutEmails;
 
-    private final List<String> accountLookups = Stream
-            .of(InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name()).collect(Collectors.toList());
+    private final List<String> accountLookups = Collections.singletonList(InterfaceName.AccountId.name());
 
-    private final List<String> contactLookups = Stream
-            .of(InterfaceName.ContactId.name(), InterfaceName.CustomerContactId.name(), InterfaceName.AccountId.name())
-            .collect(Collectors.toList());
+    private final List<String> contactLookups = Arrays.asList(InterfaceName.ContactId.name(),
+            InterfaceName.AccountId.name());
 
     protected static class Builder {
 
@@ -73,8 +72,13 @@ public class CampaignFrontEndQueryBuilder {
             return this;
         }
 
-        public Builder targetSegmentRestriction(Restriction targetSegmentRestriction) {
-            queryBuilder.baseRestriction = targetSegmentRestriction;
+        public Builder baseAccountRestriction(Restriction baseAccountRestriction) {
+            queryBuilder.baseAccountRestriction = baseAccountRestriction;
+            return this;
+        }
+
+        public Builder baseContactRestriction(Restriction baseContactRestriction) {
+            queryBuilder.baseContactRestriction = baseContactRestriction;
             return this;
         }
 
@@ -93,8 +97,8 @@ public class CampaignFrontEndQueryBuilder {
             return this;
         }
 
-        public Builder isSuppressAccountWithoutLookupId(boolean isSuppressAccountWithoutLookupId) {
-            queryBuilder.isSuppressAccountWithoutLookupId = isSuppressAccountWithoutLookupId;
+        public Builder isSuppressAccountsWithoutLookupId(boolean isSuppressAccountsWithoutLookupId) {
+            queryBuilder.isSuppressAccountsWithoutLookupId = isSuppressAccountsWithoutLookupId;
             return this;
         }
 
@@ -123,20 +127,20 @@ public class CampaignFrontEndQueryBuilder {
             addModelRatingBasedRestrictions();
         }
         addChannelSpecificRestrictions();
-        if (isSuppressAccountWithoutLookupId) {
-            addLookupIdBasedSuppression();
-        }
-        if (isSuppressAccountsWithoutContacts) {
-            addEmptyContactsBasedSuppression();
+        if (isSuppressAccountsWithoutLookupId && StringUtils.isNotBlank(lookupId)) {
+            suppressAccountsWithoutLookupId();
         }
         if (mainEntity == BusinessEntity.Contact && isSuppressContactsWithoutEmails) {
-            addEmailBasedSuppression();
+            filterContactsWithoutEmail();
         }
         addSort();
+        if (mainEntity == BusinessEntity.Contact && isSuppressAccountsWithoutContacts) {
+            filterAccountsWithoutContacts();
+        }
         return campaignFrontEndQuery;
     }
 
-    private void addLookupIdBasedSuppression() {
+    private void suppressAccountsWithoutLookupId() {
         if (mainEntity == BusinessEntity.Account && StringUtils.isNotBlank(lookupId)) {
             Restriction accountRestriction = campaignFrontEndQuery.getAccountRestriction().getRestriction();
             Restriction nonNullLookupIdRestriction = Restriction.builder().let(BusinessEntity.Account, lookupId)
@@ -148,21 +152,20 @@ public class CampaignFrontEndQueryBuilder {
         }
     }
 
-    // TODO: Disabling for now until I get details on usability of this attribute from Jonathan
-    private void addEmptyContactsBasedSuppression() {
-        // if (mainEntity == BusinessEntity.Account) {
-        // Restriction accountRestriction =
-        // campaignFrontEndQuery.getAccountRestriction().getRestriction();
-        // Restriction noOfContactsRestriction = Restriction.builder()
-        // .let(BusinessEntity.Account,
-        // InterfaceName.NumberOfContacts.name()).gte(0).build();
-        // Restriction accountRestrictionWithNonZeroContacts = Restriction.builder()
-        // .and(accountRestriction, noOfContactsRestriction).build();
-        // campaignFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonZeroContacts);
-        // }
+    private void filterAccountsWithoutContacts() {
+        // Bit hacky approach, If FrontEndQuery's MainEntity is Contact, Accounts with
+        // no contacts automatically get filtered.
+        // So set FrontEndQuery's MainEntity to Account when filtering isn't needed
+        // Also this is the reason, this should always be done right before returning
+        // the front end query
+        if (isSuppressAccountsWithoutContacts) {
+            campaignFrontEndQuery.setMainEntity(BusinessEntity.Contact);
+        } else {
+            campaignFrontEndQuery.setMainEntity(BusinessEntity.Account);
+        }
     }
 
-    private void addEmailBasedSuppression() {
+    private void filterContactsWithoutEmail() {
         if (mainEntity == BusinessEntity.Contact) {
             Restriction contactRestriction = campaignFrontEndQuery.getContactRestriction().getRestriction();
             Restriction nonNullLookupIdRestriction = Restriction.builder()
@@ -192,14 +195,12 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void setupBaseRestrictions() {
-        if (mainEntity == BusinessEntity.Account) {
-            campaignFrontEndQuery.setAccountRestriction(new FrontEndRestriction(baseRestriction));
-        }
-        if (mainEntity == BusinessEntity.Contact) {
-            baseRestriction = baseRestriction == null ? LogicalRestriction.builder().or(new ArrayList<>()).build()
-                    : baseRestriction;
-            campaignFrontEndQuery.setContactRestriction(new FrontEndRestriction(baseRestriction));
-        }
+        campaignFrontEndQuery.setAccountRestriction(new FrontEndRestriction(baseAccountRestriction));
+        baseContactRestriction = baseContactRestriction == null
+                ? LogicalRestriction.builder().or(new ArrayList<>()).build()
+                : baseContactRestriction;
+        campaignFrontEndQuery.setContactRestriction(new FrontEndRestriction(baseContactRestriction));
+
     }
 
     private void addModelRatingBasedRestrictions() {
@@ -217,7 +218,8 @@ public class CampaignFrontEndQueryBuilder {
                             .build()
                     : ratingRestriction;
 
-            Restriction finalAccountRestriction = Restriction.builder().and(baseRestriction, ratingRestriction).build();
+            Restriction finalAccountRestriction = Restriction.builder().and(baseAccountRestriction, ratingRestriction)
+                    .build();
             campaignFrontEndQuery.setAccountRestriction(new FrontEndRestriction(finalAccountRestriction));
         }
     }

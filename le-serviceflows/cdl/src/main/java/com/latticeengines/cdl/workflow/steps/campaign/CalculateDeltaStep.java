@@ -13,7 +13,6 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -22,14 +21,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CalculateDeltaStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
@@ -79,80 +75,53 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "No Channel found by ID: " + config.getChannelId() });
         }
-
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
 
-        // 1) setup queries from play and channel settings
-        FrontEndQuery accountQuery = new CampaignFrontEndQueryBuilder.Builder() //
-                .mainEntity(BusinessEntity.Account) //
-                .customerSpace(customerSpace) //
-                .targetSegmentRestriction(play.getTargetSegment().getAccountRestriction()) //
-                .isSuppressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
-                        && ((SalesforceChannelConfig) channel.getChannelConfig())
-                                .isSuppressAccountsWithoutLookupId() == Boolean.TRUE) //
-                .isSuppressAccountsWithoutContacts(channel.getChannelConfig().isSuppressAccountsWithoutContacts())
-                .bucketsToLaunch(channel.getBucketsToLaunch()) //
-                .lookupId(channel.getLookupIdMap().getAccountId()) //
-                .launchUnscored(channel.isLaunchUnscored()) //
-                .destinationSystemName(channel.getLookupIdMap().getExternalSystemName()) //
-                .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
-                .getCampaignFrontEndQueryBuilder().build();
+        HdfsDataUnit previousLaunchUniverse;
 
-        log.info("Full Account Universe Query: " + accountQuery.toString());
+        if (channel.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
+            Table previousAccountUniverseTable = StringUtils
+                    .isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
+                            ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                                    channel.getCurrentLaunchedAccountUniverseTable())
+                            : null;
+            previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
+                    && !channel.getResetDeltaCalculationData() && previousAccountUniverseTable != null)
+                            ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
+                            : null;
+            log.info(logHDFSDataUnit("PreviousAccountLaunchUniverse_", previousLaunchUniverse));
+        } else {
+            Table previousContactUniverseTable = StringUtils
+                    .isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
+                            ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                                    channel.getCurrentLaunchedContactUniverseTable())
+                            : null;
 
-        FrontEndQuery contactQuery = new CampaignFrontEndQueryBuilder.Builder() //
-                .mainEntity(BusinessEntity.Contact) //
-                .customerSpace(customerSpace) //
-                .targetSegmentRestriction(play.getTargetSegment().getContactRestriction()) //
-                .isSuppressAccountWithoutLookupId(channel.getChannelConfig() instanceof SalesforceChannelConfig
-                        && ((SalesforceChannelConfig) channel.getChannelConfig())
-                                .isSuppressAccountsWithoutLookupId() == Boolean.TRUE)
-                .isSuppressContactsWithoutEmails(channel.getChannelConfig().isSuppressContactsWithoutEmails())
-                .bucketsToLaunch(channel.getBucketsToLaunch()) //
-                .lookupId(channel.getLookupIdMap().getAccountId()) //
-                .launchUnscored(channel.isLaunchUnscored()) //
-                .destinationSystemName(channel.getLookupIdMap().getExternalSystemName()) //
-                .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
-                .getCampaignFrontEndQueryBuilder().build();
+            previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
+                    && !channel.getResetDeltaCalculationData() && previousContactUniverseTable != null)
+                            ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
+                            : null;
 
-        log.info("Full Contact Universe Query: " + contactQuery.toString());
+            log.info(logHDFSDataUnit("PreviousContactLaunchUniverse_", previousLaunchUniverse));
+        }
 
-        Table previousAccountUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
-                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                        channel.getCurrentLaunchedAccountUniverseTable())
-                : null;
-
-        HdfsDataUnit previousAccountUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
-                && !channel.getResetDeltaCalculationData() && previousAccountUniverseTable != null)
-                        ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
-                        : null;
-        log.info(logHDFSDataUnit("PreviousAccountUniverse_", previousAccountUniverse));
-
-        Table previousContactUniverseTable = StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
-                ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                        channel.getCurrentLaunchedContactUniverseTable())
-                : null;
-
-        HdfsDataUnit previousContactUniverse = (channel.getLaunchType() == LaunchType.DIFFERENTIAL
-                && !channel.getResetDeltaCalculationData() && previousContactUniverseTable != null)
-                        ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
-                        : null;
-
-        log.info(logHDFSDataUnit("PreviousContactUniverse_", previousContactUniverse));
+        HdfsDataUnit currentLaunchUniverse = getObjectFromContext(FULL_LAUNCH_UNIVERSE, HdfsDataUnit.class);
 
         // 2) compare previous launch universe to current launch universe
 
-        SparkJobResult deltaCalculationResult = executeSparkJob(accountQuery, contactQuery, channel,
-                previousAccountUniverse, previousContactUniverse);
+        SparkJobResult deltaCalculationResult = executeSparkJob(currentLaunchUniverse, previousLaunchUniverse,
+                channel.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS ? InterfaceName.AccountId.name()
+                        : InterfaceName.ContactId.name(),
+                channel.getChannelConfig().isSuppressAccountsWithoutContacts());
 
         // 3) Generate Metadata tables for delta results
-        processDeltaCalculationResult(deltaCalculationResult, config);
+        processDeltaCalculationResult(channel.getChannelConfig().getAudienceType(), deltaCalculationResult, config);
     }
 
-    private SparkJobResult executeSparkJob(FrontEndQuery accountQuery, FrontEndQuery contactQuery,
-            PlayLaunchChannel channel, HdfsDataUnit previousAccountUniverse, HdfsDataUnit previousContactUniverse) {
+    private SparkJobResult executeSparkJob(HdfsDataUnit previousLaunchUniverse, HdfsDataUnit currentLaunchUniverse,
+            String joinKey, boolean filterJoinKeyNulls) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -163,22 +132,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
-                // 2. get DataFrame for Account and Contact
-                HdfsDataUnit accountDataUnit = getEntityQueryData(accountQuery);
-                log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
-                HdfsDataUnit contactDataUnit = null;
-                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                if (StringUtils.isBlank(contactTableName)) {
-                    log.info("No contact table available in Redshift.");
-                } else {
-                    contactDataUnit = getEntityQueryData(contactQuery);
-                    log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
-                }
-
-                // 3. generate avro out of DataFrame with predefined format for Recommendations
-                return executeSparkJob(CalculateDeltaJob.class, //
-                        buildCalculateDeltaJobConfig(accountDataUnit, contactDataUnit, //
-                                previousAccountUniverse, previousContactUniverse));
+                SparkJobResult result = executeSparkJob(CalculateDeltaJob.class, new CalculateDeltaJobConfig(
+                        currentLaunchUniverse, previousLaunchUniverse, joinKey, filterJoinKeyNulls));
+                result.getTargets().add(currentLaunchUniverse);
+                return result;
             } finally {
                 stopSparkSQLSession();
             }
@@ -186,62 +143,53 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     }
 
-    private CalculateDeltaJobConfig buildCalculateDeltaJobConfig(HdfsDataUnit accountDataUnit,
-            HdfsDataUnit contactDataUnit, HdfsDataUnit previousAccountUniverse, HdfsDataUnit previousContactUniverse) {
-        CalculateDeltaJobConfig calculateDeltaConfig = new CalculateDeltaJobConfig();
-        calculateDeltaConfig.setWorkspace(getRandomWorkspace());
-        calculateDeltaConfig.setCurrentAccountUniverse(accountDataUnit);
-        calculateDeltaConfig.setCurrentContactUniverse(contactDataUnit);
-        calculateDeltaConfig.setPreviousAccountUniverse(previousAccountUniverse);
-        calculateDeltaConfig.setPreviousContactUniverse(previousContactUniverse);
-        return calculateDeltaConfig;
-    }
-
-    private void processDeltaCalculationResult(SparkJobResult deltaCalculationResult,
+    private void processDeltaCalculationResult(AudienceType audienceType, SparkJobResult deltaCalculationResult,
             CalculateDeltaStepConfiguration config) {
-        HdfsDataUnit addedAccounts = deltaCalculationResult.getTargets().get(0);
-        if (addedAccounts != null && addedAccounts.getCount() > 0) {
-            processHDFSDataUnit("AddedAccounts_" + config.getExecutionId(), addedAccounts,
-                    InterfaceName.AccountId.name(), ADDED_ACCOUNTS_DELTA_TABLE);
-        } else {
-            log.info("No new Added accounts");
+
+        if (audienceType == AudienceType.ACCOUNTS) {
+            HdfsDataUnit addedAccounts = deltaCalculationResult.getTargets().get(0);
+            if (addedAccounts != null && addedAccounts.getCount() > 0) {
+                processHDFSDataUnit("AddedAccounts_" + config.getExecutionId(), addedAccounts,
+                        InterfaceName.AccountId.name(), ADDED_ACCOUNTS_DELTA_TABLE);
+            } else {
+                log.info("No new Added accounts");
+            }
+
+            HdfsDataUnit removedAccounts = deltaCalculationResult.getTargets().get(1);
+            if (removedAccounts != null && removedAccounts.getCount() > 0) {
+                processHDFSDataUnit("RemovedAccounts_" + config.getExecutionId(), removedAccounts,
+                        InterfaceName.AccountId.name(), REMOVED_ACCOUNTS_DELTA_TABLE);
+            } else {
+                log.info("No removed accounts");
+            }
+
+            HdfsDataUnit fullAccountUniverse = deltaCalculationResult.getTargets().get(2);
+            processHDFSDataUnit("FullAccountUniverse_" + config.getExecutionId(), fullAccountUniverse,
+                    InterfaceName.AccountId.name(), FULL_ACCOUNTS_UNIVERSE);
         }
 
-        HdfsDataUnit removedAccounts = deltaCalculationResult.getTargets().get(1);
-        if (removedAccounts != null && removedAccounts.getCount() > 0) {
-            processHDFSDataUnit("RemovedAccounts_" + config.getExecutionId(), removedAccounts,
-                    InterfaceName.AccountId.name(), REMOVED_ACCOUNTS_DELTA_TABLE);
-        } else {
-            log.info("No removed accounts");
-        }
+        if (audienceType == AudienceType.CONTACTS) {
+            HdfsDataUnit addedContacts = deltaCalculationResult.getTargets().get(0);
+            if (addedContacts != null && addedContacts.getCount() > 0) {
+                processHDFSDataUnit("AddedContacts_" + config.getExecutionId(), addedContacts,
+                        InterfaceName.ContactId.name(), ADDED_CONTACTS_DELTA_TABLE);
+            } else {
+                log.info("No new contacts to be added");
+            }
 
-        HdfsDataUnit addedContacts = deltaCalculationResult.getTargets().get(2);
-        if (addedContacts != null && addedContacts.getCount() > 0) {
-            processHDFSDataUnit("AddedContacts_" + config.getExecutionId(), addedContacts,
-                    InterfaceName.ContactId.name(), ADDED_CONTACTS_DELTA_TABLE);
-        } else {
-            log.info("No new contacts to be added");
-        }
+            HdfsDataUnit removedContacts = deltaCalculationResult.getTargets().get(1);
+            if (removedContacts != null && removedContacts.getCount() > 0) {
+                processHDFSDataUnit("RemovedContacts_" + config.getExecutionId(), removedContacts,
+                        InterfaceName.ContactId.name(), REMOVED_CONTACTS_DELTA_TABLE);
+            } else {
+                log.info("No removed contacts");
+            }
 
-        HdfsDataUnit removedContacts = deltaCalculationResult.getTargets().get(3);
-        if (removedContacts != null && removedContacts.getCount() > 0) {
-            processHDFSDataUnit("RemovedContacts_" + config.getExecutionId(), removedContacts,
-                    InterfaceName.ContactId.name(), REMOVED_CONTACTS_DELTA_TABLE);
-        } else {
-            log.info("No removed contacts");
-        }
-
-        HdfsDataUnit fullAccountUniverse = deltaCalculationResult.getTargets().get(4);
-        processHDFSDataUnit("FullAccountUniverse_" + config.getExecutionId(), fullAccountUniverse,
-                InterfaceName.AccountId.name(), FULL_ACCOUNTS_UNIVERSE);
-
-        HdfsDataUnit fullContactUniverse = deltaCalculationResult.getTargets().get(5);
-        if (fullContactUniverse != null && fullContactUniverse.getCount() > 0) {
+            HdfsDataUnit fullContactUniverse = deltaCalculationResult.getTargets().get(2);
             processHDFSDataUnit("FullContactUniverse_" + config.getExecutionId(), fullContactUniverse,
                     InterfaceName.ContactId.name(), FULL_CONTACTS_UNIVERSE);
-        } else {
-            log.info("Contact universe is empty");
         }
+
     }
 
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {

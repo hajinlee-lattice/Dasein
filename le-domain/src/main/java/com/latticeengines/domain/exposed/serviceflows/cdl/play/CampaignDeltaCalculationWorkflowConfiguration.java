@@ -11,6 +11,7 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
     public static class Builder {
         private CampaignDeltaCalculationWorkflowConfiguration configuration = new CampaignDeltaCalculationWorkflowConfiguration();
         private ImportDeltaArtifactsFromS3Configuration importDeltaArtifactsFromS3Configuration = new ImportDeltaArtifactsFromS3Configuration();
+        private GenerateLaunchUniverseStepConfiguration generateLaunchUniverseStepConfiguration = new GenerateLaunchUniverseStepConfiguration();
         private CalculateDeltaStepConfiguration calculateDeltaStepConfiguration = new CalculateDeltaStepConfiguration();
         private ExportDeltaArtifactsToS3StepConfiguration exportDeltaArtifactsToS3StepConfiguration = new ExportDeltaArtifactsToS3StepConfiguration();
         private QueuePlayLaunchesStepConfiguration queuePlayLaunchesStepConfiguration = new QueuePlayLaunchesStepConfiguration();
@@ -19,6 +20,7 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
             configuration.setContainerConfiguration("campaignDeltaCalculationWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
             importDeltaArtifactsFromS3Configuration.setCustomerSpace(customerSpace);
+            generateLaunchUniverseStepConfiguration.setCustomerSpace(customerSpace);
             calculateDeltaStepConfiguration.setCustomerSpace(customerSpace);
             queuePlayLaunchesStepConfiguration.setCustomerSpace(customerSpace);
             exportDeltaArtifactsToS3StepConfiguration.setCustomerSpace(customerSpace);
@@ -34,6 +36,7 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
         public CampaignDeltaCalculationWorkflowConfiguration.Builder dataCollectionVersion(
                 DataCollection.Version version) {
             importDeltaArtifactsFromS3Configuration.setVersion(version);
+            generateLaunchUniverseStepConfiguration.setVersion(version);
             calculateDeltaStepConfiguration.setVersion(version);
             exportDeltaArtifactsToS3StepConfiguration.setVersion(version);
             return this;
@@ -41,22 +44,26 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
 
         public CampaignDeltaCalculationWorkflowConfiguration.Builder playId(String playId) {
             importDeltaArtifactsFromS3Configuration.setPlayId(playId);
-            queuePlayLaunchesStepConfiguration.setPlayId(playId);
+            generateLaunchUniverseStepConfiguration.setPlayId(playId);
             calculateDeltaStepConfiguration.setPlayId(playId);
+            queuePlayLaunchesStepConfiguration.setPlayId(playId);
             return this;
         }
 
         public CampaignDeltaCalculationWorkflowConfiguration.Builder channelId(String channelId) {
             importDeltaArtifactsFromS3Configuration.setChannelId(channelId);
-            queuePlayLaunchesStepConfiguration.setChannelId(channelId);
+
+            generateLaunchUniverseStepConfiguration.setChannelId(channelId);
             calculateDeltaStepConfiguration.setChannelId(channelId);
+            queuePlayLaunchesStepConfiguration.setChannelId(channelId);
             return this;
         }
 
         public CampaignDeltaCalculationWorkflowConfiguration.Builder executionId(String executionId) {
             importDeltaArtifactsFromS3Configuration.setExecutionId(executionId);
-            queuePlayLaunchesStepConfiguration.setExecutionId(executionId);
+            generateLaunchUniverseStepConfiguration.setExecutionId(executionId);
             calculateDeltaStepConfiguration.setExecutionId(executionId);
+            queuePlayLaunchesStepConfiguration.setExecutionId(executionId);
             exportDeltaArtifactsToS3StepConfiguration.setExecutionId(executionId);
             return this;
         }
@@ -69,6 +76,7 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
 
         public CampaignDeltaCalculationWorkflowConfiguration build() {
             configuration.add(importDeltaArtifactsFromS3Configuration);
+            configuration.add(generateLaunchUniverseStepConfiguration);
             configuration.add(calculateDeltaStepConfiguration);
             configuration.add(exportDeltaArtifactsToS3StepConfiguration);
             configuration.add(queuePlayLaunchesStepConfiguration);

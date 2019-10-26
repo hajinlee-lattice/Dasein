@@ -1,17 +1,32 @@
 package com.latticeengines.spark.exposed.job.common;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
@@ -24,69 +39,269 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Inject
     private Configuration yarnConfiguration;
 
-    @Test(groups = "functional")
-    public void testCalculateDelta() throws Exception {
-        // copy local test avro file onto hdfs
-        InputStream is = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(
-                        "com/latticeengines/common/exposed/util/SparkCountRecordsTest/newAccountData.avro");
-        Assert.assertNotNull(is);
+    private DataUnit previousAccounts;
+    private DataUnit currentAccounts;
+    private DataUnit previousContacts;
+    private DataUnit previousS3Contacts;
+    private DataUnit currentContacts;
 
-        InputStream is2 = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(
-                        "com/latticeengines/common/exposed/util/SparkCountRecordsTest/previousAccountData.avro");
-        Assert.assertNotNull(is2);
-
-        InputStream is3 = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(
-                        "com/latticeengines/common/exposed/util/SparkCountRecordsTest/newContactData.avro");
-        Assert.assertNotNull(is3);
-
-        InputStream is4 = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(
-                        "com/latticeengines/common/exposed/util/SparkCountRecordsTest/previousContactData.avro");
-        Assert.assertNotNull(is4);
-
-        String tempDir = "/tmp/testCalculateDelta";
-        String avroPath = tempDir + "/newAccountData.avro";
-        String avroPath2 = tempDir + "/previousAccountData.avro";
-        String avroPath3 = tempDir + "/newContactData.avro";
-        String avroPath4 = tempDir + "/previousContactData.avro";
-        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, avroPath);
-        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is2, avroPath2);
-        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is3, avroPath3);
-        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is4, avroPath4);
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath));
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath2));
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath3));
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath4));
-
+    @BeforeClass(groups = "functional")
+    public void setup() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setCurrentAccountUniverse(HdfsDataUnit.fromPath(avroPath));
-        config.setPreviousAccountUniverse(HdfsDataUnit.fromPath(avroPath2));
-        config.setCurrentContactUniverse(HdfsDataUnit.fromPath(avroPath3));
-        config.setPreviousContactUniverse(HdfsDataUnit.fromPath(avroPath4));
 
-        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Schema accountSchema = SchemaBuilder.record("Account").fields() //
+                .name("AccountId").type().stringType().noDefault()//
+                .endRecord();
 
-        Assert.assertEquals(result.getTargets().size(), 6);
-        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 1);
-        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
-        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 1);
-        Assert.assertEquals(result.getTargets().get(3).getCount().intValue(), 3);
-        Assert.assertEquals(result.getTargets().get(4).getCount().intValue(), 8);
-        Assert.assertEquals(result.getTargets().get(5).getCount().intValue(), 10);
+        Schema contactSchema = SchemaBuilder.record("Contact").fields() //
+                .name("ContactId").type(SchemaBuilder.unionOf().nullType().and().stringType().endUnion()).noDefault() //
+                .name("AccountId").type().stringType().noDefault() //
+                .endRecord();
+        String extension = ".avro";
+        try {
+            String fileName = "PreviousAccounts";
+            createAvroFromJson(fileName,
+                    String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
+                    accountSchema, Account.class, yarnConfiguration);
+            previousAccounts = HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName));
 
-        // clean up
-        result.getTargets().forEach(x -> {
-            try {
-                HdfsUtils.rmdir(yarnConfiguration, PathUtils.toDirWithoutTrailingSlash(x.getPath()));
-            } catch (Exception e) {
-                log.info(e.getMessage());
-            }
-        });
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/testCalculateDelta");
-        HdfsUtils.rmdir(yarnConfiguration, result.getTargets().get(0).getPath().replace("Output1", "checkpoints"));
+            fileName = "CurrentAccounts";
+            createAvroFromJson(fileName,
+                    String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
+                    accountSchema, Account.class, yarnConfiguration);
+            currentAccounts = HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName));
+
+            fileName = "PreviousContacts";
+            createAvroFromJson(fileName,
+                    String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
+                    contactSchema, Contact.class, yarnConfiguration);
+            previousContacts = HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName));
+
+            fileName = "CurrentContacts";
+            createAvroFromJson(fileName,
+                    String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
+                    contactSchema, Contact.class, yarnConfiguration);
+            currentContacts = HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName));
+
+            fileName = "PreviousS3Contacts";
+            createAvroFromJson(fileName,
+                    String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
+                    contactSchema, Contact.class, yarnConfiguration);
+            previousS3Contacts = HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testCalculateDelta" + fileName));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        super.setup();
+
+        // Spark repl setup
+        // val newDFAlias = "newDfAlias"
+        // val oldDFAlias = "oldDFAlias"
+        //
+        // val newData
+        // =spark.read.format("avro").load("/tmp/testCalculateDeltaCurrentAccounts.avro")
+        // val oldData =
+        // spark.read.format("avro").load("/tmp/testCalculateDeltaPreviousAccounts.avro")
+        //
+        // val oldCData =
+        // spark.read.format("avro").load("/tmp/testCalculateDeltaPreviousContacts.avro")
+        // val newCData
+        // =spark.read.format("avro").load("/tmp/testCalculateDeltaCurrentContacts.avro")
     }
 
+    @Test(groups = "functional")
+    public void testCalculateDeltaSalesForceUseCase() {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
+        config.setOldData(previousAccounts);
+        config.setNewData(currentAccounts);
+        config.setJoinKey(InterfaceName.AccountId.name());
+        log.info(JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Assert.assertEquals(result.getTargets().size(), 2);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 2);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 1);
+    }
+
+    @Test(groups = "functional")
+    public void testCalculateDeltaMarketoUseCase() {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
+        config.setOldData(previousContacts);
+        config.setNewData(currentContacts);
+        config.setJoinKey(InterfaceName.ContactId.name());
+        config.setFilterJoinKeyNulls(true);
+        log.info(JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Assert.assertEquals(result.getTargets().size(), 2);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 2);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
+    }
+
+    @Test(groups = "functional")
+    public void testCalculateDeltaS3UseCase() {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
+        config.setOldData(previousS3Contacts);
+        config.setNewData(currentContacts);
+        config.setJoinKey(InterfaceName.ContactId.name());
+        config.setFilterJoinKeyNulls(false);
+        log.info(JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Assert.assertEquals(result.getTargets().size(), 2);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 3);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 4);
+    }
+
+    @Test(groups = "functional")
+    public void testCalculateFirstTimeAccountDelta() {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
+        config.setOldData(null);
+        config.setNewData(currentAccounts);
+        config.setJoinKey(InterfaceName.AccountId.name());
+        log.info(JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Assert.assertEquals(result.getTargets().size(), 2);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 7);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+    }
+
+    @Test(groups = "functional")
+    public void testCalculateFirstTimeContactDelta() {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
+        config.setOldData(null);
+        config.setNewData(currentContacts);
+        config.setJoinKey(InterfaceName.ContactId.name());
+        config.setFilterJoinKeyNulls(true);
+        log.info(JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Assert.assertEquals(result.getTargets().size(), 2);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 7);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+    }
+
+    @Test(groups = "functional")
+    public void testCalculateFirstTimeContactDeltaWithoutJoinKeyNulls() {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
+        config.setOldData(null);
+        config.setNewData(currentContacts);
+        config.setJoinKey(InterfaceName.ContactId.name());
+        config.setFilterJoinKeyNulls(false);
+        log.info(JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Assert.assertEquals(result.getTargets().size(), 2);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 8);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+    }
+
+    @Test(groups = "functional")
+    public void testCalculateNoChange() {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
+        config.setOldData(previousContacts);
+        config.setNewData(previousContacts);
+        config.setJoinKey(InterfaceName.ContactId.name());
+        config.setFilterJoinKeyNulls(false);
+        log.info(JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
+        Assert.assertEquals(result.getTargets().size(), 2);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 0);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+    }
+
+    interface ITestData {
+        GenericRecord getAsRecord(Schema schema);
+    }
+
+    static class Account implements ITestData {
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public void setAccountId(String accountId) {
+            this.accountId = accountId;
+        }
+
+        @JsonProperty(value = "AccountId")
+        private String accountId;
+
+        @Override
+        public GenericRecord getAsRecord(Schema schema) {
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            builder.set("AccountId", this.getAccountId());
+            return builder.build();
+        }
+
+    }
+
+    static class Contact implements ITestData {
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public void setAccountId(String accountId) {
+            this.accountId = accountId;
+        }
+
+        @JsonProperty(value = "AccountId")
+        private String accountId;
+
+        public String getContactId() {
+            return contactId;
+        }
+
+        public void setContactId(String contactId) {
+            this.contactId = contactId;
+        }
+
+        @JsonProperty(value = "ContactId")
+        private String contactId;
+
+        @Override
+        public GenericRecord getAsRecord(Schema schema) {
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            builder.set("AccountId", this.getAccountId());
+            builder.set("ContactId", this.getContactId());
+            return builder.build();
+        }
+
+    }
+
+    private static <T extends ITestData> void createAvroFromJson(String fileName, String jsonPath, Schema schema,
+            Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream tableRegistryStream = classLoader.getResourceAsStream(jsonPath);
+        String attributesDoc = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
+        List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);
+        List<T> accounts = JsonUtils.convertList(raw, elementClazz);
+        String extension = ".avro";
+        String avroPath = "/tmp/testCalculateDelta" + fileName + extension;
+
+        File localFile = new File(avroPath);
+        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(new GenericDatumWriter<>(schema))) {
+            dataFileWriter.create(schema, localFile);
+            accounts.forEach(account -> {
+                try {
+                    dataFileWriter.append(account.getAsRecord(schema));
+                } catch (IOException ioe) {
+                    // Do Nothing
+                }
+            });
+            dataFileWriter.flush();
+        }
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), avroPath);
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, avroPath));
+    }
+
+    private void logHDFSDataUnit(String tag, HdfsDataUnit dataUnit) {
+        if (dataUnit == null) {
+            return;
+        }
+        String valueSeparator = ": ";
+        String tokenSeparator = ", ";
+        log.info(tag + tokenSeparator //
+                + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSeparator //
+                + "Path: " + valueSeparator + dataUnit.getPath() + tokenSeparator //
+                + "Count: " + valueSeparator + dataUnit.getCount());
+    }
 }
