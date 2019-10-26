@@ -1345,7 +1345,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // 2. generate validation message
         ValidateFieldDefinitionsResponse response =
                 ImportWorkflowUtils.generateValidationResponse(fieldDefinitionsRecordsMap, autoDetectionResultsMap,
-                        specFieldDefinitionsRecordsMap, existingFieldDefinitionMap, otherTemplateDataMap,resolver);
+                        specFieldDefinitionsRecordsMap, existingFieldDefinitionMap, otherTemplateDataMap, resolver);
         // set field definition records map for ui
         response.setFieldDefinitionsRecordsMap(fieldDefinitionsRecordsMap);
         return response;

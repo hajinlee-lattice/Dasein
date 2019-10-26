@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -235,7 +236,8 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
                 , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), null,null,resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
-        checkGeneratedResult(response, FieldDefinitionSectionName.Custom_Fields.getName(), "Earnings", FieldValidationMessage.MessageLevel.WARNING);
+        checkGeneratedResult(response, FieldDefinitionSectionName.Custom_Fields.getName(), "Earnings",
+                FieldValidationMessage.MessageLevel.WARNING, "column Earnings is set as TEXT but appears to only have NUMBER values");
 
         // change field type for lattice field
         Map<String, FieldDefinition> IDNameToFieldDefinition =
@@ -247,7 +249,8 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap, autoDetectionResultsMap,
                         importWorkflowSpec.getFieldDefinitionsRecordsMap(), null,null,resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
-        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.ERROR);
+        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.ERROR,
+                "the current template has fieldType INTEGER while the Spec has fieldType TEXT for field Contact ID");
 
     }
 
@@ -289,20 +292,20 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     }
 
     public static void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
-                                      FieldValidationMessage.MessageLevel messageLevel) {
+                                      FieldValidationMessage.MessageLevel messageLevel, String errMSG) {
         Map<String, List<FieldValidationMessage>> validationMap = response.getFieldValidationMessagesMap();
         Assert.assertNotNull(validationMap);
         List<FieldValidationMessage> validationMessages = validationMap.get(section);
         Assert.assertNotNull(validationMessages);
         if (FieldDefinitionSectionName.Custom_Fields.getName().equals(section)) {
             FieldValidationMessage validation =
-                    validationMessages.stream().filter(message -> name.equals(message.getColumnName())
-                            && messageLevel.equals(message.getMessageLevel())).findFirst().orElse(null);
+                    validationMessages.stream().filter(message -> StringUtils.equals(name, message.getColumnName())
+                            && messageLevel.equals(message.getMessageLevel()) && errMSG.equals(message.getMessage())).findFirst().orElse(null);
             Assert.assertNotNull(validation);
         } else {
             FieldValidationMessage validation =
-                    validationMessages.stream().filter(message -> name.equals(message.getFieldName())
-                            && messageLevel.equals(message.getMessageLevel())).findFirst().orElse(null);
+                    validationMessages.stream().filter(message -> StringUtils.equals(name, message.getFieldName())
+                            && messageLevel.equals(message.getMessageLevel()) && errMSG.equals(message.getMessage())).findFirst().orElse(null);
             Assert.assertNotNull(validation);
         }
 

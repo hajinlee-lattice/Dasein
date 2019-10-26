@@ -961,7 +961,7 @@ public class ImportWorkflowUtils {
                 StringUtils.isNotBlank(definition.getColumnName()) && !Boolean.TRUE.equals(definition.getIgnored()))
                 .map(FieldDefinition::getColumnName).collect(Collectors.toSet());
 
-        // this record the field name in existing template
+        // this set record the field name in existing and current template
         Set<String> fieldNameInExistingAndCurrentTemplate = new HashSet<>();
         // this info check only one user field mapped to lattice field in all section
         Set<String> mappedLatticeField = new HashSet<>();
@@ -993,7 +993,8 @@ public class ImportWorkflowUtils {
                             continue;
                         }
                         // check type consistence
-                        if (autoDetectedFieldDefinition.getFieldType() != definition.getFieldType()) {
+                        if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
+                                definition)) {
                             String message = String.format("column %s is set as %s but appears to only have %s values",
                                     columnName, definition.getFieldType(),
                                     autoDetectedFieldDefinition.getFieldType());
@@ -1020,13 +1021,13 @@ public class ImportWorkflowUtils {
                 // check for lattice attribute
                 List<FieldDefinition> specDefinitions = specFieldDefinitionsRecordsMap.getOrDefault(sectionName,
                         new ArrayList<>());
-                Set<String> requiredFiledNames =
+                Set<String> requiredFieldNames =
                         specDefinitions.stream().filter(FieldDefinition::isRequired).map(FieldDefinition::getFieldName)
                                 .collect(Collectors.toSet());
                 Map<String, FieldDefinition> specFieldNameToDefinition =
                         specDefinitions.stream().collect(Collectors.toMap(FieldDefinition::getFieldName,
                                 field -> field));
-                // this record the filed name in lattice field section
+                // this record the field name in lattice field section
                 Set<String> fieldNameInSpecAndCurrent = new HashSet<>();
 
                 for (FieldDefinition definition : definitions) {
@@ -1073,16 +1074,15 @@ public class ImportWorkflowUtils {
                             continue;
                         }
                         // WARNING if the auto-detected fieldType based on column data doesn’t match the Spec defined
-                        // fieldType of a Lattice Field, definition in ID(unique, mathch to Accounts - ID) Fields is
-                        // an exception
-                        if (autoDetectedFieldDefinition.getFieldType() != specDefinition.getFieldType() &&
-                                !FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName) &&
-                                !FieldDefinitionSectionName.Match_To_Accounts_ID.getName().equals(sectionName)) {
+                        // fieldType of a Lattice Field
+                        if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
+                                definition)) {
                             String message = String.format("auto-detected fieldType %s based on column data %s " +
-                                            "doesn’t match the Spec defined fieldType %s of a Lattice Field %s",
+                                            "doesn’t match the fieldType %s of %s in current template in " +
+                                            "section %s.",
                                     autoDetectedFieldDefinition.getFieldType(),
-                                    autoDetectedFieldDefinition.getColumnName(), specDefinition.getFieldType(),
-                                    specDefinition.getFieldName());
+                                    autoDetectedFieldDefinition.getColumnName(), definition.getFieldType(),
+                                    definition.getFieldName(), sectionName);
                             validations.add(new FieldValidationMessage(fieldName,
                                     columnName, message, FieldValidationMessage.MessageLevel.WARNING));
                         }
@@ -1109,9 +1109,9 @@ public class ImportWorkflowUtils {
                     // required flag check
                     if (Boolean.TRUE.equals(specDefinition.isRequired())) {
                         // if the field is required, and column name is not empty, remove fieldName from
-                        // requiredFiledNames
+                        // requiredFieldNames
                         if (StringUtils.isNotBlank(columnName)) {
-                            requiredFiledNames.remove(fieldName);
+                            requiredFieldNames.remove(fieldName);
                         }
                         if (!Boolean.TRUE.equals(definition.isRequired())) {
                             String message = String.format("Required flag is not the same for attribute %s",
@@ -1121,7 +1121,7 @@ public class ImportWorkflowUtils {
                         }
                     }
                     // change field type for standard field , Error
-                    if (!checkFieldTypeWihSpecialCase(specDefinition, definition)) {
+                    if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(specDefinition, definition)) {
                         String message = String.format("the current template has fieldType %s while the Spec has " +
                                 "fieldType %s for field %s", definition.getFieldType(), specDefinition.getFieldType(),
                                 specDefinition.getScreenName());
@@ -1136,8 +1136,8 @@ public class ImportWorkflowUtils {
 
                 }
 
-                if (CollectionUtils.isNotEmpty(requiredFiledNames)) {
-                    requiredFiledNames.forEach(name -> {
+                if (CollectionUtils.isNotEmpty(requiredFieldNames)) {
+                    requiredFieldNames.forEach(name -> {
                         String message = String.format("Field name %s is required, needs set column name", name);
                         validations.add(new FieldValidationMessage(name,
                                 null, message, FieldValidationMessage.MessageLevel.ERROR));
@@ -1198,70 +1198,86 @@ public class ImportWorkflowUtils {
     }
 
     /** the following 4 checks to validate
-     * 1. check current vs file, DF, TF
+     * 1. check current vs file, DF, TF, TZ
      * 2. check current vs existing : DF, TF, TZ
      * 3. check current vs auto-detected : DF, TF
-     * 4. check current vs file TZ
      */
     private static void checkFieldDefinitionWithDateType(FieldDefinition definition,
                                                         FieldDefinition autoDetectedDefinition,
                                                         FieldDefinition existingFieldDefinition,
                                                         MetadataResolver resolver, List<FieldValidationMessage> validations) {
-
+        String columnName = definition.getColumnName();
+        String fieldName = definition.getFieldName();
         // column is date type must have date format
         if (StringUtils.isBlank(definition.getDateFormat())) {
-            validations.add(new FieldValidationMessage(definition.getFieldName(),
-                    definition.getColumnName(), String.format("Date Format shouldn't be empty for column %s with date" +
-                            " type", definition.getColumnName()), FieldValidationMessage.MessageLevel.ERROR));
+            validations.add(new FieldValidationMessage(fieldName,
+                    columnName, String.format("Date Format shouldn't be empty for column %s with date" +
+                    " type", definition.getColumnName()), FieldValidationMessage.MessageLevel.ERROR));
             return;
         }
-        String columnName = definition.getColumnName();
-        String fieldName = definition.getColumnName();
+
         String dateFormat = definition.getDateFormat();
         String timeFormat = definition.getTimeFormat();
         String timezone = definition.getTimeZone();
         String userFormat = StringUtils.isBlank(timeFormat) ? dateFormat :
                 dateFormat + TimeStampConvertUtils.SYSTEM_DELIMITER + timeFormat;
-        String autoDetectedFormat = StringUtils
-                .isBlank(autoDetectedDefinition.getTimeFormat()) ?
-                autoDetectedDefinition.getDateFormat() :
-                autoDetectedDefinition.getDateFormat() + TimeStampConvertUtils.SYSTEM_DELIMITER
-                        + autoDetectedDefinition.getTimeFormat();
 
+        //check current vs file, DF, TF
+        ImmutableTriple<Boolean, Boolean, String> match = resolver.checkUserFormatAndTimeZone(columnName,
+                dateFormat, timeFormat, timezone);
+        if (Boolean.FALSE.equals(match.getLeft())) {
+            validations.add(new FieldValidationMessage(fieldName,
+                    columnName, String.format("%s is set to %s which can't parse the %s from uploaded" +
+                            " file.", columnName, userFormat, match.getRight()), FieldValidationMessage.MessageLevel.WARNING));
+        }
+        // check current vs existing : DF, TF, TZ
         String existingFormat = null;
+        String existingTimezone = null;
         if (existingFieldDefinition != null) {
             existingFormat = StringUtils.isBlank(existingFieldDefinition.getTimeFormat()) ?
                     existingFieldDefinition.getDateFormat() :
                     existingFieldDefinition.getDateFormat() + TimeStampConvertUtils.SYSTEM_DELIMITER
                             + existingFieldDefinition.getTimeFormat();
+            existingTimezone = existingFieldDefinition.getTimeZone();
         }
-
-        ImmutableTriple<Boolean, Boolean, String> match = resolver.checkUserFormatAndTimeZone(definition.getColumnName(),
-                definition.getDateFormat(), definition.getTimeFormat(), definition.getTimeZone());
-        if (Boolean.FALSE.equals(match.getLeft())) {
-            validations.add(new FieldValidationMessage(definition.getFieldName(),
-                    definition.getColumnName(), String.format("%s is set to %s which can't parse the %s from uploaded" +
-                            " file.", columnName, userFormat, match.getRight()), FieldValidationMessage.MessageLevel.WARNING));
-        }
-        if (StringUtils.isNotBlank(userFormat) && StringUtils.isNotBlank(existingFormat) && !userFormat.equals(existingFormat)) {
-            // this check current format against existing format: : DF, TF, TZ
-            StringBuilder message = new StringBuilder(String.format("%s is set to %s which is not consistent with " +
-                    "existing template format %s.", columnName, userFormat, existingFormat));
-            String existingTimezone = existingFieldDefinition.getTimeZone();
-            if (StringUtils.isNotBlank(existingTimezone) && !existingTimezone.equals(timezone)) {
+        boolean userFormatEqualToExisting = StringUtils.equals(userFormat, existingFormat);
+        boolean userTimezoneEqualToExisting = StringUtils.equals(timezone, existingTimezone);
+        // existing format is null means empty setting for DF/TF/TZ, then check DF/TF, if existing timezone is empty,
+        // skip checking timezone
+        if (existingFormat != null && (!userFormatEqualToExisting || (existingTimezone != null && !userTimezoneEqualToExisting))) {
+            // this check current format against existing format: DF, TF, TZ
+            StringBuilder message = new StringBuilder();
+            if (!userFormatEqualToExisting) {
+                message.append(String.format("%s is set to %s which is not consistent with " +
+                        "existing template format %s.", columnName, userFormat, existingFormat));
+            }
+            if (existingTimezone != null && !userTimezoneEqualToExisting) {
+                if (!userFormatEqualToExisting) {
+                    // this is to avoid spacing issue between two if
+                    message.append(" ");
+                }
                 message.append(String.format("Timezone set to %s which is not consistent with existing %s.", timezone
                         , existingTimezone));
             }
             validations.add(new FieldValidationMessage(fieldName,
                     columnName, message.toString(), FieldValidationMessage.MessageLevel.WARNING));
         }
-        if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(autoDetectedFormat)) {
+
+        // check current vs auto-detected : DF, TF
+        String autoDetectedFormat = StringUtils
+                .isBlank(autoDetectedDefinition.getTimeFormat()) ?
+                autoDetectedDefinition.getDateFormat() :
+                autoDetectedDefinition.getDateFormat() + TimeStampConvertUtils.SYSTEM_DELIMITER
+                        + autoDetectedDefinition.getTimeFormat();
+        if (!StringUtils.equals(userFormat, autoDetectedFormat)) {
             // this check current format against auto-detected format: DF, TF
             String message = String.format("%s is set to %s which is different from " +
                             "auto-detected format %s.", columnName, userFormat, autoDetectedFormat);
             validations.add(new FieldValidationMessage(fieldName,
                     columnName, message, FieldValidationMessage.MessageLevel.WARNING));
         }
+
+        // check current vs file: TZ
         if (Boolean.FALSE.equals(match.getMiddle())) {
             boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
             String message;
@@ -1269,7 +1285,7 @@ public class ImportWorkflowUtils {
                 message = String.format("Time zone should be part of value but is not for column %s.",
                         columnName);
             } else {
-                message = String.format("Time zone set to %s. Value should not contain time " +
+                message = String.format("Time zone set to %s. Data values should not contain time " +
                         "zone setting for column %s.", timezone, columnName);
             }
             validations.add(new FieldValidationMessage(fieldName,
@@ -1277,24 +1293,25 @@ public class ImportWorkflowUtils {
         }
     }
 
-    private static boolean checkFieldTypeWihSpecialCase(FieldDefinition specDefinition, FieldDefinition definition) {
+    private static boolean checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(FieldDefinition specOrAutoDetectedDefinition,
+                                                            FieldDefinition currentDefinition) {
         // A temp fix for schema update in maint_4.8.0.
-        if (specDefinition.getFieldType() != definition.getFieldType()) {
-            if (InterfaceName.Amount.name().equalsIgnoreCase(specDefinition.getFieldName())
-                    || InterfaceName.Quantity.name().equalsIgnoreCase(specDefinition.getFieldName())
-                    || InterfaceName.Cost.name().equalsIgnoreCase(specDefinition.getFieldName())) {
-                if (!UserDefinedType.INTEGER.equals(definition.getFieldType())
-                        && !UserDefinedType.NUMBER.equals(definition.getFieldType())) {
-                    log.error(String.format("Attribute %s has wrong physicalDataType %s", definition.getFieldName(),
-                            definition.getFieldType()));
+        if (specOrAutoDetectedDefinition.getFieldType() != currentDefinition.getFieldType()) {
+            if (InterfaceName.Amount.name().equalsIgnoreCase(currentDefinition.getFieldName())
+                    || InterfaceName.Quantity.name().equalsIgnoreCase(currentDefinition.getFieldName())
+                    || InterfaceName.Cost.name().equalsIgnoreCase(currentDefinition.getFieldName())) {
+                if (!UserDefinedType.INTEGER.equals(currentDefinition.getFieldType())
+                        && !UserDefinedType.NUMBER.equals(currentDefinition.getFieldType())) {
+                    log.error(String.format("Attribute %s has wrong physicalDataType %s", currentDefinition.getFieldName(),
+                            currentDefinition.getFieldType()));
                     return false;
                 }
-            } else if (InterfaceName.CreatedDate.name().equalsIgnoreCase(specDefinition.getFieldName())
-                    || InterfaceName.LastModifiedDate.name().equalsIgnoreCase(specDefinition.getFieldName())) {
-                if (!UserDefinedType.TEXT.equals(definition.getFieldType())
-                        && !UserDefinedType.DATE.equals(definition.getFieldType())) {
-                    log.error(String.format("Attribute %s has wrong physicalDataType %s", definition.getFieldName(),
-                            definition.getFieldType()));
+            } else if (InterfaceName.CreatedDate.name().equalsIgnoreCase(currentDefinition.getFieldName())
+                    || InterfaceName.LastModifiedDate.name().equalsIgnoreCase(currentDefinition.getFieldName())) {
+                if (!UserDefinedType.TEXT.equals(currentDefinition.getFieldType())
+                        && !UserDefinedType.DATE.equals(currentDefinition.getFieldType())) {
+                    log.error(String.format("Attribute %s has wrong physicalDataType %s", currentDefinition.getFieldName(),
+                            currentDefinition.getFieldType()));
                     return false;
                 }
 
@@ -1318,7 +1335,7 @@ public class ImportWorkflowUtils {
                                                 Map<String, FieldDefinition> existingFieldDefinitionMap,
                                                 Map<String, OtherTemplateData> otherTemplateDataMap,
                                                 List<FieldValidationMessage> validations,
-                                                Set<String> existingFieldNameSet) {
+                                                Set<String> checkInExistingAndOtherTemplate) {
         String fieldName = definition.getFieldName();
         String columnName = definition.getColumnName();
         UserDefinedType type = definition.getFieldType();
@@ -1338,7 +1355,7 @@ public class ImportWorkflowUtils {
         if (existingFieldDefinitionMap.get(fieldName) != null) {
             // check other field to elaborate further, add validation
             FieldDefinition existingFieldDefinition = existingFieldDefinitionMap.get(fieldName);
-            existingFieldNameSet.add(definition.getFieldName());
+            checkInExistingAndOtherTemplate.add(definition.getFieldName());
             // issue a WARNING if field type or data formats change from existing template.
             if (type != existingFieldDefinition.getFieldType()) {
                 String message = String.format("the field type for existing field mapping custom name %s -> field " +
@@ -1371,8 +1388,8 @@ public class ImportWorkflowUtils {
                 fieldNameInExistingTemplateNotInCurrent.forEach(fieldName -> {
                     FieldDefinition existingFieldDefinition = existingFieldDefinitionMap.get(fieldName);
                     String columnName = existingFieldDefinition.getColumnName();
-                    String message = String.format("Existing field mapping custom name %s -> field name %s cannot be" +
-                            "removed", fieldName, columnName);
+                    String message = String.format("Existing field %s mapped to column %s cannot be removed.",
+                            fieldName, columnName);
                     validations.add(new FieldValidationMessage(existingFieldDefinition.getFieldName(),
                             columnName, message,
                             FieldValidationMessage.MessageLevel.ERROR));
@@ -1409,10 +1426,11 @@ public class ImportWorkflowUtils {
     private static void checkIDFields(FieldDefinition definition, String sectionName,
                                       List<FieldValidationMessage> validations) {
         if (FieldDefinitionSectionName.Match_IDs.getName().equals(sectionName) || FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)
-                || FieldDefinitionSectionName.Unique_ID.equals(sectionName)) {
+                || FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName)) {
             if (!UserDefinedType.TEXT.equals(definition.getFieldType())) {
                 validations.add(new FieldValidationMessage(definition.getFieldName(),definition.getColumnName(),
-                        String.format("Field type in %s must be Text.", sectionName),
+                        String.format("Field mapped to %s in section %s has type %s but is required to have type Text" +
+                                ".", definition.getColumnName(), sectionName, definition.getFieldType()),
                         FieldValidationMessage.MessageLevel.ERROR));
             }
         }

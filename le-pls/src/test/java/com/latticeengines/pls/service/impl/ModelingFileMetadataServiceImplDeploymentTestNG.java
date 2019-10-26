@@ -64,6 +64,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     }
 
     /**
+     * existing check
     # ERROR if required field is missing from set of mapped Lattice Fields in the template (either in the original template or newly added during the import).
     # ERROR if multiple columnNames map to the same Spec (Lattice) Field.
     # ERROR if fieldType of Lattice Field in new template doesn’t match the Spec.
@@ -76,7 +77,32 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     Possible because autodetected format uses prior format in second round import if previous set.
     # WARNING if the data format selected by the user changed, even if it can parse more than 10% of the date columns’ rows.
     # WARNING if time zone is ISO 8601 but column values are not or time zone is not ISO 8601 but column values are.
+     new check
+     1. Validation of the Presence of Fields
+     A. Compare Current Template Against Spec:
+     i. All Lattice Fields in Spec are in Current Template.
+     a. may have inCurrentImport set to ‘false’.
+     ii. Create an ERROR for missing fields.
+     B. Compare Current Template Against Existing Template:
+     i. All fields in the Existing Template are in the Current Template.
+     a. may have inCurrentImport set to ‘false’.
+     b. may have moved from Lattice Field Section to Custom Field Section.
+     ii. Create an ERROR for missing fields.
+     C. No additional fields are in Current Template Lattice Fields sections.
+     i. If an additional field is found that is in the same section of the Existing Template, create an ERROR saying the field should be moved to the Custom Fields section.
+     ii. If an additional field is found that is not in the Existing Template, create an ERROR saying a field not in the Spec is in a Lattice Field section.
+     2. Validation of Field Types
+     A.If no Existing Template and no existing Other Templates or Batch Store, allow fieldType to be set with no warning/error.
+     B. If no Existing Template, but Other Template or Batch Store has field, fieldType must be set to match Other Template and/or Batch Store. Otherwise, create ERROR.
+     C. If Existing Template and no existing Other Templates or Batch Store, allow fieldType to be changed but create WARNING.
+     D. If Existing Template and Other Template or Batch Store has field, fieldType cannot be changed and must match Other Template and/or Batch Store. If not, issue ERROR.
+     3. Validation of Date Formats
+     A. Allow Current Template to change Date Format, Time Format, and Time Zone for Lattice and Custom Fields.
+     i. Formats do not need to match Existing Template, Other Templates, or Batch Store.
+     B. Check that at least Date Format is set for a DATE fieldType field. If not, create an ERROR.
+     4. Make sure ID fields (Unique ID, Match IDs and Other IDs) are all TEXT type. If not, create an ERROR.
      */
+
     @Test(groups = "deployment")
     public void testFieldDefinitionValidate_noExistingTemplate() throws Exception {
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
@@ -88,6 +114,10 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(),
                         new ArrayList<>()).stream()
                         .collect(Collectors.toMap(FieldDefinition::getColumnName, field -> field));
+        Map<String, FieldDefinition> fieldNameToUniqueIDFieldDefinition =
+                fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Unique_ID.getName(),
+                        new ArrayList<>()).stream().collect(Collectors.toMap(FieldDefinition::getFieldName,
+                        field -> field));
         Map<String, FieldDefinition> fieldNameToContactFieldDefinition =
                 fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Contact_Fields.getName(), new ArrayList<>()).stream()
                         .collect(Collectors.toMap(FieldDefinition::getFieldName, field -> field));
@@ -102,15 +132,14 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         ValidateFieldDefinitionsResponse validateResponse = modelingFileMetadataService.validateFieldDefinitions(
                 "Default", "Test", "Contacts", fileName, validateRequest);
 
-        System.out.println(JsonUtils.pprint(validateResponse));
         Assert.assertNotNull(validateResponse);
         Assert.assertEquals(validateResponse.getValidationResult(),
                 ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.FirstName.name(),
-                FieldValidationMessage.MessageLevel.ERROR);
+                FieldValidationMessage.MessageLevel.ERROR, "Required flag is not the same for attribute First Name");
 
-        // case 2: required field missing, error
+        // case 2: required field missing, error//Field name FirstName is required, needs set column name
         fieldNameToContactFieldDefinition.remove(InterfaceName.FirstName.name());
         fieldDefinitionMap.put(FieldDefinitionSectionName.Contact_Fields.getName(), new ArrayList<>(fieldNameToContactFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
@@ -118,7 +147,8 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         Assert.assertEquals(validateResponse.getValidationResult(),
                 ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
-                FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.FirstName.name(), FieldValidationMessage.MessageLevel.ERROR);
+                FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.FirstName.name(),
+                FieldValidationMessage.MessageLevel.ERROR, "Field name FirstName is required, needs set column name");
 
         // case 3: multiple custom name map to same lattice fields
         // Last Name -> Last Name, LastName -> Last Name, in section "Contact Fields", custom filed "LastName" was
@@ -130,63 +160,102 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 "Default", "Test", "Contacts", fileName, validateRequest);
         Assert.assertEquals(validateResponse.getValidationResult(),
                 ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
-        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Contact_Fields.getName(),
-                InterfaceName.LastName.name(),
-                FieldValidationMessage.MessageLevel.ERROR);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.LastName.name(),
+                FieldValidationMessage.MessageLevel.ERROR, "Multiple custom fields are mapped to lattice field LastName");
 
-        // case 4: change field type of Email from Text to Integer
+        // case 4: unmap the column name(Last Name in "Contact Fields") that match lattice field
+        FieldDefinition lastNameInContactField = fieldNameToContactFieldDefinition.get(InterfaceName.LastName.name());
+        lastNameInContactField.setColumnName(null);
+        lastNameInContactField.setInCurrentImport(false);
+        validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Test", "Contacts",
+                fileName, validateRequest);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Contact_Fields.getName(),
+                InterfaceName.LastName.name(), FieldValidationMessage.MessageLevel.WARNING, "Column name Last Name " +
+                        "matched Lattice Field LastName, but they are not mapped to each other");
+
+        // case 5: set fieldName LastName to empty
+        lastNameInContactField.setFieldName(null);
+        validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Test", "Contacts",
+                fileName, validateRequest);
+        System.out.println(JsonUtils.pprint(validateResponse));
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Contact_Fields.getName(),
+                null, FieldValidationMessage.MessageLevel.ERROR, "FieldName shouldn't be empty in" +
+                        " Contact Fields.");
+
+        // case 6: change field type of Email from Text to Integer(current vs spec)
         FieldDefinition emailDefinition = fieldNameToContactFieldDefinition.get(InterfaceName.Email.name());
         Assert.assertNotNull(emailDefinition);
         Assert.assertEquals(emailDefinition.getFieldType(), UserDefinedType.TEXT);
         emailDefinition.setFieldType(UserDefinedType.INTEGER);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
                 "Default", "Test", "Contacts", fileName, validateRequest);
-        Assert.assertEquals(validateResponse.getValidationResult(),
-                ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.Email.name(),
-                FieldValidationMessage.MessageLevel.ERROR);
+                FieldValidationMessage.MessageLevel.ERROR, "the current template has fieldType INTEGER while the Spec" +
+                        " has fieldType TEXT for field Email");
 
-        // case 5: unmap the column name(Last Name in "Contact Fields") that match lattice field
-        FieldDefinition lastNameInContactField = fieldNameToContactFieldDefinition.get(InterfaceName.LastName.name());
-        lastNameInContactField.setColumnName(null);
-        lastNameInContactField.setInCurrentImport(false);
-        validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Test", "Contacts",
-                fileName, validateRequest);
-        System.out.println(JsonUtils.pprint(validateResponse));
-        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Contact_Fields.getName(),
-                InterfaceName.LastName.name(),
-                FieldValidationMessage.MessageLevel.WARNING);
+        // case 7: for the case above, the type for auto-detected should be Text, this case will issue warning
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.Email.name(),
+                FieldValidationMessage.MessageLevel.WARNING, "auto-detected fieldType TEXT based on column data " +
+                        "EmailAddress doesn’t match the fieldType INTEGER of Email in current template in section Contact Fields.");
 
-        // case 6: WARNING if fieldType of Custom Field set by user doesn’t match the autodetected fieldType.
+        // case 8: WARNING if fieldType of Custom Field set by user doesn’t match the auto-detected fieldType.(current
+        // vs auto-detected in custom fields)
         FieldDefinition earningDefinition = customNameToCustomFieldDefinition.get("Earnings");
         Assert.assertNotNull(earningDefinition);
         // change field type from auto-detected number to text
         earningDefinition.setFieldType(UserDefinedType.TEXT);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
                 fileName, validateRequest);
-        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Custom_Fields.getName(),
-                "Earnings",
-                FieldValidationMessage.MessageLevel.WARNING);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Custom_Fields.getName(), "Earnings",
+                FieldValidationMessage.MessageLevel.WARNING, "column Earnings is set as TEXT but appears to only have NUMBER values");
 
-        // case 7: date format is not set when type is Date
+        // case 9: ID fields must have TEXT Field Type
+        FieldDefinition idDefinition = fieldNameToUniqueIDFieldDefinition.get("CustomerContactId");
+        Assert.assertNotNull(idDefinition);
+        // change type for id to integer
+        idDefinition.setFieldType(UserDefinedType.NUMBER);
+        validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
+                fileName, validateRequest);
+        System.out.println(JsonUtils.pprint(validateResponse));
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Unique_ID.getName(), "CustomerContactId",
+                FieldValidationMessage.MessageLevel.ERROR, "Field mapped to CustomerContactId in section Unique ID has " +
+                        "type NUMBER but is required to have type Text");
+
+        // case 10: date format is not set when type is Date
         FieldDefinition createdDateDefinition =
                 fieldNameToAnalysisFieldDefinition.get(InterfaceName.CreatedDate.name());
         Assert.assertNotNull(createdDateDefinition);
         createdDateDefinition.setDateFormat(null);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
                 fileName, validateRequest);
-        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
-                InterfaceName.CreatedDate.name(),
-                FieldValidationMessage.MessageLevel.ERROR);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
+                FieldValidationMessage.MessageLevel.ERROR, "Date Format shouldn't be empty for column CreatedDate with date type");
 
+        // case 11: Date format selected by user can't parse > 10% of column data.
+        createdDateDefinition.setDateFormat("MM-DD-YYYY");
+        validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
+                fileName, validateRequest);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
+                FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM-DD-YYYY which can't parse the 01/01/2008 from uploaded " +
+                        "file.");
+
+        // case 12: Date format selected by user doesn't match autodetected date format.
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
+                FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM-DD-YYYY which is different from " +
+        "auto-detected format MM/DD/YYYY.");
 
     }
 
-
-    @Test(groups = "deployment", dependsOnMethods = "testFieldDefinitionValidate_noExistingTemplate")
+    @Test(groups = "deployment")
     public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
-        System.out.println(JsonUtils.pprint(validateRequest));
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions("Default", "Test",
                 "Contacts", fileName,
@@ -197,7 +266,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         Assert.assertNotNull(commitRecord);
 
 
-        // second round after the fetch api
+        //the second round test after the fetch api
         currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
         Map<String, List<FieldDefinition>> fieldDefinitionMap =
                 currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
@@ -208,7 +277,8 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Analysis_Fields.getName(), new ArrayList<>()).stream()
                         .collect(Collectors.toMap(FieldDefinition::getFieldName, field -> field));
 
-        // case 1: WARNING if the auto-detected fieldType based on column data doesn’t match the User defined
+        // case 1: WARNING if the auto-detected fieldType based on column data doesn’t match the User defined in
+        // custom fields
         // fieldType of a Lattice Field(change field type of Country from text to number)
         FieldDefinition countryDefinition = customNameToCustomFieldDefinition.get("Country");
         Assert.assertNotNull(countryDefinition);
@@ -217,11 +287,18 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         ValidateFieldDefinitionsResponse validateResponse = modelingFileMetadataService.validateFieldDefinitions(
                 "Default", "Text", "Contacts",
                 fileName, validateRequest);
-        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Custom_Fields.getName(),
-                "Country",
-                FieldValidationMessage.MessageLevel.WARNING);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Custom_Fields.getName(), "Country", FieldValidationMessage.MessageLevel.WARNING,
+                "column Country is set as NUMBER but appears to only have TEXT values");
+        System.out.println(JsonUtils.pprint(validateResponse));
 
-        // case 2: WARNING if time zone is ISO 8601 but column values are not or time zone is not ISO 8601 but column values are
+        // case 2: Current Field Type doesn’t match Existing Template (no Batch Store or Other Template exists).
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Custom_Fields.getName(), "Country", FieldValidationMessage.MessageLevel.WARNING,
+                "the field type for existing field mapping custom name user_Country -> field name Country will be changed to NUMBER from TEXT");
+
+        // case 3: WARNING if time zone is ISO 8601 but column values are not or time zone is not ISO 8601 but column
+        // values are
         FieldDefinition createdDateDefinition =
                 fieldNameToAnalysisFieldDefinition.get(InterfaceName.CreatedDate.name());
         Assert.assertNotNull(createdDateDefinition);
@@ -230,39 +307,48 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
                 InterfaceName.CreatedDate.name(),
-                FieldValidationMessage.MessageLevel.WARNING);
+                FieldValidationMessage.MessageLevel.WARNING, "Time zone should be part of value but is not for column CreatedDate.");
 
-        // case 3: Compare Current Template Against Spec, Error for missing: remove created Date from Analysis Fields
+        // case 4: Date format selected by user doesn't match existing data format.
+        createdDateDefinition.setDateFormat("MM-DD-YYYY");
+        validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
+                fileName, validateRequest);
+        System.out.println(JsonUtils.pprint(validateResponse));
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
+                InterfaceName.CreatedDate.name(),
+                FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM-DD-YYYY which is not " +
+                        "consistent with existing template format MM/DD/YYYY.");
+
+        // case 5: Compare Current Template Against Spec, Error for missing: remove created Date from Analysis Fields
         fieldNameToAnalysisFieldDefinition.remove(InterfaceName.CreatedDate.name());
         fieldDefinitionMap.put(FieldDefinitionSectionName.Analysis_Fields.getName(), new ArrayList<>(fieldNameToAnalysisFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
                 fileName, validateRequest);
-        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
-                InterfaceName.CreatedDate.name(),
-                FieldValidationMessage.MessageLevel.ERROR);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
+                FieldValidationMessage.MessageLevel.ERROR, "Field name CreatedDate in spec not in current template.");
 
 
-        // case 4: Compare Current Template Against Existing, Error for missing: remove "Country" from "Custom Fields"
+        // case 6: Compare Current Template Against Existing, Error for missing: remove "Country" from "Custom Fields"
         customNameToCustomFieldDefinition.remove("Country");
         fieldDefinitionMap.put(FieldDefinitionSectionName.Custom_Fields.getName(), new ArrayList<>(customNameToCustomFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
                 fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Custom_Fields.getName(),
-                "Country",
-                FieldValidationMessage.MessageLevel.ERROR);
+                "Country", FieldValidationMessage.MessageLevel.ERROR, "Existing field user_Country mapped to column " +
+                        "Country cannot be removed.");
 
-        // case 5: If an additional field is found that is in the same section of the Existing Template, ERROR
+        // case 7: If an additional field is found that is in the same section of the Existing Template, ERROR
         // in case 1 the country definition is in Custom Fields, add it to Analysis Fields section
         fieldNameToAnalysisFieldDefinition.put("Country", countryDefinition);
         fieldDefinitionMap.put(FieldDefinitionSectionName.Analysis_Fields.getName(), new ArrayList<>(fieldNameToAnalysisFieldDefinition.values()));
-        System.out.println("test\n" + JsonUtils.pprint(validateRequest));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
                 fileName, validateRequest);
-        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
-                countryDefinition.getFieldName(),
-                FieldValidationMessage.MessageLevel.ERROR);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(), countryDefinition.getFieldName(),
+                FieldValidationMessage.MessageLevel.ERROR, "field name user_Country of Analysis Fields in template " +
+                        "not in spec should be moved to Custom Fields section.");
 
-        // case 6: If an additional field is found that is not in the Existing Template, ERROR
+        // case 8: If an additional field is found that is not in the Existing Template, ERROR
         String fakedFieldName = "fakedDefinition";
         FieldDefinition fakedDefinition = new FieldDefinition();
         fakedDefinition.setFieldName(fakedFieldName);
@@ -273,7 +359,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
                 fakedFieldName,
-                FieldValidationMessage.MessageLevel.ERROR);
+                FieldValidationMessage.MessageLevel.ERROR, "field name fakedDefinition not in spec is in Analysis Fields section.");
 
     }
 

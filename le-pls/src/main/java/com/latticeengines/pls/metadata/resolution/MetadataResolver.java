@@ -697,16 +697,20 @@ public class MetadataResolver {
                 warningMessage.append(String.format("Time zone should be part of value but is not for column %s.",
                         columnHeaderName));
             } else {
-                warningMessage.append(String.format("Time zone set to %s. Value should not contain time " +
+                warningMessage.append(String.format("Time zone set to %s. Data values should not contain time " +
                         "zone setting for column %s.", timezone, columnHeaderName));
             }
         }
         // caution: in previous design, auto-detected format can be equal to format in template if it exists
         // in new design, auto-detected format and existing format are distinct.
         if (!isCorrectFormat) {
+            // this is to avoid spacing issue between two if
+            if (!isCorrectTimezone) {
+                warningMessage.append(" ");
+            }
             if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
                 warningMessage.append(String.format("%s is set to the format %s rather than the auto-detected format " +
-                                "%s based on the data in your file",
+                                "%s based on the data in your file.",
                         columnHeaderName, userFormat, formatWithBestEffort));
             } else {
                 // this check the format inherit from the first time's date/time setting
@@ -714,7 +718,7 @@ public class MetadataResolver {
                         columnHeaderName, userFormat, result.getRight()));
             }
         }
-        return isCorrectFormat & isCorrectTimezone;
+        return isCorrectFormat && isCorrectTimezone;
     }
 
     /**
