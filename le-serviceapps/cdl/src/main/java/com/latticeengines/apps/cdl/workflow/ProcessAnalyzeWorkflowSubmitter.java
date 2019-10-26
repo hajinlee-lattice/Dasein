@@ -1116,7 +1116,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private Set<String> getNeedHardDeleteAccountSet(List<Action> actions, boolean isFullRematch) {
         List<Action> hardDeleteActions =
-                actions.stream().filter(action -> action.getTrackingPid() == null && action.getType() == ActionType.HARD_DELETE).collect(Collectors.toList());
+                actions.stream().filter(action -> action.getType() == ActionType.HARD_DELETE).collect(Collectors.toList());
         Set<String> needHardDeleteAccountSet = new HashSet<>();
         if (CollectionUtils.isEmpty(hardDeleteActions)) {
             return needHardDeleteAccountSet;
