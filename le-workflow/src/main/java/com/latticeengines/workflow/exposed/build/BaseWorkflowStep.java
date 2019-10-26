@@ -243,6 +243,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     public static final String REMATCH_TABLE_NAME = "REMATCH_TABLE_NAME";
     public static final String ENTITY_MATCH_SERVING_VERSION = "ENTITY_MATCH_SERVING_VERSION";
+    public static final String NEED_HARDDELETE_ACCOUNT_SET = "NEED_HARDDELETE_ACCOUNT_SET";
 
     public static final String TRACING_CONTEXT = "TRACING_CONTEXT";
 

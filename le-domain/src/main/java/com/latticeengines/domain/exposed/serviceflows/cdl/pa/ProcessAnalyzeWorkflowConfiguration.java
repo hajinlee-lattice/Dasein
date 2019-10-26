@@ -354,6 +354,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder setNeedHardDeleteAccountSet(Set<String> needHardDeleteAccountSet) {
+            convertBatchStoreToDataTableWorkflowBuilder.setHardDeleteAccountSet(needHardDeleteAccountSet);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

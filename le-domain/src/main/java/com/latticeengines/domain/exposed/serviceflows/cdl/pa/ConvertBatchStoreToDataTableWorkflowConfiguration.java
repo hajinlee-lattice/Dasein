@@ -60,6 +60,13 @@ public class ConvertBatchStoreToDataTableWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
+        public Builder setHardDeleteAccountSet(Set<String> hardDeleteAccountSet) {
+            convertAccountWorkflowBuilder.setNeedHardDeleteAccountSet(hardDeleteAccountSet);
+            convertContactWorkflowBuilder.setNeedHardDeleteAccountSet(hardDeleteAccountSet);
+            convertTransactionWorkflowBuilder.setNeedHardDeleteAccountSet(hardDeleteAccountSet);
+            return this;
+        }
+
         public ConvertBatchStoreToDataTableWorkflowConfiguration build() {
             configuration.setContainerConfiguration("convertBatchStoreToDataTableWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
