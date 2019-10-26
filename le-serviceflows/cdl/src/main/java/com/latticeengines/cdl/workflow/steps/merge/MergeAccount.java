@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
-import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -125,16 +124,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
         List<TransformationStepConfig> steps = new ArrayList<>(extracts);
 
-        boolean skipSoftDelete = false;
-
-        List<Action> hardDeleteActions = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
-        List<Action> softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
-        if (CollectionUtils.isNotEmpty(hardDeleteActions)) {
-            skipSoftDelete = true;
-        } else {
-            skipSoftDelete = CollectionUtils.isEmpty(softDeleteActions);
-        }
-
         int mergeStep = extractSteps.size();
         TransformationStepConfig merge = dedupAndMerge(InterfaceName.EntityId.name(), //
                 CollectionUtils.isEmpty(extractSteps) ? null : extractSteps, //
@@ -153,15 +142,16 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             steps.add(diff);
             steps.add(report);
         } else {
-            softDeleteMergeStep = mergeStep + 1;
+            upsertStep = mergeStep + 1;
+            softDeleteMergeStep = upsertStep + 1;
             softDeleteStep = softDeleteMergeStep + 1;
-            upsertStep = softDeleteStep + 1;
-            diffStep = softDeleteStep + 2;
 
-            TransformationStepConfig mergeSoftDelete = mergeSoftDelete(softDeleteActions);
-            TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, mergeStep);
+            diffStep = softDeleteStep +1;
+
             TransformationStepConfig upsert = upsertMaster(true, softDeleteStep);
-            TransformationStepConfig diff = diff(softDeleteStep, upsertStep);
+            TransformationStepConfig mergeSoftDelete = mergeSoftDelete(softDeleteActions);
+            TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, upsertStep);
+            TransformationStepConfig diff = diff(mergeStep, softDeleteStep);
             TransformationStepConfig report = reportDiff(diffStep);
             steps.add(mergeSoftDelete);
             steps.add(softDelete);
