@@ -59,7 +59,6 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     private String contactData;
     private Object[][] accounts;
     private Object[][] contacts;
-    private boolean useEntityMatch = true;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -289,7 +288,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     private List<List<Pair<List<String>, Boolean>>> generateFacebookExpectedColumns(boolean accountDataOnly) {
         List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
-                Pair.of(standardRecommendationAccountColumns(), true),
+                Pair.of(standardRecommendationAccountColumns(), false),
                 accountDataOnly ? Pair.of(Collections.emptyList(), false)
                         : Pair.of(facebookRecommendationContactColumns(), false));
         List<Pair<List<String>, Boolean>> customList = Arrays.asList(
@@ -301,7 +300,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     private List<List<Pair<List<String>, Boolean>>> generateGoogleExpectedColumns(boolean accountDataOnly) {
         List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
-                Pair.of(standardRecommendationAccountColumns(), true),
+                Pair.of(standardRecommendationAccountColumns(), false),
                 accountDataOnly ? Pair.of(Collections.emptyList(), false)
                         : Pair.of(googleRecommendationContactColumns(), false));
         List<Pair<List<String>, Boolean>> customList = Arrays.asList(
@@ -313,7 +312,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     private List<List<Pair<List<String>, Boolean>>> generateLinkedInExpectedColumns(boolean accountDataOnly) {
         List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
-                Pair.of(standardRecommendationAccountColumns(), true),
+                Pair.of(standardRecommendationAccountColumns(), false),
                 accountDataOnly ? Pair.of(Collections.emptyList(), false)
                         : Pair.of(linkedInRecommendationContactColumns(), false));
         List<Pair<List<String>, Boolean>> customList = Arrays.asList(
@@ -325,7 +324,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     private List<List<Pair<List<String>, Boolean>>> generateS3ExpectedColumns(boolean accountDataOnly) {
         List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
-                Pair.of(standardRecommendationAccountColumns(), true),
+                Pair.of(standardRecommendationAccountColumns(), false),
                 accountDataOnly ? Pair.of(Collections.emptyList(), false)
                         : Pair.of(s3RecommendationContactColumns(), false));
         List<Pair<List<String>, Boolean>> customList = Arrays.asList(Pair.of(s3RecommendationAccountColumns(), false),
@@ -336,7 +335,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
 
     private List<List<Pair<List<String>, Boolean>>> generateMarketoExpectedColumns(boolean accountDataOnly) {
         List<Pair<List<String>, Boolean>> standardList = Arrays.asList(
-                Pair.of(standardRecommendationAccountColumns(), true),
+                Pair.of(standardRecommendationAccountColumns(), false),
                 accountDataOnly ? Pair.of(Collections.emptyList(), false)
                         : Pair.of(marketoRecommendationContactColumns(), false));
         List<Pair<List<String>, Boolean>> customList = Arrays.asList(
@@ -352,7 +351,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
     }
 
     private List<Pair<List<String>, Boolean>> standardAccountAndContactExpectedColumns(boolean accountDataOnly) {
-        return Arrays.asList(Pair.of(standardRecommendationAccountColumns(), true),
+        return Arrays.asList(Pair.of(standardRecommendationAccountColumns(), false),
                 accountDataOnly ? Pair.of(Collections.emptyList(), false)
                         : Pair.of(standardRecommendationContactColumns(), false));
     }
@@ -660,7 +659,6 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                 .launchTimestampMillis(launchTime) //
                 .ratingId(ratingId) //
                 .publishedIteration(aiModel) //
-                .useEntityMatch(useEntityMatch) //
                 .dataDbDriver(dataDbDriver) //
                 .dataDbUrl(dataDbUrl) //
                 .dataDbUser(dataDbUser) //
