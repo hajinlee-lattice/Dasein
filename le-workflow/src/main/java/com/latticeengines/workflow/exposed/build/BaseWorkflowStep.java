@@ -170,6 +170,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String REMOVED_CONTACTS_DELTA_TABLE = "REMOVED_CONTACTS_DELTA_TABLE";
     protected static final String FULL_ACCOUNTS_UNIVERSE = "FULL_ACCOUNTS_UNIVERSE";
     protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
+    protected static final String FULL_LAUNCH_UNIVERSE = "FULL_LAUNCH_UNIVERSE";
     protected static final String RECOMMENDATION_ACCOUNT_DISPLAY_NAMES = "RECOMMENDATION_ACCOUNT_DISPLAY_NAMES";
     protected static final String RECOMMENDATION_CONTACT_DISPLAY_NAMES = "RECOMMENDATION_CONTACT_DISPLAY_NAMES";
     protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
@@ -515,10 +516,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
      * @param tableNameStrCtxKeys
      *            list of context keys that contain a single table as string
      * @param tableNameListCtxKeys
-     *            list of context keys that contain a list of tables as
-     *            serialized list of string
-     * @return list of tables, null will be inserted if the corresponding table
-     *         does not exist
+     *            list of context keys that contain a list of tables as serialized
+     *            list of string
+     * @return list of tables, null will be inserted if the corresponding table does
+     *         not exist
      */
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
             List<String> tableNameListCtxKeys) {
