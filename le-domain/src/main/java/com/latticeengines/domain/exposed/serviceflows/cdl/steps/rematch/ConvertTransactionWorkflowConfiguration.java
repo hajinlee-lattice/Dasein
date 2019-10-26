@@ -61,6 +61,7 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             configuration.setContainerConfiguration("convertTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Transaction);
+            deleteByUploadStepConfiguration.setEntity(BusinessEntity.Transaction);
             configuration.add(convertBatchStoreStepConfiguration);
             configuration.add(deleteByUploadStepConfiguration);
             return configuration;

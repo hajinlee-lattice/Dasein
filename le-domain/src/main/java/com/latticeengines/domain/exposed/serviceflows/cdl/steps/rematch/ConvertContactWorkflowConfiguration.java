@@ -61,6 +61,7 @@ public class ConvertContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.setContainerConfiguration("convertContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Contact);
+            deleteByUploadStepConfiguration.setEntity(BusinessEntity.Contact);
             configuration.add(convertBatchStoreStepConfiguration);
             configuration.add(deleteByUploadStepConfiguration);
             return configuration;
