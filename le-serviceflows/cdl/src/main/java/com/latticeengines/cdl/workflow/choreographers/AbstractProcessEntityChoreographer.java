@@ -45,12 +45,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean hasSchemaChange = false;
     boolean hasActiveServingStore = false;
     boolean hasImports = false;
-    boolean hasSoftDelete = false;
-    boolean hasHardDelete = false;
     boolean hasManyUpdate = false;
     boolean rebuildDueToActions = false;
     private boolean initialized = false;
     private boolean hasBatchStore = false;
+    private boolean hasSoftDelete = false;
+    private boolean hasHardDelete = false;
     float diffRate = 0;
 
     boolean rebuild = false;

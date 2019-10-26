@@ -62,16 +62,24 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         int upsertMasterStep;
         int diffStep;
         TransformationStepConfig upsert;
+        TransformationStepConfig mergeSoftDelete = null;
+        TransformationStepConfig softDelete = null;
         TransformationStepConfig diff;
         if (configuration.isEntityMatchEnabled()) {
             int dedupStep = 0;
             upsertMasterStep = 1;
+            int softDeleteMergeStep = upsertMasterStep + 1;
+            int softDeleteStep = softDeleteMergeStep + 1;
             diffStep = 2;
             TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
                     Collections.singletonList(matchedTable), //
                     Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
             upsert = upsertMaster(true, dedupStep);
-            diff = diff(dedupStep, upsertMasterStep);
+            if (!skipSoftDelete) {
+                mergeSoftDelete = mergeSoftDelete(softDeleteActions);
+                softDelete = softDelete(softDeleteMergeStep, upsertMasterStep);
+            }
+            diff = diff(dedupStep, softDeleteStep);
             steps.add(dedup);
         } else {
             upsertMasterStep = 0;
@@ -80,6 +88,10 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             diff = diff(matchedTable, upsertMasterStep);
         }
         steps.add(upsert);
+        if (configuration.isEntityMatchEnabled() && !skipSoftDelete) {
+            steps.add(mergeSoftDelete);
+            steps.add(softDelete);
+        }
         steps.add(diff);
         TransformationStepConfig report = reportDiff(diffStep);
         steps.add(report);
