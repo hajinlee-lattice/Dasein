@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -69,13 +71,23 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
 
         List<PlayLaunch> launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
 
+        log.info("Found " + launchingPlayLaunches.size() + " launches currently launching");
+
         // Attempt to clear out stuck/failed jobs
-        if (CollectionUtils.isNotEmpty(launchingPlayLaunches) && launchingPlayLaunches.size() > maxToLaunch
-                && clearStuckOrFailedLaunches(launchingPlayLaunches)) {
-            launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
+        if (launchingPlayLaunches.stream().anyMatch(l -> l.getCreated().toInstant().atOffset(ZoneOffset.UTC)
+                .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(24)))) {
+            log.info("Found "
+                    + launchingPlayLaunches.stream()
+                            .filter(l -> l.getCreated().toInstant().atOffset(ZoneOffset.UTC)
+                                    .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(24)))
+                            .count()
+                    + " launches running for more than 24 hours. Attempting Launch status cleanup");
+            if (clearStuckOrFailedLaunches(launchingPlayLaunches)) {
+                launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
+            }
         }
 
-        if (launchingPlayLaunches.size() > maxToLaunch) {
+        if (launchingPlayLaunches.size() >= maxToLaunch) {
             log.info(String.format("%s Launch jobs are currently running, no new jobs can be kicked off ",
                     launchingPlayLaunches.size()));
             return true;
