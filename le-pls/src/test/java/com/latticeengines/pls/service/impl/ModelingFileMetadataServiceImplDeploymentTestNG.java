@@ -223,8 +223,8 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         System.out.println(JsonUtils.pprint(validateResponse));
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Unique_ID.getName(), "CustomerContactId",
-                FieldValidationMessage.MessageLevel.ERROR, "Field mapped to CustomerContactId in section Unique ID has " +
-                        "type NUMBER but is required to have type Text");
+                FieldValidationMessage.MessageLevel.ERROR, "Field mapped to Contact Id in section Unique ID has type " +
+                        "NUMBER but is required to have type Text.");
 
         // case 10: date format is not set when type is Date
         FieldDefinition createdDateDefinition =
@@ -254,7 +254,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "testFieldDefinitionValidate_noExistingTemplate")
     public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions("Default", "Test",
@@ -310,14 +310,16 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 FieldValidationMessage.MessageLevel.WARNING, "Time zone should be part of value but is not for column CreatedDate.");
 
         // case 4: Date format selected by user doesn't match existing data format.
-        createdDateDefinition.setDateFormat("MM-DD-YYYY");
+        // date format for existing template is MM-DD-YYYY set in above method
+        createdDateDefinition.setDateFormat("MM.DD.YYYY");
         validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
                 fileName, validateRequest);
-        System.out.println(JsonUtils.pprint(validateResponse));
+        System.out.println("1111" + JsonUtils.pprint(validateRequest));
+        System.out.println("2222" + JsonUtils.pprint(validateResponse));
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
                 InterfaceName.CreatedDate.name(),
-                FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM-DD-YYYY which is not " +
-                        "consistent with existing template format MM/DD/YYYY.");
+                FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM.DD.YYYY which is not " +
+                        "consistent with existing template format MM-DD-YYYY.");
 
         // case 5: Compare Current Template Against Spec, Error for missing: remove created Date from Analysis Fields
         fieldNameToAnalysisFieldDefinition.remove(InterfaceName.CreatedDate.name());
