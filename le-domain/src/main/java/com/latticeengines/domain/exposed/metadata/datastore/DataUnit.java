@@ -36,6 +36,9 @@ public abstract class DataUnit {
     @JsonProperty("DataFormat")
     private DataFormat dataFormat;
 
+    @JsonProperty("Coalesce")
+    private boolean coalesce;
+
     public abstract StorageType getStorageType();
 
     public String getTenant() {
@@ -76,6 +79,14 @@ public abstract class DataUnit {
 
     public void setPartitionKeys(List<String> partitionKeys) {
         this.partitionKeys = partitionKeys;
+    }
+
+    public boolean isCoalesce() {
+        return coalesce;
+    }
+
+    public void setCoalesce(boolean coalesce) {
+        this.coalesce = coalesce;
     }
 
     public enum StorageType {

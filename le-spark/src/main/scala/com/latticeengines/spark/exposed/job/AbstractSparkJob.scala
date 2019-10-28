@@ -91,8 +91,11 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     }
     val results = targets.zip(output).par.map { t =>
       val tgt = t._1
-      val df = t._2
+      var df = t._2
       val path = tgt.getPath
+      if (tgt.isCoalesce) {
+        df = df.coalesce(1)
+      }
       val fmt = if (tgt.getDataFormat != null) tgt.getDataFormat.name.toLowerCase else "avro"
       val partitionKeys = if (tgt.getPartitionKeys == null) List() else tgt.getPartitionKeys.asScala.toList
       if (partitionKeys.isEmpty) {
