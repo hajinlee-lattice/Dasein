@@ -25,7 +25,9 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
     public CalculateDeltaJobConfig() {
     }
 
-    public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String joinKey, boolean filterJoinKeyNulls) {
+    public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String joinKey, boolean filterJoinKeyNulls,
+            String workSpace) {
+        this.setWorkspace(workSpace);
         this.newData = newData;
         this.oldData = oldData;
         this.joinKey = joinKey;
