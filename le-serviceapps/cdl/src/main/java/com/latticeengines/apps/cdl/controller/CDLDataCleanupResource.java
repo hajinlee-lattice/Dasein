@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
+import com.latticeengines.apps.cdl.service.TenantCleanupService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 
@@ -24,10 +25,13 @@ import io.swagger.annotations.ApiOperation;
 public class CDLDataCleanupResource {
     private static final Logger log = LoggerFactory.getLogger(CDLDataCleanupResource.class);
     private final CDLDataCleanupService cdlDataCleanupService;
+    private final TenantCleanupService tenantCleanupService;
 
     @Inject
-    public CDLDataCleanupResource(CDLDataCleanupService cdlDataCleanupService) {
+    public CDLDataCleanupResource(CDLDataCleanupService cdlDataCleanupService,
+                                  TenantCleanupService tenantCleanupService) {
         this.cdlDataCleanupService = cdlDataCleanupService;
+        this.tenantCleanupService = tenantCleanupService;
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -53,6 +57,18 @@ public class CDLDataCleanupResource {
             cdlDataCleanupService.createReplaceAction(customerSpace, cleanupOperationConfiguration);
         } catch (Exception e) {
             log.error("Cannot create cleanup action: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @RequestMapping(value = "/tenantcleanup", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "clean metadata and  redshift of tenant")
+    public void tenantCleanup(@PathVariable String customerSpace) {
+        try {
+            tenantCleanupService.removeTenantTables(customerSpace);
+        } catch (Exception e) {
+            log.error("error:", e.getMessage());
             throw e;
         }
     }

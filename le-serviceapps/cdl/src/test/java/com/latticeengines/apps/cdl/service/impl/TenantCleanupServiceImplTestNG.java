@@ -1,27 +1,28 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import com.latticeengines.apps.cdl.service.DataCollectionService;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
-import org.mockito.Mockito;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 
-import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyObject;
-import static org.mockito.ArgumentMatchers.anyString;
+import javax.inject.Inject;
+
+import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class TenantCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -30,9 +31,6 @@ public class TenantCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private TenantCleanupServiceImpl tenantCleanupService;
-
-    @Inject
-    private TenantEntityMgr tenantEntityMgr;
 
     @Inject
     private DataCollectionService dataCollectionService;
@@ -56,7 +54,6 @@ public class TenantCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         metadataTables = metadataTableProvider();
         tenantNames = tenantIdProvider();
         redshiftService = Mockito.mock(RedshiftService.class);
-        tenantEntityMgr = Mockito.mock(TenantEntityMgr.class);
         dataCollectionService = Mockito.mock(DataCollectionService.class);
         dataUnitProxy = Mockito.mock(DataUnitProxy.class);
         metadataProxy = Mockito.mock(MetadataProxy.class);
@@ -65,7 +62,6 @@ public class TenantCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         Mockito.when(dataUnitProxy.delete(anyString(), Mockito.any(DataUnit.class))).thenReturn(true);
         Mockito.when(dataUnitProxy.renameTableName(anyString(), Mockito.any(DataUnit.class), anyString())).thenReturn(true);
         Mockito.when(redshiftService.getTables(anyString())).thenReturn(redshiftTables);
-        Mockito.when(tenantEntityMgr.getAllTenantId()).thenReturn(tenantNames);
         Mockito.when(dataCollectionService.getTableNames(anyString(), anyObject(), anyObject(), anyObject())).thenReturn(metadataTables);
         Mockito.when(dataUnitProxy.getByNameAndType(Mockito.anyString(), Mockito.anyString(),
                 Mockito.any(DataUnit.StorageType.class))).thenAnswer((invocation) -> {
@@ -76,7 +72,6 @@ public class TenantCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         tenantCleanupService = new TenantCleanupServiceImpl();
         // replace with the mock
         ReflectionTestUtils.setField(tenantCleanupService, "redshiftService", redshiftService);
-        ReflectionTestUtils.setField(tenantCleanupService, "tenantEntityMgr", tenantEntityMgr);
         ReflectionTestUtils.setField(tenantCleanupService, "dataCollectionService", dataCollectionService);
         ReflectionTestUtils.setField(tenantCleanupService, "dataUnitProxy", dataUnitProxy);
         ReflectionTestUtils.setField(tenantCleanupService, "metadataProxy", metadataProxy);
@@ -87,7 +82,7 @@ public class TenantCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
         tenantCleanupService.removeTenantTables("Bw_1113_AutoImport");
         Mockito.verify(dataUnitProxy, Mockito.times(1)).delete(anyString(), Mockito.any(DataUnit.class));
         Mockito.verify(redshiftService, Mockito.times(1)).dropTable(anyString());
-        Mockito.verify(metadataProxy, Mockito.times(1)).deleteTable(anyString(), anyString());
+        Mockito.verify(metadataProxy, Mockito.times(12)).deleteTable(anyString(), anyString());
     }
 
     private List<String> redshiftTablesProvider() {
