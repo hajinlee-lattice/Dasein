@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
@@ -113,7 +114,9 @@ public class PivotScoreAndEventDataFlow
 
         Table scoreResultTable = metadataProxy.getTable(customerSpace.toString(), scoreTableName);
         List<DataUnit> inputUnits = new ArrayList<>();
-        inputUnits.add(scoreResultTable.toHdfsDataUnit("scoreResultTable"));
+        HdfsDataUnit hdfsDataUnit = scoreResultTable.toHdfsDataUnit("scoreResultTable");
+        hdfsDataUnit.setCoalesce(true);
+        inputUnits.add(hdfsDataUnit);
         jobConfig.setInput(inputUnits);
 
         return jobConfig;
