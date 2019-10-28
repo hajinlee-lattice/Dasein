@@ -19,8 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
-import com.latticeengines.cdl.workflow.steps.rebuild.EnrichAccount;
-import com.latticeengines.cdl.workflow.steps.rebuild.GenerateBucketedAccount;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
@@ -52,10 +51,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     private RebuildAccountWorkflow rebuildAccountWorkflow;
 
     @Inject
-    private EnrichAccount enrichAccount;
-
-    @Inject
-    private GenerateBucketedAccount generateBucketedAccount;
+    private ProfileAccount profileAccount;
 
     protected boolean rebuildNotForDataCloudChange = false;
     protected boolean dataCloudChanged = false;
@@ -169,8 +165,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         if (rebuildOnlyDueToAttrLifeCycleChange()) {
             AbstractWorkflow<?> workflow = rebuildWorkflow();
             String namespace = getStepNamespace(seq);
-            if (isStepInWorkflow(workflow, namespace) && !generateBucketedAccount.name().equals(step.name())
-                    && !enrichAccount.name().equals(step.name())) {
+            if (isStepInWorkflow(workflow, namespace) && profileAccount.name().equals(step.name())) {
                 log.info("Workflow=" + workflow.name() + " step=" + step.name() + " is skipped");
                 return true;
             }
