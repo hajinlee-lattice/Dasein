@@ -113,7 +113,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     public boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         EntityType entityType = simpleTemplateMetadata.getEntityType();
-        if (!EntityType.WebVisit.equals(entityType) && !EntityType.WebVisitPathPattern.equals(entityType)) {
+        if (!EntityType.WebVisit.equals(entityType)
+                && !EntityType.WebVisitPathPattern.equals(entityType)
+                && !EntityType.WebVisitSourceMedium.equals(entityType)) {
+            log.error("Cannot create template for: " + entityType.getDisplayName());
             throw new RuntimeException("Cannot create template for: " + entityType.getDisplayName());
         }
         S3ImportSystem websiteSystem = s3ImportSystemService.getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
@@ -168,7 +171,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
                     customerSpace, catalog, dataFeedTask.getUniqueId());
             attachPathPatternCatalog(tenant, catalog);
-        } else {
+        } else if (EntityType.WebVisit == entityType) {
             Catalog pathPtnCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitPathPattern.name(),
                     tenant);
             AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(tenant, dataFeedTask);

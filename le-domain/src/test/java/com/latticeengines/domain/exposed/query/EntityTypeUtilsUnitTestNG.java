@@ -21,6 +21,7 @@ public class EntityTypeUtilsUnitTestNG {
                 {"ProductBundle", EntityType.ProductBundles, ""},
                 {"WebSystem_WebVisitData", EntityType.WebVisit, "WebSystem"},
                 {"WebSystem_WebVisitPathPattern", EntityType.WebVisitPathPattern, "WebSystem"},
+                {"WebSystem_WebVisitSourceMedium", EntityType.WebVisitSourceMedium, "WebSystem"},
                 {"WrongFeed", null, ""}
         };
     }

@@ -92,6 +92,31 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         verifyWebVisitStream(webVisitStreamTask, false);
     }
 
+    @Test(groups = "deployment-app")
+    public void testCreateSourceMediumTemplate() {
+        EntityType type = EntityType.WebVisitSourceMedium;
+        SimpleTemplateMetadata metadata = new SimpleTemplateMetadata();
+        metadata.setEntityType(type);
+        List<SimpleTemplateMetadata.SimpleTemplateAttribute> standardList = new ArrayList<>();
+        SimpleTemplateMetadata.SimpleTemplateAttribute standardAttr = new SimpleTemplateMetadata.SimpleTemplateAttribute();
+        standardAttr.setDisplayName("RandomName_xyz");
+        standardAttr.setName(InterfaceName.SourceMedium.name());
+        standardList.add(standardAttr);
+        metadata.setStandardAttributes(standardList);
+
+        DataFeedTask webVisitSourceMediumTask = createTemplate(metadata, type);
+
+        // verification
+        Assert.assertNotNull(webVisitSourceMediumTask);
+        templateFeedType = webVisitSourceMediumTask.getFeedType();
+        Table template = webVisitSourceMediumTask.getImportTemplate();
+        Assert.assertNotNull(template);
+        Assert.assertEquals(template.getAttributes().size(), 1);
+        Attribute attrSourceMedium = template.getAttribute(InterfaceName.SourceMedium);
+        Assert.assertNotNull(attrSourceMedium);
+        Assert.assertEquals(attrSourceMedium.getDisplayName(), "RandomName_xyz");
+    }
+
     @Test(groups = "deployment-app", dependsOnMethods = { "testCreateWebVisitTemplate" })
     private void testCreateWebVisitPatternTemplate() {
         EntityType type = EntityType.WebVisitPathPattern;
