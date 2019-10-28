@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
@@ -109,6 +110,7 @@ public class ModelingFileUploadResource {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
         SourceFile response = uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true,outsizeFlag);
+        response.setPath(CipherUtils.encrypt(response.getPath()));
         return ResponseDocument.successResponse(response);
     }
 
