@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DateRestriction;
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.MetricRestriction;
@@ -45,6 +46,13 @@ public class RestrictionOptimizer {
                 || restriction instanceof DateRestriction //
                 || restriction instanceof MetricRestriction) {
             return restriction;
+        } else if (restriction instanceof ExistsRestriction) {
+            ExistsRestriction eR = (ExistsRestriction) restriction;
+            if (eR.getRestriction() != null) {
+                Restriction innerRes = eR.getRestriction();
+                eR.setRestriction(optimize(innerRes));
+            }
+            return eR;
         } else if (restriction instanceof BucketRestriction) {
             return optimizeBucketRestriction((BucketRestriction) restriction);
         } else if (restriction instanceof LogicalRestriction) {
