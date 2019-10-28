@@ -154,10 +154,12 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
                                 // iterate through all records in avro files
                                 for (GenericRecord record : fileReader) {
                                     boolean rowError = false;
-                                    String pathStr = getFieldValue(record, interfaceName.name());
-                                    if (StringUtils.isNotBlank(pathStr)) {
+                                    String val = getFieldValue(record, interfaceName.name());
+                                    if (StringUtils.isNotBlank(val)) {
                                         // validate url legacy
-                                        if (!urlValidator.isValidPath(pathStr)) {
+                                        boolean valid = InterfaceName.WebVisitPageUrl.equals(interfaceName) ?
+                                                urlValidator.isValid(val) : urlValidator.isValidPath(val);
+                                        if (!valid) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                             rowError = true;
                                             fileError = true;
