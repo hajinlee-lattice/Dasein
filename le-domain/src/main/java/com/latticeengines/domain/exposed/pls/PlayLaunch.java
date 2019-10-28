@@ -258,6 +258,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "REMOVE_CONTACTS_TABLE_NAME")
     private String removeContactsTable;
 
+    @JsonProperty("audienceState")
+    @Transient
+    private String audienceState;
+
     public PlayLaunch() {
     }
 
@@ -658,4 +662,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.removeContactsTable = removeContactsTable;
     }
 
+    public void setAudienceState(String audienceState) {
+        this.audienceState = audienceState;
+    }
+
+    public String getAudienceState() {
+        return audienceState;
+    }
 }
