@@ -103,7 +103,6 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         String outputScoredFilename = "/"
                 + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                 + "_scored_" + DateTime.now().getMillis();
-        String mergedOutputScoredFilename = StringUtils.appendIfMissing(outputScoredFilename, ".csv");
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
@@ -116,7 +115,6 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(tableToScore) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(outputScoredFilename) //
-                .mergeOutputFile(mergedOutputScoredFilename) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
                 .setScoreTestFile(false) //
