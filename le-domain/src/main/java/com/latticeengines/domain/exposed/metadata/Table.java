@@ -164,6 +164,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Transient
     private Long count;
 
+    @JsonProperty("updateby")
+    @Column(name = "UPDATEBY", nullable = true)
+    private String updateBy;
+
     public Table() {
     }
 
@@ -748,5 +752,13 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
         unit.setCount(this.getExtracts().get(0).getProcessedRecords());
         return unit;
+    }
+
+    public void setUpdateBy(String updateBy) {
+        this.updateBy = updateBy;
+    }
+
+    public String getUpdateBy() {
+        return updateBy;
     }
 }
