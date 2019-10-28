@@ -195,7 +195,7 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
     }
 
     private DataFeedTask createTemplate(SimpleTemplateMetadata metadata, EntityType type) {
-        boolean result = cdlProxy.createWebVisitTemplate(mainCustomerSpace, metadata);
+        boolean result = cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(metadata));
         Assert.assertTrue(result);
         List<S3ImportSystem> allSystems = cdlProxy.getS3ImportSystemList(mainCustomerSpace);
         S3ImportSystem webSite = allSystems.stream() //
