@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
@@ -29,6 +30,8 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 public class DataFeedProxy extends MicroserviceRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedProxy.class);
+
+    private static final int TABLE_NAME_BATCH_SIZE = 50;
 
     protected DataFeedProxy() {
         super("cdl");
@@ -238,6 +241,17 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         if (tables == null || tables.size() == 0) {
             return;
         }
+        if (tables.size() > TABLE_NAME_BATCH_SIZE) {
+            List<List<String>> tableBatches = Lists.partition(tables, TABLE_NAME_BATCH_SIZE);
+            for (List<String> tableBatch : tableBatches) {
+                addRestrictedTablesToQueue(customerSpace, taskId, tableBatch);
+            }
+        } else {
+            addRestrictedTablesToQueue(customerSpace, taskId, tables);
+        }
+    }
+
+    private void addRestrictedTablesToQueue(String customerSpace, String taskId, List<String> tables) {
         String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue?";
         StringBuilder builder = new StringBuilder();
         tables.forEach(tableName -> builder.append(String.format("tableName=%s&", tableName)));

@@ -43,7 +43,9 @@ public enum LatticeFeatureFlag {
     ENABLE_MULTI_TEMPLATE_IMPORT("EnableMultiTemplateImport", "Allows multiple templates for import"), //
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
     ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
-    ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"),
+    ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
+    ENABLE_GOOGLE_INTEGRATION("EnableGoogleIntegration", "Enable Google integration"), //
+
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
