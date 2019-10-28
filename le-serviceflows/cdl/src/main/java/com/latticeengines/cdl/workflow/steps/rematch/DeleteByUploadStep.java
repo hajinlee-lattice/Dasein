@@ -36,7 +36,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
 
     private static final String CLEANUP_TABLE_PREFIX = "DeleteByFile";
 
-    private static final String TRANSFORMER = "CleanupTransformer";
+    private static final String TRANSFORMER = "HardDeleteTransformer";
 
     static final String BEAN_NAME = "deleteByUploadStep";
 
@@ -105,8 +105,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         sourceNames.add(masterName);
         baseTables.put(masterName, source);
 
-        CleanupOperationType type = configuration.getEntity().equals(BusinessEntity.Transaction)?
-                CleanupOperationType.BYUPLOAD_ACPD : CleanupOperationType.BYUPLOAD_ID;
+        CleanupOperationType type = CleanupOperationType.BYUPLOAD_ID;
 
         CleanupConfig config = new CleanupConfig();
         config.setBusinessEntity(entity);
@@ -179,22 +178,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
     private CleanupConfig.JoinedColumns getJoinedColumns(BusinessEntity entity) {
         CleanupConfig.JoinedColumns joinedColumns = new CleanupConfig.JoinedColumns();
         InterfaceName accountId = InterfaceName.AccountId;
-        InterfaceName contactId = InterfaceName.ContactId;
-        switch (entity) {
-            case Account:
-                joinedColumns.setAccountId(accountId.name());
-                break;
-            case Contact:
-                joinedColumns.setContactId(contactId.name());
-                break;
-            case Transaction:
-                joinedColumns.setAccountId(accountId.name());
-                joinedColumns.setContactId(contactId.name());
-                joinedColumns.setProductId(InterfaceName.ProductId.name());
-                joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
-            default:
-                break;
-        }
+        joinedColumns.setAccountId(accountId.name());
         return joinedColumns;
     }
 }
