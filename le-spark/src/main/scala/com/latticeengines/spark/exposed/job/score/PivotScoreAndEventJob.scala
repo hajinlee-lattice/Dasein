@@ -140,7 +140,7 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
     }
 
     def getTotalPositiveEventsUsingAvgScore(aggregatedNode : DataFrame) : DataFrame = {
-        aggregatedNode.withColumn(BUCKET_TOTAL_POSITIVE_EVENTS, when(col(BUCKET_TOTAL_EVENTS) === 0, lit(0))
-            .otherwise(col(BUCKET_AVG_SCORE) * col(BUCKET_TOTAL_EVENTS)))
+        aggregatedNode.withColumn(BUCKET_TOTAL_POSITIVE_EVENTS, when(col(BUCKET_TOTAL_EVENTS) === 0, lit(0.0))
+            .otherwise(col(BUCKET_AVG_SCORE) * col(BUCKET_TOTAL_EVENTS) * 1.0))
     }
 }

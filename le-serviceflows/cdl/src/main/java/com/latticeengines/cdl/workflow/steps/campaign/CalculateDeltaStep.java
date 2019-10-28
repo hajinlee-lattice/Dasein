@@ -132,8 +132,9 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
-                SparkJobResult result = executeSparkJob(CalculateDeltaJob.class, new CalculateDeltaJobConfig(
-                        currentLaunchUniverse, previousLaunchUniverse, joinKey, filterJoinKeyNulls));
+                SparkJobResult result = executeSparkJob(CalculateDeltaJob.class,
+                        new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse, joinKey,
+                                filterJoinKeyNulls, getRandomWorkspace()));
                 result.getTargets().add(currentLaunchUniverse);
                 return result;
             } finally {
