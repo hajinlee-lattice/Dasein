@@ -431,6 +431,12 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
+    public void cleanupTenant(String customerSpace) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/tenantcleanup";
+        String url = constructUrl(urlPattern, customerSpace);
+        post("create replace data action", url, customerSpace);
+    }
+
     @SuppressWarnings("unchecked")
     public void createS3ImportSystem(String customerSpace, S3ImportSystem system) {
         String url = constructUrl("/customerspaces/{customerSpace}/s3import/system", shortenCustomerSpace(customerSpace));
