@@ -66,10 +66,11 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
     protected String getExclusionColumns() {
         String exclusionColumns = ScoreResultField.NormalizedScore.displayName + ";" //
                 + ScoreResultField.PredictedRevenuePercentile.displayName + ";" //
-                + ScoreResultField.PredictedRevenuePercentile.displayName + ";" //
                 + ScoreResultField.ExpectedRevenuePercentile.displayName;
         if (batonService.isEntityMatchEnabled(getConfiguration().getCustomerSpace())) {
-            exclusionColumns += ";" + InterfaceName.AccountId.name() + ";" //
+            exclusionColumns += ";" //
+                    + InterfaceName.AccountId.name() + ";" //
+                    + InterfaceName.EntityId.name() + ";" //
                     + InterfaceName.PeriodId.name();
         }
         return  exclusionColumns;
