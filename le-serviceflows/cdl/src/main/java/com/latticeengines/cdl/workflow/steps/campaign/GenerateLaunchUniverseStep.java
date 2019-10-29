@@ -98,8 +98,9 @@ public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchU
                 .isSuppressAccountsWithoutContacts(channelConfig.isSuppressAccountsWithoutContacts())
                 .isSuppressContactsWithoutEmails(channelConfig.isSuppressContactsWithoutEmails())
                 .bucketsToLaunch(launchBuckets) //
+                .limit(channel.getMaxAccountsToLaunch()) //
                 .lookupId(lookupId) //
-                .launchUnscored(launchUnscored) //
+                .launchUnScored(launchUnscored) //
                 .destinationSystemName(externalSystemName) //
                 .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
                 .getCampaignFrontEndQueryBuilder().build();
