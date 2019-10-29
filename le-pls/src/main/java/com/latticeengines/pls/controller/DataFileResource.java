@@ -256,7 +256,7 @@ public class DataFileResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            dataFileProviderService.downloadCurrentBundleFile(request, response, "application/csv");
+            dataFileProviderService.downloadCurrentBundleFileV2(request, response, "application/csv", tenantId);
         } catch (Exception e) {
             log.error("Download csv Failed: " + e.getMessage());
             throw e;
