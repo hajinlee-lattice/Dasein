@@ -19,7 +19,7 @@ public interface DataIntegrationStatusMonitoringRepository
             List<String> entityIds);
 
     @Query("select msg from DataIntegrationStatusMessage msg " +
-            "where msg.statusMonitor.entityId like ?1 " +
+            "where msg.statusMonitor.entityId = ?1 " +
             "order by msg.updatedDate desc")
     List<DataIntegrationStatusMessage> getMessagesByLaunchId(String launchId);
 }

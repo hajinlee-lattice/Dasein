@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +98,7 @@ public class DataIntegrationStatusMonitoringEntityMgrImpl
     @Override
     public DataIntegrationStatusMessage getLatestMessageByLaunchId(String launchId) {
         List<DataIntegrationStatusMessage> messages = getReaderRepo().getMessagesByLaunchId(launchId);
-        if(messages != null && !messages.isEmpty()){
+        if(messages != null && CollectionUtils.isNotEmpty(messages)){
             return messages.get(0);
         }
         return null;
