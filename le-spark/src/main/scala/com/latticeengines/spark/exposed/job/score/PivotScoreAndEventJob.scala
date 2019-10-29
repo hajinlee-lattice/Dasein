@@ -57,7 +57,7 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
             node.groupBy(percentileScoreField, ScoreResultField.ModelId.displayName)
               .agg(
                   count(percentileScoreField).alias(BUCKET_TOTAL_EVENTS), 
-                  sum(col("IsPositiveEvent")).alias(BUCKET_TOTAL_POSITIVE_EVENTS)).sort(asc(percentileScoreField))
+                  sum(col("IsPositiveEvent") * 1.0).alias(BUCKET_TOTAL_POSITIVE_EVENTS)).sort(asc(percentileScoreField))
         } else {
              node.groupBy(percentileScoreField, ScoreResultField.ModelId.displayName)
               .agg(
@@ -99,12 +99,12 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
             isEV : Boolean, useEvent : Boolean) : DataFrame = {
         if (useEvent) {
             val modelAvgProbability : Double = avgScore.get
-            var aggrNode = aggregatedNode.withColumn("ConversionRate", when(col(BUCKET_TOTAL_EVENTS) === 0, lit(0))
-                .otherwise(col(BUCKET_TOTAL_POSITIVE_EVENTS) / col(BUCKET_TOTAL_EVENTS)))
+            var aggrNode = aggregatedNode.withColumn("ConversionRate", when(col(BUCKET_TOTAL_EVENTS) === 0, lit(0.0))
+                .otherwise(col(BUCKET_TOTAL_POSITIVE_EVENTS) / col(BUCKET_TOTAL_EVENTS) * 1.0))
             aggrNode.withColumn(BUCKET_LIFT, col("ConversionRate") / modelAvgProbability)
         } else {
             var aggrNode = aggregatedNode.join(total, Seq(MODEL_GUID), joinType = "inner")
-            aggrNode = aggrNode.withColumn(BUCKET_LIFT, when(col(MODEL_AVG) > 0, col(BUCKET_AVG_SCORE) / col(MODEL_AVG))
+            aggrNode = aggrNode.withColumn(BUCKET_LIFT, when(col(MODEL_AVG) > 0, col(BUCKET_AVG_SCORE) / col(MODEL_AVG) * 1.0)
                 .otherwise(lit(0.0)))
             if (!isEV) {
                 aggrNode = getTotalPositiveEvents(aggrNode, scoreDerivation, fitFunctionParams, isEV)
@@ -112,7 +112,7 @@ class PivotScoreAndEventJob extends AbstractSparkJob[PivotScoreAndEventJobConfig
                 aggrNode = aggrNode.withColumn(BUCKET_SUM, lit(null).cast(DoubleType))
             } else {
                 aggrNode = aggrNode.withColumn(BUCKET_TOTAL_POSITIVE_EVENTS, when(col(BUCKET_TOTAL_EVENTS) === 0, 
-                    lit(0)).otherwise(col(BUCKET_TOTAL_EVENTS) * col(BUCKET_SUM) / col(MODEL_SUM)))
+                    lit(0.0)).otherwise(col(BUCKET_TOTAL_EVENTS) * col(BUCKET_SUM) / col(MODEL_SUM) * 1.0))
             }
             aggrNode.select(col(ScoreResultField.ModelId.displayName), col(ScoreResultField.Percentile.displayName),
                     col(BUCKET_TOTAL_POSITIVE_EVENTS), col(BUCKET_TOTAL_EVENTS), col(BUCKET_LIFT),
