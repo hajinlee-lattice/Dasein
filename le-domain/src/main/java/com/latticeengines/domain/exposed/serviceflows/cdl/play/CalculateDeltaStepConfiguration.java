@@ -6,8 +6,9 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
     private CustomerSpace customerSpace;
-    private String channelId;
     private String playId;
+    private String channelId;
+    private String launchId;
     private String executionId;
     private DataCollection.Version version;
 
@@ -19,12 +20,6 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
         this.customerSpace = customerSpace;
     }
 
-    public String getChannelId() {
-        return channelId;
-    }
-
-    public void setChannelId(String channelId) { this.channelId = channelId; }
-
     public String getPlayId() {
         return playId;
     }
@@ -33,6 +28,20 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
         this.playId = playId;
     }
 
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(String channelId) { this.channelId = channelId; }
+
+    public String getLaunchId() { return launchId; }
+
+    public void setLaunchId(String launchId) { this.launchId = launchId; }
+
+    public String getExecutionId() { return executionId; }
+
+    public void setExecutionId(String executionId) { this.executionId = executionId; }
+
     public DataCollection.Version getVersion() {
         return version;
     }
@@ -40,9 +49,4 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
     public void setVersion(DataCollection.Version version) {
         this.version = version;
     }
-
-    public String getExecutionId() { return executionId; }
-
-    public void setExecutionId(String executionId) { this.executionId = executionId; }
-
 }
