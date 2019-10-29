@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -37,7 +38,8 @@ public class CampaignFrontEndQueryBuilder {
     private Restriction baseAccountRestriction;
     private Restriction baseContactRestriction;
     private Set<RatingBucketName> bucketsToLaunch;
-    private boolean launchUnscored;
+    private boolean launchUnScored;
+    private long limit;
     private CDLExternalSystemName destinationSystemName;
     private boolean isSuppressAccountsWithoutLookupId;
     private boolean isSuppressAccountsWithoutContacts;
@@ -87,8 +89,8 @@ public class CampaignFrontEndQueryBuilder {
             return this;
         }
 
-        public Builder launchUnscored(boolean launchUnscored) {
-            queryBuilder.launchUnscored = launchUnscored;
+        public Builder launchUnScored(boolean launchUnscored) {
+            queryBuilder.launchUnScored = launchUnscored;
             return this;
         }
 
@@ -109,6 +111,11 @@ public class CampaignFrontEndQueryBuilder {
 
         public Builder isSuppressAccountsWithoutContacts(boolean isSuppressAccountsWithoutContacts) {
             queryBuilder.isSuppressAccountsWithoutContacts = isSuppressAccountsWithoutContacts;
+            return this;
+        }
+
+        public Builder limit(long limit) {
+            queryBuilder.limit = limit;
             return this;
         }
 
@@ -134,10 +141,17 @@ public class CampaignFrontEndQueryBuilder {
             filterContactsWithoutEmail();
         }
         addSort();
+        setLimit();
         if (mainEntity == BusinessEntity.Contact && isSuppressAccountsWithoutContacts) {
             filterAccountsWithoutContacts();
         }
         return campaignFrontEndQuery;
+    }
+
+    private void setLimit() {
+        if (limit > 0) {
+            campaignFrontEndQuery.setPageFilter(new PageFilter(0, limit));
+        }
     }
 
     private void suppressAccountsWithoutLookupId() {
@@ -181,16 +195,11 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void setupLookups() {
+        campaignFrontEndQuery.setLookups(accountLookups.stream()
+                .map(cl -> new AttributeLookup(BusinessEntity.Account, cl)).collect(Collectors.toList()));
         if (mainEntity == BusinessEntity.Contact) {
-            campaignFrontEndQuery.setLookups(contactLookups.stream().map(cl -> new AttributeLookup(mainEntity, cl))
-                    .collect(Collectors.toList()));
-        }
-        if (mainEntity == BusinessEntity.Account) {
-            if (StringUtils.isNotBlank(lookupId)) {
-                accountLookups.add(lookupId);
-            }
-            campaignFrontEndQuery.setLookups(accountLookups.stream().map(cl -> new AttributeLookup(mainEntity, cl))
-                    .collect(Collectors.toList()));
+            campaignFrontEndQuery.setLookups(contactLookups.stream()
+                    .map(cl -> new AttributeLookup(BusinessEntity.Contact, cl)).collect(Collectors.toList()));
         }
     }
 
@@ -212,7 +221,7 @@ public class CampaignFrontEndQueryBuilder {
             Lookup rhs = new CollectionLookup(allowedRatingsCollection);
             ratingRestriction = new ConcreteRestriction(false, lhs, ComparisonType.IN_COLLECTION, rhs);
 
-            ratingRestriction = launchUnscored //
+            ratingRestriction = launchUnScored //
                     ? Restriction.builder()
                             .or(ratingRestriction, new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
                             .build()
@@ -240,13 +249,13 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void addSort() {
-        if (mainEntity == BusinessEntity.Account) {
-            if (ratingId != null) {
-                setSortField(BusinessEntity.Rating, Collections.singletonList(ratingId), campaignFrontEndQuery);
-            }
-            setSortField(BusinessEntity.Account, Collections.singletonList(InterfaceName.AccountId.name()),
-                    campaignFrontEndQuery);
+
+        if (ratingId != null) {
+            setSortField(BusinessEntity.Rating, Collections.singletonList(ratingId), campaignFrontEndQuery);
         }
+        setSortField(BusinessEntity.Account, Collections.singletonList(InterfaceName.AccountId.name()),
+                campaignFrontEndQuery);
+
         if (mainEntity == BusinessEntity.Contact) {
             setSortField(BusinessEntity.Contact, Collections.singletonList(InterfaceName.ContactId.name()),
                     campaignFrontEndQuery);
