@@ -641,7 +641,7 @@ public class ImportWorkflowUtils {
         definition.setFieldType(existingDefinition.getFieldType());
         definition.setScreenName(screenName);
         definition.setColumnName(existingDefinition.getColumnName());
-        definition.setRequired(isRequired);
+        definition.setRequired(isRequired || existingDefinition.isRequired());
         if (UserDefinedType.DATE.equals(definition.getFieldType())) {
             definition.setDateFormat(existingDefinition.getDateFormat());
             definition.setTimeFormat(existingDefinition.getTimeFormat());
@@ -835,17 +835,16 @@ public class ImportWorkflowUtils {
                 // table as this indicates that they have a current mapping column or had in the a previous import.
                 // In this case, skip FieldDefinitions that don't have columnName set as these are Spec fields that
                 // do not currently or did not previously match a import file column.
-                if (writeAllDefinitions || StringUtils.isNotBlank(definition.getColumnName())) {
+                if (writeAllDefinitions || (StringUtils.isNotBlank(definition.getColumnName()) &&
+                        !Boolean.TRUE.equals(definition.getIgnored()))) {
                     // ignored fields should be ignored when generating table
-                    if (!Boolean.TRUE.equals(definition.getIgnored())) {
-                        Attribute attribute = getAttributeFromFieldDefinition(definition);
-                        table.addAttribute(attribute);
-                        log.info("   SectionName: {}  FieldName: {}  ColumnName: {}", entry.getKey(),
-                                definition.getFieldName(), definition.getColumnName());
-                    }
+                    Attribute attribute = getAttributeFromFieldDefinition(definition);
+                    table.addAttribute(attribute);
+                    log.info("   SectionName: {}  FieldName: {}  ColumnName: {}", entry.getKey(),
+                            definition.getFieldName(), definition.getColumnName());
                 } else {
-                    log.info("   Skipped Field: SectionName: {}  FieldName: {}", entry.getKey(),
-                            definition.getFieldName());
+                    log.info("   Skipped Field: SectionName: {}  FieldName: {}, Skipped state: {}", entry.getKey(),
+                            definition.getFieldName(), definition.getIgnored());
                 }
             }
         }

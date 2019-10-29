@@ -276,7 +276,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         FieldDefinition earningsDefinition = customNameToFieldDefinition.get("Earnings");
         Assert.assertNotNull(earningsDefinition);
         earningsDefinition.setIgnored(Boolean.TRUE);
-        Table result = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(currentRecord, true);
+        Table result = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(currentRecord, false);
 
         List<Attribute> attrs = result.getAttributes();
         Attribute earningsAttr =
