@@ -16,8 +16,8 @@ public enum EntityType {
     ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles", "ProductBundle"), //
     ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy", "ProductHierarchy"),
     WebVisit(BusinessEntity.ActivityStream, null, "Web Visit", "WebVisitData"),
-    WebVisitPathPattern(BusinessEntity.Catalog, null, "Web Visit Path Pattern", "WebVisitPathPattern"), //
-    WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Web Visit Source", "WebVisitSourceMedium");
+    WebVisitPathPattern(BusinessEntity.Catalog, null, "Website Path", "WebVisitPathPattern"), //
+    WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Visit Source", "WebVisitSourceMedium");
 
     private BusinessEntity entity;
     private SubType subType;
