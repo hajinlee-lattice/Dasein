@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -77,7 +77,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         List<TransformationStepConfig> steps = new ArrayList<>();
         configuration.getCatalogImports() //
                 .forEach((catalogId, catalogImports) -> {
-                    List<String> importTableNames = catalogImports.stream().map(CatalogImport::getTableName)
+                    List<String> importTableNames = catalogImports.stream().map(ActivityImport::getTableName)
                             .collect(Collectors.toList());
                     mergeAndUpsertCatalogImports(catalogId, importTableNames, steps);
                 });
@@ -134,18 +134,17 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
     private TransformationStepConfig upsertBatchStore(int mergeStepIdx, @NotNull String activeTableName,
             @NotNull String catalogTablePrefix, @NotNull String primaryKey) {
         TransformationStepConfig step = new TransformationStepConfig();
-        setTargetTable(step, activeTableName);
+        addBaseTables(step, activeTableName);
         // use the merged imports result to upsert
         step.setInputSteps(Collections.singletonList(mergeStepIdx));
         step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
         setTargetTable(step, catalogTablePrefix);
 
-        // TODO make sure this is correct
         UpsertConfig config = new UpsertConfig();
         config.setColsFromLhs(Collections.singletonList(InterfaceName.CDLCreatedTime.name()));
         config.setNotOverwriteByNull(true);
         config.setJoinKey(primaryKey);
-        config.setSwitchSides(false);
+        config.setSwitchSides(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
@@ -186,7 +185,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         configuration.getCatalogTables().forEach(finalCatalogTables::putIfAbsent);
         log.info("Building catalog tables, tables={}, pipelineVersion={}", finalCatalogTables, pipelineVersion);
 
-        // link all tables and use catalogName as signature
+        // link all tables and use catalogId as signature
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), finalCatalogTables, batchStore,
                 inactive);
         return new ArrayList<>(finalCatalogTables.values());
@@ -209,7 +208,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         configuration.getCatalogImports()
                 .forEach((catalogId, catalogImports) -> originalInputFiles.put(catalogId, catalogImports.stream() //
                         .filter(Objects::nonNull) //
-                        .map(CatalogImport::getOriginalFilename) //
+                        .map(ActivityImport::getOriginalFilename) //
                         .filter(StringUtils::isNotBlank) //
                         .collect(Collectors.toList())));
         log.info("Saving original catalog file map to DataCollectionStatus. CatalogFileMap={}", originalInputFiles);

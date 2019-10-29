@@ -86,7 +86,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         // if we have convertBatchStore, we should merge and match new import first
         // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
         if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-            TransformationStepConfig entityMatch = match(concatenateStep++, null, null);
+            TransformationStepConfig entityMatch = matchContact(concatenateStep++, null, null);
             steps.add(merge);
             steps.add(concatenate);
             steps.add(entityMatch);
@@ -94,7 +94,8 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
                     convertBatchStoreTableName, concatenateStep++);
             concatenate = concatenateContactName(concatenateStep++, null);
         }
-        TransformationStepConfig entityMatch = match(concatenateStep, matchTargetTablePrefix, convertBatchStoreTableName);
+        TransformationStepConfig entityMatch = matchContact(concatenateStep, matchTargetTablePrefix,
+                convertBatchStoreTableName);
         steps.add(merge);
         steps.add(concatenate);
         steps.add(entityMatch);
@@ -127,7 +128,8 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         return step;
     }
 
-    private TransformationStepConfig match(int inputStep, String targetTableName, String convertBatchStoreTableName) {
+    private TransformationStepConfig matchContact(int inputStep, String targetTableName,
+            String convertBatchStoreTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         setTargetTable(step, targetTableName);

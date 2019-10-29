@@ -22,8 +22,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
-import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -88,7 +88,7 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
         primaryKeys.put(CATALOG_2, InterfaceName.CustomerAccountId.name());
         primaryKeys.put(CATALOG_3, InterfaceName.CustomerAccountId.name());
 
-        Map<String, List<CatalogImport>> catalogImports = new HashMap<>();
+        Map<String, List<ActivityImport>> catalogImports = new HashMap<>();
         catalogImports.put(CATALOG_1, prepareCatalogImports(CATALOG_1, new int[] { 1, 1 }, IngestionBehavior.Upsert,
                 InterfaceName.CustomerAccountId.name()));
         catalogImports.put(CATALOG_2, prepareCatalogImports(CATALOG_2, new int[] { 1, 3 }, IngestionBehavior.Replace,
@@ -97,7 +97,7 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
                 InterfaceName.CustomerAccountId.name()));
         // catalogName -> catalogId
         Map<String, String> catalogIdMap = catalogImports.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0).getCatalogId()));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0).getUniqueId()));
         ArrayList<String> catalogIds = new ArrayList<>(catalogIdMap.values());
         importCatalogAndBuildBatchStore(behaviors, primaryKeys, catalogImports, Collections.emptyMap(), catalogIdMap);
 
@@ -181,7 +181,7 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
     }
 
     private void importCatalogAndBuildBatchStore(@NotNull Map<String, IngestionBehavior> behaviors,
-            @NotNull Map<String, String> primaryKeys, @NotNull Map<String, List<CatalogImport>> catalogImports,
+            @NotNull Map<String, String> primaryKeys, @NotNull Map<String, List<ActivityImport>> catalogImports,
             @NotNull Map<String, String> activeBatchStoreTables, @NotNull Map<String, String> catalogIdMap)
             throws Exception {
         ProcessCatalogWorkflowConfiguration config = new ProcessCatalogWorkflowConfiguration.Builder() //
@@ -202,7 +202,7 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
                 .collect(Collectors.toMap(entry -> nameIdMap.get(entry.getKey()), Map.Entry::getValue));
     }
 
-    private List<CatalogImport> prepareCatalogImports(@NotNull String catalogName, @NotNull int[] fileIndices,
+    private List<ActivityImport> prepareCatalogImports(@NotNull String catalogName, @NotNull int[] fileIndices,
             @NotNull IngestionBehavior behavior, String primaryKeyColumn) {
         String testArtifactFeedType = getFeedTypeByEntity(TEST_FILE_ENTITY_TYPE);
         String testFeedType = catalogFeedType(catalogName);
@@ -232,11 +232,10 @@ public class ProcessCatalogWorkflowStepDeploymentTestNG extends CDLWorkflowFrame
         }
         String catalogId = catalog.getCatalogId();
 
-        List<CatalogImport> catalogImports = tables.stream() //
+        List<ActivityImport> catalogImports = tables.stream() //
                 .map(tableName -> {
-                    CatalogImport catalogImport = new CatalogImport();
-                    catalogImport.setCatalogName(catalogName);
-                    catalogImport.setCatalogId(catalogId);
+                    ActivityImport catalogImport = new ActivityImport();
+                    catalogImport.setUniqueId(catalogId);
                     catalogImport.setTableName(tableName);
                     catalogImport.setOriginalFilename(tableName + ".csv");
                     return catalogImport;

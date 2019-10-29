@@ -54,13 +54,14 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             // if we have convertBatchStore, we should merge and match new import first
             // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
             if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                TransformationStepConfig match = match(mergeStep++, null, null);
+                TransformationStepConfig match = matchTransaction(mergeStep++, null, null);
                 merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
                         ETLEngineLoad.LIGHT, convertBatchStoreTableName, mergeStep++);
                 steps.add(match);
                 steps.add(merge);
             }
-            TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix, convertBatchStoreTableName);
+            TransformationStepConfig match = matchTransaction(mergeStep, matchTargetTablePrefix,
+                    convertBatchStoreTableName);
             steps.add(match);
         }
         log.info("steps are {}.", steps);
@@ -81,7 +82,8 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         }
     }
 
-    private TransformationStepConfig match(int inputStep, String matchTargetTable, String convertBatchStoreTableName) {
+    private TransformationStepConfig matchTransaction(int inputStep, String matchTargetTable,
+            String convertBatchStoreTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {

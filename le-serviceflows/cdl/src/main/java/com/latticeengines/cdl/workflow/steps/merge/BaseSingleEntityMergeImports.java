@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -31,14 +30,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -282,22 +279,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         }
     }
 
-    MatchInput getBaseMatchInput() {
-        MatchInput matchInput = new MatchInput();
-        matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
-        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
-        matchInput.setExcludePublicDomain(false);
-        matchInput.setPublicDomainAsNormalDomain(false);
-        matchInput.setDataCloudVersion(getDataCloudVersion());
-        matchInput.setSkipKeyResolution(true);
-        matchInput.setUseDnBCache(true);
-        matchInput.setUseRemoteDnB(true);
-        matchInput.setLogDnBBulkResult(false);
-        matchInput.setMatchDebugEnabled(false);
-        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
-        return matchInput;
-    }
-
     void setServingVersionForEntityMatchTenant(MatchInput matchInput) {
         if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
             EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
@@ -316,16 +297,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     Set<String> getInputTableColumnNames(int tableIdx) {
         String tableName = inputTableNames.get(tableIdx);
         return getTableColumnNames(tableName);
-    }
-
-    Set<String> getTableColumnNames(String... tableNames) {
-        // TODO add a batch retrieve API to optimize this
-        return Arrays.stream(tableNames) //
-                .flatMap(tableName -> metadataProxy //
-                        .getTableColumns(customerSpace.toString(), tableName) //
-                        .stream() //
-                        .map(ColumnMetadata::getAttrName)) //
-                .collect(Collectors.toSet());
     }
 
     /**
