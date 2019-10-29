@@ -216,6 +216,25 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
+    TransformationStepConfig softDelete(int mergeSoftDeleteStep, String inputMasterTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+        if (StringUtils.isNotBlank(inputMasterTableName)) {
+            Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
+            if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
+                log.info("Add masterTable=" + inputMasterTableName);
+                addBaseTables(step, inputMasterTableName);
+            }
+        } else {
+            throw new IllegalArgumentException("The master table is empty for soft delete!");
+        }
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setDeleteSourceIdx(0);
+        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        return step;
+    }
+
     TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, null);

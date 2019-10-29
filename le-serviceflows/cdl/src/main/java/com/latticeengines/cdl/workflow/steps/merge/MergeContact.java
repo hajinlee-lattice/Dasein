@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,28 +67,44 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         TransformationStepConfig softDelete = null;
         TransformationStepConfig diff;
         if (configuration.isEntityMatchEnabled()) {
-            int dedupStep = 0;
-            upsertMasterStep = 1;
-            int softDeleteMergeStep = upsertMasterStep + 1;
-            int softDeleteStep = softDeleteMergeStep + 1;
-            diffStep = 2;
-            TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
-                    Collections.singletonList(matchedTable), //
-                    Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
-            upsert = upsertMaster(true, dedupStep);
-            if (!skipSoftDelete) {
-                mergeSoftDelete = mergeSoftDelete(softDeleteActions);
-                softDelete = softDelete(softDeleteMergeStep, upsertMasterStep);
+            boolean noImports = StringUtils.isEmpty(matchedTable);
+            if (noImports) {
+                int softDeleteMergeStep = 0;
+                int softDeleteStep = softDeleteMergeStep + 1;
+                diffStep = softDeleteStep + 1;
+                if (skipSoftDelete) {
+                    throw new IllegalArgumentException("There's no merge or soft delete!");
+                } else {
+                    mergeSoftDelete = mergeSoftDelete(softDeleteActions);
+                    softDelete = softDelete(softDeleteMergeStep, inputMasterTableName);
+                    diff = diff(inputMasterTableName, softDeleteStep);
+                }
+            } else {
+                int dedupStep = 0;
+                upsertMasterStep = 1;
+                int softDeleteMergeStep = upsertMasterStep + 1;
+                int softDeleteStep = softDeleteMergeStep + 1;
+                diffStep = softDeleteStep + 1;
+                TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
+                        Collections.singletonList(matchedTable), //
+                        Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
+                upsert = upsertMaster(true, dedupStep);
+                if (!skipSoftDelete) {
+                    mergeSoftDelete = mergeSoftDelete(softDeleteActions);
+                    softDelete = softDelete(softDeleteMergeStep, upsertMasterStep);
+                }
+                diff = diff(dedupStep, softDeleteStep);
+                steps.add(dedup);
+                steps.add(upsert);
             }
-            diff = diff(dedupStep, softDeleteStep);
-            steps.add(dedup);
         } else {
             upsertMasterStep = 0;
             diffStep = 1;
             upsert = upsertMaster(false, matchedTable);
             diff = diff(matchedTable, upsertMasterStep);
+            steps.add(upsert);
         }
-        steps.add(upsert);
+
         if (configuration.isEntityMatchEnabled() && !skipSoftDelete) {
             steps.add(mergeSoftDelete);
             steps.add(softDelete);
