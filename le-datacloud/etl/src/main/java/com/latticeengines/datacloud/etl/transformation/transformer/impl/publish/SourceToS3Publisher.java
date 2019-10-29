@@ -274,7 +274,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private String gets3nPath(String hdfsPath) {
-        return "s3n://" + s3Bucket + getValidPath(hdfsPath);
+        return "s3a://" + s3Bucket + getValidPath(hdfsPath);
     }
 
     private String getValidPath(String path) {
