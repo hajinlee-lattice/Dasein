@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.workflow.steps;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +102,7 @@ public class CombineInputTableWithScoreDataFlow
         containers.forEach(container -> {
             List<BucketMetadata> bucketMetadata = getSingleModelBucketMetadata(container);
             String modelGuid = ((AIModel) container.getModel()).getModelSummaryId();
+            Collections.sort(bucketMetadata, (a, b) -> a.getRightBoundScore() - b.getRightBoundScore());
             bucketMetadataMap.put(modelGuid, bucketMetadata);
         });
 
@@ -153,6 +155,7 @@ public class CombineInputTableWithScoreDataFlow
             bucketMetadata = BucketMetadataUtils.getDefaultMetadata();
         }
         putObjectInContext(SCORING_BUCKET_METADATA, bucketMetadata);
+        Collections.sort(bucketMetadata, (a, b) -> a.getRightBoundScore() - b.getRightBoundScore());
         return bucketMetadata;
     }
 
