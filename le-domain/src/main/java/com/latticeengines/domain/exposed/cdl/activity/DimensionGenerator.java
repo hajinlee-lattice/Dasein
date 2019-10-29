@@ -35,7 +35,7 @@ public class DimensionGenerator {
     // how to get/generate dimension values
     @JsonProperty("option")
     private DimensionGeneratorOption option;
-    
+
     public String getAttribute() {
         return attribute;
     }
@@ -64,7 +64,7 @@ public class DimensionGenerator {
         // Use case: WebVisitPathPattern -- take pattern names provided in
         // WebVisitPathPattern catalog, standardize and calculate hash strings
         // as dimension values
-        HASH("Hash"), 
+        HASH("Hash"),
         // Use case 1: MarketoActivity -- take ActivityTypeId attribute values
         // provided in MarketoActivityTypes catalog as dimension values
         // Use case 2: EloquaActivity -- take ActivityType attribute values
@@ -113,7 +113,7 @@ public class DimensionGenerator {
 
         public String getName() {
             return this.name;
-        }    
+        }
     }
 
     /*-
