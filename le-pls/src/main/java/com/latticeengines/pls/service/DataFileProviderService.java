@@ -42,4 +42,6 @@ public interface DataFileProviderService {
 
     void downloadPostMatchFile(HttpServletRequest request, HttpServletResponse response, String modelId,
                                String filter) throws IOException;
+    void downloadCurrentBundleFileV2(HttpServletRequest request, HttpServletResponse response, String mimeType,
+                                     String tenantId) throws Exception;
 }
