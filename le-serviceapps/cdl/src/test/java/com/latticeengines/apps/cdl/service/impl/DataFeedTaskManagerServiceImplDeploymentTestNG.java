@@ -82,17 +82,19 @@ public class DataFeedTaskManagerServiceImplDeploymentTestNG extends CDLDeploymen
                 columnMetadata.getTags().add("ExcludeFromListView");
             }
         });
+        vdbMetadata2.getVdbLoadTableConfig().getMetadataList().remove(5);
     }
 
     @Test(groups = "deployment")
     public void testCreateDataFeedTask() {
         String taskId1 = dataFeedTaskManagerService.createDataFeedTask(mainTestTenant.getId(),
                 ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_ACCOUNT,
-                "VisiDB", "", "", false, "", vdbMetadata1);
+                "VisiDB", "", "", false, "1", vdbMetadata1);
         Assert.assertNotNull(taskId1);
         String taskId2 = dataFeedTaskManagerService.createDataFeedTask(mainTestTenant.getId(),
                 ENTITY_ACCOUNT + FEED_TYPE_SUFFIX, ENTITY_ACCOUNT,
-                "VisiDB", "", "", false, "", vdbMetadata2);
+                "VisiDB", "", "", false, "2", vdbMetadata2);
+
         Assert.assertEquals(taskId1, taskId2);
     }
 

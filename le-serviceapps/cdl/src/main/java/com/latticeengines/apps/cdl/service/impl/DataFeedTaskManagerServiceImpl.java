@@ -186,12 +186,13 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 Table finalTemplate = mergeTable(originMeta, newMeta);
-                finalTemplate.setUpdateBy(user);
+                finalTemplate.setUpdatedBy(user);
                 if (!finalSchemaCheck(customerSpace, finalTemplate, feedType, entity, withoutId,
                         batonService.isEntityMatchEnabled(customerSpace))) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");
                 }
                 dataFeedTask.setImportTemplate(finalTemplate);
+                metadataProxy.updateTable(customerSpace.toString(), finalTemplate.getName(), finalTemplate);
                 dataFeedTaskService.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
                 log.info(String.format("DataFeedTask %s template has been updated by user: %s",
