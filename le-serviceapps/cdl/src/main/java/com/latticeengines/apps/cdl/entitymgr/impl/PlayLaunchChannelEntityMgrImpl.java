@@ -150,6 +150,9 @@ public class PlayLaunchChannelEntityMgrImpl
             playLaunchChannel.setExpirationDate(
                     PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(playLaunchChannel));
         }
+        if (playLaunchChannel.getMaxAccountsToLaunch() < 0) {
+            playLaunchChannel.setMaxAccountsToLaunch(null);
+        }
         playLaunchChannel.setLookupIdMap(lookupIdMap);
         playLaunchChannel.setId(playLaunchChannel.generateChannelId());
         playLaunchChannelDao.create(playLaunchChannel);
@@ -160,9 +163,6 @@ public class PlayLaunchChannelEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRED)
     public PlayLaunchChannel updatePlayLaunchChannel(PlayLaunchChannel existingPlayLaunchChannel,
             PlayLaunchChannel updatedChannel) {
-        if (updatedChannel.getMaxAccountsToLaunch() != null) {
-            existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
-        }
         if (updatedChannel.getBucketsToLaunch() != null) {
             existingPlayLaunchChannel.setBucketsToLaunch(updatedChannel.getBucketsToLaunch());
         }
