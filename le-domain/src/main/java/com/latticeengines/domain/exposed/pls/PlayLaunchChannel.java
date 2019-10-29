@@ -309,7 +309,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     }
 
     public void setMaxAccountsToLaunch(Long maxAccountsToLaunch) {
-        this.maxAccountsToLaunch = maxAccountsToLaunch;
+        this.maxAccountsToLaunch = maxAccountsToLaunch < 0 ? null : maxAccountsToLaunch;
     }
 
     public Set<RatingBucketName> getBucketsToLaunch() {

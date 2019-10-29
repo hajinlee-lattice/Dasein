@@ -170,11 +170,7 @@ public class PlayLaunchChannelEntityMgrImpl
             existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
         }
         if (updatedChannel.getMaxAccountsToLaunch() != null) {
-            if (updatedChannel.getMaxAccountsToLaunch() < 0) {
-                existingPlayLaunchChannel.setMaxAccountsToLaunch(null);
-            } else {
-                existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
-            }
+            existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
         }
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
