@@ -96,25 +96,35 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private Scheduler scheduler = Schedulers.newParallel("verification");
 
-    @Test(groups = "deployment-app", priority = 1)
+    @Test(groups = "deployment-app", priority = 1, enabled = false)
     public void test() {
-        testMyAttributes(false);
-        testContactAttributes(false);
+        testMyAttributes(false, false);
+        testContactAttributes(false, false);
         testLDCAttrs();
         testProductSpendAttributes();
         testCuratedAccountAttributes();
     }
 
     @Test(groups = "deployment-app", priority = 2)
-    public void testEntityMatchEnabled() {
-        // Enable EntityMatch feature flag
+    public void testEntityMatchEnabledGA() {
+        // Enable EntityMatch GA feature flag
         testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
 
-        testMyAttributes(true);
-        testContactAttributes(true);
+        testMyAttributes(true, true);
+        testContactAttributes(true, true);
     }
 
-    private void testMyAttributes(boolean entityMatchEnabled) {
+    @Test(groups = "deployment-app", priority = 3)
+    public void testEntityMatchEnabled() {
+        // Enable EntityMatch feature flag
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
+        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+
+        testMyAttributes(true, false);
+        testContactAttributes(true, false);
+    }
+
+    private void testMyAttributes(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
         final Category cat = Category.ACCOUNT_ATTRIBUTES;
         checkAndVerifyCategory(cat, config -> {
             String attrName = config.getAttrName();
@@ -143,6 +153,16 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         false, true, //
                         false, false);
                 break;
+            case Partition.ACCOUNT_ID:
+                boolean canChangeExport = !onlyEntityMatchGAEnabled;
+                verifyFlags(config, cat, partition, //
+                        Active, canChangeExport, //
+                        false, false, //
+                        false, canChangeExport, //
+                        false, canChangeExport, //
+                        false, canChangeExport, //
+                        false, false);
+                break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
                         Active, true, //
@@ -158,7 +178,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private String getMyAttributesPartition(String attrName, boolean entityMatchEnabled) {
         String partiion;
-        if (getAccountSystemAttrs(entityMatchEnabled).contains(attrName)) {
+        if (entityMatchEnabled && InterfaceName.AccountId.name().equals(attrName)) {
+            partiion = Partition.ACCOUNT_ID;
+        } else if (getAccountSystemAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.SYSTEM;
         } else if (getAccountStandardAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.STD_ATTRS;
@@ -170,7 +192,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         return partiion;
     }
 
-    private void testContactAttributes(boolean entityMatchEnabled) {
+    private void testContactAttributes(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
         final Category cat = Category.CONTACT_ATTRIBUTES;
         checkAndVerifyCategory(cat, (config) -> {
             String attrName = config.getAttrName();
@@ -190,6 +212,16 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         false, true, //
                         false, false);
                 break;
+            case Partition.CONTACT_ID:
+                boolean canChangeExport = !onlyEntityMatchGAEnabled;
+                verifyFlags(config, cat, partition, //
+                        Active, canChangeExport, //
+                        false, false, //
+                        false, canChangeExport, //
+                        false, canChangeExport, //
+                        false, canChangeExport, //
+                        false, false);
+                break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
                         Active, true, //
@@ -205,7 +237,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private String getContactAttributesPartition(String attrName, boolean entityMatchEnabled) {
         String partiion;
-        if (getContactSystemAttrs(entityMatchEnabled).contains(attrName)) {
+        if (entityMatchEnabled && InterfaceName.ContactId.name().equals(attrName)) {
+            partiion = Partition.CONTACT_ID;
+        } else if (getContactSystemAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.SYSTEM;
         } else if (getContactStandardAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.STD_ATTRS;
@@ -600,6 +634,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         static final String EXTERNAL_ID = "ExternalID";
         static final String HAS_PURCHASED = "HasPurchased";
         static final String APS = "APS";
+        static final String ACCOUNT_ID = "AccountID";
+        static final String CONTACT_ID = "ContactID";
         static final String OTHERS = "Others";
 
         // skip verification on these attributes

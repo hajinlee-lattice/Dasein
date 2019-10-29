@@ -38,6 +38,9 @@ public enum Category {
     AI_INSIGHTS("AI Insights", 15), //
     WEB_VISIT_PROFILE("My Website Profile", 16); //
 
+
+    public static final String DEFAULT_SUB_CATEGORY = "Other";
+
     private static Map<String, Category> nameMap;
     private static Set<String> values;
     private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE,

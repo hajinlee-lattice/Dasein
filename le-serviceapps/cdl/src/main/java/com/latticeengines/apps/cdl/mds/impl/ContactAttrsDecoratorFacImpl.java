@@ -23,7 +23,8 @@ public class ContactAttrsDecoratorFacImpl implements ContactAttrsDecoratorFac {
         String tenantId = namespace.getCoord1();
         if (StringUtils.isNotBlank(tenantId)) {
             boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
-            return new ContactAttrsDecorator(entityMatchEnabled);
+            boolean onlyEntityMatchGAEnabled = batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(tenantId));
+            return new ContactAttrsDecorator(entityMatchEnabled, onlyEntityMatchGAEnabled);
         } else {
             return new DummyDecorator();
         }

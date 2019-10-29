@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -14,7 +13,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 /**
  * $ dpltc deploy -a admin,matchapi,pls,metadata,cdl,lp
  */
-public class ServingStoreServiceImplEntityMatchEnabledDeploymentTestNG extends ServingStoreDeploymentTestNGBase {
+abstract class ServingStoreServiceImplEntityMatchDeploymentTestNGBase extends ServingStoreDeploymentTestNGBase {
 
     @Test(groups = "deployment-app")
     private void testDecoratedMetadata() {
@@ -34,6 +33,11 @@ public class ServingStoreServiceImplEntityMatchEnabledDeploymentTestNG extends S
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
                         ColumnSelection.Predefined.Segment) //
                 .build());
+        cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.AccountId.name()) //
+                .withCategory(Category.ACCOUNT_ATTRIBUTES) //
+                .withSubcategory("Account IDs") //
+                .build());
         return cms;
     }
 
@@ -45,20 +49,21 @@ public class ServingStoreServiceImplEntityMatchEnabledDeploymentTestNG extends S
         cms.put(InterfaceName.CustomerContactId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.CustomerContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
-                .withSubcategory("Other") //
+                .withSubcategory(Category.DEFAULT_SUB_CATEGORY) //
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
                         ColumnSelection.Predefined.Segment) //
                 .build());
         cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.CustomerAccountId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
-                .withSubcategory("Other") //
+                .withSubcategory(Category.DEFAULT_SUB_CATEGORY) //
+                .build());
+        cms.put(InterfaceName.ContactId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.ContactId.name()) //
+                .withCategory(Category.CONTACT_ATTRIBUTES) //
+                .withSubcategory(Category.DEFAULT_SUB_CATEGORY) //
                 .build());
         return cms;
     }
 
-    @Override
-    protected void overwriteFeatureFlag() {
-        testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
-    }
 }
