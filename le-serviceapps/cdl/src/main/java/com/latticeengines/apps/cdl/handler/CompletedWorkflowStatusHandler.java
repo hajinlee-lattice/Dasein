@@ -88,7 +88,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             playLaunch.setAudienceSize(eventDetail.getAudienceSize());
             playLaunch.setMatchedCount(eventDetail.getMatchedCount());
             //Update audience state if it exists
-            DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessage(playLaunch.getLaunchId());
+            DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessageByLaunchId(playLaunch.getLaunchId());
             if(audienceState != null && audienceState.getEventDetail() != null && audienceState.getEventDetail().getType().equals(eventDetail.getType())){
                 playLaunch.setAudienceState(eventDetail.getStatus());
             }

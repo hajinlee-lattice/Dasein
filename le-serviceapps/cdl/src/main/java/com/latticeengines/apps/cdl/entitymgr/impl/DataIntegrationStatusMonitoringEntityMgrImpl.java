@@ -95,7 +95,12 @@ public class DataIntegrationStatusMonitoringEntityMgrImpl
 
     @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
     @Override
-    public DataIntegrationStatusMessage getLatestMessage(String launchId) {
-        return getReaderRepo().findLatestMsg(launchId);
+    public DataIntegrationStatusMessage getLatestMessageByLaunchId(String launchId) {
+        List<DataIntegrationStatusMessage> messages = getReaderRepo().getMessagesByLaunchId(launchId);
+        if(messages != null && !messages.isEmpty()){
+            return messages.get(0);
+        }
+        return null;
+
     }
 }
