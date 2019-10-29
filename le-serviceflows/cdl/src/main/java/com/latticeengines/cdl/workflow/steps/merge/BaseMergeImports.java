@@ -112,13 +112,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
-        List<Action> hardDeleteActions = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
         softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
-        if (CollectionUtils.isNotEmpty(hardDeleteActions)) {
-            skipSoftDelete = true;
-        } else {
-            skipSoftDelete = CollectionUtils.isEmpty(softDeleteActions);
-        }
+        skipSoftDelete = CollectionUtils.isEmpty(softDeleteActions);
 
         entity = configuration.getMainEntity();
         batchStore = entity.getBatchStore();
