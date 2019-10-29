@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStreamWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessActivityStreamWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -23,10 +24,14 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     @Inject
     private PrepareForActivityStream prepareForActivityStream;
 
+    @Inject
+    private BuildRawActivityStreamWrapper buildRawActivityStreamWrapper;
+
     @Override
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(prepareForActivityStream) //
+                .next(buildRawActivityStreamWrapper) //
                 .build();
     }
 }

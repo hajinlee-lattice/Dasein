@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJ
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
@@ -65,6 +66,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CalculateDeltaJobConfig.class, name = CalculateDeltaJobConfig.NAME), //
         @JsonSubTypes.Type(value = TestPartitionJobConfig.class, name = TestPartitionJobConfig.NAME), //
         @JsonSubTypes.Type(value = AccountContactExportConfig.class, name = AccountContactExportConfig.NAME), //
+        @JsonSubTypes.Type(value = AppendRawStreamConfig.class, name = AppendRawStreamConfig.NAME), //
 })
 public abstract class SparkJobConfig implements Serializable {
 

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -17,7 +17,7 @@ public class BuildCatalogStepConfiguration extends BaseProcessEntityStepConfigur
     private Map<String, String> catalogTables;
 
     @JsonProperty("catalog_imports")
-    private Map<String, List<CatalogImport>> catalogImports;
+    private Map<String, List<ActivityImport>> catalogImports;
 
     @JsonProperty("catalog_ingestion_behaviors")
     private Map<String, DataFeedTask.IngestionBehavior> ingestionBehaviors;
@@ -41,11 +41,11 @@ public class BuildCatalogStepConfiguration extends BaseProcessEntityStepConfigur
         this.catalogTables = catalogTables;
     }
 
-    public Map<String, List<CatalogImport>> getCatalogImports() {
+    public Map<String, List<ActivityImport>> getCatalogImports() {
         return catalogImports;
     }
 
-    public void setCatalogImports(Map<String, List<CatalogImport>> catalogImports) {
+    public void setCatalogImports(Map<String, List<ActivityImport>> catalogImports) {
         this.catalogImports = catalogImports;
     }
 

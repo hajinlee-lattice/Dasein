@@ -81,6 +81,8 @@ public enum InterfaceName {
     TransactionTime, //
     TransactionDate, //
     TransactionDayPeriod, //
+    __StreamDateId, //
+    __StreamDate, //
     TransactionCount, //
     Quantity, //
     TotalQuantity, //

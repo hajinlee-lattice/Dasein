@@ -114,7 +114,6 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         String outputScoredFilename = "/"
                 + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                 + "_scored_" + DateTime.now().getMillis();
-        String mergedOutputScoredFilename = StringUtils.appendIfMissing(outputScoredFilename, ".csv");
 
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -136,7 +135,6 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchRequestSource(MatchRequestSource.SCORING) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(outputScoredFilename) //
-                .mergeOutputFile(mergedOutputScoredFilename) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
                 .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup))//

@@ -144,11 +144,6 @@ public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConf
             return this;
         }
 
-        public Builder mergeOutputFile(String mergedFileName) {
-            scoreWorkflowConfigurationBuilder.mergeOutputFile(mergedFileName);
-            return this;
-        }
-
         public Builder outputFileFormat(ExportFormat format) {
             scoreWorkflowConfigurationBuilder.outputFileFormat(format);
             return this;

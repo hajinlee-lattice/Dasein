@@ -142,7 +142,6 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         String outputScoredFilename = "/"
                 + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                 + "_scored_" + DateTime.now().getMillis();
-        String mergedOutputScoredFilename = StringUtils.appendIfMissing(outputScoredFilename, ".csv");
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -156,7 +155,6 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(sourceFile.getTableName()) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(outputScoredFilename) //
-                .mergeOutputFile(mergedOutputScoredFilename) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
                 .setScoreTestFile(true) //
