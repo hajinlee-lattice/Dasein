@@ -8,7 +8,7 @@ BOOTSTRAP_MODE=$1
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping Spark ..."
 
-    SPARK_VERSION=2.4.3
+    SPARK_VERSION=2.4.4
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 
     if [[ ! -f "${ARTIFACT_DIR}/spark-${SPARK_VERSION}.tgz" ]]; then
