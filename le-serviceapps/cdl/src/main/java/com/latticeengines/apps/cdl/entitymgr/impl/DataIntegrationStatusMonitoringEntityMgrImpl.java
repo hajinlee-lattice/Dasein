@@ -14,6 +14,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEnti
 import com.latticeengines.apps.cdl.repository.DataIntegrationStatusMonitoringRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 
 /**
@@ -90,5 +91,11 @@ public class DataIntegrationStatusMonitoringEntityMgrImpl
     @Override
     public List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(Long tenantPid, String entityName, List<String> entityIds) {
         return getReaderRepo().findAllByTenantPidAndEntityNameAndEntityIdIn(tenantPid, entityName, entityIds);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Override
+    public DataIntegrationStatusMessage getLatestMessage(String launchId) {
+        return getReaderRepo().findLatestMsg(launchId);
     }
 }
