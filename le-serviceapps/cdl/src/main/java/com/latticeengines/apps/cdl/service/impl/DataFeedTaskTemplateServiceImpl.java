@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
@@ -52,6 +53,7 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -98,6 +100,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private S3Service s3Service;
 
     @Inject
+    private DataFeedService dataFeedService;
+
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Inject
@@ -113,7 +118,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     public boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         EntityType entityType = simpleTemplateMetadata.getEntityType();
-        if (!EntityType.WebVisit.equals(entityType) && !EntityType.WebVisitPathPattern.equals(entityType)) {
+        if (!EntityType.WebVisit.equals(entityType)
+                && !EntityType.WebVisitPathPattern.equals(entityType)
+                && !EntityType.WebVisitSourceMedium.equals(entityType)) {
+            log.error("Cannot create template for: " + entityType.getDisplayName());
             throw new RuntimeException("Cannot create template for: " + entityType.getDisplayName());
         }
         S3ImportSystem websiteSystem = s3ImportSystemService.getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
@@ -154,6 +162,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dataFeedTask.setSubType(entityType.getSubType());
         dataFeedTask.setTemplateDisplayName(dataFeedTask.getFeedType());
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
+            dataFeedService.updateDataFeed(customerSpace, "", DataFeed.Status.Initialized.getName());
+        }
 
         Tenant tenant = websiteSystem.getTenant();
         if (EntityType.WebVisitPathPattern == entityType) {
@@ -168,7 +180,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             log.info("Create WebVisitPathPattern catalog for tenant {}, catalog={}, dataFeedTaskUniqueId={}",
                     customerSpace, catalog, dataFeedTask.getUniqueId());
             attachPathPatternCatalog(tenant, catalog);
-        } else {
+        } else if (EntityType.WebVisit == entityType) {
             Catalog pathPtnCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitPathPattern.name(),
                     tenant);
             AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(tenant, dataFeedTask);

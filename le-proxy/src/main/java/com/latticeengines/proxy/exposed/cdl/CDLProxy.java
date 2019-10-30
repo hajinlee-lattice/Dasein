@@ -526,10 +526,11 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
-    public boolean createWebVisitTemplate(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
+    public boolean createWebVisitTemplate(String customerSpace,
+                                          List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/webvisit",
                 shortenCustomerSpace(customerSpace));
-        ResponseDocument<Boolean> responseDoc = post("create webvisit template", url, simpleTemplateMetadata,
+        ResponseDocument<Boolean> responseDoc = post("create webvisit template", url, simpleTemplateMetadataList,
                 ResponseDocument.class);
         if (responseDoc.isSuccess()) {
             return responseDoc.getResult();

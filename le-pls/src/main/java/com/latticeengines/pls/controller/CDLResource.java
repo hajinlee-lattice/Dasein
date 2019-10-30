@@ -334,7 +334,7 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         return cdlService.getS3ImportTemplate(customerSpace.toString(), sortBy,
-                ImmutableSet.of(EntityType.WebVisit, EntityType.WebVisitPathPattern));
+                ImmutableSet.of(EntityType.WebVisit));
     }
 
     @GetMapping(value = "/s3import/fileList")

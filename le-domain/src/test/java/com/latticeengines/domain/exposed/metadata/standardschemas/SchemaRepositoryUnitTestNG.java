@@ -108,6 +108,8 @@ public class SchemaRepositoryUnitTestNG {
             SourceMedium, CompanyName, City, State, Country, DUNS);
 
     private static final List<InterfaceName> WEBVISIT_PATHPATTERN_ATTRS = Arrays.asList(PathPatternName, PathPattern);
+
+    private static final List<InterfaceName> WEBVISIT_SOURCE_MEDIUM = Arrays.asList(SourceMedium);
     /**
      * Currently only covers testing Account & Contact schema with
      * enableEntityMatch turned on and off
@@ -205,6 +207,7 @@ public class SchemaRepositoryUnitTestNG {
                 {S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, false, TRANSACTION_ATTRS }, //
                 {S3ImportSystem.SystemType.Other, EntityType.WebVisit, true, WEBVISIT_ATTRS }, //
                 {S3ImportSystem.SystemType.Other, EntityType.WebVisitPathPattern, true, WEBVISIT_PATHPATTERN_ATTRS }, //
+                {S3ImportSystem.SystemType.Other, EntityType.WebVisitSourceMedium, true, WEBVISIT_SOURCE_MEDIUM }, //
         };
     }
 }
