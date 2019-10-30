@@ -27,6 +27,9 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
+/**
+ * dpltc deploy -a admin,pls,cdl,metadata
+ */
 public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskResourceDeploymentTestNG.class);
 
