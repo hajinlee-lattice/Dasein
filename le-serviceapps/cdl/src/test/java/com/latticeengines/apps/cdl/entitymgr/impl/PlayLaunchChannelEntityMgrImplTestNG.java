@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -135,7 +136,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         config.setAudienceName("something");
         channel2.setChannelConfig(config);
 
-        //Create Outreach
+        // Create Outreach
         lookupIdMap3 = new LookupIdMap();
         lookupIdMap3.setExternalSystemType(CDLExternalSystemType.MAP);
         lookupIdMap3.setExternalSystemName(CDLExternalSystemName.Outreach);
@@ -180,30 +181,30 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         }
 
         channel1.setCronScheduleExpression("0 0 12 ? * WED *");
-        // try {
-        // playLaunchChannelEntityMgr.createPlayLaunchChannel(channel1);
-        // Assert.fail("Should fail to create channel here");
-        // } catch (LedpException e) {
-        // Assert.assertEquals(e.getMessage(),
-        // "Validation Error: Need an expiration period if a Channel is Always On");
-        // }
+        try {
+            playLaunchChannelEntityMgr.createPlayLaunchChannel(channel1);
+            Assert.fail("Should fail to create channel here");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Validation Error: Need an expiration period if a Channel is Always On");
+        }
 
-        // channel1.setExpirationPeriodString("Pasd");
-        // try {
-        // playLaunchChannelEntityMgr.createPlayLaunchChannel(channel1);
-        // Assert.fail("Should fail to create channel here");
-        // } catch (LedpException e) {
-        // Assert.assertEquals(e.getMessage(),
-        // "Validation Error: Unable to parse the provided ExpirationPeriod: Pasd");
-        // }
-        //
-        // channel1.setExpirationPeriodString("P7M");
-        // try {
-        // playLaunchChannelEntityMgr.createPlayLaunchChannel(channel1);
-        // Assert.fail("Should fail to create channel here");
-        // } catch (LedpException e) {
-        // Assert.assertEquals(e.getCode(), LedpCode.LEDP_18232);
-        // }
+        channel1.setExpirationPeriodString("Pasd");
+        try {
+            playLaunchChannelEntityMgr.createPlayLaunchChannel(channel1);
+            Assert.fail("Should fail to create channel here");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Validation Error: Unable to parse the provided ExpirationPeriod: Pasd");
+        }
+
+        channel1.setExpirationPeriodString("P7M");
+        try {
+            playLaunchChannelEntityMgr.createPlayLaunchChannel(channel1);
+            Assert.fail("Should fail to create channel here");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_18232);
+        }
     }
 
     @Test(groups = "functional", dependsOnMethods = "testFailingCreateChannel")
@@ -259,49 +260,39 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
     public void testExpirationAndScheduling() {
-        // TODO: PLS-14902: Uncomment once UI is ready
-        // PlayLaunchChannel retrieved =
-        // playLaunchChannelEntityMgr.findById(channel1.getId());
-        //
-        // Assert.assertNotNull(retrieved);
-        // Assert.assertEquals(retrieved.getId(), channel1.getId());
-        // Assert.assertTrue(retrieved.getIsAlwaysOn());
-        // Assert.assertNotNull(retrieved.getExpirationDate());
-        //
-        // channel1.setExpirationPeriodString("P4M");
-        // channel1.setCronScheduleExpression("0 0 12 ? * MON *");
-        // Date testDate = new Date();
-        // channel1.setExpirationDate(testDate);
-        // retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved,
-        // channel1);
-        // Assert.assertNotEquals(retrieved.getExpirationDate(),
-        // channel1.getExpirationDate());
-        // Assert.assertNotEquals(retrieved.getNextScheduledLaunch(),
-        // channel1.getNextScheduledLaunch());
-        // Assert.assertEquals(retrieved.getCronScheduleExpression(),
-        // channel1.getCronScheduleExpression());
-        // Assert.assertNotEquals(retrieved.getExpirationDate(), testDate);
-        // Assert.assertEquals(retrieved.getExpirationPeriodString(), "P4M");
-        //
-        //
-        // channel1.setIsAlwaysOn(false);
-        // retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved,
-        // channel1);
-        // Assert.assertNull(retrieved.getNextScheduledLaunch());
-        // Assert.assertNull(retrieved.getExpirationDate());
-        // channel1.setIsAlwaysOn(true);
-        // channel1.setCronScheduleExpression(CRON_EXPRESSION);
-        // retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved,
-        // channel1);
-        // Assert.assertNotNull(retrieved.getNextScheduledLaunch());
-        // Assert.assertNotNull(retrieved.getExpirationDate());
-        //
-        // channel1.setIsAlwaysOn(false);
-        // retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved,
-        // channel1);
-        // Assert.assertNull(retrieved.getExpirationDate());
-        //
-        // channel1.setIsAlwaysOn(true);
+        PlayLaunchChannel retrieved = playLaunchChannelEntityMgr.findById(channel1.getId());
+
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getId(), channel1.getId());
+        Assert.assertTrue(retrieved.getIsAlwaysOn());
+        Assert.assertNotNull(retrieved.getExpirationDate());
+
+        channel1.setExpirationPeriodString("P4M");
+        channel1.setCronScheduleExpression("0 0 12 ? * MON *");
+        Date testDate = new Date();
+        channel1.setExpirationDate(testDate);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotEquals(retrieved.getExpirationDate(), channel1.getExpirationDate());
+        Assert.assertNotEquals(retrieved.getNextScheduledLaunch(), channel1.getNextScheduledLaunch());
+        Assert.assertEquals(retrieved.getCronScheduleExpression(), channel1.getCronScheduleExpression());
+        Assert.assertNotEquals(retrieved.getExpirationDate(), testDate);
+        Assert.assertEquals(retrieved.getExpirationPeriodString(), "P4M");
+
+        channel1.setIsAlwaysOn(false);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNull(retrieved.getNextScheduledLaunch());
+        Assert.assertNull(retrieved.getExpirationDate());
+        channel1.setIsAlwaysOn(true);
+        channel1.setCronScheduleExpression(CRON_EXPRESSION);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved.getNextScheduledLaunch());
+        Assert.assertNotNull(retrieved.getExpirationDate());
+
+        channel1.setIsAlwaysOn(false);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNull(retrieved.getExpirationDate());
+
+        channel1.setIsAlwaysOn(true);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testExpirationAndScheduling" })

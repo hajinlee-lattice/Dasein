@@ -431,11 +431,8 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
             Period expirationPeriod = Period.parse(channel.getExpirationPeriodString());
             return Date.from(Instant.now().atOffset(ZoneOffset.UTC).plus(expirationPeriod).toInstant());
         } catch (DateTimeParseException exp) {
-            // TODO: PLS-14902: Remove once UI is ready
-            return Date.from(Instant.now().atOffset(ZoneOffset.UTC).plus(Period.ofMonths(5)).toInstant());
-            // throw new LedpException(LedpCode.LEDP_32000, new String[] {
-            // "Unable to parse the provided ExpirationPeriod: " +
-            // channel.getExpirationPeriodString() });
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Unable to parse the provided ExpirationPeriod: " + channel.getExpirationPeriodString() });
         }
     }
 
