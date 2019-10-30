@@ -39,7 +39,8 @@ public enum Category {
     WEB_VISIT_PROFILE("My Website Profile", 16); //
 
 
-    public static final String DEFAULT_SUB_CATEGORY = "Other";
+    public static final String SUB_CAT_OTHER = "Other";
+    public static final String SUB_CAT_ACCOUNT_IDS = "Account IDs";
 
     private static Map<String, Category> nameMap;
     private static Set<String> values;

@@ -73,7 +73,7 @@ public class AccountAttrsDecorator implements Decorator {
 
         if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())
                 || InterfaceName.CustomerAccountId.name().equalsIgnoreCase(cm.getAttrName())) {
-            cm.setSubcategory("Account IDs");
+            cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
         }
 
         if (systemAttrs.contains(cm.getAttrName())) {

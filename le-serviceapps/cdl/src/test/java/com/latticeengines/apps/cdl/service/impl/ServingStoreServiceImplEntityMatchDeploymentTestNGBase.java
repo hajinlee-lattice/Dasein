@@ -29,14 +29,14 @@ abstract class ServingStoreServiceImplEntityMatchDeploymentTestNGBase extends Se
         cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.CustomerAccountId.name()) //
                 .withCategory(Category.ACCOUNT_ATTRIBUTES) //
-                .withSubcategory("Account IDs") //
+                .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
                         ColumnSelection.Predefined.Segment) //
                 .build());
         cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.AccountId.name()) //
                 .withCategory(Category.ACCOUNT_ATTRIBUTES) //
-                .withSubcategory("Account IDs") //
+                .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
                 .build());
         return cms;
     }
@@ -49,19 +49,19 @@ abstract class ServingStoreServiceImplEntityMatchDeploymentTestNGBase extends Se
         cms.put(InterfaceName.CustomerContactId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.CustomerContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
-                .withSubcategory(Category.DEFAULT_SUB_CATEGORY) //
+                .withSubcategory(Category.SUB_CAT_OTHER) //
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
                         ColumnSelection.Predefined.Segment) //
                 .build());
         cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.CustomerAccountId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
-                .withSubcategory(Category.DEFAULT_SUB_CATEGORY) //
+                .withSubcategory(Category.SUB_CAT_OTHER) //
                 .build());
         cms.put(InterfaceName.ContactId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.ContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
-                .withSubcategory(Category.DEFAULT_SUB_CATEGORY) //
+                .withSubcategory(Category.SUB_CAT_OTHER) //
                 .build());
         return cms;
     }

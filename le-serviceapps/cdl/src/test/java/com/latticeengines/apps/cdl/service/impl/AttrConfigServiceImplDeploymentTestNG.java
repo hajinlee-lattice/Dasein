@@ -96,7 +96,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private Scheduler scheduler = Schedulers.newParallel("verification");
 
-    @Test(groups = "deployment-app", priority = 1, enabled = false)
+    @Test(groups = "deployment-app", priority = 1)
     public void test() {
         testMyAttributes(false, false);
         testContactAttributes(false, false);
