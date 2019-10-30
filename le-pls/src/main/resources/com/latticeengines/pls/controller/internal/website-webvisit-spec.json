@@ -1,0 +1,173 @@
+{
+    "systemType": "Website",
+    "systemObject": "Web Visit",
+    "fieldDefinitionsRecordsMap": {
+        "General": [
+            {
+                "fieldName": "WebVisitPageUrl",
+                "fieldType": "TEXT",
+                "screenName": "Web Visit Page URL",
+                "matchingColumnNames": [
+                    "PAGE URL",
+                    "WEB_VISIT_PAGE_URL"
+                ],
+                "required": true,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "WebVisitDate",
+                "fieldType": "DATE",
+                "screenName": "Web Visit Date",
+                "matchingColumnNames": [
+                    "CREATED DATE",
+                    "WEB VISIT DATE"
+                ],
+                "required": true,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "logicalDataType": "Date",
+                "fundamentalType": "YEAR"
+            },
+            {
+                "fieldName": "UserId",
+                "fieldType": "TEXT",
+                "screenName": "User ID",
+                "matchingColumnNames": [
+                    "ID",
+                    "USER ID"
+                ],
+                "required": true,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "SourceMedium",
+                "fieldType": "TEXT",
+                "screenName": "Source Medium",
+                "matchingColumnNames": [
+                    "SOURCE MEDIUM"
+                ],
+                "required": true,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "CompanyName",
+                "fieldType": "TEXT",
+                "screenName": "Company Name",
+                "matchingColumnNames": [
+                    "COMPANY",
+                    "COMPANY NAME"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "Website",
+                "fieldType": "TEXT",
+                "screenName": "Website",
+                "matchingColumnNames": [
+                    "WEBSITE",
+                    "DOMAIN"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "NOMINAL_STAT_TYPE"
+            },
+            {
+                "fieldName": "City",
+                "fieldType": "TEXT",
+                "screenName": "City",
+                "matchingColumnNames": [
+                    "CITY",
+                    "BILLING CITY"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "State",
+                "fieldType": "TEXT",
+                "screenName": "State",
+                "matchingColumnNames": [
+                    "STATE",
+                    "PROVINCE",
+                    "STATE PROVINCE",
+                    "PROVINCE STATE",
+                    "BILLING STATE",
+                    "BILLING PROVINCE"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "Country",
+                "fieldType": "TEXT",
+                "screenName": "Country",
+                "matchingColumnNames": [
+                    "COUNTRY",
+                    "BILLING COUNTRY"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "PostalCode",
+                "fieldType": "TEXT",
+                "screenName": "Postal Code",
+                "matchingColumnNames": [
+                    "ZIP",
+                    "ZIP CODE",
+                    "POSTAL CODE",
+                    "BILLING ZIP",
+                    "BILLING ZIP CODE",
+                    "BILLING POSTAL CODE"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+
+            },
+            {
+                "fieldName": "DUNS",
+                "fieldType": "TEXT",
+                "screenName": "D-U-N-S",
+                "matchingColumnNames": [
+                    "DUNS",
+                    "DUNS NUMBER"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            }
+        ],
+        "Custom Fields": []
+    }
+}
