@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
@@ -52,6 +53,7 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -96,6 +98,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private DataFeedService dataFeedService;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -157,6 +162,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dataFeedTask.setSubType(entityType.getSubType());
         dataFeedTask.setTemplateDisplayName(dataFeedTask.getFeedType());
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
+            dataFeedService.updateDataFeed(customerSpace, "", DataFeed.Status.Initialized.getName());
+        }
 
         Tenant tenant = websiteSystem.getTenant();
         if (EntityType.WebVisitPathPattern == entityType) {
