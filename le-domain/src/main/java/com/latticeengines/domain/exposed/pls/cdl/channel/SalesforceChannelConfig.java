@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -55,6 +56,11 @@ public class SalesforceChannelConfig implements ChannelConfig {
     @Override
     public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
         return false;
+    }
+
+    @Override
+    public void populateLaunchFromChannelConfig(PlayLaunch playLaunch) {
+        playLaunch.setExcludeItemsWithoutSalesforceId(this.isSuppressAccountsWithoutLookupId());
     }
 
     @Override

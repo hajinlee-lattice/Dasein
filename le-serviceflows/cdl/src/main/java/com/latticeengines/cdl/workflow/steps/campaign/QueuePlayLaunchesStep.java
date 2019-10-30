@@ -48,6 +48,7 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
                 launch.setAddContactsTable(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class));
                 launch.setRemoveAccountsTable(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class));
                 launch.setRemoveContactsTable(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
+                launch.setLaunchState(LaunchState.Queued);
                 playProxy.updatePlayLaunch(configuration.getCustomerSpace().getTenantId(), configuration.getPlayId(),
                         configuration.getLaunchId(), launch);
                 log.info("Updated the scheduled Launch: " + configuration.getLaunchId() + " with delta tables ("

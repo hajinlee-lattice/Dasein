@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -110,6 +111,12 @@ public class LinkedInChannelConfig implements ChannelConfig {
                 : !this.audienceType.equals(updatedConfig.audienceType)) //
                 || (StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
                         : !this.audienceName.equals(updatedConfig.audienceName));
+    }
+
+    @Override
+    public void populateLaunchFromChannelConfig(PlayLaunch playLaunch) {
+        playLaunch.setAudienceId(this.getAudienceId());
+        playLaunch.setAudienceName(this.getAudienceName());
     }
 
     @Override
