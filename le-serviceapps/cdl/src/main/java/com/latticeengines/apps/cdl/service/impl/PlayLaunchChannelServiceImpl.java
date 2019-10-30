@@ -39,10 +39,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -120,10 +116,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         retrievedPlayLaunchChannel
                 .setLastLaunch(playLaunchEntityMgr.findLatestByChannel(retrievedPlayLaunchChannel.getPid()));
         return retrievedPlayLaunchChannel;
-    }
-
-    private void resetDeltaCalculations() {
-
     }
 
     @Override
@@ -215,60 +207,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel, String addAccountTable,
             String removeAccountsTable, String addContactsTable, String removeContactsTable, boolean autoLaunch) {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
+        PlayLaunch playLaunch = createPlayLaunchFromPlayAndChannel(play, playLaunchChannel, autoLaunch);
 
-        PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setTenant(MultiTenantContext.getTenant());
-        playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
-        playLaunch.setUpdatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
-        playLaunch.setCreatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
-        playLaunch.setPlay(play);
-        playLaunch.setPlayLaunchChannel(playLaunchChannel);
         playLaunch.setLaunchState(LaunchState.Queued);
-        playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
-        playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
-        playLaunch.setLaunchUnscored(playLaunchChannel.isLaunchUnscored());
-        playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
-        playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
-        playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
-        playLaunch.setTableName(createTable());
-
-        if (playLaunchChannel.getChannelConfig() instanceof MarketoChannelConfig) {
-            MarketoChannelConfig channelConfig = (MarketoChannelConfig) playLaunchChannel.getChannelConfig();
-            playLaunch.setAudienceId(channelConfig.getAudienceId());
-            playLaunch.setAudienceName(channelConfig.getAudienceName());
-            playLaunch.setFolderName(channelConfig.getFolderName());
-        } else if (playLaunchChannel.getChannelConfig() instanceof SalesforceChannelConfig) {
-            SalesforceChannelConfig channelConfig = (SalesforceChannelConfig) playLaunchChannel.getChannelConfig();
-            playLaunch.setExcludeItemsWithoutSalesforceId(channelConfig.isSuppressAccountsWithoutLookupId());
-        } else if (playLaunchChannel.getChannelConfig() instanceof LinkedInChannelConfig) {
-            LinkedInChannelConfig channelConfig = (LinkedInChannelConfig) playLaunchChannel.getChannelConfig();
-            playLaunch.setAudienceId(channelConfig.getAudienceId());
-            playLaunch.setAudienceName(channelConfig.getAudienceName());
-            channelConfig.setAudienceType(channelConfig.getAudienceType());
-        } else if (playLaunchChannel.getChannelConfig() instanceof FacebookChannelConfig) {
-            FacebookChannelConfig channelConfig = (FacebookChannelConfig) playLaunchChannel.getChannelConfig();
-            playLaunch.setAudienceId(channelConfig.getAudienceId());
-            playLaunch.setAudienceName(channelConfig.getAudienceName());
-        } else if (playLaunchChannel.getChannelConfig() instanceof OutreachChannelConfig) {
-            OutreachChannelConfig channelConfig = (OutreachChannelConfig) playLaunchChannel.getChannelConfig();
-            playLaunch.setAudienceId(channelConfig.getAudienceId());
-            playLaunch.setAudienceName(channelConfig.getAudienceName());
-            playLaunch.setFolderName(channelConfig.getFolderName());
-        }
-        playLaunch.setChannelConfig(playLaunchChannel.getChannelConfig());
-
-        Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
-        Long totalAvailableContacts = play.getTargetSegment().getContacts();
-
-        playLaunch.setAccountsSelected(totalAvailableRatedAccounts != null ? totalAvailableRatedAccounts : 0L);
-        playLaunch.setAccountsSuppressed(0L);
-        playLaunch.setAccountsErrored(0L);
-        playLaunch.setAccountsLaunched(0L);
-        playLaunch.setContactsSelected(totalAvailableContacts != null ? totalAvailableContacts : 0L);
-        playLaunch.setContactsLaunched(0L);
-        playLaunch.setContactsSuppressed(0L);
-        playLaunch.setContactsErrored(0L);
-
         playLaunch.setAddAccountsTable(addAccountTable);
         playLaunch.setRemoveAccountsTable(removeAccountsTable);
         playLaunch.setAddContactsTable(addContactsTable);
@@ -277,7 +218,49 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchEntityMgr.create(playLaunch);
         playLaunchChannel.setLastLaunch(playLaunch);
         return playLaunch;
+    }
 
+    @Override
+    public PlayLaunch createNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel) {
+        runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
+        PlayLaunch playLaunch = createPlayLaunchFromPlayAndChannel(play, playLaunchChannel, false);
+        playLaunch.setLaunchState(LaunchState.UnLaunched);
+        playLaunchEntityMgr.create(playLaunch);
+        playLaunchChannel.setLastLaunch(playLaunch);
+        return playLaunch;
+    }
+
+    private PlayLaunch createPlayLaunchFromPlayAndChannel(Play play, PlayLaunchChannel playLaunchChannel,
+            boolean autoLaunch) {
+        PlayLaunch playLaunch = new PlayLaunch();
+        playLaunch.setTenant(MultiTenantContext.getTenant());
+        playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
+        playLaunch.setUpdatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
+        playLaunch.setCreatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
+        playLaunch.setPlay(play);
+        playLaunch.setPlayLaunchChannel(playLaunchChannel);
+        playLaunch.setLaunchState(LaunchState.UnLaunched);
+        playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
+        playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
+        playLaunch.setLaunchUnscored(playLaunchChannel.isLaunchUnscored());
+        playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
+        playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
+        playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
+        playLaunch.setTableName(createTable());
+        playLaunchChannel.getChannelConfig().populateLaunchFromChannelConfig(playLaunch);
+        playLaunch.setChannelConfig(playLaunchChannel.getChannelConfig());
+
+        Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
+        Long totalAvailableContacts = play.getTargetSegment().getContacts();
+        playLaunch.setAccountsSelected(totalAvailableRatedAccounts != null ? totalAvailableRatedAccounts : 0L);
+        playLaunch.setAccountsSuppressed(0L);
+        playLaunch.setAccountsErrored(0L);
+        playLaunch.setAccountsLaunched(0L);
+        playLaunch.setContactsSelected(totalAvailableContacts != null ? totalAvailableContacts : 0L);
+        playLaunch.setContactsLaunched(0L);
+        playLaunch.setContactsSuppressed(0L);
+        playLaunch.setContactsErrored(0L);
+        return playLaunch;
     }
 
     @Override

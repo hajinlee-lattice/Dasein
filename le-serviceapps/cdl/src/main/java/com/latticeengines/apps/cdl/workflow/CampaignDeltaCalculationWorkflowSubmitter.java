@@ -33,7 +33,7 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
     @Inject
     private WorkflowProxy workflowProxy;
 
-    public Long submit(String customerSpace, String playId, String channelId) {
+    public Long submit(String customerSpace, String playId, String channelId, String launchId) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignDeltaCalculationWorkflow");
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
@@ -44,6 +44,7 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
                 .inputProperties(inputProperties) //
                 .playId(playId) //
                 .channelId(channelId) //
+                .launchId(launchId) //
                 .executionId(UUID.randomUUID().toString()) //
                 .build();
         ApplicationId appId = workflowJobService.submit(configuration);
