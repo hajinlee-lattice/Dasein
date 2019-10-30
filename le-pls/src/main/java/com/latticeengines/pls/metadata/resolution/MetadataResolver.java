@@ -701,8 +701,8 @@ public class MetadataResolver {
                         "zone setting for column %s.", timezone, columnHeaderName));
             }
         }
-        // caution: in previous design, auto-detected format can be equal to format in template if it exists
-        // in new design, auto-detected format and existing format are distinct.
+        // userFormat can equal the formatWithBestEffort format but still not match the file because the
+        // formatWithBestEffort could be reflecting the existing format from a previous template rather than the autodetected format for this file
         if (!isCorrectFormat) {
             // this is to avoid spacing issue between two if
             if (!isCorrectTimezone) {

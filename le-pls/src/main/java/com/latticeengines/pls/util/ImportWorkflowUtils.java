@@ -994,7 +994,8 @@ public class ImportWorkflowUtils {
                         }
                         // check type consistence
                         if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
-                                definition)) {
+                                definition) && !FieldDefinitionSectionName.Match_IDs.getName().equals(sectionName)
+                                && !FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)) {
                             String message = String.format("column %s is set as %s but appears to only have %s values",
                                     columnName, definition.getFieldType(),
                                     autoDetectedFieldDefinition.getFieldType());
@@ -1076,7 +1077,8 @@ public class ImportWorkflowUtils {
                         // WARNING if the auto-detected fieldType based on column data doesn’t match the Spec defined
                         // fieldType of a Lattice Field
                         if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
-                                definition)) {
+                                definition) && !FieldDefinitionSectionName.Match_To_Accounts_ID.getName().equals(sectionName)
+                                && !FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName)) {
                             String message = String.format("auto-detected fieldType %s based on column data %s " +
                                             "doesn’t match the fieldType %s of %s in current template in " +
                                             "section %s.",
@@ -1335,7 +1337,7 @@ public class ImportWorkflowUtils {
                                                 Map<String, FieldDefinition> existingFieldDefinitionMap,
                                                 Map<String, OtherTemplateData> otherTemplateDataMap,
                                                 List<FieldValidationMessage> validations,
-                                                Set<String> checkInExistingAndOtherTemplate) {
+                                                Set<String> fieldNameInExistingAndCurrentTemplate) {
         String fieldName = definition.getFieldName();
         String columnName = definition.getColumnName();
         UserDefinedType type = definition.getFieldType();
@@ -1355,7 +1357,7 @@ public class ImportWorkflowUtils {
         if (existingFieldDefinitionMap.get(fieldName) != null) {
             // check other field to elaborate further, add validation
             FieldDefinition existingFieldDefinition = existingFieldDefinitionMap.get(fieldName);
-            checkInExistingAndOtherTemplate.add(definition.getFieldName());
+            fieldNameInExistingAndCurrentTemplate.add(definition.getFieldName());
             // issue a WARNING if field type or data formats change from existing template.
             if (type != existingFieldDefinition.getFieldType()) {
                 String message = String.format("the field type for existing field mapping custom name %s -> field " +
@@ -1426,7 +1428,7 @@ public class ImportWorkflowUtils {
     private static void checkIDFields(FieldDefinition definition, String sectionName,
                                       List<FieldValidationMessage> validations) {
         if (FieldDefinitionSectionName.Match_IDs.getName().equals(sectionName) || FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)
-                || FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName)) {
+                || FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName) || FieldDefinitionSectionName.Match_To_Accounts_ID.getName().equals(sectionName)) {
             if (!UserDefinedType.TEXT.equals(definition.getFieldType())) {
                 validations.add(new FieldValidationMessage(definition.getFieldName(),definition.getColumnName(),
                         String.format("Field mapped to %s in section %s has type %s but is required to have type Text" +

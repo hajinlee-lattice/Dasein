@@ -139,7 +139,8 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.FirstName.name(),
                 FieldValidationMessage.MessageLevel.ERROR, "Required flag is not the same for attribute First Name");
 
-        // case 2: required field missing, error//Field name FirstName is required, needs set column name
+        // case 2: required field missing, error
+        // Field name FirstName is required, needs set column name
         fieldNameToContactFieldDefinition.remove(InterfaceName.FirstName.name());
         fieldDefinitionMap.put(FieldDefinitionSectionName.Contact_Fields.getName(), new ArrayList<>(fieldNameToContactFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
