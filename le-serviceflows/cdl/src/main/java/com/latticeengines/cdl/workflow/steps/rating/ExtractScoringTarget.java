@@ -80,7 +80,7 @@ public class ExtractScoringTarget extends BaseExtractRatingsStep<GenerateRatingS
         HdfsDataUnit result = null;
         if (RatingEngineType.CUSTOM_EVENT.equals(engineType)) {
             FrontEndQuery frontEndQuery = customEventQuery(engineSummary);
-            result = getEntityQueryData(frontEndQuery);
+            result = getEntityQueryData(frontEndQuery, false);
         } else if (RatingEngineType.CROSS_SELL.equals(engineType)) {
             EventFrontEndQuery frontEndQuery = crossSellQuery(engineSummary.getId(), container.getModel().getId());
             result = getEventScoringTarget(frontEndQuery);
@@ -90,10 +90,9 @@ public class ExtractScoringTarget extends BaseExtractRatingsStep<GenerateRatingS
 
     @Override
     protected GenericRecord getDummyRecord() {
-        Schema schema = AvroUtils.constructSchema("dummyScoringTarget", Arrays.asList(
-                Pair.of(InterfaceName.AccountId.name(), String.class),
-                Pair.of(InterfaceName.PeriodId.name(), Long.class)
-        ));
+        Schema schema = AvroUtils.constructSchema("dummyScoringTarget",
+                Arrays.asList(Pair.of(InterfaceName.AccountId.name(), String.class),
+                        Pair.of(InterfaceName.PeriodId.name(), Long.class)));
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         String accountId = "__Dummy__Account__";
         builder.set(InterfaceName.AccountId.name(), accountId);

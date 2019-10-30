@@ -123,7 +123,8 @@ public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchU
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
                 // 2. get DataFrame for Account and Contact
-                HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery);
+                HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery, true);
+
                 log.info("FullLaunchUniverseDataUnit: " + JsonUtils.serialize(launchDataUniverseDataUnit));
                 return launchDataUniverseDataUnit;
             } finally {
