@@ -142,7 +142,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             upsertStep = mergeStep + 1;
             diffStep = mergeStep + 2;
 
-            TransformationStepConfig upsert = upsertMaster(true, mergeStep);
+            TransformationStepConfig upsert = upsertMaster(true, mergeStep, true);
             TransformationStepConfig diff = diff(mergeStep, upsertStep);
             TransformationStepConfig report = reportDiff(diffStep);
             steps.add(upsert);
@@ -168,7 +168,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
                 diffStep = softDeleteStep + 1;
 
-                TransformationStepConfig upsert = upsertMaster(true, softDeleteStep);
+                TransformationStepConfig upsert = upsertMaster(true, softDeleteStep, false);
                 TransformationStepConfig mergeSoftDelete = mergeSoftDelete(softDeleteActions);
                 TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, upsertStep);
                 TransformationStepConfig diff = diff(mergeStep, softDeleteStep);
