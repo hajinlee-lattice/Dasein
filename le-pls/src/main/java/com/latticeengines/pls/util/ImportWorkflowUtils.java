@@ -641,7 +641,7 @@ public class ImportWorkflowUtils {
         definition.setFieldType(existingDefinition.getFieldType());
         definition.setScreenName(screenName);
         definition.setColumnName(existingDefinition.getColumnName());
-        definition.setRequired(isRequired || existingDefinition.isRequired());
+        definition.setRequired(isRequired);
         if (UserDefinedType.DATE.equals(definition.getFieldType())) {
             definition.setDateFormat(existingDefinition.getDateFormat());
             definition.setTimeFormat(existingDefinition.getTimeFormat());
