@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -135,7 +136,7 @@ public class DataFeedTaskResource {
         dataFeedTaskService.addTableToQueue(customerSpace, taskId, tableName);
     }
 
-    @RequestMapping(value = "/{taskId}/addtablestoqueue", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping("/{taskId}/addtablestoqueue")
     @ResponseBody
     @ApiOperation(value = "Add tables to data feed task table queue")
     public void addTablesToQueue(@PathVariable String customerSpace, @PathVariable String taskId,
