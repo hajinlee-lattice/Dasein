@@ -110,7 +110,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         EaiImportJobDetail webVisitDetail =
                 eaiJobDetailProxy.getImportJobDetailByCollectionIdentifier(webVisitDataFeedTask.getUniqueId());
         // 90 rows has field exceeds 1000 chars, 2 rows has invalid url
-        verifyEaiJobDetail(webVisitDetail, 92L, 208);
+        verifyEaiJobDetail(webVisitDetail, 90L, 210);
 
         // call separate api to create web visit path pattern template
         File pathPatternTemplateFile =
@@ -118,7 +118,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         cdlService.createWebVisitTemplate(customerSpace, EntityType.WebVisitPathPattern,
                 new FileInputStream(pathPatternTemplateFile));
         getDataFeedTask(ENTITY_CATALOG);
-        // 11 valid url path pattern, fail the import
+        // 13 valid url path pattern, fail the import
         startCDLImportWithTemplateData(webVisitPathPatternDataFeedTask, JobStatus.FAILED);
 
 
@@ -135,8 +135,8 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyReport(accountReport, 3L, 3L, 47L);
         verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 0L, 2L, 0L);
-        verifyReport(webVisitReport, 92L, 92L, 208L);
-        verifyReport(webVisitPathPatternReport, 2L, 2L, 11L);
+        verifyReport(webVisitReport, 90L, 90L, 210L);
+        verifyReport(webVisitPathPatternReport, 0L, 0L, 13L);
     }
 
     @Test(groups = "deployment")

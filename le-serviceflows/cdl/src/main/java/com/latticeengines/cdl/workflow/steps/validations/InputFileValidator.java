@@ -29,8 +29,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ActivityStreamFileValidationConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.CatalogFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ContactFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
@@ -207,19 +205,6 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             productConfig.setEnableEntityMatchGA(enableEntityMatchGA);
             productConfig.setDataFeedTaskId(configuration.getDataFeedTaskId());
             return productConfig;
-        case ActivityStream:
-            ActivityStreamFileValidationConfiguration activityStreamConfig =
-                    new ActivityStreamFileValidationConfiguration();
-            activityStreamConfig.setEntity(entity);
-            activityStreamConfig.setPathList(pathList);
-            activityStreamConfig.setEnableEntityMatchGA(enableEntityMatchGA);
-            return activityStreamConfig;
-        case Catalog:
-            CatalogFileValidationConfiguration catalogConfig = new CatalogFileValidationConfiguration();
-            catalogConfig.setEntity(entity);
-            catalogConfig.setPathList(pathList);
-            catalogConfig.setEnableEntityMatchGA(enableEntityMatchGA);
-            return catalogConfig;
         default:
             return null;
         }
