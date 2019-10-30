@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -96,9 +97,11 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         try {
             getCurrentBundleResponse();
         } catch (Exception e) {
-            Assert.assertEquals(e.getMessage(), "No bundle file due to empty actions");
+            Assert.assertTrue(e instanceof  RuntimeException);
         }
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        importData(BusinessEntity.Product, "ProductBundles.csv", null,
+                false, false, DataFeedTask.SubType.Bundle.name());
+        processAnalyze();
         // get current bundle after PA
         try {
             byte[] bytes2 = getCurrentBundleResponse();
@@ -123,6 +126,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
 
     @Test(groups = "end2end", dependsOnMethods = "testDownloadCurrentBundleFile")
     public void testProductBundle() throws Exception {
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         // create bundle related segment
         createTestSegmentProductBundle();
 
@@ -149,7 +153,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         RatingEngine ai = createCrossSellEngine(segment, summary, PredictionType.EXPECTED_VALUE);
         activateRatingEngine(ai.getId());
         ApplicationId applicationId = importDataWithApplicationId(BusinessEntity.Product, "ProductBundles_Validations.csv", null,
-                false, false);
+                false, false, DataFeedTask.SubType.Bundle.name());
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.FAILED);
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);

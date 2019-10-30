@@ -718,24 +718,24 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void importData(BusinessEntity entity, String s3FileName) {
-        importData(entity, s3FileName, null, false, false);
+        importData(entity, s3FileName, null, false, false, null);
     }
 
     void importData(BusinessEntity entity, String s3FileName, String systemName) {
-        importData(entity, s3FileName, getFeedType(entity.name(), systemName), false, false);
+        importData(entity, s3FileName, getFeedType(entity.name(), systemName), false, false, null);
     }
 
     void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
-            boolean outsizeFlag) {
+            boolean outsizeFlag, String subType) {
         ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed,
-                outsizeFlag);
+                outsizeFlag, subType);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
 
     ApplicationId importDataWithApplicationId(BusinessEntity entity, String s3FileName, String feedType,
-                                              boolean compressed, boolean outsizeFlag) {
+                                              boolean compressed, boolean outsizeFlag, String subType) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
@@ -760,7 +760,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 SourceType.FILE.getName(), feedType);
         log.info("Modified field mapping document is saved, start importing ...");
         ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template, template,
-                INITIATOR);
+                INITIATOR, subType);
         return applicationId;
     }
 
@@ -792,7 +792,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                     SourceType.FILE.getName(), feedType);
             log.info("Modified field mapping document is saved, start importing ...");
             ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), feedType, template,
-                    template, INITIATOR);
+                    template, INITIATOR, "");
             applicationIds.add(applicationId);
         }
         int count = 0;
@@ -965,10 +965,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private ApplicationId submitImport(String customerSpace, String entity, String feedType,
-            SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
+            SourceFile templateSourceFile, SourceFile dataSourceFile, String email, String subType) {
         String source = SourceType.FILE.getName();
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
-        String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType, "", "",
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType, subType,
+                "",
                 metaData);
         log.info("Creating a data feed task for " + entity + " with id " + taskId);
         if (StringUtils.isEmpty(taskId)) {
