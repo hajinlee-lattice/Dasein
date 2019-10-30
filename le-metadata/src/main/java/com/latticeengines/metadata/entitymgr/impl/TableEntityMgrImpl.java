@@ -460,6 +460,11 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
     }
 
+    @Override
+    public void merge(Table table) {
+        tableDao.merge(table);
+    }
+
     private void deleteExtractsInBackend(List<String> extractPaths) {
         final ImmutableList<String> finalPaths = ImmutableList.copyOf(extractPaths);
         new Thread(() -> finalPaths.forEach(p -> {
