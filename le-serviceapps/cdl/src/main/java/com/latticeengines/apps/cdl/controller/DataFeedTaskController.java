@@ -1,7 +1,10 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -156,10 +159,17 @@ public class DataFeedTaskController {
     @ResponseBody
     @ApiOperation(value = "Create a WebVisit template")
     public ResponseDocument<Boolean> createWebVisitTemplate(@PathVariable String customerSpace,
-                                                            @RequestBody SimpleTemplateMetadata simpleTemplateMetadata) {
+                                                            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
         try {
-            return ResponseDocument.successResponse(
-                    dataFeedTaskTemplateService.setupWebVisitProfile(customerSpace, simpleTemplateMetadata));
+            if (CollectionUtils.isNotEmpty(simpleTemplateMetadataList)) {
+                Boolean result = Boolean.TRUE;
+                for (SimpleTemplateMetadata simpleTemplateMetadata : simpleTemplateMetadataList) {
+                    result = result && dataFeedTaskTemplateService.setupWebVisitProfile(customerSpace,
+                            simpleTemplateMetadata);
+                }
+                return ResponseDocument.successResponse(result);
+            }
+            return ResponseDocument.successResponse(Boolean.FALSE);
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }

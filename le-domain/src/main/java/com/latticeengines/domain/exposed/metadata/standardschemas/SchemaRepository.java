@@ -1624,6 +1624,11 @@ public class SchemaRepository {
                 schemaTable = createTable(SchemaInterpretation.WebVisitPathPattern);
                 schemaTable.addAttributes(attrs);
                 break;
+            case WebVisitSourceMedium:
+                attrs = new ArrayList<>(Arrays.asList(attrSourceMedium()));
+                schemaTable = createTable(SchemaInterpretation.WebVisitSourceMedium);
+                schemaTable.addAttributes(attrs);
+                break;
         }
         return schemaTable;
     }
