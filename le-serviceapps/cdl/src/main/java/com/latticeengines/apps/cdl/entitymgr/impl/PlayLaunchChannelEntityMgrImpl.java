@@ -261,6 +261,7 @@ public class PlayLaunchChannelEntityMgrImpl
                     false);
             if (table != null) {
                 existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(table.getName());
+                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
             } else {
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Failed to update channel: " + updatedChannel.getId()
@@ -273,6 +274,7 @@ public class PlayLaunchChannelEntityMgrImpl
                     false);
             if (table != null) {
                 existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(table.getName());
+                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
             } else {
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Failed to update channel: " + updatedChannel.getId()
@@ -323,9 +325,8 @@ public class PlayLaunchChannelEntityMgrImpl
                     new String[] { "Need a Cron Schedule Expression if a Channel is Always On" });
         }
         if (StringUtils.isBlank(channel.getExpirationPeriodString())) {
-            // TODO: PLS-14902: Uncomment once UI is ready
-            // throw new LedpException(LedpCode.LEDP_32000,
-            // new String[] { "Need an expiration period if a Channel is Always On" });
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Need an expiration period if a Channel is Always On" });
         }
         Date expirationDate = PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(channel);
         if (Instant.now().atOffset(ZoneOffset.UTC).plusMonths(maxExpirationMonths)

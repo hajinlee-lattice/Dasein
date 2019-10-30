@@ -200,12 +200,12 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void setupLookups() {
-        campaignFrontEndQuery.setLookups(accountLookups.stream()
-                .map(cl -> new AttributeLookup(BusinessEntity.Account, cl)).collect(Collectors.toList()));
+        List<Lookup> lookups = new ArrayList<>();
+        lookups.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()));
         if (mainEntity == BusinessEntity.Contact) {
-            campaignFrontEndQuery.setLookups(contactLookups.stream()
-                    .map(cl -> new AttributeLookup(BusinessEntity.Contact, cl)).collect(Collectors.toList()));
+            lookups.add(new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name()));
         }
+        campaignFrontEndQuery.setLookups(lookups);
     }
 
     private void setupBaseRestrictions() {
