@@ -487,9 +487,9 @@ public class ImportWorkflowUtils {
     public static void generateCurrentFieldDefinitionRecord(FetchFieldDefinitionsResponse fetchResponse) {
         validateFetchFieldDefinitionsResponse(fetchResponse);
 
-        // Create a FieldDefinitionsRecord to hold the mapping recommendations to be generated based on the import CSV,
-        // the Spec, and the existing template for this System Name, System Type, and System Object.
-        FieldDefinitionsRecord record = new FieldDefinitionsRecord();
+        // Get the current FieldDefinitionsRecord which will hold the mapping recommendations to be generated based on
+        // the import CSV, the Spec, and the existing template for this System Name, System Type, and System Object.
+        FieldDefinitionsRecord record = fetchResponse.getCurrentFieldDefinitionsRecord();
 
         // Generate the set of column header names from imported file, which can be found as the keys of the
         // autodetection map.  This set will track the columns that are available to map to either new Lattice Fields
@@ -585,9 +585,6 @@ public class ImportWorkflowUtils {
             FieldDefinition recordDefinition = createNewCustomFieldDefinition(autodetectionMap.get(columnName));
             addFieldDefinitionToRecord(recordDefinition, FieldDefinitionSectionName.Custom_Fields.getName(), record);
         }
-
-        // Set the recommend FieldDefinitionsRecord in the fetch response to the record just created.
-        fetchResponse.setCurrentFieldDefinitionsRecord(record);
     }
 
     private static void validateFetchFieldDefinitionsResponse(FetchFieldDefinitionsResponse fetchResponse) {
@@ -812,6 +809,14 @@ public class ImportWorkflowUtils {
     // Metadata Attributes table.
     public static Table getTableFromFieldDefinitionsRecord(FieldDefinitionsRecord record, boolean writeAllDefinitions) {
         Table table = new Table();
+        if (StringUtils.isBlank(record.getSystemObject())) {
+            throw new IllegalArgumentException(
+                    "FieldDefinitionRecord must have SystemObject defined to create a table from it");
+        }
+        String schemaInterpretationString = SchemaInterpretation.getByName(
+                EntityType.fromDisplayNameToEntityType(record.getSystemObject()).getEntity().toString()).toString();
+        table.setName(schemaInterpretationString);
+        table.setDisplayName(schemaInterpretationString);
 
         if (record == null || MapUtils.isEmpty(record.getFieldDefinitionsRecordsMap())) {
             log.warn("getTableFromFieldDefinitionsRecord provided with null record or empty record map");
@@ -1118,7 +1123,7 @@ public class ImportWorkflowUtils {
                         if (!Boolean.TRUE.equals(definition.isRequired())) {
                             String message = String.format("Required flag is not the same for attribute %s",
                                     specDefinition.getScreenName());
-                            validations.add(new FieldValidationMessage(fieldName, null, message,
+                            validations.add(new FieldValidationMessage(fieldName, columnName, message,
                                     FieldValidationMessage.MessageLevel.ERROR));
                         }
                     }

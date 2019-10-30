@@ -38,8 +38,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     private String awsSecret;
 
     public ImportWorkflowSpec loadSpecFromS3(String systemType, String systemObject) throws Exception {
-        String fileSystemType = systemType.toLowerCase();
-        String fileSystemObject = systemObject.toLowerCase();
+        String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
+        String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
         File specFile = null;
         try {
             specFile = File.createTempFile("temp-" + fileSystemType + "-" + fileSystemObject, ".json");

@@ -19,9 +19,56 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class FieldDefinitionsRecord {
     private static final Logger log = LoggerFactory.getLogger(FieldDefinitionsRecord.class);
 
+    @JsonProperty(required = false)
+    protected String systemName;
+
+    @JsonProperty(required = false)
+    protected String systemType;
+
+    @JsonProperty(required = false)
+    protected String systemObject;
+
     // Contains the current state of the field definitions prior to the application of the requested changes.
-    @JsonProperty
-    protected Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap = new HashMap<>();
+    @JsonProperty(required = true)
+    protected Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap;
+
+    public FieldDefinitionsRecord() {
+        systemName = null;
+        systemType = null;
+        systemObject = null;
+        fieldDefinitionsRecordsMap = new HashMap<>();
+    }
+
+    public FieldDefinitionsRecord(String name, String type, String object) {
+        systemName = name;
+        systemType = type;
+        systemObject = object;
+        fieldDefinitionsRecordsMap = new HashMap<>();
+    }
+
+    public String getSystemName() {
+        return systemName;
+    }
+
+    public void setSystemName(String systemName) {
+        this.systemName = systemName;
+    }
+
+    public String getSystemType() {
+        return systemType;
+    }
+
+    public void setSystemType(String systemType) {
+        this.systemType = systemType;
+    }
+
+    public String getSystemObject() {
+        return systemObject;
+    }
+
+    public void setSystemObject(String systemObject) {
+        this.systemObject = systemObject;
+    }
 
     public Map<String, List<FieldDefinition>> getFieldDefinitionsRecordsMap() {
         return fieldDefinitionsRecordsMap;
@@ -111,6 +158,13 @@ public class FieldDefinitionsRecord {
     public boolean equals(Object object) {
         if (object instanceof FieldDefinitionsRecord) {
             FieldDefinitionsRecord record = (FieldDefinitionsRecord) object;
+
+            if (!StringUtils.equals(this.systemName, record.systemName) ||
+                    !StringUtils.equals(this.systemType, record.systemType) ||
+                    !StringUtils.equals(this.systemObject, record.systemObject)) {
+                return false;
+            }
+
             if (this.getFieldDefinitionsRecordsMap() == null || record.getFieldDefinitionsRecordsMap() == null) {
                 return this.getFieldDefinitionsRecordsMap() == record.getFieldDefinitionsRecordsMap();
             } else if (this.getFieldDefinitionsRecordsMap().size() != record.getFieldDefinitionsRecordsMap().size()) {

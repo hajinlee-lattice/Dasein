@@ -20,8 +20,8 @@ public class FieldValidationMessage {
         ERROR
     }
 
-    public FieldValidationMessage (String fieldName, String columnName, String message
-            , FieldValidationMessage.MessageLevel level) {
+    public FieldValidationMessage (String fieldName, String columnName, String message,
+                                   FieldValidationMessage.MessageLevel level) {
         this.fieldName = fieldName;
         this.columnName = columnName;
         this.message = message;
@@ -66,5 +66,11 @@ public class FieldValidationMessage {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s for field name %s, column name %s: %s", messageLevel.name(), fieldName, columnName,
+                message);
     }
 }
