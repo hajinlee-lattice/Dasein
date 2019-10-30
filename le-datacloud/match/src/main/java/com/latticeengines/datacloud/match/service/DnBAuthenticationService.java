@@ -5,21 +5,15 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 
 public interface DnBAuthenticationService {
     /**
-     * Request for DnB token
-     *
-     * @param type:
-     *            DnB key type -- realtime/batch
-     * @return token
-     */
-    String requestToken(@NotNull DnBKeyType type);
-
-    /**
-     * Request to refresh DnB token with current expired token provided
+     * Request for DnB token -- If expiredToken is not provided, return local
+     * cached token; If expiredToken is provided, compare with local cached
+     * token: if different, return local cached token, if same, request token
+     * remotely to refresh local cached token.
      *
      * @param type:
      *            DnB key type -- realtime/batch
      * @param expiredToken
-     * @return refreshed token
+     * @return token
      */
-    String refreshToken(@NotNull DnBKeyType type, @NotNull String expiredToken);
+    String requestToken(@NotNull DnBKeyType type, String expiredToken);
 }

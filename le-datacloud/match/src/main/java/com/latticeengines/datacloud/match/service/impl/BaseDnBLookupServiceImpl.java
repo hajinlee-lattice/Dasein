@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -24,17 +25,19 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jayway.jsonpath.JsonPath;
+import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContextBase;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
-public abstract class BaseDnBLookupServiceImpl<T> {
+public abstract class BaseDnBLookupServiceImpl<T extends DnBMatchContextBase> {
     private static final Logger log = LoggerFactory.getLogger(BaseDnBLookupServiceImpl.class);
 
-    @Autowired
-    private DnBAuthenticationServiceImpl dnBAuthenticationService;
+    @Inject
+    private DnBAuthenticationService dnBAuthenticationService;
 
     private RestApiClient dnbClient;
 
@@ -64,6 +67,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         String response = null;
         try {
             String token = dnBAuthenticationService.requestToken(keyType);
+            context.setToken(token);
             String url = constructUrl(context, apiType);
             HttpEntity<String> entity = constructEntity(context, token);
             if (keyType == DnBKeyType.BATCH) {

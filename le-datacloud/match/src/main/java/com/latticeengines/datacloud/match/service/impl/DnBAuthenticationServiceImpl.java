@@ -96,23 +96,13 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
 
     @Override
-    public String requestToken(@NotNull DnBKeyType type) {
+    public String requestToken(@NotNull DnBKeyType type, String expiredToken) {
         Preconditions.checkNotNull(type);
-        try {
-            return tokenCache.get(type);
-        } catch (ExecutionException e) {
-            log.error(e.getMessage(), e);
-            throw new LedpException(LedpCode.LEDP_25027, e);
-        }
-    }
-
-    @Override
-    public synchronized String refreshToken(@NotNull DnBKeyType type, @NotNull String expiredToken) {
-        Preconditions.checkNotNull(type);
-        Preconditions.checkNotNull(expiredToken);
-        String cachedToken = requestToken(type);
-        if (!expiredToken.equals(cachedToken)) {
-            return cachedToken;
+        String localToken = localRequest(type);
+        // Handles the case that expiredToken is not provided or
+        // localToken has been refreshed
+        if (!localToken.equals(expiredToken)) {
+            return localToken;
         }
         String newToken = externalRequest(type, expiredToken);
         tokenCache.put(type, newToken);
@@ -120,44 +110,66 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     }
 
     /**
-     * Request DnB token from Redis/DnB
+     * Request DnB token from local cache
+     * 
+     * @param type:
+     *            DnB key type -- realtime/batch
+     * @return localCache
+     */
+    private String localRequest(@NotNull DnBKeyType type) {
+        try {
+            return tokenCache.get(type);
+        } catch (ExecutionException e) {
+            log.error("Fail to get DnB " + type + " token from local cache", e);
+            throw new LedpException(LedpCode.LEDP_25027, e);
+        }
+    }
+
+    /**
+     * Request DnB token externally from Redis/DnB
      *
-     * When to use token cached in Redis (all the conditions should be satisfied):
-     * 1. Cached token is not empty; 
-     * 2. Cached token was created within {expireTimeInMin} minutes
-     * 3. Cached token is different with {expiredToken}
+     * When to use token cached in Redis (all the conditions should be
+     * satisfied): 1. Cached token is not empty; 2. Cached token was created
+     * within {expireTimeInMin} minutes 3. Cached token is different with
+     * {expiredToken}
+     * 
      * @param type
      * @param expiredToken
      * @return
      */
-    private String externalRequest(DnBKeyType type, String expiredToken) {
-        Pair<String, Long> cachedToken = fetchFromRedis(type);
-        if (cachedToken != null && !isTimestampExpired(cachedToken.getRight())
-                && !cachedToken.getLeft().equals(expiredToken)) {
-            return cachedToken.getLeft();
+    private synchronized String externalRequest(@NotNull DnBKeyType type, String expiredToken) {
+        String redisToken = redisRequest(type);
+        if (!redisToken.equals(expiredToken)) {
+            return redisToken;
         }
+
         return null;
     }
 
     /**
-     * Fetch DnB token from Redis with some validations in case Redis data is
+     * Request DnB token from Redis with some validations in case Redis data is
      * illegally updated outside of application
      *
      * @param type:
-     *            DnB key type
-     * @return pair of (token, created time)
+     *            DnB key type -- realtime/batch
+     * @return token
      */
-    private Pair<String, Long> fetchFromRedis(DnBKeyType type) {
+    private String redisRequest(DnBKeyType type) {
         try {
-            Object obj = redisTemplate.opsForValue().get(type);
+            Object obj = redisTemplate.opsForValue().get(type.name());
+            // pair of (token, timestamp)
             @SuppressWarnings("unchecked")
             Pair<String, Long> pair = (obj instanceof Pair) ? (Pair<String, Long>) obj : null;
             if (pair != null) {
                 pair = StringUtils.isNotBlank(pair.getLeft()) && pair.getRight() != null ? pair : null;
             }
-            return pair;
+            if (pair != null && !isTimestampExpired(pair.getRight())) {
+                return pair.getLeft();
+            } else {
+                return null;
+            }
         } catch (Exception e) {
-            log.error(String.format("Fail to load DnB token from Redis for type %s", type), e);
+            log.error("Fail to get DnB " + type + " token from redis cache", e);
             return null;
         }
     }
