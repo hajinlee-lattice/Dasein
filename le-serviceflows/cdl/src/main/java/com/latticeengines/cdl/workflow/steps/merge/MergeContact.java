@@ -87,7 +87,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
                         Collections.singletonList(matchedTable), //
                         Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
-                upsert = upsertMaster(true, dedupStep);
+                upsert = upsertMaster(true, dedupStep, skipSoftDelete);
                 if (!skipSoftDelete) {
                     mergeSoftDelete = mergeSoftDelete(softDeleteActions);
                     softDelete = softDelete(softDeleteMergeStep, upsertMasterStep);

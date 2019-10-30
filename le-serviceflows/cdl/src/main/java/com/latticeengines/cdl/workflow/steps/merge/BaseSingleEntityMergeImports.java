@@ -211,6 +211,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Arrays.asList(mergeSoftDeleteStep, mergeStep));
+        setTargetTable(step, batchStoreTablePrefix);
         SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
         softDeleteConfig.setDeleteSourceIdx(0);
         softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
@@ -222,6 +223,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+        setTargetTable(step, batchStoreTablePrefix);
         if (StringUtils.isNotBlank(inputMasterTableName)) {
             Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
             if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
@@ -238,12 +240,14 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
-    TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep) {
+    TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep, boolean setTarget) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, null);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
-        setTargetTable(step, batchStoreTablePrefix);
+        if (setTarget) {
+            setTargetTable(step, batchStoreTablePrefix);
+        }
         UpsertConfig config = getUpsertConfig(entityMatch, true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
