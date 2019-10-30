@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -263,6 +265,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     private TransformationStepConfig softDelete(int softDeleteMergeStep, Table rawTable) {
         TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(softDeleteMergeStep));
 
         String tableSourceName = "RawTransaction";
