@@ -188,11 +188,8 @@ public class DataCollectionStatusDetail implements Serializable {
         if (activityStreamMapStr == null) {
             return Collections.emptyMap();
         }
-        try {
-            return JsonUtils.deserialize(activityStreamMapStr, STREAM_MAP_TYPE);
-        } catch (Exception e) {
-            return Collections.emptyMap();
-        }
+
+        return JsonUtils.deserialize(activityStreamMapStr, STREAM_MAP_TYPE);
     }
 
     public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
