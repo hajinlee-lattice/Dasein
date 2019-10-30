@@ -18,5 +18,5 @@ public interface DataIntegrationStatusMonitoringEntityMgr {
     List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(Long tenantPid, String entityName,
             List<String> entityIds);
 
-    DataIntegrationStatusMessage getLatestMessage(String launchId);
+    DataIntegrationStatusMessage getLatestMessageByLaunchId(String launchId);
 }
