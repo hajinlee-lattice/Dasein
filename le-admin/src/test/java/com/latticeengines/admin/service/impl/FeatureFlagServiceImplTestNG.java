@@ -90,6 +90,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_GOOGLE_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_DELTA_CALCULATION, //
                 LatticeFeatureFlag.ADVANCED_MODELING, //
                 LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, //
                 LatticeFeatureFlag.MIGRATION_TENANT, //
@@ -120,6 +121,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_GOOGLE_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_DELTA_CALCULATION, //
                 LatticeFeatureFlag.ADVANCED_MODELING, //
                 LatticeFeatureFlag.MIGRATION_TENANT, //
                 LatticeFeatureFlag.PROTOTYPE_FEATURE, //

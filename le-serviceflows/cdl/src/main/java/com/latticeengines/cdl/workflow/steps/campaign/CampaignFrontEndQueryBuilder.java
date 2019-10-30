@@ -114,8 +114,13 @@ public class CampaignFrontEndQueryBuilder {
             return this;
         }
 
-        public Builder limit(long limit) {
-            queryBuilder.limit = limit;
+        public Builder limit(Long limit) {
+            if (limit != null) {
+                queryBuilder.limit = limit;
+            } else {
+                queryBuilder.limit = 0L;
+            }
+
             return this;
         }
 
