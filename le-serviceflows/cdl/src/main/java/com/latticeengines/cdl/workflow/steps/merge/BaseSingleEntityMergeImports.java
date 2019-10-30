@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
 
 import java.util.ArrayList;
@@ -208,6 +209,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep, int mergeStep) {
         TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Arrays.asList(mergeSoftDeleteStep, mergeStep));
         SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
         softDeleteConfig.setDeleteSourceIdx(0);
@@ -218,6 +220,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep, String inputMasterTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
         if (StringUtils.isNotBlank(inputMasterTableName)) {
             Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
