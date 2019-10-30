@@ -33,6 +33,8 @@ public class ProcessDimensionConfig extends SparkJobConfig {
         @JsonProperty
         public int inputIdx;
         @JsonProperty
+        public Map<String, String> renameAttrs;
+        @JsonProperty
         public Map<String, String> hashAttrs;
         @JsonProperty
         public Set<String> attrs;

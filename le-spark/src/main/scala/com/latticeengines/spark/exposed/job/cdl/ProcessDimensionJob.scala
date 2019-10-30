@@ -22,19 +22,24 @@ class ProcessDimensionJob extends AbstractSparkJob[ProcessDimensionConfig] {
     val dimDfs = dimensions mapValues { dim =>
       val attrs = dim.attrs.asScala.toSeq
       val dedupAttrs = if (dim.dedupAttrs == null) attrs else dim.dedupAttrs.asScala.toSeq
-      val hashAttrs = if (dim.hashAttrs == null) None else Some(dim.hashAttrs.asScala)
+      val hashAttrs = Option(dim.hashAttrs)
+      val renameAttrs = Option(dim.renameAttrs)
       val hashVal = udf { obj: Any => DimensionGenerator.hashDimensionValue(obj) }
 
       val allAttrNotNull = attrs.foldLeft(lit(true)) {
         (acc, attr) => acc.and(col(attr).isNotNull)
       }
-      var df = hashAttrs match {
-        case Some(attributes) => attributes.foldLeft(lattice.input(dim.inputIdx)) {
-          (inputDf, entry) => inputDf.withColumn(entry._2, hashVal(col(entry._1)))
-        }
-        case _ => lattice.input(dim.inputIdx)
-      }
 
+      // hash & rename
+      val inputDf = lattice.input(dim.inputIdx)
+      var df = hashAttrs.fold(inputDf)(_.asScala.foldLeft(inputDf) {
+        (accDf, entry) => accDf.withColumn(entry._2, hashVal(col(entry._1)))
+      })
+      df = renameAttrs.fold(df)(_.asScala.foldLeft(df) {
+        (accDf, entry) => accDf.withColumnRenamed(entry._2, entry._1)
+      })
+
+      // group by and order by frequency
       df = df.filter(allAttrNotNull)
         .groupBy(attrs.head, attrs.tail: _*)
         .agg(count("*").as(FREQ_COL))
