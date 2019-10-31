@@ -432,6 +432,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         FieldValidationResult fieldValidationResult = new FieldValidationResult();
         checkTemplateTable(fieldValidationResult, standardSizeToExclude, finalTemplate, entity, withoutId,
                 enableEntityMatch, validations);
+        fieldValidationResult.setFieldValidations(validations);
         return fieldValidationResult;
     }
 
