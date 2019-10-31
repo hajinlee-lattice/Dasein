@@ -45,6 +45,9 @@
         fs.s3n.awsAccessKeyId=${aws.default.access.key}
         fs.s3n.awsSecretAccessKey=${aws.default.secret.key.encrypted}
         fs.s3n.impl=org.apache.hadoop.fs.s3native.NativeS3FileSystem
+        fs.s3a.access.key=${aws.default.access.key}
+        fs.s3a.secret.key=${aws.default.secret.key.encrypted}
+        fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
     </yarn:configuration>
 
     <bean id="emrConfiguration" class="com.latticeengines.hadoop.bean.YarnConfigurationBeanFactory" lazy-init="true" />
