@@ -400,11 +400,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .collect(Collectors.toList());
         Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        // site that doesn't contain standard attributes
+        // size that doesn't contain standard attributes
+        boolean noOriginTemplate = false;
+        if (templateTable == null) {
+            noOriginTemplate = true;
+        }
         int sizeBeforeMerge = templateTable == null ? 0 : templateTable.getAttributes().size();
         Table templateWithStandard = mergeTable(templateTable, standardTable);
         int sizeAfterMerge = templateTable.getAttributes().size();
-        int standardSizeToExclude = sizeAfterMerge - sizeBeforeMerge;
         Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
         // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
         while (iter.hasNext()) {
@@ -428,9 +431,15 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // generate template in memory
         Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
+        int fieldSize;
+        if (noOriginTemplate) {
+            fieldSize = generatedTemplate.getAttributes().size();
+        } else {
+            fieldSize = finalTemplate.getAttributes().size() - (sizeAfterMerge - sizeBeforeMerge);
+        }
         // compare type, require flag between template and standard schema
         FieldValidationResult fieldValidationResult = new FieldValidationResult();
-        checkTemplateTable(fieldValidationResult, standardSizeToExclude, finalTemplate, entity, withoutId,
+        checkTemplateTable(fieldValidationResult, fieldSize, finalTemplate, entity, withoutId,
                 enableEntityMatch, validations);
         fieldValidationResult.setFieldValidations(validations);
         return fieldValidationResult;
@@ -460,12 +469,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return validation;
     }
 
-    void checkTemplateTable(FieldValidationResult fieldValidationResult, int standardSizeToExclude, Table finalTemplate,
+    void checkTemplateTable(FieldValidationResult fieldValidationResult, int fieldSize, Table finalTemplate,
                             String entity, boolean withoutId, boolean enableEntityMatch, List<FieldValidation> validations) {
         Map<String, Attribute> standardAttrs = new HashMap<>();
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId
                 , enableEntityMatch);
-        int fieldSize = finalTemplate.getAttributes().size() - standardSizeToExclude;
         if (BusinessEntity.Account.name().equals(entity)) {
             int limit =
                     appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
