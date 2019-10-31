@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -75,26 +76,25 @@ public class ImportSystemAttrsDecorator implements Decorator {
     private ColumnMetadata filterAccountSystemId(ColumnMetadata cm) {
         if (BusinessEntity.Account.equals(cm.getEntity())) {
             Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(cm.getAttrName());
-            cm.setDisplayName(String.format("%s_%s_ID", attrInfoPair.getLeft().getName(),
-                    removeTailingS(attrInfoPair.getRight().getDisplayName())));
-            cm.setSubcategory("Account ID");
+            cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+            cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
         }
         return cm;
     }
 
-    private String removeTailingS(String displayName) {
+    private String convertPluralToSingular(String displayName) {
         if (StringUtils.isNotEmpty(displayName) && displayName.endsWith("s")) {
             return displayName.substring(0, displayName.length() - 1);
         }
         return displayName;
     }
 
-    // Contact System ID is not
     private ColumnMetadata filterContactSystemId(ColumnMetadata cm) {
         if (BusinessEntity.Contact.equals(cm.getEntity())) {
             Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(cm.getAttrName());
-            cm.setDisplayName(String.format("%s_%s_ID", attrInfoPair.getLeft().getName(),
-                    removeTailingS(attrInfoPair.getRight().getDisplayName())));
+            cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
         }
         return cm;
     }
