@@ -815,6 +815,7 @@ public class ImportWorkflowUtils {
         }
         String schemaInterpretationString = SchemaInterpretation.getByName(
                 EntityType.fromDisplayNameToEntityType(record.getSystemObject()).getEntity().toString()).toString();
+        table.setInterpretation(schemaInterpretationString);
         table.setName(schemaInterpretationString);
         table.setDisplayName(schemaInterpretationString);
 
