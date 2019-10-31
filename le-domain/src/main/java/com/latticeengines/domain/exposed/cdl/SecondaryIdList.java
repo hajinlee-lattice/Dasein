@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +54,18 @@ public class SecondaryIdList {
         }
         SecondaryIdItem secondaryIdItem = secondaryIdItems.get(entityType);
         return secondaryIdItem == null ? StringUtils.EMPTY : secondaryIdItem.getColumnName();
+    }
+
+    @JsonIgnore
+    public Map<String, EntityType> getSecondaryIdToEntityTypeMap() {
+        if (MapUtils.isEmpty(secondaryIdItems)) {
+            return Collections.emptyMap();
+        }
+        Map<String, EntityType> idToEntityType = new HashMap<>();
+        for (Map.Entry<EntityType, SecondaryIdItem> entry : secondaryIdItems.entrySet()) {
+            idToEntityType.put(entry.getValue().getColumnName(), entry.getKey());
+        }
+        return idToEntityType;
     }
 
     @JsonIgnore
