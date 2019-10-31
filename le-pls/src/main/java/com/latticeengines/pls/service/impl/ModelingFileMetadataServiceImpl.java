@@ -407,7 +407,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         int sizeBeforeMerge = noOriginTemplate ? 0 : templateTable.getAttributes().size();
         Table templateWithStandard = mergeTable(templateTable, standardTable);
-        int sizeAfterMerge = templateTable.getAttributes().size();
+        int sizeAfterMerge = templateWithStandard.getAttributes().size();
         Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
         // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
         while (iter.hasNext()) {
