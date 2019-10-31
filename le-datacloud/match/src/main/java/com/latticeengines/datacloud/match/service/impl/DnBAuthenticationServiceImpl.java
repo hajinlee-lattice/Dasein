@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
@@ -28,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.RestApiClient;
+import com.latticeengines.redis.lock.RedisDistributedLock;
 
 @Component("dnbAuthenticationService")
 public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
@@ -80,6 +82,9 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     private RestApiClient dnbClient;
 
+    @Inject
+    private RedisDistributedLock redisLock;
+
     @PostConstruct
     public void initialize() throws Exception {
         dnbClient = RestApiClient.newExternalClient(applicationContext);
@@ -101,11 +106,13 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         String localToken = localRequest(type);
         // Handles the case that expiredToken is not provided or
         // localToken has been refreshed
-        if (!localToken.equals(expiredToken)) {
+        if (localToken != null && !localToken.equals(expiredToken)) {
             return localToken;
         }
         String newToken = externalRequest(type, expiredToken);
-        tokenCache.put(type, newToken);
+        if (newToken != null) {
+            tokenCache.put(type, newToken);
+        }
         return newToken;
     }
 
@@ -138,12 +145,57 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      * @return
      */
     private synchronized String externalRequest(@NotNull DnBKeyType type, String expiredToken) {
+        // Fetch token from local cache again in case other threads already
+        // refreshed local cache when current thread is blocked by synchronized
+        // externalRequest()
+        String localToken = localRequest(type);
+        if (localToken != null && !localToken.equals(expiredToken)) {
+            return localToken;
+        }
+
         String redisToken = redisRequest(type);
         if (!redisToken.equals(expiredToken)) {
             return redisToken;
         }
 
-        return null;
+        // Acquire the lock and go to remote DnB to refresh token
+        String lockKey = type + "Lock";
+        String reqId = UUID.randomUUID().toString();
+        boolean acquired = false;
+        int attempt = 0;
+        // Every attempt to fetch lock takes up to 5s. Try for up to 6 times so
+        // that total wait time is 30s.
+        while (attempt < 6) {
+            acquired = redisLock.lock(lockKey, reqId, 60000, true);
+            if (acquired) {
+                break;
+            }
+            // Fetch token from redis again in case other applications already
+            // refreshed redis cache
+            redisToken = redisRequest(type);
+            if (!redisToken.equals(expiredToken)) {
+                return redisToken;
+            }
+            attempt++;
+        }
+
+        if (!acquired) {
+            return null;
+        }
+        // Fetch token from redis again in case other applications already
+        // refreshed redis cache
+        redisToken = redisRequest(type);
+        if (!redisToken.equals(expiredToken)) {
+            redisLock.releaseLock(lockKey, reqId);
+            return redisToken;
+        }
+
+        String dnbToken = dnbRequest(type);
+        if (dnbToken != null) {
+            redisRefresh(type, dnbToken);
+        }
+        redisLock.releaseLock(lockKey, reqId);
+        return dnbToken;
     }
 
     /**
@@ -174,32 +226,56 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         }
     }
 
-    private String fetchFromDnB(DnBKeyType type) {
-        String token = "";
-        try {
-            String response = makeDnBRequest(type);
-            token = parseResponse(response);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        log.info("Refreshed DnB token to be {}", token);
-
-        return token;
+    /**
+     * Refresh DnB token cached in redis
+     *
+     * @param type:
+     *            DnB key type -- realtime/batch
+     * @param token
+     */
+    private void redisRefresh(DnBKeyType type, String token) {
+        redisTemplate.opsForValue().set(type.name(), Pair.of(token, System.currentTimeMillis()));
     }
 
+    /**
+     * Whether cached token has approaching expiration in timestamp
+     *
+     * @param timestamp:
+     *            create timestamp of token
+     * @return
+     */
     private boolean isTimestampExpired(long timestamp) {
         return (System.currentTimeMillis() - timestamp) > expireTimeInMin * 60_000;
     }
 
     /**
-     * Make DnB API call and return raw response
+     * Request DnB token from DnB authentication API
      *
      * @param type:
-     *            DnB key type
-     * @return response
+     *            DnB key type -- realtime/batch
+     * @return
+     */
+    private String dnbRequest(DnBKeyType type) {
+        try {
+            String response = dnbAuthenticateRequest(type);
+            String token = parseDnBResponse(response);
+            log.info("Get new DnB " + type + " token {}", token);
+            return token;
+        } catch (Exception e) {
+            log.error("Fail to get DnB " + type + " token from remote DnB API", e);
+            return null;
+        }
+    }
+
+    /**
+     * Make DnB authentication API call
+     *
+     * @param type:
+     *            DnB key type -- realtime/batch
+     * @return response: DnB authentication API response
      * @throws IOException
      */
-    private String makeDnBRequest(DnBKeyType type) throws IOException {
+    private String dnbAuthenticateRequest(DnBKeyType type) throws IOException {
         switch (type) {
         case REALTIME:
             return dnbClient.post(getHttpEntity(realtimeKey, realtimePwd), url);
@@ -225,10 +301,10 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      *            DnB API response
      * @return token
      */
-    private String parseResponse(String response) {
+    private String parseDnBResponse(String response) {
         String token = JsonPath.parse(response).read(tokenJsonPath);
-        if (token == null) {
-            throw new RuntimeException(String.format("Failed to parse token from response %s!", response));
+        if (StringUtils.isBlank(token)) {
+            throw new RuntimeException(String.format("Fail to parse DnB token from response: %s", response));
         }
         return token;
     }

@@ -71,8 +71,7 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
             Object result;
             if (lock) {
                 result = redisTemplate.execute(lockScript, Collections.singletonList(key),
-                        requestId,
-                        expire);
+                        requestId, expire);
             } else {
                 result = redisTemplate.execute(unlockScript, Collections.singletonList(key),
                         requestId);

@@ -29,15 +29,14 @@ import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContextBase;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
-public abstract class BaseDnBLookupServiceImpl<T extends DnBMatchContextBase> {
+public abstract class BaseDnBLookupServiceImpl<T> {
     private static final Logger log = LoggerFactory.getLogger(BaseDnBLookupServiceImpl.class);
 
     @Inject
-    private DnBAuthenticationService dnBAuthenticationService;
+    private DnBAuthenticationService dnbAuthenticationService;
 
     private RestApiClient dnbClient;
 
@@ -54,6 +53,8 @@ public abstract class BaseDnBLookupServiceImpl<T extends DnBMatchContextBase> {
 
     protected abstract String getResultIdPath();
 
+    protected abstract void updateTokenInContext(T context, String token);
+
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -66,8 +67,8 @@ public abstract class BaseDnBLookupServiceImpl<T extends DnBMatchContextBase> {
     public void executeLookup(T context, DnBKeyType keyType, DnBAPIType apiType) {
         String response = null;
         try {
-            String token = dnBAuthenticationService.requestToken(keyType);
-            context.setToken(token);
+            String token = dnbAuthenticationService.requestToken(keyType, null);
+            updateTokenInContext(context, token);
             String url = constructUrl(context, apiType);
             HttpEntity<String> entity = constructEntity(context, token);
             if (keyType == DnBKeyType.BATCH) {
