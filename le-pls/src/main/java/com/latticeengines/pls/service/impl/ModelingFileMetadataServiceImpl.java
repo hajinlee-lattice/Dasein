@@ -405,7 +405,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (templateTable == null) {
             noOriginTemplate = true;
         }
-        int sizeBeforeMerge = templateTable == null ? 0 : templateTable.getAttributes().size();
+        int sizeBeforeMerge = noOriginTemplate ? 0 : templateTable.getAttributes().size();
         Table templateWithStandard = mergeTable(templateTable, standardTable);
         int sizeAfterMerge = templateTable.getAttributes().size();
         Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
@@ -431,12 +431,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // generate template in memory
         Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
-        int fieldSize;
-        if (noOriginTemplate) {
-            fieldSize = generatedTemplate.getAttributes().size();
-        } else {
-            fieldSize = finalTemplate.getAttributes().size() - (sizeAfterMerge - sizeBeforeMerge);
-        }
+        int fieldSize = noOriginTemplate ? generatedTemplate.getAttributes().size() :
+                finalTemplate.getAttributes().size() - (sizeAfterMerge - sizeBeforeMerge);
         // compare type, require flag between template and standard schema
         FieldValidationResult fieldValidationResult = new FieldValidationResult();
         checkTemplateTable(fieldValidationResult, fieldSize, finalTemplate, entity, withoutId,
