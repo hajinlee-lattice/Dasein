@@ -1,18 +1,24 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataCollectionStatusDetail implements Serializable {
     private static final long serialVersionUID = 7817179046757931427L;
+
+    private static final TypeReference<Map<String, AtlasStream>> STREAM_MAP_TYPE = new TypeReference<Map<String, AtlasStream>>() {
+    };
 
     public static final String NOT_SET = "not set";
 
@@ -23,9 +29,9 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("OrigCatalogFileMap")
     private Map<String, List<String>> origCatalogFileMap;
 
-    // streamId -> stream object
-    @JsonProperty("ActivityStreamMap")
-    private Map<String, AtlasStream> activityStreamMap;
+    // JSON str streamId -> stream object
+    @JsonProperty("ActivityStreamMapStr")
+    private String activityStreamMapStr;
 
     @JsonProperty("MinTxnDate")
     private Integer minTxnDate = 0;
@@ -179,11 +185,15 @@ public class DataCollectionStatusDetail implements Serializable {
     }
 
     public Map<String, AtlasStream> getActivityStreamMap() {
-        return activityStreamMap;
+        if (activityStreamMapStr == null) {
+            return Collections.emptyMap();
+        }
+
+        return JsonUtils.deserialize(activityStreamMapStr, STREAM_MAP_TYPE);
     }
 
     public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
-        this.activityStreamMap = activityStreamMap;
+        this.activityStreamMapStr = JsonUtils.serialize(activityStreamMap);
     }
 
     public int getServingStoreVersion() {

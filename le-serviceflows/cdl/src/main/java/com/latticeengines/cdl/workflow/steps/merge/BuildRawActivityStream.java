@@ -107,6 +107,12 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
             }
             appendRawStream(steps, stream, matchedStepIdx, activeTable);
         });
+
+        if (CollectionUtils.isEmpty(steps)) {
+            log.info("No existing/new activity stream found, skip build raw stream step");
+            return null;
+        }
+
         request.setSteps(steps);
         return request;
     }

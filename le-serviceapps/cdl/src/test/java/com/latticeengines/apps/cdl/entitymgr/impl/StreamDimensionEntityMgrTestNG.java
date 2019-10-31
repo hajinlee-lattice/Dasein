@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.testng.Assert;
@@ -24,12 +26,15 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
@@ -46,10 +51,12 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
     private static final String DIM_LEAD_SOURCE = LeadSource.name();
     private static final String DIM_IS_CLOSED = IsClosed.name();
 
+    @Inject
+    private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
+
     private Map<String, StreamDimension> dimensions = new HashMap<>();
     // stream name -> associated lsit of dimensions
     private Map<String, List<StreamDimension>> dimensionMap = new HashMap<>();
-
     @Override
     protected List<String> getCatalogNames() {
         return CATALOG_NAMES;
@@ -59,6 +66,7 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
     protected List<String> getStreamNames() {
         return STREAM_NAMES;
     };
+
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -77,6 +85,15 @@ public class StreamDimensionEntityMgrTestNG extends ActivityRelatedEntityMgrImpl
         String streamName = dimension.getStream().getName();
         dimensionMap.putIfAbsent(streamName, new ArrayList<>());
         dimensionMap.get(streamName).add(dimension);
+
+        // make sure stream & dimension can be saved into datacollection status
+        DataCollectionStatus status = new DataCollectionStatus();
+        status.setTenant(mainTestTenant);
+        status.setDataCollection(dataCollection);
+        status.setVersion(DataCollection.Version.Blue);
+        status.setAccountCount(10L);
+        status.setActivityStreamMap(streams);
+        dataCollectionStatusEntityMgr.createOrUpdate(status);
     }
 
     // [ Name + Stream + Tenant ] need to be unique
