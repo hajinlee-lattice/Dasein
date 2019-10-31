@@ -33,9 +33,13 @@ public class AccountAttrsDecorator implements Decorator {
     private final Set<String> exportAttrs;
 
     private final boolean internalEnrichEnabled;
+    private final boolean entityMatchEnabled;
+    private final boolean onlyEntityMatchGAEnabled;
 
-    AccountAttrsDecorator(boolean internalEnrichEnabled, boolean entityMatchEnabled) {
+    AccountAttrsDecorator(boolean internalEnrichEnabled, boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
         this.internalEnrichEnabled = internalEnrichEnabled;
+        this.entityMatchEnabled = entityMatchEnabled;
+        this.onlyEntityMatchGAEnabled = onlyEntityMatchGAEnabled;
         this.systemAttrs = SchemaRepository //
                 .getSystemAttributes(BusinessEntity.Account, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
@@ -67,13 +71,29 @@ public class AccountAttrsDecorator implements Decorator {
         cm.setCategory(Category.ACCOUNT_ATTRIBUTES);
         cm.setAttrState(AttrState.Active);
 
+        if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())
+                || InterfaceName.CustomerAccountId.name().equalsIgnoreCase(cm.getAttrName())) {
+            cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
+        }
+
         if (systemAttrs.contains(cm.getAttrName())) {
             return cm;
         }
 
-        if (InterfaceName.AccountId.name().equalsIgnoreCase(cm.getAttrName())
-                || InterfaceName.CustomerAccountId.name().equalsIgnoreCase(cm.getAttrName())) {
-            cm.setSubcategory("Account IDs");
+        if (InterfaceName.AccountId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
+            cm.disableGroup(Segment);
+            cm.disableGroup(Enrichment);
+            cm.disableGroup(TalkingPoint);
+            cm.disableGroup(CompanyProfile);
+            cm.disableGroup(Model);
+            cm.setCanSegment(false);
+            cm.setCanModel(false);
+            if (onlyEntityMatchGAEnabled) {
+                cm.setCanEnrich(false);
+            } else {
+                cm.setCanEnrich(true);
+            }
+            return cm;
         }
 
         cm.enableGroup(Segment);
@@ -92,6 +112,7 @@ public class AccountAttrsDecorator implements Decorator {
         if (LogicalDataType.Date.equals(cm.getLogicalDataType())) {
             cm.setCanModel(false);
         }
+
         return cm;
     }
 

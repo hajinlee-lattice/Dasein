@@ -421,7 +421,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
-                    cm.setSubcategory("Other");
+                    cm.setSubcategory(Category.SUB_CAT_OTHER);
                     return toReturn;
 
                 }, () -> iterationAttributes).block();

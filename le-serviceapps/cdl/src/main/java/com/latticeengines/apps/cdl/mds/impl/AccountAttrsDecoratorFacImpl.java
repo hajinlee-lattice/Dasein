@@ -29,7 +29,8 @@ public class AccountAttrsDecoratorFacImpl implements AccountAttrsDecoratorFac {
         if (StringUtils.isNotBlank(tenantId)) {
             boolean internalEnrichEnabled = zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(tenantId));
             boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
-            return new AccountAttrsDecorator(internalEnrichEnabled, entityMatchEnabled);
+            boolean onlyEntityMatchGAEnabled = batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(tenantId));
+            return new AccountAttrsDecorator(internalEnrichEnabled, entityMatchEnabled, onlyEntityMatchGAEnabled);
         } else {
             return new DummyDecorator();
         }

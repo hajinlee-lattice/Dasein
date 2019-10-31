@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.mds.impl;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.metadata.Category;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -67,7 +68,7 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         ColumnMetadata cm = new ColumnMetadata();
         cm.setAttrName(attrName);
         cm.enableGroup(ColumnSelection.Predefined.LookupId);
-        cm.setSubcategory("Account IDs");
+        cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
         if (StringUtils.isNotBlank(type)) {
             cm.setSecondaryDisplayName(type);
         }
