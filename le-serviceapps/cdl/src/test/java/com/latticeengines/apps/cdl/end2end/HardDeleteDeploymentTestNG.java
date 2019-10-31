@@ -104,26 +104,31 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
             sb.append('\n');
             idSets.add(id);
             numRecordsInCsv++;
-            if (numRecordsInCsv == 10) {
-                break;
+            if (numRecordsInCsv == recordsBeforeDelete.size()/2 || numRecordsInCsv == recordsBeforeDelete.size() - 1) {
+
+                log.info("There are " + numRecordsInCsv + " rows in csv.");
+                String fileName = "account_delete_" + numRecordsInCsv + ".csv";
+                Resource source = new ByteArrayResource(sb.toString().getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return fileName;
+                    }
+                };
+                SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.RegisterDeleteDataTemplate,
+                        CleanupOperationType.BYUPLOAD_ID,
+                        source);
+                ApplicationId appId = cdlProxy.registerDeleteData(customerSpace, MultiTenantContext.getEmailAddress(),
+                        sourceFile.getName(), true);
+                JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+                Assert.assertEquals(JobStatus.COMPLETED, status);
+                sb = new StringBuilder();
+                sb.append("id");
+                sb.append(',');
+                sb.append("index");
+                sb.append('\n');
             }
         }
         assert (numRecordsInCsv > 0);
-        log.info("There are " + numRecordsInCsv + " rows in csv.");
-        String fileName = "account_delete.csv";
-        Resource source = new ByteArrayResource(sb.toString().getBytes()) {
-            @Override
-            public String getFilename() {
-                return fileName;
-            }
-        };
-        SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.RegisterDeleteDataTemplate,
-                CleanupOperationType.BYUPLOAD_ID,
-                source);
-        ApplicationId appId = cdlProxy.registerDeleteData(customerSpace, MultiTenantContext.getEmailAddress(),
-                sourceFile.getName(), true);
-        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
-        Assert.assertEquals(JobStatus.COMPLETED, status);
     }
 
     private List<GenericRecord> getRecords(Table table) {

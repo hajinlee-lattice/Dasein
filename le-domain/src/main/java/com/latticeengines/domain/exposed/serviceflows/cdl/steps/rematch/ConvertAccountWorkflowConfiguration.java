@@ -1,9 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch;
 
 import java.util.HashMap;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -46,14 +43,6 @@ public class ConvertAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             serviceConfiguration.setEntity(BusinessEntity.Account);
             serviceConfiguration.setBatchstoresToConvert(batchStoresToConvert);
             convertBatchStoreStepConfiguration.setConvertServiceConfig(serviceConfiguration);
-            return this;
-        }
-
-        public Builder setNeedHardDeleteAccountSet(Set<String> hardDeleteAccountSet) {
-            if (CollectionUtils.isEmpty(hardDeleteAccountSet)) {
-                deleteByUploadStepConfiguration.setSkipStep(true);
-            }
-            deleteByUploadStepConfiguration.setHardDeleteTableSet(hardDeleteAccountSet);
             return this;
         }
 

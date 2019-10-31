@@ -79,7 +79,6 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
-import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -237,8 +236,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         try {
             Set<BusinessEntity> needDeletedEntity = new HashSet<>();
             List<Action> actions = actionService.findByOwnerId(null);
-            Set<String> needHardDeleteAccountSet = getNeedHardDeleteAccountSet(actions,
-                    Boolean.TRUE.equals(request.getFullRematch()));
             List<Action> completedActions = getCompletedActions(customerSpace, actions, needDeletedEntity);
             List<Long> actionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
@@ -266,7 +263,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
-                    completedActions, actionIds, needDeletedEntity, needHardDeleteAccountSet, initialStatus,
+                    completedActions, actionIds, needDeletedEntity, initialStatus,
                     currentDataCloudBuildNumber,
                     pidWrapper.getPid());
 
@@ -649,7 +646,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, Tenant tenant,
             ProcessAnalyzeRequest request, List<Action> completedActions, List<Long> actionIds,
                                                                       Set<BusinessEntity> needDeletedEntities,
-                                                                      Set<String> needHardDeleteAccountSet,
                                                                       Status status,
             String currentDataCloudBuildNumber, long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
@@ -753,7 +749,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
                 .skipEntityMatchRematch(needSkipConvertEntities)
                 .setConvertServiceConfig(needConvertBatchStoreMap)
-                .setNeedHardDeleteAccountSet(needHardDeleteAccountSet)
                 .build();
     }
 
@@ -943,7 +938,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
-                Collections.emptyList(), importActionIds, new HashSet<>(), new HashSet<>(),
+                Collections.emptyList(), importActionIds, new HashSet<>(),
                 initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
         configuration.setFailingStep(request.getFailingStep());
@@ -1112,25 +1107,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         } else {
             needConvertBatchStoreMap.put(tableRoleInCollection, masterTable.get(0));
         }
-    }
-
-    private Set<String> getNeedHardDeleteAccountSet(List<Action> actions, boolean isFullRematch) {
-        List<Action> hardDeleteActions =
-                actions.stream().filter(action -> action.getType() == ActionType.HARD_DELETE).collect(Collectors.toList());
-        Set<String> needHardDeleteAccountSet = new HashSet<>();
-        if (CollectionUtils.isEmpty(hardDeleteActions)) {
-            return needHardDeleteAccountSet;
-        }
-        if (CollectionUtils.isNotEmpty(hardDeleteActions) && !isFullRematch) {
-            log.error("hard delete must come with rematch.");
-            throw new IllegalStateException("hard delete must come with rematch.");
-        }
-        for (Action action : hardDeleteActions) {
-            DeleteActionConfiguration deleteActionConfiguration = (DeleteActionConfiguration) action.getActionConfiguration();
-            needHardDeleteAccountSet.add(deleteActionConfiguration.getDeleteDataTable());
-        }
-        log.info("needHardDeleteTableSet is {}.", needHardDeleteAccountSet);
-        return needHardDeleteAccountSet;
     }
 
     /*-

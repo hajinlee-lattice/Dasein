@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rematch;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,18 +16,18 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CleanupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteByUploadStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
@@ -35,8 +36,6 @@ import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadStepConfiguration> {
 
     private static final String CLEANUP_TABLE_PREFIX = "DeleteByFile";
-
-    private static final String TRANSFORMER = "HardDeleteTransformer";
 
     static final String BEAN_NAME = "deleteByUploadStep";
 
@@ -79,10 +78,10 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             int mergeStep = 0;
-            TransformationStepConfig mergeDelete = concatImports();
-            TransformationStepConfig cleanup = cleanup(mergeStep);
+            TransformationStepConfig mergeDelete = mergeHardDelete();
+            TransformationStepConfig hardDelete = hardDelete(mergeStep);
             steps.add(mergeDelete);
-            steps.add(cleanup);
+            steps.add(hardDelete);
 
             request.setSteps(steps);
             return request;
@@ -92,63 +91,55 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         }
     }
 
-    private TransformationStepConfig cleanup(int inputStep) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        BusinessEntity entity = configuration.getEntity();
-
-        List<String> sourceNames = new ArrayList<>();
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        step.setInputSteps(Collections.singletonList(inputStep));
-        String masterName = masterTable.getName();
-        SourceTable source = new SourceTable(masterName, customerSpace);
-
-        sourceNames.add(masterName);
-        baseTables.put(masterName, source);
-
-        CleanupOperationType type = CleanupOperationType.BYUPLOAD_ID;
-
-        CleanupConfig config = new CleanupConfig();
-        config.setBusinessEntity(entity);
-        config.setOperationType(type);
-        config.setTransformer(TRANSFORMER);
-        config.setBaseJoinedColumns(getJoinedColumns(config.getBusinessEntity()));
-        config.setDeleteJoinedColumns(getJoinedColumns(config.getBusinessEntity()));
-
-        String configStr = appendEngineConf(config, lightEngineConfig());
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(CLEANUP_TABLE_PREFIX);
-
-        step.setBaseSources(sourceNames);
-        step.setBaseTables(baseTables);
-        step.setTransformer(TRANSFORMER);
-        step.setConfiguration(configStr);
-        step.setTargetTable(targetTable);
-
-        return step;
-    }
-
-    TransformationStepConfig concatImports() {
+    TransformationStepConfig mergeHardDelete() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
-        configuration.getHardDeleteTableSet().forEach(tblName -> addBaseTables(step, tblName));
-
+        List<Action> hardDeleteTableLists = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
+        hardDeleteTableLists.forEach(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            addBaseTables(step, configuration.getDeleteDataTable());
+        });
         MergeImportsConfig config = new MergeImportsConfig();
-        config.setDedupSrc(false);
-        config.setJoinKey(null);
+        config.setDedupSrc(true);
+        config.setJoinKey(InterfaceName.AccountId.name());
         config.setAddTimestamps(false);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         return step;
     }
 
-    protected String getConvertBatchStoreTableName() {
+    TransformationStepConfig hardDelete(int mergeSoftDeleteStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
+        String masterName = masterTable.getName();
+        SourceTable source = new SourceTable(masterName, customerSpace);
+        List<String> sourceNames = new ArrayList<>();
+        Map<String, SourceTable> baseTables = new HashMap<>();
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(CLEANUP_TABLE_PREFIX);
+
+        sourceNames.add(masterName);
+        baseTables.put(masterName, source);
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setDeleteSourceIdx(0);
+        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        step.setBaseSources(sourceNames);
+        step.setBaseTables(baseTables);
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        step.setTargetTable(targetTable);
+        return step;
+    }
+
+    private String getConvertBatchStoreTableName() {
         Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
         return (rematchTables != null) && rematchTables.get(configuration.getEntity().name()) != null ?
                 rematchTables.get(configuration.getEntity().name()) : null;
     }
 
-    protected void setRematchTableName(String tableName) {
+    private void setRematchTableName(String tableName) {
         Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
         rematchTables.put(configuration.getEntity().name(), tableName);
         putObjectInContext(REMATCH_TABLE_NAME, rematchTables);
@@ -173,12 +164,5 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         }
         step.setBaseSources(baseSources);
         step.setBaseTables(baseTables);
-    }
-
-    private CleanupConfig.JoinedColumns getJoinedColumns(BusinessEntity entity) {
-        CleanupConfig.JoinedColumns joinedColumns = new CleanupConfig.JoinedColumns();
-        InterfaceName accountId = InterfaceName.AccountId;
-        joinedColumns.setAccountId(accountId.name());
-        return joinedColumns;
     }
 }
