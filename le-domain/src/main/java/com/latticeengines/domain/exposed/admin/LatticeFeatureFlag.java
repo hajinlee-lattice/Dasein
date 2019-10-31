@@ -76,7 +76,7 @@ public enum LatticeFeatureFlag {
     @Deprecated
     ENABLE_CDL(true, "EnableCdl", "Enable Customer Data Lake"), //
     @Deprecated
-    ENABLE_TARGET_SCORE_DERIVATION("EnableTargetScoreDerivation", "Enable Target Score Derivation"), //
+    ENABLE_TARGET_SCORE_DERIVATION(true, "EnableTargetScoreDerivation", "Enable Target Score Derivation"), //
     @Deprecated
     ALWAYS_ON_CAMPAIGNS(true, "AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns");
 
