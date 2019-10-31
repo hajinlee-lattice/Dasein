@@ -71,34 +71,33 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
                 String.valueOf(enableEntityMatch)));
         boolean enableEntityMatchGA = configuration.isEnableEntityMatchGA();
-        String dataFeedTaskId = configuration.getDataFeedTaskId();
         // errorLine is used to count number of error found in this step
-        long errorLine;
+        long errorLineInValidationStep;
         InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList,
-                enableEntityMatch, enableEntityMatchGA, dataFeedTaskId);
+                enableEntityMatch, enableEntityMatchGA);
         // this variable is used to generate statistics for product
         StringBuilder statistics = new StringBuilder();
         if (fileConfiguration == null) {
             log.info(String.format(
                     "skip validation as file configuration is null, the validation for this file with %s waiting to be implemented.",
                     entity));
-            errorLine = 0L;
+            errorLineInValidationStep = 0L;
         } else {
             InputFileValidationService fileValidationService = InputFileValidationService
-                    .getValidationService(fileConfiguration.getClass().getSimpleName());
-            errorLine = fileValidationService.validate(fileConfiguration, processedRecords, statistics);
+                    .getValidationService(fileConfiguration.getClass());
+            errorLineInValidationStep = fileValidationService.validate(fileConfiguration, processedRecords, statistics);
         }
         // update eaiJobDetail if found error in validations
-        if (errorLine != 0L) {
+        if (errorLineInValidationStep != 0L) {
             eaiImportJobDetail.setPRDetail(processedRecords);
-            eaiImportJobDetail.setIgnoredRows(eaiImportJobDetail.getIgnoredRows() + errorLine);
-            eaiImportJobDetail.setProcessedRecords(eaiImportJobDetail.getProcessedRecords() - (int) errorLine);
+            eaiImportJobDetail.setIgnoredRows(eaiImportJobDetail.getIgnoredRows() + errorLineInValidationStep);
+            eaiImportJobDetail.setProcessedRecords(eaiImportJobDetail.getProcessedRecords() - (int) errorLineInValidationStep);
             eaiJobDetailProxy.updateImportJobDetail(eaiImportJobDetail);
         }
 
         // add report for this step and import data step
         long totalFailed = 0L;
-        if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
+        if (errorLineInValidationStep != 0 && BusinessEntity.Product.equals(entity)) {
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
             totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
             getJson().put(entity.toString(), eaiImportJobDetail.getTotalRows())
@@ -116,10 +115,23 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
                     .put("deduped_rows", eaiImportJobDetail.getDedupedRows()).put("total_failed_rows", totalFailed);
         }
         super.execute();
-        // make sure report first, then throw exception if necessary
-        if (errorLine != 0 && BusinessEntity.Product.equals(entity)) {
+        // make sure report first, then fail work flow if necessary
+        failWorkflowIfNeeded(entity, errorLineInValidationStep, totalFailed, eaiImportJobDetail.getProcessedRecords()
+                , statistics);
+    }
+
+    private void failWorkflowIfNeeded(BusinessEntity entity, long errorLineInValidationStep, long totalFailed,
+                                      long totalRows,
+                                      StringBuilder statistics) {
+        if (errorLineInValidationStep != 0 && BusinessEntity.Product.equals(entity)) {
             String errorMessage = String.format("Import failed because there were %s errors : %s",
                     String.valueOf(totalFailed), statistics.toString());
+            throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
+                    ImportProperty.ERROR_FILE });
+        }
+        if (totalRows > 10 && BusinessEntity.Catalog.equals(entity)) {
+            String errorMessage = String.format("%s Exceeds platform Limit - Please retry with no more than 10 path " +
+                    "patterns", String.valueOf(totalRows));
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
@@ -128,7 +140,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
 
 
     private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList,
-            boolean enableEntityMatch, boolean enableEntityMatchGA, String dataFeedTaskId) {
+            boolean enableEntityMatch, boolean enableEntityMatchGA) {
         switch (entity) {
         case Account:
             AccountFileValidationConfiguration accountConfig = new AccountFileValidationConfiguration();
