@@ -124,7 +124,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         return response.getBody();
     }
 
-    @Test(groups = "end2end", dependsOnMethods = "testDownloadCurrentBundleFile")
+    @Test(groups = "end2end")
     public void testProductBundle() throws Exception {
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         // create bundle related segment

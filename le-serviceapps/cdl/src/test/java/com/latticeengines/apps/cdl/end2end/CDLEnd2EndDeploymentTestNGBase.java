@@ -718,22 +718,26 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void importData(BusinessEntity entity, String s3FileName) {
-        importData(entity, s3FileName, null, false, false, null);
+        importData(entity, s3FileName, null, false, false);
     }
 
     void importData(BusinessEntity entity, String s3FileName, String systemName) {
-        importData(entity, s3FileName, getFeedType(entity.name(), systemName), false, false, null);
+        importData(entity, s3FileName, getFeedType(entity.name(), systemName), false, false);
     }
 
     void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
-            boolean outsizeFlag, String subType) {
+            boolean outsizeFlag) {
+        importData(entity, s3FileName, feedType, compressed, outsizeFlag, null);
+    }
+
+    void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
+                    boolean outsizeFlag, String subType) {
         ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed,
                 outsizeFlag, subType);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
-
     ApplicationId importDataWithApplicationId(BusinessEntity entity, String s3FileName, String feedType,
                                               boolean compressed, boolean outsizeFlag, String subType) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
