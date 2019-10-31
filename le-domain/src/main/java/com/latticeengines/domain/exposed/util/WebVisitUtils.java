@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +11,6 @@ import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -29,9 +27,10 @@ public class WebVisitUtils {
     /*
      * all dimensions for web visit
      */
-    public static List<StreamDimension> newWebVisitDimensions(@NotNull AtlasStream stream, Catalog pathPtnCatalog) {
+    public static List<StreamDimension> newWebVisitDimensions(@NotNull AtlasStream stream, Catalog pathPtnCatalog,
+            Catalog srcMediumCatalog) {
         StreamDimension pathPtnDim = pathPtnDimension(stream, pathPtnCatalog);
-        StreamDimension sourceMediumDim = sourceMediumDimension(stream);
+        StreamDimension sourceMediumDim = sourceMediumDimension(stream, srcMediumCatalog);
         StreamDimension userIdDim = userIdDimension(stream);
         return Arrays.asList(pathPtnDim, sourceMediumDim, userIdDim);
     }
@@ -39,18 +38,19 @@ public class WebVisitUtils {
     /*
      * Source medium profile
      */
-    public static StreamDimension sourceMediumDimension(@NotNull AtlasStream stream) {
+    public static StreamDimension sourceMediumDimension(@NotNull AtlasStream stream, Catalog srcMediumCatalog) {
         StreamDimension dim = new StreamDimension();
         dim.setName(InterfaceName.SourceMediumId.name());
         dim.setDisplayName(dim.getName());
         dim.setTenant(stream.getTenant());
         dim.setStream(stream);
         dim.addUsages(StreamDimension.Usage.Pivot);
+        dim.setCatalog(srcMediumCatalog);
 
         // hash source medium
         DimensionGenerator generator = new DimensionGenerator();
         generator.setAttribute(InterfaceName.SourceMedium.name());
-        generator.setFromCatalog(false);
+        generator.setFromCatalog(true);
         generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
         dim.setGenerator(generator);
 
@@ -118,7 +118,7 @@ public class WebVisitUtils {
      * Stream object for web visit data
      *
      * Period: Week
-     * Retention: 120d
+     * Retention: 1yr
      * Entity: Account
      * Rollup: Unique account visit, All account visit
      */
@@ -131,20 +131,7 @@ public class WebVisitUtils {
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setDateAttribute(InterfaceName.WebVisitDate.name());
         stream.setPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name()));
-        stream.setRetentionDays(120);
-        stream.setAttributeDerivers(getWebVisitAttrDerivers());
+        stream.setRetentionDays(365);
         return stream;
-    }
-
-    private static List<StreamAttributeDeriver> getWebVisitAttrDerivers() {
-        List<StreamAttributeDeriver> derivers = new ArrayList<>();
-
-        // total number of visit to target path
-        StreamAttributeDeriver visitCount = new StreamAttributeDeriver();
-        visitCount.setSourceAttributes(Collections.singletonList(InterfaceName.InternalId.name()));
-        visitCount.setTargetAttribute(InterfaceName.TotalVisits.name());
-        visitCount.setCalculation(StreamAttributeDeriver.Calculation.COUNT);
-        derivers.add(visitCount);
-        return derivers;
     }
 }

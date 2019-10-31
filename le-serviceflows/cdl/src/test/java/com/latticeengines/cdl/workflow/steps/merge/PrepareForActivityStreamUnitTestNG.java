@@ -86,9 +86,9 @@ public class PrepareForActivityStreamUnitTestNG {
                  */
                 { defaultStream(), dimensions(getDefaultDimensions()), false }, //
                 { defaultStream(), addDimension(pathPtnDimension(dummyStream(), null)), true }, //
-                { defaultStream(), dimensions(singletonList(sourceMediumDimension(dummyStream()))), true }, //
+                { defaultStream(), dimensions(singletonList(sourceMediumDimension(dummyStream(), null))), true }, //
                 { defaultStream(),
-                        dimensions(Arrays.asList(sourceMediumDimension(dummyStream()),
+                        dimensions(Arrays.asList(sourceMediumDimension(dummyStream(), null),
                                 pathPtnDimension(dummyStream(), null))),
                         true }, //
                 /*-
@@ -104,7 +104,7 @@ public class PrepareForActivityStreamUnitTestNG {
     private StreamAttributeDeriver deriver(StreamAttributeDeriver.Calculation calculation) {
         StreamAttributeDeriver visitCount = new StreamAttributeDeriver();
         visitCount.setSourceAttributes(Collections.singletonList(InterfaceName.InternalId.name()));
-        visitCount.setTargetAttribute(InterfaceName.TotalVisits.name());
+        visitCount.setTargetAttribute(InterfaceName.__Row_Count__.name());
         visitCount.setCalculation(calculation);
         return visitCount;
     }
@@ -180,7 +180,7 @@ public class PrepareForActivityStreamUnitTestNG {
 
     private List<StreamDimension> getDefaultDimensions() {
         AtlasStream stream = dummyStream();
-        return Arrays.asList(sourceMediumDimension(stream), WebVisitUtils.userIdDimension(stream));
+        return Arrays.asList(sourceMediumDimension(stream, null), WebVisitUtils.userIdDimension(stream));
     }
 
     private AtlasStream dummyStream() {
