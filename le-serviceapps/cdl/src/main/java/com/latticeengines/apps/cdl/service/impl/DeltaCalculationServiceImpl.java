@@ -17,6 +17,8 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -38,6 +40,8 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
     private String internalAppUrl;
 
     private final String campaignDeltaCalculationUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-delta-calculation";
+    private final String campaignLaunchUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/launch?is-auto-launch=true";
+    private final String setChannelScheduleUrlPrefix = "/customerspaces/{customerSpace}/plays//{playName}/channels/{channelId}/next-scheduled-date";
 
     public DeltaCalculationServiceImpl() {
         super(PropertyUtils.getProperty("common.internal.app.url"), "cdl");
@@ -52,18 +56,38 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
 
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllValidScheduledChannels();
 
-        channels = channels.stream().filter(c -> batonService.isEnabled(CustomerSpace.parse(c.getTenant().getId()),
-                LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS)).collect(Collectors.toList());
+        List<PlayLaunchChannel> deltaLaunchChannels = channels.stream()
+                .filter(c -> c.getLaunchType() == LaunchType.DELTA)
+                .filter(c -> batonService.isEnabled(CustomerSpace.parse(c.getTenant().getId()),
+                        LatticeFeatureFlag.ENABLE_DELTA_CALCULATION))
+                .collect(Collectors.toList());
 
-        log.info("Found " + channels.size() + " channels scheduled for launch");
+        long inValidDeltaLaunchChannels = channels.stream().filter(c -> c.getLaunchType() == LaunchType.DELTA)
+                .filter(c -> !batonService.isEnabled(CustomerSpace.parse(c.getTenant().getId()),
+                        LatticeFeatureFlag.ENABLE_DELTA_CALCULATION))
+                .count();
+        if (inValidDeltaLaunchChannels > 0) {
+            log.warn(
+                    "%d channels found scheduled for delta launches, in tenants inactive for delta calculation, these channels will be skipped");
+        }
 
-        long successfullyQueued = channels.stream().map(this::queueNewDeltaCalculationJob).filter(x -> x).count();
+        List<PlayLaunchChannel> fullLaunchChannels = channels.stream().filter(c -> c.getLaunchType() == LaunchType.FULL)
+                .collect(Collectors.toList());
 
-        log.info(
-                String.format("Total Delta Calculation Jobs to be Scheduled: %s, Queued: %s, Job Submission failed: %s",
-                        channels.size(), //
-                        successfullyQueued, //
-                        channels.size() - successfullyQueued));
+        log.info(String.format("Found %d channels scheduled for launch, Full Launches: %d, Delta Launches: %d",
+                channels.size(), fullLaunchChannels.size(), deltaLaunchChannels.size()));
+
+        long successfullyQueuedForDelta = deltaLaunchChannels.stream().map(this::queueNewDeltaCalculationJob)
+                .filter(x -> x).count();
+
+        long successfullyQueuedForFull = deltaLaunchChannels.stream().map(this::queueNewFullCampaignLaunch)
+                .filter(x -> x).count();
+
+        log.info(String.format(
+                "Total Delta Calculation Jobs to be Scheduled: %s, Queued Delta: %s, Queued Full Launches: %s Job Submissions failed: %s",
+                channels.size(), //
+                successfullyQueuedForDelta, //
+                successfullyQueuedForFull, channels.size() - successfullyQueuedForDelta));
         return true;
     }
 
@@ -77,7 +101,31 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
                     + channel.getId() + "  WorkflowPid: " + workflowPid);
             return true;
         } catch (Exception e) {
-            log.error("Failed to Kick off delta calculation\n", e);
+            log.error("Failed to Kick off delta calculation for channel: " + channel.getId() + " \n", e);
+            return false;
+        }
+    }
+
+    private boolean queueNewFullCampaignLaunch(PlayLaunchChannel channel) {
+        try {
+            String url = constructUrl(campaignLaunchUrlPrefix,
+                    CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                    channel.getId());
+
+            PlayLaunch launch = post("Kicking off Campaign Launch", url, null, PlayLaunch.class);
+            log.info("Queued a Campaign Launch for campaignId " + channel.getPlay().getName() + ", Channel ID: "
+                    + channel.getId() + " Launch Id: " + launch.getLaunchId() + "  ApplicationId: "
+                    + launch.getApplicationId());
+
+            url = constructUrl(setChannelScheduleUrlPrefix,
+                    CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                    channel.getId());
+            channel = post("Setting Next Scheduled Date", url, null, PlayLaunchChannel.class);
+            log.info("Next Scheduled Date for campaignId " + channel.getPlay().getName() + ", Channel ID: "
+                    + channel.getId() + " is: " + channel.getNextScheduledLaunch().toString());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to Kick off Campaign Launch for channel: " + channel.getId() + " \n", e);
             return false;
         }
     }
