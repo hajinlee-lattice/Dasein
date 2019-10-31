@@ -33,7 +33,6 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.StatusDocument;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
