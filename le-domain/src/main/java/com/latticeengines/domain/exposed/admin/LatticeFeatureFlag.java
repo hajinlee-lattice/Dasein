@@ -18,7 +18,6 @@ public enum LatticeFeatureFlag {
     ENABLE_ENTITY_MATCH("EnableEntityMatch", "Enable Entity Match"), //
     // TODO: To be retired after all the tenants are migrated to entity match
     ENABLE_ENTITY_MATCH_GA("EnableEntityMatchGA", "Enable Entity Match GA"), //
-    ENABLE_TARGET_SCORE_DERIVATION("EnableTargetScoreDerivation", "Enable Target Score Derivation"), //
     ENABLE_APS_IMPUTATION("EnableApsImputation", "Enable APS null imputation with 0"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"), //
     ALLOW_AUTO_SCHEDULE("AllowAutoSchedule", "Allow Auto Schedule"), //
@@ -76,6 +75,8 @@ public enum LatticeFeatureFlag {
     BYPASS_DNB_CACHE(true, "BypassDnbCache", "Bypass DnB Cache"), //
     @Deprecated
     ENABLE_CDL(true, "EnableCdl", "Enable Customer Data Lake"), //
+    @Deprecated
+    ENABLE_TARGET_SCORE_DERIVATION("EnableTargetScoreDerivation", "Enable Target Score Derivation"), //
     @Deprecated
     ALWAYS_ON_CAMPAIGNS(true, "AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns");
 
