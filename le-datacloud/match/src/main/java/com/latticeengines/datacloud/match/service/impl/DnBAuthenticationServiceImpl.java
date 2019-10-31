@@ -148,13 +148,16 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         // Fetch token from local cache again in case other threads already
         // refreshed local cache when current thread is blocked by synchronized
         // externalRequest()
-        String localToken = localRequest(type);
-        if (localToken != null && !localToken.equals(expiredToken)) {
-            return localToken;
+        if (expiredToken != null) {
+            String localToken = localRequest(type);
+            if (localToken != null && !localToken.equals(expiredToken)) {
+                return localToken;
+            }
         }
+        log.info("ZDD1");
 
         String redisToken = redisRequest(type);
-        if (!redisToken.equals(expiredToken)) {
+        if (redisToken != null && !redisToken.equals(expiredToken)) {
             return redisToken;
         }
 
@@ -173,7 +176,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             // Fetch token from redis again in case other applications already
             // refreshed redis cache
             redisToken = redisRequest(type);
-            if (!redisToken.equals(expiredToken)) {
+            if (redisToken != null && !redisToken.equals(expiredToken)) {
                 return redisToken;
             }
             attempt++;
@@ -185,7 +188,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         // Fetch token from redis again in case other applications already
         // refreshed redis cache
         redisToken = redisRequest(type);
-        if (!redisToken.equals(expiredToken)) {
+        if (redisToken != null && !redisToken.equals(expiredToken)) {
             redisLock.releaseLock(lockKey, reqId);
             return redisToken;
         }
