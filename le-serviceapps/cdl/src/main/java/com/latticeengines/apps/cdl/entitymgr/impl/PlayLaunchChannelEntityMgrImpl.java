@@ -150,7 +150,7 @@ public class PlayLaunchChannelEntityMgrImpl
             playLaunchChannel.setExpirationDate(
                     PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(playLaunchChannel));
         }
-        if (playLaunchChannel.getMaxAccountsToLaunch() < 0) {
+        if (playLaunchChannel.getMaxAccountsToLaunch() == null || playLaunchChannel.getMaxAccountsToLaunch() < 0) {
             playLaunchChannel.setMaxAccountsToLaunch(null);
         }
         playLaunchChannel.setLookupIdMap(lookupIdMap);
