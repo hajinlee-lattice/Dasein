@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
@@ -680,14 +681,56 @@ public class MetadataResolver {
     public boolean checkUserDateType(String columnHeaderName, String dateFormat,
                                      String timeFormat, String timezone, StringBuilder warningMessage,
                                      String formatWithBestEffort) {
-        String errorValue = null;
-        List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
-        boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
+
         if (StringUtils.isEmpty(dateFormat)) {
             return false;
         }
         String userFormat = StringUtils.isBlank(timeFormat) ? dateFormat :
                 dateFormat + TimeStampConvertUtils.SYSTEM_DELIMITER + timeFormat;
+        boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
+        ImmutableTriple<Boolean, Boolean, String> result =  checkUserFormatAndTimeZone(columnHeaderName, dateFormat,
+                timeFormat, timezone);
+        boolean isCorrectFormat = result.getLeft();
+        boolean isCorrectTimezone = result.getMiddle();
+        if (!isCorrectTimezone) {
+            if (isISO8601) {
+                warningMessage.append(String.format("Time zone should be part of value but is not for column %s.",
+                        columnHeaderName));
+            } else {
+                warningMessage.append(String.format("Time zone set to %s. Data values should not contain time " +
+                        "zone setting for column %s.", timezone, columnHeaderName));
+            }
+        }
+        // userFormat can equal the formatWithBestEffort format but still not match the file because the
+        // formatWithBestEffort could be reflecting the existing format from a previous template rather than the autodetected format for this file
+        if (!isCorrectFormat) {
+            // this is to avoid spacing issue between two if
+            if (!isCorrectTimezone) {
+                warningMessage.append(" ");
+            }
+            if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
+                warningMessage.append(String.format("%s is set to the format %s rather than the auto-detected format " +
+                                "%s based on the data in your file.",
+                        columnHeaderName, userFormat, formatWithBestEffort));
+            } else {
+                // this check the format inherit from the first time's date/time setting
+                warningMessage.append(String.format("%s is set as %s which can't parse the %s from uploaded file.",
+                        columnHeaderName, userFormat, result.getRight()));
+            }
+        }
+        return isCorrectFormat && isCorrectTimezone;
+    }
+
+    /**
+     * check current date/time format and time zone against file, return immutable triple, left indicates correct
+     * format or not, middle indicates if correct time zone or not, right indicates one error value in file
+     *
+     */
+    public ImmutableTriple<Boolean, Boolean, String> checkUserFormatAndTimeZone(String columnHeaderName,
+                                                                              String dateFormat, String timeFormat, String timezone) {
+        String errorValue = null;
+        List<String> columnFields = getColumnFieldsByHeader(columnHeaderName);
+        boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
         int conformingDateCount = 0;
         int nonConformingTimeZoneCount = 0;
         double dateThreshold = 0.1 * columnFields.size();
@@ -726,30 +769,13 @@ public class MetadataResolver {
 
             }
         }
-        if (nonConformingTimeZoneCount > 0) {
-            if (isISO8601) {
-                warningMessage.append("Time zone should be part of value but is not.");
-            } else {
-                warningMessage.append(String.format("Time zone set to %s. Value should not contain time " +
-                        "zone setting.", timezone));
-            }
-        }
-        if (conformingDateCount < dateThreshold) {
-            if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
-                warningMessage.append(String.format("%s is set to the format %s rather than the auto-detected format " +
-                                "%s based on the data in your file",
-                        columnHeaderName, userFormat, formatWithBestEffort));
-            } else {
-                // this check the format inherit from the first time's date/time setting
-                warningMessage.append(String.format("%s is set as %s which can't parse the %s from uploaded file.",
-                        columnHeaderName, userFormat, errorValue));
-            }
-            return false;
-        }
-        return true;
+        Boolean isCorrectUserFormat = conformingDateCount > dateThreshold ? Boolean.TRUE : Boolean.FALSE;
+        Boolean isCorrectTimeZone = nonConformingTimeZoneCount > 0 ? Boolean.FALSE : Boolean.TRUE;
+        return new ImmutableTriple<>(isCorrectUserFormat, isCorrectTimeZone, errorValue);
+
     }
 
-    /*
+    /**
      * Note that the returned data and time format are the user supported
      * formats not the Java 8 formats. if number of column value can be parsed
      * is more than 10% of size of columnFields, regard it as date, pick the

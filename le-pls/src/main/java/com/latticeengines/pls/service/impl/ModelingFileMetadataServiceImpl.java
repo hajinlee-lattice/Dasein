@@ -69,6 +69,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
+import com.latticeengines.domain.exposed.pls.frontend.OtherTemplateData;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
@@ -1334,6 +1335,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 validateRequest.getImportWorkflowSpec().getFieldDefinitionsRecordsMap();
         Map<String, List<FieldDefinition>> fieldDefinitionsRecordsMap =
                 validateRequest.getCurrentFieldDefinitionsRecord().getFieldDefinitionsRecordsMap();
+        Map<String, FieldDefinition> existingFieldDefinitionMap = validateRequest.getExistingFieldDefinitionsMap();
+        Map<String, OtherTemplateData> otherTemplateDataMap = validateRequest.getOtherTemplateDataMap();
 
         // 1 Generate source file and resolver
         SourceFile sourceFile = getSourceFile(importFile);
@@ -1342,7 +1345,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // 2. generate validation message
         ValidateFieldDefinitionsResponse response =
                 ImportWorkflowUtils.generateValidationResponse(fieldDefinitionsRecordsMap, autoDetectionResultsMap,
-                        specFieldDefinitionsRecordsMap, resolver);
+                        specFieldDefinitionsRecordsMap, existingFieldDefinitionMap, otherTemplateDataMap, resolver);
         // set field definition records map for ui
         response.setFieldDefinitionsRecordsMap(fieldDefinitionsRecordsMap);
         return response;
