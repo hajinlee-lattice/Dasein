@@ -41,16 +41,22 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         matchedContactTable = getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE);
-        if (StringUtils.isBlank(matchedContactTable)) {
-            throw new RuntimeException("There's no matched table found!");
+        if (StringUtils.isBlank(matchedContactTable) && skipSoftDelete) {
+            throw new RuntimeException("There's no matched table found, and no soft delete action!");
         }
 
         double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
-        Table tableSummary = metadataProxy.getTableSummary(customerSpace.toString(), matchedContactTable);
-        double newTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
-        scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
-        log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
-                scalingMultiplier, oldTableSize + newTableSize));
+        if (StringUtils.isBlank(matchedContactTable)) {
+            scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + oldTableSize);
+            log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
+                    scalingMultiplier, oldTableSize + oldTableSize));
+        } else {
+            Table tableSummary = metadataProxy.getTableSummary(customerSpace.toString(), matchedContactTable);
+            double newTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
+            scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
+            log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
+                    scalingMultiplier, oldTableSize + newTableSize));
+        }
     }
 
     @Override
