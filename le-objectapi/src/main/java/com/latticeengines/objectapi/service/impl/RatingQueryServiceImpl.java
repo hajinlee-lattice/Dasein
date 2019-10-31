@@ -135,7 +135,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            if (QueryServiceUtils.getQueryLoggingConfig()) {
+            if (queryDiagnostics.getQueryLoggingConfig()) {
                 log.info("getData using query: {}",
                         getQueryStr(frontEndQuery, version, sqlUser).replaceAll("\\r\\n|\\r|\\n", " "));
             }
