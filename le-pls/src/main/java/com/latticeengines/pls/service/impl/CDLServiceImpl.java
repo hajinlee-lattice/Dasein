@@ -707,7 +707,8 @@ public class CDLServiceImpl implements CDLService {
             DataFeedTask task = new DataFeedTask();
             task.setUniqueId(taskId);
             AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(MultiTenantContext.getTenant(), task);
-            List<StreamDimension> dimensions = WebVisitUtils.newWebVisitDimensions(webVisitStream, pathPtnCatalog);
+            List<StreamDimension> dimensions = WebVisitUtils.newWebVisitDimensions(webVisitStream, pathPtnCatalog,
+                    null);
             webVisitStream.setDimensions(dimensions);
             webVisitStream = activityStoreProxy.createStream(customerSpace, webVisitStream);
 

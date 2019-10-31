@@ -76,8 +76,8 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         totalVisit.setActivityTimeRange(createActivityTimeRange(ComparisonType.LAST,
                 Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
         totalVisit.setRollupDimensions(DIM_NAME_PATH_PATTERN);
-        totalVisit.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.InternalId.name()),
-                InterfaceName.TotalVisits.name(), StreamAttributeDeriver.Calculation.SUM));
+        totalVisit.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
+                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
         totalVisit.setCategory(Category.WEB_VISIT_PROFILE);
         totalVisit.setSubCategoryTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY);
         totalVisit.setDisplayNameTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME);
