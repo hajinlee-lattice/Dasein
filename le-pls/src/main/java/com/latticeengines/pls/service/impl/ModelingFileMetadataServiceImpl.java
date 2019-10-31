@@ -68,6 +68,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.OtherTemplateData;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
@@ -294,7 +295,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
      * in DataFeedTaskManage service
      */
     @Override
-    public List<FieldValidation> validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
+    public FieldValidationResult validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
             String entity, String source, String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
@@ -399,7 +400,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .collect(Collectors.toList());
         Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+        // site that doesn't contain standard attributes
+        int sizeBeforeMerge = templateTable.getAttributes().size();
         Table templateWithStandard = mergeTable(templateTable, standardTable);
+        int sizeAfterMerge = templateTable.getAttributes().size();
+        int standardSizeToExclude = sizeAfterMerge - sizeBeforeMerge;
         Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
         // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
         while (iter.hasNext()) {
@@ -424,9 +429,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
         // compare type, require flag between template and standard schema
-        checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch, validations);
-
-        return validations;
+        FieldValidationResult fieldValidationResult = new FieldValidationResult();
+        checkTemplateTable(fieldValidationResult, standardSizeToExclude, finalTemplate, entity, withoutId,
+                enableEntityMatch, validations);
+        return fieldValidationResult;
     }
 
     private Table mergeTable(Table templateTable, Table renderedTable) {
@@ -453,10 +459,21 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return validation;
     }
 
-    void checkTemplateTable(Table finalTemplate, String entity, boolean withoutId, boolean enableEntityMatch, List<FieldValidation> validations) {
+    void checkTemplateTable(FieldValidationResult fieldValidationResult, int standardSizeToExclude, Table finalTemplate,
+                            String entity, boolean withoutId, boolean enableEntityMatch, List<FieldValidation> validations) {
         Map<String, Attribute> standardAttrs = new HashMap<>();
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId
                 , enableEntityMatch);
+        int fieldSize = finalTemplate.getAttributes().size() - standardSizeToExclude;
+        if (BusinessEntity.Account.name().equals(entity)) {
+            int limit =
+                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
+            ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            int limit =
+                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
+            ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
+        }
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
@@ -943,15 +960,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
-        if (BusinessEntity.Account.name().equals(entity)) {
-            int limit =
-                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
-            ValidateFileHeaderUtils.checkForHeaderNum(headerFields, limit);
-        } else if (BusinessEntity.Contact.equals(entity)) {
-            int limit =
-                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
-            ValidateFileHeaderUtils.checkForHeaderNum(headerFields, limit);
-        }
 
         Collection<String> reservedWords = new ArrayList<>(
                 Arrays.asList(ReservedField.Rating.displayName, ReservedField.Percentile.displayName));

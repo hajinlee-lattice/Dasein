@@ -37,6 +37,8 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 
 public class ValidateFileHeaderUtils {
 
@@ -223,11 +225,13 @@ public class ValidateFileHeaderUtils {
         }
     }
 
-    public static void checkForHeaderNum(Set<String> headerFields, int limit) {
-        if (headerFields.size() > limit) {
-            throw new LedpException(LedpCode.LEDP_18226, new String[] {String.valueOf(limit), String.valueOf(headerFields.size())});
+    // total field size should not be greater than quota limit
+    public static void exceedQuotaFieldSize(FieldValidationResult validationResult, int fieldSize, int limit) {
+        if (fieldSize > limit) {
+            validationResult.setExceedQuotaLimit(true);
+            validationResult.setErrorMessage(LedpException.buildMessage(LedpCode.LEDP_18226,
+                    new String[]{String.valueOf(limit), String.valueOf(fieldSize)}));
         }
-
     }
 
     public static String convertFieldNameToAvroFriendlyFormat(String fieldName) {
