@@ -34,6 +34,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PlayService;
@@ -45,6 +46,7 @@ import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -56,6 +58,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -103,6 +106,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
+    private static Long defaultActiveModelQuotaLimit = 50L;
+
     @Value("${cdl.rating.service.threadpool.size:20}")
     private Integer fetcherNum;
 
@@ -114,6 +119,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private PlayEntityMgr playEntityMgr;
+
+    @Inject
+    private ZKConfigService zkConfigService;
 
     @Inject
     private SegmentService segmentService;
@@ -179,6 +187,23 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngine> result = ratingEngineEntityMgr.findAll();
         updateLastRefreshedDate(tenant.getId(), result);
         return result;
+    }
+
+    @Override
+    public DataLimit getActiveModelQuotaLimit(CustomerSpace customerSpace) {
+        String componentName = CDLComponent.componentName;
+        DataLimit dataLimit = new DataLimit();
+        Long activeModelDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
+                BusinessEntity.ActiveModel);
+        defaultActiveModelQuotaLimit = activeModelDataLimit != null ? activeModelDataLimit
+                : defaultActiveModelQuotaLimit;
+        dataLimit.setActiveModelDataQuotaLimit(defaultActiveModelQuotaLimit);
+        return dataLimit;
+    }
+
+    @Override
+    public List<String> getActiveRatingEnginesCount() {
+        return ratingEngineEntityMgr.findAllActiveModels();
     }
 
     @Override
@@ -1127,4 +1152,5 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     void setTpForParallelStream(ForkJoinPool tpForParallelStream) {
         this.tpForParallelStream = tpForParallelStream;
     }
+
 }

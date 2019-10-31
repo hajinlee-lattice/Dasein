@@ -11,6 +11,8 @@ public interface RatingEngineEntityMgr extends BaseEntityMgrRepository<RatingEng
 
     List<RatingEngine> findAllDeleted();
 
+    List<String> findAllActiveModels();
+
     List<RatingEngine> findAllByTypeAndStatus(String type, String status);
 
     List<String> findAllIdsInSegment(String segmentName);

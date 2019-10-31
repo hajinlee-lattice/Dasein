@@ -17,7 +17,8 @@ public interface ZKConfigService {
 
     int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense);
 
-    Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity);
+    Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName,
+            BusinessEntity businessEntity);
 
     Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, ProductType type);
 

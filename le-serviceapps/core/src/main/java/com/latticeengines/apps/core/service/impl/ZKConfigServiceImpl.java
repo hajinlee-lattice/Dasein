@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Service("zKConfigService")
@@ -32,6 +33,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
 
     @Inject
     private BatonService batonService;
+
+    private RatingEngineActionConfiguration ratingEngConfig;
 
     @Override
     public String getFakeCurrentDate(CustomerSpace customerSpace, String componentName) {
@@ -138,7 +141,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     }
 
     @Override
-    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity) {
+    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName,
+            BusinessEntity businessEntity) {
         try {
             Long dataQuotaLimit = null;
             Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
@@ -156,6 +160,9 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                     break;
                 case Transaction:
                     entityDataQuotaPath = path.append("TransactionQuotaLimit");
+                    break;
+                case ActiveModel:
+                    entityDataQuotaPath = path.append("ActiveModelQuotaLimit");
                     break;
                 default:
                     break;
@@ -196,4 +203,5 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             throw new RuntimeException("Failed to get DataQuotaLimit from ZK for " + customerSpace.getTenantId(), e);
         }
     }
+
 }

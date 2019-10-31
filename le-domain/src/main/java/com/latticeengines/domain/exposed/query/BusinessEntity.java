@@ -42,6 +42,7 @@ public enum BusinessEntity implements GraphNode {
     Contact, //
     Product, //
     Transaction, //
+    ActiveModel,
     PeriodTransaction, //
     PurchaseHistory, //
     DepivotedPurchaseHistory, //
