@@ -1,14 +1,6 @@
 package com.latticeengines.objectapi.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
