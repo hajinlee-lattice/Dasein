@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.GenerateDimensionMetadataStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -55,7 +55,7 @@ import com.latticeengines.spark.exposed.job.cdl.ProcessDimensionJob;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Lazy
 public class GenerateDimensionMetadata
-        extends RunSparkJob<ProcessActivityStreamStepConfiguration, ProcessDimensionConfig> {
+        extends RunSparkJob<GenerateDimensionMetadataStepConfiguration, ProcessDimensionConfig> {
     private static final Logger log = LoggerFactory.getLogger(GenerateDimensionMetadata.class);
     private static final int DIMENSION_CARDINALITY_LIMIT = 10;
 
@@ -72,7 +72,7 @@ public class GenerateDimensionMetadata
     private Map<String, String> streamErrorMsgs = new HashMap<>();
 
     @Override
-    protected ProcessDimensionConfig configureJob(ProcessActivityStreamStepConfiguration stepConfiguration) {
+    protected ProcessDimensionConfig configureJob(GenerateDimensionMetadataStepConfiguration stepConfiguration) {
         Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
         Map<String, Table> catalogTableNames = getActivityStoreTables(CATALOG_TABLE_NAME);
         Map<String, Table> rawStreamTableNames = getActivityStoreTables(RAW_ACTIVITY_STREAM_TABLE_NAME);
