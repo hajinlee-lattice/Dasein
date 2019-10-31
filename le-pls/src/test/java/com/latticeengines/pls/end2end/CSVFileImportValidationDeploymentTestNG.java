@@ -104,7 +104,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         // webvisit call separate api to create webvisit template
         File templateFile = new File(
                 ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + WEB_VISIT_WITH_INVALID_URL).getPath());
-        cdlService.createWebVisitTemplate(customerSpace, EntityType.WebVisit, new FileInputStream(templateFile));
+        cdlService.createWebVisitProfile(customerSpace, EntityType.WebVisit, new FileInputStream(templateFile));
         getDataFeedTask(ENTITY_ACTIVITY_STREAM);
         startCDLImportWithTemplateData(webVisitDataFeedTask, JobStatus.COMPLETED);
         EaiImportJobDetail webVisitDetail =
@@ -115,7 +115,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         // call separate api to create web visit path pattern template
         File pathPatternTemplateFile =
                 new File(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + WEB_VISIT_WITH_INVALID_PATH_PATTERN).getPath());
-        cdlService.createWebVisitTemplate(customerSpace, EntityType.WebVisitPathPattern,
+        cdlService.createWebVisitProfile(customerSpace, EntityType.WebVisitPathPattern,
                 new FileInputStream(pathPatternTemplateFile));
         getDataFeedTask(ENTITY_CATALOG);
         // 13 valid url path pattern, fail the import
