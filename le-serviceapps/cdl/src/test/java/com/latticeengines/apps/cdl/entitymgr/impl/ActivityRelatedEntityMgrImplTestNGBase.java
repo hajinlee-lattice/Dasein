@@ -101,6 +101,7 @@ public class ActivityRelatedEntityMgrImplTestNGBase extends CDLFunctionalTestNGB
         catalog.setTenant(mainTestTenant);
         catalog.setDataFeedTask(taskMap.get(name));
         catalog.setName(name);
+        catalog.setCatalogId(Catalog.generateId());
         catalogEntityMgr.create(catalog);
         return catalog;
     }

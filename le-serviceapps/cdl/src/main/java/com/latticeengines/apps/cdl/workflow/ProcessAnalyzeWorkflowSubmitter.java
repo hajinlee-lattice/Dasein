@@ -63,6 +63,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -673,6 +674,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         // streamId -> stream obj
         Map<String, AtlasStream> streams = streamEntityMgr.findByTenant(tenant, true).stream()
                 .collect(Collectors.toMap(AtlasStream::getStreamId, stream -> stream));
+        cleanupActivityStreams(streams);
         log.info("ActivityStreams for tenant {} are {}", customerSpace, JsonUtils.serialize(streams));
 
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
@@ -1101,5 +1103,45 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         } else {
             needConvertBatchStoreMap.put(tableRoleInCollection, masterTable.get(0));
         }
+    }
+
+    /*-
+     * cleanup state not important to stream processing
+     */
+    private void cleanupActivityStreams(@NotNull Map<String, AtlasStream> streams) {
+        streams.values().stream().filter(Objects::nonNull).forEach(stream -> {
+            stream.setTenant(null);
+            stream.setDataFeedTask(cleanDataFeedTask(stream.getDataFeedTask()));
+
+            if (CollectionUtils.isEmpty(stream.getDimensions())) {
+                return;
+            }
+            stream.getDimensions().forEach(this::cleanupDimension);
+        });
+    }
+
+    private void cleanupDimension(StreamDimension dimension) {
+        if (dimension == null) {
+            return;
+        }
+
+        dimension.setStream(null);
+        dimension.setTenant(null);
+        if (dimension.getCatalog() != null) {
+            Catalog catalog = dimension.getCatalog();
+            catalog.setTenant(null);
+            catalog.setDataFeedTask(cleanDataFeedTask(catalog.getDataFeedTask()));
+        }
+    }
+
+    private DataFeedTask cleanDataFeedTask(DataFeedTask task) {
+        if (task == null) {
+            return null;
+        }
+
+        DataFeedTask cleanTask = new DataFeedTask();
+        cleanTask.setUniqueId(task.getUniqueId());
+        cleanTask.setIngestionBehavior(task.getIngestionBehavior());
+        return cleanTask;
     }
 }
