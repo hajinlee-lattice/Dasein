@@ -58,16 +58,13 @@ public class SchemaRepository {
         } else {
             if (entityMatchEnabled) {
                 sysAttrs.add(InterfaceName.EntityId);
-                sysAttrs.add(InterfaceName.AccountId);
-                sysAttrs.add(InterfaceName.ContactId);
                 if (!BusinessEntity.Account.equals(entity)) {
                     sysAttrs.add(InterfaceName.CustomerAccountId);
                 }
-            } else {
-                // common
-                if (!BusinessEntity.Account.equals(entity)) {
-                    sysAttrs.add(InterfaceName.AccountId);
-                }
+            }
+            // common
+            if (!BusinessEntity.Account.equals(entity)) {
+                sysAttrs.add(InterfaceName.AccountId);
             }
             sysAttrs.add(InterfaceName.InternalId);
             sysAttrs.add(InterfaceName.CDLCreatedTime);

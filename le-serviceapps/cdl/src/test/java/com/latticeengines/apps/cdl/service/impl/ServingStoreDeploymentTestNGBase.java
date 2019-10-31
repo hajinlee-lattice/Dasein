@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
@@ -120,6 +121,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
         Map<String, ColumnMetadata> cmsToVerify = getAccountMetadataToVerify();
         verifyMetadata(cms, cmsToVerify);
+        verifyAccountMetadata(cms);
     }
 
     protected void testContactMetadata() {
@@ -130,6 +132,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
         Map<String, ColumnMetadata> cmsToVerify = getContactMetadataToVerify();
         verifyMetadata(cms, cmsToVerify);
+        verifyContactMetadata(cms);
     }
 
     private void verifyMetadata(List<ColumnMetadata> cms, Map<String, ColumnMetadata> cmsToVerify) {
@@ -143,26 +146,30 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
                 String.format("Expected metadata doesn't exist: %s", JsonUtils.serialize(cmsToVerify)));
     }
 
+    protected void verifyAccountMetadata(List<ColumnMetadata> cms) {
+    }
+
+    protected void verifyContactMetadata(List<ColumnMetadata> cms) {
+    }
+
     // Currently only verify Category, Subcategory, Groups
-    // FIXME Why is getEnabledGroups is deprecated?
-    @SuppressWarnings("deprecation")
     private void verifyColumnMetadata(ColumnMetadata cm, ColumnMetadata cmExpected) {
         Assert.assertEquals(cm.getCategory(), cmExpected.getCategory());
         Assert.assertEquals(cm.getSubcategory(), cmExpected.getSubcategory());
         List<ColumnSelection.Predefined> enabledGroups = cm.getEnabledGroups();
         List<ColumnSelection.Predefined> enabledGroupsExpected = cmExpected.getEnabledGroups();
         if (enabledGroupsExpected == null) {
-            Assert.assertNull(enabledGroups);
+            Assert.assertTrue(CollectionUtils.isEmpty(enabledGroups));
         } else {
             Assert.assertNotNull(enabledGroups);
             Collections.sort(enabledGroups);
             Collections.sort(enabledGroupsExpected);
             Assert.assertEquals(enabledGroups, enabledGroupsExpected,
                     String.format("Expected enabled groups: %s, actual enabled groups: %s",
-                            String.join(",", enabledGroupsExpected.stream().map(ColumnSelection.Predefined::getName)
-                                    .collect(Collectors.toList())),
-                            String.join(",", enabledGroups.stream().map(ColumnSelection.Predefined::getName)
-                                    .collect(Collectors.toList()))));
+                            enabledGroupsExpected.stream().map(ColumnSelection.Predefined::getName)
+                                    .collect(Collectors.joining(",")),
+                            enabledGroups.stream().map(ColumnSelection.Predefined::getName)
+                                    .collect(Collectors.joining(","))));
         }
     }
 

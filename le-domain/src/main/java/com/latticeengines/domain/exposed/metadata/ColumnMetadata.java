@@ -515,8 +515,6 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         return false;
     }
 
-    // for backward compatible to list-format groups
-    @Deprecated
     public List<ColumnSelection.Predefined> getEnabledGroups() {
         if (MapUtils.isNotEmpty(groups)) {
             return groups.entrySet().stream() //
