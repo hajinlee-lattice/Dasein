@@ -95,7 +95,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         Span workflowSpan = null;
         try (Scope scope = startWorkflowSpan(parentCtx, workflowName, appId.toString(), start, isRestart)) {
             workflowSpan = tracer.activeSpan();
-            traceSoftwareLibrariesLoad(start, end, swpkgNames.toString());
+            traceSoftwareLibrariesLoad(start, end, swpkgNames);
 
             WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(appId.toString());
             if (workflowJob == null) {
@@ -133,10 +133,11 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         span.finish(jobStartTime);
     }
 
-    private void traceSoftwareLibrariesLoad(long start, long end, String libraryNames) {
+    private void traceSoftwareLibrariesLoad(long start, long end, Collection<String> swpkgNames) {
         Tracer tracer = GlobalTracer.get();
+        String pkgStr = swpkgNames == null ? "all" : swpkgNames.toString();
         Span loadLibSpan = tracer.buildSpan("loadSoftwareLibraries") //
-                .withTag(TracingTags.Workflow.SOFTWARE_LIBRARIES, libraryNames) //
+                .withTag(TracingTags.Workflow.SOFTWARE_LIBRARIES, pkgStr) //
                 .asChildOf(tracer.activeSpan()) //
                 .withStartTimestamp(start) //
                 .start();
