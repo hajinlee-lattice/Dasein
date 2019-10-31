@@ -8,7 +8,7 @@ public interface DnBAuthenticationService {
      * Request for DnB token -- If expiredToken is not provided, return local
      * cached token; If expiredToken is provided, compare with local cached
      * token: if different, return local cached token, if same, request token
-     * remotely to refresh local cached token.
+     * remotely (redis/DnB) to refresh local cached token.
      *
      * @param type:
      *            DnB key type -- realtime/batch

@@ -8,7 +8,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.kitesdk.shaded.com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -84,6 +87,9 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     @Inject
     private RedisDistributedLock redisLock;
+    
+    private static final String DNB_KEY_PREFIX = "DnBAPIKey_";
+    private static final String DNB_LOCK_PREFIX = "DnBLockKey_";
 
     @PostConstruct
     public void initialize() throws Exception {
@@ -154,7 +160,6 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
                 return localToken;
             }
         }
-        log.info("ZDD1");
 
         String redisToken = redisRequest(type);
         if (redisToken != null && !redisToken.equals(expiredToken)) {
@@ -162,7 +167,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         }
 
         // Acquire the lock and go to remote DnB to refresh token
-        String lockKey = type + "Lock";
+        String lockKey = DNB_LOCK_PREFIX + type;
         String reqId = UUID.randomUUID().toString();
         boolean acquired = false;
         int attempt = 0;
@@ -202,8 +207,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     }
 
     /**
-     * Request DnB token from Redis with some validations in case Redis data is
-     * illegally updated outside of application
+     * Request DnB token from Redis
      *
      * @param type:
      *            DnB key type -- realtime/batch
@@ -211,15 +215,9 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      */
     private String redisRequest(DnBKeyType type) {
         try {
-            Object obj = redisTemplate.opsForValue().get(type.name());
-            // pair of (token, timestamp)
-            @SuppressWarnings("unchecked")
-            Pair<String, Long> pair = (obj instanceof Pair) ? (Pair<String, Long>) obj : null;
-            if (pair != null) {
-                pair = StringUtils.isNotBlank(pair.getLeft()) && pair.getRight() != null ? pair : null;
-            }
-            if (pair != null && !isTimestampExpired(pair.getRight())) {
-                return pair.getLeft();
+            DnBTokenCache cache = (DnBTokenCache) redisTemplate.opsForValue().get(DNB_KEY_PREFIX + type);
+            if (cache != null && !isTimestampExpired(cache.getCreatedAt())) {
+                return cache.getToken();
             } else {
                 return null;
             }
@@ -237,7 +235,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      * @param token
      */
     private void redisRefresh(DnBKeyType type, String token) {
-        redisTemplate.opsForValue().set(type.name(), Pair.of(token, System.currentTimeMillis()));
+        redisTemplate.opsForValue().set(DNB_KEY_PREFIX + type, new DnBTokenCache(token, System.currentTimeMillis()));
     }
 
     /**
@@ -310,6 +308,29 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             throw new RuntimeException(String.format("Fail to parse DnB token from response: %s", response));
         }
         return token;
+    }
+    
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class DnBTokenCache {
+        @JsonProperty("Token")
+        private String token;
+        @JsonProperty("CreatedAt")
+        private long createdAt;
+
+        @JsonCreator
+        DnBTokenCache(@JsonProperty("Token") String token, @JsonProperty("CreatedAt") long createdAt) {
+            this.token = token;
+            this.createdAt = createdAt;
+        }
+
+        String getToken() {
+            return token;
+        }
+
+        long getCreatedAt() {
+            return createdAt;
+        }
     }
 
 }
