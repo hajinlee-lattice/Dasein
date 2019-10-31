@@ -401,7 +401,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         // site that doesn't contain standard attributes
-        int sizeBeforeMerge = templateTable.getAttributes().size();
+        int sizeBeforeMerge = templateTable == null ? 0 : templateTable.getAttributes().size();
         Table templateWithStandard = mergeTable(templateTable, standardTable);
         int sizeAfterMerge = templateTable.getAttributes().size();
         int standardSizeToExclude = sizeAfterMerge - sizeBeforeMerge;
