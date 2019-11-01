@@ -1188,8 +1188,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
                 feedType, source, sourceFile.getName(), customerSpace.toString()));
 
-        // 3. Process System IDs.
-        SystemIdsUtils.processSystemIds(customerSpace, systemName, entityType, commitRequest, cdlService);
+        // 3. Process System IDs.  For now, this is only supported for entity types Accounts, Contacts, and Leads.
+        if (EntityType.Accounts.equals(entityType) || EntityType.Contacts.equals(entityType) ||
+                EntityType.Leads.equals(entityType)) {
+            SystemIdsUtils.processSystemIds(customerSpace, systemName, systemType, entityType, commitRequest,
+                    cdlService);
+        }
 
         // 4. Generate new table from FieldDefinitionsRecord,
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);

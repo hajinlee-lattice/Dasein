@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem.SystemType;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -66,7 +67,8 @@ public class SystemIdsUtilsUnitTestNG {
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), bomboraSystemName)).thenReturn(
                 bomboraImportSystem);
 
-        SystemIdsUtils.processSystemIds(customerSpace, salesforceSystemName, entityType, actualRecord, mockCdlService);
+        SystemIdsUtils.processSystemIds(customerSpace, salesforceSystemName, SystemType.Salesforce.name(), entityType,
+                actualRecord, mockCdlService);
 
         log.info("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
         log.info("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
@@ -129,7 +131,8 @@ public class SystemIdsUtilsUnitTestNG {
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), bomboraSystemName)).thenReturn(
                 bomboraImportSystem);
 
-        SystemIdsUtils.processSystemIds(customerSpace, marketoSystemName, entityType, actualRecord, mockCdlService);
+        SystemIdsUtils.processSystemIds(customerSpace, marketoSystemName, SystemType.Marketo.name(), entityType,
+                actualRecord, mockCdlService);
 
         log.info("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
         log.info("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
@@ -183,8 +186,8 @@ public class SystemIdsUtilsUnitTestNG {
                 bomboraImportSystem);
 
         IllegalStateException exception = Assert.expectThrows(IllegalStateException.class,
-                () -> SystemIdsUtils.processSystemIds(customerSpace, defaultSystemName, entityType, actualRecord,
-                        mockCdlService));
+                () -> SystemIdsUtils.processSystemIds(customerSpace, defaultSystemName, SystemType.Other.name(),
+                        entityType, actualRecord, mockCdlService));
         assertTrue(exception.getMessage().contains(
                 "Cannot assign column Salesforce Contact Id as Contact ID from system " +
                         salesforceSystemName + " as match ID in section " + SystemIdsUtils.MATCH_IDS_SECTION +
@@ -248,7 +251,8 @@ public class SystemIdsUtilsUnitTestNG {
         when(mockCdlService.getS3ImportSystem(customerSpace.toString(), bomboraSystemName)).thenReturn(
                 bomboraImportSystem);
 
-        SystemIdsUtils.processSystemIds(customerSpace, salesforceSystemName, entityType, actualRecord, mockCdlService);
+        SystemIdsUtils.processSystemIds(customerSpace, salesforceSystemName, SystemType.Salesforce.name(), entityType,
+                actualRecord, mockCdlService);
 
         log.info("Actual FieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
         log.info("DefaultImportSystem:\n" + JsonUtils.pprint(defaultImportSystem));
