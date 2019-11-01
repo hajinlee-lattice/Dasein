@@ -492,6 +492,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             flags[0] = false;
             // deprecated attrs are not enabled for Export
             flags[3] = false;
+            // deprecated attrs are not enabled for Model
+            flags[9] = false;
         }
         if (AttrState.Inactive.equals(state)) {
             // cannot change usage for inactive attributes
