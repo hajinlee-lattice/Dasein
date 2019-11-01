@@ -64,15 +64,14 @@ public class RatingEngineDaoImpl extends BaseDaoImpl<RatingEngine> implements Ra
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<String> findAllActiveModels() {
+    public Long findActiveRatingEnginesCount() {
         Session session = sessionFactory.getCurrentSession();
         String queryPattern = String.format(
                 "SELECT re.id FROM %s as re WHERE re.status = :statusName",
                 getEntityClass().getSimpleName());
         Query<?> query = session.createQuery(queryPattern);
         query.setParameter("statusName", RatingEngineStatus.ACTIVE);
-        return (List<String>) query.list();
+        return Long.valueOf(query.list().size());
     }
 
 }

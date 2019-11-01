@@ -16,6 +16,7 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -67,14 +68,6 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
         ratingEngineTest2.setNote(RATING_ENGINE_NOTE);
         ratingEngineTest2.setId(UUID.randomUUID().toString());
 
-        ratingEngineTest3 = new RatingEngine();
-        ratingEngineTest3.setSegment(testSegment);
-        ratingEngineTest3.setCreatedBy(CREATED_BY);
-        ratingEngineTest3.setUpdatedBy(CREATED_BY);
-        ratingEngineTest3.setType(RatingEngineType.RULE_BASED);
-        ratingEngineTest3.setNote(RATING_ENGINE_NOTE);
-        ratingEngineTest3.setId(UUID.randomUUID().toString());
-
         crossSellRatingEngine = new RatingEngine();
         crossSellRatingEngine.setSegment(testSegment);
         crossSellRatingEngine.setCreatedBy(CREATED_BY);
@@ -90,6 +83,14 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
         customEventRatingEngine.setType(RatingEngineType.CUSTOM_EVENT);
         customEventRatingEngine.setNote(RATING_ENGINE_NOTE);
         customEventRatingEngine.setId(UUID.randomUUID().toString());
+
+        ratingEngineTest3 = new RatingEngine();
+        ratingEngineTest3.setSegment(testSegment);
+        ratingEngineTest3.setCreatedBy(CREATED_BY);
+        ratingEngineTest3.setUpdatedBy(CREATED_BY);
+        ratingEngineTest3.setType(RatingEngineType.RULE_BASED);
+        ratingEngineTest3.setNote(RATING_ENGINE_NOTE);
+        ratingEngineTest3.setTenant(mainTestTenant);
 
         ActionContext.remove();
     }
@@ -113,13 +114,10 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
         createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngineTest2);
         log.info("4Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
-        createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngineTest3);
-        log.info("5Rating Engine is " + createdRatingEngine.toString());
-        Assert.assertNotNull(createdRatingEngine);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "create" })
-    public void testUpdate() {
+    public void update() {
         RatingEngine re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
         re.setNote(RATING_ENGINE_NEW_NOTE);
@@ -130,10 +128,10 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
                 RatingBucketName.A.getName(), 1L, //
                 RatingBucketName.B.getName(), 2L, //
                 RatingBucketName.C.getName(), 3L));
-        RatingEngine updatedRatingEngine = ratingEngineEntityMgr.updateRatingEngine(re,
+        RatingEngine updatedRatingEngine1 = ratingEngineEntityMgr.updateRatingEngine(re,
                 ratingEngineEntityMgr.findById(ratingEngineTest1.getId()), false);
-        log.info("Rating Engine after update is " + updatedRatingEngine.toString());
-        Assert.assertEquals(updatedRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+        log.info("Rating Engine after update is " + updatedRatingEngine1.toString());
+        Assert.assertEquals(updatedRatingEngine1.getStatus(), RatingEngineStatus.ACTIVE);
         re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
         re.setNote(RATING_ENGINE_NEW_NOTE);
@@ -144,12 +142,19 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
                 RatingBucketName.A.getName(), 1L, //
                 RatingBucketName.B.getName(), 2L, //
                 RatingBucketName.C.getName(), 3L));
-        updatedRatingEngine = ratingEngineEntityMgr.updateRatingEngine(re,
+        RatingEngine updatedRatingEngine2 = ratingEngineEntityMgr.updateRatingEngine(re,
                 ratingEngineEntityMgr.findById(ratingEngineTest2.getId()), false);
-        log.info("Rating Engine after update is " + updatedRatingEngine.toString());
-        Assert.assertEquals(updatedRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+        log.info("Rating Engine after update is " + updatedRatingEngine2.toString());
+        Assert.assertEquals(updatedRatingEngine2.getStatus(), RatingEngineStatus.ACTIVE);
         // check Active Rating Engine Models for Tenant
-        Assert.assertEquals(ratingEngineService.getActiveRatingEnginesCount().size(), 2);
+        Assert.assertEquals(ratingEngineService.getActiveRatingEnginesCount().longValue(), 2L);
+        testBed.bootstrap(2);
+        mainTestTenant = testBed.getTestTenants().get(1);
+        mainCustomerSpace = mainTestTenant.getId();
+        MultiTenantContext.setTenant(mainTestTenant);
+        ratingEngineTest3.setId(UUID.randomUUID().toString());
+        createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngineTest3);
+        Assert.assertNotNull(createdRatingEngine);
         re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
         re.setNote(RATING_ENGINE_NEW_NOTE);
@@ -160,11 +165,11 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
                 RatingBucketName.A.getName(), 1L, //
                 RatingBucketName.B.getName(), 2L, //
                 RatingBucketName.C.getName(), 3L));
-        updatedRatingEngine = ratingEngineEntityMgr.updateRatingEngine(re,
+        RatingEngine updatedRatingEngine3 = ratingEngineEntityMgr.updateRatingEngine(re,
                 ratingEngineEntityMgr.findById(ratingEngineTest3.getId()), false);
-        log.info("Rating Engine after update is " + updatedRatingEngine.toString());
-        Assert.assertEquals(updatedRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
-        Assert.assertEquals(ratingEngineService.getActiveRatingEnginesCount().size(), 3);
+        log.info("Rating Engine after update is " + updatedRatingEngine3.toString());
+        Assert.assertEquals(updatedRatingEngine3.getStatus(), RatingEngineStatus.ACTIVE);
+        Assert.assertEquals(ratingEngineService.getActiveRatingEnginesCount().longValue(), 1L);
     }
 
 }

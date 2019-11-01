@@ -19,9 +19,6 @@ public class DataLimit {
     @JsonProperty("product_sku_data_quota_limit")
     private Long productSkuDataQuotaLimit;
 
-    @JsonProperty("active_model_data_quota_limit")
-    private Long activeModelDataQuotaLimit;
-
     public Long getAccountDataQuotaLimit() {
         return accountDataQuotaLimit;
     }
@@ -62,11 +59,4 @@ public class DataLimit {
         this.productSkuDataQuotaLimit = productSkuDataQuotaLimit;
     }
 
-    public Long getActiveModelDataQuotaLimit() {
-        return activeModelDataQuotaLimit;
-    }
-
-    public void setActiveModelDataQuotaLimit(Long activeModelDataQuotaLimit) {
-        this.activeModelDataQuotaLimit = activeModelDataQuotaLimit;
-    }
 }

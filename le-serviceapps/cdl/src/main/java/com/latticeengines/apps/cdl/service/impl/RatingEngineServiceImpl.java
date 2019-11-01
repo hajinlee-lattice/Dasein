@@ -58,7 +58,6 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.cdl.CrossSellModelingParameters;
-import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -190,20 +189,18 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public DataLimit getActiveModelQuotaLimit(CustomerSpace customerSpace) {
+    public Long getActiveRatingEngineQuotaLimit(CustomerSpace customerSpace) {
         String componentName = CDLComponent.componentName;
-        DataLimit dataLimit = new DataLimit();
-        Long activeModelDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
-                BusinessEntity.ActiveModel);
+        Long activeModelDataLimit = zkConfigService.getActiveRatingEngingQuota(customerSpace,
+                componentName);
         defaultActiveModelQuotaLimit = activeModelDataLimit != null ? activeModelDataLimit
                 : defaultActiveModelQuotaLimit;
-        dataLimit.setActiveModelDataQuotaLimit(defaultActiveModelQuotaLimit);
-        return dataLimit;
+        return defaultActiveModelQuotaLimit;
     }
 
     @Override
-    public List<String> getActiveRatingEnginesCount() {
-        return ratingEngineEntityMgr.findAllActiveModels();
+    public Long getActiveRatingEnginesCount() {
+        return ratingEngineEntityMgr.findAllActiveRatingEngines();
     }
 
     @Override

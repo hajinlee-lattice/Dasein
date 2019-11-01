@@ -20,6 +20,8 @@ public interface ZKConfigService {
     Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName,
             BusinessEntity businessEntity);
 
+    Long getActiveRatingEngingQuota(CustomerSpace customerSpace, String componentName);
+
     Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, ProductType type);
 
 }

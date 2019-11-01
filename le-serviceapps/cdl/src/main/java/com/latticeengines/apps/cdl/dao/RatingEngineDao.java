@@ -15,6 +15,6 @@ public interface RatingEngineDao extends BaseDao<RatingEngine> {
 
     void deleteById(String id);
 
-    List<String> findAllActiveModels();
+    Long findActiveRatingEnginesCount();
 
 }

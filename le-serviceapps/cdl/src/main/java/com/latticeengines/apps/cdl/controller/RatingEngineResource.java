@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +30,6 @@ import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
 import com.latticeengines.apps.cdl.util.ActionContext;
-import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -644,15 +642,4 @@ public class RatingEngineResource {
         return ratingEngineService.getAllRatingModels();
     }
 
-    // -------------------
-    // RatingEngine
-    // get all active models for tenant
-    // -------------------
-    @RequestMapping(value = "/{tenantId}/activeModelsCount", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @NoCustomerSpace
-    @ApiOperation(value = "get count of active models for tenant")
-    public Integer getActiveModelPerTenant() {
-        return ratingEngineService.getActiveRatingEnginesCount().size();
-    }
 }

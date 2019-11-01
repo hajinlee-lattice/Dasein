@@ -248,10 +248,9 @@ public class RatingEngineEntityMgrImpl //
                 // check the threshold for active models for the tenant
                 CustomerSpace space = CustomerSpace.parse(tenantId);
                 Long quotaLimit = ratingEngineService
-                        .getActiveModelQuotaLimit(new CustomerSpace(space.getContractId(),
-                                space.getTenantId(), space.getSpaceId()))
-                        .getActiveModelDataQuotaLimit();
-                if (ratingEngineService.getActiveRatingEnginesCount().size() > quotaLimit) {
+                        .getActiveRatingEngineQuotaLimit(new CustomerSpace(space.getContractId(),
+                                space.getTenantId(), space.getSpaceId()));
+                if (ratingEngineService.getActiveRatingEnginesCount() > quotaLimit) {
                     // throw exception
                     throw new RuntimeException("Too many Active Models",
                             new Throwable("There are already " + quotaLimit
@@ -628,7 +627,7 @@ public class RatingEngineEntityMgrImpl //
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<String> findAllActiveModels() {
-        return ratingEngineDao.findAllActiveModels();
+    public Long findAllActiveRatingEngines() {
+        return ratingEngineDao.findActiveRatingEnginesCount();
     }
 }
