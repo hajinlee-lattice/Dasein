@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -57,6 +59,7 @@ import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -77,6 +80,9 @@ import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRe
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
@@ -87,6 +93,7 @@ import com.latticeengines.pls.util.EntityMatchGAConverterUtils;
 import com.latticeengines.pls.util.ImportWorkflowUtils;
 import com.latticeengines.pls.util.SystemIdsUtils;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -126,10 +133,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Autowired
     private ImportWorkflowSpecService importWorkflowSpecService;
 
+    @Autowired
+    private CDLAttrConfigProxy cdlAttrConfigProxy;
+
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean isModel, boolean withoutId,
-            boolean enableEntityMatch) {
+                                                                  SchemaInterpretation schemaInterpretation, ModelingParameters parameters, boolean isModel, boolean withoutId,
+                                                                  boolean enableEntityMatch) {
         schemaInterpretation = isModel && enableEntityMatch && schemaInterpretation.equals(SchemaInterpretation.Account) ?
                 SchemaInterpretation.ModelAccount : schemaInterpretation;
         SourceFile sourceFile = getSourceFile(sourceFileName);
@@ -147,7 +157,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, String entity, String source,
-            String feedType) {
+                                                                  String feedType) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         log.info(String.format("Customer Space: %s, entity: %s, source: %s, datafeed: %s", customerSpace.toString(),
@@ -216,15 +226,15 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private FieldMappingDocument mergeFieldMappingBestEffort(FieldMappingDocument templateMapping,
-            FieldMappingDocument standardMapping, Table templateTable, Table standardTable) {
+                                                             FieldMappingDocument standardMapping, Table templateTable, Table standardTable) {
         // Create schema user -> fieldMapping
         Map<String, FieldMapping> standardMappingMap = new HashMap<>();
         for (FieldMapping fieldMapping : standardMapping.getFieldMappings()) {
             standardMappingMap.put(fieldMapping.getUserField(), fieldMapping);
         }
         Set<String> alreadyMappedField = templateMapping.getFieldMappings().stream()
-                                                        .map(FieldMapping::getMappedField)
-                                                        .filter(Objects::nonNull).collect(Collectors.toSet());
+                .map(FieldMapping::getMappedField)
+                .filter(Objects::nonNull).collect(Collectors.toSet());
         // Add mapped fields from schema to template, if not already in a template mapped field
         for (FieldMapping fieldMapping : templateMapping.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -296,7 +306,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
      */
     @Override
     public FieldValidationResult validateFieldMappings(String sourceFileName, FieldMappingDocument fieldMappingDocument,
-            String entity, String source, String feedType) {
+                                                       String entity, String source, String feedType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
 
@@ -400,14 +410,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .collect(Collectors.toList());
         Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        // size that doesn't contain standard attributes
-        boolean noOriginTemplate = false;
-        if (templateTable == null) {
-            noOriginTemplate = true;
-        }
-        int sizeBeforeMerge = noOriginTemplate ? 0 : templateTable.getAttributes().size();
         Table templateWithStandard = mergeTable(templateTable, standardTable);
-        int sizeAfterMerge = templateWithStandard.getAttributes().size();
         Iterator<Attribute> iter = templateWithStandard.getAttributes().iterator();
         // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
         while (iter.hasNext()) {
@@ -427,18 +430,48 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 }
             }
         }
-
         // generate template in memory
         Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
-        Table finalTemplate = mergeTable(templateTable, generatedTemplate);
-        int fieldSize = noOriginTemplate ? generatedTemplate.getAttributes().size() :
-                finalTemplate.getAttributes().size() - (sizeAfterMerge - sizeBeforeMerge);
-        // compare type, require flag between template and standard schema
         FieldValidationResult fieldValidationResult = new FieldValidationResult();
-        checkTemplateTable(fieldValidationResult, fieldSize, finalTemplate, entity, withoutId,
-                enableEntityMatch, validations);
+        int limit;
+        List<S3ImportTemplateDisplay> s3ImportTemplateDisplays;
+        if (BusinessEntity.Account.name().equals(entity)) {
+            limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
+            s3ImportTemplateDisplays = cdlService.getS3ImportTemplate(customerSpace.toString(), "SystemDisplay", ImmutableSet.of(EntityType.Accounts));
+            validateFieldSize(fieldValidationResult, s3ImportTemplateDisplays, customerSpace, entity, generatedTemplate, limit);
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
+            s3ImportTemplateDisplays = cdlService.getS3ImportTemplate(customerSpace.toString(), "SystemDisplay", ImmutableSet.of(EntityType.Contacts));
+            validateFieldSize(fieldValidationResult, s3ImportTemplateDisplays, customerSpace, entity, generatedTemplate, limit);
+        }
+
+        Table finalTemplate = mergeTable(templateTable, generatedTemplate);
+        // compare type, require flag between template and standard schema
+        checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch, validations);
         fieldValidationResult.setFieldValidations(validations);
         return fieldValidationResult;
+    }
+
+    private void validateFieldSize(FieldValidationResult fieldValidationResult, List<S3ImportTemplateDisplay> s3ImportTemplateDisplays,
+                                    CustomerSpace customerSpace, String entity, Table generatedTemplate, int limit) {
+        Set<String> attributes = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(s3ImportTemplateDisplays)) {
+            s3ImportTemplateDisplays.stream().forEach(s3ImportTemplateDisplay -> {
+                DataFeedTask dataFeedTask1 = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "File", s3ImportTemplateDisplay.getFeedType(), entity);
+                if (dataFeedTask1 != null) {
+                    Table table = dataFeedTask1.getImportTemplate();
+                    if (table != null) {
+                        attributes.addAll(table.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet()));
+                    }
+                }
+            });
+        }
+        AttrConfigRequest configRequest = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace.toString(), BusinessEntity.getByName(entity), true);
+        Set<String> inactiveNames = configRequest.getAttrConfigs().stream().filter(config -> !AttrState.Active.equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
+                .map(AttrConfig::getAttrName).collect(Collectors.toSet());
+        attributes.addAll(generatedTemplate.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet()));
+        int fieldSize = attributes.size() - inactiveNames.size();
+        ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
     }
 
     private Table mergeTable(Table templateTable, Table renderedTable) {
@@ -456,7 +489,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private FieldValidation createValidation(String userField, String latticeField, ValidationStatus status,
-            String message) {
+                                             String message) {
         FieldValidation validation = new FieldValidation();
         validation.setUserField(userField);
         validation.setLatticeField(latticeField);
@@ -465,20 +498,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return validation;
     }
 
-    void checkTemplateTable(FieldValidationResult fieldValidationResult, int fieldSize, Table finalTemplate,
-                            String entity, boolean withoutId, boolean enableEntityMatch, List<FieldValidation> validations) {
+    void checkTemplateTable(Table finalTemplate, String entity, boolean withoutId, boolean enableEntityMatch, List<FieldValidation> validations) {
         Map<String, Attribute> standardAttrs = new HashMap<>();
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId
                 , enableEntityMatch);
-        if (BusinessEntity.Account.name().equals(entity)) {
-            int limit =
-                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
-            ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
-        } else if (BusinessEntity.Contact.equals(entity)) {
-            int limit =
-                    appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
-            ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
-        }
         standardTable.getAttributes().forEach(attribute -> standardAttrs.put(attribute.getName(), attribute));
         Map<String, Attribute> templateAttrs = new HashMap<>();
         finalTemplate.getAttributes().forEach(attribute -> templateAttrs.put(attribute.getName(), attribute));
@@ -494,9 +517,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 Attribute attr1 = attrEntry.getValue();
                 Attribute attr2 = templateAttrs.get(attrEntry.getKey());
                 if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
-                        String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
-                        validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
-                                ValidationStatus.ERROR, message));
+                    String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
+                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                            ValidationStatus.ERROR, message));
                 }
                 if (!attr1.getRequired().equals(attr2.getRequired())) {
                     String message = "Required flag is not the same for attribute: " + attr1.getDisplayName();
@@ -509,7 +532,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, boolean isModel,
-            boolean enableEntityMatch) {
+                                boolean enableEntityMatch) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         SchemaInterpretation schemaInterpretation = sourceFile.getSchemaInterpretation();
@@ -519,7 +542,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private Table generateTemplate(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
-            String source, String feedType) {
+                                   String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table, schemaTable;
@@ -556,7 +579,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
-            String source, String feedType) {
+                                String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table, schemaTable;
@@ -584,7 +607,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName,
-            boolean checkHeaderFormat) {
+                                            boolean checkHeaderFormat) {
         return validateHeaderFields(stream, leCsvParser, fileName, checkHeaderFormat, null);
     }
 
@@ -615,7 +638,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity, String feedType,
-            Table templateTable) {
+                                      Table templateTable) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
                 || fieldMappingDocument.getFieldMappings().size() == 0) {
             return;
@@ -884,7 +907,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table,
-            boolean cdlResolve, Table schemaTable, BusinessEntity entity) {
+                                 boolean cdlResolve, Table schemaTable, BusinessEntity entity) {
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, cdlResolve, schemaTable);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
@@ -945,7 +968,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-            String fileDisplayName, boolean checkHeaderFormat, String entity) {
+                                            String fileDisplayName, boolean checkHeaderFormat, String entity) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
@@ -1073,7 +1096,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
 
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
-                "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(), feedType,
+                        "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(), feedType,
                 source, sourceFile.getName(), customerSpace.toString()));
 
         // 3. Get flags relevant to import workflow.
@@ -1154,7 +1177,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public FieldDefinitionsRecord commitFieldDefinitions(String systemName, String systemType, String systemObject,
                                                          String importFile, boolean runImport,
                                                          FieldDefinitionsRecord commitRequest)
-        throws LedpException, IllegalArgumentException {
+            throws LedpException, IllegalArgumentException {
 
         log.info("JAW ------ BEGIN Real Commit Field Definition -----");
 
@@ -1425,7 +1448,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
-            boolean cdlResolve) {
+                                                 boolean cdlResolve) {
         return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, null);
     }
 
@@ -1460,3 +1483,4 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
 
 }
+

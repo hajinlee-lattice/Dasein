@@ -37,7 +37,6 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 
 public class ValidateFileHeaderUtils {
