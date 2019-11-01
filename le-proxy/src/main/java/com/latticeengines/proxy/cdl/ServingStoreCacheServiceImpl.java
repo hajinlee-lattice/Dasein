@@ -2,21 +2,17 @@ package com.latticeengines.proxy.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -41,36 +37,32 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
 
     private static final Logger log = LoggerFactory.getLogger(ServingStoreCacheServiceImpl.class);
 
-    private LocalCacheManager<String, List<ColumnMetadata>> metadataCache;
-
-    private final CacheManager cacheManager;
+    private LocalCacheManager<String, List<ColumnMetadata>> metadataCache = new LocalCacheManager<>(
+            CacheName.ServingMetadataLocalCache, this::loadServingColumnMetadata, 20, 5);
 
     private final DataCollectionProxy dataCollectionProxy;
 
     private final MetadataProxy metadataProxy;
 
+    private ServingStoreCacheServiceImpl _service;
+
     @Inject
-    protected ServingStoreCacheServiceImpl(CacheManager cacheManager, DataCollectionProxy dataCollectionProxy, //
-                                           MetadataProxy metadataProxy) {
+    protected ServingStoreCacheServiceImpl(DataCollectionProxy dataCollectionProxy, //
+                                           MetadataProxy metadataProxy, ServingStoreCacheServiceImpl service) {
         super("cdl");
-        this.cacheManager = cacheManager;
-        this.metadataCache = new LocalCacheManager<>(CacheName.ServingMetadataCache, //
-                this::getDecoratedMetadataFromApi, 200);
         this.dataCollectionProxy = dataCollectionProxy;
         this.metadataProxy = metadataProxy;
-    }
-
-    @PostConstruct
-    public void addCacheManager() {
-        if (cacheManager instanceof CompositeCacheManager) {
-            log.info("adding local entity cache manager to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Collections.singletonList(metadataCache));
-        }
+        this._service = service;
     }
 
     @Override
-    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|decoratedmetadata\", #customerSpace, #entity)", unless="#result == null")
     public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity) {
+        String key = customerSpace + "|" + entity.name();
+        return metadataCache.getWatcherCache().get(key);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|decoratedmetadata\", #customerSpace, #entity)", unless="#result == null")
+    public List<ColumnMetadata> getDecoratedMetadataFromDistributedCache(String customerSpace, BusinessEntity entity) {
         String key = customerSpace + "|" + entity.name();
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<ColumnMetadata> cms = getDecoratedMetadataFromApi(key);
@@ -120,6 +112,13 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
                 shortenCustomerSpace(customerSpace), entity);
         List<?> list = get("serving store metadata", url, List.class);
         return JsonUtils.convertList(list, ColumnMetadata.class);
+    }
+
+    private List<ColumnMetadata> loadServingColumnMetadata(String cacheKey) {
+        String[] tokens = cacheKey.split("\\|");
+        String tenant = tokens[0];
+        BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);
+        return _service.getDecoratedMetadataFromDistributedCache(tenant, entity);
     }
 
 }

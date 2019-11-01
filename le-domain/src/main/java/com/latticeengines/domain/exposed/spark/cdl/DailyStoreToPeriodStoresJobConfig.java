@@ -16,8 +16,8 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
     @JsonProperty("stream")
     public AtlasStream stream;
 
-    @JsonProperty("currentDateStr")
-    public String currentDateStr;
+    @JsonProperty("evaluationDate")
+    public String evaluationDate;
 
     @JsonProperty("entity")
     public BusinessEntity entity;
