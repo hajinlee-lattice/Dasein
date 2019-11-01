@@ -106,8 +106,14 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
                             @Override
                             public ListenableFuture<String> reload(DnBKeyType type, String expiredToken) {
+                                // Eager local cache refresh actually doesn't
+                                // help much, as the token is got from redis
+                                // whose life span is longer than the
+                                // duration of its existing in local cache.
+                                // Mostly rely on the caller to trigger token
+                                // expiration.
                                 log.info(
-                                        "DnB token in local cache {} was created more than 23hrs ago, requesting a new one.",
+                                        "DnB token in local cache {} has existed for more than 23hrs, updating token from redis/dnb.",
                                         expiredToken);
                                 return Futures.immediateFuture(externalRequest(type, expiredToken));
                             }
@@ -258,7 +264,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private boolean isTimestampExpired(DnBTokenCache cache) {
         boolean expired = (System.currentTimeMillis() - cache.getCreatedAt()) > expireTimeInMin * 60_000;
         if (expired) {
-            log.info("DnB token cached in redis {} was created more than 23hrs ago, requesting a new one.",
+            log.info("DnB token in redis {} has existed for more than 23hrs, updating token from dnb.",
                     cache.getToken());
         }
         return expired;
