@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -22,9 +23,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
@@ -88,8 +92,8 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     @Inject
     private RedisDistributedLock redisLock;
     
-    private static final String DNB_KEY_PREFIX = "DnBAPIKey_";
-    private static final String DNB_LOCK_PREFIX = "DnBLockKey_";
+    static final String DNB_KEY_PREFIX = "DnBAPIKey_";
+    static final String DNB_LOCK_PREFIX = "DnBLockKey_";
 
     @PostConstruct
     public void initialize() throws Exception {
@@ -97,10 +101,19 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         tokenCache = //
                 CacheBuilder.newBuilder()//
                         .maximumSize(DnBKeyType.values().length)
+                        .refreshAfterWrite(expireTimeInMin, TimeUnit.MINUTES)
                         .build(new CacheLoader<DnBKeyType, String>() {
                             @Override
                             public String load(DnBKeyType type) throws Exception {
                                 return externalRequest(type, null);
+                            }
+
+                            @Override
+                            public ListenableFuture<String> reload(DnBKeyType type, String expiredToken) {
+                                log.info(
+                                        "DnB token in local cache {} was created more than 23hrs ago, requesting a new one.",
+                                        expiredToken);
+                                return Futures.immediateFuture(externalRequest(type, expiredToken));
                             }
                         });
     }
@@ -216,7 +229,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private String redisRequest(DnBKeyType type) {
         try {
             DnBTokenCache cache = (DnBTokenCache) redisTemplate.opsForValue().get(DNB_KEY_PREFIX + type);
-            if (cache != null && !isTimestampExpired(cache.getCreatedAt())) {
+            if (cache != null && !isTimestampExpired(cache)) {
                 return cache.getToken();
             } else {
                 return null;
@@ -245,8 +258,13 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      *            create timestamp of token
      * @return
      */
-    private boolean isTimestampExpired(long timestamp) {
-        return (System.currentTimeMillis() - timestamp) > expireTimeInMin * 60_000;
+    private boolean isTimestampExpired(DnBTokenCache cache) {
+        boolean expired = (System.currentTimeMillis() - cache.getCreatedAt()) > expireTimeInMin * 60_000;
+        if (expired) {
+            log.info("DnB token cached in redis {} was created more than 23hrs ago, requesting a new one.",
+                    cache.getToken());
+        }
+        return expired;
     }
 
     /**
@@ -312,7 +330,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class DnBTokenCache {
+    static class DnBTokenCache {
         @JsonProperty("Token")
         private String token;
         @JsonProperty("CreatedAt")
@@ -331,6 +349,16 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         long getCreatedAt() {
             return createdAt;
         }
+    }
+    
+    /**
+     * ONLY for testing purpose
+     *
+     * @param type
+     */
+    @VisibleForTesting
+    void refreshLocalCache(DnBKeyType type) {
+        tokenCache.refresh(type);
     }
 
 }
