@@ -4,7 +4,6 @@ public class MatchCdlAccountConfiguration extends BaseCDLDataFlowStepConfigurati
 
     private String matchInputTableName;
     private String matchAccountIdColumn;
-    private boolean mapToLatticeAccount;
     public MatchCdlAccountConfiguration() {
         setBeanName("matchCdlAccountFlow");
     }
@@ -24,13 +23,4 @@ public class MatchCdlAccountConfiguration extends BaseCDLDataFlowStepConfigurati
     public void setMatchAccountIdColumn(String matchAccountIdColumn) {
         this.matchAccountIdColumn = matchAccountIdColumn;
     }
-
-    public void setMapToLatticeAccount(boolean mapToLatticeAccount) {
-        this.mapToLatticeAccount = mapToLatticeAccount;
-    }
-
-    public boolean isMapToLatticeAccount() {
-        return mapToLatticeAccount;
-    }
-
 }

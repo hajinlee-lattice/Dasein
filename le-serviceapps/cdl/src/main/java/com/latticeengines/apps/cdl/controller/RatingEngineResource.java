@@ -641,4 +641,5 @@ public class RatingEngineResource {
     public List<RatingModel> getAllModels(@PathVariable String customerSpace) {
         return ratingEngineService.getAllRatingModels();
     }
+
 }
