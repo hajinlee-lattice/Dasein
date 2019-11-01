@@ -21,7 +21,7 @@ public class S3ChannelConfig implements ChannelConfig {
     private String s3CampaignExportDir;
 
     @JsonProperty("includeExportAttributes")
-    private boolean isIncludeExportAttributes = false;
+    private boolean includeExportAttributes = false;
 
     public Long getAccountLimit() {
         return accountLimit;
@@ -38,11 +38,11 @@ public class S3ChannelConfig implements ChannelConfig {
     public void setS3CampaignExportDir(String s3CampaignExportDir) { this.s3CampaignExportDir = s3CampaignExportDir; }
 
     public boolean isIncludeExportAttributes() {
-        return isIncludeExportAttributes;
+        return includeExportAttributes;
     }
 
-    public void setIsIncludeExportAttributes(boolean isIncludeExportAttributes) {
-        this.isIncludeExportAttributes = isIncludeExportAttributes;
+    public void setIncludeExportAttributes(boolean includeExportAttributes) {
+        this.includeExportAttributes = includeExportAttributes;
     }
 
     @Override
@@ -82,7 +82,7 @@ public class S3ChannelConfig implements ChannelConfig {
         S3ChannelConfig newS3ChannelConfig = (S3ChannelConfig) config;
         s3ChannelConfig.setAccountLimit(newS3ChannelConfig.getAccountLimit());
         s3ChannelConfig.setS3CampaignExportDir(newS3ChannelConfig.getS3CampaignExportDir());
-        s3ChannelConfig.setIsIncludeExportAttributes(newS3ChannelConfig.isIncludeExportAttributes());
+        s3ChannelConfig.setIncludeExportAttributes(newS3ChannelConfig.isIncludeExportAttributes());
         return this;
     }
 
