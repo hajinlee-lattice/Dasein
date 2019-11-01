@@ -163,6 +163,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         false, canChangeExport, //
                         false, false);
                 break;
+            case Partition.SYSTEM_ID:
+                verifySystemID(config);
+                break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
                         Active, true, //
@@ -176,6 +179,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         });
     }
 
+    private void verifySystemID(AttrConfig attrConfig) {
+        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Subcategory).getSystemValue().toString(), "Account ID");
+        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getSystemValue().toString(), "DefaultSystem_Account_ID");
+    }
+
     private String getMyAttributesPartition(String attrName, boolean entityMatchEnabled) {
         String partiion;
         if (entityMatchEnabled && InterfaceName.AccountId.name().equals(attrName)) {
@@ -186,6 +194,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             partiion = Partition.STD_ATTRS;
         } else if (CRM_ID.equals(attrName)) {
             partiion = Partition.EXTERNAL_ID;
+        } else if (ACCOUNT_SYSTEM_ID.equals(attrName)) {
+            partiion = Partition.SYSTEM_ID;
         } else {
             partiion = Partition.OTHERS;
         }
@@ -632,6 +642,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         static final String SYSTEM = "System";
         static final String STD_ATTRS = "StdAttrs";
         static final String EXTERNAL_ID = "ExternalID";
+        static final String SYSTEM_ID = "SystemID";
         static final String HAS_PURCHASED = "HasPurchased";
         static final String APS = "APS";
         static final String ACCOUNT_ID = "AccountID";
