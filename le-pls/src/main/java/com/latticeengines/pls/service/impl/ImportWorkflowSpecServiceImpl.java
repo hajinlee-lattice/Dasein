@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static com.latticeengines.pls.util.ImportWorkflowUtils.getSchemaInterpretationFromSpec;
 import static com.latticeengines.pls.util.ImportWorkflowUtils.getTableFromFieldDefinitionsRecord;
 
 import java.io.File;
@@ -74,13 +73,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     }
 
     public Table tableFromSpec(ImportWorkflowSpec spec) {
-        Table table = getTableFromFieldDefinitionsRecord(spec, true);
-        String schemaInterpretationString = getSchemaInterpretationFromSpec(spec).name();
-        table.setInterpretation(schemaInterpretationString);
-        // TODO(jwinter): Figure out how to better set these fields.
-        table.setName(schemaInterpretationString);
-        table.setDisplayName(schemaInterpretationString);
-
+        Table table = getTableFromFieldDefinitionsRecord(null, spec, true);
         log.info("Generating Table from Spec of type " + spec.getSystemType() + " and object " +
                 spec.getSystemObject());
         return table;

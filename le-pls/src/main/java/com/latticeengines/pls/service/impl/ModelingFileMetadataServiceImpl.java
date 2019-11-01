@@ -1189,7 +1189,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // 3. Generate new table from FieldDefinitionsRecord,
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
-        Table newTable = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(commitRequest, false);
+        // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
+        String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
+        Table newTable = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(newTableName, commitRequest, false);
+        // TODO(jwinter): Figure out how to properly set the Table display name.
+        printTableAttributes("New Table", newTable);
 
         // 4. Delete old table associated with the source file from the database if it exists.
         if (sourceFile.getTableName() != null) {
@@ -1197,13 +1201,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         // 5. Associate the new table with the source file and add new table to the database.
-        // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
-        newTable.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
-        // TODO(jwinter): Figure out how to properly set the Table display name.
-        if (StringUtils.isBlank(newTable.getDisplayName())) {
-            newTable.setDisplayName(newTable.getName());
-        }
-        printTableAttributes("New Table", newTable);
         metadataProxy.createTable(customerSpace.toString(), newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
@@ -1289,7 +1286,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
-            dataFeedTask.setSubType(entityType.getSubType() == null ? "" : entityType.getSubType().name());
+            dataFeedTask.setSubType(entityType.getSubType().name());
             dataFeedTask.setTemplateDisplayName(entityType.getDefaultFeedTypeName());
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             // TODO(jwinter): Add DropBoxService stuff.

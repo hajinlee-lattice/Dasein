@@ -807,7 +807,8 @@ public class ImportWorkflowUtils {
     // Table.  It should be set false when converting a FieldDefinitionsRecord to a Table that will be written to
     // DataFeedTask template because Spec fields that were never matched to input columns should not be in the
     // Metadata Attributes table.
-    public static Table getTableFromFieldDefinitionsRecord(FieldDefinitionsRecord record, boolean writeAllDefinitions) {
+    public static Table getTableFromFieldDefinitionsRecord(String tableName, FieldDefinitionsRecord record,
+                                                           boolean writeAllDefinitions) {
         Table table = new Table();
         if (StringUtils.isBlank(record.getSystemObject())) {
             throw new IllegalArgumentException(
@@ -816,7 +817,7 @@ public class ImportWorkflowUtils {
         String schemaInterpretationString = SchemaInterpretation.getByName(
                 EntityType.fromDisplayNameToEntityType(record.getSystemObject()).getEntity().toString()).toString();
         table.setInterpretation(schemaInterpretationString);
-        table.setName(schemaInterpretationString);
+        table.setName(StringUtils.isNotBlank(tableName) ? tableName : schemaInterpretationString);
         table.setDisplayName(schemaInterpretationString);
 
         if (record == null || MapUtils.isEmpty(record.getFieldDefinitionsRecordsMap())) {
