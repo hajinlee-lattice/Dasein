@@ -105,6 +105,9 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
         boolean skip;
         skip = isCommonSkip(step, seq);
         if (!skip) {
+            skip = !hasImports;
+        }
+        if (!skip) {
             BusinessEntity entity = null;
             if (isProfileProduct(step)) {
                 entity = BusinessEntity.Product;

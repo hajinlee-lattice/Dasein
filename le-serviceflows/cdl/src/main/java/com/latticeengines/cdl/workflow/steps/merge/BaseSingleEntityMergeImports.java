@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
@@ -205,12 +207,47 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         log.info("Set inputMasterTableName=" + inputMasterTableName);
     }
 
-    TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep) {
+    TransformationStepConfig softDelete(int mergeSoftDeleteStep, int mergeStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
+        step.setInputSteps(Arrays.asList(mergeSoftDeleteStep, mergeStep));
+        setTargetTable(step, batchStoreTablePrefix);
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setDeleteSourceIdx(0);
+        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        return step;
+    }
+
+    TransformationStepConfig softDelete(int mergeSoftDeleteStep, String inputMasterTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
+        step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+        setTargetTable(step, batchStoreTablePrefix);
+        if (StringUtils.isNotBlank(inputMasterTableName)) {
+            Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
+            if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
+                log.info("Add masterTable=" + inputMasterTableName);
+                addBaseTables(step, inputMasterTableName);
+            }
+        } else {
+            throw new IllegalArgumentException("The master table is empty for soft delete!");
+        }
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setDeleteSourceIdx(0);
+        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        return step;
+    }
+
+    TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep, boolean setTarget) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, null);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
-        setTargetTable(step, batchStoreTablePrefix);
+        if (setTarget) {
+            setTargetTable(step, batchStoreTablePrefix);
+        }
         UpsertConfig config = getUpsertConfig(entityMatch, true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;

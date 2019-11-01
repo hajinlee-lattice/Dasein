@@ -47,6 +47,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -91,6 +93,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<Table> inputTables = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
+    boolean skipSoftDelete = true;
+    List<Action> softDeleteActions;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -107,6 +111,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+
+        softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
+        skipSoftDelete = CollectionUtils.isEmpty(softDeleteActions);
 
         entity = configuration.getMainEntity();
         batchStore = entity.getBatchStore();
@@ -214,6 +221,21 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             setTargetTable(step, targetTablePrefix);
         }
 
+        return step;
+    }
+
+    TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
+        softDeleteActions.forEach(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            addBaseTables(step, configuration.getDeleteDataTable());
+        });
+        MergeImportsConfig config = new MergeImportsConfig();
+        config.setDedupSrc(true);
+        config.setJoinKey(InterfaceName.AccountId.name());
+        config.setAddTimestamps(false);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
