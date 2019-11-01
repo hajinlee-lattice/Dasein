@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.pls.frontend;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
@@ -101,42 +102,6 @@ public class FieldDefinitionsRecord {
         return false;
     }
 
-    // Add single FieldDefinition to one field section.  Returns true if provided FieldDefinition was added to the map.
-    // TODO(jwinter): Refine how the replace existing logic works.
-    public boolean addFieldDefinition(String fieldSectionName, FieldDefinition fieldDefinition,
-                                      boolean replaceExisting) {
-        if (fieldDefinition == null) {
-            log.error("Tried to add null fieldDefinition to section " + fieldSectionName);
-            return false;
-        }
-        if (fieldDefinitionsRecordsMap == null) {
-            fieldDefinitionsRecordsMap = new HashMap<>();
-        }
-        List<FieldDefinition> fieldDefinitionsList;
-        if (!fieldDefinitionsRecordsMap.containsKey(fieldSectionName)) {
-            fieldDefinitionsList = new ArrayList<>();
-            fieldDefinitionsRecordsMap.put(fieldSectionName, fieldDefinitionsList);
-        } else {
-            fieldDefinitionsList = fieldDefinitionsRecordsMap.get(fieldSectionName);
-        }
-        for (int i = 0; i < fieldDefinitionsList.size(); i++) {
-            if ((StringUtils.isNotBlank(fieldDefinitionsList.get(i).getFieldName()) &&
-                    StringUtils.isNotBlank(fieldDefinition.getFieldName()) &&
-                    fieldDefinitionsList.get(i).getFieldName().equals(fieldDefinition.getFieldName())) ||
-                    (StringUtils.isNotBlank(fieldDefinitionsList.get(i).getColumnName()) &&
-                            StringUtils.isNotBlank(fieldDefinition.getColumnName()) &&
-                            fieldDefinitionsList.get(i).getColumnName().equals(fieldDefinition.getColumnName()))) {
-                if (replaceExisting) {
-                    fieldDefinitionsList.add(i, fieldDefinition);
-                    return true;
-                }
-                return false;
-            }
-        }
-        fieldDefinitionsList.add(fieldDefinition);
-        return true;
-    }
-
     public FieldDefinition getFieldDefinition(String fieldSectionName, String fieldName) {
         if (StringUtils.isBlank(fieldSectionName) || StringUtils.isBlank(fieldName)) {
             return null;
@@ -153,6 +118,72 @@ public class FieldDefinitionsRecord {
         return null;
     }
 
+    // Add single FieldDefinition to one field section.  Returns true if provided FieldDefinition was added to the map.
+    // TODO(jwinter): Refine how the replace existing logic works.  Should columnName be checked for duplicates?
+    public boolean addFieldDefinition(String fieldSectionName, FieldDefinition addDefinition,
+                                      boolean replaceExisting) {
+        if (StringUtils.isBlank(fieldSectionName)) {
+            log.error("Can't add fieldDefinition to null fieldSectionName");
+            return false;
+        }
+        if (addDefinition == null) {
+            log.error("Can't add null fieldDefinition to section " + fieldSectionName);
+            return false;
+        }
+
+        if (fieldDefinitionsRecordsMap == null) {
+            fieldDefinitionsRecordsMap = new HashMap<>();
+        }
+        List<FieldDefinition> fieldDefinitionsList;
+        if (!fieldDefinitionsRecordsMap.containsKey(fieldSectionName)) {
+            fieldDefinitionsList = new ArrayList<>();
+            fieldDefinitionsRecordsMap.put(fieldSectionName, fieldDefinitionsList);
+        } else {
+            fieldDefinitionsList = fieldDefinitionsRecordsMap.get(fieldSectionName);
+        }
+        ListIterator<FieldDefinition> fieldDefinitionIter = fieldDefinitionsList.listIterator();
+        while (fieldDefinitionIter.hasNext()) {
+            FieldDefinition fieldDefinition = fieldDefinitionIter.next();
+            if ((StringUtils.isNotBlank(fieldDefinition.getFieldName()) &&
+                    StringUtils.equals(fieldDefinition.getFieldName(), addDefinition.getFieldName())) ||
+                    (StringUtils.isNotBlank(fieldDefinition.getColumnName()) &&
+                            StringUtils.equals(fieldDefinition.getColumnName(), addDefinition.getColumnName()))) {
+                if (replaceExisting) {
+                    fieldDefinitionIter.set(addDefinition);
+                    return true;
+                }
+                return false;
+            }
+        }
+        fieldDefinitionsList.add(addDefinition);
+        return true;
+    }
+
+    public boolean removeFieldDefinition(String fieldSectionName, String fieldName) {
+        if (StringUtils.isBlank(fieldSectionName)) {
+            log.error("Can't remove fieldDefinition from null fieldSectionName");
+            return false;
+        }
+        if (StringUtils.isBlank(fieldName)) {
+            log.error("Can't remove fieldDefinition with null fieldName from section " + fieldSectionName);
+            return false;
+        }
+        if (MapUtils.isEmpty(fieldDefinitionsRecordsMap) ||
+                !fieldDefinitionsRecordsMap.containsKey(fieldSectionName)) {
+            log.warn("Record does not contain fieldSectionName "+ fieldSectionName);
+            return false;
+        }
+        ListIterator<FieldDefinition> fieldDefinitionIter =
+                fieldDefinitionsRecordsMap.get(fieldSectionName).listIterator();
+        while (fieldDefinitionIter.hasNext()) {
+            FieldDefinition fieldDefinition = fieldDefinitionIter.next();
+            if (fieldDefinition != null && StringUtils.equals(fieldName, fieldDefinition.getFieldName())) {
+                fieldDefinitionIter.remove();
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public boolean equals(Object object) {
