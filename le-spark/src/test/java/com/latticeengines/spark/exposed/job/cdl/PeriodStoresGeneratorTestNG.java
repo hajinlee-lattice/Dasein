@@ -50,7 +50,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void test() {
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
-        config.currentDateStr = "2019-10-28";
+        config.evaluationDate = "2019-10-28";
         config.entity = BusinessEntity.Account;
         config.stream = STREAM;
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config);
