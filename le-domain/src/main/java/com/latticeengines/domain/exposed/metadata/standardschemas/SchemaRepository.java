@@ -1561,7 +1561,7 @@ public class SchemaRepository {
             }
         } else if (schema == SchemaInterpretation.ContactEntityMatch) {
             email.setDefaultValueStr("");
-            attrs.addAll(Arrays.asList(email, website, accountCompanyName, duns, city, state, country, postalCode,
+            attrs.addAll(Arrays.asList(email, website, contactCompanyName, duns, city, state, country, postalCode,
                     phoneNumber, address1, address2));
             attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
         }
