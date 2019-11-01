@@ -28,11 +28,11 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val config: DailyStoreToPeriodStoresJobConfig = lattice.config
     val dailyStore: DataFrame = lattice.input.head
     val stream: AtlasStream = config.stream
-    val curDate: String = config.currentDateStr
+    val evaluationDate: String = config.evaluationDate
     val periods: Seq[String] = asScalaIteratorConverter(stream.getPeriods.iterator).asScala.toSeq
     val dimensions: Seq[StreamDimension] = asScalaIteratorConverter(stream.getDimensions.iterator).asScala.toSeq
     val aggregators: Seq[StreamAttributeDeriver] = asScalaIteratorConverter(stream.getAttributeDerivers.iterator).asScala.toSeq
-    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods), curDate)
+    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods), evaluationDate)
 
     // parase date ranges:
     // 1: for each requested period (week, month, etc.):
