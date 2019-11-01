@@ -339,7 +339,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.getImportTemplate().setUpdatedBy(dataFeedTask.getImportTemplate().getUpdatedBy());
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());
-        tableEntityMgr.merge(task.getImportTemplate());
         datafeedTaskDao.update(task);
     }
 
