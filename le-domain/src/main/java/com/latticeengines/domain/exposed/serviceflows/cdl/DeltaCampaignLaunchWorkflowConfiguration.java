@@ -11,10 +11,10 @@ import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesToS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 
 public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -22,19 +22,20 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String RECOMMENDATION_EXPORT_FILES = "RECOMMENDATION_EXPORT_FILES";
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
+    public static final String DATA_FRAME_NUM = "DATA_FRAME_NUM";
 
     public static class Builder {
         private DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration();
-        private ImportExportS3StepConfiguration importS3 = new ImportExportS3StepConfiguration();
+        private ImportDeltaCalculationResultsFromS3StepConfiguration importDeltaCalculationResultsFromS3Conf = new ImportDeltaCalculationResultsFromS3StepConfiguration();
         private DeltaCampaignLaunchInitStepConfiguration initStepConf = new DeltaCampaignLaunchInitStepConfiguration();
         private PlayLaunchExportFilesGeneratorConfiguration exportFileGeneratorConf = new PlayLaunchExportFilesGeneratorConfiguration();
         private PlayLaunchExportFilesToS3Configuration exportFilesToS3Conf = new PlayLaunchExportFilesToS3Configuration();
         private PlayLaunchExportPublishToSNSConfiguration exportPublishToSNSConf = new PlayLaunchExportPublishToSNSConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("campaignLaunchWorkflow", customerSpace,
+            configuration.setContainerConfiguration("deltaCampaignLaunchWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
-            importS3.setCustomerSpace(customerSpace);
+            importDeltaCalculationResultsFromS3Conf.setCustomerSpace(customerSpace);
             initStepConf.setCustomerSpace(customerSpace);
             exportFileGeneratorConf.setCustomerSpace(customerSpace);
             exportFilesToS3Conf.setCustomerSpace(customerSpace);
@@ -43,12 +44,13 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
-            importS3.setVersion(version);
             initStepConf.setDataCollectionVersion(version);
             return this;
         }
 
         public Builder playLaunch(PlayLaunch playLaunch) {
+            importDeltaCalculationResultsFromS3Conf.setPlayId(playLaunch.getPlay().getName());
+            importDeltaCalculationResultsFromS3Conf.setLaunchId(playLaunch.getLaunchId());
             initStepConf.setPlayName(playLaunch.getPlay().getName());
             initStepConf.setPlayLaunchId(playLaunch.getLaunchId());
             configuration.setUserId(playLaunch.getPlay().getCreatedBy());
@@ -125,7 +127,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public DeltaCampaignLaunchWorkflowConfiguration build() {
-            configuration.add(importS3);
+            configuration.add(importDeltaCalculationResultsFromS3Conf);
             configuration.add(initStepConf);
             configuration.add(exportFileGeneratorConf);
             configuration.add(exportFilesToS3Conf);

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.PlayLaunchWorkflowListener;
 import com.latticeengines.cdl.workflow.steps.DeltaCampaignLaunchInitStep;
-import com.latticeengines.cdl.workflow.steps.export.ImportExtractEntityFromS3;
+import com.latticeengines.cdl.workflow.steps.play.ImportDeltaCalculationResultsFromS3;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFilesToS3Step;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportPublishToSNSStep;
@@ -24,7 +24,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class DeltaCampaignLaunchWorkflow extends AbstractWorkflow<DeltaCampaignLaunchWorkflowConfiguration> {
 
     @Inject
-    private ImportExtractEntityFromS3 importExtractEntityFromS3;
+    private ImportDeltaCalculationResultsFromS3 importDeltaCalculationResultsFromS3;
 
     @Inject
     private DeltaCampaignLaunchInitStep deltaCampaignLaunchInitStep;
@@ -44,7 +44,7 @@ public class DeltaCampaignLaunchWorkflow extends AbstractWorkflow<DeltaCampaignL
     @Override
     public Workflow defineWorkflow(DeltaCampaignLaunchWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
-                .next(importExtractEntityFromS3) //
+                .next(importDeltaCalculationResultsFromS3) //
                 .next(deltaCampaignLaunchInitStep) //
                 .next(playLaunchExportFileGeneratorStep) //
                 .next(playLaunchExportFilesToS3Step) //
