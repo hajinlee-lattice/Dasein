@@ -1,5 +1,7 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ORIGINAL_BUCKET_METADATA;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +50,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.score.PivotScoreAndEventJob;
+import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("pivotScoreAndEventDataFlow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -69,6 +72,7 @@ public class PivotScoreAndEventDataFlow
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
     private Map<String, String> modelGuidToEngineIdMap;
     private Map<String, Boolean> modelGuidToIsEVFlagMap;
+    private Map<String, Map<String, Double>> originalLiftMap;
 
     private CustomerSpace customerSpace;
     private String targetTableName;
@@ -127,8 +131,9 @@ public class PivotScoreAndEventDataFlow
         String customer = configuration.getCustomer();
         Table targetTable = toTable(targetTableName, result.getTargets().get(0));
         metadataProxy.createTable(customer, targetTableName, targetTable);
-
         putObjectInContext(EVENT_TABLE, targetTable);
+
+        originalLiftMap = getOriginalLifts();
         String targetExtractPath = targetTable.getExtracts().get(0).getPath();
         if (!targetExtractPath.endsWith(".avro")) {
             targetExtractPath = targetExtractPath.endsWith("/") ? targetExtractPath : targetExtractPath + "/";
@@ -136,7 +141,6 @@ public class PivotScoreAndEventDataFlow
         }
         saveBucketedScoreSummary(targetExtractPath);
         putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH, targetExtractPath);
-
         upsertRatingLifts();
 
         putStringValueInContext(EXPORT_BUCKET_TOOL_TABLE_NAME, targetTableName);
@@ -145,7 +149,7 @@ public class PivotScoreAndEventDataFlow
         putStringValueInContext(EXPORT_BUCKET_TOOL_OUTPUT_PATH, pivotOutputPath);
         saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
     }
-    
+
     private Map<String, String> getScoreDerivationMap(Collection<String> modelIds, Map<String, String> scoreFieldMap) {
         ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
                 yarnConfiguration);
@@ -326,14 +330,19 @@ public class PivotScoreAndEventDataFlow
         if (MapUtils.isNotEmpty(mapInContext)) {
             mapInContext.forEach((k, v) -> liftMap.put(k, JsonUtils.convertMap(v, String.class, Double.class)));
         }
+        // read lift from original bucket metadata (the latest published version before scoring)
         modelGuidToEngineIdMap.forEach((modelGuid, engineId) -> {
-            List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
-            liftMap.put(engineId, new HashMap<>());
-            bucketMetadata.forEach(bm -> {
-                String rating = bm.getBucketName();
-                double lift = bm.getLift();
-                liftMap.get(engineId).put(rating, lift);
-            });
+            if (originalLiftMap.containsKey(modelGuid)) {
+                liftMap.put(engineId, originalLiftMap.get(modelGuid));
+            } else {
+                List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
+                liftMap.put(engineId, new HashMap<>());
+                bucketMetadata.forEach(bm -> {
+                    String rating = bm.getBucketName();
+                    double lift = bm.getLift();
+                    liftMap.get(engineId).put(rating, lift);
+                });
+            }
         });
         putObjectInContext(RATING_LIFTS, liftMap);
     }
@@ -384,12 +393,38 @@ public class PivotScoreAndEventDataFlow
             @SuppressWarnings("rawtypes")
             Map<String, List> map = getMapObjectFromContext(BUCKET_METADATA_MAP_AGG, String.class, List.class);
             Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMapAgg = new HashMap<>();
+            WorkflowStaticContext.getObject(ORIGINAL_BUCKET_METADATA, Map.class);
             if (MapUtils.isNotEmpty(map)) {
-                map.forEach((key, val) -> //
-                modelGuidToBucketMetadataMapAgg.put(key, JsonUtils.convertList(val, BucketMetadata.class)));
+                map.forEach((guid, val) -> {
+                    List<BucketMetadata> bmList = JsonUtils.convertList(val, BucketMetadata.class);
+                    if (CollectionUtils.isNotEmpty(bmList)) {
+                        Map<String, Double> originalLift = originalLiftMap.get(guid);
+                        bmList.forEach(bm -> bm.setLift(originalLift.getOrDefault(bm.getBucketName(), bm.getLift())));
+                    }
+                    modelGuidToBucketMetadataMapAgg.put(guid, bmList);
+                });
             }
             modelGuidToBucketMetadataMapAgg.putAll(modelGuidToBucketMetadataMap);
             putObjectInContext(BUCKET_METADATA_MAP_AGG, modelGuidToBucketMetadataMapAgg);
         }
     }
+
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Map<String, Double>> getOriginalLifts() {
+        Map<String, Map<String, Double>> liftMap = new HashMap<>();
+        Map<String, List<BucketMetadata>> bmMap = (Map<String, List<BucketMetadata>>) //
+                WorkflowStaticContext.getObject(ORIGINAL_BUCKET_METADATA, Map.class);
+        if (MapUtils.isNotEmpty(bmMap)) {
+            bmMap.forEach((guid, bmList) -> {
+                Map<String, Double> lifts = new HashMap<>();
+                if (CollectionUtils.isNotEmpty(bmList)) {
+                    bmList.forEach(bm -> lifts.put(bm.getBucketName(), bm.getLift()));
+                }
+                liftMap.put(guid, lifts);
+            });
+        }
+        return liftMap;
+    }
+
 }

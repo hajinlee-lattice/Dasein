@@ -184,7 +184,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder userId(String userId) {
             modelWorkflowBuilder.userId(userId);
             configuration.setUserId(userId);
-            generateAIRating.userId(userId);
             return this;
         }
 
