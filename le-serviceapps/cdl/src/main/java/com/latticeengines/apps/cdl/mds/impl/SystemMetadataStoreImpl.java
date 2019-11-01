@@ -12,6 +12,7 @@ import com.latticeengines.apps.cdl.mds.ActivityMetricDecoratorFac;
 import com.latticeengines.apps.cdl.mds.ContactAttrsDecoratorFac;
 import com.latticeengines.apps.cdl.mds.CuratedAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
+import com.latticeengines.apps.cdl.mds.ImportSystemAttrsDecoratorFac;
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.apps.cdl.mds.RawSystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.SpendAnalyticMetricsDecoratorFac;
@@ -42,6 +43,7 @@ public class SystemMetadataStoreImpl extends
                                     RawSystemMetadataStore rawSystemMetadataStore, //
                                     AccountAttrsDecoratorFac accountAttrsDecorator, //
                                     ContactAttrsDecoratorFac contactAttrsDecorator, //
+                                    ImportSystemAttrsDecoratorFac importSystemAttrsDecorator, //
                                     SpendAnalyticMetricsDecoratorFac activityMetricsDecorator, //
                                     RatingDisplayMetadataStore ratingDisplayMetadataStore, //
                                     ExternalSystemMetadataStore externalSystemMetadataStore, //
@@ -51,6 +53,7 @@ public class SystemMetadataStoreImpl extends
                 getDecoratorChain(//
                         accountAttrsDecorator, //
                         contactAttrsDecorator, //
+                        importSystemAttrsDecorator, //
                         activityMetricsDecorator, //
                         ratingDisplayMetadataStore, //
                         externalSystemMetadataStore, //
@@ -62,6 +65,7 @@ public class SystemMetadataStoreImpl extends
     private static ChainedDecoratorFactory<Namespace2<BusinessEntity, DataCollection.Version>> getDecoratorChain(
             AccountAttrsDecoratorFac accountAttrsDecorator, //
             ContactAttrsDecoratorFac contactAttrsDecorator, //
+            ImportSystemAttrsDecoratorFac importSystemAttrsDecorator, //
             SpendAnalyticMetricsDecoratorFac activityMetricsDecorator, //
             RatingDisplayMetadataStore ratingDisplayMetadataStore, //
             ExternalSystemMetadataStore externalSystemMetadataStore, //
@@ -80,6 +84,7 @@ public class SystemMetadataStoreImpl extends
                 accountAttrsDecorator, //
                 lookupIdDecorator, //
                 contactAttrsDecorator, //
+                importSystemAttrsDecorator,
                 activityMetricsDecorator, //
                 apsAttrDecorator, //
                 ratingDisplayDecorator, //
@@ -96,6 +101,8 @@ public class SystemMetadataStoreImpl extends
                 String tenantId = MultiTenantContext.getShortTenantId();
                 Namespace accountNs = Namespace.as(BusinessEntity.Account.equals(entity) ? tenantId : "");
                 Namespace contactNs = Namespace.as(BusinessEntity.Contact.equals(entity) ? tenantId : "");
+                Namespace importSystemNs =
+                        Namespace.as((BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) ? tenantId : "");
                 Namespace activityMetricsNs = Namespace
                         .as(BusinessEntity.PurchaseHistory.equals(entity) ? tenantId : "");
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
@@ -110,6 +117,7 @@ public class SystemMetadataStoreImpl extends
                         accountNs, //
                         lookupIdNs, //
                         contactNs, //
+                        importSystemNs, //
                         activityMetricsNs, //
                         Namespace0.NS, //
                         ratingNs, //
