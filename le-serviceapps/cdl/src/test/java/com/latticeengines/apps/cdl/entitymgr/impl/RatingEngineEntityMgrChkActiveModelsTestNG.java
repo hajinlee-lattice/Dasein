@@ -18,7 +18,6 @@ import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.ActionContext;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -42,9 +41,6 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
-
-    @Inject
-    private BatonService batonService;
 
     @Inject
     private RatingEngineService ratingEngineService;
@@ -129,7 +125,7 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
     }
 
     @Test(groups = "functional")
-    public void createTenant() {
+    public void createTestTenant() {
         CustomerSpace space = CustomerSpace.parse(mainTestTenant.getId());
         Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
                 CDLComponent.componentName);
@@ -145,7 +141,7 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "create", "createTenant" })
+    @Test(groups = "functional", dependsOnMethods = { "create", "createTestTenant" })
     public void update() {
         RatingEngine re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
