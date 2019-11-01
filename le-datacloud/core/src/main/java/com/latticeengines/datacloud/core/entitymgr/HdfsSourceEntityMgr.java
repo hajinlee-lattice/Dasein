@@ -42,6 +42,8 @@ public interface HdfsSourceEntityMgr {
     TableSource materializeTableSource(String tableName, CustomerSpace customerSpace);
     TableSource materializeTableSource(TableSource tableSource, Long count);
 
+    TableSource materializeTableSource(TableSource tableSource, Long count, boolean hasSparkPartition);
+
     Table getCollectedTableSince(IngestedRawSource source, Date earliest);
 
     Table getCollectedTableSince(IngestedRawSource source, String firstVersion);

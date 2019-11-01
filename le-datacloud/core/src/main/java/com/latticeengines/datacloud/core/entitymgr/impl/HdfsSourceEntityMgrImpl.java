@@ -291,6 +291,11 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public TableSource materializeTableSource(TableSource tableSource, Long count) {
+        return materializeTableSource(tableSource, count, false);
+    }
+
+    @Override
+    public TableSource materializeTableSource(TableSource tableSource, Long count, boolean hasSparkPartition) {
         boolean expandBucketed = tableSource.isExpandBucketedAttrs();
         String tableName = tableSource.getTable().getName();
         CustomerSpace customerSpace = tableSource.getCustomerSpace();
@@ -300,9 +305,17 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         if (expandBucketed) {
             table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avroDir, avscPath,
                     tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
+            // TODO support spark partition version
         } else {
-            table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(),
-                    tableSource.getLastModifiedKey());
+            if (hasSparkPartition) {
+                log.info("convert spark partition directory {} to table", avroDir);
+                table = MetadataConverter.getTableFromDir(yarnConfiguration, avscPath,
+                        tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey(), count != null);
+            } else {
+                // get table by glob
+                table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(),
+                        tableSource.getLastModifiedKey());
+            }
             try {
                 boolean avscExists = HdfsUtils.fileExists(yarnConfiguration, avscPath);
                 if (avscExists) {
