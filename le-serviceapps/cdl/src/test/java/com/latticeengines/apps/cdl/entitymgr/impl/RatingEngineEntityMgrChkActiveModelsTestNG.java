@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -13,10 +14,18 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -33,6 +42,9 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     private RatingEngineService ratingEngineService;
@@ -116,7 +128,24 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
         Assert.assertNotNull(createdRatingEngine);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "create" })
+    @Test(groups = "functional")
+    public void createTenant() {
+        CustomerSpace space = CustomerSpace.parse(mainTestTenant.getId());
+        Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
+                CDLComponent.componentName);
+        Path activeModelCntPath = path.append("ActiveModelQuotaLimit");
+        Camille camille = CamilleEnvironment.getCamille();
+        try {
+            if (!camille.exists(activeModelCntPath)) {
+                camille.create(activeModelCntPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
+            camille.set(activeModelCntPath, new Document("50"));
+        } catch (Exception e) {
+            System.out.println("Error Creating Zookeeper Path : " + e);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "create", "createTenant" })
     public void update() {
         RatingEngine re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
