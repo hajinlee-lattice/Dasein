@@ -336,8 +336,10 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.setTemplateDisplayName(dataFeedTask.getTemplateDisplayName());
         task.setFeedType(dataFeedTask.getFeedType());
         task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
+        task.getImportTemplate().setUpdatedBy(dataFeedTask.getImportTemplate().getUpdatedBy());
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());
+        tableEntityMgr.merge(task.getImportTemplate());
         datafeedTaskDao.update(task);
     }
 
