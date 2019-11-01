@@ -125,9 +125,10 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             return localToken;
         }
         String newToken = externalRequest(type, expiredToken);
-        if (newToken != null) {
-            tokenCache.put(type, newToken);
+        if (newToken == null) {
+            throw new LedpException(LedpCode.LEDP_25027);
         }
+        tokenCache.put(type, newToken);
         return newToken;
     }
 
@@ -143,7 +144,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             return tokenCache.get(type);
         } catch (ExecutionException e) {
             log.error("Fail to get DnB " + type + " token from local cache", e);
-            throw new LedpException(LedpCode.LEDP_25027, e);
+            return null;
         }
     }
 
