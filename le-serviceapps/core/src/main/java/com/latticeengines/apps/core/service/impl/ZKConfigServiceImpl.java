@@ -95,6 +95,24 @@ public class ZKConfigServiceImpl implements ZKConfigService {
         return period;
     }
 
+    @Override
+    public Long getActiveRatingEngingQuota(CustomerSpace customerSpace, String componentName) {
+        Long dataQuotaLimit = null;
+        try {
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    componentName);
+            Path activeModelCntPath = path.append("ActiveModelQuotaLimit");
+            Camille camille = CamilleEnvironment.getCamille();
+            if (activeModelCntPath != null && camille.exists(activeModelCntPath)) {
+                dataQuotaLimit = Long.valueOf(camille.get(activeModelCntPath).getData());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get count of ActiveModels from ZK for "
+                    + customerSpace.getTenantId(), e);
+        }
+        return dataQuotaLimit;
+    }
+
     @VisibleForTesting
     public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense) {
         String maxPremiumLeadEnrichmentAttributes;
@@ -138,7 +156,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     }
 
     @Override
-    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity) {
+    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName,
+            BusinessEntity businessEntity) {
         try {
             Long dataQuotaLimit = null;
             Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
@@ -196,4 +215,5 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             throw new RuntimeException("Failed to get DataQuotaLimit from ZK for " + customerSpace.getTenantId(), e);
         }
     }
+
 }

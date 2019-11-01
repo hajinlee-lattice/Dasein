@@ -58,4 +58,5 @@ public class DataLimit {
     public void setProductSkuDataQuotaLimit(Long productSkuDataQuotaLimit) {
         this.productSkuDataQuotaLimit = productSkuDataQuotaLimit;
     }
+
 }
