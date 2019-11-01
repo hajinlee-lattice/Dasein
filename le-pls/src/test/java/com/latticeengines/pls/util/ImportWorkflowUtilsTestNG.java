@@ -130,6 +130,8 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testGenerateCurrentFieldDefinitionRecord_noExistingTemplate() throws IOException {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+        actualResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
@@ -165,6 +167,8 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testGenerateCurrentFieldDefinitionRecord_withExistingTemplate() throws IOException {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+        actualResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
@@ -216,15 +220,16 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
         Map<String, FieldDefinition> autoDetectionResultsMap = ImportWorkflowUtils.generateAutodetectionResultsMap(resolver);
 
-
         FetchFieldDefinitionsResponse fetchResponse = new FetchFieldDefinitionsResponse();
+        fetchResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+
         fetchResponse.setAutodetectionResultsMap(autoDetectionResultsMap);
         fetchResponse.setImportWorkflowSpec(importWorkflowSpec);
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchResponse);
         FieldDefinitionsRecord currentFieldDefinitionsRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
         Map<String, List<FieldDefinition>> fieldDefinitionMap =
                 currentFieldDefinitionsRecord.getFieldDefinitionsRecordsMap();
-
 
         // change customer field's type
         Map<String, FieldDefinition> customNameToFieldDefinition =
@@ -257,6 +262,9 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testIgnoredFlag() throws Exception {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+        actualResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+
         // Generate Spec Java class from resource file
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/test-contact-spec.json", ImportWorkflowSpec.class);
@@ -282,7 +290,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         FieldDefinition earningsDefinition = customNameToFieldDefinition.get("Earnings");
         Assert.assertNotNull(earningsDefinition);
         earningsDefinition.setIgnored(Boolean.TRUE);
-        Table result = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(currentRecord, false);
+        Table result = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(null, currentRecord, false);
 
         List<Attribute> attrs = result.getAttributes();
         Attribute earningsAttr =
@@ -308,8 +316,6 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
                             && messageLevel.equals(message.getMessageLevel()) && errMSG.equals(message.getMessage())).findFirst().orElse(null);
             Assert.assertNotNull(validation);
         }
-
-
     }
 
     // resourceJsonFileRelativePath should start "com/latticeengines/...".
@@ -339,6 +345,5 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         }
         return pojo;
     }
-
 
 }

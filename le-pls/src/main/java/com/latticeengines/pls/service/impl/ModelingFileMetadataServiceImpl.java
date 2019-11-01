@@ -1038,8 +1038,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         EntityType entityType = EntityType.fromDisplayNameToEntityType(systemObject);
 
         // 2b. Convert systemName and entityType to feedType.
-        // TODO(jwinter): Make sure the implemented approach is correct.
-        String feedType = ImportWorkflowUtils.getFeedTypeFromSystemNameAndEntityType(systemName, entityType);
+        String feedType = EntityTypeUtils.generateFullFeedType(systemName, entityType);
 
         // 2c. Generate source string.
         // TODO(jwinter): Assume source is always "File".  I don't think VisiDB support is needed.
@@ -1071,18 +1070,23 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // TODO(jwinter): Need to incorporate Batch Store into initial generation of FetchFieldDefinitionsResponse.
         // 4. Generate FetchFieldMappingResponse by combining:
-        //    a. Spec for this system.
-        //    b. Existing field definitions from DataFeedTask.
-        //    c. Columns and autodetection results from the sourceFile.
-        //    d. Other System Templates matching this System Object.
-        //    e. Batch Store (TODO)
-        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
+        //    a. A FieldDefinitionRecord to hold the current field definitions.
+        //    b. Spec for this system.
+        //    c. Existing field definitions from DataFeedTask.
+        //    d. Columns and autodetection results from the sourceFile.
+        //    e. Other System Templates matching this System Object (TODO).
+        //    f. Batch Store (TODO)
 
-        // 4a. Retrieve Spec for given systemType and systemObject.
+        // 4a. Setup up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
+        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
+        fetchFieldDefinitionsResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord(systemName, systemType, systemObject));
+
+        // 4b. Retrieve Spec for given systemType and systemObject.
         fetchFieldDefinitionsResponse.setImportWorkflowSpec(
                 importWorkflowSpecService.loadSpecFromS3(systemType, systemObject));
 
-        // 4b. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
+        // 4c. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
         // exists.
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
                 entityType.getEntity().name());
@@ -1095,19 +1099,19 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     ImportWorkflowUtils.getFieldDefinitionsMapFromTable(existingTable));
         }
 
-        // 4c. Create a MetadataResolver using the sourceFile.
+        // 4d. Create a MetadataResolver using the sourceFile.
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
         fetchFieldDefinitionsResponse.setAutodetectionResultsMap(
                 ImportWorkflowUtils.generateAutodetectionResultsMap(resolver));
 
-        // 4d. Fetch all other DataFeedTask templates for Other Systems that are the same System Object and extract
+        // 4e. Fetch all other DataFeedTask templates for Other Systems that are the same System Object and extract
         // the fieldTypes used for each field.
         // TODO(jwinter): Add Other System processing.
 
-        // 4e. Get the Metadata Attribute data from the Batch Store and get the fieldTypes set there.
+        // 4f. Get the Metadata Attribute data from the Batch Store and get the fieldTypes set there.
         // TODO(jwinter):  Implement Batch Store extractions.
 
-        // 4f. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
+        // 5. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
 
         //ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(importWorkflowSpec, existingTable, resolver);
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
@@ -1159,8 +1163,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         EntityType entityType = EntityType.fromDisplayNameToEntityType(systemObject);
 
         // 2b. Convert systemName and entityType to feedType.
-        // TODO(jwinter): Make sure the implemented approach is correct.
-        String feedType = ImportWorkflowUtils.getFeedTypeFromSystemNameAndEntityType(systemName, entityType);
+        String feedType = EntityTypeUtils.generateFullFeedType(systemName, entityType);
 
         // 2c. Generate source string.
         // TODO(jwinter): Assume source is always "File".  I don't think VisiDB support is needed.
@@ -1186,7 +1189,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // 3. Generate new table from FieldDefinitionsRecord,
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
-        Table newTable = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(commitRequest, false);
+        // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
+        String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
+        Table newTable = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(newTableName, commitRequest, false);
+        // TODO(jwinter): Figure out how to properly set the Table display name.
+        printTableAttributes("New Table", newTable);
 
         // 4. Delete old table associated with the source file from the database if it exists.
         if (sourceFile.getTableName() != null) {
@@ -1194,11 +1201,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         // 5. Associate the new table with the source file and add new table to the database.
-        // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
-        newTable.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
-        // TODO(jwinter): Figure out how to properly set the Table display name.
-        newTable.setDisplayName(newTable.getName());
-        printTableAttributes("New Table", newTable);
         metadataProxy.createTable(customerSpace.toString(), newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
@@ -1257,7 +1259,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     // are fields and properties bucket values that are not related to import that have been stored in the
     // existing table's attributes?
     private String createOrUpdateDataFeedTask(Table newTable, CustomerSpace customerSpace, String source,
-                                            String feedType, EntityType entityType) {
+                                              String feedType, EntityType entityType) {
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType,
                 entityType.getEntity().name());
         if (dataFeedTask != null) {
@@ -1284,12 +1286,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
-            // TODO(jwinter): Figure out how to get subtype from incoming parameters.
-            dataFeedTask.setSubType(entityType.getSubType());
+            dataFeedTask.setSubType(entityType.getSubType().name());
             dataFeedTask.setTemplateDisplayName(entityType.getDefaultFeedTypeName());
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             // TODO(jwinter): Add DropBoxService stuff.
 
+            // TODO(jwinter): Should we be doing this DataFeed status update?
             DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
             if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
                 dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Initialized.getName());

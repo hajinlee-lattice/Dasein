@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static com.latticeengines.pls.util.ImportWorkflowUtils.getSchemaInterpretationFromSpec;
 import static com.latticeengines.pls.util.ImportWorkflowUtils.getTableFromFieldDefinitionsRecord;
 
 import java.io.File;
@@ -38,8 +37,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     private String awsSecret;
 
     public ImportWorkflowSpec loadSpecFromS3(String systemType, String systemObject) throws Exception {
-        String fileSystemType = systemType.toLowerCase();
-        String fileSystemObject = systemObject.toLowerCase();
+        String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
+        String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
         File specFile = null;
         try {
             specFile = File.createTempFile("temp-" + fileSystemType + "-" + fileSystemObject, ".json");
@@ -74,13 +73,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     }
 
     public Table tableFromSpec(ImportWorkflowSpec spec) {
-        Table table = getTableFromFieldDefinitionsRecord(spec, true);
-        String schemaInterpretationString = getSchemaInterpretationFromSpec(spec).name();
-        table.setInterpretation(schemaInterpretationString);
-        // TODO(jwinter): Figure out how to better set these fields.
-        table.setName(schemaInterpretationString);
-        table.setDisplayName(schemaInterpretationString);
-
+        Table table = getTableFromFieldDefinitionsRecord(null, spec, true);
         log.info("Generating Table from Spec of type " + spec.getSystemType() + " and object " +
                 spec.getSystemObject());
         return table;
