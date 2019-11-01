@@ -75,10 +75,6 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     @Value("${datacloud.dnb.authentication.token.jsonpath}")
     private String tokenJsonPath;
 
-    // Local cache doesn't refresh automatically
-    // There are 2 cases that tokenCache might be refreshed:
-    // 1. In initialization, load token from Redis
-    // 2. External service found current cached token has been expired
     private LoadingCache<DnBKeyType, String> tokenCache;
 
     @Inject
