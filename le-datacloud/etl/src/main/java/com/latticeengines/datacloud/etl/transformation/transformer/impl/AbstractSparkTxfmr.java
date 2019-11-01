@@ -286,7 +286,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
                     schema.getFields().forEach(field -> inputFields.putIfAbsent(field.name(), field));
                 }
             });
-            Schema resultSchema = AvroParquetUtils.parseAvroSchema(yarnConfiguration, result.getPath());
+            Schema resultSchema = AvroParquetUtils.parseAvroSchemaInDirectory(yarnConfiguration, result.getPath());
             return AvroUtils.overwriteFields(resultSchema, inputFields);
         } else {
             return null;

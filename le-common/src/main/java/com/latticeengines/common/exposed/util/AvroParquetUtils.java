@@ -6,12 +6,48 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 
 public class AvroParquetUtils {
+    private static final String PARQUET_EXTENSION = ".parquet";
+    private static final String AVRO_EXTENSION = ".avro";
+    private static final HdfsUtils.HdfsFileFilter AVRO_PARQUET_FILTER = file -> {
+        if (file == null || file.getPath() == null) {
+            return false;
+        }
+        String filename = file.getPath().getName();
+        return filename != null && (filename.endsWith(PARQUET_EXTENSION) || filename.endsWith(AVRO_EXTENSION));
+    };
+
+    // determine schema by the first avro/parquet file found in directory and its
+    // sub-directory
+    public static Schema parseAvroSchemaInDirectory(Configuration configuration, String dir) {
+        List<String> files = listAvroParquetFiles(configuration, dir, true);
+        if (CollectionUtils.isEmpty(files)) {
+            throw new IllegalArgumentException(String.format("No avro/parquet files in directory %s", dir));
+        }
+
+        String path = files.get(0);
+        if (path.endsWith(PARQUET_EXTENSION)) {
+            return ParquetUtils.getAvroSchema(configuration, path);
+        } else {
+            return AvroUtils.getSchema(configuration, new Path(path));
+        }
+    }
+
+    public static List<String> listAvroParquetFiles(Configuration configuration, String dir,
+            boolean onlyReturnFirstMatch) {
+        try {
+            return HdfsUtils.onlyGetFilesForDirRecursive(configuration, dir, AVRO_PARQUET_FILTER, onlyReturnFirstMatch);
+        } catch (IOException e) {
+            String msg = String.format("Failed to list avro/parquet files in directory %s", dir);
+            throw new RuntimeException(msg, e);
+        }
+    }
 
     public static Schema parseAvroSchema(Configuration configuration, String globPath) {
         globPath = toParquetOrAvroGlob(configuration, globPath);
-        if (globPath.endsWith(".parquet")) {
+        if (globPath.endsWith(PARQUET_EXTENSION)) {
             return ParquetUtils.getAvroSchema(configuration, globPath);
         } else {
             return AvroUtils.getSchemaFromGlob(configuration, globPath);
@@ -50,7 +86,7 @@ public class AvroParquetUtils {
             }
             if (CollectionUtils.isNotEmpty(files)) {
                 for (String file: files) {
-                    if (file.endsWith(".parquet")) {
+                    if (file.endsWith(PARQUET_EXTENSION)) {
                         return true;
                     } else if (file.endsWith(".avro")) {
                         return false;
