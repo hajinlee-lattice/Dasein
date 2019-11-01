@@ -1,5 +1,8 @@
 {
     "currentFieldDefinitionsRecord": {
+        "systemName": "ImportWorkflowUtilsTest",
+        "systemType": "Test",
+        "systemObject": "Contacts",
         "fieldDefinitionsRecordsMap": {
             "Unique ID": [
                 {
