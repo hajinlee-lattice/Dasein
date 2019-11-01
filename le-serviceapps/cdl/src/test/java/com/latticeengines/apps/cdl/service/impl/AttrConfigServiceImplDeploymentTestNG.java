@@ -156,7 +156,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             case Partition.ACCOUNT_ID:
                 boolean canChangeExport = !onlyEntityMatchGAEnabled;
                 verifyFlags(config, cat, partition, //
-                        Active, canChangeExport, //
+                        Active, false, //
                         false, false, //
                         false, canChangeExport, //
                         false, canChangeExport, //
@@ -215,7 +215,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             case Partition.CONTACT_ID:
                 boolean canChangeExport = !onlyEntityMatchGAEnabled;
                 verifyFlags(config, cat, partition, //
-                        Active, canChangeExport, //
+                        Active, false, //
                         false, false, //
                         false, canChangeExport, //
                         false, canChangeExport, //

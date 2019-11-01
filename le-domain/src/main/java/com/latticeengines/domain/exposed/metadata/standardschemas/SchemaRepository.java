@@ -100,9 +100,8 @@ public class SchemaRepository {
             case Account:
                 if (entityMatchEnabled) {
                     stdAttrs.add(InterfaceName.CustomerAccountId);
-                } else {
-                    stdAttrs.add(InterfaceName.AccountId);
                 }
+                stdAttrs.add(InterfaceName.AccountId);
                 stdAttrs.add(InterfaceName.Website);
                 stdAttrs.add(InterfaceName.IsMatched);
                 break;
@@ -110,9 +109,8 @@ public class SchemaRepository {
                 stdAttrs.add(InterfaceName.ContactName);
                 if (entityMatchEnabled) {
                     stdAttrs.add(InterfaceName.CustomerContactId);
-                } else {
-                    stdAttrs.add(InterfaceName.ContactId);
                 }
+                stdAttrs.add(InterfaceName.ContactId);
                 stdAttrs.add(InterfaceName.Email);
                 break;
             default:

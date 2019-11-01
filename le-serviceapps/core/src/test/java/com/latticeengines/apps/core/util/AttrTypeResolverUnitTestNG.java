@@ -81,11 +81,11 @@ public class AttrTypeResolverUnitTestNG {
         assertEquals(AttrTypeResolver.resolveType(internal1, false), AttrType.Internal);
         assertEquals(AttrTypeResolver.resolveType(internal1, true), AttrType.Internal);
         assertEquals(AttrTypeResolver.resolveType(internal2, false), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(internal2, true), AttrType.Internal);
+        assertEquals(AttrTypeResolver.resolveType(internal2, true), AttrType.Custom);
         assertEquals(AttrTypeResolver.resolveType(internal3, false), AttrType.Internal);
         assertEquals(AttrTypeResolver.resolveType(internal3, true), AttrType.Internal);
         assertEquals(AttrTypeResolver.resolveType(internal4, false), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(internal4, true), AttrType.Internal);
+        assertEquals(AttrTypeResolver.resolveType(internal4, true), AttrType.Custom);
         assertEquals(AttrTypeResolver.resolveType(internal5, true), AttrType.Internal);
 
 
@@ -111,11 +111,11 @@ public class AttrTypeResolverUnitTestNG {
         assertNull(AttrTypeResolver.resolveSubType(internal1, false));
         assertNull(AttrTypeResolver.resolveSubType(internal1, true));
         assertEquals(AttrTypeResolver.resolveSubType(internal2, false), AttrSubType.Standard);
-        assertNull(AttrTypeResolver.resolveSubType(internal2, true));
+        assertEquals(AttrTypeResolver.resolveSubType(internal2, true), AttrSubType.Standard);
         assertNull(AttrTypeResolver.resolveSubType(internal3, false));
         assertNull(AttrTypeResolver.resolveSubType(internal3, true));
         assertEquals(AttrTypeResolver.resolveSubType(internal4, false), AttrSubType.Standard);
-        assertNull(AttrTypeResolver.resolveSubType(internal4, true));
+        assertEquals(AttrTypeResolver.resolveSubType(internal4, true), AttrSubType.Standard);
         assertNull(AttrTypeResolver.resolveSubType(internal5, true));
 
         dataCloud.setCanInternalEnrich(Boolean.TRUE);
