@@ -90,7 +90,7 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
         ratingEngineTest3.setUpdatedBy(CREATED_BY);
         ratingEngineTest3.setType(RatingEngineType.RULE_BASED);
         ratingEngineTest3.setNote(RATING_ENGINE_NOTE);
-        ratingEngineTest3.setTenant(mainTestTenant);
+        ratingEngineTest3.setId(UUID.randomUUID().toString());
 
         ActionContext.remove();
     }
@@ -152,7 +152,7 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
         mainTestTenant = testBed.getTestTenants().get(1);
         mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
-        ratingEngineTest3.setId(UUID.randomUUID().toString());
+        ratingEngineTest3.setTenant(mainTestTenant);
         createdRatingEngine = ratingEngineEntityMgr.createRatingEngine(ratingEngineTest3);
         Assert.assertNotNull(createdRatingEngine);
         re = new RatingEngine();

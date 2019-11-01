@@ -10,10 +10,6 @@
       "Data": -1
     },
     {
-       "Node": "ActiveModelQuotaLimit",
-       "Data": 50
-    },
-    {
       "Node": "AccountQuotaLimit",
       "Data": 5000000
     },
