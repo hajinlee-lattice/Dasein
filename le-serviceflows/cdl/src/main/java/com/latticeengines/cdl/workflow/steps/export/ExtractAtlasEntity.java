@@ -322,7 +322,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         }
         log.info("Going to export " + lookups.size() + " columns for " + exportEntity);
         frontEndQuery.setLookups(lookups);
-        return getEntityQueryData(frontEndQuery);
+        return getEntityQueryData(frontEndQuery, false);
     }
 
     private boolean isEntityValid(BusinessEntity mainEntity) {
