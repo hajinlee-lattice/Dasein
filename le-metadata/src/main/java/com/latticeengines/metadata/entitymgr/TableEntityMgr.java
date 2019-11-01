@@ -60,4 +60,5 @@ public interface TableEntityMgr {
 
     void fixAttributes(String name, List<AttributeFixer> attributeFixerList);
 
+    void merge(Table table);
 }
