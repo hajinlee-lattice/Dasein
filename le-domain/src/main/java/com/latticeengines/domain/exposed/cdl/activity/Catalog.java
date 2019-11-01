@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
-import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.IngestionBehavior.Upsert;
+import static com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.IngestionBehavior.Replace;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @UniqueConstraint(columnNames = { "FK_TASK_ID", "FK_TENANT_ID" }) })
 public class Catalog implements HasPid, Serializable, HasAuditingFields {
 
-    public static final DataFeedTask.IngestionBehavior DEFAULT_INGESTION_BEHAVIOR = Upsert;
+    public static final DataFeedTask.IngestionBehavior DEFAULT_INGESTION_BEHAVIOR = Replace;
     private static final long serialVersionUID = -8455242959058500143L;
     private static final String CATALOG_ID_PREFIX = "ctl_";
 
