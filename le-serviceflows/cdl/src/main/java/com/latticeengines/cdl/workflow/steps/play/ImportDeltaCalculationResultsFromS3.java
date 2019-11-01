@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -64,6 +66,10 @@ public class ImportDeltaCalculationResultsFromS3
         if (playLaunch == null) {
             throw new NullPointerException("PlayLaunch should not be null");
         }
+        ChannelConfig channelConfig = playLaunch.getChannelConfig();
+        if (channelConfig == null) {
+            throw new NullPointerException("ChannelConfig should not be null");
+        }
 
         List<String> tableNames = new ArrayList<>();
         int totalDfs = 0;
@@ -72,50 +78,50 @@ public class ImportDeltaCalculationResultsFromS3
         String delAccounts = playLaunch.getRemoveAccountsTable();
         String delContacts = playLaunch.getRemoveContactsTable();
         String completeContacts = playLaunch.getCompleteContactsTable();
+        AudienceType audienceType = channelConfig.getAudienceType();
 
-        boolean addAccountsExists = StringUtils.isNotEmpty(addAccounts);
-        boolean delAccountsExists = StringUtils.isNotEmpty(delAccounts);
-        // 1. add csv dataframe
-        if (StringUtils.isNotEmpty(addContacts)) {
-            if (addAccountsExists) {
-                totalDfs += 1;
+        if (AudienceType.ACCOUNTS == audienceType) {
+            if (StringUtils.isNotEmpty(addAccounts)) {
+                totalDfs += 2; // add csv and recommendation csv
                 tableNames.add(addAccounts);
-                tableNames.add(addContacts);
-            } else {
-                throw new RuntimeException("No corresponding Account table exists for add csv dataframe.");
+                if (StringUtils.isNotEmpty(addContacts)) {
+                    tableNames.add(addContacts);
+                }
+                if (StringUtils.isNotEmpty(completeContacts)) {
+                    tableNames.add(completeContacts);
+                }
+            }
+            if (StringUtils.isNotEmpty(delAccounts)) {
+                totalDfs += 1; // delete csv
+                tableNames.add(delAccounts);
+                if (StringUtils.isNotEmpty(delContacts)) {
+                    tableNames.add(delContacts);
+                }
+            }
+        } else if (AudienceType.CONTACTS == audienceType) {
+            if (StringUtils.isNotEmpty(addContacts)) {
+                if (StringUtils.isNotEmpty(addAccounts) && StringUtils.isNotEmpty(completeContacts)) {
+                    totalDfs += 2; // add csv and recommendation csv
+                    tableNames.add(addContacts);
+                    tableNames.add(addAccounts);
+                    tableNames.add(completeContacts);
+                } else {
+                    throw new RuntimeException("Wrong dataframe combinations for " + addContacts);
+                }
+            }
+            if (StringUtils.isNotEmpty(delContacts)) {
+                if (StringUtils.isNotEmpty(delAccounts)) {
+                    totalDfs += 1;
+                    tableNames.add(delContacts);
+                    tableNames.add(delAccounts);
+                } else {
+                    throw new RuntimeException("Wrong dataframe combinations for " + delContacts);
+                }
             }
         } else {
-            if (addAccountsExists) {
-                totalDfs += 1;
-                tableNames.add(addAccounts);
-            }
+            throw new RuntimeException(audienceType + " not supported.");
         }
 
-        // 2. recommendation dataframe
-        if (StringUtils.isNotEmpty(completeContacts)) {
-            if (addAccountsExists) {
-                totalDfs += 1;
-                tableNames.add(completeContacts);
-            } else {
-                throw new RuntimeException("No corresponding Account table exists for recommendation dataframe.");
-            }
-        }
-
-        // 3. delete csv dataframe
-        if (StringUtils.isNotEmpty(delContacts)) {
-            if (delAccountsExists) {
-                totalDfs += 1;
-                tableNames.add(delAccounts);
-                tableNames.add(delContacts);
-            } else {
-                throw new RuntimeException("No corresponding Account table exists for delete csv dataframe.");
-            }
-        } else {
-            if (delAccountsExists) {
-                totalDfs += 1;
-                tableNames.add(delAccounts);
-            }
-        }
         log.info(String.format("totalDfs=%d, tableNames=%s", totalDfs, Arrays.toString(tableNames.toArray())));
         putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM, String.valueOf(totalDfs));
 
