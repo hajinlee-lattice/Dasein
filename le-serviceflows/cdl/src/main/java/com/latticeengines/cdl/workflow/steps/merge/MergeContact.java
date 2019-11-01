@@ -41,16 +41,22 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         matchedContactTable = getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE);
-        if (StringUtils.isBlank(matchedContactTable)) {
-            throw new RuntimeException("There's no matched table found!");
+        if (StringUtils.isBlank(matchedContactTable) && skipSoftDelete) {
+            throw new RuntimeException("There's no matched table found, and no soft delete action!");
         }
 
         double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
-        Table tableSummary = metadataProxy.getTableSummary(customerSpace.toString(), matchedContactTable);
-        double newTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
-        scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
-        log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
-                scalingMultiplier, oldTableSize + newTableSize));
+        if (StringUtils.isBlank(matchedContactTable)) {
+            scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + oldTableSize);
+            log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
+                    scalingMultiplier, oldTableSize + oldTableSize));
+        } else {
+            Table tableSummary = metadataProxy.getTableSummary(customerSpace.toString(), matchedContactTable);
+            double newTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
+            scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
+            log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
+                    scalingMultiplier, oldTableSize + newTableSize));
+        }
     }
 
     @Override
@@ -62,24 +68,52 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         int upsertMasterStep;
         int diffStep;
         TransformationStepConfig upsert;
+        TransformationStepConfig mergeSoftDelete = null;
+        TransformationStepConfig softDelete = null;
         TransformationStepConfig diff;
         if (configuration.isEntityMatchEnabled()) {
-            int dedupStep = 0;
-            upsertMasterStep = 1;
-            diffStep = 2;
-            TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
-                    Collections.singletonList(matchedTable), //
-                    Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
-            upsert = upsertMaster(true, dedupStep);
-            diff = diff(dedupStep, upsertMasterStep);
-            steps.add(dedup);
+            boolean noImports = StringUtils.isEmpty(matchedTable);
+            if (noImports) {
+                int softDeleteMergeStep = 0;
+                int softDeleteStep = softDeleteMergeStep + 1;
+                diffStep = softDeleteStep + 1;
+                if (skipSoftDelete) {
+                    throw new IllegalArgumentException("There's no merge or soft delete!");
+                } else {
+                    mergeSoftDelete = mergeSoftDelete(softDeleteActions);
+                    softDelete = softDelete(softDeleteMergeStep, inputMasterTableName);
+                    diff = diff(inputMasterTableName, softDeleteStep);
+                }
+            } else {
+                int dedupStep = 0;
+                upsertMasterStep = 1;
+                int softDeleteMergeStep = upsertMasterStep + 1;
+                int softDeleteStep = softDeleteMergeStep + 1;
+                diffStep = softDeleteStep + 1;
+                TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
+                        Collections.singletonList(matchedTable), //
+                        Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
+                upsert = upsertMaster(true, dedupStep, skipSoftDelete);
+                if (!skipSoftDelete) {
+                    mergeSoftDelete = mergeSoftDelete(softDeleteActions);
+                    softDelete = softDelete(softDeleteMergeStep, upsertMasterStep);
+                }
+                diff = diff(dedupStep, softDeleteStep);
+                steps.add(dedup);
+                steps.add(upsert);
+            }
         } else {
             upsertMasterStep = 0;
             diffStep = 1;
             upsert = upsertMaster(false, matchedTable);
             diff = diff(matchedTable, upsertMasterStep);
+            steps.add(upsert);
         }
-        steps.add(upsert);
+
+        if (configuration.isEntityMatchEnabled() && !skipSoftDelete) {
+            steps.add(mergeSoftDelete);
+            steps.add(softDelete);
+        }
         steps.add(diff);
         TransformationStepConfig report = reportDiff(diffStep);
         steps.add(report);

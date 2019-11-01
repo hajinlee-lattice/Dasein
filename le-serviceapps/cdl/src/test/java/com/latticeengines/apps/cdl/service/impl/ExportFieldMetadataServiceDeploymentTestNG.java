@@ -179,7 +179,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_1");
 
         S3ChannelConfig channelConfig = new S3ChannelConfig();
-        channelConfig.setIsIncludeExportAttributes(false);
+        channelConfig.setIncludeExportAttributes(false);
         createPlayLaunchChannel(channelConfig, lookupIdMap);
 
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
@@ -199,7 +199,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_2");
 
         S3ChannelConfig channelConfig = new S3ChannelConfig();
-        channelConfig.setIsIncludeExportAttributes(true);
+        channelConfig.setIncludeExportAttributes(true);
         createPlayLaunchChannel(channelConfig, lookupIdMap);
 
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase

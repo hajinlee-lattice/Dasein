@@ -84,6 +84,7 @@ import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.EntityMatchGAConverterUtils;
 import com.latticeengines.pls.util.ImportWorkflowUtils;
+import com.latticeengines.pls.util.SystemIdsUtils;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -1187,7 +1188,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
                 feedType, source, sourceFile.getName(), customerSpace.toString()));
 
-        // 3. Generate new table from FieldDefinitionsRecord,
+        // 3. Process System IDs.  For now, this is only supported for entity types Accounts, Contacts, and Leads.
+        if (EntityType.Accounts.equals(entityType) || EntityType.Contacts.equals(entityType) ||
+                EntityType.Leads.equals(entityType)) {
+            SystemIdsUtils.processSystemIds(customerSpace, systemName, systemType, entityType, commitRequest,
+                    cdlService);
+        }
+
+        // 4. Generate new table from FieldDefinitionsRecord,
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
         // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
         String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
@@ -1195,17 +1203,17 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // TODO(jwinter): Figure out how to properly set the Table display name.
         printTableAttributes("New Table", newTable);
 
-        // 4. Delete old table associated with the source file from the database if it exists.
+        // 5. Delete old table associated with the source file from the database if it exists.
         if (sourceFile.getTableName() != null) {
             metadataProxy.deleteTable(customerSpace.toString(), sourceFile.getTableName());
         }
 
-        // 5. Associate the new table with the source file and add new table to the database.
+        // 6. Associate the new table with the source file and add new table to the database.
         metadataProxy.createTable(customerSpace.toString(), newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
 
-        // 6. Update the CDL External System data structures.
+        // 7. Update the CDL External System data structures.
         // TODO(jwinter): Complete this work.
         // Set external system column name
         if (BusinessEntity.Account.equals(entityType.getEntity()) ||
@@ -1213,10 +1221,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             setCDLExternalSystem(resolver.getExternalSystem(), entityType.getEntity());
         }
 
-        // 7. Create or Update the DataFeedTask
+        // 8. Create or Update the DataFeedTask
         String taskId = createOrUpdateDataFeedTask(newTable, customerSpace, source, feedType, entityType);
 
-        // 8. Additional Steps
+        // 9. Additional Steps
         // a. Update Attribute Configs.
         // b. Send email about S3 update.
         // TODO(jwinter): Do we need to add code to update the Attr Configs?
@@ -1225,14 +1233,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // TODO(jwinter): Add flag to indicate a workflow job should be submitted and the code for submitting
         // workflow jobs.
-        // 9. If requested, submit a workflow import job for this new template.
+        // 10. If requested, submit a workflow import job for this new template.
         if (runImport) {
             log.info("Running import workflow job for CustomerSpace {} and task ID {} on file {}",
                     customerSpace.toString(), taskId, importFile);
             cdlService.submitS3ImportWithTemplateData(customerSpace.toString(), taskId, importFile);
         }
 
-        // 10. Setup the Commit Response for this request.
+        // 11. Setup the Commit Response for this request.
         // TODO(jwinter): Figure out what is the best commitResponse to provide.
         // Should the FieldDefinitionsRecord reflect any changes when new table is merged with
         // existing table?

@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.pls.download.TemplateFileHttpDownloader;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SystemStatusService;
@@ -431,8 +432,15 @@ public class CDLResource {
         try {
             DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
             boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
-            Table standardTable = SchemaRepository.instance().getSchema(
-                    BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+            EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
+            Table standardTable;
+            if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
+                standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
+                        entityType, enableEntityMatch);
+            } else {
+                standardTable = SchemaRepository.instance().getSchema(
+                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+            }
             return cdlService.getTemplatePreview(customerSpace.toString(),
                     dataFeedTask.getImportTemplate(), standardTable);
         } catch (RuntimeException e) {

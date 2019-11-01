@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.joda.time.DateTime;
 
+import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
@@ -62,6 +64,19 @@ public class MetadataConverter {
         }
     }
 
+    public static Table getTableFromDir(Configuration configuration, String dirPath, String primaryKeyName,
+            String lastModifiedKeyName, boolean skipCount) {
+        try {
+            List<Extract> extracts = convertDirToExtracts(configuration, dirPath, skipCount);
+            Schema schema = AvroParquetUtils.parseAvroSchemaInDirectory(configuration, dirPath);
+            return getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format("Failed to parse metadata for avro/parquet file located at directory %s", dirPath),
+                    e);
+        }
+    }
+
     public static Table getParquetTable(Configuration configuration, String path, String primaryKeyName,
                                  String lastModifiedKeyName, boolean skipCount) {
         try {
@@ -87,6 +102,25 @@ public class MetadataConverter {
                     "Failed to parse metadata for avro file located at %s, using avsc at %s",
                     avroPath, avscPath), e);
         }
+    }
+
+    private static List<Extract> convertDirToExtracts(Configuration configuration, String hdfsDir, boolean skipCount)
+            throws Exception {
+        List<String> files = AvroParquetUtils.listAvroParquetFiles(configuration, hdfsDir, false);
+        if (CollectionUtils.isEmpty(files)) {
+            return Collections.emptyList();
+        }
+
+        Extract extract = new Extract();
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            extract.setExtractionTimestamp(fs.getFileStatus(new Path(files.get(0))).getModificationTime());
+        }
+        if (!skipCount) {
+            extract.setProcessedRecords(AvroUtils.count(configuration, files.toArray(new String[0])));
+        }
+        // TODO make other places able to handle directory instead of glob
+        extract.setPath(hdfsDir);
+        return Collections.singletonList(extract);
     }
 
     private static List<Extract> convertToExtracts(Configuration configuration, String avroPath,
