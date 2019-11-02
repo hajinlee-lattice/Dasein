@@ -250,7 +250,8 @@ public class RatingEngineEntityMgrImpl //
                 Long quotaLimit = ratingEngineService
                         .getActiveRatingEngineQuotaLimit(new CustomerSpace(space.getContractId(),
                                 space.getTenantId(), space.getSpaceId()));
-                if (ratingEngineService.getActiveRatingEnginesCount() > quotaLimit) {
+                // Enforce quota limit
+                if (ratingEngineService.getActiveRatingEnginesCount() >= quotaLimit) {
                     // throw exception
                     throw new RuntimeException("Too many Active Models",
                             new Throwable("There are already " + quotaLimit
