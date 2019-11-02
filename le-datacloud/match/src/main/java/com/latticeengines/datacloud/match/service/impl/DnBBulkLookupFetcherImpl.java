@@ -103,7 +103,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                 }
                 return batchContext;
             }
-            dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
+            dnBAuthenticationService.requestToken(DnBKeyType.BATCH, batchContext.getToken());
         }
         log.error("Fail to fetch batch results from dnb because API token expires and fails to refresh");
         return batchContext;
@@ -188,6 +188,11 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Override
     protected String getResultIdPath() {
         return transactionCodeXPath;
+    }
+
+    @Override
+    protected void updateTokenInContext(DnBBatchMatchContext context, String token) {
+        context.setToken(token);
     }
 
     /**

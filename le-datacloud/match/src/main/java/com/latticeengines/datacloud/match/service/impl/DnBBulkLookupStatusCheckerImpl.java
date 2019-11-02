@@ -98,7 +98,8 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
                     log.info("Checked status for batch requests: " + logBuilder.toString());
                     break;
                 }
-                dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
+                dnBAuthenticationService.requestToken(DnBKeyType.BATCH,
+                        batches.entrySet().iterator().next().getValue().getToken());
                 if (i == retries - 1) {
                     log.error("Fail to check status for batch requests due to invalid token and failed to refresh: "
                             + logBuilder.toString());
@@ -152,6 +153,13 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     @Override
     protected String getResultIdPath() {
         return transactionCodeXPath;
+    }
+
+    @Override
+    protected void updateTokenInContext(Map<String, DnBBatchMatchContext> contexts, String token) {
+        for (DnBBatchMatchContext context : contexts.values()) {
+            context.setToken(token);
+        }
     }
 
     private DnBReturnCode parseTransactionStatus(String body) {

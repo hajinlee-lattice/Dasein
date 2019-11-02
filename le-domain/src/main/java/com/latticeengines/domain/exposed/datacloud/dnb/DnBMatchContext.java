@@ -12,7 +12,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
-public class DnBMatchContext implements Fact, Dimension {
+public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimension {
 
     private NameLocation inputNameLocation;
 

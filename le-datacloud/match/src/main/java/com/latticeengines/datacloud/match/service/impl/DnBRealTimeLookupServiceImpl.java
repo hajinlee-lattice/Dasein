@@ -99,7 +99,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                         context.getDnbCode(), context.getDuration()));
                 break;
             }
-            dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
+            dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, context.getToken());
         }
         return context;
     }
@@ -118,7 +118,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                         context.getDnbCode(), context.getDuration()));
                 break;
             }
-            dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
+            dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, context.getToken());
         }
         return context;
     }
@@ -289,5 +289,10 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     @Override
     protected String getResultIdPath() {
         return transactionCodeXPath;
+    }
+
+    @Override
+    protected void updateTokenInContext(DnBMatchContext context, String token) {
+        context.setToken(token);
     }
 }
