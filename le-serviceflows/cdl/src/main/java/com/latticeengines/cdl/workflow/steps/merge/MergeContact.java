@@ -87,6 +87,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             } else {
                 int dedupStep = 0;
                 upsertMasterStep = 1;
+
                 TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
                         Collections.singletonList(matchedTable), //
                         Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));

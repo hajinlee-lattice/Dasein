@@ -263,7 +263,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
-                    completedActions, actionIds, needDeletedEntity, initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
+                    completedActions, actionIds, needDeletedEntity, initialStatus,
+                    currentDataCloudBuildNumber,
+                    pidWrapper.getPid());
 
             configuration.setFailingStep(request.getFailingStep());
 
@@ -642,7 +644,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, Tenant tenant,
-            ProcessAnalyzeRequest request, List<Action> completedActions, List<Long> actionIds, Set<BusinessEntity> needDeletedEntities, Status status,
+            ProcessAnalyzeRequest request, List<Action> completedActions, List<Long> actionIds,
+                                                                      Set<BusinessEntity> needDeletedEntities,
+                                                                      Status status,
             String currentDataCloudBuildNumber, long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
@@ -675,7 +679,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         // streamId -> stream obj
         Map<String, AtlasStream> streams = streamEntityMgr.findByTenant(tenant, true).stream()
                 .collect(Collectors.toMap(AtlasStream::getStreamId, stream -> stream));
-        cleanupActivityStreams(streams);
         log.info("ActivityStreams for tenant {} are {}", customerSpace, JsonUtils.serialize(streams));
 
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
