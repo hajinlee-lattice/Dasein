@@ -34,6 +34,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PlayService;
@@ -45,6 +46,7 @@ import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
 import com.latticeengines.apps.cdl.workflow.CrossSellImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -103,6 +105,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
+    private static Long defaultActiveModelQuotaLimit = 50L;
+
     @Value("${cdl.rating.service.threadpool.size:20}")
     private Integer fetcherNum;
 
@@ -114,6 +118,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private PlayEntityMgr playEntityMgr;
+
+    @Inject
+    private ZKConfigService zkConfigService;
 
     @Inject
     private SegmentService segmentService;
@@ -179,6 +186,21 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngine> result = ratingEngineEntityMgr.findAll();
         updateLastRefreshedDate(tenant.getId(), result);
         return result;
+    }
+
+    @Override
+    public Long getActiveRatingEngineQuotaLimit(CustomerSpace customerSpace) {
+        String componentName = CDLComponent.componentName;
+        Long activeModelDataLimit = zkConfigService.getActiveRatingEngingQuota(customerSpace,
+                componentName);
+        defaultActiveModelQuotaLimit = (activeModelDataLimit != null && activeModelDataLimit > 0)
+                ? activeModelDataLimit : defaultActiveModelQuotaLimit;
+        return defaultActiveModelQuotaLimit;
+    }
+
+    @Override
+    public Long getActiveRatingEnginesCount() {
+        return ratingEngineEntityMgr.findAllActiveRatingEngines();
     }
 
     @Override
@@ -1127,4 +1149,5 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     void setTpForParallelStream(ForkJoinPool tpForParallelStream) {
         this.tpForParallelStream = tpForParallelStream;
     }
+
 }

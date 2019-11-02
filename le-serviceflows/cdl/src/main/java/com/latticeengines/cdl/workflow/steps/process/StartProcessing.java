@@ -268,6 +268,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 CollectionUtils.isNotEmpty(engineIds) || CollectionUtils.isNotEmpty(segments));
         putObjectInContext(ACTION_IMPACTED_ENGINES, engineIds);
         putObjectInContext(ACTION_IMPACTED_SEGMENTS, segments);
+        List<Action> softDeleteActions = getSoftOrHardDeleteActions(true, actions);
+        List<Action> hardDeleteActions = getSoftOrHardDeleteActions(false, actions);
+        putObjectInContext(SOFT_DEELETE_ACTIONS, softDeleteActions);
+        putObjectInContext(HARD_DEELETE_ACTIONS, hardDeleteActions);
 
         grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
 
@@ -449,6 +453,17 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             }
         }
         return segmentNames;
+    }
+
+    private List<Action> getSoftOrHardDeleteActions(boolean softDelete, List<Action> actions) {
+        ActionType actionType = softDelete ? ActionType.SOFT_DELETE : ActionType.HARD_DELETE;
+        if (CollectionUtils.isNotEmpty(actions)) {
+            return actions.stream()
+                    .filter(action -> actionType.equals(action.getType()))
+                    .collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private List<Action> getDeleteActions() {

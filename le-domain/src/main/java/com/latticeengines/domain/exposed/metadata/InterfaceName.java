@@ -81,6 +81,8 @@ public enum InterfaceName {
     TransactionTime, //
     TransactionDate, //
     TransactionDayPeriod, //
+    __StreamDateId, //
+    __StreamDate, //
     TransactionCount, //
     Quantity, //
     TotalQuantity, //
@@ -133,7 +135,7 @@ public enum InterfaceName {
     ModelId, Rating, Score, RawScore, ExpectedValue, Likelihood, Lift,
 
     // WebVisit
-    WebVisitPageUrl, UserId, WebVisitDate, SourceMedium, SourceMediumId, TotalVisits, //
+    WebVisitPageUrl, UserId, WebVisitDate, SourceMedium, SourceMediumId, //
 
     // WebVisitPathPattern
     PathPatternName, PathPattern, PathPatternId,
@@ -142,6 +144,7 @@ public enum InterfaceName {
     ActivityType,
 
     // Internal
+    __Row_Count__, // total row count in activity store aggregation
     __Composite_Key__; // primary key for internal use
 
     private static final Set<String> EntityIds = ImmutableSet.of( //

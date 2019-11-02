@@ -54,7 +54,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             // if we have convertBatchStore, we should merge and match new import first
             // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
             if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                TransformationStepConfig match = match(mergeStep++, null, null);
+                TransformationStepConfig match = matchAccount(mergeStep++, null, null);
                 steps.add(merge);
                 steps.add(match);
                 merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
@@ -63,7 +63,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         } else {
             merge = dedupAndConcatImports(InterfaceName.AccountId.name());
         }
-        TransformationStepConfig match = match(mergeStep, matchTargetTablePrefix, convertBatchStoreTableName);
+        TransformationStepConfig match = matchAccount(mergeStep, matchTargetTablePrefix, convertBatchStoreTableName);
         steps.add(merge);
         steps.add(match);
         log.info("steps are {}.", steps);
@@ -107,7 +107,8 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
     }
 
-    private TransformationStepConfig match(int inputStep, String matchTargetTable, String convertBatchStoreTableName) {
+    private TransformationStepConfig matchAccount(int inputStep, String matchTargetTable,
+            String convertBatchStoreTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {

@@ -1,20 +1,25 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +30,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -34,12 +40,15 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Co
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateReportConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -84,6 +93,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<Table> inputTables = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
+    boolean skipSoftDelete = true;
+    List<Action> softDeleteActions;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -100,6 +111,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+
+        softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
+        skipSoftDelete = CollectionUtils.isEmpty(softDeleteActions);
 
         entity = configuration.getMainEntity();
         batchStore = entity.getBatchStore();
@@ -164,12 +178,16 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     TransformationStepConfig dedupAndConcatImports(String joinKey) {
+        return dedupAndConcatTables(joinKey, true, inputTableNames);
+    }
+
+    TransformationStepConfig dedupAndConcatTables(String joinKey, boolean dedupSrc, List<String> tables) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
-        inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
+        tables.forEach(tblName -> addBaseTables(step, tblName));
 
         MergeImportsConfig config = new MergeImportsConfig();
-        config.setDedupSrc(true);
+        config.setDedupSrc(dedupSrc);
         config.setJoinKey(joinKey);
         config.setAddTimestamps(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
@@ -203,6 +221,21 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             setTargetTable(step, targetTablePrefix);
         }
 
+        return step;
+    }
+
+    TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
+        softDeleteActions.forEach(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            addBaseTables(step, configuration.getDeleteDataTable());
+        });
+        MergeImportsConfig config = new MergeImportsConfig();
+        config.setDedupSrc(true);
+        config.setJoinKey(InterfaceName.AccountId.name());
+        config.setAddTimestamps(false);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
@@ -253,6 +286,49 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
         step.setConfiguration(appendEngineConf(config, getEngineConfig(engineLoad)));
         return step;
+    }
+
+    TransformationStepConfig match(int inputStep, String matchTargetTable, String matchConfig) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(inputStep));
+        if (matchTargetTable != null) {
+            setTargetTable(step, matchTargetTable);
+        }
+        step.setTransformer(TRANSFORMER_MATCH);
+        step.setConfiguration(matchConfig);
+        return step;
+    }
+
+    MatchInput getBaseMatchInput() {
+        MatchInput matchInput = new MatchInput();
+        matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
+        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
+        matchInput.setExcludePublicDomain(false);
+        matchInput.setPublicDomainAsNormalDomain(false);
+        matchInput.setDataCloudVersion(getDataCloudVersion());
+        matchInput.setSkipKeyResolution(true);
+        matchInput.setUseDnBCache(true);
+        matchInput.setUseRemoteDnB(true);
+        matchInput.setLogDnBBulkResult(false);
+        matchInput.setMatchDebugEnabled(false);
+        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
+        return matchInput;
+    }
+
+    /**
+     * Retrieve all system IDs for target entity of current tenant (sorted by system
+     * priority from high to low)
+     *
+     * @param entity
+     *            target entity
+     * @return non-null list of system IDs
+     */
+    protected List<String> getSystemIds(BusinessEntity entity) {
+        Map<String, List<String>> systemIdMap = configuration.getSystemIdMap();
+        if (MapUtils.isEmpty(systemIdMap)) {
+            return Collections.emptyList();
+        }
+        return systemIdMap.getOrDefault(entity.name(), Collections.emptyList());
     }
 
     // For common use case. If need to customize more parameters, better to
@@ -379,6 +455,16 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             updatedEnvs.addAll(environments);
             putObjectInContext(NEW_ENTITY_MATCH_ENVS, updatedEnvs);
         }
+    }
+
+    Set<String> getTableColumnNames(String... tableNames) {
+        // TODO add a batch retrieve API to optimize this
+        return Arrays.stream(tableNames) //
+                .flatMap(tableName -> metadataProxy //
+                        .getTableColumns(customerSpace.toString(), tableName) //
+                        .stream() //
+                        .map(ColumnMetadata::getAttrName)) //
+                .collect(Collectors.toSet());
     }
 
     private void setScalingMultiplier(List<Table> inputTables) {

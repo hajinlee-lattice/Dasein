@@ -21,12 +21,15 @@ import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJ
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
+import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
@@ -47,6 +50,7 @@ import reactor.core.publisher.Flux;
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = ScriptJobConfig.class, name = ScriptJobConfig.NAME), //
         @JsonSubTypes.Type(value = RemoveOrphanConfig.class, name = RemoveOrphanConfig.NAME), //
+        @JsonSubTypes.Type(value = SoftDeleteConfig.class, name = SoftDeleteConfig.NAME), //
         @JsonSubTypes.Type(value = CreateRecommendationConfig.class, name = CreateRecommendationConfig.NAME), //
         @JsonSubTypes.Type(value = MergeImportsConfig.class, name = MergeImportsConfig.NAME), //
         @JsonSubTypes.Type(value = MergeScoringTargetsConfig.class, name = MergeScoringTargetsConfig.NAME), //
@@ -65,6 +69,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CalculateDeltaJobConfig.class, name = CalculateDeltaJobConfig.NAME), //
         @JsonSubTypes.Type(value = TestPartitionJobConfig.class, name = TestPartitionJobConfig.NAME), //
         @JsonSubTypes.Type(value = AccountContactExportConfig.class, name = AccountContactExportConfig.NAME), //
+        @JsonSubTypes.Type(value = AppendRawStreamConfig.class, name = AppendRawStreamConfig.NAME), //
+        @JsonSubTypes.Type(value = DailyStoreToPeriodStoresJobConfig.class, name = DailyStoreToPeriodStoresJobConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 

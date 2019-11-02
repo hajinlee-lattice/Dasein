@@ -66,12 +66,14 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
-            public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version) {
+            public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
+                    DataCollection.Version version) {
                 return null;
             }
 
             @Override
-            public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version) {
+            public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
+                    DataCollection.Version version) {
                 return null;
             }
 
@@ -112,23 +114,17 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
         at.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
         attrList.add(at);
 
-        at = new ColumnMetadata();
-        at.setAttrName("something3");
-        at.setDisplayName("something more 2");
-        at.enableGroupIfNotPresent(ColumnSelection.Predefined.CompanyProfile);
-        attrList.add(at);
-
         doReturn(attrList).when(spiedServingStoreService) //
-                .getDecoratedMetadataFromCache(tenantName, BusinessEntity.Account);
+                .getAccountMetadata(tenantName, ColumnSelection.Predefined.TalkingPoint, null);
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() {}
+    public void teardown() {
+    }
 
     @Test(groups = "functional")
     public void testGetAccountAttributes() {
-        List<TalkingPointAttribute> attributes =
-                talkingPointAttributeService.getAccountAttributes();
+        List<TalkingPointAttribute> attributes = talkingPointAttributeService.getAccountAttributes();
         Assert.assertNotNull(attributes);
         Assert.assertEquals(2, attributes.size());
         Assert.assertTrue(attributes.get(0).getValue().startsWith(accountAttributePrefix));
@@ -139,8 +135,7 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
 
     @Test(groups = "functional")
     public void testGetRecommendationAttributes() {
-        List<TalkingPointAttribute> attributes =
-                talkingPointAttributeService.getRecommendationAttributes();
+        List<TalkingPointAttribute> attributes = talkingPointAttributeService.getRecommendationAttributes();
         Assert.assertNotNull(attributes);
         Assert.assertEquals(8, attributes.size());
     }
@@ -148,10 +143,8 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
     @Test(groups = "functional")
     public void testAttributes() {
         List<String> notions = Arrays.asList( //
-                "RecoMMendation", "accOUNT", "something", "invalid", "account", "account",
-                "Variable");
-        TalkingPointNotionAttributes notionAttributes =
-                talkingPointAttributeService.getAttributesForNotions(notions);
+                "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable");
+        TalkingPointNotionAttributes notionAttributes = talkingPointAttributeService.getAttributesForNotions(notions);
         Assert.assertNotNull(notionAttributes);
         Assert.assertNotNull(notionAttributes.getInvalidNotions());
         Assert.assertEquals(notionAttributes.getInvalidNotions().size(), 2);

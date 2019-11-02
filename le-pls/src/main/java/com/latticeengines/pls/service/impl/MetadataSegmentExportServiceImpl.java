@@ -108,8 +108,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         String customerSpaceStr = customerSpace.toString();
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpaceStr);
-        checkExportAttribute(metadataSegmentExportJob, customerSpaceStr, version);
         setCreatedBy(metadataSegmentExportJob);
+        checkExportAttribute(metadataSegmentExportJob, customerSpaceStr, version);
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }

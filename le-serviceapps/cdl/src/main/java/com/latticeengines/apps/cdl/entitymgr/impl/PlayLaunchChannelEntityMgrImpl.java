@@ -150,6 +150,7 @@ public class PlayLaunchChannelEntityMgrImpl
             playLaunchChannel.setExpirationDate(
                     PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(playLaunchChannel));
         }
+
         playLaunchChannel.setLookupIdMap(lookupIdMap);
         playLaunchChannel.setId(playLaunchChannel.generateChannelId());
         playLaunchChannelDao.create(playLaunchChannel);
@@ -160,9 +161,6 @@ public class PlayLaunchChannelEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRED)
     public PlayLaunchChannel updatePlayLaunchChannel(PlayLaunchChannel existingPlayLaunchChannel,
             PlayLaunchChannel updatedChannel) {
-        if (updatedChannel.getMaxAccountsToLaunch() != null) {
-            existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
-        }
         if (updatedChannel.getBucketsToLaunch() != null) {
             existingPlayLaunchChannel.setBucketsToLaunch(updatedChannel.getBucketsToLaunch());
         }
@@ -170,11 +168,7 @@ public class PlayLaunchChannelEntityMgrImpl
             existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
         }
         if (updatedChannel.getMaxAccountsToLaunch() != null) {
-            if (updatedChannel.getMaxAccountsToLaunch() < 0) {
-                existingPlayLaunchChannel.setMaxAccountsToLaunch(null);
-            } else {
-                existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
-            }
+            existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
         }
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
@@ -261,6 +255,7 @@ public class PlayLaunchChannelEntityMgrImpl
                     false);
             if (table != null) {
                 existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(table.getName());
+                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
             } else {
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Failed to update channel: " + updatedChannel.getId()
@@ -273,6 +268,7 @@ public class PlayLaunchChannelEntityMgrImpl
                     false);
             if (table != null) {
                 existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(table.getName());
+                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
             } else {
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Failed to update channel: " + updatedChannel.getId()
@@ -323,9 +319,8 @@ public class PlayLaunchChannelEntityMgrImpl
                     new String[] { "Need a Cron Schedule Expression if a Channel is Always On" });
         }
         if (StringUtils.isBlank(channel.getExpirationPeriodString())) {
-            // TODO: PLS-14902: Uncomment once UI is ready
-            // throw new LedpException(LedpCode.LEDP_32000,
-            // new String[] { "Need an expiration period if a Channel is Always On" });
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Need an expiration period if a Channel is Always On" });
         }
         Date expirationDate = PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(channel);
         if (Instant.now().atOffset(ZoneOffset.UTC).plusMonths(maxExpirationMonths)

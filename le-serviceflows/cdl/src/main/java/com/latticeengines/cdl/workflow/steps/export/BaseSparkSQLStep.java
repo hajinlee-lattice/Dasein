@@ -122,11 +122,12 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         throw new NullPointerException("LivySession not initialized.");
     }
 
-    protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
+    protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery, boolean preservePageFilters) {
         setCustomerSpace();
 
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
-        frontEndQuery.setPageFilter(null);
+        frontEndQuery.setPageFilter(preservePageFilters ? frontEndQuery.getPageFilter() : null);
+        frontEndQuery.setSort(preservePageFilters ? frontEndQuery.getSort() : null);
         log.info("frontend query is " + frontEndQuery);
         AttributeRepository attrRepo = parseAttrRepo(configuration);
         Map<String, Map<Long, String>> decodeMapping = entityQueryService.getDecodeMapping(attrRepo,

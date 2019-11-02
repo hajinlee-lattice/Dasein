@@ -11,10 +11,12 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.ZKConfigService;
@@ -25,6 +27,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -35,6 +38,8 @@ import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     static final String CRM_ID = "CrmAccount_External_ID";
+    static final String ACCOUNT_SYSTEM_ID = "ACCT_INTESTCASE8_D8D0DCAADB";
+    private static final String DEFAULT_SYSTEM = "DefaultSystem";
 
     @Inject
     private CDLTestDataService cdlTestDataService;
@@ -50,6 +55,9 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
     @Inject
     private CDLExternalSystemService externalSystemService;
+
+    @Inject
+    private S3ImportSystemService s3ImportSystemService;
 
     @Inject
     protected ServingStoreService servingStoreService;
@@ -98,6 +106,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
         // setup external id attrs
         createExternalSystem();
+        updateDefaultSystem();
 
         // TODO: setup rating engines and rating attrs
     }
@@ -112,6 +121,12 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
                 BusinessEntity.Account);
     }
 
+    private void updateDefaultSystem() {
+        S3ImportSystem defaultSystem = s3ImportSystemService.getS3ImportSystem(mainCustomerSpace, DEFAULT_SYSTEM);
+        defaultSystem.setAccountSystemId(ACCOUNT_SYSTEM_ID);
+        s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, defaultSystem);
+    }
+
     protected void testAccountMetadata() {
         List<ColumnMetadata> cms = servingStoreService //
                 .getDecoratedMetadataFromCache(mainCustomerSpace, BusinessEntity.Account);
@@ -120,6 +135,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
         Map<String, ColumnMetadata> cmsToVerify = getAccountMetadataToVerify();
         verifyMetadata(cms, cmsToVerify);
+        verifyAccountMetadata(cms);
     }
 
     protected void testContactMetadata() {
@@ -130,6 +146,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
         Map<String, ColumnMetadata> cmsToVerify = getContactMetadataToVerify();
         verifyMetadata(cms, cmsToVerify);
+        verifyContactMetadata(cms);
     }
 
     private void verifyMetadata(List<ColumnMetadata> cms, Map<String, ColumnMetadata> cmsToVerify) {
@@ -143,26 +160,30 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
                 String.format("Expected metadata doesn't exist: %s", JsonUtils.serialize(cmsToVerify)));
     }
 
+    protected void verifyAccountMetadata(List<ColumnMetadata> cms) {
+    }
+
+    protected void verifyContactMetadata(List<ColumnMetadata> cms) {
+    }
+
     // Currently only verify Category, Subcategory, Groups
-    // FIXME Why is getEnabledGroups is deprecated?
-    @SuppressWarnings("deprecation")
     private void verifyColumnMetadata(ColumnMetadata cm, ColumnMetadata cmExpected) {
         Assert.assertEquals(cm.getCategory(), cmExpected.getCategory());
         Assert.assertEquals(cm.getSubcategory(), cmExpected.getSubcategory());
         List<ColumnSelection.Predefined> enabledGroups = cm.getEnabledGroups();
         List<ColumnSelection.Predefined> enabledGroupsExpected = cmExpected.getEnabledGroups();
         if (enabledGroupsExpected == null) {
-            Assert.assertNull(enabledGroups);
+            Assert.assertTrue(CollectionUtils.isEmpty(enabledGroups));
         } else {
             Assert.assertNotNull(enabledGroups);
             Collections.sort(enabledGroups);
             Collections.sort(enabledGroupsExpected);
             Assert.assertEquals(enabledGroups, enabledGroupsExpected,
                     String.format("Expected enabled groups: %s, actual enabled groups: %s",
-                            String.join(",", enabledGroupsExpected.stream().map(ColumnSelection.Predefined::getName)
-                                    .collect(Collectors.toList())),
-                            String.join(",", enabledGroups.stream().map(ColumnSelection.Predefined::getName)
-                                    .collect(Collectors.toList()))));
+                            enabledGroupsExpected.stream().map(ColumnSelection.Predefined::getName)
+                                    .collect(Collectors.joining(",")),
+                            enabledGroups.stream().map(ColumnSelection.Predefined::getName)
+                                    .collect(Collectors.joining(","))));
         }
     }
 

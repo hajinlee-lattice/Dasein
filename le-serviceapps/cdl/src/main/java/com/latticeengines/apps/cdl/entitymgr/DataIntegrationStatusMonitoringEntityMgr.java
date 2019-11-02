@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 
 public interface DataIntegrationStatusMonitoringEntityMgr {
@@ -16,4 +17,6 @@ public interface DataIntegrationStatusMonitoringEntityMgr {
 
     List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(Long tenantPid, String entityName,
             List<String> entityIds);
+
+    DataIntegrationStatusMessage getLatestMessageByLaunchId(String launchId);
 }

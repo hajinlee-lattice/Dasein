@@ -98,8 +98,9 @@ public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchU
                 .isSuppressAccountsWithoutContacts(channelConfig.isSuppressAccountsWithoutContacts())
                 .isSuppressContactsWithoutEmails(channelConfig.isSuppressContactsWithoutEmails())
                 .bucketsToLaunch(launchBuckets) //
+                .limit(channel.getMaxAccountsToLaunch()) //
                 .lookupId(lookupId) //
-                .launchUnscored(launchUnscored) //
+                .launchUnScored(launchUnscored) //
                 .destinationSystemName(externalSystemName) //
                 .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
                 .getCampaignFrontEndQueryBuilder().build();
@@ -122,7 +123,8 @@ public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchU
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
                 // 2. get DataFrame for Account and Contact
-                HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery);
+                HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery, true);
+
                 log.info("FullLaunchUniverseDataUnit: " + JsonUtils.serialize(launchDataUniverseDataUnit));
                 return launchDataUniverseDataUnit;
             } finally {

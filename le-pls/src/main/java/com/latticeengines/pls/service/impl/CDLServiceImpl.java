@@ -212,6 +212,16 @@ public class CDLServiceImpl implements CDLService {
             CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
         UIAction uiAction = new UIAction();
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace));
+        if (!Boolean.TRUE.equals(entityMatchEnabled)) {
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(generateDeleteResultMsg("<p>Cleanup operation does not support entity match tenant " +
+                    "</p>"));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
+        }
+
         switch (schemaInterpretation) {
         case DeleteAccountTemplate:
             entity = BusinessEntity.Account;
@@ -707,7 +717,8 @@ public class CDLServiceImpl implements CDLService {
             DataFeedTask task = new DataFeedTask();
             task.setUniqueId(taskId);
             AtlasStream webVisitStream = WebVisitUtils.newWebVisitStream(MultiTenantContext.getTenant(), task);
-            List<StreamDimension> dimensions = WebVisitUtils.newWebVisitDimensions(webVisitStream, pathPtnCatalog);
+            List<StreamDimension> dimensions = WebVisitUtils.newWebVisitDimensions(webVisitStream, pathPtnCatalog,
+                    null);
             webVisitStream.setDimensions(dimensions);
             webVisitStream = activityStoreProxy.createStream(customerSpace, webVisitStream);
 

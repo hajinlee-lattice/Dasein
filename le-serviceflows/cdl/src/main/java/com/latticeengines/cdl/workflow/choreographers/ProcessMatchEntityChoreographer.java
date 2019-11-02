@@ -42,21 +42,21 @@ public class ProcessMatchEntityChoreographer extends BaseChoreographer {
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        if (step.name().endsWith(matchAccount.name()) && hasNoImports(step, BusinessEntity.Account)) {
-            log.info("Skip matchAccount, because no imports for Account");
-            return true;
-        } else if (step.name().endsWith(matchContact.name()) && hasNoImports(step, BusinessEntity.Contact)) {
-            log.info("Skip matchContact, because no imports for Contact");
-            return true;
-        } else if (step.name().endsWith(matchTransaction.name()) && hasNoImports(step, BusinessEntity.Transaction)) {
-            log.info("Skip matchTransaction, because no imports for Transaction");
-            return true;
-        } else if (isRematchStep(step)) {
+        if (isRematchStep(step)) {
             boolean shouldRematch = checkShouldRematch(step);
             if (shouldRematch) {
                 log.info("Enforced to rematch account.");
             }
             return !shouldRematch;
+        } else if (step.name().equalsIgnoreCase(matchAccount.name()) && hasNoImports(step, BusinessEntity.Account)) {
+            log.info("Skip matchAccount, because no imports for Account");
+            return true;
+        } else if (step.name().equalsIgnoreCase(matchContact.name()) && hasNoImports(step, BusinessEntity.Contact)) {
+            log.info("Skip matchContact, because no imports for Contact");
+            return true;
+        } else if (step.name().equalsIgnoreCase(matchTransaction.name()) && hasNoImports(step, BusinessEntity.Transaction)) {
+            log.info("Skip matchTransaction, because no imports for Transaction");
+            return true;
         } else {
             return false;
         }

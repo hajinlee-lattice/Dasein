@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -125,13 +126,13 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
         ResponseDocument<SourceFile> response = submitFile(false, PATH, false);
         assertTrue(response.isSuccess());
         SourceFile fileResponse = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, fileResponse.getPath());
+        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, CipherUtils.decrypt(fileResponse.getPath()));
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()), //
                 Charset.defaultCharset());
         assertEquals(contents, expectedContents);
 
         List<SourceFile> files = sourceFileRepository.findAll();
-        String path = fileResponse.getPath();
+        String path = CipherUtils.decrypt(fileResponse.getPath());
         foundTheFiles(path, files);
     }
 
@@ -173,7 +174,7 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
         switchToExternalAdmin();
         ResponseDocument<SourceFile> response = submitFile(true, PATH, false);
         assertTrue(response.isSuccess());
-        String path = response.getResult().getPath();
+        String path = CipherUtils.decrypt(response.getResult().getPath());
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()), //
                 Charset.defaultCharset());
@@ -189,7 +190,7 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
 
         ResponseDocument<SourceFile> response = submitFile(false, COMPRESSED_PATH, true);
         assertTrue(response.isSuccess());
-        String path = response.getResult().getPath();
+        String path = CipherUtils.decrypt(response.getResult().getPath());
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
 
         String expectedContents = GzipUtils.decompressFileToString(ClassLoader.getSystemResource(COMPRESSED_PATH)

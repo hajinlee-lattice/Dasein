@@ -114,7 +114,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
                 queryEvaluatorService);
         try {
             Query query = getQuery(attrRepo, frontEndQuery, eventType);
-            if (QueryServiceUtils.getQueryLoggingConfig()){
+            if (queryDiagnostics.getQueryLoggingConfig()){
                 log.info("getData using query: {}",
                         getQueryStr(frontEndQuery, eventType, version)
                         .replaceAll("\\r\\n|\\r|\\n", " "));

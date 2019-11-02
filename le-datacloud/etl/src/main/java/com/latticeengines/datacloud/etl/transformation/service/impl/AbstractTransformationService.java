@@ -16,9 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
+import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.Source;
@@ -271,9 +273,11 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
             String workflowDir, Long count) {
         String finalWorkflowDir = finalWorkflowOuputDir(workflowDir, progress);
+        boolean sparkPartitionUsed = hasSparkPartitionDir(finalWorkflowDir);
+        log.info("Spark partition used for transformation = {}", sparkPartitionUsed);
         // extract schema
         try {
-            extractSchema(source, schema, version, finalWorkflowDir);
+            extractSchema(source, schema, version, finalWorkflowDir, sparkPartitionUsed);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.", e);
             return false;
@@ -292,20 +296,28 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
             log.info(String.format("Moving files from %s to %s", finalWorkflowDir, sourceDir));
             int cnt = 0;
-            for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
-                    finalWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
-                if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
-                    HdfsUtils.mkdir(yarnConfiguration, sourceDir);
+            if (sparkPartitionUsed) {
+                cnt = copySparkPartitionFiles(finalWorkflowDir, sourceDir);
+            } else {
+                // non-partition part use legacy code for back-ward compatibility for now
+                // only support avro and won't scan nested dir
+                for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
+                        finalWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
+                    if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
+                        HdfsUtils.mkdir(yarnConfiguration, sourceDir);
+                    }
+                    String avroFileName = new Path(avroFilePath).getName();
+                    HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
+                    cnt++;
                 }
-                String avroFileName = new Path(avroFilePath).getName();
-                HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
-                cnt++;
             }
+
             log.info(String.format("Moved %d files from %s to %s", cnt, finalWorkflowDir, sourceDir));
 
             if (source instanceof TableSource) {
                 // register table with metadata proxy
-                TableSource tableSource = hdfsSourceEntityMgr.materializeTableSource((TableSource) source, count);
+                TableSource tableSource = hdfsSourceEntityMgr.materializeTableSource((TableSource) source, count,
+                        sparkPartitionUsed);
                 metadataProxy.updateTable(tableSource.getCustomerSpace().toString(), tableSource.getTable().getName(),
                         tableSource.getTable());
             } else {
@@ -370,7 +382,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return HdfsPathBuilder.dateFormat.format(progress.getCreateTime());
     }
 
-    protected void extractSchema(Source source, Schema schema, String version, String avroDir) throws Exception {
+    protected void extractSchema(Source source, Schema schema, String version, String avroDir,
+            boolean sparkPartitionUsed) throws Exception {
         String avscPath;
         if (source instanceof TableSource) {
             TableSource tableSource = (TableSource) source;
@@ -384,13 +397,17 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         }
 
         Schema parsedSchema = null;
-        List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration,
-                avroDir + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_EXTENSION);
-        if (files.size() > 0) {
-            String avroPath = files.get(0);
-            parsedSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+        if (sparkPartitionUsed) {
+            parsedSchema = AvroParquetUtils.parseAvroSchemaInDirectory(yarnConfiguration, avroDir);
         } else {
-            throw new IllegalStateException("No avro file found at " + avroDir);
+            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration,
+                    avroDir + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_EXTENSION);
+            if (files.size() > 0) {
+                String avroPath = files.get(0);
+                parsedSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+            } else {
+                throw new IllegalStateException("No avro file found at " + avroDir);
+            }
         }
 
         if (schema != null) {
@@ -487,4 +504,46 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return HdfsPathBuilder.dateFormat.format(new Date());
     }
 
+    // return copied file count
+    private int copySparkPartitionFiles(@NotNull String srcDir, @NotNull String dstDir) throws IOException {
+        int fileCnt = 0;
+        for (String avroParquetPath : AvroParquetUtils.listAvroParquetFiles(yarnConfiguration, srcDir, false)) {
+            if (!HdfsUtils.isDirectory(yarnConfiguration, dstDir)) {
+                HdfsUtils.mkdir(yarnConfiguration, dstDir);
+            }
+            Path dstPath = new Path(avroParquetPath.replace(srcDir, dstDir));
+            Path parent = dstPath.getParent();
+            if (parent != null && !HdfsUtils.fileExists(yarnConfiguration, parent.toString())) {
+                HdfsUtils.mkdir(yarnConfiguration, parent.toString());
+            }
+            HdfsUtils.moveFile(yarnConfiguration, avroParquetPath, dstPath.toString());
+            fileCnt++;
+        }
+        return fileCnt;
+    }
+
+    /*-
+     * Check whether there are any directory with pattern `key=value` (spark naming convension)
+     * under rootDir. TODO have a more robust implementation, probably just get ride of using glob
+     */
+    private boolean hasSparkPartitionDir(@NotNull String rootDir) {
+        try {
+            List<String> partitionDirs = HdfsUtils.getFilesForDir(yarnConfiguration, rootDir,
+                    SPARK_PARTITION_DIR_FILTER);
+            log.info("Found spark partition directories = {} under path {}", partitionDirs, rootDir);
+            return !CollectionUtils.isEmpty(partitionDirs);
+        } catch (IOException e) {
+            log.warn("Failed to check whether there are spark partition directories in path {}, error={}", rootDir, e);
+            return false;
+        }
+    }
+
+    private static HdfsUtils.HdfsFileFilter SPARK_PARTITION_DIR_FILTER = file -> {
+        if (file == null || !file.isDirectory() || file.getPath() == null) {
+            return false;
+        }
+
+        String dirName = file.getPath().getName();
+        return StringUtils.isNotBlank(dirName) && dirName.matches("^.+=.+$");
+    };
 }

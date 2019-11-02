@@ -241,17 +241,17 @@ public class CDLRealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalT
         Assert.assertEquals(record.isMatched(), shouldMatch);
         Assert.assertNotNull(record.getOutput());
         if (shouldMatch) {
-            int offset = 0;
             for (int i = 0; i < accountAttrs.length; i++) {
-                Assert.assertEquals(record.getOutput().get(i + offset), accountAttrVals[i]);
+                int idx = output.getOutputFields().indexOf(accountAttrs[i]);
+                Assert.assertEquals(record.getOutput().get(idx), accountAttrVals[i]);
             }
-            offset += accountAttrs.length;
             for (int i = 0; i < ratingAttrs.length; i++) {
-                Assert.assertEquals(record.getOutput().get(i + offset), ratingAttrVals[i]);
+                int idx = output.getOutputFields().indexOf(ratingAttrs[i]);
+                Assert.assertEquals(record.getOutput().get(idx), ratingAttrVals[i]);
             }
-            offset += ratingAttrs.length;
             for (int i = 0; i < phAttrs.length; i++) {
-                Assert.assertEquals(record.getOutput().get(i + offset), phAttrVals[i]);
+                int idx = output.getOutputFields().indexOf(phAttrs[i]);
+                Assert.assertEquals(record.getOutput().get(idx), phAttrVals[i]);
             }
         }
     }

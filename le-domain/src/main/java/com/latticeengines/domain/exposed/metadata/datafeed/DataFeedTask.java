@@ -310,7 +310,7 @@ public class DataFeedTask implements HasPid, Serializable {
     }
 
     public enum SubType {
-        Bundle, Hierarchy, Lead
+        Bundle, Hierarchy, Lead, SourceMedium
     }
 
     public enum S3ImportStatus {

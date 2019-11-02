@@ -58,16 +58,13 @@ public class SchemaRepository {
         } else {
             if (entityMatchEnabled) {
                 sysAttrs.add(InterfaceName.EntityId);
-                sysAttrs.add(InterfaceName.AccountId);
-                sysAttrs.add(InterfaceName.ContactId);
                 if (!BusinessEntity.Account.equals(entity)) {
                     sysAttrs.add(InterfaceName.CustomerAccountId);
                 }
-            } else {
-                // common
-                if (!BusinessEntity.Account.equals(entity)) {
-                    sysAttrs.add(InterfaceName.AccountId);
-                }
+            }
+            // common
+            if (!BusinessEntity.Account.equals(entity)) {
+                sysAttrs.add(InterfaceName.AccountId);
             }
             sysAttrs.add(InterfaceName.InternalId);
             sysAttrs.add(InterfaceName.CDLCreatedTime);
@@ -103,9 +100,8 @@ public class SchemaRepository {
             case Account:
                 if (entityMatchEnabled) {
                     stdAttrs.add(InterfaceName.CustomerAccountId);
-                } else {
-                    stdAttrs.add(InterfaceName.AccountId);
                 }
+                stdAttrs.add(InterfaceName.AccountId);
                 stdAttrs.add(InterfaceName.Website);
                 stdAttrs.add(InterfaceName.IsMatched);
                 break;
@@ -113,9 +109,8 @@ public class SchemaRepository {
                 stdAttrs.add(InterfaceName.ContactName);
                 if (entityMatchEnabled) {
                     stdAttrs.add(InterfaceName.CustomerContactId);
-                } else {
-                    stdAttrs.add(InterfaceName.ContactId);
                 }
+                stdAttrs.add(InterfaceName.ContactId);
                 stdAttrs.add(InterfaceName.Email);
                 break;
             default:
@@ -1566,7 +1561,7 @@ public class SchemaRepository {
             }
         } else if (schema == SchemaInterpretation.ContactEntityMatch) {
             email.setDefaultValueStr("");
-            attrs.addAll(Arrays.asList(email, website, accountCompanyName, duns, city, state, country, postalCode,
+            attrs.addAll(Arrays.asList(email, website, contactCompanyName, duns, city, state, country, postalCode,
                     phoneNumber, address1, address2));
             attrs.forEach(a -> a.setCategory(Category.CONTACT_ATTRIBUTES));
         }
@@ -1622,6 +1617,11 @@ public class SchemaRepository {
             case WebVisitPathPattern:
                 attrs = new ArrayList<>(Arrays.asList(attrPathPatternName(), attrPathPattern()));
                 schemaTable = createTable(SchemaInterpretation.WebVisitPathPattern);
+                schemaTable.addAttributes(attrs);
+                break;
+            case WebVisitSourceMedium:
+                attrs = new ArrayList<>(Arrays.asList(attrSourceMedium()));
+                schemaTable = createTable(SchemaInterpretation.WebVisitSourceMedium);
                 schemaTable.addAttributes(attrs);
                 break;
         }

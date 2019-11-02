@@ -89,10 +89,40 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         Assert.assertEquals(attribute.getDisplayName(), "CustomerName");
 
         // verify stream is created correctly
-        verifyWebVisitStream(webVisitStreamTask, false);
+        verifyWebVisitStream(webVisitStreamTask, InterfaceName.PathPatternId.name(), false);
+        verifyWebVisitStream(webVisitStreamTask, InterfaceName.SourceMediumId.name(), false);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCreateWebVisitTemplate" })
+    public void testCreateSourceMediumTemplate() {
+        EntityType type = EntityType.WebVisitSourceMedium;
+        SimpleTemplateMetadata metadata = new SimpleTemplateMetadata();
+        metadata.setEntityType(type);
+        List<SimpleTemplateMetadata.SimpleTemplateAttribute> standardList = new ArrayList<>();
+        SimpleTemplateMetadata.SimpleTemplateAttribute standardAttr = new SimpleTemplateMetadata.SimpleTemplateAttribute();
+        standardAttr.setDisplayName("RandomName_xyz");
+        standardAttr.setName(InterfaceName.SourceMedium.name());
+        standardList.add(standardAttr);
+        metadata.setStandardAttributes(standardList);
+
+        DataFeedTask webVisitSourceMediumTask = createTemplate(metadata, type);
+
+        // verification
+        Assert.assertNotNull(webVisitSourceMediumTask);
+        templateFeedType = webVisitSourceMediumTask.getFeedType();
+        Table template = webVisitSourceMediumTask.getImportTemplate();
+        Assert.assertNotNull(template);
+        Assert.assertEquals(template.getAttributes().size(), 1);
+        Attribute attrSourceMedium = template.getAttribute(InterfaceName.SourceMedium);
+        Assert.assertNotNull(attrSourceMedium);
+        Assert.assertEquals(attrSourceMedium.getDisplayName(), "RandomName_xyz");
+
+        // only source medium catalog is attached
+        verifyWebVisitStream(webVisitStreamTask, InterfaceName.PathPatternId.name(), false);
+        verifyWebVisitStream(webVisitStreamTask, InterfaceName.SourceMediumId.name(), true);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateSourceMediumTemplate" })
     private void testCreateWebVisitPatternTemplate() {
         EntityType type = EntityType.WebVisitPathPattern;
         SimpleTemplateMetadata metadata = prepareMetadata(type,
@@ -116,8 +146,9 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         Assert.assertNotNull(catalog.getDataFeedTask());
         Assert.assertEquals(catalog.getDataFeedTask().getUniqueId(), dataFeedTask.getUniqueId());
 
-        // verify catalog is attached to stream dimension
-        verifyWebVisitStream(webVisitStreamTask, true);
+        // verify both catalogs are attached to stream dimension
+        verifyWebVisitStream(webVisitStreamTask, InterfaceName.PathPatternId.name(), true);
+        verifyWebVisitStream(webVisitStreamTask, InterfaceName.SourceMediumId.name(), true);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCreateWebVisitPatternTemplate" })
@@ -143,7 +174,8 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
                 "RandomName.json", true));
     }
 
-    private void verifyWebVisitStream(@NotNull DataFeedTask dataFeedTask, boolean pathPatternCatalogAttached) {
+    private void verifyWebVisitStream(@NotNull DataFeedTask dataFeedTask, @NotNull String dimensionName,
+            boolean catalogAttached) {
         AtlasStream stream = activityStoreProxy.findStreamByName(mainCustomerSpace, EntityType.WebVisit.name(), true);
         Assert.assertNotNull(stream);
         Assert.assertEquals(stream.getName(), EntityType.WebVisit.name());
@@ -155,22 +187,22 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         Optional<StreamDimension> result = stream.getDimensions() //
                 .stream() //
                 .filter(Objects::nonNull) //
-                .filter(dim -> InterfaceName.PathPatternId.name().equals(dim.getName())) //
+                .filter(dim -> dimensionName.equals(dim.getName())) //
                 .findFirst();
-        Assert.assertTrue(result.isPresent(), "Dimensions should contain path pattern dimension");
+        Assert.assertTrue(result.isPresent(), String.format("Dimensions should contain %s dimension", dimensionName));
         StreamDimension dimension = result.get();
         Assert.assertNotNull(dimension);
-        Assert.assertEquals(dimension.getName(), InterfaceName.PathPatternId.name());
-        if (pathPatternCatalogAttached) {
+        Assert.assertEquals(dimension.getName(), dimensionName);
+        if (catalogAttached) {
             Assert.assertNotNull(dimension.getCatalog());
         } else {
             Assert.assertNull(dimension.getCatalog(),
-                    "Should not have any catalog attached to dimension before path pattern template is created");
+                    "Should not have any catalog attached to dimension before template is created");
         }
     }
 
     private DataFeedTask createTemplate(SimpleTemplateMetadata metadata, EntityType type) {
-        boolean result = cdlProxy.createWebVisitTemplate(mainCustomerSpace, metadata);
+        boolean result = cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(metadata));
         Assert.assertTrue(result);
         List<S3ImportSystem> allSystems = cdlProxy.getS3ImportSystemList(mainCustomerSpace);
         S3ImportSystem webSite = allSystems.stream() //

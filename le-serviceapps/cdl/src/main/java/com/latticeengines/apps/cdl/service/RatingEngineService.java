@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -23,6 +24,8 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 public interface RatingEngineService {
 
     List<RatingEngine> getAllRatingEngines();
+
+    Long getActiveRatingEnginesCount();
 
     List<RatingEngine> getAllDeletedRatingEngines();
 
@@ -115,4 +118,6 @@ public interface RatingEngineService {
             String ratingEngineId);
 
     List<RatingModel> getAllRatingModels();
+
+    Long getActiveRatingEngineQuotaLimit(CustomerSpace customerSpace);
 }

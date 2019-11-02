@@ -147,9 +147,11 @@ public final class DataCloudConstants {
 
     public static final String TRANSFORMER_REMOVE_ORPHAN_CONTACT = "RemoveOrphanContact";
     public static final String TRANSFORMER_COPY_TXMFR = "CopyTxmfr";
+    public static final String TRANSFORMER_SOFT_DELETE_TXFMR = "SoftDeleteTxfmr";
     public static final String TRANSFORMER_REPARTITION_TXMFR = "RepartitionTxmfr";
     public static final String TRANSFORMER_UPSERT_TXMFR = "UpsertTxmfr";
     public static final String TRANSFORMER_MERGE_IMPORTS = "MergeImports";
+    public static final String TRANSFORMER_APPEND_RAWSTREAM = "AppendRawStreamTxmfr";
     public static final String TRANSFORMER_CONSOLIDATE_REPORT = "ConsolidateReporter";
     public static final String TRANSFORMER_CONSOLIDATE_DATA = "consolidateDataTransformer";
     public static final String TRANSFORMER_CONSOLIDATE_DELTA = "consolidateDeltaTransformer";

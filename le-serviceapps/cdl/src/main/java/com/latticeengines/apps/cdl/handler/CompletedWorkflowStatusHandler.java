@@ -11,6 +11,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
@@ -41,7 +42,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
     @Override
     public DataIntegrationStatusMonitor handleWorkflowState(DataIntegrationStatusMonitor statusMonitor,
             DataIntegrationStatusMonitorMessage status) {
-        
+
         checkStatusMonitorExists(statusMonitor, status);
 
         statusMonitor.setEventCompletedTime(status.getEventTime());
@@ -53,6 +54,10 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         switch (statusMonitor.getEntityName()) {
         case "PlayLaunch":
             PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
+            if(playLaunch == null){
+                log.error("DataIntegrationStatusMonitor NOT updated: Entity " + statusMonitor.getEntityId() + "is not returning the playLaunch.");
+                return statusMonitor;
+            }
             Long recordsProcessed = eventDetail.getProcessed();
             Long recordsFailed = eventDetail.getFailed();
             Long totalRecords = eventDetail.getTotalRecordsSubmitted();
@@ -82,6 +87,11 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
             playLaunch.setAudienceSize(eventDetail.getAudienceSize());
             playLaunch.setMatchedCount(eventDetail.getMatchedCount());
+            //Update audience state if it exists
+            DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessageByLaunchId(playLaunch.getLaunchId());
+            if(audienceState != null && audienceState.getEventDetail() != null && audienceState.getEventDetail().getType().equals(eventDetail.getType())){
+                playLaunch.setAudienceState(eventDetail.getStatus());
+            }
 
             playLaunchService.update(playLaunch);
         }

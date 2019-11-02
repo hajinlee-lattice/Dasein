@@ -100,11 +100,6 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
-        public Builder mergeOutputFile(String mergedFileName) {
-            rtsBulkScoreWorkflowConfigurationBuilder.mergeOutputFile(mergedFileName);
-            return this;
-        }
-
         public Builder outputFileFormat(ExportFormat format) {
             rtsBulkScoreWorkflowConfigurationBuilder.outputFileFormat(format);
             return this;

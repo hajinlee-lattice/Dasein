@@ -2,19 +2,13 @@ package com.latticeengines.apps.cdl.end2end;
 
 
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,12 +25,12 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -98,29 +92,26 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     }
 
     @Test(groups = "end2end")
-    public void testCurrentBundle() throws Exception {
+    public void testDownloadCurrentBundleFile() throws Exception {
         // get current bundle before PA
-        byte[] bytes = getCurrentBundleResponse();
-        Assert.assertTrue(bytes == null);
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
-
-        // get current bundle after PA
-        byte[] bytes2 = getCurrentBundleResponse();
-        Assert.assertTrue(bytes2.length > 0);
-        CSVFormat format = LECSVFormat.format;
-        try (CSVParser parser = new CSVParser(new InputStreamReader(new ByteArrayInputStream(bytes2)), format)){
-            Set<String> csvHeaders = parser.getHeaderMap().keySet();
-            assertTrue(csvHeaders.contains("Product Id"));
-            assertTrue(csvHeaders.contains("Product Name"));
-            assertTrue(csvHeaders.contains("Product Bundle"));
-            assertTrue(csvHeaders.contains("Description"));
+        try {
+            getCurrentBundleResponse();
         } catch (Exception e) {
-            // unexpected exception happened
+            Assert.assertTrue(e instanceof  RuntimeException);
         }
-
+        importData(BusinessEntity.Product, "ProductBundles.csv", null,
+                false, false, DataFeedTask.SubType.Bundle.name());
+        processAnalyze();
+        // get current bundle after PA
+        try {
+            byte[] bytes2 = getCurrentBundleResponse();
+            Assert.assertTrue(bytes2.length > 0);
+        } catch (Exception e) {
+            Assert.fail("Shouldn't be here");
+        }
     }
 
-    private byte[] getCurrentBundleResponse() {
+    private byte[] getCurrentBundleResponse() throws Exception {
         RestTemplate template = testBed.getRestTemplate();
         String url = String.format("%s/pls/datafiles/bundlecsv", deployedHostPort);
         HttpHeaders headers = new HttpHeaders();
@@ -133,8 +124,9 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         return response.getBody();
     }
 
-    @Test(groups = "end2end", dependsOnMethods = "testCurrentBundle")
+    @Test(groups = "end2end")
     public void testProductBundle() throws Exception {
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         // create bundle related segment
         createTestSegmentProductBundle();
 
@@ -161,7 +153,7 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         RatingEngine ai = createCrossSellEngine(segment, summary, PredictionType.EXPECTED_VALUE);
         activateRatingEngine(ai.getId());
         ApplicationId applicationId = importDataWithApplicationId(BusinessEntity.Product, "ProductBundles_Validations.csv", null,
-                false, false);
+                false, false, DataFeedTask.SubType.Bundle.name());
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.FAILED);
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
 
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -31,19 +31,18 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
@@ -208,12 +207,47 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         log.info("Set inputMasterTableName=" + inputMasterTableName);
     }
 
-    TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep) {
+    TransformationStepConfig softDelete(int mergeSoftDeleteStep, int mergeStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
+        step.setInputSteps(Arrays.asList(mergeSoftDeleteStep, mergeStep));
+        setTargetTable(step, batchStoreTablePrefix);
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setDeleteSourceIdx(0);
+        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        return step;
+    }
+
+    TransformationStepConfig softDelete(int mergeSoftDeleteStep, String inputMasterTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
+        step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+        setTargetTable(step, batchStoreTablePrefix);
+        if (StringUtils.isNotBlank(inputMasterTableName)) {
+            Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
+            if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
+                log.info("Add masterTable=" + inputMasterTableName);
+                addBaseTables(step, inputMasterTableName);
+            }
+        } else {
+            throw new IllegalArgumentException("The master table is empty for soft delete!");
+        }
+        SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
+        softDeleteConfig.setDeleteSourceIdx(0);
+        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
+        return step;
+    }
+
+    TransformationStepConfig upsertMaster(boolean entityMatch, int mergeStep, boolean setTarget) {
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step, null);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
-        setTargetTable(step, batchStoreTablePrefix);
+        if (setTarget) {
+            setTargetTable(step, batchStoreTablePrefix);
+        }
         UpsertConfig config = getUpsertConfig(entityMatch, true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
@@ -282,22 +316,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         }
     }
 
-    MatchInput getBaseMatchInput() {
-        MatchInput matchInput = new MatchInput();
-        matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
-        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
-        matchInput.setExcludePublicDomain(false);
-        matchInput.setPublicDomainAsNormalDomain(false);
-        matchInput.setDataCloudVersion(getDataCloudVersion());
-        matchInput.setSkipKeyResolution(true);
-        matchInput.setUseDnBCache(true);
-        matchInput.setUseRemoteDnB(true);
-        matchInput.setLogDnBBulkResult(false);
-        matchInput.setMatchDebugEnabled(false);
-        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
-        return matchInput;
-    }
-
     void setServingVersionForEntityMatchTenant(MatchInput matchInput) {
         if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
             EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
@@ -316,16 +334,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     Set<String> getInputTableColumnNames(int tableIdx) {
         String tableName = inputTableNames.get(tableIdx);
         return getTableColumnNames(tableName);
-    }
-
-    Set<String> getTableColumnNames(String... tableNames) {
-        // TODO add a batch retrieve API to optimize this
-        return Arrays.stream(tableNames) //
-                .flatMap(tableName -> metadataProxy //
-                        .getTableColumns(customerSpace.toString(), tableName) //
-                        .stream() //
-                        .map(ColumnMetadata::getAttrName)) //
-                .collect(Collectors.toSet());
     }
 
     /**

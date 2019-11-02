@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ORIGINAL_BUCKET_METADATA;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +43,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -70,6 +73,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         putObjectInContext(RATING_MODELS, activeModels);
 
         initializeRatingLifts();
+        initializeModelGuidToOriginalBucketMetadataMap(activeModels);
 
         removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
         removeObjectFromContext(TABLES_GOING_TO_REDSHIFT);
@@ -222,6 +226,18 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             return false;
         }
         return true;
+    }
+
+    private void initializeModelGuidToOriginalBucketMetadataMap(List<RatingModelContainer> models) {
+        Map<String, List<BucketMetadata>> bucketMetadataMap = new HashMap<>();
+        for (RatingModelContainer container: models) {
+            List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
+            if ((container.getModel() instanceof AIModel) && CollectionUtils.isNotEmpty(bucketMetadata)) {
+                AIModel aiModel = (AIModel) container.getModel();
+                bucketMetadataMap.put(aiModel.getModelSummaryId(), bucketMetadata);
+            }
+        }
+        WorkflowStaticContext.putObject(ORIGINAL_BUCKET_METADATA, bucketMetadataMap);
     }
 
     private void initializeRatingLifts() {

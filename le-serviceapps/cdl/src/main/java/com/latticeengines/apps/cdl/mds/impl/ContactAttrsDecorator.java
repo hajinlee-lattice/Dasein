@@ -28,7 +28,12 @@ public class ContactAttrsDecorator implements Decorator {
 
     private final Set<String> exportAttrs;
 
-    ContactAttrsDecorator(boolean entityMatchEnabled) {
+    private final boolean entityMatchEnabled;
+    private final boolean onlyEntityMatchGAEnabled;
+
+    ContactAttrsDecorator(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
+        this.entityMatchEnabled = entityMatchEnabled;
+        this.onlyEntityMatchGAEnabled = onlyEntityMatchGAEnabled;
         this.stdAttrs = SchemaRepository //
                 .getStandardAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
@@ -61,6 +66,22 @@ public class ContactAttrsDecorator implements Decorator {
             cm.setAttrState(AttrState.Active);
 
             if (systemAttrs.contains(cm.getAttrName())) {
+                return cm;
+            }
+
+            if (InterfaceName.ContactId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
+                cm.disableGroup(Segment);
+                cm.disableGroup(Enrichment);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                cm.disableGroup(Model);
+                cm.setCanSegment(false);
+                cm.setCanModel(false);
+                if (onlyEntityMatchGAEnabled) {
+                    cm.setCanEnrich(false);
+                } else {
+                    cm.setCanEnrich(true);
+                }
                 return cm;
             }
 

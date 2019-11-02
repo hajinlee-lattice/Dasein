@@ -26,6 +26,8 @@ public interface PlayLaunchChannelService {
 
     PlayLaunchChannel findById(String channelId);
 
+    PlayLaunch createNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel);
+
     PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel);
 
     PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel, String addAccountTable,

@@ -209,7 +209,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             // Remove this below line and replace it with some code that creates
             // a metadata table but does not copy the
             // underlying data
-            Table clonedTable = metadataProxy.cloneTable(customerSpace, originalSourceFile.getTableName(), false);
+            Table clonedTable = metadataProxy.cloneTable(customerSpace, originalSourceFile.getTableName(), true);
             sourceFileProxy.copySourceFile(customerSpace, sourceFileName, clonedTable.getName(), customerSpace);
             SourceFile clonedSourceFile = sourceFileProxy.findByTableName(customerSpace, clonedTable.getName());
             modelingConfig.setSourceFileName(clonedSourceFile.getName());
@@ -412,8 +412,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         Map<String, ColumnMetadata> modelingAttributes = servingStoreService
                 .getAllowedModelingAttrs(customerSpace, BusinessEntity.Account,
-                        dataCollectionService.getActiveVersion(customerSpace),
-                        false)
+                        dataCollectionService.getActiveVersion(customerSpace), false)
                 .concatWith(
                         servingStoreService.getAllowedModelingAttrs(customerSpace, BusinessEntity.AnalyticPurchaseState,
                                 dataCollectionService.getActiveVersion(customerSpace), false))
@@ -421,7 +420,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
-                    cm.setSubcategory("Other");
+                    cm.setSubcategory(Category.SUB_CAT_OTHER);
                     return toReturn;
 
                 }, () -> iterationAttributes).block();
@@ -520,7 +519,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 && CollectionUtils.isNotEmpty(predictor.getPredictorElements());
         cm.setCanEnrich(!predictorsElementsExist);
         attrStat.setNonNullCount(predictorsElementsExist
-                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum() : 0);
+                ? predictor.getPredictorElements().stream().mapToLong(PredictorElement::getCount).sum()
+                : 0);
         attrStat.getBuckets()
                 .setBucketList(predictorsElementsExist
                         ? predictor.getPredictorElements().stream().map(this::convertToBucket)

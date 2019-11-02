@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -34,4 +35,5 @@ public interface ChannelConfig {
 
     boolean isSuppressContactsWithoutEmails();
 
+    void populateLaunchFromChannelConfig(PlayLaunch playLaunch);
 }

@@ -74,6 +74,7 @@ public class RegisterDeleteDataDeploymentTestNG extends CDLEnd2EndDeploymentTest
     public void testRegisterDeleteData() {
         registerDeleteData();
         verifyRegister();
+        processAnalyze();
     }
 
     private void registerDeleteData() {

@@ -31,8 +31,8 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
-import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -77,13 +77,14 @@ public class ProcessAnalyzeWorkflowSubmitterUnitTestNG {
     private void testGetCatalogImports(List<Catalog> catalogs, List<Action> actions,
             Map<String, Set<String>> expectedResult) {
         ProcessAnalyzeWorkflowSubmitter submitter = mockSubmitter(null);
-        Map<String, List<CatalogImport>> result = submitter.getCatalogImports(new Tenant(getClass().getSimpleName()),
+        Map<String, List<ActivityImport>> result = submitter.getCatalogImports(new Tenant(getClass().getSimpleName()),
                 actions, catalogs);
         Assert.assertNotNull(result);
 
         Map<String, Set<String>> tableNames = result.entrySet().stream().map(entry -> {
             String catalogId = entry.getKey();
-            Set<String> tables = entry.getValue().stream().map(CatalogImport::getTableName).collect(Collectors.toSet());
+            Set<String> tables = entry.getValue().stream().map(ActivityImport::getTableName)
+                    .collect(Collectors.toSet());
             return Pair.of(catalogId, tables);
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         Assert.assertEquals(tableNames, expectedResult,

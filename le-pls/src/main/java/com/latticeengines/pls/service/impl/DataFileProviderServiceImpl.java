@@ -1,9 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.latticeengines.app.exposed.download.BundleFileHttpDownloader;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
@@ -31,16 +35,28 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.DataFileProviderService;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("dataFileProviderService")
 public class DataFileProviderServiceImpl implements DataFileProviderService {
@@ -48,6 +64,8 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     private static final Logger log = LoggerFactory.getLogger(DataFileProviderServiceImpl.class);
 
     private static String MODEL_PROFILE_AVRO = "model_profile.avro";
+
+    private static String S3_ATLAS_DATA_FILE = "/%s/atlas/Data/Files/%s";
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
@@ -75,6 +93,15 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private ActionProxy actionProxy;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
@@ -296,5 +323,94 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         //download
         HdfsFileHttpDownloader downloader = getDownloader(modelId, MediaType.APPLICATION_OCTET_STREAM, filter);
         downloader.downloadCsvWithTransform(request, response, headerTransform);
+    }
+
+    @Override
+    public void downloadCurrentBundleFileV2(HttpServletRequest request, HttpServletResponse response, String mimeType
+            , String customerSpace) throws Exception {
+        List<Action> actions = actionProxy.getActions(customerSpace);
+        Preconditions.checkState(CollectionUtils.isNotEmpty(actions), "No bundle file due to empty actions");
+
+        List<Action> importActionsAfterPA =
+                actions.stream().filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
+                        && ActionStatus.ACTIVE.equals(action.getActionStatus()) && action.getOwnerId() != null).collect(Collectors.toList());
+
+        Preconditions.checkState(CollectionUtils.isNotEmpty(importActionsAfterPA), "No bundle file due to empty " +
+                "import action");
+
+        // group by owner ID
+        Map<Long, List<Action>> ownerIdToList =
+                importActionsAfterPA.stream().collect(Collectors.groupingBy(Action::getOwnerId));
+        // sort by owner ID DESC
+        List<Long> ownerIdList = ownerIdToList.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        // only one valid bundle file action
+        Action bundleAction = null;
+        for (Long ownerId : ownerIdList) {
+            Job qaJob = workflowProxy.getJobByWorkflowJobPid(customerSpace, ownerId);
+            // find the latest successful PA with bundle
+            if (JobStatus.COMPLETED.equals(qaJob.getJobStatus())) {
+                List<Action> importActions = ownerIdToList.get(ownerId);
+                int bundleCnt = 0;
+                bundleAction = null;
+                for (Action action : importActions) {
+                    ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+                    String dataFeedTaskId = importActionConfiguration.getDataFeedTaskId();
+                    if (dataFeedTaskId == null) {
+                        continue;
+                    }
+                    DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, dataFeedTaskId);
+                    if (dataFeedTask == null) {
+                        continue;
+                    }
+                    if (BusinessEntity.Product.name().equals(dataFeedTask.getEntity()) &&
+                            DataFeedTask.SubType.Bundle.equals(dataFeedTask.getSubType())) {
+                        bundleCnt++;
+                        bundleAction = action;
+                    }
+                }
+                if (bundleCnt == 1) {
+                    // found one bundle file
+                    break;
+                } else if (bundleCnt > 1) {
+                    // multiple bundle file in this PA
+                    throw new RuntimeException("Can't download bundle file due to Multiple files uploaded to system");
+                }
+            }
+        }
+        String fileName = "currentBundle.csv";
+        if (bundleAction != null) {
+            String filePath = getBundleFilePath(bundleAction, customerSpace);
+            log.info(String.format("download file from path %s", fileName));
+            downloadS3File(request, response, mimeType, fileName, filePath, s3Bucket);
+
+        } else {
+            // no bundle file
+            throw new RuntimeException("No bundle file found.");
+        }
+
+    }
+
+    /**
+     * if import file through s3, get path SOURCE_FILE_PATH in inputs
+     * else if import file from page, construct path
+     * @param action
+     * @param customerSpace
+     * @return
+     */
+    private String getBundleFilePath(Action action, String customerSpace) {
+        ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+        Long workflowId = importActionConfiguration.getWorkflowId();
+        Preconditions.checkNotNull(workflowId, "configuration is null for bundle");
+        Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, workflowId);
+        Map<String, String> inputs = job.getInputs();
+        String filePath = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH);
+        if (StringUtils.isNotEmpty(filePath)) {
+            return filePath;
+        } else {
+            String fileName = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME);
+            Preconditions.checkNotNull(fileName, "fileName is null for bundle");
+            return String.format(S3_ATLAS_DATA_FILE, customerSpace, fileName);
+        }
+
     }
 }

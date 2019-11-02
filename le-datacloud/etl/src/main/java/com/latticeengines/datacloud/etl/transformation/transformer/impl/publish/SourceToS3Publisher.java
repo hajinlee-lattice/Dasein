@@ -163,7 +163,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private void copyToS3(String sourceName, String hdfsDir, List<String> files, boolean isDir) {
-        String s3nDir = gets3nPath(hdfsDir);
+        String s3nDir = gets3aPath(hdfsDir);
         try {
             cleanupS3Path(hdfsDir);
 
@@ -273,8 +273,8 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
         }
     }
 
-    private String gets3nPath(String hdfsPath) {
-        return "s3n://" + s3Bucket + getValidPath(hdfsPath);
+    private String gets3aPath(String hdfsPath) {
+        return "s3a://" + s3Bucket + getValidPath(hdfsPath);
     }
 
     private String getValidPath(String path) {

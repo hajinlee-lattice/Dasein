@@ -175,6 +175,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 batonService.isEntityMatchEnabled(customerSpace));
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
+        newMeta.setUpdatedBy(user);
         DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask != null) {
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
@@ -186,6 +187,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 Table finalTemplate = mergeTable(originMeta, newMeta);
+                finalTemplate.setUpdatedBy(user);
                 if (!finalSchemaCheck(customerSpace, finalTemplate, feedType, entity, withoutId,
                         batonService.isEntityMatchEnabled(customerSpace))) {
                     throw new RuntimeException("The final import template is invalid, please check import settings!");

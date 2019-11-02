@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -21,16 +22,19 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionSectionName;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+
 
 public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     private static Logger log = LoggerFactory.getLogger(ImportWorkflowUtilsTestNG.class);
@@ -126,6 +130,8 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testGenerateCurrentFieldDefinitionRecord_noExistingTemplate() throws IOException {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+        actualResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
@@ -161,6 +167,8 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testGenerateCurrentFieldDefinitionRecord_withExistingTemplate() throws IOException {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+        actualResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
@@ -212,8 +220,10 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
         Map<String, FieldDefinition> autoDetectionResultsMap = ImportWorkflowUtils.generateAutodetectionResultsMap(resolver);
 
-
         FetchFieldDefinitionsResponse fetchResponse = new FetchFieldDefinitionsResponse();
+        fetchResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+
         fetchResponse.setAutodetectionResultsMap(autoDetectionResultsMap);
         fetchResponse.setImportWorkflowSpec(importWorkflowSpec);
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchResponse);
@@ -221,50 +231,91 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         Map<String, List<FieldDefinition>> fieldDefinitionMap =
                 currentFieldDefinitionsRecord.getFieldDefinitionsRecordsMap();
 
-
         // change customer field's type
         Map<String, FieldDefinition> customNameToFieldDefinition =
-                fieldDefinitionMap.getOrDefault(ImportWorkflowUtils.CUSTOM_FIELDS, new ArrayList<>()).stream().collect(Collectors.toMap(FieldDefinition::getColumnName, field -> field));
+                fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(), new ArrayList<>()).stream()
+                        .collect(Collectors.toMap(FieldDefinition::getColumnName, field -> field));
         FieldDefinition customField = customNameToFieldDefinition.get("Earnings");
         Assert.assertNotNull(customField);
         customField.setFieldType(UserDefinedType.TEXT);
         ValidateFieldDefinitionsResponse response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap
-                , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
+                , autoDetectionResultsMap, importWorkflowSpec.getFieldDefinitionsRecordsMap(), null,null,resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.WARNING);
-        checkGeneratedResult(response, ImportWorkflowUtils.CUSTOM_FIELDS, "Earnings", FieldValidationMessage.MessageLevel.WARNING);
+        checkGeneratedResult(response, FieldDefinitionSectionName.Custom_Fields.getName(), "Earnings",
+                FieldValidationMessage.MessageLevel.WARNING, "column Earnings is set as TEXT but appears to only have NUMBER values");
 
         // change field type for lattice field
         Map<String, FieldDefinition> IDNameToFieldDefinition =
-                fieldDefinitionMap.getOrDefault("Unique ID", new ArrayList<>()).stream().collect(Collectors.toMap(FieldDefinition::getFieldName, field -> field));
+                fieldDefinitionMap.getOrDefault("Unique ID", new ArrayList<>()).stream()
+                        .collect(Collectors.toMap(FieldDefinition::getFieldName, field -> field));
         FieldDefinition IDDefinition = IDNameToFieldDefinition.get("CustomerContactId");
         Assert.assertNotNull(IDDefinition);
         IDDefinition.setFieldType(UserDefinedType.INTEGER);
         response = ImportWorkflowUtils.generateValidationResponse(fieldDefinitionMap, autoDetectionResultsMap,
-                        importWorkflowSpec.getFieldDefinitionsRecordsMap(), resolver);
+                        importWorkflowSpec.getFieldDefinitionsRecordsMap(), null,null,resolver);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
-        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.ERROR);
+        checkGeneratedResult(response, "Unique ID", "CustomerContactId", FieldValidationMessage.MessageLevel.ERROR,
+                "the current template has fieldType INTEGER while the Spec has fieldType TEXT for field Contact ID");
 
     }
 
-    private void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
-                                      FieldValidationMessage.MessageLevel messageLevel) {
+    @Test(groups = "functional")
+    public void testIgnoredFlag() throws Exception {
+        FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
+        actualResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+
+        // Generate Spec Java class from resource file
+        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+                "com/latticeengines/pls/util/test-contact-spec.json", ImportWorkflowSpec.class);
+
+        actualResponse.setImportWorkflowSpec(importWorkflowSpec);
+
+        // load csv and generate auto-detected field definitions
+        MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
+        Map<String, FieldDefinition> autodetectionResultsMap =
+                ImportWorkflowUtils.generateAutodetectionResultsMap(resolver);
+
+        actualResponse.setAutodetectionResultsMap(autodetectionResultsMap);
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(actualResponse);
+
+        FieldDefinitionsRecord currentRecord = actualResponse.getCurrentFieldDefinitionsRecord();
+        List<FieldDefinition> customFieldDefinitions = currentRecord.getFieldDefinitionsRecordsMap().getOrDefault(
+                "Custom Fields", new ArrayList<>());
+
+        Assert.assertNotNull(customFieldDefinitions);
+        Map<String, FieldDefinition> customNameToFieldDefinition =
+                customFieldDefinitions.stream().collect(Collectors.toMap(FieldDefinition::getColumnName,
+                        field -> field));
+        FieldDefinition earningsDefinition = customNameToFieldDefinition.get("Earnings");
+        Assert.assertNotNull(earningsDefinition);
+        earningsDefinition.setIgnored(Boolean.TRUE);
+        Table result = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(null, currentRecord, false);
+
+        List<Attribute> attrs = result.getAttributes();
+        Attribute earningsAttr =
+                attrs.stream().filter(attr -> "Earnings".equals(attr.getDisplayName())).findFirst().orElse(null);
+
+        Assert.assertNull(earningsAttr);
+    }
+
+    public static void checkGeneratedResult(ValidateFieldDefinitionsResponse response, String section, String name,
+                                      FieldValidationMessage.MessageLevel messageLevel, String errMSG) {
         Map<String, List<FieldValidationMessage>> validationMap = response.getFieldValidationMessagesMap();
         Assert.assertNotNull(validationMap);
         List<FieldValidationMessage> validationMessages = validationMap.get(section);
         Assert.assertNotNull(validationMessages);
-        if (ImportWorkflowUtils.CUSTOM_FIELDS.equals(section)) {
+        if (FieldDefinitionSectionName.Custom_Fields.getName().equals(section)) {
             FieldValidationMessage validation =
-                    validationMessages.stream().filter(message -> name.equals(message.getColumnName())
-                            && messageLevel.equals(message.getMessageLevel())).findFirst().orElse(null);
+                    validationMessages.stream().filter(message -> StringUtils.equals(name, message.getColumnName())
+                            && messageLevel.equals(message.getMessageLevel()) && errMSG.equals(message.getMessage())).findFirst().orElse(null);
             Assert.assertNotNull(validation);
         } else {
             FieldValidationMessage validation =
-                    validationMessages.stream().filter(message -> name.equals(message.getFieldName())
-                            && messageLevel.equals(message.getMessageLevel())).findFirst().orElse(null);
+                    validationMessages.stream().filter(message -> StringUtils.equals(name, message.getFieldName())
+                            && messageLevel.equals(message.getMessageLevel()) && errMSG.equals(message.getMessage())).findFirst().orElse(null);
             Assert.assertNotNull(validation);
         }
-
-
     }
 
     // resourceJsonFileRelativePath should start "com/latticeengines/...".
@@ -294,6 +345,5 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         }
         return pojo;
     }
-
 
 }

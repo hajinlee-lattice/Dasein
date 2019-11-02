@@ -132,7 +132,6 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
         String outputScoredFilename = "/"
                 + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                 + "_scored_" + DateTime.now().getMillis();
-        String mergedOutputScoredFilename = StringUtils.appendIfMissing(outputScoredFilename, ".csv");
 
         return new ImportMatchAndScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -157,7 +156,6 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchRequestSource(MatchRequestSource.SCORING) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(outputScoredFilename) //
-                .mergeOutputFile(mergedOutputScoredFilename) //
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //

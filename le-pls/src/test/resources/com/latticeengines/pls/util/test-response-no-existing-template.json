@@ -1,5 +1,8 @@
 {
     "currentFieldDefinitionsRecord": {
+        "systemName": "ImportWorkflowUtilsTest",
+        "systemType": "Test",
+        "systemObject": "Contacts",
         "fieldDefinitionsRecordsMap": {
             "Unique ID": [
                 {
@@ -7,7 +10,8 @@
                     "fieldType": "TEXT",
                     "screenName": "Contact ID",
                     "columnName": "Contact Id",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 }
             ],
             "Match IDs": [],
@@ -18,27 +22,31 @@
                     "fieldType": "TEXT",
                     "screenName": "First Name",
                     "columnName": "First Name",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 },
                 {
                     "fieldName": "LastName",
                     "fieldType": "TEXT",
                     "screenName": "Last Name",
                     "columnName": "LastName",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 },
                 {
                     "fieldName": "Title",
                     "fieldType": "TEXT",
                     "screenName": "Title",
-                    "inCurrentImport": false
+                    "inCurrentImport": false,
+                    "required": false
                 },
                 {
                     "fieldName": "Email",
                     "fieldType": "TEXT",
                     "screenName": "Email",
                     "columnName": "EmailAddress",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 }
             ],
             "Analysis Fields": [
@@ -46,21 +54,24 @@
                     "fieldName": "LeadSource",
                     "fieldType": "TEXT",
                     "screenName": "Lead Source",
-                    "inCurrentImport": false
+                    "inCurrentImport": false,
+                    "required": false
                 },
                 {
                     "fieldName": "LeadType",
                     "fieldType": "TEXT",
                     "screenName": "Lead Type",
                     "columnName": "LeadType",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 },
                 {
                     "fieldName": "DoNotCall",
                     "fieldType": "BOOLEAN",
                     "screenName": "Has Opted Out of Phone Calls",
                     "columnName": "Do_Not_Call",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 },
                 {
                     "fieldName": "CreatedDate",
@@ -68,13 +79,15 @@
                     "screenName": "Created Date",
                     "columnName": "CreatedDate",
                     "inCurrentImport": true,
-                    "dateFormat": "MM/DD/YYYY"
+                    "dateFormat": "MM/DD/YYYY",
+                    "required": false
                 },
                 {
                     "fieldName": "LastModifiedDate",
                     "fieldType": "DATE",
                     "screenName": "Last Modified Date",
-                    "inCurrentImport": false
+                    "inCurrentImport": false,
+                    "required": false
                 }
             ],
             "Match to Accounts - ID": [
@@ -83,7 +96,8 @@
                     "fieldType": "TEXT",
                     "screenName": "Unique Account Identifier",
                     "columnName": "AccountExternalId",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 }
             ],
             "Match to Accounts - Fields": [
@@ -92,33 +106,38 @@
                     "fieldType": "TEXT",
                     "screenName": "Website",
                     "columnName": "Domain",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 },
                 {
                     "fieldName": "CompanyName",
                     "fieldType": "TEXT",
                     "screenName": "Company Name",
-                    "inCurrentImport": false
+                    "inCurrentImport": false,
+                    "required": false
                 },
                 {
                     "fieldName": "DUNS",
                     "fieldType": "TEXT",
                     "screenName": "D-U-N-S",
-                    "inCurrentImport": false
+                    "inCurrentImport": false,
+                    "required": false
                 },
                 {
                     "fieldName": "Country",
                     "fieldType": "TEXT",
                     "screenName": "Country",
                     "columnName": "BillingCountry",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 },
                 {
                     "fieldName": "ZipCode",
                     "fieldType": "TEXT",
                     "screenName": "Zip Code",
                     "columnName": "BILLING_ZIP_CODE",
-                    "inCurrentImport": true
+                    "inCurrentImport": true,
+                    "required": false
                 }
             ],
             "Custom Fields": [

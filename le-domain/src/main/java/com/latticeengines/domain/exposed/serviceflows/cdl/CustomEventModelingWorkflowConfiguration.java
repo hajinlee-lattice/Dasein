@@ -184,7 +184,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder userId(String userId) {
             modelWorkflowBuilder.userId(userId);
             configuration.setUserId(userId);
-            generateAIRating.userId(userId);
             return this;
         }
 
@@ -442,11 +441,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder cdlMultiModel(boolean cdlMultiMode) {
             generateAIRating.cdlMultiModel(cdlMultiMode);
-            return this;
-        }
-
-        public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
-            customEventMatchWorkflowConfigurationBuilder.mapToLatticeAccount(mapToLatticeAccount);
             return this;
         }
 

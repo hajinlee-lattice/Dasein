@@ -21,7 +21,7 @@ public class DateTimeUtils {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     private static final String FILEPATH_DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
     private static final SimpleDateFormat filePathDateFormat = new SimpleDateFormat(FILEPATH_DATE_FORMAT_STRING);
-    
+
     public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
 
     static {
@@ -97,7 +97,7 @@ public class DateTimeUtils {
             int day = Integer.parseInt(dateUnits[2]);
             int dayPeriod = (year - 1900) * 13 * 32 + month * 32 + day;
             // log.info("Date to day period " + dateString + " " + dayPeriod);
-            return new Integer(dayPeriod);
+            return dayPeriod;
         } catch (Exception e) {
             log.error("Failed to convert " + dateString + " to period", e);
             return null;

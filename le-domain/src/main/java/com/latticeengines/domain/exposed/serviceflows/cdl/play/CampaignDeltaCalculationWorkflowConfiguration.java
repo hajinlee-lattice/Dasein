@@ -52,10 +52,16 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
 
         public CampaignDeltaCalculationWorkflowConfiguration.Builder channelId(String channelId) {
             importDeltaArtifactsFromS3Configuration.setChannelId(channelId);
-
             generateLaunchUniverseStepConfiguration.setChannelId(channelId);
             calculateDeltaStepConfiguration.setChannelId(channelId);
             queuePlayLaunchesStepConfiguration.setChannelId(channelId);
+            return this;
+        }
+
+        public CampaignDeltaCalculationWorkflowConfiguration.Builder launchId(String launchId) {
+            generateLaunchUniverseStepConfiguration.setLaunchId(launchId);
+            calculateDeltaStepConfiguration.setLaunchId(launchId);
+            queuePlayLaunchesStepConfiguration.setLaunchId(launchId);
             return this;
         }
 

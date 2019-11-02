@@ -54,7 +54,7 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
         cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.AccountId.name()) //
                 .withCategory(Category.ACCOUNT_ATTRIBUTES) //
-                .withSubcategory("Account IDs") //
+                .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
                         ColumnSelection.Predefined.Segment) //
                 .build());

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -73,6 +74,8 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
 
     private boolean shortCutMode = false;
     private DataCollection.Version inactive;
+    private List<ColumnMetadata> featureSchema;
+    private List<ColumnMetadata> exportSchema;
 
     @Override
     protected Class<MultiCopyJob> getJobClz() {
@@ -128,11 +131,12 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
     }
 
     private CopyConfig getFeaturesCopyConfig() {
-        List<String> retainAttrNames = servingStoreProxy //
+        featureSchema = servingStoreProxy //
                 .getAllowedModelingAttrs(customerSpace.toString(), true, inactive) //
-                .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
-        if (retainAttrNames == null) {
+        List<String> retainAttrNames = featureSchema.stream().map(ColumnMetadata::getAttrName) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(retainAttrNames)) {
             retainAttrNames = new ArrayList<>();
         }
         log.info("retainAttrNames from servingStore: {}", CollectionUtils.size(retainAttrNames));
@@ -149,15 +153,16 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
     }
 
     private CopyConfig getExportCopyConfig() {
-        List<String> retainAttrNames = servingStoreProxy
+        exportSchema = servingStoreProxy
                 .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account, null,
                         inactive) //
                 .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState())) //
                 .filter(cm -> !(Boolean.FALSE.equals(cm.getCanSegment()) //
                         && Boolean.FALSE.equals(cm.getCanEnrich()))) //
-                .map(ColumnMetadata::getAttrName) //
                 .collectList().block();
-        if (retainAttrNames == null) {
+        List<String> retainAttrNames = exportSchema.stream() //
+                .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(retainAttrNames)) {
             retainAttrNames = new ArrayList<>();
         }
         if (!retainAttrNames.contains(InterfaceName.AccountId.name())) {
@@ -181,6 +186,7 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
     private void processAccountExportResult(HdfsDataUnit result) {
         String filteredTableName = NamingUtils.timestamp("AccountExport");
         Table filteredTable = toTable(filteredTableName, InterfaceName.AccountId.name(), result);
+        setAccountExportTableSchema(filteredTable);
         metadataProxy.createTable(customerSpace.toString(), filteredTableName, filteredTable);
         dataCollectionProxy.upsertTable(customerSpace.toString(), filteredTableName, //
                 TableRoleInCollection.AccountExport, inactive);
@@ -198,6 +204,7 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
     }
 
     private void setAccountFeatureTableSchema(Table table) {
+        overwriteServingSchema(table, featureSchema);
         String dataCloudVersion = configuration.getDataCloudVersion();
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model,
                 dataCloudVersion);
@@ -209,6 +216,29 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
                 ColumnMetadata cm = amColMap.get(attr0.getName());
                 if (Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())) {
                     attr0.setTags(Tag.INTERNAL);
+                }
+            }
+            attrs.add(attr0);
+        });
+        table.setAttributes(attrs);
+    }
+
+    private void setAccountExportTableSchema(Table table) {
+        overwriteServingSchema(table, exportSchema);
+    }
+
+    private void overwriteServingSchema(Table table, List<ColumnMetadata> schema) {
+        Map<String, ColumnMetadata> colMap = new HashMap<>();
+        schema.forEach(cm -> colMap.put(cm.getAttrName(), cm));
+        List<Attribute> attrs = new ArrayList<>();
+        table.getAttributes().forEach(attr0 -> {
+            if (colMap.containsKey(attr0.getName())) {
+                ColumnMetadata cm = colMap.get(attr0.getName());
+                if (cm.getFundamentalType() != null) {
+                    attr0.setFundamentalType(cm.getFundamentalType());
+                }
+                if (cm.getLogicalDataType() != null) {
+                    attr0.setLogicalDataType(cm.getLogicalDataType());
                 }
             }
             attrs.add(attr0);

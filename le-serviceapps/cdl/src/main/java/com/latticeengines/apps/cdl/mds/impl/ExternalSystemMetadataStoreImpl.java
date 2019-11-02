@@ -10,6 +10,7 @@ import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -67,7 +68,7 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         ColumnMetadata cm = new ColumnMetadata();
         cm.setAttrName(attrName);
         cm.enableGroup(ColumnSelection.Predefined.LookupId);
-        cm.setSubcategory("Account IDs");
+        cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
         if (StringUtils.isNotBlank(type)) {
             cm.setSecondaryDisplayName(type);
         }

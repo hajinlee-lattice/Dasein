@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +30,14 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
         String exportPath = exportData();
         log.info("Export score training file path = {}", exportPath);
 
-        if (configuration.isExportMergedFile() && configuration.getExportFormat().equals(ExportFormat.CSV)
+        if (configuration.getExportFormat().equals(ExportFormat.CSV)
                 && StringUtils.isNotBlank(exportPath)) {
             putStringValueInContext(EXPORT_MERGE_FILE_PATH, exportPath);
+            // get export file name prefix and use it as merged csv filename
+            String filename = FilenameUtils.getName(exportPath);
+            filename = StringUtils.appendIfMissing(filename, ".csv");
+            log.info("Merge file path = {}, filename = {}", exportPath, filename);
+            putStringValueInContext(EXPORT_MERGE_FILE_NAME, filename);
             mergeCSVFiles(true);
         }
     }
@@ -60,10 +66,11 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
     protected String getExclusionColumns() {
         String exclusionColumns = ScoreResultField.NormalizedScore.displayName + ";" //
                 + ScoreResultField.PredictedRevenuePercentile.displayName + ";" //
-                + ScoreResultField.PredictedRevenuePercentile.displayName + ";" //
                 + ScoreResultField.ExpectedRevenuePercentile.displayName;
         if (batonService.isEntityMatchEnabled(getConfiguration().getCustomerSpace())) {
-            exclusionColumns += ";" + InterfaceName.AccountId.name() + ";" //
+            exclusionColumns += ";" //
+                    + InterfaceName.AccountId.name() + ";" //
+                    + InterfaceName.EntityId.name() + ";" //
                     + InterfaceName.PeriodId.name();
         }
         return  exclusionColumns;

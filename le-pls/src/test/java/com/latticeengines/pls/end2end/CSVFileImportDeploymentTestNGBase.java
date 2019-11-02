@@ -44,6 +44,8 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     protected static final String ENTITY_CONTACT = "Contact";
     protected static final String ENTITY_TRANSACTION = "Transaction";
     protected static final String ENTITY_PRODUCT = "Product";
+    protected static final String ENTITY_ACTIVITY_STREAM = "ActivityStream";
+    protected  static final String ENTITY_CATALOG = "Catalog";
 
     protected static final String ACCOUNT_SOURCE_FILE = "Account_base.csv";
     protected static final String CONTACT_SOURCE_FILE = "Contact_base.csv";
@@ -55,6 +57,7 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     protected static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     protected static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
 
+    private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
     @Autowired
     protected FileUploadService fileUploadService;
 
@@ -87,6 +90,10 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     protected DataFeedTask contactDataFeedTask;
 
     protected DataFeedTask transactionDataFeedTask;
+
+    protected DataFeedTask webVisitDataFeedTask;
+
+    protected DataFeedTask webVisitPathPatternDataFeedTask;
 
 
     protected void prepareBaseData(String entity) {
@@ -122,6 +129,14 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
             case ENTITY_TRANSACTION:
                 transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
                         DEFAULT_SYSTEM + SPLIT_CHART + EntityType.ProductPurchases.getDefaultFeedTypeName(), ENTITY_TRANSACTION);
+                break;
+            case ENTITY_ACTIVITY_STREAM:
+                webVisitDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
+                        DEFAULT_WEBSITE_SYSTEM + SPLIT_CHART + EntityType.WebVisit.getDefaultFeedTypeName(), ENTITY_ACTIVITY_STREAM);
+                break;
+            case ENTITY_CATALOG:
+                webVisitPathPatternDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
+                        DEFAULT_WEBSITE_SYSTEM + SPLIT_CHART + EntityType.WebVisitPathPattern.getDefaultFeedTypeName(), ENTITY_CATALOG);
                 break;
         }
     }

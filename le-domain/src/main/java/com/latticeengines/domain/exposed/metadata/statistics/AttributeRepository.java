@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,6 +21,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -119,6 +122,15 @@ public class AttributeRepository {
             metadata.setNumBits(attr.getNumOfBits());
             metadata.setBitOffset(attr.getBitOffset());
             metadata.setPhysicalName(attr.getPhysicalName());
+            if (attr.getLogicalDataType() != null) {
+                metadata.setLogicalDataType(attr.getLogicalDataType());
+            }
+            if (StringUtils.isNotBlank(attr.getFundamentalType())) {
+                FundamentalType fundamentalType = FundamentalType.fromName(attr.getFundamentalType());
+                if (!FundamentalType.ALPHA.equals(fundamentalType)) {
+                    metadata.setFundamentalType(fundamentalType);
+                }
+            }
             attrMap.put(attr.getName(), metadata);
         });
         return attrMap;

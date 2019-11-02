@@ -31,8 +31,11 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -89,6 +92,9 @@ public class PlayResource {
 
     @Inject
     private RatingCoverageService ratingCoverageService;
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     public PlayResource(PlayService playService, PlayLaunchService playLaunchService, MetadataProxy metadataProxy,
@@ -247,8 +253,20 @@ public class PlayResource {
         }
         playLaunchChannel = playLaunchChannelService.update(playName, playLaunchChannel);
         if (launchNow) {
-            PlayLaunch launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
-                    playLaunchChannel);
+            PlayLaunch launch;
+            if (playLaunchChannel.getLaunchType() != null && playLaunchChannel.getLaunchType() == LaunchType.DELTA
+                    && batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                            LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
+                launch = playLaunchChannelService.createNewLaunchForChannel(playLaunchChannel.getPlay(),
+                        playLaunchChannel);
+                Long workflowId = schedule(customerSpace, playName, channelId, launch.getLaunchId());
+                log.info(String.format(
+                        "Scheduled Delta Calculation workflow for Play: %s, Channel: %s and Launch: %s with WorkflowPID: %s",
+                        playName, channelId, launch.getLaunchId(), workflowId.toString()));
+            } else {
+                launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
+                        playLaunchChannel);
+            }
             log.info(String.format("Queued new launch for play:%s and channel: %s : %s", playName, channelId,
                     launch.getLaunchId()));
         }
@@ -313,9 +331,11 @@ public class PlayResource {
     @ApiOperation(value = "Update a play launch channel for a given play and channel id")
     public Long schedule(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
-            @PathVariable("channelId") String channelId) {
+            @PathVariable("channelId") String channelId, //
+            @RequestParam(value = "launchId", required = false) String launchId) {
         try {
-            Long workflowPid = campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId);
+            Long workflowPid = campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId,
+                    launchId);
             playLaunchChannelService.updateLastDeltaWorkflowId(playName, channelId, workflowPid);
             return workflowPid;
         } catch (Exception e) {

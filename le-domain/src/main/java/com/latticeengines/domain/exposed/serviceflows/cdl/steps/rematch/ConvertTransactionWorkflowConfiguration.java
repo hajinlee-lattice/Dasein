@@ -16,21 +16,25 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
                 new ConvertTransactionWorkflowConfiguration();
         private ConvertBatchStoreStepConfiguration convertBatchStoreStepConfiguration =
                 new ConvertBatchStoreStepConfiguration();
+        private DeleteByUploadStepConfiguration deleteByUploadStepConfiguration = new DeleteByUploadStepConfiguration();
 
         public ConvertTransactionWorkflowConfiguration.Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             convertBatchStoreStepConfiguration.setCustomerSpace(customerSpace);
+            deleteByUploadStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             convertBatchStoreStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            deleteByUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder setSkipStep(boolean skipStep) {
             convertBatchStoreStepConfiguration.setSkipStep(skipStep);
+            deleteByUploadStepConfiguration.setSkipStep(skipStep);
             return this;
         }
 
@@ -46,7 +50,9 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             configuration.setContainerConfiguration("convertTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Transaction);
+            deleteByUploadStepConfiguration.setEntity(BusinessEntity.Transaction);
             configuration.add(convertBatchStoreStepConfiguration);
+            configuration.add(deleteByUploadStepConfiguration);
             return configuration;
         }
     }

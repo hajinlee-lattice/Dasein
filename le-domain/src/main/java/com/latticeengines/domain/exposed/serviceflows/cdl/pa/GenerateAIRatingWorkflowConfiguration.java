@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWo
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculateExpectedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculatePredictedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculateExpectedRevenueDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RecalculatePercentileScoreDataFlowConfiguration;
@@ -70,7 +69,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         private CalculateExpectedRevenuePercentileDataFlowConfiguration calculateExpectedRevenuePercentile = new CalculateExpectedRevenuePercentileDataFlowConfiguration();
         private ScoreAggregateFlowConfiguration scoreAgg = new ScoreAggregateFlowConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
-        private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
@@ -86,7 +84,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             calculateExpectedRevenuePercentile.setCustomerSpace(customerSpace);
             scoreAgg.setCustomer(customerSpace.toString());
             combineInputWithScores.setCustomer(customerSpace.toString());
-            computeLift.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomer(customerSpace.toString());
             return this;
         }
@@ -101,7 +98,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             recalculateExpectedRevenue.setMicroServiceHostPort(microServiceHostPort);
             calculatePredictedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
             calculateExpectedRevenuePercentile.setMicroServiceHostPort(microServiceHostPort);
-            computeLift.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -154,11 +150,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder cdlMultiModel(boolean cdlMultiMode) {
             combineInputWithScores.setCdlMultiModel(cdlMultiMode);
-            return this;
-        }
-
-        public Builder userId(String userId) {
-            computeLift.setUserId(userId);
             return this;
         }
 
@@ -274,7 +265,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             configuration.add(calculateExpectedRevenuePercentile);
             configuration.add(scoreAgg);
             configuration.add(combineInputWithScores);
-            configuration.add(computeLift);
             configuration.add(pivotScoreAndEvent);
             return configuration;
         }

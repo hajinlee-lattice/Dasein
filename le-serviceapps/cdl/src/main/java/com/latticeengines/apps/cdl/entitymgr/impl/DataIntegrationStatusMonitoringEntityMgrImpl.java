@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEnti
 import com.latticeengines.apps.cdl.repository.DataIntegrationStatusMonitoringRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 
 /**
@@ -90,5 +92,16 @@ public class DataIntegrationStatusMonitoringEntityMgrImpl
     @Override
     public List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(Long tenantPid, String entityName, List<String> entityIds) {
         return getReaderRepo().findAllByTenantPidAndEntityNameAndEntityIdIn(tenantPid, entityName, entityIds);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly=true)
+    @Override
+    public DataIntegrationStatusMessage getLatestMessageByLaunchId(String launchId) {
+        List<DataIntegrationStatusMessage> messages = getReaderRepo().getMessagesByLaunchId(launchId);
+        if(messages != null && CollectionUtils.isNotEmpty(messages)){
+            return messages.get(0);
+        }
+        return null;
+
     }
 }

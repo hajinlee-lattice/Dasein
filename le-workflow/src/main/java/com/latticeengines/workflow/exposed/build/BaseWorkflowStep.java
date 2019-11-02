@@ -116,6 +116,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     // CDL
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
+    public static final String SOFT_DEELETE_ACTIONS = "SOFT_DEELETE_ACTIONS";
+    public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
@@ -199,6 +201,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String AGG_DAILY_TRXN_TABLE_NAME = "AGG_DAILY_TRXN_TABLE_NAME";
     protected static final String PERIOD_TRXN_TABLE_NAME = "PERIOD_TRXN_TABLE_NAME";
     protected static final String CATALOG_TABLE_NAME = "CATALOG_TABLE_NAME";
+    protected static final String RAW_ACTIVITY_STREAM_TABLE_NAME = "RAW_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";

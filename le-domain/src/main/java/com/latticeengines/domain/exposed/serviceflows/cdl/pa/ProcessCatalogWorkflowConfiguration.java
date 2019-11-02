@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.activity.CatalogImport;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BuildCatalogStepConfiguration;
@@ -56,7 +56,7 @@ public class ProcessCatalogWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public Builder catalogImports(Map<String, List<CatalogImport>> catalogImports) {
+        public Builder catalogImports(Map<String, List<ActivityImport>> catalogImports) {
             buildCatalogConfig.setCatalogImports(catalogImports);
             return this;
         }
