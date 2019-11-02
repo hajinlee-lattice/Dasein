@@ -57,6 +57,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation.ValidationStatus;
+import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -484,8 +485,9 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
             }
         }
         Assert.assertTrue(dateExist);
-        List<FieldValidation> validations = modelingFileMetadataService
-                .validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_TRANSACTION, SOURCE, feedType);;
+        FieldValidationResult fieldValidationResult = modelingFileMetadataService
+                .validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_TRANSACTION, SOURCE, feedType);
+        List<FieldValidation> validations = fieldValidationResult.getFieldValidations();
         Assert.assertNotNull(validations);
         List<FieldValidation> errorValidations = validations.stream()
                 .filter(validation -> ValidationStatus.ERROR.equals(validation.getStatus()))
