@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.service.impl;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     private static final Logger log = LoggerFactory.getLogger(ZKConfigServiceImpl.class);
     private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
+    private static final String ACTIVE_MODEL_QUOTA = "ActiveModelQuotaLimit";
     private static final String PLS = "PLS";
 
     @Inject
@@ -101,10 +103,14 @@ public class ZKConfigServiceImpl implements ZKConfigService {
         try {
             Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
                     componentName);
-            Path activeModelCntPath = path.append("ActiveModelQuotaLimit");
+            Path activeModelCntPath = path.append(ACTIVE_MODEL_QUOTA);
             Camille camille = CamilleEnvironment.getCamille();
+            // if zookeeper node value <= 0 or empty then we take the default quota limit value = 50
             if (activeModelCntPath != null && camille.exists(activeModelCntPath)) {
-                dataQuotaLimit = Long.valueOf(camille.get(activeModelCntPath).getData());
+                String activeModelsQuota = camille.get(activeModelCntPath).getData();
+                if (!StringUtils.isEmpty(activeModelsQuota)) {
+                    dataQuotaLimit = Long.valueOf(camille.get(activeModelCntPath).getData());
+                }
             }
         } catch (Exception e) {
             log.warn("Failed to get count of ActiveModels from ZK for "
