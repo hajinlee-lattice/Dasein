@@ -239,7 +239,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             throw new RuntimeException(String.format("No such table with name %s", name));
         }
 
-        final Table clone = TableUtils.clone(existing, "clone_" + UUID.randomUUID().toString().replace('-', '_'));
+        final Table clone = TableUtils.clone(existing, "clone_" + UUID.randomUUID().toString().replace('-', '_'),
+                ignoreExtracts);
 
         String cloneTable = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 MultiTenantContext.getCustomerSpace(), existing.getNamespace()).append(clone.getName()).toString();
@@ -322,7 +323,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     String.format("Failed to copy schema in HDFS from %s to %s", oldTableSchema, cloneTableSchema), e);
         }
 
-        DatabaseUtils.retry("createTable", input -> create(TableUtils.clone(clone, clone.getName())));
+        DatabaseUtils.retry("createTable", input -> create(clone));
 
         return clone;
     }
