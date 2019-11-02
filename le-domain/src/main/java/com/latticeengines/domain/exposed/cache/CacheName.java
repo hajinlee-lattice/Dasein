@@ -12,6 +12,7 @@ public enum CacheName {
     JobsCache(Constants.JobsCacheName), //
     MetadataCache(Constants.MetadataCacheName), //
     ServingMetadataCache(Constants.ServingMetadataCacheName), //
+    ServingMetadataLocalCache(Constants.ServingMetadataLocalCacheName), //
     TableRoleMetadataCache(Constants.TableRoleMetadataCacheName), //
     DantePreviewTokenCache(Constants.DantePreviewTokenCacheName), //
 
@@ -48,6 +49,7 @@ public enum CacheName {
     public static CacheName[] getCdlLocalCacheGroup() {
         return new CacheName[] {
                 AttrRepoCache, //
+                ServingMetadataLocalCache, //
                 TimeTranslatorCache };
     }
 
@@ -75,6 +77,7 @@ public enum CacheName {
         public static final String DataCloudStatsCacheName = "DataCloudStatsCache";
         public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
         public static final String ServingMetadataCacheName = "ServingMetadataCache";
+        public static final String ServingMetadataLocalCacheName = "ServingMetadataLocalCache";
         public static final String TableRoleMetadataCacheName = "TableRoleMetadataCache";
         public static final String DantePreviewTokenCacheName = "DantePreviewTokenCache";
         public static final String EMRClusterCacheName = "EMRClusterCache";

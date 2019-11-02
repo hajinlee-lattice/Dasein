@@ -31,6 +31,7 @@ import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.repository.RatingEngineRepository;
+import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.apps.core.service.ActionService;
@@ -41,6 +42,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -110,6 +112,9 @@ public class RatingEngineEntityMgrImpl //
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private RatingEngineService ratingEngineService;
 
     @Override
     public BaseDao<RatingEngine> getDao() {
@@ -225,7 +230,6 @@ public class RatingEngineEntityMgrImpl //
         ratingEngineDao.revertDeleteById(id);
     }
 
-    @SuppressWarnings("deprecation")
     private void updateExistingRatingEngine(RatingEngine retrievedRatingEngine, RatingEngine ratingEngine,
             String tenantId, Boolean unlinkSegment) {
         log.info(String.format("Updating existing rating engine with id %s for tenant %s", ratingEngine.getId(),
@@ -241,6 +245,18 @@ public class RatingEngineEntityMgrImpl //
             // set Activation Action Context
             if (retrievedRatingEngine.getStatus() == RatingEngineStatus.INACTIVE
                     && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
+                // check the threshold for active models for the tenant
+                CustomerSpace space = CustomerSpace.parse(tenantId);
+                Long quotaLimit = ratingEngineService
+                        .getActiveRatingEngineQuotaLimit(new CustomerSpace(space.getContractId(),
+                                space.getTenantId(), space.getSpaceId()));
+                // Enforce quota limit
+                if (ratingEngineService.getActiveRatingEnginesCount() >= quotaLimit) {
+                    // throw exception
+                    throw new RuntimeException("Too many Active Models",
+                            new Throwable("There are already " + quotaLimit
+                                    + " Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model"));
+                }
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {
                     if (retrievedRatingEngine.getType() == RatingEngineType.RULE_BASED) {
@@ -608,5 +624,11 @@ public class RatingEngineEntityMgrImpl //
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public void accept(GraphVisitor visitor, Object entity) throws Exception {
         visitor.visit((RatingEngine) entity, parse((RatingEngine) entity, null));
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long findAllActiveRatingEngines() {
+        return ratingEngineDao.findActiveRatingEnginesCount();
     }
 }

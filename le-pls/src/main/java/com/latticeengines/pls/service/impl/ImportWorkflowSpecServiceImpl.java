@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static com.latticeengines.pls.util.ImportWorkflowUtils.getSchemaInterpretationFromSpec;
 import static com.latticeengines.pls.util.ImportWorkflowUtils.getTableFromFieldDefinitionsRecord;
 
 import java.io.File;
@@ -24,12 +23,11 @@ import com.latticeengines.pls.service.ImportWorkflowSpecService;
 public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService {
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowSpecServiceImpl.class);
 
-    // TODO(jwinter): These static variables must be instance dependent and use configuration files.
-    private static String s3Bucket = "latticeengines-dev";
-    private static String s3Dir = "jwinter-import-workflow-testing/";
+    @Value("${pls.import.specs.s3bucket}")
+    private String s3Bucket;
 
-    @Inject
-    private S3Service s3Service;
+    @Value("${pls.import.specs.s3dir}")
+    private String s3Dir;
 
     @Value("${aws.default.access.key}")
     private String awsKey;
@@ -37,9 +35,12 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     @Value("${aws.default.secret.key.encrypted}")
     private String awsSecret;
 
+    @Inject
+    private S3Service s3Service;
+
     public ImportWorkflowSpec loadSpecFromS3(String systemType, String systemObject) throws Exception {
-        String fileSystemType = systemType.toLowerCase();
-        String fileSystemObject = systemObject.toLowerCase();
+        String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
+        String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
         File specFile = null;
         try {
             specFile = File.createTempFile("temp-" + fileSystemType + "-" + fileSystemObject, ".json");
@@ -51,7 +52,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                     " and SystemObject " + systemObject + ".  Error was: " + e.getMessage());
         }
 
-        String s3Path = s3Dir + fileSystemType + "-" + fileSystemObject + "-spec.json";
+        String s3Path = s3Dir + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
 
         // Read in S3 file as InputStream.
@@ -74,13 +75,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     }
 
     public Table tableFromSpec(ImportWorkflowSpec spec) {
-        Table table = getTableFromFieldDefinitionsRecord(spec, true);
-        String schemaInterpretationString = getSchemaInterpretationFromSpec(spec).name();
-        table.setInterpretation(schemaInterpretationString);
-        // TODO(jwinter): Figure out how to better set these fields.
-        table.setName(schemaInterpretationString);
-        table.setDisplayName(schemaInterpretationString);
-
+        Table table = getTableFromFieldDefinitionsRecord(null, spec, true);
         log.info("Generating Table from Spec of type " + spec.getSystemType() + " and object " +
                 spec.getSystemObject());
         return table;

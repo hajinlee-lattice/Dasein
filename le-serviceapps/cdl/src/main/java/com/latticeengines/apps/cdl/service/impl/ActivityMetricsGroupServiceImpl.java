@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -53,11 +54,10 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         Tenant tenant = MultiTenantContext.getTenant();
         AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
         ActivityMetricsGroup totalVisit = setupDefaultTotalVisitGroup(tenant, stream);
-        // skip creating sourceMedium group. may move it to another method called by separate api
-//        ActivityMetricsGroup sourceMedium = setupDefaultSourceMediumGroup(tenant, stream);
+        ActivityMetricsGroup sourceMedium = setupDefaultSourceMediumGroup(tenant, stream);
         activityMetricsGroupEntityMgr.create(totalVisit);
-//        activityMetricsGroupEntityMgr.create(sourceMedium);
-        return Collections.singletonList(totalVisit);
+        activityMetricsGroupEntityMgr.create(sourceMedium);
+        return Arrays.asList(totalVisit, sourceMedium);
     }
 
     private ActivityMetricsGroup setupDefaultTotalVisitGroup(Tenant tenant, AtlasStream stream) {
@@ -85,30 +85,30 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         return totalVisit;
     }
 
-//    private ActivityMetricsGroup setupDefaultSourceMediumGroup(Tenant tenant, AtlasStream stream) {
-//        ActivityMetricsGroup sourceMedium = new ActivityMetricsGroup();
-//        sourceMedium.setStream(stream);
-//        sourceMedium.setTenant(tenant);
-//        sourceMedium.setGroupId(getGroupId(SOURCE_MEDIUM_GROUPNAME));
-//        sourceMedium.setGroupName(SOURCE_MEDIUM_GROUPNAME);
-//        sourceMedium.setJavaClass(Long.class.getSimpleName());
-//        sourceMedium.setEntity(BusinessEntity.Account);
-//        Set<List<Integer>> paramSet = new HashSet<>();
-//        paramSet.add(Collections.singletonList(2));
-//        paramSet.add(Collections.singletonList(4));
-//        paramSet.add(Collections.singletonList(8));
-//        paramSet.add(Collections.singletonList(12));
-//        sourceMedium.setActivityTimeRange(createActivityTimeRange(ComparisonType.LAST,
-//                Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
-//        sourceMedium.setRollupDimensions(String.join(",", Arrays.asList(DIM_NAME_SOURCEMEDIUM, DIM_NAME_PATH_PATTERN)));
-//        sourceMedium.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.InternalId.name()),
-//                InterfaceName.TotalVisits.name(), StreamAttributeDeriver.Calculation.SUM));
-//        sourceMedium.setCategory(Category.WEB_VISIT_PROFILE);
-//        sourceMedium.setSubCategoryTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY);
-//        sourceMedium.setDisplayNameTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME);
-//        sourceMedium.setDescriptionTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION);
-//        return sourceMedium;
-//    }
+    private ActivityMetricsGroup setupDefaultSourceMediumGroup(Tenant tenant, AtlasStream stream) {
+        ActivityMetricsGroup sourceMedium = new ActivityMetricsGroup();
+        sourceMedium.setStream(stream);
+        sourceMedium.setTenant(tenant);
+        sourceMedium.setGroupId(getGroupId(SOURCE_MEDIUM_GROUPNAME));
+        sourceMedium.setGroupName(SOURCE_MEDIUM_GROUPNAME);
+        sourceMedium.setJavaClass(Long.class.getSimpleName());
+        sourceMedium.setEntity(BusinessEntity.Account);
+        Set<List<Integer>> paramSet = new HashSet<>();
+        paramSet.add(Collections.singletonList(2));
+        paramSet.add(Collections.singletonList(4));
+        paramSet.add(Collections.singletonList(8));
+        paramSet.add(Collections.singletonList(12));
+        sourceMedium.setActivityTimeRange(createActivityTimeRange(ComparisonType.LAST,
+                Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
+        sourceMedium.setRollupDimensions(String.join(",", Arrays.asList(DIM_NAME_SOURCEMEDIUM, DIM_NAME_PATH_PATTERN)));
+        sourceMedium.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
+                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
+        sourceMedium.setCategory(Category.WEB_VISIT_PROFILE);
+        sourceMedium.setSubCategoryTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY);
+        sourceMedium.setDisplayNameTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME);
+        sourceMedium.setDescriptionTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION);
+        return sourceMedium;
+    }
 
     private String getGroupId(String groupName) {
         String base = ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(groupName);

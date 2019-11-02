@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.service.impl;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     private static final Logger log = LoggerFactory.getLogger(ZKConfigServiceImpl.class);
     private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
+    private static final String ACTIVE_MODEL_QUOTA = "ActiveModelQuotaLimit";
     private static final String PLS = "PLS";
 
     @Inject
@@ -95,6 +97,28 @@ public class ZKConfigServiceImpl implements ZKConfigService {
         return period;
     }
 
+    @Override
+    public Long getActiveRatingEngingQuota(CustomerSpace customerSpace, String componentName) {
+        Long dataQuotaLimit = null;
+        try {
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    componentName);
+            Path activeModelCntPath = path.append(ACTIVE_MODEL_QUOTA);
+            Camille camille = CamilleEnvironment.getCamille();
+            // if zookeeper node value <= 0 or empty then we take the default quota limit value = 50
+            if (activeModelCntPath != null && camille.exists(activeModelCntPath)) {
+                String activeModelsQuota = camille.get(activeModelCntPath).getData();
+                if (!StringUtils.isEmpty(activeModelsQuota)) {
+                    dataQuotaLimit = Long.valueOf(camille.get(activeModelCntPath).getData());
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get count of ActiveModels from ZK for "
+                    + customerSpace.getTenantId(), e);
+        }
+        return dataQuotaLimit;
+    }
+
     @VisibleForTesting
     public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense) {
         String maxPremiumLeadEnrichmentAttributes;
@@ -138,7 +162,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     }
 
     @Override
-    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity) {
+    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName,
+            BusinessEntity businessEntity) {
         try {
             Long dataQuotaLimit = null;
             Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
@@ -196,4 +221,5 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             throw new RuntimeException("Failed to get DataQuotaLimit from ZK for " + customerSpace.getTenantId(), e);
         }
     }
+
 }

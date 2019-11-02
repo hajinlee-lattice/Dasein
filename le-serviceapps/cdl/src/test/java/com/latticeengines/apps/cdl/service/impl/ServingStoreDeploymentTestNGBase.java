@@ -16,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.ZKConfigService;
@@ -26,6 +27,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -36,6 +38,8 @@ import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     static final String CRM_ID = "CrmAccount_External_ID";
+    static final String ACCOUNT_SYSTEM_ID = "ACCT_INTESTCASE8_D8D0DCAADB";
+    private static final String DEFAULT_SYSTEM = "DefaultSystem";
 
     @Inject
     private CDLTestDataService cdlTestDataService;
@@ -51,6 +55,9 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
     @Inject
     private CDLExternalSystemService externalSystemService;
+
+    @Inject
+    private S3ImportSystemService s3ImportSystemService;
 
     @Inject
     protected ServingStoreService servingStoreService;
@@ -99,6 +106,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
         // setup external id attrs
         createExternalSystem();
+        updateDefaultSystem();
 
         // TODO: setup rating engines and rating attrs
     }
@@ -111,6 +119,12 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         cdlExternalSystem.setEntity(BusinessEntity.Account);
         externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystem,
                 BusinessEntity.Account);
+    }
+
+    private void updateDefaultSystem() {
+        S3ImportSystem defaultSystem = s3ImportSystemService.getS3ImportSystem(mainCustomerSpace, DEFAULT_SYSTEM);
+        defaultSystem.setAccountSystemId(ACCOUNT_SYSTEM_ID);
+        s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, defaultSystem);
     }
 
     protected void testAccountMetadata() {

@@ -11,6 +11,7 @@
         }
     },
     { "Node": "AccountQuotaLimit", "Data": {"Type": "number", "Required": false}},
+    { "Node": "ActiveModelQuotaLimit", "Data": {"Type": "number", "Required": true}},
     { "Node": "ContactQuotaLimit", "Data": {"Type": "number", "Required": false}},
     { "Node": "ProductBundlesQuotaLimit", "Data": {"Type": "number", "Required": false}},
     { "Node": "ProductSKUsQuotaLimit", "Data": {"Type": "number", "Required": false}},

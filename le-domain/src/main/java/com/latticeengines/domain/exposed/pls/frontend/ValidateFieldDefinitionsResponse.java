@@ -68,4 +68,18 @@ public class ValidateFieldDefinitionsResponse extends FieldDefinitionsRecord {
         }
         return null;
     }
+
+    public String validationMessagesToString() {
+        StringBuilder messages = new StringBuilder();
+        for (Map.Entry<String, List<FieldValidationMessage>> entry : fieldValidationMessagesMap.entrySet()) {
+            messages.append(entry.getKey());
+            messages.append(":\n");
+            for (FieldValidationMessage message : entry.getValue()) {
+                messages.append("    ");
+                messages.append(message.toString());
+                messages.append("\n");
+            }
+        }
+        return messages.toString();
+    }
 }

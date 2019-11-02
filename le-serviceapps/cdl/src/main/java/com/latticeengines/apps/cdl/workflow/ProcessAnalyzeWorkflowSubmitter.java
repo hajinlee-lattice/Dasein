@@ -215,7 +215,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
         if (tenantInMigration) {
             try {
-                return submitWithOnlyImportActions(customerSpace, tenant, request, datafeed, pidWrapper);
+                return submitWithMigrationActions(customerSpace, tenant, request, datafeed, pidWrapper);
             } catch (Exception e) {
                 log.error(String.format("Failed to submit %s's P&A workflow", customerSpace)
                         + ExceptionUtils.getStackTrace(e));
@@ -920,10 +920,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    private ApplicationId submitWithOnlyImportActions(String customerSpace, Tenant tenant,
-            ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
+    private ApplicationId submitWithMigrationActions(String customerSpace, Tenant tenant,
+                                                     ProcessAnalyzeRequest request, DataFeed datafeed, WorkflowPidWrapper pidWrapper) {
         checkImportTrackingLinked(customerSpace);
-        List<Long> importActionIds = getImportActionIds(customerSpace);
+        List<Long> actionIds = new ArrayList<>(getImportActionIds(customerSpace));
+        actionIds.add(createReplaceAction(tenant, request, pidWrapper).getPid());
         Status datafeedStatus = datafeed.getStatus();
         lockExecution(customerSpace, datafeedStatus);
 
@@ -934,16 +935,32 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         log.info("Submitting migration PA workflow for customer {}", customerSpace);
 
-        updateActions(importActionIds, pidWrapper.getPid());
+        updateActions(actionIds, pidWrapper.getPid());
 
         String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
-                Collections.emptyList(), importActionIds, new HashSet<>(),
+                Collections.emptyList(), actionIds, new HashSet<>(),
                 initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
         configuration.setFailingStep(request.getFailingStep());
 
         return workflowJobService.submit(configuration, pidWrapper.getPid());
+    }
+
+    private Action createReplaceAction(Tenant tenant, ProcessAnalyzeRequest request, WorkflowPidWrapper pidWrapper) {
+        Action action = new Action();
+        action.setType(ActionType.DATA_REPLACE);
+        action.setTrackingPid(pidWrapper.getPid());
+        action.setActionInitiator(request.getUserId());
+        action.setTenant(tenant);
+        action.setActionConfiguration(createReplaceActionConfigForMigration());
+        return actionService.create(action);
+    }
+
+    private CleanupActionConfiguration createReplaceActionConfigForMigration() {
+        CleanupActionConfiguration config = new CleanupActionConfiguration();
+        config.setImpactEntities(Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Transaction));
+        return config;
     }
 
     private void checkImportTrackingLinked(String customerSpace) {
