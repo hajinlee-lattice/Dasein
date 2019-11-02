@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
@@ -59,7 +58,6 @@ import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
-import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -434,15 +432,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
         FieldValidationResult fieldValidationResult = new FieldValidationResult();
         int limit;
-        List<S3ImportTemplateDisplay> s3ImportTemplateDisplays;
+        List<DataFeedTask> dataFeedTasks;
         if (BusinessEntity.Account.name().equals(entity)) {
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
-            s3ImportTemplateDisplays = cdlService.getS3ImportTemplate(customerSpace.toString(), "SystemDisplay", ImmutableSet.of(EntityType.Accounts));
-            validateFieldSize(fieldValidationResult, s3ImportTemplateDisplays, customerSpace, entity, generatedTemplate, limit);
+            validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit);
         } else if (BusinessEntity.Contact.equals(entity)) {
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
-            s3ImportTemplateDisplays = cdlService.getS3ImportTemplate(customerSpace.toString(), "SystemDisplay", ImmutableSet.of(EntityType.Contacts));
-            validateFieldSize(fieldValidationResult, s3ImportTemplateDisplays, customerSpace, entity, generatedTemplate, limit);
+            validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit);
         }
 
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
@@ -452,17 +448,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return fieldValidationResult;
     }
 
-    private void validateFieldSize(FieldValidationResult fieldValidationResult, List<S3ImportTemplateDisplay> s3ImportTemplateDisplays,
-                                    CustomerSpace customerSpace, String entity, Table generatedTemplate, int limit) {
+    private void validateFieldSize(FieldValidationResult fieldValidationResult, CustomerSpace customerSpace, String entity, Table generatedTemplate, int limit) {
         Set<String> attributes = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(s3ImportTemplateDisplays)) {
-            s3ImportTemplateDisplays.stream().forEach(s3ImportTemplateDisplay -> {
-                DataFeedTask dataFeedTask1 = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "File", s3ImportTemplateDisplay.getFeedType(), entity);
-                if (dataFeedTask1 != null) {
-                    Table table = dataFeedTask1.getImportTemplate();
-                    if (table != null) {
-                        attributes.addAll(table.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet()));
-                    }
+        List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(), entity);
+        if (CollectionUtils.isNotEmpty(dataFeedTasks)) {
+            dataFeedTasks.stream().forEach(dataFeedTask -> {
+                Table table = dataFeedTask.getImportTemplate();
+                if (table != null) {
+                    attributes.addAll(table.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet()));
                 }
             });
         }
