@@ -151,7 +151,6 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
         public Builder userId(String userId) {
             cdlModelWorkflowBuilder.userId(userId);
             configuration.setUserId(userId);
-            generateAIRating.userId(userId);
             return this;
         }
 
@@ -428,7 +427,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             exportScoreTrainingFile.setExportInclusionColumns(exportInclusionColumns);
             return this;
         }
-        
+
         public CrossSellImportMatchAndModelWorkflowConfiguration build() {
             exportBucketTool.setUsingDisplayName(Boolean.FALSE);
             generateAIRating.saveBucketMetadata();
