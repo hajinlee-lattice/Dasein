@@ -34,6 +34,8 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.utils.TestRetryUtils;
@@ -133,7 +135,9 @@ public class CampaignLaunchTriggerServiceImplDeploymentTestNG extends CDLDeploym
         Assert.assertNotNull(lookupIdMap2);
 
         playLaunchChannel1 = createPlayLaunchChannel(play, lookupIdMap1);
+        playLaunchChannel1.setChannelConfig(new SalesforceChannelConfig());
         playLaunchChannel2 = createPlayLaunchChannel(play, lookupIdMap2);
+        playLaunchChannel2.setChannelConfig(new MarketoChannelConfig());
         playLaunchChannel1.setIsAlwaysOn(true);
         playLaunchChannel2.setIsAlwaysOn(true);
         playLaunchChannelEntityMgr.create(playLaunchChannel1);
