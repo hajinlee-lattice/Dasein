@@ -230,11 +230,13 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
 
     private void initializeModelGuidToOriginalBucketMetadataMap(List<RatingModelContainer> models) {
         Map<String, List<BucketMetadata>> bucketMetadataMap = new HashMap<>();
-        for (RatingModelContainer container: models) {
-            List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
-            if ((container.getModel() instanceof AIModel) && CollectionUtils.isNotEmpty(bucketMetadata)) {
-                AIModel aiModel = (AIModel) container.getModel();
-                bucketMetadataMap.put(aiModel.getModelSummaryId(), bucketMetadata);
+        if (CollectionUtils.isNotEmpty(models)) {
+            for (RatingModelContainer container : models) {
+                List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
+                if ((container.getModel() instanceof AIModel) && CollectionUtils.isNotEmpty(bucketMetadata)) {
+                    AIModel aiModel = (AIModel) container.getModel();
+                    bucketMetadataMap.put(aiModel.getModelSummaryId(), bucketMetadata);
+                }
             }
         }
         WorkflowStaticContext.putObject(ORIGINAL_BUCKET_METADATA, bucketMetadataMap);
