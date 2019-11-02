@@ -309,7 +309,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } else {
             if (hasSparkPartition) {
                 log.info("convert spark partition directory {} to table", avroDir);
-                table = MetadataConverter.getTableFromDir(yarnConfiguration, avscPath,
+                table = MetadataConverter.getTableFromDir(yarnConfiguration, avroDir,
                         tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey(), count != null);
             } else {
                 // get table by glob
