@@ -4,7 +4,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DnBBatchMatchContext {
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+
+public class DnBBatchMatchContext extends DnBMatchContextBase implements Fact, Dimension {
 
     private String rootOperationUid;
 

@@ -115,7 +115,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
                         + " serviceId=" + batchContext.getServiceBatchId());
                 return batchContext;
             }
-            dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
+            dnBAuthenticationService.requestToken(DnBKeyType.BATCH, batchContext.getToken());
         }
         log.error("Failed to submit batched request due to invalid token and failed to refresh");
         return batchContext;
@@ -185,6 +185,11 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     @Override
     protected String getResultIdPath() {
         return batchResultIdXpath;
+    }
+
+    @Override
+    protected void updateTokenInContext(DnBBatchMatchContext context, String token) {
+        context.setToken(token);
     }
 
     private String constructBulkRequestBody(DnBBatchMatchContext batchContext) {
