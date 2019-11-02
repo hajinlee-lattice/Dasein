@@ -436,11 +436,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (BusinessEntity.Account.name().equals(entity)) {
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
             validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit);
-        } else if (BusinessEntity.Contact.equals(entity)) {
+        } else if (BusinessEntity.Contact.name().equals(entity)) {
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
             validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit);
         }
-
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
         // compare type, require flag between template and standard schema
         checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch, validations);
@@ -452,18 +451,19 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> attributes = new HashSet<>();
         List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(), entity);
         if (CollectionUtils.isNotEmpty(dataFeedTasks)) {
-            dataFeedTasks.stream().forEach(dataFeedTask -> {
+            for (DataFeedTask dataFeedTask : dataFeedTasks) {
                 Table table = dataFeedTask.getImportTemplate();
                 if (table != null) {
                     attributes.addAll(table.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet()));
                 }
-            });
+            }
         }
         AttrConfigRequest configRequest = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace.toString(), BusinessEntity.getByName(entity), true);
         Set<String> inactiveNames = configRequest.getAttrConfigs().stream().filter(config -> !AttrState.Active.equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
                 .map(AttrConfig::getAttrName).collect(Collectors.toSet());
         attributes.addAll(generatedTemplate.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet()));
-        int fieldSize = attributes.size() - inactiveNames.size();
+        attributes = attributes.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
+        int fieldSize = attributes.size();
         ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
     }
 
