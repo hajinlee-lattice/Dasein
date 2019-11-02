@@ -310,6 +310,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         // modify field document before final validation
         Table templateTable = null;
         if (dataFeedTask != null) {
@@ -432,13 +433,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
         FieldValidationResult fieldValidationResult = new FieldValidationResult();
         int limit;
-        List<DataFeedTask> dataFeedTasks;
         if (BusinessEntity.Account.name().equals(entity)) {
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
-            validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit);
+            validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit, enableEntityMatch, enableEntityMatchGA);
         } else if (BusinessEntity.Contact.name().equals(entity)) {
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
-            validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit);
+            validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit, enableEntityMatch, enableEntityMatchGA);
         }
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
         // compare type, require flag between template and standard schema
@@ -447,7 +447,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return fieldValidationResult;
     }
 
-    private void validateFieldSize(FieldValidationResult fieldValidationResult, CustomerSpace customerSpace, String entity, Table generatedTemplate, int limit) {
+    private void validateFieldSize(FieldValidationResult fieldValidationResult, CustomerSpace customerSpace, String entity, Table generatedTemplate,
+                                   int limit, boolean enableEntityMatch, boolean enableEntityMatchGA) {
         Set<String> attributes = new HashSet<>();
         List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(), entity);
         if (CollectionUtils.isNotEmpty(dataFeedTasks)) {
@@ -461,7 +462,24 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         AttrConfigRequest configRequest = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace.toString(), BusinessEntity.getByName(entity), true);
         Set<String> inactiveNames = configRequest.getAttrConfigs().stream().filter(config -> !AttrState.Active.equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
                 .map(AttrConfig::getAttrName).collect(Collectors.toSet());
-        attributes.addAll(generatedTemplate.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet()));
+        // needs to convert AccountId or ContactId mapping
+        Boolean convertName = false;
+        if (enableEntityMatchGA && !enableEntityMatch) {
+            convertName = true;
+        }
+        for (Attribute attribute : generatedTemplate.getAttributes()) {
+            if (convertName) {
+                if (InterfaceName.AccountId.name().equals(attribute.getName())) {
+                    attributes.add(InterfaceName.CustomerAccountId.name());
+                } else if (InterfaceName.ContactId.name().equals(attribute.getName())) {
+                    attributes.add(InterfaceName.CustomerContactId.name());
+                } else {
+                    attributes.add(attribute.getName());
+                }
+            } else {
+                attributes.add(attribute.getName());
+            }
+        }
         attributes = attributes.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
         int fieldSize = attributes.size();
         ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
