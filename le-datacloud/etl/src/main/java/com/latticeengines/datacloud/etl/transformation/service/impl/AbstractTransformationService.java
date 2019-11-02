@@ -273,9 +273,11 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
             String workflowDir, Long count) {
         String finalWorkflowDir = finalWorkflowOuputDir(workflowDir, progress);
+        boolean sparkPartitionUsed = hasSparkPartitionDir(finalWorkflowDir);
+        log.info("Spark partition used for transformation = {}", sparkPartitionUsed);
         // extract schema
         try {
-            extractSchema(source, schema, version, finalWorkflowDir);
+            extractSchema(source, schema, version, finalWorkflowDir, sparkPartitionUsed);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.", e);
             return false;
@@ -294,8 +296,6 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
             log.info(String.format("Moving files from %s to %s", finalWorkflowDir, sourceDir));
             int cnt = 0;
-            boolean sparkPartitionUsed = hasSparkPartitionDir(finalWorkflowDir);
-            log.info("Spark partition used for transformation = {}", sparkPartitionUsed);
             if (sparkPartitionUsed) {
                 cnt = copySparkPartitionFiles(finalWorkflowDir, sourceDir);
             } else {
@@ -382,7 +382,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return HdfsPathBuilder.dateFormat.format(progress.getCreateTime());
     }
 
-    protected void extractSchema(Source source, Schema schema, String version, String avroDir) throws Exception {
+    protected void extractSchema(Source source, Schema schema, String version, String avroDir,
+            boolean sparkPartitionUsed) throws Exception {
         String avscPath;
         if (source instanceof TableSource) {
             TableSource tableSource = (TableSource) source;
@@ -395,7 +396,20 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }
 
-        Schema parsedSchema = AvroParquetUtils.parseAvroSchemaInDirectory(yarnConfiguration, avroDir);
+        Schema parsedSchema = null;
+        if (sparkPartitionUsed) {
+            parsedSchema = AvroParquetUtils.parseAvroSchemaInDirectory(yarnConfiguration, avroDir);
+        } else {
+            List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration,
+                    avroDir + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_EXTENSION);
+            if (files.size() > 0) {
+                String avroPath = files.get(0);
+                parsedSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+            } else {
+                throw new IllegalStateException("No avro file found at " + avroDir);
+            }
+        }
+
         if (schema != null) {
             verifySchemaCorrectness(parsedSchema, schema);
             log.info("Saving provided schema at " + avscPath);

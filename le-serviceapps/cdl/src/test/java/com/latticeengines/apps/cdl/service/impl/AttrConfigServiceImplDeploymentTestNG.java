@@ -180,8 +180,10 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void verifySystemID(AttrConfig attrConfig) {
-        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Subcategory).getSystemValue().toString(), "Account ID");
-        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getSystemValue().toString(), "DefaultSystem_Account_ID");
+        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Subcategory).getSystemValue().toString(),
+                Category.SUB_CAT_ACCOUNT_IDS);
+        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getSystemValue().toString(),
+                "DefaultSystem Account ID");
     }
 
     private String getMyAttributesPartition(String attrName, boolean entityMatchEnabled) {
