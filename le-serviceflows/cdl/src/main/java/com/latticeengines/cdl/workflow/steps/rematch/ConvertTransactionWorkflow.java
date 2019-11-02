@@ -21,10 +21,14 @@ public class ConvertTransactionWorkflow extends AbstractWorkflow<ConvertTransact
     @Inject
     private ConvertBatchStoreToImportWrapper convertBatchStoreToImportWrapper;
 
+    @Inject
+    private DeleteByUploadStepWrapper deleteByUploadStepWrapper;
+
     @Override
     public Workflow defineWorkflow(ConvertTransactionWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(convertBatchStoreToImportWrapper)
+                .next(deleteByUploadStepWrapper)
                 .build();
     }
 }

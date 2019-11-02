@@ -166,6 +166,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void updateBucketMetadata() {
+        // TODO: clean up isTargetScoreDerivationEnabled=FALSE code path
         if (!getConfiguration().isTargetScoreDerivationEnabled()) {
             Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = getMapObjectFromContext(//
                     BUCKETED_SCORE_SUMMARIES_AGG, String.class, BucketedScoreSummary.class);
@@ -196,6 +197,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void processMetadata(String modelGuid, List<BucketMetadata> bucketMetadata, String engineId) {
+        // TODO: clean up isTargetScoreDerivationEnabled=FALSE code path
         if (getConfiguration().isTargetScoreDerivationEnabled()) {
             processMetadataWithTargetScoreDerivationEnabled(modelGuid, bucketMetadata, engineId);
         } else {
@@ -205,7 +207,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     private void processMetadataWithTargetScoreDerivationEnabled(String modelGuid, List<BucketMetadata> bucketMetadata,
             String engineId) {
-        if (bucketMetadata.get(0).getOrigCreationTimestamp() != null && bucketMetadata.get(0).getCreationTimestamp() == bucketMetadata.get(0).getOrigCreationTimestamp()) {
+        if (bucketMetadata.get(0).getOrigCreationTimestamp() != null && //
+                bucketMetadata.get(0).getCreationTimestamp() == bucketMetadata.get(0).getOrigCreationTimestamp()) {
             createMetadataForPublish(modelGuid, bucketMetadata, engineId);
         } else {
             log.info("Updating bucket metadata for modelGUID=" + modelGuid + " : "

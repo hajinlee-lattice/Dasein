@@ -224,6 +224,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         return false;
     }
 
+
     private List<TransformationStepConfig> getUpgradeSteps(boolean noImports) {
         if (noImports) { // then there must have soft delete actions. Else there will be exception when init.
             softDeleteMergeStep = 0;
@@ -239,6 +240,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             steps.add(softDelete);
             steps.add(dayPeriodsAgain);
             steps.add(dailyPartitionAgain);
+
             return steps;
 
         } else {
@@ -324,6 +326,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             steps.add(softDelete);
             steps.add(dayPeriodsAgain);
             steps.add(dailyPartitionAgain);
+
             return steps;
         } else {
             dailyStep = 0;

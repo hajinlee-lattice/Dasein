@@ -21,10 +21,14 @@ public class ConvertContactWorkflow extends AbstractWorkflow<ConvertContactWorkf
     @Inject
     private ConvertBatchStoreToImportWrapper convertBatchStoreToImportWrapper;
 
+    @Inject
+    private DeleteByUploadStepWrapper deleteByUploadStepWrapper;
+
     @Override
     public Workflow defineWorkflow(ConvertContactWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(convertBatchStoreToImportWrapper)
+                .next(deleteByUploadStepWrapper)
                 .build();
     }
 }

@@ -16,21 +16,25 @@ public class ConvertContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 new ConvertContactWorkflowConfiguration();
         private ConvertBatchStoreStepConfiguration convertBatchStoreStepConfiguration =
                 new ConvertBatchStoreStepConfiguration();
+        private DeleteByUploadStepConfiguration deleteByUploadStepConfiguration = new DeleteByUploadStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             convertBatchStoreStepConfiguration.setCustomerSpace(customerSpace);
+            deleteByUploadStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             convertBatchStoreStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            deleteByUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder setSkipStep(boolean skipStep) {
             convertBatchStoreStepConfiguration.setSkipStep(skipStep);
+            deleteByUploadStepConfiguration.setSkipStep(skipStep);
             return this;
         }
 
@@ -46,7 +50,9 @@ public class ConvertContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.setContainerConfiguration("convertContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             convertBatchStoreStepConfiguration.setEntity(BusinessEntity.Contact);
+            deleteByUploadStepConfiguration.setEntity(BusinessEntity.Contact);
             configuration.add(convertBatchStoreStepConfiguration);
+            configuration.add(deleteByUploadStepConfiguration);
             return configuration;
         }
     }

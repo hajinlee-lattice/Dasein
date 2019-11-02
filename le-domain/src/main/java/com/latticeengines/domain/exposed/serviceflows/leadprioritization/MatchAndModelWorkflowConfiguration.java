@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.R
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportBucketToolStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
@@ -53,7 +52,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         private ModelWorkflowConfiguration.Builder modelWorkflowBuilder = new ModelWorkflowConfiguration.Builder();
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private RTSBulkScoreWorkflowConfiguration.Builder rtsBulkScoreWorkflowBuilder = new RTSBulkScoreWorkflowConfiguration.Builder();
-        private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportBucketToolStepConfiguration export = new ExportBucketToolStepConfiguration();
         private ImportExportS3StepConfiguration modelExportToS3 = new ImportExportS3StepConfiguration();
@@ -67,7 +65,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             rtsBulkScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
-            computeLift.setMicroServiceHostPort(microServiceHostPort);
             modelExportToS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -97,7 +94,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             setConfigForScoring.setCustomerSpace(customerSpace);
             rtsBulkScoreWorkflowBuilder.customer(customerSpace);
             pivotScoreAndEvent.setCustomer(customerSpace.toString());
-            computeLift.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             modelExportToS3.setCustomerSpace(customerSpace);
             return this;
@@ -135,7 +131,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public Builder userId(String userId) {
-            computeLift.setUserId(userId);
             modelWorkflowBuilder.userId(userId);
             return this;
         }
@@ -354,8 +349,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             configuration.setContainerConfiguration("modelAndEmailWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             export.setUsingDisplayName(Boolean.FALSE);
-            computeLift.setScoreField(InterfaceName.Event.name());
-            computeLift.setSaveBucketMetadata(Boolean.TRUE);
             pivotScoreAndEvent.setSaveBucketMetadata(Boolean.TRUE);
             pivotScoreAndEvent.setScoreField(InterfaceName.Event.name());
 
@@ -366,7 +359,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             configuration.add(addStandardAttributes);
             configuration.add(resolveAttributes);
             configuration.add(setConfigForScoring);
-            configuration.add(computeLift);
             configuration.add(pivotScoreAndEvent);
             configuration.add(export);
             configuration.add(modelExportToS3);
