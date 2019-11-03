@@ -151,6 +151,10 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
             playLaunch.setAddAccountsTable(
                     handleTable(playLaunch.getAddAccountsTable(), playLaunch.getLaunchId(), "AddAccounts"));
         }
+        if (StringUtils.isNotBlank(playLaunch.getCompleteContactsTable())) {
+            playLaunch.setCompleteContactsTable(
+                    handleTable(playLaunch.getCompleteContactsTable(), playLaunch.getLaunchId(), "CompleteContacts"));
+        }
         if (StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable())) {
             playLaunch.setRemoveAccountsTable(
                     handleTable(playLaunch.getRemoveAccountsTable(), playLaunch.getLaunchId(), "RemoveAccounts"));

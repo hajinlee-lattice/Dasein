@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 public class PlayUtils {
 
     public static final String ADDED_ACCOUNTS_DELTA_TABLE = "added-accounts-delta-table";
+    public static final String COMPLETE_CONTACTS_TABLE = "complete-contacts-table";
     public static final String REMOVED_ACCOUNTS_DELTA_TABLE = "removed-accounts-delta-table";
     public static final String ADDED_CONTACTS_DELTA_TABLE = "added-contacts-delta-table";
     public static final String REMOVED_CONTACTS_DELTA_TABLE = "removed-contacts-delta-table";

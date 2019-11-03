@@ -31,5 +31,6 @@ public interface PlayLaunchChannelService {
     PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel);
 
     PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel, String addAccountTable,
-            String removeAccountsTable, String addContactsTable, String removeContactsTable, boolean autoLaunch);
+            String completeContactsTable, String removeAccountsTable, String addContactsTable,
+            String removeContactsTable, boolean autoLaunch);
 }

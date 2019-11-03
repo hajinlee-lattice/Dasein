@@ -16,10 +16,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.QueuePlayLaunches
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-@Component("queuePlayLaunchesStep")
+@Component("queuePlayLaunches")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesStepConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(QueuePlayLaunchesStep.class);
+public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(QueuePlayLaunches.class);
 
     @Inject
     private PlayProxy playProxy;
@@ -45,6 +45,7 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
                     configuration.getPlayId(), configuration.getLaunchId());
             if (launch != null && launch.getLaunchState() == LaunchState.UnLaunched) {
                 launch.setAddAccountsTable(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class));
+                launch.setCompleteContactsTable(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class));
                 launch.setAddContactsTable(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class));
                 launch.setRemoveAccountsTable(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class));
                 launch.setRemoveContactsTable(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
@@ -73,6 +74,7 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
         PlayLaunch launch = playProxy.queueNewLaunchByPlayAndChannel(configuration.getCustomerSpace().toString(),
                 configuration.getPlayId(), configuration.getChannelId(),
                 getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class),
+                getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class),
                 getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class),
                 getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class),
                 getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class), true);
@@ -83,6 +85,10 @@ public class QueuePlayLaunchesStep extends BaseWorkflowStep<QueuePlayLaunchesSte
         return (StringUtils.isNotBlank(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class))
                 ? ("AddedAccounts: " + getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class))
                 : "") //
+                + (StringUtils.isNotBlank(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class))
+                        ? ("AddedCompleteContacts: "
+                                + getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class))
+                        : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
                         ? ("AddedAccounts: " + getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
                         : "") //

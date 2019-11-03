@@ -122,6 +122,10 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         throw new NullPointerException("LivySession not initialized.");
     }
 
+    protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
+        return getEntityQueryData(frontEndQuery, false);
+    }
+
     protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery, boolean preservePageFilters) {
         setCustomerSpace();
 

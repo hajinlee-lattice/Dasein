@@ -56,7 +56,6 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.spark.exposed.job.cdl.AccountContactExportJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
-
 @Component("extractAtlasEntity")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfiguration> {
@@ -141,7 +140,9 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     }
 
     private void addPathToDeletePath(List<String> files, Map<ExportEntity, HdfsDataUnit> outputUnits) {
-        files.addAll(outputUnits.values().stream().map(hdfsDataUnit -> hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/"))).collect(Collectors.toList()));
+        files.addAll(outputUnits.values().stream()
+                .map(hdfsDataUnit -> hdfsDataUnit.getPath().substring(0, hdfsDataUnit.getPath().lastIndexOf("/")))
+                .collect(Collectors.toList()));
     }
 
     private AtlasExport buildAtlasExport() {
@@ -153,7 +154,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     }
 
     private AccountContactExportConfig generateAccountAndContactExportConfig(HdfsDataUnit accountDataUnit,
-                                                                             HdfsDataUnit contactDataUnit) {
+            HdfsDataUnit contactDataUnit) {
         AccountContactExportConfig accountContactExportConfig = new AccountContactExportConfig();
         accountContactExportConfig.setWorkspace(getRandomWorkspace());
         if (contactDataUnit != null) {
@@ -162,7 +163,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             accountContactExportConfig.setInput(Collections.singletonList(accountDataUnit));
         }
         accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
-        accountContactExportConfig.getAccountContactExportContext().setJoinKey(entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name());
+        accountContactExportConfig.getAccountContactExportContext().setJoinKey(
+                entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name());
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
     }
@@ -220,7 +222,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return attrRepo;
     }
 
-    private void addAcoountId(BusinessEntity businessEntity, List<List<ColumnMetadata>> metadataList, String accountId) {
+    private void addAcoountId(BusinessEntity businessEntity, List<List<ColumnMetadata>> metadataList,
+            String accountId) {
         ColumnMetadata columnMetadata = new ColumnMetadata();
         columnMetadata.setCategory(Category.ACCOUNT_ATTRIBUTES);
         columnMetadata.setAttrName(accountId);
@@ -229,7 +232,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         metadataList.get(Category.ACCOUNT_ATTRIBUTES.getOrder()).add(columnMetadata);
     }
 
-    private void addContactId(BusinessEntity businessEntity, List<List<ColumnMetadata>> metadataList, String contactId) {
+    private void addContactId(BusinessEntity businessEntity, List<List<ColumnMetadata>> metadataList,
+            String contactId) {
         ColumnMetadata columnMetadata = new ColumnMetadata();
         columnMetadata.setCategory(Category.CONTACT_ATTRIBUTES);
         columnMetadata.setAttrName(contactId);
@@ -240,7 +244,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
 
     private List<Lookup> convertToLookup(List<List<ColumnMetadata>> columnMetadataList) {
         List<Lookup> lookups = new ArrayList<>();
-        columnMetadataList.stream().forEach(cms -> cms.forEach(cm -> {
+        columnMetadataList.forEach(cms -> cms.forEach(cm -> {
             lookups.add(new AttributeLookup(cm.getEntity(), cm.getAttrName()));
         }));
         return lookups;
@@ -296,7 +300,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
 
     // sort display name for look up
     private void sortAttribute(List<List<ColumnMetadata>> columnMetadataList) {
-        columnMetadataList.stream().forEach(cms -> cms.sort((cm1, cm2) -> {
+        columnMetadataList.forEach(cms -> cms.sort((cm1, cm2) -> {
             String displayName1 = cm1.getDisplayName();
             if (StringUtils.isEmpty(displayName1)) {
                 return -1;
@@ -322,7 +326,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         }
         log.info("Going to export " + lookups.size() + " columns for " + exportEntity);
         frontEndQuery.setLookups(lookups);
-        return getEntityQueryData(frontEndQuery, false);
+        return getEntityQueryData(frontEndQuery);
     }
 
     private boolean isEntityValid(BusinessEntity mainEntity) {
@@ -359,4 +363,3 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     }
 
 }
-

@@ -2,8 +2,12 @@ package com.latticeengines.cdl.workflow.steps.campaign;
 
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +40,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
-@Component("calculateDeltaStep")
+@Component("calculateDelta")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(CalculateDeltaStep.class);
@@ -117,7 +121,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 channel.getChannelConfig().isSuppressAccountsWithoutContacts());
 
         // 3) Generate Metadata tables for delta results
-        processDeltaCalculationResult(channel.getChannelConfig().getAudienceType(), deltaCalculationResult, config);
+        processDeltaCalculationResult(channel.getChannelConfig().getAudienceType(), deltaCalculationResult);
     }
 
     private SparkJobResult executeSparkJob(HdfsDataUnit previousLaunchUniverse, HdfsDataUnit currentLaunchUniverse,
@@ -144,60 +148,48 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     }
 
-    private void processDeltaCalculationResult(AudienceType audienceType, SparkJobResult deltaCalculationResult,
-            CalculateDeltaStepConfiguration config) {
+    private void processDeltaCalculationResult(AudienceType audienceType, SparkJobResult deltaCalculationResult) {
+        CalculateDeltaStepConfiguration config = getConfiguration();
 
-        if (audienceType == AudienceType.ACCOUNTS) {
-            HdfsDataUnit addedAccounts = deltaCalculationResult.getTargets().get(0);
-            if (addedAccounts != null && addedAccounts.getCount() > 0) {
-                processHDFSDataUnit("AddedAccounts_" + config.getExecutionId(), addedAccounts,
-                        InterfaceName.AccountId.name(), ADDED_ACCOUNTS_DELTA_TABLE);
-            } else {
-                log.info("No new Added accounts");
-            }
-
-            HdfsDataUnit removedAccounts = deltaCalculationResult.getTargets().get(1);
-            if (removedAccounts != null && removedAccounts.getCount() > 0) {
-                processHDFSDataUnit("RemovedAccounts_" + config.getExecutionId(), removedAccounts,
-                        InterfaceName.AccountId.name(), REMOVED_ACCOUNTS_DELTA_TABLE);
-            } else {
-                log.info("No removed accounts");
-            }
-
-            HdfsDataUnit fullAccountUniverse = deltaCalculationResult.getTargets().get(2);
-            processHDFSDataUnit("FullAccountUniverse_" + config.getExecutionId(), fullAccountUniverse,
-                    InterfaceName.AccountId.name(), FULL_ACCOUNTS_UNIVERSE);
+        HdfsDataUnit positiveDelta = deltaCalculationResult.getTargets().get(0);
+        if (positiveDelta != null && positiveDelta.getCount() > 0) {
+            processHDFSDataUnit(
+                    String.format("Added%ss_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
+                    positiveDelta, audienceType.getInterfaceName(),
+                    getAddDeltaTableContextKeyByAudienceType(audienceType));
+        } else {
+            log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
         }
 
-        if (audienceType == AudienceType.CONTACTS) {
-            HdfsDataUnit addedContacts = deltaCalculationResult.getTargets().get(0);
-            if (addedContacts != null && addedContacts.getCount() > 0) {
-                processHDFSDataUnit("AddedContacts_" + config.getExecutionId(), addedContacts,
-                        InterfaceName.ContactId.name(), ADDED_CONTACTS_DELTA_TABLE);
-            } else {
-                log.info("No new contacts to be added");
-            }
-
-            HdfsDataUnit removedContacts = deltaCalculationResult.getTargets().get(1);
-            if (removedContacts != null && removedContacts.getCount() > 0) {
-                processHDFSDataUnit("RemovedContacts_" + config.getExecutionId(), removedContacts,
-                        InterfaceName.ContactId.name(), REMOVED_CONTACTS_DELTA_TABLE);
-            } else {
-                log.info("No removed contacts");
-            }
-
-            HdfsDataUnit fullContactUniverse = deltaCalculationResult.getTargets().get(2);
-            processHDFSDataUnit("FullContactUniverse_" + config.getExecutionId(), fullContactUniverse,
-                    InterfaceName.ContactId.name(), FULL_CONTACTS_UNIVERSE);
+        HdfsDataUnit negativeDelta = deltaCalculationResult.getTargets().get(1);
+        if (negativeDelta != null && negativeDelta.getCount() > 0) {
+            processHDFSDataUnit(
+                    String.format("Removed%ss_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
+                    negativeDelta, audienceType.getInterfaceName(),
+                    getRemoveDeltaTableContextKeyByAudienceType(audienceType));
+        } else {
+            log.info(String.format("No %ss to be removed", audienceType.asBusinessEntity().name()));
         }
 
+        HdfsDataUnit fullUniverse = deltaCalculationResult.getTargets().get(2);
+        processHDFSDataUnit(
+                String.format("Full%sUniverse_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
+                fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType));
     }
 
+    @SuppressWarnings("unchecked")
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
         log.info(logHDFSDataUnit(tableName, dataUnit));
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         putObjectInContext(contextKey, tableName);
+        putObjectInContext(contextKey + ATLAS_EXPORT_DATA_UNIT, dataUnit);
+        Map<String, Long> counts = getObjectFromContext(DELTA_TABLE_COUNTS, Map.class);
+        if (MapUtils.isEmpty(counts)) {
+            counts = new HashMap<>();
+        }
+        counts.put(contextKey, dataUnit.getCount());
+
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
@@ -211,6 +203,39 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSeparator //
                 + "Path: " + valueSeparator + dataUnit.getPath() + tokenSeparator //
                 + "Count: " + valueSeparator + dataUnit.getCount();
+    }
+
+    private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return ADDED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return ADDED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
+        }
+    }
+
+    private String getRemoveDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return REMOVED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return REMOVED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
+        }
+    }
+
+    private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return FULL_ACCOUNTS_UNIVERSE;
+        case CONTACTS:
+            return FULL_CONTACTS_UNIVERSE;
+        default:
+            return null;
+        }
     }
 
     @Override
