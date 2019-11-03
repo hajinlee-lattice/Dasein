@@ -256,6 +256,25 @@ public class MatchHistory implements HasId<String> {
     private String businessEntity;
 
     @Nullable
+    @AvroName("AllocateIdMode")
+    private Boolean allocateIdMode;
+
+    // Map: entity --> original customer provided preferred ID
+    @Nullable
+    @AvroName("RawPreferredEntityIds")
+    private Map<String, String> rawPreferredEntityIds;
+
+    // Map: entity --> processed customer provided preferred ID
+    @Nullable
+    @AvroName("StandardisedPreferredEntityIds")
+    private Map<String, String> standardisedPreferredEntityIds;
+
+    // Map: entity --> result of whether preferred ID was used
+    @Nullable
+    @AvroName("PreferredEntityIdOutcomes")
+    private Map<String, String> preferredEntityIdOutcomes;
+
+    @Nullable
     @AvroName("EntityMatched")
     private String entityMatched;
 
@@ -1198,6 +1217,46 @@ public class MatchHistory implements HasId<String> {
     }
 
     @Union({})
+    public void setAllocateIdMode(Boolean allocateIdMode) {
+        this.allocateIdMode = allocateIdMode;
+    }
+
+    @Union({})
+    public Boolean isAllocateIdMode() {
+        return allocateIdMode;
+    }
+
+    @Union({})
+    public void setRawPreferredEntityIds(Map<String, String> rawPreferredEntityIds) {
+        this.rawPreferredEntityIds = rawPreferredEntityIds;
+    }
+
+    @Union({})
+    public Map<String, String> getRawPreferredEntityIds() {
+        return rawPreferredEntityIds;
+    }
+
+    @Union({})
+    public void setStandardisedPreferredEntityIds(Map<String, String> standardisedPreferredEntityIds) {
+        this.standardisedPreferredEntityIds = standardisedPreferredEntityIds;
+    }
+
+    @Union({})
+    public Map<String, String> getStandardisedPreferredEntityIds() {
+        return standardisedPreferredEntityIds;
+    }
+
+    @Union({})
+    public void setPreferredEntityIdOutcomes(Map<String, String> preferredEntityIdOutcomes) {
+        this.preferredEntityIdOutcomes = preferredEntityIdOutcomes;
+    }
+
+    @Union({})
+    public Map<String, String> getPreferredEntityIdOutcomes() {
+        return preferredEntityIdOutcomes;
+    }
+
+    @Union({})
     public void setEntityMatched(String entityMatched) {
         this.entityMatched = entityMatched;
     }
@@ -1381,6 +1440,10 @@ public class MatchHistory implements HasId<String> {
     public MatchHistory setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
         if (entityMatchHistory != null) {
             businessEntity = entityMatchHistory.getBusinessEntity();
+            allocateIdMode = entityMatchHistory.isAllocateIdMode();
+            rawPreferredEntityIds = entityMatchHistory.getRawPreferredEntityIds();
+            standardisedPreferredEntityIds = entityMatchHistory.getStandardisedPreferredEntityIds();
+            preferredEntityIdOutcomes = entityMatchHistory.getPreferredEntityIdOutcomes();
             entityMatched = entityMatchHistory.getEntityMatched();
             entityId = entityMatchHistory.getEntityId();
             customerEntityId = entityMatchHistory.getCustomerEntityId();

@@ -555,7 +555,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         MatchInput input = jobConfigurations.get(0).getMatchInput();
         if (!EntityMatchUtils.shouldOutputNewEntities(input)) {
             log.info(
-                    "Should not ouput new entities. Skip merging block new entity result. "
+                    "Should not output new entities. Skip merging block new entity result. "
                             + "MatchInput(OperationalMode={},isAllocateId={},outputNewEntities={})",
                     input.getOperationalMode(), input.isAllocateId(), input.isOutputNewEntities());
             return;

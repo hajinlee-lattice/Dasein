@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -9,6 +10,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class EntityMatchHistory {
     @JsonProperty("BusinessEntity")
     private String businessEntity;
+
+    @JsonProperty("AllocateIdMode")
+    private Boolean allocateIdMode;
+
+    // Map: entity --> original customer provided preferred ID
+    @JsonProperty("RawPreferredEntityIds")
+    private Map<String, String> rawPreferredEntityIds;
+
+    // Map: entity --> processed customer provided preferred ID
+    @JsonProperty("StandardisedPreferredEntityIds")
+    private Map<String, String> standardisedPreferredEntityIds;
+
+    // Map: entity --> outcome of whether preferred ID was used
+    @JsonProperty("PreferredEntityIdOutcomes")
+    private Map<String, String> preferredEntityIdOutcomes;
 
     @JsonProperty("EntityMatched")
     private String entityMatched;
@@ -73,6 +89,38 @@ public class EntityMatchHistory {
 
     public String getBusinessEntity() {
         return businessEntity;
+    }
+
+    public void setAllocateIdMode(Boolean allocateIdMode) {
+        this.allocateIdMode = allocateIdMode;
+    }
+
+    public Boolean isAllocateIdMode() {
+        return allocateIdMode;
+    }
+
+    public void setRawPreferredEntityIds(Map<String, String> rawPreferredEntityIds) {
+        this.rawPreferredEntityIds = rawPreferredEntityIds;
+    }
+
+    public Map<String, String> getRawPreferredEntityIds() {
+        return rawPreferredEntityIds;
+    }
+
+    public void setStandardisedPreferredEntityIds(Map<String, String> standardisedPreferredEntityIds) {
+        this.standardisedPreferredEntityIds = standardisedPreferredEntityIds;
+    }
+
+    public Map<String, String> getStandardisedPreferredEntityIds() {
+        return standardisedPreferredEntityIds;
+    }
+
+    public void setPreferredEntityIdOutcomes(Map<String, String> preferredEntityIdOutcomes) {
+        this.preferredEntityIdOutcomes = preferredEntityIdOutcomes;
+    }
+
+    public Map<String, String> getPreferredEntityIdOutcomes() {
+        return preferredEntityIdOutcomes;
     }
 
     public void setEntityMatched(String entityMatched) {
