@@ -32,6 +32,7 @@ import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
+import com.latticeengines.datacloud.match.util.MatchHistoryUtils;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -179,9 +180,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // MatchPlannerMicroEngineActor into the InternalOutputRecord.
         copyFromEntityToInternalOutputRecord(traveler.getEntityMatchKeyRecord(), matchRecord);
 
-        // Need to copy information from MatchTraveler to a place where we can add it to
-        // MatchHistory.
-        matchRecord.setEntityMatchHistory(generateEntityMatchHistory(traveler));
+        EntityMatchHistory entityMatchHistory = generateEntityMatchHistory(traveler);
+        MatchHistoryUtils.processPreferredIds(matchRecord, traveler, entityMatchHistory);
+        // Need to copy information from MatchTraveler to a place where we can add it to MatchHistory.
+        matchRecord.setEntityMatchHistory(entityMatchHistory);
         if (StringUtils.isNotEmpty(result) && !DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(result)) {
             matchRecord.setMatched(true);
         }
@@ -429,6 +431,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
         history.setBusinessEntity(traveler.getMatchInput().getTargetEntity());
         log.debug("Business Entity: " + history.getBusinessEntity());
+
+        history.setAllocateIdMode(traveler.getMatchInput().isAllocateId());
+        log.debug("Allocate Id Mode: " + history.isAllocateIdMode());
 
         // Check if DUNS was a provided MatchKey and extract Input MatchKeys
         String inputDuns = getInputDunsAndPrintInputMatchKeys(traveler, history.getBusinessEntity());
@@ -905,9 +910,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
 
         if (MapUtils.isEmpty(traveler.getNewEntityIds())) {
-            log.debug("Found null or empty NewEntityIds Map in MatchTraveler");
+            log.debug("NewEntityIds are: null or empty");
         } else {
-            log.debug("NewEntityIds is: ");
+            log.debug("NewEntityIds are: ");
             for (Map.Entry<String, String> entry : traveler.getNewEntityIds().entrySet()) {
                 log.debug("    Entity: " + entry.getKey() + "  NewEntityId: " + entry.getValue());
             }
