@@ -112,6 +112,7 @@ public class MetadataConverter {
         }
 
         Extract extract = new Extract();
+        extract.setName("extract");
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             extract.setExtractionTimestamp(fs.getFileStatus(new Path(files.get(0))).getModificationTime());
         }
