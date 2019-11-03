@@ -463,10 +463,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> inactiveNames = configRequest.getAttrConfigs().stream().filter(config -> !AttrState.Active.equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
                 .map(AttrConfig::getAttrName).collect(Collectors.toSet());
         // needs to convert AccountId or ContactId mapping
-        Boolean convertName = false;
-        if (enableEntityMatchGA && !enableEntityMatch) {
-            convertName = true;
-        }
+        Boolean convertName = enableEntityMatchGA && !enableEntityMatch;
         for (Attribute attribute : generatedTemplate.getAttributes()) {
             if (convertName) {
                 if (InterfaceName.AccountId.name().equals(attribute.getName())) {
