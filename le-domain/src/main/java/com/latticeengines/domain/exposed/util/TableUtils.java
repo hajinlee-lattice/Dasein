@@ -18,9 +18,14 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public class TableUtils {
     public static Table clone(Table source, String name) {
+        return clone(source, name, false);
+    }
+
+    public static Table clone(Table source, String name, boolean ignoreExtracts) {
         Table clone = JsonUtils.clone(source);
         clone.setTableType(source.getTableType());
         clone.setName(name);
+        clone.setExtracts(ignoreExtracts ? null : clone.getExtracts());
         return clone;
     }
 
@@ -49,68 +54,58 @@ public class TableUtils {
                 fieldBuilder = fieldBuilder.prop("scale", attr.getScale().toString());
             }
             if (attr.getLogicalDataType() != null) {
-                fieldBuilder = fieldBuilder.prop("logicalType",
-                        attr.getLogicalDataType().toString());
+                fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType().toString());
             }
             if (attr.getNullable() != null) {
                 fieldBuilder = fieldBuilder.prop("Nullable", attr.getNullable().toString());
             }
             if (attr.getSourceLogicalDataType() != null) {
-                fieldBuilder = fieldBuilder.prop("sourceLogicalType",
-                        attr.getSourceLogicalDataType());
+                fieldBuilder = fieldBuilder.prop("sourceLogicalType", attr.getSourceLogicalDataType());
             }
             String groups = CollectionUtils.isNotEmpty(attr.getGroupsAsList())
-                    ? StringUtils.join(attr.getGroupsAsList(), ",") : null;
+                    ? StringUtils.join(attr.getGroupsAsList(), ",")
+                    : null;
             if (StringUtils.isNotBlank(groups)) {
                 fieldBuilder = fieldBuilder.prop("groups", groups);
             }
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
 
             for (Map.Entry<String, Object> entry : attr.getEntries()) {
-                fieldBuilder.prop(entry.getKey(),
-                        entry.getValue() == null ? "" : entry.getValue().toString());
+                fieldBuilder.prop(entry.getKey(), entry.getValue() == null ? "" : entry.getValue().toString());
             }
 
             if (attr.getCleanedUpEnumValues().size() > 0) {
-                fieldBuilder = fieldBuilder.prop("enumValues",
-                        attr.getCleanedUpEnumValuesAsString());
+                fieldBuilder = fieldBuilder.prop("enumValues", attr.getCleanedUpEnumValuesAsString());
             }
 
             Type type = getTypeFromPhysicalDataType(attr.getPhysicalDataType().toUpperCase());
 
             switch (type) {
-                case DOUBLE:
-                    fieldAssembler = fieldBuilder.type().unionOf().doubleType().and().nullType()
-                            .endUnion().noDefault();
-                    break;
-                case FLOAT:
-                    fieldAssembler = fieldBuilder.type().unionOf().floatType().and().nullType()
-                            .endUnion().noDefault();
-                    break;
-                case INT:
-                    fieldAssembler = fieldBuilder.type().unionOf().intType().and().nullType()
-                            .endUnion().noDefault();
-                    break;
-                case LONG:
-                    fieldAssembler = fieldBuilder.type().unionOf().longType().and().nullType()
-                            .endUnion().noDefault();
-                    break;
-                case STRING:
-                    fieldAssembler = fieldBuilder.type().unionOf().stringType().and().nullType()
-                            .endUnion().noDefault();
-                    break;
-                case BOOLEAN:
-                    fieldAssembler = fieldBuilder.type().unionOf().booleanType().and().nullType()
-                            .endUnion().noDefault();
-                    break;
-                case ENUM:
-                    String[] enumValues = new String[attr.getCleanedUpEnumValues().size()];
-                    attr.getCleanedUpEnumValues().toArray(enumValues);
-                    fieldAssembler = fieldBuilder.type().enumeration(attr.getName())
-                            .symbols(enumValues).noDefault();
-                    break;
-                default:
-                    break;
+            case DOUBLE:
+                fieldAssembler = fieldBuilder.type().unionOf().doubleType().and().nullType().endUnion().noDefault();
+                break;
+            case FLOAT:
+                fieldAssembler = fieldBuilder.type().unionOf().floatType().and().nullType().endUnion().noDefault();
+                break;
+            case INT:
+                fieldAssembler = fieldBuilder.type().unionOf().intType().and().nullType().endUnion().noDefault();
+                break;
+            case LONG:
+                fieldAssembler = fieldBuilder.type().unionOf().longType().and().nullType().endUnion().noDefault();
+                break;
+            case STRING:
+                fieldAssembler = fieldBuilder.type().unionOf().stringType().and().nullType().endUnion().noDefault();
+                break;
+            case BOOLEAN:
+                fieldAssembler = fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion().noDefault();
+                break;
+            case ENUM:
+                String[] enumValues = new String[attr.getCleanedUpEnumValues().size()];
+                attr.getCleanedUpEnumValues().toArray(enumValues);
+                fieldAssembler = fieldBuilder.type().enumeration(attr.getName()).symbols(enumValues).noDefault();
+                break;
+            default:
+                break;
             }
         }
         return fieldAssembler.endRecord();
@@ -125,17 +120,17 @@ public class TableUtils {
             return Type.STRING;
         }
         switch (dataType) {
-            case "BIT":
-                return Type.BOOLEAN;
-            case "BYTE":
-            case "SHORT":
-                return Type.INT;
-            case "DATE":
-            case "DATETIME":
-            case "DATETIMEOFFSET":
-                return Type.LONG;
-            default:
-                return Type.valueOf(dataType);
+        case "BIT":
+            return Type.BOOLEAN;
+        case "BYTE":
+        case "SHORT":
+            return Type.INT;
+        case "DATE":
+        case "DATETIME":
+        case "DATETIMEOFFSET":
+            return Type.LONG;
+        default:
+            return Type.valueOf(dataType);
         }
     }
 
@@ -159,8 +154,7 @@ public class TableUtils {
             }
             return avscPath + "*.avsc";
         } else {
-            throw new IllegalArgumentException(
-                    "The avro path does not match regex pattern " + pattern);
+            throw new IllegalArgumentException("The avro path does not match regex pattern " + pattern);
         }
     }
 

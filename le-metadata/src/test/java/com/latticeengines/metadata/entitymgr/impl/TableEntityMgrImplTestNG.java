@@ -93,7 +93,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         Table deserializedTable = JsonUtils.deserialize(serializedStr, Table.class);
         validateTable(deserializedTable);
     }
-    
+
     @Test(groups = "functional")
     public void testCountAttributes() {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace1));
@@ -113,13 +113,15 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         log.info("Attribute List Size for table {} - {} ", TABLE1, attributes.size());
         assertEquals(table.getAttributes().size(), attributes.size());
 
-        attributes = tableEntityMgr.findAttributesByTable_Pid(table.getPid(), PageRequest.of(0, CollectionUtils.size(attributes)));
+        attributes = tableEntityMgr.findAttributesByTable_Pid(table.getPid(),
+                PageRequest.of(0, CollectionUtils.size(attributes)));
         log.info("Attribute List Size for table {} - {} ", TABLE1, attributes.size());
         assertEquals(table.getAttributes().size(), attributes.size());
 
         List<Attribute> paginatedAttrs = new ArrayList<>();
-        IntStream.range(0,  (int)Math.ceil(attributes.size()/5.0)).forEach(page -> {
-            List<Attribute> currPage = tableEntityMgr.findAttributesByTable_Pid(table.getPid(), PageRequest.of(page, 5));
+        IntStream.range(0, (int) Math.ceil(attributes.size() / 5.0)).forEach(page -> {
+            List<Attribute> currPage = tableEntityMgr.findAttributesByTable_Pid(table.getPid(),
+                    PageRequest.of(page, 5));
             paginatedAttrs.addAll(currPage);
             log.info("Attribute List by page {} - {} - Results: {} ", page, currPage.size(), currPage);
         });
@@ -164,6 +166,29 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = { "findAll", "findByName" })
+    public void testClone(String customerSpace, String tableName) throws IOException {
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
+
+        Table table = tableEntityMgr.findByName(tableName);
+        String extractPath = "/tmp/data.txt";
+        HdfsUtils.writeToFile(yarnConfiguration, extractPath, "test data\ntest data");
+        Extract e1 = new Extract();
+        e1.setName("extract");
+        e1.setPath("/tmp/data.txt");
+        e1.setExtractionTimestamp(new Date().getTime());
+        e1.setProcessedRecords(2L);
+        tableEntityMgr.addExtract(table, e1);
+
+        Table clone = tableEntityMgr.clone(table.getName(), false);
+        assertFalse(CollectionUtils.isEmpty(clone.getExtracts()));
+        tableEntityMgr.deleteTableAndCleanupByName(clone.getName());
+
+        clone = tableEntityMgr.clone(table.getName(), true);
+        assertTrue(CollectionUtils.isEmpty(clone.getExtracts()));
+        tableEntityMgr.deleteTableAndCleanupByName(clone.getName());
+    }
+
+    @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = "testClone")
     public void deleteTableAndCleanup(String customerSpace, String tableName) throws IOException {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
 
