@@ -69,6 +69,9 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.CustomEventRatingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -85,6 +88,9 @@ public class RatingEngineEntityMgrImpl //
         implements RatingEngineEntityMgr, GraphVisitable {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImpl.class);
+
+    public static final String GET_ACTIVE_MODELS_WARNING_TITLE = "Warning";
+    public static final String GET_ACTIVE_MODELS_WARNING_MSG = "Too many Active Models.";
 
     @Inject
     private RatingEngineEntityMgrImpl _self;
@@ -250,12 +256,18 @@ public class RatingEngineEntityMgrImpl //
                 Long quotaLimit = ratingEngineService
                         .getActiveRatingEngineQuotaLimit(new CustomerSpace(space.getContractId(),
                                 space.getTenantId(), space.getSpaceId()));
+                Long countActiveModelsForTenant = ratingEngineService
+                        .getActiveRatingEnginesCount();
                 // Enforce quota limit
-                if (ratingEngineService.getActiveRatingEnginesCount() >= quotaLimit) {
+                if (countActiveModelsForTenant >= quotaLimit) {
+                    UIAction uiAction = new UIAction();
                     // throw exception
-                    throw new RuntimeException("Too many Active Models",
-                            new Throwable("There are already " + quotaLimit
-                                    + " Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model"));
+                    uiAction.setTitle(GET_ACTIVE_MODELS_WARNING_TITLE);
+                    uiAction.setView(View.Banner);
+                    uiAction.setStatus(Status.Warning);
+                    uiAction.setMessage(GET_ACTIVE_MODELS_WARNING_MSG);
+                    throw new LedpException(LedpCode.LEDP_40074, new String[] {
+                            countActiveModelsForTenant.toString(), quotaLimit.toString() });
                 }
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {
