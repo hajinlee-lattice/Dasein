@@ -114,6 +114,23 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             existingPlayLaunch.setMatchedCount(playLaunch.getMatchedCount());
         }
 
+        // Delta Launch Tables
+        if (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())) {
+            existingPlayLaunch.setAddAccountsTable(playLaunch.getAddAccountsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getCompleteContactsTable())) {
+            existingPlayLaunch.setCompleteContactsTable(playLaunch.getCompleteContactsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable())) {
+            existingPlayLaunch.setRemoveAccountsTable(playLaunch.getRemoveAccountsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getAddContactsTable())) {
+            existingPlayLaunch.setAddContactsTable(playLaunch.getAddContactsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
+            existingPlayLaunch.setRemoveContactsTable(playLaunch.getRemoveContactsTable());
+        }
+
         // TODO: Keeping here for backwards compatibility with UI, should go away after M32
         if (CollectionUtils.isNotEmpty(playLaunch.getBucketsToLaunch())) {
             existingPlayLaunch.setBucketsToLaunch(playLaunch.getBucketsToLaunch());

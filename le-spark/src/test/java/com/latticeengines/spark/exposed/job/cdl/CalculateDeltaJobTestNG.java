@@ -1,4 +1,4 @@
-package com.latticeengines.spark.exposed.job.common;
+package com.latticeengines.spark.exposed.job.cdl;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
-import com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJob;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
@@ -267,6 +266,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
 
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends ITestData> void createAvroFromJson(String fileName, String jsonPath, Schema schema,
             Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

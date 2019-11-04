@@ -16,14 +16,7 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
     @JsonProperty("JoinKey")
     private String joinKey;
 
-    @Override
-    @JsonProperty("Name")
-    public String getName() {
-        return NAME;
-    }
-
-    public CalculateDeltaJobConfig() {
-    }
+    public CalculateDeltaJobConfig() { }
 
     public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String joinKey, boolean filterJoinKeyNulls,
             String workSpace) {
@@ -32,6 +25,12 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
         this.oldData = oldData;
         this.joinKey = joinKey;
         this.filterJoinKeyNulls = filterJoinKeyNulls;
+    }
+
+    @Override
+    @JsonProperty("Name")
+    public String getName() {
+        return NAME;
     }
 
     @Override
