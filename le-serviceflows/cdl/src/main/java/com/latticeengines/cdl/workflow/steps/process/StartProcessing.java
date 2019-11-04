@@ -134,7 +134,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (migrationMode) {
             log.info("Tenant {} is marked as STARTED in migration table. Running with migration mode", customerSpace);
             verifyActiveDataCollectionVersion();
-            unlinkTables();
         }
 
         String tenantName = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
@@ -660,10 +659,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             log.error("Current active version for tenant {} doesn't match the one in migration table", customerSpace);
             throw new IllegalStateException(String.format("Current active data collection version not match for %s", customerSpace));
         }
-    }
-
-    private void unlinkTables() {
-        dataCollectionProxy.unlinkTables(customerSpace.toString(), activeVersion);
     }
 
     public static class RebuildEntitiesProvider {
