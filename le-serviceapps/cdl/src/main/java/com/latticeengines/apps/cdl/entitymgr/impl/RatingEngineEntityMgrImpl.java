@@ -253,9 +253,9 @@ public class RatingEngineEntityMgrImpl //
                 // Enforce quota limit
                 if (ratingEngineService.getActiveRatingEnginesCount() >= quotaLimit) {
                     // throw exception
-                    throw new RuntimeException("Too many Active Models",
-                            new Throwable("There are already " + quotaLimit
-                                    + " Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model"));
+                    throw new LedpException(LedpCode.LEDP_40074, new String[] { "There are already "
+                            + quotaLimit
+                            + " Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model" });
                 }
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {
