@@ -58,7 +58,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
 
-        cdlService.createS3ImportSystem(mainTestTenant.toString(), "Default", S3ImportSystem.SystemType.Other, false);
+        cdlService.createS3ImportSystem(mainTestTenant.getName(), "Default", S3ImportSystem.SystemType.Other, false);
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity.name()), entity.name(), csvFileName,
                 ClassLoader.getSystemResourceAsStream(localPath + csvFileName));
@@ -267,6 +267,11 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions("Default", "Test",
                 "Contacts", fileName,
                 false, currentFieldDefinitionRecord);
+        Map<String, List<FieldDefinition>> currentMap = currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
+        Assert.assertNotNull(currentMap);
+        if (currentMap.containsKey(FieldDefinitionSectionName.Match_To_Accounts_ID.getName())) {
+            currentMap.remove(FieldDefinitionSectionName.Match_To_Accounts_ID.getName());
+        }
         FetchFieldDefinitionsResponse  fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions("Default",
                 "Test", "Contacts", fileName);
         setValidateRequestFromFetchResponse(fetchResponse);
