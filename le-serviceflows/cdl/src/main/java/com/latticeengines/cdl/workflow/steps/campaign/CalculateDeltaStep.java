@@ -189,6 +189,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             counts = new HashMap<>();
         }
         counts.put(contextKey, dataUnit.getCount());
+        putObjectInContext(DELTA_TABLE_COUNTS, counts);
 
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
