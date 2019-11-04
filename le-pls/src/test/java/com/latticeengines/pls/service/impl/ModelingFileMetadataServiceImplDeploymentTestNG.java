@@ -264,14 +264,15 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     @Test(groups = "deployment", dependsOnMethods = "testFieldDefinitionValidate_noExistingTemplate")
     public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
-        FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions("Default", "Test",
-                "Contacts", fileName,
-                false, currentFieldDefinitionRecord);
         Map<String, List<FieldDefinition>> currentMap = currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
         Assert.assertNotNull(currentMap);
         if (currentMap.containsKey(FieldDefinitionSectionName.Match_To_Accounts_ID.getName())) {
             currentMap.remove(FieldDefinitionSectionName.Match_To_Accounts_ID.getName());
         }
+        FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions("Default", "Test",
+                "Contacts", fileName,
+                false, currentFieldDefinitionRecord);
+
         FetchFieldDefinitionsResponse  fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions("Default",
                 "Test", "Contacts", fileName);
         setValidateRequestFromFetchResponse(fetchResponse);
