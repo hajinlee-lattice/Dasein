@@ -16,6 +16,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRe
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.util.ImportWorkflowUtilsTestNG;
@@ -48,11 +50,15 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     @Inject
     private FileUploadService fileUploadService;
 
+    @Inject
+    private CDLService cdlService;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
 
+        cdlService.createS3ImportSystem(mainTestTenant.getName(), "Default", S3ImportSystem.SystemType.Other, false);
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity.name()), entity.name(), csvFileName,
                 ClassLoader.getSystemResourceAsStream(localPath + csvFileName));
@@ -258,9 +264,15 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     @Test(groups = "deployment", dependsOnMethods = "testFieldDefinitionValidate_noExistingTemplate")
     public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
+        Map<String, List<FieldDefinition>> currentMap = currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
+        Assert.assertNotNull(currentMap);
+        if (currentMap.containsKey(FieldDefinitionSectionName.Match_To_Accounts_ID.getName())) {
+            currentMap.remove(FieldDefinitionSectionName.Match_To_Accounts_ID.getName());
+        }
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions("Default", "Test",
                 "Contacts", fileName,
                 false, currentFieldDefinitionRecord);
+
         FetchFieldDefinitionsResponse  fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions("Default",
                 "Test", "Contacts", fileName);
         setValidateRequestFromFetchResponse(fetchResponse);
@@ -315,8 +327,6 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         createdDateDefinition.setDateFormat("MM.DD.YYYY");
         validateResponse = modelingFileMetadataService.validateFieldDefinitions("Default", "Text", "Contacts",
                 fileName, validateRequest);
-        System.out.println("1111" + JsonUtils.pprint(validateRequest));
-        System.out.println("2222" + JsonUtils.pprint(validateResponse));
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Analysis_Fields.getName(),
                 InterfaceName.CreatedDate.name(),
                 FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM.DD.YYYY which is not " +
