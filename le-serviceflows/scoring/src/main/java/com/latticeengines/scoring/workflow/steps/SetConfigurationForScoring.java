@@ -13,9 +13,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceUtil;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigura
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("setConfigurationForScoring")
@@ -34,6 +37,12 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private FeatureImportanceUtil featureImportanceUtil;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     public SetConfigurationForScoring() {
     }
@@ -90,6 +99,9 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
                 RatingModelContainer container = new RatingModelContainer(ratingModel, ratingEngineSummary,
                         BucketMetadataUtils.getDefaultMetadata());
                 putObjectInContext(ITERATION_RATING_MODELS, Collections.singletonList(container));
+
+                ModelSummary modelSummary = modelSummaryProxy.findValidByModelId(customerSpace, modelId);
+                putObjectInContext(SCORE_TRAINING_FILE_INCLUDED_FEATURES, featureImportanceUtil.getFeatureImportance(customerSpace, modelSummary).keySet());
 
                 putStringValueInContext(SCORING_MODEL_ID, modelGuid);
             }
