@@ -50,12 +50,12 @@ public class ImportSystemAttrsDecorator implements Decorator {
 
     @Override
     public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
-        return metadata.map(this::filter);
+        return metadata.map(this::process);
     }
 
     @Override
     public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
-        return metadata.map(this::filter);
+        return metadata.map(this::process);
     }
 
     @Override
@@ -63,17 +63,17 @@ public class ImportSystemAttrsDecorator implements Decorator {
         return "systemid-attrs";
     }
 
-    private ColumnMetadata filter(ColumnMetadata cm) {
+    private ColumnMetadata process(ColumnMetadata cm) {
         if (isAccountSystemId(cm)) {
-            return filterAccountSystemId(cm);
+            return processAccountSystemId(cm);
         } else if (isContactSystemId(cm)) {
-            return filterContactSystemId(cm);
+            return processContactSystemId(cm);
         } else {
             return cm;
         }
     }
 
-    private ColumnMetadata filterAccountSystemId(ColumnMetadata cm) {
+    private ColumnMetadata processAccountSystemId(ColumnMetadata cm) {
         if (BusinessEntity.Account.equals(cm.getEntity())) {
             Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(cm.getAttrName());
             cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
@@ -83,6 +83,9 @@ public class ImportSystemAttrsDecorator implements Decorator {
         return cm;
     }
 
+    // the original display name is the entity type's display name
+    // which is usually plural
+    // for now, removing the trailing s can convert them to singular
     private String convertPluralToSingular(String displayName) {
         if (StringUtils.isNotEmpty(displayName) && displayName.endsWith("s")) {
             return displayName.substring(0, displayName.length() - 1);
@@ -90,7 +93,7 @@ public class ImportSystemAttrsDecorator implements Decorator {
         return displayName;
     }
 
-    private ColumnMetadata filterContactSystemId(ColumnMetadata cm) {
+    private ColumnMetadata processContactSystemId(ColumnMetadata cm) {
         if (BusinessEntity.Contact.equals(cm.getEntity())) {
             Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(cm.getAttrName());
             cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),

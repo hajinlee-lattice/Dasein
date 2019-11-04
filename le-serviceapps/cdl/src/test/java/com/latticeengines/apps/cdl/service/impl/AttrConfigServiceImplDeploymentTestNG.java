@@ -181,9 +181,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void verifySystemID(AttrConfig attrConfig) {
         Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Subcategory).getSystemValue().toString(),
-                Category.SUB_CAT_ACCOUNT_IDS);
+                Category.SUB_CAT_ACCOUNT_IDS, attrConfig.getAttrName());
         Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getSystemValue().toString(),
-                "DefaultSystem Account ID");
+                "DefaultSystem Account ID", attrConfig.getAttrName());
     }
 
     private String getMyAttributesPartition(String attrName, boolean entityMatchEnabled) {
