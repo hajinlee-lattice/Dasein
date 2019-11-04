@@ -1323,7 +1323,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
-            dataFeedTask.setSubType(entityType.getSubType().name());
+            dataFeedTask.setSubType(entityType.getSubType());
             dataFeedTask.setTemplateDisplayName(entityType.getDefaultFeedTypeName());
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             // TODO(jwinter): Add DropBoxService stuff.
