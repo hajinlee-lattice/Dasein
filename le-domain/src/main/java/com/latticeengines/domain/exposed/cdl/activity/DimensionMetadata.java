@@ -7,6 +7,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 
 /**
  * Metadata for {@link StreamDimension} (possible values and other info)
@@ -39,5 +40,22 @@ public class DimensionMetadata implements Serializable {
 
     public void setCardinality(long cardinality) {
         this.cardinality = cardinality;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DimensionMetadata metadata = (DimensionMetadata) o;
+        return cardinality == metadata.cardinality && Objects.equal(dimensionValues, metadata.dimensionValues);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(dimensionValues, cardinality);
     }
 }
