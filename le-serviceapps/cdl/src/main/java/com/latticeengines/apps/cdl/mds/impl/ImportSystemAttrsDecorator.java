@@ -74,12 +74,10 @@ public class ImportSystemAttrsDecorator implements Decorator {
     }
 
     private ColumnMetadata processAccountSystemId(ColumnMetadata cm) {
-        if (BusinessEntity.Account.equals(cm.getEntity())) {
-            Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(cm.getAttrName());
-            cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
-                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
-            cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
-        }
+        Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(cm.getAttrName());
+        cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
+        cm.setSubcategory(Category.SUB_CAT_ACCOUNT_IDS);
         return cm;
     }
 
@@ -94,19 +92,17 @@ public class ImportSystemAttrsDecorator implements Decorator {
     }
 
     private ColumnMetadata processContactSystemId(ColumnMetadata cm) {
-        if (BusinessEntity.Contact.equals(cm.getEntity())) {
-            Pair<S3ImportSystem, EntityType> attrInfoPair = accountSystemIdMap.get(cm.getAttrName());
-            cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
-                    convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
-        }
+        Pair<S3ImportSystem, EntityType> attrInfoPair = contactSystemIdMap.get(cm.getAttrName());
+        cm.setDisplayName(String.format("%s %s ID", attrInfoPair.getLeft().getName(),
+                convertPluralToSingular(attrInfoPair.getRight().getDisplayName())));
         return cm;
     }
 
     private boolean isAccountSystemId(ColumnMetadata cm) {
-        return accountSystemIdMap.containsKey(cm.getAttrName());
+        return BusinessEntity.Account.equals(cm.getEntity()) &&  accountSystemIdMap.containsKey(cm.getAttrName());
     }
 
     private boolean isContactSystemId(ColumnMetadata cm) {
-        return contactSystemIdMap.containsKey(cm.getAttrName());
+        return BusinessEntity.Contact.equals(cm.getEntity()) && contactSystemIdMap.containsKey(cm.getAttrName());
     }
 }
