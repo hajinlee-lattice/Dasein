@@ -42,6 +42,19 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
     protected void buildRequests(List<ImportExportRequest> requests) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
 
+        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), configuration.getPlayId(),
+                configuration.getChannelId());
+
+        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
+            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
+                    channel.getCurrentLaunchedAccountUniverseTable()), requests);
+        }
+
+        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
+            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
+                    channel.getCurrentLaunchedContactUniverseTable()), requests);
+        }
+
         AttributeRepository attrRepo = buildAttrRepo(customerSpace);
         attrRepo.getTableNames().forEach(tblName -> {
             Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
@@ -52,18 +65,6 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
             }
             addTableToRequestForImport(table, requests);
         });
-
-        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), configuration.getPlayId(),
-                configuration.getChannelId());
-        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
-            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
-                    channel.getCurrentLaunchedAccountUniverseTable()), requests);
-        }
-
-        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
-            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
-                    channel.getCurrentLaunchedContactUniverseTable()), requests);
-        }
     }
 
     private AttributeRepository buildAttrRepo(CustomerSpace customerSpace) {

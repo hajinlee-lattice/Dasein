@@ -415,13 +415,16 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId,
-            String addAccountTable, String removeAccountsTable, String addContactsTable, String removeContactsTable,
-            boolean isAutoLaunch) {
+            String addAccountTable, String completeContactsTable, String removeAccountsTable, String addContactsTable,
+            String removeContactsTable, boolean isAutoLaunch) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
                 shortenCustomerSpace(customerSpace), playName, channelId);
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotBlank(addAccountTable)) {
             params.add(PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE + "=" + addAccountTable);
+        }
+        if (StringUtils.isNotBlank(completeContactsTable)) {
+            params.add(PlayUtils.COMPLETE_CONTACTS_TABLE + "=" + completeContactsTable);
         }
         if (StringUtils.isNotBlank(removeAccountsTable)) {
             params.add(PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE + "=" + removeAccountsTable);

@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
@@ -37,10 +38,10 @@ import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
-@Component("generateLaunchableUniverseStep")
+@Component("generateLaunchUniverse")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchUniverseStepConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverseStep.class);
+public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUniverseStepConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverse.class);
 
     @Inject
     private PeriodProxy periodProxy;
@@ -66,7 +67,6 @@ public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchU
         Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId());
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
                 config.getChannelId());
-
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "No Campaign found by ID: " + config.getPlayId() });
@@ -77,13 +77,20 @@ public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchU
                     new String[] { "No Channel found by ID: " + config.getChannelId() });
         }
 
+        PlayLaunch launch = null;
+        if (StringUtils.isNotBlank(config.getLaunchId())) {
+            launch = playProxy.getPlayLaunch(customerSpace.getTenantId(), config.getPlayId(), config.getLaunchId());
+        }
+
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
-        ChannelConfig channelConfig = channel.getChannelConfig();
-        Set<RatingBucketName> launchBuckets = channel.getBucketsToLaunch();
-        String lookupId = channel.getLookupIdMap().getAccountId();
-        boolean launchUnscored = channel.isLaunchUnscored();
+
+        ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
+        Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
+                : launch.getBucketsToLaunch();
+        String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
+        boolean launchUnScored = launch == null ? channel.isLaunchUnscored() : launch.isLaunchUnscored();
         CDLExternalSystemName externalSystemName = channel.getLookupIdMap().getExternalSystemName();
 
         // 1) setup queries from play and channel settings
@@ -100,7 +107,7 @@ public class GenerateLaunchUniverseStep extends BaseSparkSQLStep<GenerateLaunchU
                 .bucketsToLaunch(launchBuckets) //
                 .limit(channel.getMaxAccountsToLaunch()) //
                 .lookupId(lookupId) //
-                .launchUnScored(launchUnscored) //
+                .launchUnScored(launchUnScored) //
                 .destinationSystemName(externalSystemName) //
                 .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
                 .getCampaignFrontEndQueryBuilder().build();

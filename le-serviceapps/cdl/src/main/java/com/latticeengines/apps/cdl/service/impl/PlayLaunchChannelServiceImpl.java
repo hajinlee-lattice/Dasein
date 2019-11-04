@@ -205,12 +205,14 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel, String addAccountTable,
-            String removeAccountsTable, String addContactsTable, String removeContactsTable, boolean autoLaunch) {
+            String completeContactsTable, String removeAccountsTable, String addContactsTable,
+            String removeContactsTable, boolean autoLaunch) {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
         PlayLaunch playLaunch = createPlayLaunchFromPlayAndChannel(play, playLaunchChannel, autoLaunch);
 
         playLaunch.setLaunchState(LaunchState.Queued);
         playLaunch.setAddAccountsTable(addAccountTable);
+        playLaunch.setCompleteContactsTable(completeContactsTable);
         playLaunch.setRemoveAccountsTable(removeAccountsTable);
         playLaunch.setAddContactsTable(addContactsTable);
         playLaunch.setRemoveContactsTable(removeContactsTable);
@@ -265,7 +267,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel) {
-        return queueNewLaunchForChannel(play, playLaunchChannel, null, null, null, null, false);
+        return queueNewLaunchForChannel(play, playLaunchChannel, null, null, null, null, null, false);
     }
 
     private void runValidations(String customerSpace, Play play, PlayLaunchChannel playLaunchChannel) {

@@ -187,14 +187,14 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
                 // 2. get DataFrame for Account and Contact
-                HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery(), false);
+                HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
                 log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
                 HdfsDataUnit contactDataUnit = null;
                 String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
                 if (StringUtils.isBlank(contactTableName)) {
                     log.info("No contact table available in Redshift.");
                 } else {
-                    contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery(), false);
+                    contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
                     log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
                 }
 
@@ -207,7 +207,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                         processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
                 playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(
                         processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
-                ;
                 playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
                 playLaunchSparkContext.setDataDbDriver(dataDbDriver);
                 playLaunchSparkContext.setDataDbUrl(dataDbUrl);

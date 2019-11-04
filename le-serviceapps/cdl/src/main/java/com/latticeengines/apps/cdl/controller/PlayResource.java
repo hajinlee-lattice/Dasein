@@ -289,6 +289,7 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId, //
             @RequestParam(value = PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE, required = false) String addAccountsTable, //
+            @RequestParam(value = PlayUtils.COMPLETE_CONTACTS_TABLE, required = false) String completeContactsTable, //
             @RequestParam(value = PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE, required = false) String removeAccountsTable, //
             @RequestParam(value = PlayUtils.ADDED_CONTACTS_DELTA_TABLE, required = false) String addContactsTable, //
             @RequestParam(value = PlayUtils.REMOVED_CONTACTS_DELTA_TABLE, required = false) String removeContactsTable, //
@@ -310,8 +311,8 @@ public class PlayResource {
         channel.setPlay(play);
         channel.setTenant(MultiTenantContext.getTenant());
         channel.setTenantId(MultiTenantContext.getTenant().getPid());
-        return playLaunchChannelService.queueNewLaunchForChannel(play, channel, addAccountsTable, removeAccountsTable,
-                addContactsTable, removeContactsTable, isAutoLaunch);
+        return playLaunchChannelService.queueNewLaunchForChannel(play, channel, addAccountsTable, completeContactsTable,
+                removeAccountsTable, addContactsTable, removeContactsTable, isAutoLaunch);
     }
 
     @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-workflow", headers = "Accept=application/json")
@@ -322,7 +323,7 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
         PlayLaunch playLaunch = queueNewLaunchByPlayAndChannel(customerSpace, playName, channelId, null, null, null,
-                null, false);
+                null, null, false);
         return kickOffLaunch(customerSpace, playName, playLaunch.getId());
     }
 

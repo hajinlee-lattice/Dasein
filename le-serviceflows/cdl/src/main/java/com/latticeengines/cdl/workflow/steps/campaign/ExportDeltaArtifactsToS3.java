@@ -19,10 +19,10 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
-@Component("exportDeltaArtifactsToS3Step")
+@Component("exportDeltaArtifactsToS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ExportDeltaArtifactsToS3Step extends BaseImportExportS3<ExportDeltaArtifactsToS3StepConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(ExportDeltaArtifactsToS3Step.class);
+public class ExportDeltaArtifactsToS3 extends BaseImportExportS3<ExportDeltaArtifactsToS3StepConfiguration> {
+    private static final Logger log = LoggerFactory.getLogger(ExportDeltaArtifactsToS3.class);
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -30,6 +30,7 @@ public class ExportDeltaArtifactsToS3Step extends BaseImportExportS3<ExportDelta
     @Override
     public void buildRequests(List<ImportExportRequest> requests) {
         addTableDirs(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class), requests);
+        addTableDirs(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class), requests);
         addTableDirs(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class), requests);
         addTableDirs(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class), requests);
         addTableDirs(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class), requests);

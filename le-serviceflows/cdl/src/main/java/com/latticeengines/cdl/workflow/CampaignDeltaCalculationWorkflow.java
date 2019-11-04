@@ -8,10 +8,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.campaign.CalculateDeltaStep;
-import com.latticeengines.cdl.workflow.steps.campaign.ExportDeltaArtifactsToS3Step;
-import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchUniverseStep;
+import com.latticeengines.cdl.workflow.steps.campaign.ExportDeltaArtifactsToS3;
+import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchArtifacts;
+import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchUniverse;
 import com.latticeengines.cdl.workflow.steps.campaign.ImportDeltaArtifactsFromS3;
-import com.latticeengines.cdl.workflow.steps.campaign.QueuePlayLaunchesStep;
+import com.latticeengines.cdl.workflow.steps.campaign.QueuePlayLaunches;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -26,25 +27,29 @@ public class CampaignDeltaCalculationWorkflow extends AbstractWorkflow<CampaignD
     private ImportDeltaArtifactsFromS3 importDeltaArtifactsFromS3;
 
     @Inject
-    private GenerateLaunchUniverseStep generateLaunchUniverseStep;
+    private GenerateLaunchUniverse generateLaunchUniverse;
 
     @Inject
     private CalculateDeltaStep calculateDeltaStep;
 
     @Inject
-    private ExportDeltaArtifactsToS3Step exportArtifactsToS3Step;
+    private GenerateLaunchArtifacts generateLaunchArtifacts;
 
     @Inject
-    private QueuePlayLaunchesStep queuePlayLaunchesStep;
+    private ExportDeltaArtifactsToS3 exportArtifactsToS3Step;
+
+    @Inject
+    private QueuePlayLaunches queuePlayLaunches;
 
     @Override
     public Workflow defineWorkflow(CampaignDeltaCalculationWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(importDeltaArtifactsFromS3) //
-                .next(generateLaunchUniverseStep) //
+                .next(generateLaunchUniverse) //
                 .next(calculateDeltaStep) //
+                .next(generateLaunchArtifacts) //
                 .next(exportArtifactsToS3Step) //
-                .next(queuePlayLaunchesStep) //
+                .next(queuePlayLaunches) //
                 .build();
     }
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "AccountId": "A1",
+    "ContactId": "C11"
+  },
+  {
+    "AccountId": "A1",
+    "ContactId": "C12"
+  },
+  {
+    "AccountId": "A2",
+    "ContactId": "C21"
+  },
+  {
+    "AccountId": "A3",
+    "ContactId": "C3"
+  }
+]

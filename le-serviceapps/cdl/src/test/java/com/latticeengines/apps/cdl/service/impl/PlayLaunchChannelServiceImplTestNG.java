@@ -127,8 +127,9 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
         playLaunchChannel1.setIsAlwaysOn(true);
         playLaunchChannel1.setExpirationPeriodString("P3M");
-        playLaunchChannel2.setIsAlwaysOn(false);
         playLaunchChannel1.setChannelConfig(new SalesforceChannelConfig());
+
+        playLaunchChannel2.setIsAlwaysOn(false);
         playLaunchChannel2.setChannelConfig(new MarketoChannelConfig());
 
     }
@@ -139,7 +140,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(channels);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testGetPreCreate" })
+    @Test(groups = "deployment-app", dependsOnMethods = "testGetPreCreate")
     public void testCreateChannel() throws InterruptedException {
         playLaunchChannelService.create(play.getName(), playLaunchChannel1);
         Thread.sleep(1000);
@@ -153,7 +154,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(playLaunchChannel2.getId());
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateChannel" })
+    @Test(groups = "deployment-app", dependsOnMethods = "testCreateChannel")
     public void testBasicOperations() {
 
         PlayLaunchChannel retrieved = playLaunchChannelService.findById(playLaunchChannel1.getId());
@@ -186,7 +187,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testBasicOperations" })
+    @Test(groups = "deployment-app", dependsOnMethods = "testBasicOperations")
     public void testCreateFromChannel() {
         PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel1.getPid());
         Assert.assertNull(retrievedLaunch);
@@ -208,12 +209,6 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(retrieved.getId(), playLaunchChannel1.getId());
         Assert.assertFalse(retrieved.getIsAlwaysOn());
         Assert.assertNull(retrieved.getExpirationDate());
-
-        PlayLaunch retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel1.getPid());
-        Assert.assertNotNull(retrievedLaunch);
-        Assert.assertNotNull(retrieved.getLastLaunch());
-        Assert.assertEquals(retrieved.getLastLaunch().getId(), retrievedLaunch.getId());
-
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })

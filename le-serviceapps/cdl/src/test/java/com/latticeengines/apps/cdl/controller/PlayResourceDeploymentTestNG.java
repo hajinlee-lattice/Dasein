@@ -121,7 +121,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
                 .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
         // Mimicking an automatic Launch creation
         PlayLaunch testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(),
-                play.getName(), channel.getId(), null, null, null, null, true);
+                play.getName(), channel.getId(), null, null, null, null, null, true);
         Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
         Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
         Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
@@ -224,8 +224,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Play retrievedPlay = retrievedFullPlayList.get(0);
         PlayLaunchChannel retrievedChannel = playProxy
                 .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), retrievedPlay.getName(), false).get(0);
-        Assert.assertEquals(retrievedPlay.getPlayLaunchChannels().get(0).getId(),
-                retrievedChannel.getId());
+        Assert.assertEquals(retrievedPlay.getPlayLaunchChannels().get(0).getId(), retrievedChannel.getId());
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testGetFullPlays" })
