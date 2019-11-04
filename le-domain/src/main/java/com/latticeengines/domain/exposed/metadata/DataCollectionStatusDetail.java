@@ -29,9 +29,12 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("OrigCatalogFileMap")
     private Map<String, List<String>> origCatalogFileMap;
 
-    // JSON str streamId -> stream object
+    // JSON str of Map[ streamId -> stream object ]
     @JsonProperty("ActivityStreamMapStr")
     private String activityStreamMapStr;
+
+    @JsonProperty("DimensionMetadataSignature")
+    private String dimensionMetadataSignature;
 
     @JsonProperty("MinTxnDate")
     private Integer minTxnDate = 0;
@@ -194,6 +197,14 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
         this.activityStreamMapStr = JsonUtils.serialize(activityStreamMap);
+    }
+
+    public String getDimensionMetadataSignature() {
+        return dimensionMetadataSignature;
+    }
+
+    public void setDimensionMetadataSignature(String dimensionMetadataSignature) {
+        this.dimensionMetadataSignature = dimensionMetadataSignature;
     }
 
     public int getServingStoreVersion() {

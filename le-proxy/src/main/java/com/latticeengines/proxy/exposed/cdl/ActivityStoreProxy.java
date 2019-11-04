@@ -2,12 +2,17 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -58,5 +63,47 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
                 "/customerspaces/{customerSpace}/activities/streams/{streamName}/dimensions/{dimensionName}",
                 shortenCustomerSpace(customerSpace), streamName, dimension.getName());
         return put("update_stream_dimension", url, dimension, StreamDimension.class);
+    }
+
+    public String saveDimensionMetadata(@NotNull String customerSpace,
+            @NotNull Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata",
+                shortenCustomerSpace(customerSpace));
+        return post("save_dimension_metadata", url, dimensionMetadataMap, String.class);
+    }
+
+    public String saveDimensionMetadataWithSignature(@NotNull String customerSpace, @NotNull String signature,
+            @NotNull Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata/{signature}",
+                shortenCustomerSpace(customerSpace), signature);
+        return post("save_dimension_metadata_with_signature", url, dimensionMetadataMap, String.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
+            String signature) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata",
+                shortenCustomerSpace(customerSpace));
+        if (StringUtils.isNotBlank(signature)) {
+            url += "?signature=" + signature;
+        }
+        return get("get_dimension_metadata", url, Map.class);
+    }
+
+    public Map<String, DimensionMetadata> getDimensionMetadataInStream(@NotNull String customerSpace,
+            @NotNull String streamName, String signature) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata/streams/{streamName}",
+                shortenCustomerSpace(customerSpace), streamName);
+        if (StringUtils.isNotBlank(signature)) {
+            url += "?signature=" + signature;
+        }
+        Map<?, ?> rawMap = get("get_dimension_metadata_in_stream", url, Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, DimensionMetadata.class);
+    }
+
+    public void deleteDimensionMetadataWithSignature(@NotNull String customerSpace, @NotNull String signature) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata/{signature}",
+                shortenCustomerSpace(customerSpace), signature);
+        delete("delete_dimension_metadata_with_signature", url);
     }
 }

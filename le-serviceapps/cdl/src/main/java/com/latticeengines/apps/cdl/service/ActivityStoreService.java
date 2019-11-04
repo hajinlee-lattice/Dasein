@@ -1,10 +1,13 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.Map;
+
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -60,4 +63,47 @@ public interface ActivityStoreService {
      */
     StreamDimension updateStreamDimension(@NotNull String customerSpace, @NotNull String streamName,
             @NotNull StreamDimension dimension);
+
+    /**
+     * Save given dimension metadata for target tenant
+     *
+     * @param customerSpace
+     *            target tenant
+     * @param signature
+     *            if not provided, a new signature will be generated
+     * @param dimensionMetadataMap
+     *            map of streamId -> dimensionName -> metadata
+     * @return final signature after combine with tenant namespace, will not be
+     *         {@code null}
+     */
+    String saveDimensionMetadata(@NotNull String customerSpace, String signature,
+            @NotNull Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap);
+
+    /**
+     * Retrieve dimension metadata of a given stream
+     *
+     * @param customerSpace
+     *            target tenant
+     * @param streamName
+     *            {@link AtlasStream#getName()} ()} of target stream
+     * @param signature
+     *            signature of metadata, if not provided, will use the signature
+     *            associated to current active version
+     * @return map of dimensionName -> metadata, will not be {@code null}
+     */
+    Map<String, DimensionMetadata> getDimensionMetadataInStream(@NotNull String customerSpace,
+            @NotNull String streamName, String signature);
+
+    /**
+     * Retrieve all dimension metadata of given tenant
+     *
+     * @param customerSpace
+     *            target tenant
+     * @param signature
+     *            signature of metadata, if not provided, will use the signature
+     *            associated to current active version
+     * @return map of streamName -> dimensionName -> metadata, will not be
+     *         {@code null}
+     */
+    Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace, String signature);
 }
