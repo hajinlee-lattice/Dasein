@@ -99,8 +99,11 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         } catch (Exception e) {
             Assert.assertTrue(e instanceof  RuntimeException);
         }
+
+        Assert.assertTrue(checkBundleUpload());
         importData(BusinessEntity.Product, "ProductBundles.csv", null,
                 false, false, DataFeedTask.SubType.Bundle.name());
+        Assert.assertFalse(checkBundleUpload());
         processAnalyze();
         // get current bundle after PA
         try {
@@ -122,6 +125,12 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         String fileName = response.getHeaders().getFirst("Content-Disposition");
         Assert.assertTrue(fileName.contains(".csv"));
         return response.getBody();
+    }
+
+    private boolean checkBundleUpload () {
+        RestTemplate template = testBed.getRestTemplate();
+        String url = String.format("%s/pls/cdl/bundle/upload", deployedHostPort);
+        return template.getForObject(url, Boolean.class);
     }
 
     @Test(groups = "end2end")

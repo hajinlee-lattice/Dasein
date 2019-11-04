@@ -50,7 +50,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionStatus;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.FileProperty;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -66,10 +70,13 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -120,6 +127,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;
@@ -795,4 +805,43 @@ public class CDLServiceImpl implements CDLService {
         return action;
     }
 
+    public boolean checkBundleUpload(String customerSpace) {
+        List<Action> actions = actionProxy.getActions(customerSpace);
+        if (CollectionUtils.isEmpty(actions)) {
+            return true;
+        }
+
+        // get action without running PA
+        List<Action> importActionsBeforePA =
+                actions.stream().filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
+                        && ActionStatus.ACTIVE.equals(action.getActionStatus()) && action.getOwnerId() == null).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(importActionsBeforePA)) {
+            return true;
+        }
+
+        for (Action action : importActionsBeforePA) {
+            ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+            String dataFeedTaskId = importActionConfiguration.getDataFeedTaskId();
+            if (dataFeedTaskId == null) {
+                continue;
+            }
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, dataFeedTaskId);
+            if (dataFeedTask == null) {
+                continue;
+            }
+            if (BusinessEntity.Product.name().equals(dataFeedTask.getEntity()) &&
+                    DataFeedTask.SubType.Bundle.equals(dataFeedTask.getSubType())) {
+                Long workflowId = importActionConfiguration.getWorkflowId();
+                Preconditions.checkNotNull(workflowId, "configuration is null for bundle");
+                Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, workflowId);
+                // forbidden user upload if status is completed, running, enqueued, pending
+                if (JobStatus.COMPLETED.equals(job.getJobStatus()) || JobStatus.RUNNING.equals(job.getJobStatus())
+                        || JobStatus.ENQUEUED.equals(job.getJobStatus()) || JobStatus.PENDING.equals(job.getJobStatus())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
