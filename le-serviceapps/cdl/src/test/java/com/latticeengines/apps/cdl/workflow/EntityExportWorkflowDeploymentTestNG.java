@@ -245,18 +245,20 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             // "Header map: " + JsonUtils.serialize(headerMap));
             for (CSVRecord record : records) {
                 String dateStr = record.get("Test Date");
-                SimpleDateFormat dateFmt = new SimpleDateFormat(ConvertToCSVConfig.ISO_8601);
-                try {
-                    Date date = dateFmt.parse(dateStr);
-                    Assert.assertNotNull(date);
-                } catch (ParseException e) {
-                    Assert.fail("Failed to parse date string " + dateStr, e);
-                }
-                String decodedStr = record.get("Has Oracle Commerce");
-                if (StringUtils.isNotBlank(decodedStr)) {
-                    Assert.assertTrue(decodedStr.equals("Yes") || decodedStr.equals("No"), //
-                            "Invalid decoded value " + decodedStr);
-                    break; // only need to verify the first record
+                if (StringUtils.isNotEmpty(dateStr)) {
+                    SimpleDateFormat dateFmt = new SimpleDateFormat(ConvertToCSVConfig.ISO_8601);
+                    try {
+                        Date date = dateFmt.parse(dateStr);
+                        Assert.assertNotNull(date);
+                    } catch (ParseException e) {
+                        Assert.fail("Failed to parse date string " + dateStr, e);
+                    }
+                    String decodedStr = record.get("Has Oracle Commerce");
+                    if (StringUtils.isNotBlank(decodedStr)) {
+                        Assert.assertTrue(decodedStr.equals("Yes") || decodedStr.equals("No"), //
+                                "Invalid decoded value " + decodedStr);
+                        break; // only need to verify the first record
+                    }
                 }
             }
         } catch (IOException e) {
