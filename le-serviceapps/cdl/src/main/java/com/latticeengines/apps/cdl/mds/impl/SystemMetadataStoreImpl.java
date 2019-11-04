@@ -66,7 +66,7 @@ public class SystemMetadataStoreImpl extends
             AccountAttrsDecoratorFac accountAttrsDecorator, //
             ContactAttrsDecoratorFac contactAttrsDecorator, //
             ImportSystemAttrsDecoratorFac importSystemAttrsDecorator, //
-            SpendAnalyticMetricsDecoratorFac activityMetricsDecorator, //
+            SpendAnalyticMetricsDecoratorFac spendAnalyticMetricsDecorator, //
             RatingDisplayMetadataStore ratingDisplayMetadataStore, //
             ExternalSystemMetadataStore externalSystemMetadataStore, //
             CuratedAttrsMetadataStore curatedAttrsMetadataStore, //
@@ -82,10 +82,10 @@ public class SystemMetadataStoreImpl extends
         // order in sync with ChainedDecoratorFactory.project() below
         List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList(//
                 accountAttrsDecorator, //
-                lookupIdDecorator, //
                 contactAttrsDecorator, //
-                importSystemAttrsDecorator,
-                activityMetricsDecorator, //
+                lookupIdDecorator, //
+                importSystemAttrsDecorator, //
+                spendAnalyticMetricsDecorator, //
                 apsAttrDecorator, //
                 ratingDisplayDecorator, //
                 curatedAttrsDecorator, //
@@ -103,7 +103,7 @@ public class SystemMetadataStoreImpl extends
                 Namespace contactNs = Namespace.as(BusinessEntity.Contact.equals(entity) ? tenantId : "");
                 Namespace importSystemNs =
                         Namespace.as((BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) ? tenantId : "");
-                Namespace activityMetricsNs = Namespace
+                Namespace phNs = Namespace
                         .as(BusinessEntity.PurchaseHistory.equals(entity) ? tenantId : "");
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
                 Namespace curatedNs = Namespace.as(//
@@ -115,10 +115,10 @@ public class SystemMetadataStoreImpl extends
                 // order in sync with getDecoratorChain()
                 return Arrays.asList( //
                         accountNs, //
-                        lookupIdNs, //
                         contactNs, //
+                        lookupIdNs, //
                         importSystemNs, //
-                        activityMetricsNs, //
+                        phNs, //
                         Namespace0.NS, //
                         ratingNs, //
                         curatedNs, //

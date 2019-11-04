@@ -29,6 +29,8 @@ public class SystemPostRenderDecorator implements Decorator {
             }
             // PLS-11145 set Export init value to false, for deprecated attr
             cm.disableGroup(ColumnSelection.Predefined.Enrichment);
+            // PLS-15312 set Model init value to false, for deprecated attr
+            cm.disableGroup(ColumnSelection.Predefined.Model);
         }
         return cm;
     }
