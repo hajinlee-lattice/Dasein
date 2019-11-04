@@ -41,11 +41,15 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMo
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.GenerateDimensionMetadataStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -63,6 +67,12 @@ public class GenerateDimensionMetadata
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private ActivityStoreProxy activityStoreProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
 
     // [streamId, dimName] <-> UUID
     private BiMap<Pair<String, String>, String> dimIdMap = HashBiMap.create();
@@ -114,7 +124,18 @@ public class GenerateDimensionMetadata
         log.info("Final dimension metadata map = {}", JsonUtils.serialize(dimensionMetadataMap));
         putObjectInContext(STREAM_DIMENSION_METADATA_MAP, dimensionMetadataMap);
         recordStreamSkippedForAgg();
-        // TODO publish metadata to dynamo for serving in app
+        // publish metadata for serving in app
+        String signature = activityStoreProxy.saveDimensionMetadata(configuration.getCustomer(), dimensionMetadataMap);
+        saveDimensionMetadataSignature(signature);
+    }
+
+    private void saveDimensionMetadataSignature(@NotNull String signature) {
+        String customerSpace = configuration.getCustomer();
+        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, inactive);
+        status.setDimensionMetadataSignature(signature);
+        log.info("Save dimension metadata signature {} to version {}", signature, inactive);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace, status, inactive);
     }
 
     private void recordStreamSkippedForAgg() {
