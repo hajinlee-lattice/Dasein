@@ -1,7 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import static com.latticeengines.pls.util.ImportWorkflowUtils.getTableFromFieldDefinitionsRecord;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +16,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.pls.service.ImportWorkflowSpecService;
+import com.latticeengines.pls.util.ImportWorkflowUtils;
 
 @Component("importWorkflowSpecService")
 public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService {
@@ -75,9 +74,9 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     }
 
     public Table tableFromSpec(ImportWorkflowSpec spec) {
-        Table table = getTableFromFieldDefinitionsRecord(null, spec, true);
         log.info("Generating Table from Spec of type " + spec.getSystemType() + " and object " +
                 spec.getSystemObject());
+        Table table = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(null, spec, true);
         return table;
     }
 
