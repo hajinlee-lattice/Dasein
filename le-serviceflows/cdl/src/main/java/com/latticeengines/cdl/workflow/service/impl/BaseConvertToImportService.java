@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,11 +12,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreDetail;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -144,22 +141,4 @@ public class BaseConvertToImportService
         return convertBatchStoreInfo;
     }
 
-    private Long getTableDataLines(Table table, Configuration yarnConfiguration) {
-        if (table == null || table.getExtracts() == null) {
-            return 0L;
-        }
-        Long lines = 0L;
-        List<String> paths = new ArrayList<>();
-        for (Extract extract : table.getExtracts()) {
-            if (!extract.getPath().endsWith("avro")) {
-                paths.add(extract.getPath() + "/*.avro");
-            } else {
-                paths.add(extract.getPath());
-            }
-        }
-        for (String path : paths) {
-            lines += AvroUtils.count(yarnConfiguration, path);
-        }
-        return lines;
-    }
 }
