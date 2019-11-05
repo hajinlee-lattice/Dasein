@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
@@ -88,9 +89,7 @@ public class RatingEngineEntityMgrImpl //
         implements RatingEngineEntityMgr, GraphVisitable {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImpl.class);
-
-    public static final String GET_ACTIVE_MODELS_WARNING_TITLE = "Warning";
-    public static final String GET_ACTIVE_MODELS_WARNING_MSG = "Too many Active Models.";
+    private static final String GET_ACTIVE_MODELS_ERR_MSG = "Too many Active Models.";
 
     @Inject
     private RatingEngineEntityMgrImpl _self;
@@ -260,14 +259,15 @@ public class RatingEngineEntityMgrImpl //
                         .getActiveRatingEnginesCount();
                 // Enforce quota limit
                 if (countActiveModelsForTenant >= quotaLimit) {
-                    UIAction uiAction = new UIAction();
                     // throw exception
-                    uiAction.setTitle(GET_ACTIVE_MODELS_WARNING_TITLE);
-                    uiAction.setView(View.Banner);
-                    uiAction.setStatus(Status.Warning);
-                    uiAction.setMessage(GET_ACTIVE_MODELS_WARNING_MSG);
-                    throw new LedpException(LedpCode.LEDP_40074, new String[] {
+                    LedpException ledp = new LedpException(LedpCode.LEDP_40074, new String[] {
                             countActiveModelsForTenant.toString(), quotaLimit.toString() });
+                    UIAction uiAction = new UIAction();
+                    uiAction.setTitle(GET_ACTIVE_MODELS_ERR_MSG);
+                    uiAction.setView(View.Banner);
+                    uiAction.setStatus(Status.Error);
+                    uiAction.setMessage(ledp.getMessage());
+                    throw new UIActionException(uiAction, ledp.getCode());
                 }
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {
