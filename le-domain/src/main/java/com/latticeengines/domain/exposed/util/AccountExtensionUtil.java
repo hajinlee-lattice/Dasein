@@ -66,20 +66,17 @@ public class AccountExtensionUtil {
         }
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
-            RestrictionBuilder accountIdRestrictionBuilder = Restriction.builder();
             if (isEntityMatchEnabled) {
-                RestrictionBuilder custAccountIdRestriction = Restriction.builder()
+                Restriction custAccountIdRestriction = Restriction.builder()
                         .let(BusinessEntity.Account, InterfaceName.CustomerAccountId.name())
-                        .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
-                accountIdRestrictionBuilder.or(custAccountIdRestriction);
+                        .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
+                idRestrictions.add(custAccountIdRestriction);
             }
 
-            RestrictionBuilder accountIdRestriction = Restriction.builder()
+            Restriction accountIdRestriction = Restriction.builder()
                     .let(BusinessEntity.Account, InterfaceName.AccountId.name())
-                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList()));
-            accountIdRestrictionBuilder.or(accountIdRestriction);
-
-            idRestrictions.add(accountIdRestrictionBuilder.build());
+                    .inCollection(accountIds.stream().map(s -> (Object) s).collect(Collectors.toList())).build();
+            idRestrictions.add(accountIdRestriction);
 
             if (shouldAddLookupIdClause && StringUtils.isNotBlank(lookupIdColumn)) {
                 RestrictionBuilder sfdcRestrictionBuilder = Restriction.builder()
