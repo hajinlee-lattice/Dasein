@@ -120,6 +120,8 @@ public class SplitAccountStores extends RunSparkJob<ProcessAccountStepConfigurat
                 log.warn("10 second sleep is interrupted.", e);
             }
 
+            setPartitionMultiplier(4);
+
             CopyConfig filterAccountExport = getExportCopyConfig();
             CopyConfig filterAccountFeatures = getFeaturesCopyConfig();
             MultiCopyConfig config = new MultiCopyConfig();

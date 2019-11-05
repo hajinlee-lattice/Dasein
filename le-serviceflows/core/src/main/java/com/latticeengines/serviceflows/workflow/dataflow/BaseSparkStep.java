@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected LivySession createLivySession(String jobName) {
         return livySessionManager.createLivySession(jobName, //
-                new LivySessionConfig(scalingMultiplier, partitionMultiplier));
+                new LivyScalingConfig(scalingMultiplier, partitionMultiplier));
     }
 
     protected void killLivySession() {

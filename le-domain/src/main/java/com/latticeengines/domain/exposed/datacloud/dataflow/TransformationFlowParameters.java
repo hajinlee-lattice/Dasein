@@ -139,6 +139,9 @@ public class TransformationFlowParameters extends DataFlowParameters {
         @JsonProperty("Partitions")
         private Integer partitions;
 
+        @JsonProperty("ScalingMultiplier")
+        private Integer scalingMultiplier;
+
         public String getEngine() {
             return engine;
         }
@@ -161,6 +164,14 @@ public class TransformationFlowParameters extends DataFlowParameters {
 
         public void setPartitions(Integer partitions) {
             this.partitions = partitions;
+        }
+
+        public Integer getScalingMultiplier() {
+            return scalingMultiplier;
+        }
+
+        public void setScalingMultiplier(Integer scalingMultiplier) {
+            this.scalingMultiplier = scalingMultiplier;
         }
     }
 }
