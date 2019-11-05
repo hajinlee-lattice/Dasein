@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,14 +15,17 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.MigrateImportServiceConfiguration;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("migrateImportService")
 @Lazy(value = false)
@@ -36,6 +40,12 @@ public class MigrateImportService
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Inject
+    private MetadataProxy metadataProxy;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     public String getOutputDataFeedTaskId(String customerSpace, MigrateImportServiceConfiguration config) {
@@ -202,23 +212,40 @@ public class MigrateImportService
 
     @Override
     public void setDataTable(String migratedImportTableName, String customerSpace, Table templateTable, MigrateImportServiceConfiguration config, Configuration yarnConfiguration) {
-        //do nothing
+        Table migratedImportTable = metadataProxy.getTable(customerSpace, migratedImportTableName);
+        Long importCounts = getTableDataLines(migratedImportTable, yarnConfiguration);
+        List<String> dataTables = dataFeedProxy.registerExtracts(customerSpace, getOutputDataFeedTaskId(customerSpace
+                , config), templateTable.getName(), migratedImportTable.getExtracts());
+        updateConvertResult(customerSpace, config, importCounts,
+                dataTables);
     }
 
     @Override
     public Table verifyTenantStatus(String customerSpace, MigrateImportServiceConfiguration config) {
-        return null;
+        String taskUniqueId = getOutputDataFeedTaskId(customerSpace, config);
+        if (StringUtils.isEmpty(taskUniqueId)) {
+            throw new RuntimeException("Cannot find the target datafeed task for Account migrate!");
+        }
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskUniqueId);
+        if (dataFeedTask == null) {
+            throw new RuntimeException("Cannot find the dataFeedTask with id: " + taskUniqueId);
+        }
+        Table templateTable = dataFeedTask.getImportTemplate();
+        if (templateTable == null) {
+            throw new RuntimeException("Template is NULL for dataFeedTask: " + taskUniqueId);
+        }
+        return templateTable;
     }
 
     @Override
     public List<String> getAttributes(String customerSpace, Table templateTable, 
                                       Table masterTable, MigrateImportServiceConfiguration config) {
-        return null;
+        return templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList());
     }
 
     @Override
     public Table getMasterTable(String customerSpace,
                                 TableRoleInCollection batchStore, MigrateImportServiceConfiguration config) {
-        return null;
+        return dataCollectionProxy.getTable(customerSpace, batchStore);
     }
 }
