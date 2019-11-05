@@ -1,10 +1,10 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements Serializable {
@@ -13,14 +13,14 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
 
     public static final String NAME = "DailyStoreToPeriodStoresJobConfig";
 
-    @JsonProperty("stream")
-    public AtlasStream stream;
+    @JsonProperty("streams")
+    public List<AtlasStream> streams;
 
     @JsonProperty("evaluationDate")
     public String evaluationDate;
 
-    @JsonProperty("entity")
-    public BusinessEntity entity;
+    @JsonProperty("inputMetadata")
+    public ActivityStoreSparkIOMetadata inputMetadata; // describes streamId -> dailyStore input index
 
     @Override
     @JsonProperty("Name")
@@ -32,6 +32,6 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
     // depends on stream config. Only generate requested period stores, others will be empty dataframe
     @Override
     public int getNumTargets() {
-        return stream.getPeriods().size();
+        return streams.stream().mapToInt(stream -> stream.getPeriods().size()).sum();
     }
 }

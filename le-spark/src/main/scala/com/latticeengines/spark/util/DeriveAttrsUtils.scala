@@ -1,8 +1,9 @@
 package com.latticeengines.spark.util
 
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver
+import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver}
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
 import com.latticeengines.domain.exposed.metadata.InterfaceName
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId}
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import org.apache.spark.sql.DataFrame
 
@@ -51,11 +52,19 @@ private[spark] object DeriveAttrsUtils {
     }
   }
 
-  def getEntityIdColumnName(entity: BusinessEntity): String = {
+  def getMetricsGroupEntityIdColumnName(entity: BusinessEntity): String = {
     entity match {
-      case BusinessEntity.Account => InterfaceName.AccountId.name
-      case BusinessEntity.Contact => InterfaceName.ContactId.name
+      case BusinessEntity.Account => AccountId.name
+      case BusinessEntity.Contact => ContactId.name
       case _ => throw new UnsupportedOperationException(s"Entity $entity is not supported")
+    }
+  }
+
+  def getGroupByEntityColsFromStream(stream: AtlasStream): Seq[String] = {
+    if (stream.getAggrEntities.contains(BusinessEntity.Contact.name)) {
+      Seq(AccountId.name, ContactId.name)
+    } else {
+      Seq(AccountId.name)
     }
   }
 }

@@ -2,6 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,13 +14,17 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
+import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
@@ -30,8 +35,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String ContactId = "ContactId";
     private static final String Count = "Count";
     private static final String SOME_DIM = "SomeDimension";
-    private static final String Date = "Date";
-    private static final String PeriodId = "PeriodId";
+    private static final String Date = InterfaceName.__StreamDate.name();
     private static final String PeriodIdForPartition = "PeriodIdPartition";
     // DateId in daily store table is not used while generating period stores
 
@@ -39,6 +43,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static List<String> OUTPUT_FIELDS;
     private static List<String> PERIODS = Arrays.asList(PeriodStrategy.Template.Week.name(), PeriodStrategy.Template.Month.name());
     private static AtlasStream STREAM;
+    private static final String STREAM_ID = "abc123";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -51,10 +56,25 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     public void test() {
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.evaluationDate = "2019-10-28";
-        config.entity = BusinessEntity.Account;
-        config.stream = STREAM;
+        config.streams = Collections.singletonList(STREAM);
+        config.inputMetadata = createInputMetadata();
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config);
+        Assert.assertNotNull(result.getOutput());
+        ActivityStoreSparkIOMetadata metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        Assert.assertNotNull(metadata);
+        Assert.assertNotNull(metadata.getMetadata().get(STREAM_ID));
+        Assert.assertEquals(metadata.getMetadata().get(STREAM_ID).getLabels(), PERIODS);
         verify(result, Arrays.asList(this::verifyWeekPeriodStore, this::verifyMonthPeriodStore));
+    }
+
+    private ActivityStoreSparkIOMetadata createInputMetadata() {
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> metadata = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        metadata.put(STREAM_ID, details);
+        inputMetadata.setMetadata(metadata);
+        return inputMetadata;
     }
 
     private void setupData() {
@@ -81,6 +101,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private void setupStream() {
         AtlasStream stream = new AtlasStream();
+        stream.setStreamId(STREAM_ID);
         stream.setPeriods(PERIODS);
         stream.setDimensions(prepareDimensions());
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
