@@ -309,7 +309,6 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
         channel1.setMaxAccountsToLaunch(NULL_MAX_ACCOUNTS_TO_LAUNCH);
         Assert.assertNotNull(channel1);
-        Assert.assertNull(channel1.getMaxAccountsToLaunch());
 
         channel1.setIsAlwaysOn(false);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
@@ -319,6 +318,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(retrieved.getId(), channel1.getId());
         Assert.assertFalse(retrieved.getIsAlwaysOn());
         Assert.assertNull(retrieved.getExpirationDate());
+        Assert.assertNull(retrieved.getMaxAccountsToLaunch());
 
         channel1.setLaunchUnscored(false);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
