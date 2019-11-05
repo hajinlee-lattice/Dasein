@@ -332,14 +332,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.setSourceConfig(dataFeedTask.getSourceConfig());
         task.setStatus(dataFeedTask.getStatus());
         task.setS3ImportStatus(dataFeedTask.getS3ImportStatus());
+        task.getImportTemplate().setUpdatedBy(dataFeedTask.getImportTemplate().getUpdatedBy());
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        tableEntityMgr.update(task.getImportTemplate());
+        tableTypeHolder.setTableType(TableType.DATATABLE);
         deleteReferences(task.getImportTemplate());
         task.setTemplateDisplayName(dataFeedTask.getTemplateDisplayName());
         task.setFeedType(dataFeedTask.getFeedType());
         task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
-        task.getImportTemplate().setUpdatedBy(dataFeedTask.getImportTemplate().getUpdatedBy());
+
         updateReferences(task.getImportTemplate());
         createReferences(task.getImportTemplate());
         datafeedTaskDao.update(task);
+
     }
 
     private void deleteReferences(Table table) {

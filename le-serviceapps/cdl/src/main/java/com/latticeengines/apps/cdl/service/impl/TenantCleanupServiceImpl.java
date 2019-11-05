@@ -63,11 +63,11 @@ public class TenantCleanupServiceImpl implements TenantCleanupService {
                             allRedshiftTables.add(redshiftTable);
                             DataUnit dataUnit = null;
                             log.info("need delete redshift tablename under tenant " + customerSpace + " is :" + tableName);
-                            dataUnit = dataUnitProxy.getByNameAndType(customerSpace.toLowerCase(), tableName,
+                            dataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName,
                                     DataUnit.StorageType.Redshift);
                             if (dataUnit != null) {
                                 log.info("dataunit is " + dataUnit.getName());
-                                dataUnitProxy.delete(customerSpace.toLowerCase(), dataUnit);
+                                dataUnitProxy.delete(customerSpace, dataUnit);
                             } else {
                                 log.info("no dataunit found, drop redshift table directly");
                                 redshiftService.dropTable(tableName);
