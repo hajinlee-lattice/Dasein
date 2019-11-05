@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class CreateDeltaRecommendationConfig extends SparkJobConfig {
@@ -13,10 +13,10 @@ public class CreateDeltaRecommendationConfig extends SparkJobConfig {
 
     public static final String NAME = "createDeltaRecommendation";
 
-    public static final int NUM_TARGETS = 2;
+    private int targetNums;
 
-    @JsonProperty("PlayLaunchSparkContext")
-    private PlayLaunchSparkContext playLaunchSparkContext;
+    @JsonProperty("DeltaCampaignLaunchSparkContext")
+    private DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext;
 
     @Override
     @JsonProperty("Name")
@@ -26,15 +26,19 @@ public class CreateDeltaRecommendationConfig extends SparkJobConfig {
 
     @Override
     public int getNumTargets() {
-        return NUM_TARGETS;
+        return targetNums;
     }
 
-    public PlayLaunchSparkContext getPlayLaunchSparkContext() {
-        return this.playLaunchSparkContext;
+    public void setTargetNums(int targetNums) {
+        this.targetNums = targetNums;
     }
 
-    public void setPlayLaunchSparkContext(PlayLaunchSparkContext playLaunchSparkContext) {
-        this.playLaunchSparkContext = playLaunchSparkContext;
+    public DeltaCampaignLaunchSparkContext getDeltaCampaignLaunchSparkContext() {
+        return this.deltaCampaignLaunchSparkContext;
+    }
+
+    public void setDeltaCampaignLaunchSparkContext(DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext) {
+        this.deltaCampaignLaunchSparkContext = deltaCampaignLaunchSparkContext;
     }
 
 }

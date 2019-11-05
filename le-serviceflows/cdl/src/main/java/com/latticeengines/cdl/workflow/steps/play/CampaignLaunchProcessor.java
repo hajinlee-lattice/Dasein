@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -136,6 +137,94 @@ public class CampaignLaunchProcessor {
     }
 
     public PlayLaunchContext initPlayLaunchContext(Tenant tenant, CampaignLaunchInitStepConfiguration config) {
+        PlayLaunchContextBuilder playLaunchContextBuilder = new PlayLaunchContextBuilder();
+
+        CustomerSpace customerSpace = config.getCustomerSpace();
+        String playName = config.getPlayName();
+        String playLaunchId = config.getPlayLaunchId();
+
+        Play play = playProxy.getPlay(customerSpace.toString(), playName);
+        PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
+        List<ColumnMetadata> fieldMappingMetadata = null;
+
+        PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
+                playName, playLaunchId);
+        if (playLaunchChannel != null) {
+            fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
+                    playLaunchChannel.getId());
+            playLaunch.setDestinationOrgName(playLaunchChannel.getLookupIdMap().getOrgName());
+            if (fieldMappingMetadata != null) {
+                log.info("For tenant= " + tenant.getName() + ", playChannelId= " + playLaunchChannel.getId()
+                        + ", the columnmetadata size is=" + fieldMappingMetadata.size());
+            }
+        }
+
+        long launchTimestampMillis = playLaunch.getCreated().getTime();
+
+        RatingEngine ratingEngine = play.getRatingEngine();
+
+        if (ratingEngine != null) {
+            ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
+        }
+
+        MetadataSegment segment;
+        if (play.getTargetSegment() != null) {
+            segment = play.getTargetSegment();
+        } else {
+            log.info(String.format(
+                    "No Target segment defined for Play %s, falling back to target segment of Rating Engine %s",
+                    play.getName(), ratingEngine.getSegment()));
+            if (ratingEngine != null) {
+                segment = play.getRatingEngine().getSegment();
+            }
+            segment = null;
+        }
+
+        if (segment == null) {
+            throw new NullPointerException(String.format("No Target segment defined for Play %s or Rating Engine %s",
+                    play.getName(), ratingEngine.getId()));
+        }
+
+        String segmentName = segment.getName();
+
+        Table recommendationTable = metadataProxy.getTable(tenant.getId(), playLaunch.getTableName());
+        Schema schema = TableUtils.createSchema(playLaunch.getTableName(), recommendationTable);
+        RatingModel publishedIteration = null;
+        String modelId = null;
+        String ratingId = null;
+        if (ratingEngine != null) {
+            publishedIteration = ratingEngine.getPublishedIteration();
+            modelId = publishedIteration.getId();
+            ratingId = ratingEngine.getId();
+        }
+        log.info(String.format("Processing segment: %s", segmentName));
+
+        playLaunchContextBuilder //
+                .customerSpace(customerSpace) //
+                .tenant(tenant) //
+                .launchTimestampMillis(launchTimestampMillis) //
+                .playName(playName) //
+                .play(play) //
+                .playLaunchId(playLaunchId) //
+                .playLaunch(playLaunch) //
+                .ratingId(ratingId) //
+                .ratingEngine(ratingEngine) //
+                .publishedIterationId(modelId) //
+                .publishedIteration(publishedIteration) //
+                .segmentName(segmentName) //
+                .segment(segment) //
+                .accountFrontEndQuery(new FrontEndQuery()) //
+                .contactFrontEndQuery(new FrontEndQuery()) //
+                .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
+                .fieldMappingMetadata(fieldMappingMetadata) //
+                .counter(new Counter()) //
+                .recommendationTable(recommendationTable) //
+                .schema(schema);
+
+        return playLaunchContextBuilder.build();
+    }
+
+    public PlayLaunchContext initPlayLaunchContext(Tenant tenant, DeltaCampaignLaunchInitStepConfiguration config) {
         PlayLaunchContextBuilder playLaunchContextBuilder = new PlayLaunchContextBuilder();
 
         CustomerSpace customerSpace = config.getCustomerSpace();

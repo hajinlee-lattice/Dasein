@@ -46,18 +46,18 @@ object CreateDeltaRecommendationsJob {
 
   def createRec(account: Row, serializedCtx: String): Recommendation = {
 
-    val playLaunchContext = JsonUtils.deserialize(serializedCtx, classOf[PlayLaunchSparkContext])
+    val deltaCampaignLaunchSparkContext = JsonUtils.deserialize(serializedCtx, classOf[DeltaCampaignLaunchSparkContext])
 
-    val launchTimestampMillis: Long = playLaunchContext.getLaunchTimestampMillis
-    val playId: String = playLaunchContext.getPlayName
-    val playLaunchId: String = playLaunchContext.getPlayLaunchId
-    val tenantId: Long = playLaunchContext.getTenantPid
+    val launchTimestampMillis: Long = deltaCampaignLaunchSparkContext.getLaunchTimestampMillis
+    val playId: String = deltaCampaignLaunchSparkContext.getPlayName
+    val playLaunchId: String = deltaCampaignLaunchSparkContext.getPlayLaunchId
+    val tenantId: Long = deltaCampaignLaunchSparkContext.getTenantPid
     val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
     val externalAccountId: String = accountId
     val uuid: String = UUID.randomUUID().toString
-    val description: String = playLaunchContext.getPlayDescription
-    val ratingModelId: String = playLaunchContext.getModelId
-    val modelSummaryId: String = playLaunchContext.getModelSummaryId
+    val description: String = deltaCampaignLaunchSparkContext.getPlayDescription
+    val ratingModelId: String = deltaCampaignLaunchSparkContext.getModelId
+    val modelSummaryId: String = deltaCampaignLaunchSparkContext.getModelSummaryId
 
     var synchronizationDestination: String = null
     var destinationOrgId: String = null
@@ -72,27 +72,27 @@ object CreateDeltaRecommendationsJob {
     var priorityDisplayName: String = null
     var launchTime: Option[Long] = None
 
-    if (playLaunchContext.getCreated != null) {
-      launchTime = Some(playLaunchContext.getCreated.getTime)
+    if (deltaCampaignLaunchSparkContext.getCreated != null) {
+      launchTime = Some(deltaCampaignLaunchSparkContext.getCreated.getTime)
     } else {
       launchTime = Some(launchTimestampMillis)
     }
 
     val sfdcAccountId: String =
-      if (playLaunchContext.getSfdcAccountID == null)
+      if (deltaCampaignLaunchSparkContext.getSfdcAccountID == null)
         null
       else
-        checkAndGet(account, playLaunchContext.getSfdcAccountID)
+        checkAndGet(account, deltaCampaignLaunchSparkContext.getSfdcAccountID)
 
     var companyName: String = checkAndGet(account, InterfaceName.CompanyName.name)
     if (StringUtils.isBlank(companyName)) {
       companyName = checkAndGet(account, InterfaceName.LDC_Name.name())
     }
 
-    if (playLaunchContext.getRatingId != null) {
+    if (deltaCampaignLaunchSparkContext.getRatingId != null) {
       score = checkAndGet(account,
-        playLaunchContext.getRatingId + PlaymakerConstants.RatingScoreColumnSuffix)
-      bucketName = checkAndGet(account, playLaunchContext.getRatingId, RatingBucketName.getUnscoredBucketName)
+        deltaCampaignLaunchSparkContext.getRatingId + PlaymakerConstants.RatingScoreColumnSuffix)
+      bucketName = checkAndGet(account, deltaCampaignLaunchSparkContext.getRatingId, RatingBucketName.getUnscoredBucketName)
       if (EnumUtils.isValidEnum(classOf[RatingBucketName], bucketName)) {
         bucket = RatingBucketName.valueOf(bucketName)
       } else {
@@ -100,11 +100,11 @@ object CreateDeltaRecommendationsJob {
       }
       likelihood = if (StringUtils.isNotEmpty(score)) Some(score.toDouble) else Some(getDefaultLikelihood(bucket))
       expectedValue = checkAndGet(account,
-        playLaunchContext.getRatingId + PlaymakerConstants.RatingEVColumnSuffix)
+        deltaCampaignLaunchSparkContext.getRatingId + PlaymakerConstants.RatingEVColumnSuffix)
       monetaryValue = if (StringUtils.isNotEmpty(expectedValue)) Some(expectedValue.toDouble) else None
-      synchronizationDestination = playLaunchContext.getSynchronizationDestination
-      destinationOrgId = playLaunchContext.getDestinationOrgId
-      destinationSysType = playLaunchContext.getDestinationSysType
+      synchronizationDestination = deltaCampaignLaunchSparkContext.getSynchronizationDestination
+      destinationOrgId = deltaCampaignLaunchSparkContext.getDestinationOrgId
+      destinationSysType = deltaCampaignLaunchSparkContext.getDestinationSysType
 
       priorityId =
         if (bucket != null)
@@ -174,20 +174,30 @@ object CreateDeltaRecommendationsJob {
 
 }
 
-class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateRecommendationConfig] {
+class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommendationConfig] {
 
-  override def runJob(spark: SparkSession, lattice: LatticeContext[CreateRecommendationConfig]): Unit = {
-    val config: CreateRecommendationConfig = lattice.config
+  override def runJob(spark: SparkSession, lattice: LatticeContext[CreateDeltaRecommendationConfig]): Unit = {
+    val config: CreateDeltaRecommendationConfig = lattice.config
+    val deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext = config.getDeltaCampaignLaunchSparkContext
+    val joinKey: String = deltaCampaignLaunchSparkContext.getJoinKey
+    val playId: String = deltaCampaignLaunchSparkContext.getPlayName
+    val playLaunchId: String = deltaCampaignLaunchSparkContext.getPlayLaunchId
+    val ratingId: String = deltaCampaignLaunchSparkContext.getRatingId
+    val tenantId: Long = deltaCampaignLaunchSparkContext.getTenantPid
+    val accountColsRecIncluded: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecIncluded != null ) deltaCampaignLaunchSparkContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
+    val accountColsRecNotIncludedStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
+    val accountColsRecNotIncludedNonStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
+    val contactCols: Seq[String] = if (deltaCampaignLaunchSparkContext.getContactCols != null) deltaCampaignLaunchSparkContext.getContactCols.asScala else Seq.empty[String]
     
   }
   
-  private def exportToRecommendationTable(playLaunchContext: PlayLaunchSparkContext, orderedRec: DataFrame) = {
-    val driver = playLaunchContext.getDataDbDriver()
-    val url = playLaunchContext.getDataDbUrl()
-    val user = playLaunchContext.getDataDbUser()
-    val pw = playLaunchContext.getDataDbPassword()
-    val saltHint = playLaunchContext.getSaltHint()
-    val encryptionKey = playLaunchContext.getEncryptionKey()
+  private def exportToRecommendationTable(deltaCampaignLaunchSparkContext: PlayLaunchSparkContext, orderedRec: DataFrame) = {
+    val driver = deltaCampaignLaunchSparkContext.getDataDbDriver()
+    val url = deltaCampaignLaunchSparkContext.getDataDbUrl()
+    val user = deltaCampaignLaunchSparkContext.getDataDbUser()
+    val pw = deltaCampaignLaunchSparkContext.getDataDbPassword()
+    val saltHint = deltaCampaignLaunchSparkContext.getSaltHint()
+    val encryptionKey = deltaCampaignLaunchSparkContext.getEncryptionKey()
     val prop = new java.util.Properties
     prop.setProperty("driver", driver)
     prop.setProperty("user", user)
@@ -208,11 +218,11 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateRecommendatio
                      .withColumnRenamed("LAST_UPDATED_TIMESTAMP_DATE", "LAST_UPDATED_TIMESTAMP")
   }
 
-  private def generateUserConfiguredDataFrame(finalRecommendations: DataFrame, accountTable: DataFrame, playLaunchContext: PlayLaunchSparkContext, joinKey: String): DataFrame = {
-    val accountColsRecIncluded: Seq[String] = if (playLaunchContext.getAccountColsRecIncluded != null ) playLaunchContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
-    val accountColsRecNotIncludedStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedStd != null) playLaunchContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
-    val accountColsRecNotIncludedNonStd: Seq[String] = if (playLaunchContext.getAccountColsRecNotIncludedNonStd != null) playLaunchContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
-    val contactCols: Seq[String] = if (playLaunchContext.getContactCols != null) playLaunchContext.getContactCols.asScala else Seq.empty[String]
+  private def generateUserConfiguredDataFrame(finalRecommendations: DataFrame, accountTable: DataFrame, deltaCampaignLaunchSparkContext: PlayLaunchSparkContext, joinKey: String): DataFrame = {
+    val accountColsRecIncluded: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecIncluded != null ) deltaCampaignLaunchSparkContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
+    val accountColsRecNotIncludedStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
+    val accountColsRecNotIncludedNonStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
+    val contactCols: Seq[String] = if (deltaCampaignLaunchSparkContext.getContactCols != null) deltaCampaignLaunchSparkContext.getContactCols.asScala else Seq.empty[String]
     logSpark("Four categories of column metadata are as follows:")
     println(accountColsRecIncluded)
     println(accountColsRecNotIncludedStd)
@@ -264,13 +274,13 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateRecommendatio
     if (accountColsRecNotIncludedNonStd.nonEmpty) {
       for (name <- accountColsRecNotIncludedNonStd) {
         if (name == NonStandardRecColumnName.DESTINATION_SYS_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getDestinationOrgName).cast(StringType))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(deltaCampaignLaunchSparkContext.getDestinationOrgName).cast(StringType))
         } else if (name == NonStandardRecColumnName.PLAY_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getPlayDisplayName).cast(StringType))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(deltaCampaignLaunchSparkContext.getPlayDisplayName).cast(StringType))
         } else if (name == NonStandardRecColumnName.RATING_MODEL_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getRatingEngineDisplayName).cast(StringType))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(deltaCampaignLaunchSparkContext.getRatingEngineDisplayName).cast(StringType))
         } else if (name == NonStandardRecColumnName.SEGMENT_NAME.name) {
-          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(playLaunchContext.getSegmentDisplayName).cast(StringType))
+          userConfiguredDataFrame = userConfiguredDataFrame.withColumn(name, lit(deltaCampaignLaunchSparkContext.getSegmentDisplayName).cast(StringType))
         }
       }
     }

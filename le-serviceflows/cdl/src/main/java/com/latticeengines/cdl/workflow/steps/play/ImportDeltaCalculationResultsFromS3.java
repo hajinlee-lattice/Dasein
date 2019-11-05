@@ -50,7 +50,7 @@ public class ImportDeltaCalculationResultsFromS3
                 if (table == null) {
                     throw new RuntimeException("Table " + tblName + " for customer " //
                             + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
-                            + " in attr repo does not exists.");
+                            + " does not exists.");
                 }
                 addTableToRequestForImport(table, requests);
             });
@@ -83,6 +83,10 @@ public class ImportDeltaCalculationResultsFromS3
         if (AudienceType.ACCOUNTS == audienceType) {
             if (StringUtils.isNotEmpty(addAccounts)) {
                 totalDfs += 2; // add csv and recommendation csv
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_RECOMMENDATION_DATA_FRAME,
+                        Boolean.toString(true));
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME,
+                        Boolean.toString(true));
                 tableNames.add(addAccounts);
                 if (StringUtils.isNotEmpty(addContacts)) {
                     tableNames.add(addContacts);
@@ -93,6 +97,8 @@ public class ImportDeltaCalculationResultsFromS3
             }
             if (StringUtils.isNotEmpty(delAccounts)) {
                 totalDfs += 1; // delete csv
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME,
+                        Boolean.toString(true));
                 tableNames.add(delAccounts);
                 if (StringUtils.isNotEmpty(delContacts)) {
                     tableNames.add(delContacts);
@@ -102,6 +108,10 @@ public class ImportDeltaCalculationResultsFromS3
             if (StringUtils.isNotEmpty(addContacts)) {
                 if (StringUtils.isNotEmpty(addAccounts) && StringUtils.isNotEmpty(completeContacts)) {
                     totalDfs += 2; // add csv and recommendation csv
+                    putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_RECOMMENDATION_DATA_FRAME,
+                            Boolean.toString(true));
+                    putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME,
+                            Boolean.toString(true));
                     tableNames.add(addContacts);
                     tableNames.add(addAccounts);
                     tableNames.add(completeContacts);
@@ -112,6 +122,8 @@ public class ImportDeltaCalculationResultsFromS3
             if (StringUtils.isNotEmpty(delContacts)) {
                 if (StringUtils.isNotEmpty(delAccounts)) {
                     totalDfs += 1;
+                    putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME,
+                            Boolean.toString(true));
                     tableNames.add(delContacts);
                     tableNames.add(delAccounts);
                 } else {
@@ -124,6 +136,9 @@ public class ImportDeltaCalculationResultsFromS3
 
         log.info(String.format("totalDfs=%d, tableNames=%s", totalDfs, Arrays.toString(tableNames.toArray())));
         putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM, String.valueOf(totalDfs));
+        if (totalDfs == 0) {
+            throw new RuntimeException("There is nothing to be launched.");
+        }
 
         return tableNames;
     }

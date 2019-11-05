@@ -23,6 +23,9 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
     public static final String DATA_FRAME_NUM = "DATA_FRAME_NUM";
+    public static final String CREATE_RECOMMENDATION_DATA_FRAME = "CREATE_RECOMMENDATION_DATA_FRAME";
+    public static final String CREATE_ADD_CSV_DATA_FRAME = "CREATE_ADD_CSV_DATA_FRAME";
+    public static final String CREATE_DELETE_CSV_DATA_FRAME = "CREATE_DELETE_CSV_DATA_FRAME";
 
     public static class Builder {
         private DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration();
