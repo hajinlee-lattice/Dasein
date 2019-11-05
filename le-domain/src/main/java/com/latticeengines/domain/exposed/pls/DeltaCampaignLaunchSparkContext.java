@@ -120,14 +120,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("EncryptionKey")
     private String encryptionKey;
 
-    @JsonProperty("CreateRecommendationDataframe")
-    private boolean createRecommendationDataframe;
+    @JsonProperty("CreateRecommendationDataFrame")
+    private boolean createRecommendationDataFrame;
 
-    @JsonProperty("CreateAddCsvDataframe")
-    private boolean createAddCsvDataframe;
+    @JsonProperty("CreateAddCsvDataFrame")
+    private boolean createAddCsvDataFrame;
 
-    @JsonProperty("CreateDeleteCsvDataframe")
-    private boolean createDeleteCsvDataframe;
+    @JsonProperty("CreateDeleteCsvDataFrame")
+    private boolean createDeleteCsvDataFrame;
 
     public DeltaCampaignLaunchSparkContext() {
     }
@@ -381,28 +381,28 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         this.encryptionKey = encryptionKey;
     }
 
-    public boolean getCreateRecommendationDataframe() {
-        return this.createRecommendationDataframe;
+    public boolean getCreateRecommendationDataFrame() {
+        return this.createRecommendationDataFrame;
     }
 
-    public void setCreateRecommendationDataframe(boolean createRecommendationDataframe) {
-        this.createRecommendationDataframe = createRecommendationDataframe;
+    public void setCreateRecommendationDataFrame(boolean createRecommendationDataFrame) {
+        this.createRecommendationDataFrame = createRecommendationDataFrame;
     }
 
-    public boolean getCreateAddCsvDataframe() {
-        return this.createAddCsvDataframe;
+    public boolean getCreateAddCsvDataFrame() {
+        return this.createAddCsvDataFrame;
     }
 
-    public void setCreateAddCsvDataframe(boolean createAddCsvDataframe) {
-        this.createAddCsvDataframe = createAddCsvDataframe;
+    public void setCreateAddCsvDataFrame(boolean createAddCsvDataFrame) {
+        this.createAddCsvDataFrame = createAddCsvDataFrame;
     }
 
-    public boolean getCreateDeleteCsvDataframe() {
-        return this.createDeleteCsvDataframe;
+    public boolean getCreateDeleteCsvDataFrame() {
+        return this.createDeleteCsvDataFrame;
     }
 
-    public void setCreateDeleteCsvDataframe(boolean createDeleteCsvDataframe) {
-        this.createDeleteCsvDataframe = createDeleteCsvDataframe;
+    public void setCreateDeleteCsvDataFrame(boolean createDeleteCsvDataFrame) {
+        this.createDeleteCsvDataFrame = createDeleteCsvDataFrame;
     }
 
     private void setSyncDestination(PlayLaunch playLaunch) {

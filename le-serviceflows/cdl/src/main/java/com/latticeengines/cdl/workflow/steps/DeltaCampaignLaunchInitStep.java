@@ -131,15 +131,15 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setEncryptionKey(encryptionKey);
         deltaCampaignLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword, encryptionKey, saltHint));
 
-        boolean createRecommendationDataframe = Boolean.toString(true).equals(
+        boolean createRecommendationDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_RECOMMENDATION_DATA_FRAME));
-        deltaCampaignLaunchSparkContext.setCreateRecommendationDataframe(createRecommendationDataframe);
-        boolean createAddCsvDataframe = Boolean.toString(true)
+        deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
+        boolean createAddCsvDataFrame = Boolean.toString(true)
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
-        deltaCampaignLaunchSparkContext.setCreateAddCsvDataframe(createAddCsvDataframe);
-        boolean createDeleteCsvDataframe = Boolean.toString(true).equals(
+        deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
+        boolean createDeleteCsvDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
-        deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataframe(createDeleteCsvDataframe);
+        deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
 
         sparkConfig.setDeltaCampaignLaunchSparkContext(deltaCampaignLaunchSparkContext);
 
