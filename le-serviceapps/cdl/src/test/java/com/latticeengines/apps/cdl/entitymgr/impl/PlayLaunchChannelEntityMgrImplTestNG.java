@@ -285,6 +285,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel1.setIsAlwaysOn(true);
         channel1.setCronScheduleExpression(CRON_EXPRESSION);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved.getCronScheduleExpression());
         Assert.assertNotNull(retrieved.getNextScheduledLaunch());
         Assert.assertNotNull(retrieved.getExpirationDate());
 
