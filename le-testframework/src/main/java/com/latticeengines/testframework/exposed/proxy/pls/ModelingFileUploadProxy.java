@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -17,6 +20,8 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 
 @Service("modelingFileUploadProxy")
 public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelingFileUploadProxy.class);
 
     public ModelingFileUploadProxy() {
         super("pls/models/uploadfile");
@@ -77,7 +82,15 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
         parts.add("file", fileResource);
         ResponseDocument<?> resp = postMultiPart("upload file", url, parts, ResponseDocument.class);
         if (resp.isSuccess()) {
-            return JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), SourceFile.class);
+            SourceFile sourceFile = JsonUtils.deserialize(JsonUtils.serialize(resp.getResult()), SourceFile.class);
+            if (StringUtils.isNotEmpty(sourceFile.getPath())) {
+                try {
+                    sourceFile.setPath(CipherUtils.decrypt(sourceFile.getPath()));
+                } catch (Exception e) {
+                    log.error("Cannot decrypt path.");
+                }
+            }
+            return sourceFile;
         } else {
             throw new RuntimeException("Failed to upload file: " + StringUtils.join(resp.getErrors(), ","));
         }

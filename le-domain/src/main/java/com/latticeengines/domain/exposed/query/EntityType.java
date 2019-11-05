@@ -7,23 +7,26 @@ import java.util.Set;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public enum EntityType {
-    Accounts(BusinessEntity.Account, null, "Accounts", "AccountData"), //
-    Contacts(BusinessEntity.Contact, null, "Contacts", "ContactData"), //
-    Leads(BusinessEntity.Contact, SubType.Lead, "Leads", "LeadsData"),
-    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases", "TransactionData"), //
-    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles", "ProductBundle"), //
-    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy", "ProductHierarchy"),
-    WebVisit(BusinessEntity.ActivityStream, null, "Web Visit", "WebVisitData"),
-    WebVisitPathPattern(BusinessEntity.Catalog, null, "Website Path", "WebVisitPathPattern"), //
-    WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Visit Source", "WebVisitSourceMedium");
+    Accounts(BusinessEntity.Account, null, "Accounts", "AccountData", SchemaInterpretation.Account), //
+    Contacts(BusinessEntity.Contact, null, "Contacts", "ContactData", SchemaInterpretation.Contact), //
+    Leads(BusinessEntity.Contact, SubType.Lead, "Leads", "LeadsData", SchemaInterpretation.Contact),
+    ProductPurchases(BusinessEntity.Transaction, null, "Product Purchases", "TransactionData", SchemaInterpretation.Transaction), //
+    ProductBundles(BusinessEntity.Product, SubType.Bundle, "Product Bundles", "ProductBundle", SchemaInterpretation.Product), //
+    ProductHierarchy(BusinessEntity.Product, SubType.Hierarchy, "Product Hierarchy", "ProductHierarchy", SchemaInterpretation.Product),
+    WebVisit(BusinessEntity.ActivityStream, null, "Web Visit", "WebVisitData", SchemaInterpretation.WebVisit),
+    WebVisitPathPattern(BusinessEntity.Catalog, null, "Website Path", "WebVisitPathPattern",
+            SchemaInterpretation.WebVisitPathPattern), //
+    WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Visit Source", "WebVisitSourceMedium",
+            SchemaInterpretation.WebVisitSourceMedium);
 
     private BusinessEntity entity;
     private SubType subType;
     private String displayName;
     private String feedType;
-    //private Pattern feedTypePattern; // for future System(group(1)) match & default feedType name (group(2))
+    private SchemaInterpretation schemaInterpretation;
 
     private static List<String> names;
     static {
@@ -33,12 +36,12 @@ public enum EntityType {
         }
     }
 
-    EntityType(BusinessEntity entity, SubType subType, String displayName, String feedType) {
+    EntityType(BusinessEntity entity, SubType subType, String displayName, String feedType, SchemaInterpretation schemaInterpretation) {
         this.entity = entity;
         this.subType = subType;
         this.displayName = displayName;
         this.feedType = feedType;
-//        this.feedTypePattern = Pattern.compile(feedTypeRegex);
+        this.schemaInterpretation = schemaInterpretation;
     }
 
     public static List<String> getNames() {
@@ -103,6 +106,10 @@ public enum EntityType {
 
     public String getDefaultFeedTypeName() {
         return feedType;
+    }
+
+    public SchemaInterpretation getSchemaInterpretation() {
+        return schemaInterpretation;
     }
 
     public static List<String> getDefaultFolders() {
