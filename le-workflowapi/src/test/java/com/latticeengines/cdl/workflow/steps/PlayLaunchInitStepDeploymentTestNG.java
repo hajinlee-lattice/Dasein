@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchInitStepConfiguration;
+import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
@@ -86,6 +87,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @Inject
     RecommendationService recommendationService;
+
+    @Inject
+    private RecommendationEntityMgr recommendationEntityMgr;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -205,12 +209,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
 
-        recommendations.forEach(rec -> {
-            if (log.isDebugEnabled()) {
-                log.debug("Cleaning up recommendation: " + rec.getId());
-            }
-            recommendationService.delete(rec, false);
-        });
+        recommendationEntityMgr.deleteInBulkByLaunchId(rulesBasedPlayLaunch.getId(), false, recommendations.size());
+
         recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
 
         Assert.assertNotNull(recommendations);
