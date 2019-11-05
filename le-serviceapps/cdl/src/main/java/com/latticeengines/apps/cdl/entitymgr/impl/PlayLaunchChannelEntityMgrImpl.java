@@ -150,7 +150,9 @@ public class PlayLaunchChannelEntityMgrImpl
             playLaunchChannel.setExpirationDate(
                     PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(playLaunchChannel));
         }
-
+        if (playLaunchChannel.getMaxAccountsToLaunch() == null || playLaunchChannel.getMaxAccountsToLaunch() < 0) {
+            playLaunchChannel.setMaxAccountsToLaunch(null);
+        }
         playLaunchChannel.setLookupIdMap(lookupIdMap);
         playLaunchChannel.setId(playLaunchChannel.generateChannelId());
         playLaunchChannelDao.create(playLaunchChannel);
@@ -168,7 +170,11 @@ public class PlayLaunchChannelEntityMgrImpl
             existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
         }
         if (updatedChannel.getMaxAccountsToLaunch() != null) {
-            existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
+            if (updatedChannel.getMaxAccountsToLaunch() < 0) {
+                existingPlayLaunchChannel.setMaxAccountsToLaunch(null);
+            } else {
+                existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
+            }
         }
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
