@@ -260,14 +260,15 @@ public class RatingEngineEntityMgrImpl //
                 // Enforce quota limit
                 if (countActiveModelsForTenant >= quotaLimit) {
                     // throw exception
-                    LedpException ledp = new LedpException(LedpCode.LEDP_40074, new String[] {
+                    LedpException tooManyActiveModelsError = new LedpException(LedpCode.LEDP_40074,
+                            new String[] {
                             countActiveModelsForTenant.toString(), quotaLimit.toString() });
                     UIAction uiAction = new UIAction();
                     uiAction.setTitle(GET_ACTIVE_MODELS_ERR_MSG);
                     uiAction.setView(View.Banner);
                     uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(ledp.getMessage());
-                    throw new UIActionException(uiAction, ledp.getCode());
+                    uiAction.setMessage(tooManyActiveModelsError.getMessage());
+                    throw new UIActionException(uiAction, tooManyActiveModelsError.getCode());
                 }
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {
