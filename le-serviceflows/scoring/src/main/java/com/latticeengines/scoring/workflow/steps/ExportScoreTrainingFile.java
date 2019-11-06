@@ -66,8 +66,10 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
         String existingColumns = getConfiguration().getExportInclusionColumns();
 
         Set<String> features = getObjectFromContext(SCORE_TRAINING_FILE_INCLUDED_FEATURES, Set.class);
-        String featureListStr = StringUtils.join(features, ';');
+        if (features == null)//will not be set when it is LPI model
+            return existingColumns;
 
+        String featureListStr = StringUtils.join(features, ';');
         if (!StringUtils.isEmpty(existingColumns))
             return existingColumns + ";" + featureListStr;
         else
