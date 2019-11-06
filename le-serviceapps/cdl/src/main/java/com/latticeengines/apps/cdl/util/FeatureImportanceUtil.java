@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.cdl.util;
+package com.latticeengines.apps.cdl.util;
 
 import java.io.IOException;
 import java.text.MessageFormat;
