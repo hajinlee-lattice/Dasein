@@ -18,11 +18,11 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalcul
 
 public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
-    public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
 
     // avro file path in hdfs
+    public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
     public static final String ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH = "ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH";
     public static final String DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH = "DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH";
     // csv/json file path in hdfs after file generation

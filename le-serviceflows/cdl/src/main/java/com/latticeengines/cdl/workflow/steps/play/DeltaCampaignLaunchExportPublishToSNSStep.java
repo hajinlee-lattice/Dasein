@@ -136,9 +136,4 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         this.dropBoxProxy = dropBoxProxy;
     }
 
-    @VisibleForTesting
-    public void setS3ExportFiles(List<String> exportFiles) {
-        s3ExportFilePaths = exportFiles;
-    }
-
 }

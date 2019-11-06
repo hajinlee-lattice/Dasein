@@ -204,11 +204,19 @@ public class DeltaCampaignLaunchInitStep
         int resultDataFrameNum = result.getTargets().size();
         log.info("resultDataFrameNum=" + resultDataFrameNum);
         if (createAddCsvDataFrame && !createDeleteCsvDataFrame) {
+            String recommendationTargetPath = result.getTargets().get(0).getPath();
+            log.info("recommendationTargetPath: " + recommendationTargetPath);
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(recommendationTargetPath));
             String addCsvTargetPath = result.getTargets().get(1).getPath();
             log.info("addCsvTargetPath: " + addCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(addCsvTargetPath));
         } else if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            String recommendationTargetPath = result.getTargets().get(0).getPath();
+            log.info("recommendationTargetPath: " + recommendationTargetPath);
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(recommendationTargetPath));
             String addCsvTargetPath = result.getTargets().get(1).getPath();
             log.info("addCsvTargetPath: " + addCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
