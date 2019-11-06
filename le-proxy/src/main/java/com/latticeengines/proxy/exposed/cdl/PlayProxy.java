@@ -407,19 +407,13 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return put("update play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
     }
 
-    public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId) {
-        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
-                shortenCustomerSpace(customerSpace), playName, channelId);
-        log.info("url is " + url);
-        return post("Queuing a new PlayLaunch for a given play and channel ", url, null, PlayLaunch.class);
-    }
-
-    public PlayLaunch queueNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId,
-            String addAccountTable, String completeContactsTable, String removeAccountsTable, String addContactsTable,
-            String removeContactsTable, boolean isAutoLaunch) {
+    public PlayLaunch createNewLaunchByPlayChannelAndState(String customerSpace, String playName, String channelId,
+            LaunchState state, String addAccountTable, String completeContactsTable, String removeAccountsTable,
+            String addContactsTable, String removeContactsTable, boolean isAutoLaunch) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
                 shortenCustomerSpace(customerSpace), playName, channelId);
         List<String> params = new ArrayList<>();
+        params.add("state=" + state);
         if (StringUtils.isNotBlank(addAccountTable)) {
             params.add(PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE + "=" + addAccountTable);
         }

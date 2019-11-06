@@ -48,5 +48,6 @@ public class WorkflowContextConstants {
         public static final String DATAFEED_EXECUTION_ID = "DATAFEED_EXECUTION_ID";
         public static final String PLAY_NAME = "PLAY_NAME";
         public static final String PLAY_LAUNCH_ID = "PLAY_LAUNCH_ID";
+        public static final String PLAY_LAUNCH_CHANNEL_ID = "PLAY_LAUNCH_CHANNEL_ID";
     }
 }

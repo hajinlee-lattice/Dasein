@@ -38,4 +38,12 @@ public class HdfsDataUnit extends DataUnit {
         this.path = path;
     }
 
+    @Override
+    public String toString() {
+        String valueSeparator = ": ";
+        String tokenSeparator = ", ";
+        return "{ StorageType: " + valueSeparator + getStorageType().name() + tokenSeparator //
+                + "Path: " + valueSeparator + getPath() + tokenSeparator //
+                + "Count: " + valueSeparator + getCount() + " }";
+    }
 }

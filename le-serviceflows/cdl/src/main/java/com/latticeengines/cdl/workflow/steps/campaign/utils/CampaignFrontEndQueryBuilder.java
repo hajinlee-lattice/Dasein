@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.steps.campaign;
+package com.latticeengines.cdl.workflow.steps.campaign.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public class CampaignFrontEndQueryBuilder {
     private final List<String> contactLookups = Arrays.asList(InterfaceName.ContactId.name(),
             InterfaceName.AccountId.name());
 
-    protected static class Builder {
+    public static class Builder {
 
         private CampaignFrontEndQueryBuilder queryBuilder = new CampaignFrontEndQueryBuilder();
 

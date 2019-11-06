@@ -158,7 +158,8 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return playProxy.queueNewLaunchByPlayAndChannel(tenant.getId(), playName, channelId);
+        return playProxy.createNewLaunchByPlayChannelAndState(tenant.getId(), playName, channelId, LaunchState.Queued, null,
+                null, null, null, null, false);
     }
     // --------
     // Channels

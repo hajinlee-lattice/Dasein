@@ -208,11 +208,11 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
     }
 
-    interface ITestData {
+    interface AvroExportable {
         GenericRecord getAsRecord(Schema schema);
     }
 
-    static class Account implements ITestData {
+    static class Account implements AvroExportable {
         public String getAccountId() {
             return accountId;
         }
@@ -233,7 +233,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
 
     }
 
-    static class Contact implements ITestData {
+    static class Contact implements AvroExportable {
         public String getAccountId() {
             return accountId;
         }
@@ -267,8 +267,8 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends ITestData> void createAvroFromJson(String fileName, String jsonPath, Schema schema,
-            Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
+    private static <T extends AvroExportable> void createAvroFromJson(String fileName, String jsonPath, Schema schema,
+                                                                      Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream tableRegistryStream = classLoader.getResourceAsStream(jsonPath);
         String attributesDoc = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
