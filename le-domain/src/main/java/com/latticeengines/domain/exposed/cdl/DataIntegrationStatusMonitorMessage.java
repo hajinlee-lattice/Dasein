@@ -32,6 +32,9 @@ public class DataIntegrationStatusMonitorMessage {
     @JsonProperty("sourceFile")
     private String sourceFile;
 
+    @JsonProperty("deleteFile")
+    private String deleteFile;
+
     @JsonProperty("messageType")
     private String messageType;
 
@@ -110,6 +113,14 @@ public class DataIntegrationStatusMonitorMessage {
 
     public void setSourceFile(String sourceFile) {
         this.sourceFile = sourceFile;
+    }
+
+    public String getDeleteFile() {
+        return deleteFile;
+    }
+
+    public void setDeleteFile(String deleteFile) {
+        this.deleteFile = deleteFile;
     }
 
     public String getMessageType() {

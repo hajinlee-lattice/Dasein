@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext.DeltaCampaignLaunchSparkContextBuilder;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
@@ -92,6 +94,21 @@ public class PlayLaunchContext {
 
     public PlayLaunchSparkContext toPlayLaunchSparkContext() {
         return new PlayLaunchSparkContextBuilder()//
+                .tenant(this.tenant)//
+                .playName(this.playName)//
+                .playLaunchId(this.playLaunchId)//
+                .playLaunch(this.playLaunch)//
+                .play(this.play)//
+                .ratingEngine(this.ratingEngine)//
+                .segment(this.segment)//
+                .launchTimestampMillis(this.launchTimestampMillis)//
+                .ratingId(this.ratingId)//
+                .publishedIteration(this.publishedIteration)//
+                .build();
+    }
+
+    public DeltaCampaignLaunchSparkContext toDeltaCampaignLaunchSparkContext() {
+        return new DeltaCampaignLaunchSparkContextBuilder()//
                 .tenant(this.tenant)//
                 .playName(this.playName)//
                 .playLaunchId(this.playLaunchId)//
