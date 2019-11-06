@@ -153,8 +153,8 @@ public class IngestionSFTPProviderServiceImpl extends IngestionProviderServiceIm
         }
 
         String fileNamePattern = ingestionVersionService.getFileNamePattern(progress.getVersion(),
-                sftpConfig.getFileNamePrefix(),
-                sftpConfig.getFileNamePostfix(), sftpConfig.getFileExtension(), sftpConfig.getFileTimestamp());
+                sftpConfig.getFileNamePrefix(), sftpConfig.getFileNamePostfix(), sftpConfig.getFileExtension(),
+                sftpConfig.getFileTimestamp());
         List<String> sftpFiles = SftpUtils.getFileNames(sftpConfig, fileNamePattern);
 
         List<String> hdfsFiles = getHdfsFileNamesByExtension(hdfsDir.toString(), sftpConfig.getFileExtension());

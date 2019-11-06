@@ -186,8 +186,11 @@ public class SftpUtils {
         List<String> scanFiles = new ArrayList<>();
         try {
             for (String dir : scanDirs) {
-                dir = getSanityPath(dir, true);
-                Vector<ChannelSftp.LsEntry> files = channel.ls("." + dir);
+                dir = getSanityPath(dir, false);
+                if (StringUtils.isBlank(dir)) {
+                    dir = ".";
+                }
+                Vector<ChannelSftp.LsEntry> files = channel.ls(dir);
                 for (int i = 0; i < files.size(); i++) {
                     ChannelSftp.LsEntry file = files.get(i);
                     if (file.getAttrs().isDir()) {
