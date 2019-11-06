@@ -24,8 +24,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -112,8 +114,10 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
 
         // check whether the step needs to be skipped
-        if (shouldSkipStep(launch == null ? channel.getChannelConfig().getAudienceType()
-                : launch.getChannelConfig().getAudienceType())) {
+        if (shouldSkipStep(
+                launch == null ? channel.getChannelConfig().getAudienceType()
+                        : launch.getChannelConfig().getAudienceType(),
+                channel.getLookupIdMap().getExternalSystemName())) {
             log.info("No Delta Data found, skipping Launch Artifact generation");
             return;
         }
@@ -236,23 +240,11 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     }
 
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
-        log.info(logHDFSDataUnit(tableName, dataUnit));
+        log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         putObjectInContext(contextKey, tableName);
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
-    }
-
-    private String logHDFSDataUnit(String tag, HdfsDataUnit dataUnit) {
-        if (dataUnit == null) {
-            return tag + " data set empty";
-        }
-        String valueSeparator = ": ";
-        String tokenSeparator = ", ";
-        return tag + tokenSeparator //
-                + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSeparator //
-                + "Path: " + valueSeparator + dataUnit.getPath() + tokenSeparator //
-                + "Count: " + valueSeparator + dataUnit.getCount();
     }
 
     private Set<Lookup> buildLookupsByEntity(BusinessEntity mainEntity, List<ColumnMetadata> fieldMappingMetadata) {
@@ -342,43 +334,25 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     }
 
     @SuppressWarnings("unchecked")
-    private boolean shouldSkipStep(AudienceType audienceType) {
+    private boolean shouldSkipStep(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
         Map<String, Long> counts = getObjectFromContext(DELTA_TABLE_COUNTS, Map.class);
-        return MapUtils.isNotEmpty(counts) && //
-                (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
-                        || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
-    }
-
-    private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
-        switch (audienceType) {
-        case ACCOUNTS:
-            return ADDED_ACCOUNTS_DELTA_TABLE;
-        case CONTACTS:
-            return ADDED_CONTACTS_DELTA_TABLE;
+        switch (externalSystemName) {
+        case Salesforce:
+        case Eloqua:
+            return MapUtils.isNotEmpty(counts) && //
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+        case AWS_S3:
+        case Marketo:
+        case Facebook:
+        case LinkedIn:
+        case Outreach:
+            return MapUtils.isNotEmpty(counts) && //
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
+                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
         default:
-            return null;
-        }
-    }
-
-    private String getRemoveDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
-        switch (audienceType) {
-        case ACCOUNTS:
-            return REMOVED_ACCOUNTS_DELTA_TABLE;
-        case CONTACTS:
-            return REMOVED_CONTACTS_DELTA_TABLE;
-        default:
-            return null;
-        }
-    }
-
-    private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
-        switch (audienceType) {
-        case ACCOUNTS:
-            return FULL_ACCOUNTS_UNIVERSE;
-        case CONTACTS:
-            return FULL_CONTACTS_UNIVERSE;
-        default:
-            return null;
+            return MapUtils.isNotEmpty(counts) && //
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
+                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
         }
     }
 
@@ -414,5 +388,45 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             throw new RuntimeException("Cannot find attribute repo in context");
         }
         return attrRepo;
+    }
+
+    private String getHDFSDataUnitLogEntry(String tag, HdfsDataUnit dataUnit) {
+        if (dataUnit == null) {
+            return tag + " data set empty";
+        }
+        return tag + ", " + JsonUtils.serialize(dataUnit);
+    }
+
+    private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return ADDED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return ADDED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
+        }
+    }
+
+    private String getRemoveDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return REMOVED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return REMOVED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
+        }
+    }
+
+    private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return FULL_ACCOUNTS_UNIVERSE;
+        case CONTACTS:
+            return FULL_CONTACTS_UNIVERSE;
+        default:
+            return null;
+        }
     }
 }

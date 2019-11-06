@@ -167,11 +167,11 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         Assert.assertEquals(result.getTargets().get(4).getCount().intValue(), 4);
     }
 
-    interface ITestData {
+    interface AvroExportable {
         GenericRecord getAsRecord(Schema schema);
     }
 
-    static class DeltaAccount implements ITestData {
+    static class DeltaAccount implements AvroExportable {
         public String getAccountId() {
             return accountId;
         }
@@ -192,7 +192,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
 
     }
 
-    static class Account implements ITestData {
+    static class Account implements AvroExportable {
         public String getAccountId() {
             return accountId;
         }
@@ -297,7 +297,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
 
     }
 
-    static class Contact implements ITestData {
+    static class Contact implements AvroExportable {
 
         public String getAccountId() {
             return accountId;
@@ -391,7 +391,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
 
     }
 
-    static class DeltaContact implements ITestData {
+    static class DeltaContact implements AvroExportable {
         public String getAccountId() {
             return accountId;
         }
@@ -425,7 +425,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends ITestData> void createAvroFromJson(String fileName, String jsonPath, Schema schema,
+    private static <T extends AvroExportable> void createAvroFromJson(String fileName, String jsonPath, Schema schema,
             Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream tableRegistryStream = classLoader.getResourceAsStream(jsonPath);
@@ -455,11 +455,6 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         if (dataUnit == null) {
             return;
         }
-        String valueSeparator = ": ";
-        String tokenSeparator = ", ";
-        log.info(tag + tokenSeparator //
-                + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSeparator //
-                + "Path: " + valueSeparator + dataUnit.getPath() + tokenSeparator //
-                + "Count: " + valueSeparator + dataUnit.getCount());
+        log.info(tag + ", " + dataUnit.toString());
     }
 }

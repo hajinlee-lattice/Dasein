@@ -1,7 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +12,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.QueuePlayLaunchesStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -28,21 +33,30 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
     public void execute() {
         // 4) Update current launch universe in the channel for the next delta
         // calculation
-        PlayLaunchChannel channel = playProxy.getChannelById(configuration.getCustomerSpace().getTenantId(),
-                configuration.getPlayId(), configuration.getChannelId());
+        String customerSpace = configuration.getCustomerSpace().getTenantId();
+        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, configuration.getPlayId(),
+                configuration.getChannelId());
+        PlayLaunch launch = null;
+        if (StringUtils.isNotBlank(configuration.getLaunchId())) {
+            launch = playProxy.getPlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId());
+            channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, configuration.getPlayId(),
+                    configuration.getLaunchId());
+
+        }
+
         channel.setCurrentLaunchedAccountUniverseTable(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class));
         channel.setCurrentLaunchedContactUniverseTable(getObjectFromContext(FULL_CONTACTS_UNIVERSE, String.class));
         log.info(String.format(
                 "Updating channel: %s with the FULL_ACCOUNTS_UNIVERSE table: %s and FULL_CONTACTS_UNIVERSE table: %s",
                 configuration.getChannelId(), channel.getCurrentLaunchedAccountUniverseTable(),
                 channel.getCurrentLaunchedContactUniverseTable()));
-        playProxy.updatePlayLaunchChannel(configuration.getCustomerSpace().getTenantId(), configuration.getPlayId(),
-                configuration.getChannelId(), channel, false);
+        playProxy.updatePlayLaunchChannel(customerSpace, configuration.getPlayId(), configuration.getChannelId(),
+                channel, false);
 
-        log.info("Queueing the scheduled PlayLaunch");
-        if (StringUtils.isNotBlank(configuration.getLaunchId())) {
-            PlayLaunch launch = playProxy.getPlayLaunch(configuration.getCustomerSpace().getTenantId(),
-                    configuration.getPlayId(), configuration.getLaunchId());
+        boolean deltaFound = wasDeltaDataFound(channel.getChannelConfig().getAudienceType(),
+                channel.getLookupIdMap().getExternalSystemName());
+
+        if (deltaFound) {
             if (launch != null && launch.getLaunchState() == LaunchState.UnLaunched) {
                 launch.setAddAccountsTable(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class));
                 launch.setCompleteContactsTable(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class));
@@ -50,8 +64,8 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 launch.setRemoveAccountsTable(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class));
                 launch.setRemoveContactsTable(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
                 launch.setLaunchState(LaunchState.Queued);
-                playProxy.updatePlayLaunch(configuration.getCustomerSpace().getTenantId(), configuration.getPlayId(),
-                        configuration.getLaunchId(), launch);
+                playProxy.updatePlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId(),
+                        launch);
                 log.info("Updated the scheduled Launch: " + configuration.getLaunchId() + " with delta tables ("
                         + getDeltaTables() + ")");
             } else if (launch != null && launch.getLaunchState() != LaunchState.UnLaunched) {
@@ -63,7 +77,16 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 queueNewLaunch();
             }
         } else {
-            queueNewLaunch();
+            if (launch != null) {
+                log.info(String.format(
+                        "No Delta Found: Marking existing launch (%s) as cancelled since no delta found for launch",
+                        configuration.getLaunchId()));
+                playProxy.updatePlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId(),
+                        LaunchState.Canceled);
+            } else {
+                log.info(String.format("No Delta Found: No launch queued for play %s, channel %s ",
+                        configuration.getPlayId(), configuration.getChannelId()));
+            }
         }
 
         playProxy.setNextScheduledTimeForChannel(configuration.getCustomerSpace().toString(), configuration.getPlayId(),
@@ -71,8 +94,8 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
     }
 
     private void queueNewLaunch() {
-        PlayLaunch launch = playProxy.queueNewLaunchByPlayAndChannel(configuration.getCustomerSpace().toString(),
-                configuration.getPlayId(), configuration.getChannelId(),
+        PlayLaunch launch = playProxy.createNewLaunchByPlayChannelAndState(configuration.getCustomerSpace().toString(),
+                configuration.getPlayId(), configuration.getChannelId(), LaunchState.Queued,
                 getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class),
                 getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class),
                 getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class),
@@ -98,6 +121,48 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 + (StringUtils.isNotBlank(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
                         ? ("AddedAccounts: " + getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
                         : "");
+    }
 
+    @SuppressWarnings("unchecked")
+    private boolean wasDeltaDataFound(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
+        Map<String, Long> counts = getObjectFromContext(DELTA_TABLE_COUNTS, Map.class);
+        switch (externalSystemName) {
+        case Salesforce:
+        case Eloqua:
+            return MapUtils.isNotEmpty(counts) && //
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+        case AWS_S3:
+        case Marketo:
+        case Facebook:
+        case LinkedIn:
+        case Outreach:
+            return MapUtils.isNotEmpty(counts) && //
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
+                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+        default:
+            return false;
+        }
+    }
+
+    private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return ADDED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return ADDED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
+        }
+    }
+
+    private String getRemoveDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+        case ACCOUNTS:
+            return REMOVED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return REMOVED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
+        }
     }
 }

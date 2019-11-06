@@ -30,6 +30,7 @@ import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CampaignLaunchWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.DeltaCampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -86,6 +87,9 @@ public class PlayResource {
 
     @Inject
     private CampaignLaunchWorkflowSubmitter campaignLaunchWorkflowSubmitter;
+
+    @Inject
+    private DeltaCampaignLaunchWorkflowSubmitter deltaCampaignLaunchWorkflowSubmitter;
 
     @Inject
     private CampaignDeltaCalculationWorkflowSubmitter campaignDeltaCalculationWorkflowSubmitter;
@@ -257,8 +261,8 @@ public class PlayResource {
             if (playLaunchChannel.getLaunchType() != null && playLaunchChannel.getLaunchType() == LaunchType.DELTA
                     && batonService.isEnabled(CustomerSpace.parse(customerSpace),
                             LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
-                launch = playLaunchChannelService.createNewLaunchForChannel(playLaunchChannel.getPlay(),
-                        playLaunchChannel);
+                launch = playLaunchChannelService.createNewLaunchForChannelByState(playLaunchChannel.getPlay(),
+                        playLaunchChannel, LaunchState.UnLaunched, false);
                 Long workflowId = schedule(customerSpace, playName, channelId, launch.getLaunchId());
                 log.info(String.format(
                         "Scheduled Delta Calculation workflow for Play: %s, Channel: %s and Launch: %s with WorkflowPID: %s",
@@ -285,9 +289,10 @@ public class PlayResource {
     @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Queue a new Play launch for a given play, channel with delta tables")
-    public PlayLaunch queueNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
+    public PlayLaunch createLaunchByPlayChannelAndState(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId, //
+            @RequestParam(value = "state") LaunchState state, //
             @RequestParam(value = PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE, required = false) String addAccountsTable, //
             @RequestParam(value = PlayUtils.COMPLETE_CONTACTS_TABLE, required = false) String completeContactsTable, //
             @RequestParam(value = PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE, required = false) String removeAccountsTable, //
@@ -322,8 +327,8 @@ public class PlayResource {
     public String kickOffWorkflowFromChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
-        PlayLaunch playLaunch = queueNewLaunchByPlayAndChannel(customerSpace, playName, channelId, null, null, null,
-                null, null, false);
+        PlayLaunch playLaunch = createLaunchByPlayChannelAndState(customerSpace, playName, channelId,
+                LaunchState.Queued, null, null, null, null, null, false);
         return kickOffLaunch(customerSpace, playName, playLaunch.getId());
     }
 
@@ -467,8 +472,22 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { String
                     .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
         }
+
+        if (batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)
+                && hasDeltaTables(playLaunch)) {
+            return deltaCampaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
+        }
+
         return campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
 
+    }
+
+    private boolean hasDeltaTables(PlayLaunch playLaunch) {
+        return (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())
+                && StringUtils.isNotBlank(playLaunch.getCompleteContactsTable()))
+                || StringUtils.isNotBlank(playLaunch.getAddContactsTable())
+                || StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())
+                || StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable());
     }
 
     @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
