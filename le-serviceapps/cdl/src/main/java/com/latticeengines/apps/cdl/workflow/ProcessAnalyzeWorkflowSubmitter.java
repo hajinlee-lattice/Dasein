@@ -236,6 +236,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         try {
             Set<BusinessEntity> needDeletedEntity = new HashSet<>();
             List<Action> actions = actionService.findByOwnerId(null);
+            validateHardDelete(actions, request.getFullRematch());
             List<Action> completedActions = getCompletedActions(customerSpace, actions, needDeletedEntity);
             List<Long> actionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
@@ -1164,5 +1165,22 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         cleanTask.setUniqueId(task.getUniqueId());
         cleanTask.setIngestionBehavior(task.getIngestionBehavior());
         return cleanTask;
+    }
+
+    private void validateHardDelete(List<Action> actions, Boolean isFullRematch) {
+        if (hasHardDelete(actions) && !Boolean.TRUE.equals(isFullRematch)) {
+            throw new IllegalStateException("FullRematch flag is false, cannot submit PA, hardDelete should come up " +
+                    "with " +
+                    "FullRematch Flag");
+        }
+    }
+
+    private boolean hasHardDelete(List<Action> actions) {
+        for (Action action : actions) {
+            if (ActionType.HARD_DELETE.equals(action.getType())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
