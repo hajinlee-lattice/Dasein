@@ -187,7 +187,7 @@ public class SftpUtils {
         try {
             for (String dir : scanDirs) {
                 dir = getSanityPath(dir, false);
-                if (dir.isEmpty()) {
+                if (StringUtils.isBlank(dir)) {
                     dir = ".";
                 }
                 Vector<ChannelSftp.LsEntry> files = channel.ls(dir);
