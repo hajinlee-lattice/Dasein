@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.datacloud.ingestion;
 
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,18 +25,34 @@ public class SftpConfiguration extends ProviderConfiguration {
     @JsonProperty("SftpDir")
     private String sftpDir;
 
+    // When backtracking versions to check missing files, the number of versions
+    // is defined by day, week or month, or all -- checking all the versions
+    // with {@link #checkVersion} ignored
     @JsonProperty("CheckStrategy")
     private VersionCheckStrategy checkStrategy;
 
+    // When checking missing files, only look at files with specific extension;
+    // Must provide; Currently only allow single kind of extension
     @JsonProperty("FileExtension")
     private String fileExtension;
 
+    // Filename prefix is filename part before timestamp section; When checking
+    // missing files, only look at files with prefix satisfying specific regex;
+    // If no such restriction, fine to not provide
     @JsonProperty("FileNamePrefix")
     private String fileNamePrefix;
 
+    // Filename prefix is filename part (excluding extension) after timestamp
+    // section; When checking missing files, only look at files with postfix
+    // satisfying specific regex; If no such restriction, fine to not provide
     @JsonProperty("FileNamePostfix")
     private String fileNamePostfix;
 
+    // Only effective when {@link #checkStrategy} is not ALL; If {@link
+    // #checkStrategy} is not ALL, version info must be provided in either file
+    // name or subfolder name;
+    // If file version is defined in file name, provide timestamp format string,
+    // eg. yyyy-MM-dd
     @JsonProperty("FileTimestamp")
     private String fileTimestamp;
 
@@ -96,6 +114,10 @@ public class SftpConfiguration extends ProviderConfiguration {
     }
 
     public String getFileExtension() {
+        Preconditions.checkNotNull(fileExtension);
+        if (!fileExtension.startsWith(".")) {
+            fileExtension = "." + fileExtension;
+        }
         return fileExtension;
     }
 
@@ -104,7 +126,7 @@ public class SftpConfiguration extends ProviderConfiguration {
     }
 
     public String getFileNamePrefix() {
-        return fileNamePrefix;
+        return fileNamePrefix == null ? "(.*)" : fileNamePrefix;
     }
 
     public void setFileNamePrefix(String fileNamePrefix) {
@@ -112,7 +134,7 @@ public class SftpConfiguration extends ProviderConfiguration {
     }
 
     public String getFileNamePostfix() {
-        return fileNamePostfix;
+        return fileNamePostfix == null ? "(.*)" : fileNamePostfix;
     }
 
     public void setFileNamePostfix(String fileNamePostfix) {
@@ -120,7 +142,7 @@ public class SftpConfiguration extends ProviderConfiguration {
     }
 
     public String getFileTimestamp() {
-        return fileTimestamp;
+        return fileTimestamp == null ? "" : fileTimestamp;
     }
 
     public void setFileTimestamp(String fileTimestamp) {

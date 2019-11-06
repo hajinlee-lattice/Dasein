@@ -2,10 +2,19 @@ package com.latticeengines.domain.exposed.datacloud.ingestion;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Usually API based data provider provides 2 API, one is to get current version
+ * information (currently only support timestamp based version), the other is to
+ * deliver file.
+ */
 public class ApiConfiguration extends ProviderConfiguration {
+    // API to get current version info
     private String versionUrl;
+    // Timestamp format
     private String versionFormat;
+    // API to get file
     private String fileUrl;
+    // Filename (currently only support static file name)
     private String fileName;
 
     @JsonProperty("VersionUrl")
@@ -46,9 +55,5 @@ public class ApiConfiguration extends ProviderConfiguration {
     @JsonProperty("FileName")
     public void setFileName(String fileName) {
         this.fileName = fileName;
-    }
-
-    public enum ApiType {
-        GET, POST
     }
 }

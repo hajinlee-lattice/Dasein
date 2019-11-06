@@ -13,11 +13,25 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = BWRawConfiguration.class, name = "BWRawConfiguration"),
         @JsonSubTypes.Type(value = PatchBookConfiguration.class, name = "PatchBookConfiguration"), })
 public abstract class ProviderConfiguration {
-    protected Integer concurrentNum;
-    protected Integer checkVersion;
-    protected boolean emailEnabled;
-    protected String notifyEmail;
+
+    // Names of subclass extending ProviderConfiguration
     private String className;
+
+    // For single version of ingestion which has multiple files, number of files
+    // to download concurrently
+    protected Integer concurrentNum;
+
+    // When looking for missing files to ingest, number of target versions to
+    // backtrack
+    protected Integer checkVersion;
+
+    // If a version is finished/failed, whether to send email for notification
+    protected boolean emailEnabled;
+
+    // Only effective when EmailEnabled is true. Email to send notification for
+    // ingestion status
+    protected String notifyEmail;
+
 
     public ProviderConfiguration() {
         setClassName(getClass().getSimpleName());

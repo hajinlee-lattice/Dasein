@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.datacloud.ingestion.VersionCheckStrategy;
 
 public class VersionUtils {
@@ -45,6 +46,7 @@ public class VersionUtils {
         if (checkStrategy == VersionCheckStrategy.ALL) {
             return paths;
         }
+        Preconditions.checkNotNull(nPeriod);
         String tsRegex = tsPattern.replace("d", "\\d").replace("y", "\\d").replace("M", "\\d");
         Pattern pattern = Pattern.compile(tsRegex);
         List<String> result = new ArrayList<>();
