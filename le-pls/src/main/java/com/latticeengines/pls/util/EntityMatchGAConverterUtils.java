@@ -70,28 +70,11 @@ public class EntityMatchGAConverterUtils {
         if (fieldMappingDocument == null || CollectionUtils.isEmpty(fieldMappingDocument.getFieldMappings())) {
             return;
         }
-        boolean containsAccountId = false;
-        boolean containsContactId = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
-                containsAccountId = true;
-            }
-            if (InterfaceName.ContactId.name().equals(fieldMapping.getMappedField())) {
-                containsContactId = true;
-            }
-        }
-        if (containsAccountId) {
-            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
-                    fieldMapping.setMappedField(InterfaceName.CustomerAccountId.name());
-                }
-            }
-        }
-        if (containsContactId) {
-            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                if (InterfaceName.ContactId.name().equals(fieldMapping.getMappedField())) {
-                    fieldMapping.setMappedField(InterfaceName.CustomerContactId.name());
-                }
+                fieldMapping.setMappedField(InterfaceName.CustomerAccountId.name());
+            } else if (InterfaceName.ContactId.name().equals(fieldMapping.getMappedField())) {
+                fieldMapping.setMappedField(InterfaceName.CustomerContactId.name());
             }
         }
     }

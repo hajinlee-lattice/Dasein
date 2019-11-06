@@ -63,6 +63,8 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.View;
+import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
@@ -139,7 +141,12 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,
             @RequestBody(required = false) ModelingParameters parameters) {
         if (!StringUtils.isEmpty(entity)) {
-            schemaInterpretation = SchemaInterpretation.getByName(entity);
+            EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
+            if (entityType != null) {
+                schemaInterpretation = entityType.getSchemaInterpretation();
+            } else {
+                schemaInterpretation = SchemaInterpretation.getByName(entity);
+            }
         }
         boolean hasCgProduct = batonService.hasProduct(MultiTenantContext.getCustomerSpace(),
                 LatticeProduct.CG);
@@ -203,7 +210,13 @@ public class ModelingFileUploadResource {
             return ResponseDocument.successResponse(
                     modelingFileMetadataService.getSchemaToLatticeSchemaFields(excludeLatticeDataAttributes));
         } else {
-            SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+            SchemaInterpretation schemaInterpretation;
+            EntityType entityType = StringUtils.isNotEmpty(feedType) ? EntityTypeUtils.matchFeedType(feedType) : null;
+            if (entityType != null) {
+                schemaInterpretation = entityType.getSchemaInterpretation();
+            } else {
+                schemaInterpretation = SchemaInterpretation.getByName(entity);
+            }
             return ResponseDocument.successResponse(ImmutableMap.of(schemaInterpretation,
                     modelingFileMetadataService.getSchemaToLatticeSchemaFields(entity, source, feedType)));
         }
@@ -580,7 +593,11 @@ public class ModelingFileUploadResource {
             stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName,
                     checkHeaderFormat, entity);
             if (!StringUtils.isEmpty(entity)) {
-                schemaInterpretation = SchemaInterpretation.getByName(entity);
+                try {
+                    schemaInterpretation = SchemaInterpretation.getByName(entity);
+                } catch (IllegalArgumentException e) {
+                    schemaInterpretation = null;
+                }
             }
 
             return fileUploadService.uploadFile(fileName, schemaInterpretation, entity, csvFileName, stream, outsizeFlag);
