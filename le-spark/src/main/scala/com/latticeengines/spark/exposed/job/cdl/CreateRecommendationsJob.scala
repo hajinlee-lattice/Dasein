@@ -272,11 +272,6 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
       // join
       val recommendations = derivedAccounts.join(aggregatedContacts, joinKey :: Nil, "left")
-      //recommendations.rdd.saveAsTextFile("/tmp/recommendations.txt")
-      logSpark("----- BEGIN SCRIPT OUTPUT -----")
-	    recommendations.printSchema
-	    logSpark("----- END SCRIPT OUTPUT -----")
-
       val contactCount = recommendations.agg( //
     	  sum("CONTACT_NUM")
       ).first.get(0)

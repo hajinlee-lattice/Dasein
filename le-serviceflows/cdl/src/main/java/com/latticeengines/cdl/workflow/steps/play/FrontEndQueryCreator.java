@@ -208,7 +208,7 @@ public class FrontEndQueryCreator {
         }
     }
 
-    private void processFieldMappingMetadataWithExistingRecommendationColumns(List<ColumnMetadata> fieldMappingMetadata,
+    public void processFieldMappingMetadataWithExistingRecommendationColumns(List<ColumnMetadata> fieldMappingMetadata,
             ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
         List<String> accountColsRecIncluded = new ArrayList<>();
         List<String> accountColsRecNotIncludedStd = new ArrayList<>();

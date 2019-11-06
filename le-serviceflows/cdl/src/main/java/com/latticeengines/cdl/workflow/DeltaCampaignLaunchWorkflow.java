@@ -7,12 +7,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.listeners.PlayLaunchWorkflowListener;
+import com.latticeengines.cdl.workflow.listeners.DeltaCampaignLaunchWorkflowListener;
 import com.latticeengines.cdl.workflow.steps.DeltaCampaignLaunchInitStep;
+import com.latticeengines.cdl.workflow.steps.play.DeltaCampaignLaunchExportFileGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.play.DeltaCampaignLaunchExportFilesToS3Step;
+import com.latticeengines.cdl.workflow.steps.play.DeltaCampaignLaunchExportPublishToSNSStep;
 import com.latticeengines.cdl.workflow.steps.play.ImportDeltaCalculationResultsFromS3;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFilesToS3Step;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportPublishToSNSStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -30,26 +30,26 @@ public class DeltaCampaignLaunchWorkflow extends AbstractWorkflow<DeltaCampaignL
     private DeltaCampaignLaunchInitStep deltaCampaignLaunchInitStep;
 
     @Inject
-    private PlayLaunchExportFileGeneratorStep playLaunchExportFileGeneratorStep;
+    private DeltaCampaignLaunchExportFileGeneratorStep deltaCampaignLaunchExportFileGeneratorStep;
 
     @Inject
-    private PlayLaunchExportFilesToS3Step playLaunchExportFilesToS3Step;
+    private DeltaCampaignLaunchExportFilesToS3Step deltaCampaignLaunchExportFilesToS3Step;
 
     @Inject
-    private PlayLaunchExportPublishToSNSStep playLaunchExportPublishToSNSStep;
+    private DeltaCampaignLaunchExportPublishToSNSStep deltaCampaignLaunchExportPublishToSNSStep;
 
     @Inject
-    private PlayLaunchWorkflowListener playLaunchWorkflowListener;
+    private DeltaCampaignLaunchWorkflowListener deltaCampaignLaunchWorkflowListener;
 
     @Override
     public Workflow defineWorkflow(DeltaCampaignLaunchWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(importDeltaCalculationResultsFromS3) //
                 .next(deltaCampaignLaunchInitStep) //
-                .next(playLaunchExportFileGeneratorStep) //
-                .next(playLaunchExportFilesToS3Step) //
-                .next(playLaunchExportPublishToSNSStep) //
-                .listener(playLaunchWorkflowListener) //
+                .next(deltaCampaignLaunchExportFileGeneratorStep) //
+                .next(deltaCampaignLaunchExportFilesToS3Step) //
+                .next(deltaCampaignLaunchExportPublishToSNSStep) //
+                .listener(deltaCampaignLaunchWorkflowListener) //
                 .build();
     }
 }
