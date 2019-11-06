@@ -48,6 +48,10 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignDeltaCalculationWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playId);
+        inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_CHANNEL_ID, channelId);
+        inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID, launchId);
+
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
         CampaignDeltaCalculationWorkflowConfiguration configuration = new CampaignDeltaCalculationWorkflowConfiguration.Builder()
                 .workflow("campaignDeltaCalculationWorkflow") //

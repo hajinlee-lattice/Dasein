@@ -17,6 +17,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -95,7 +96,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                     && !channel.getResetDeltaCalculationData() && previousAccountUniverseTable != null)
                             ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
                             : null;
-            log.info(logHDFSDataUnit("PreviousAccountLaunchUniverse_", previousLaunchUniverse));
+            log.info(getHDFSDataUnitLogEntry("PreviousAccountLaunchUniverse_", previousLaunchUniverse));
         } else {
             Table previousContactUniverseTable = StringUtils
                     .isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
@@ -108,10 +109,11 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                             ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
                             : null;
 
-            log.info(logHDFSDataUnit("PreviousContactLaunchUniverse_", previousLaunchUniverse));
+            log.info(getHDFSDataUnitLogEntry("PreviousContactLaunchUniverse_", previousLaunchUniverse));
         }
 
         HdfsDataUnit currentLaunchUniverse = getObjectFromContext(FULL_LAUNCH_UNIVERSE, HdfsDataUnit.class);
+        log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse_", currentLaunchUniverse));
 
         // 2) compare previous launch universe to current launch universe
 
@@ -126,6 +128,9 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     private SparkJobResult executeSparkJob(HdfsDataUnit previousLaunchUniverse, HdfsDataUnit currentLaunchUniverse,
             String joinKey, boolean filterJoinKeyNulls) {
+        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
+                joinKey, filterJoinKeyNulls, getRandomWorkspace());
+        log.info("Executing CalculateDeltaJob with config: " + config.toString());
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -136,9 +141,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
-                SparkJobResult result = executeSparkJob(CalculateDeltaJob.class,
-                        new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse, joinKey,
-                                filterJoinKeyNulls, getRandomWorkspace()));
+                SparkJobResult result = executeSparkJob(CalculateDeltaJob.class, config);
                 result.getTargets().add(currentLaunchUniverse);
                 return result;
             } finally {
@@ -179,7 +182,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     @SuppressWarnings("unchecked")
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
-        log.info(logHDFSDataUnit(tableName, dataUnit));
+        log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         putObjectInContext(contextKey, tableName);
@@ -194,16 +197,11 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
-    private String logHDFSDataUnit(String tag, HdfsDataUnit dataUnit) {
+    private String getHDFSDataUnitLogEntry(String tag, HdfsDataUnit dataUnit) {
         if (dataUnit == null) {
             return tag + " data set empty";
         }
-        String valueSeparator = ": ";
-        String tokenSeparator = ", ";
-        return tag + tokenSeparator //
-                + "StorageType: " + valueSeparator + dataUnit.getStorageType().name() + tokenSeparator //
-                + "Path: " + valueSeparator + dataUnit.getPath() + tokenSeparator //
-                + "Count: " + valueSeparator + dataUnit.getCount();
+        return tag + ", " + JsonUtils.serialize(dataUnit);
     }
 
     private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {

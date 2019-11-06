@@ -98,8 +98,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Thread.sleep(30000); // Making sure update passes thru to the read cluster
 
         // Mimicking a manual Launch creation
-        PlayLaunch testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(),
-                play.getName(), channel.getId());
+        PlayLaunch testPlayLaunch = playProxy.createNewLaunchByPlayChannelAndState(playCreationHelper.getCustomerSpace(),
+                play.getName(), channel.getId(), LaunchState.Queued, null, null, null, null, null, false);
         Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
         Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
         Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
@@ -120,8 +120,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         PlayLaunchChannel channel = playProxy
                 .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
         // Mimicking an automatic Launch creation
-        PlayLaunch testPlayLaunch = playProxy.queueNewLaunchByPlayAndChannel(playCreationHelper.getCustomerSpace(),
-                play.getName(), channel.getId(), null, null, null, null, null, true);
+        PlayLaunch testPlayLaunch = playProxy.createNewLaunchByPlayChannelAndState(playCreationHelper.getCustomerSpace(),
+                play.getName(), channel.getId(), LaunchState.Queued, null, null, null, null, null, true);
         Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
         Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
         Assert.assertNotNull(testPlayLaunch.getContactsLaunched());

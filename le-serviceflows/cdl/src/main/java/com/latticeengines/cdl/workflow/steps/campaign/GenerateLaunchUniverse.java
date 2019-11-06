@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignFrontEndQueryBuilder;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -115,6 +116,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         log.info("Full Launch Universe Query: " + frontEndquery.toString());
 
         HdfsDataUnit launchUniverseDataUnit = executeSparkJob(frontEndquery);
+        log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
     }
 
@@ -173,5 +175,12 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             throw new RuntimeException("Cannot find attribute repo in context");
         }
         return attrRepo;
+    }
+
+    private String getHDFSDataUnitLogEntry(String tag, HdfsDataUnit dataUnit) {
+        if (dataUnit == null) {
+            return tag + " data set empty";
+        }
+        return tag + ", " + JsonUtils.serialize(dataUnit);
     }
 }

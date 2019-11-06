@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.listeners.CampaignDeltaCalculationWorkflowListener;
 import com.latticeengines.cdl.workflow.steps.campaign.CalculateDeltaStep;
 import com.latticeengines.cdl.workflow.steps.campaign.ExportDeltaArtifactsToS3;
 import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchArtifacts;
@@ -41,6 +42,9 @@ public class CampaignDeltaCalculationWorkflow extends AbstractWorkflow<CampaignD
     @Inject
     private QueuePlayLaunches queuePlayLaunches;
 
+    @Inject
+    private CampaignDeltaCalculationWorkflowListener campaignDeltaCalculationWorkflowListener;
+
     @Override
     public Workflow defineWorkflow(CampaignDeltaCalculationWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -50,6 +54,7 @@ public class CampaignDeltaCalculationWorkflow extends AbstractWorkflow<CampaignD
                 .next(generateLaunchArtifacts) //
                 .next(exportArtifactsToS3Step) //
                 .next(queuePlayLaunches) //
+                .listener(campaignDeltaCalculationWorkflowListener) //
                 .build();
     }
 }
