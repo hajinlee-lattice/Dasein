@@ -34,7 +34,7 @@ import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.cdl.util.CustomEventModelingDataStoreUtil;
-import com.latticeengines.apps.cdl.util.FeatureImportanceUtil;
+import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceUtil;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
