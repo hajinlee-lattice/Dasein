@@ -462,8 +462,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     @Override
-    public void merge(Table table) {
-        tableDao.merge(table);
+    public void update(Table table) {
+        Table existing = tableDao.findByName(table.getName());
+        if (existing == null) {
+            throw new RuntimeException(String.format("No such table with name %s", table.getName()));
+        }
+        existing.setUpdatedBy(table.getUpdatedBy());
+        tableDao.update(existing);
     }
 
     private void deleteExtractsInBackend(List<String> extractPaths) {
