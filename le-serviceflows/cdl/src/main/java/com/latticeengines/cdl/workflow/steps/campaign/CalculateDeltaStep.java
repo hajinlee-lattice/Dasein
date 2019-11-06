@@ -17,6 +17,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -200,7 +201,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         if (dataUnit == null) {
             return tag + " data set empty";
         }
-        return tag + ", " + dataUnit.toString();
+        return tag + ", " + JsonUtils.serialize(dataUnit);
     }
 
     private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {

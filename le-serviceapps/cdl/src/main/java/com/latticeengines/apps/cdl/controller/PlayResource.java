@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -8,7 +7,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -485,9 +483,11 @@ public class PlayResource {
     }
 
     private boolean hasDeltaTables(PlayLaunch playLaunch) {
-        return CollectionUtils.isNotEmpty(Arrays.asList(playLaunch.getAddAccountsTable(),
-                playLaunch.getRemoveAccountsTable(), playLaunch.getAddContactsTable(),
-                playLaunch.getRemoveContactsTable(), playLaunch.getCompleteContactsTable()));
+        return (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())
+                && StringUtils.isNotBlank(playLaunch.getCompleteContactsTable()))
+                || StringUtils.isNotBlank(playLaunch.getAddContactsTable())
+                || StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())
+                || StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable());
     }
 
     @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")

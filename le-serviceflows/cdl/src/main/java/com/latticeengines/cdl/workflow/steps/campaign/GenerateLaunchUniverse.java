@@ -181,6 +181,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         if (dataUnit == null) {
             return tag + " data set empty";
         }
-        return tag + ", " + dataUnit.toString();
+        return tag + ", " + JsonUtils.serialize(dataUnit);
     }
 }
