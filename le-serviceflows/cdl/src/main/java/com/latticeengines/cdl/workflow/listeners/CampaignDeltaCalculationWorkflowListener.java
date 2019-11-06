@@ -54,6 +54,7 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                     launchId = launch.getId();
                     log.warn(String.format("Created a failed a new launch (%s) with failed state", launchId));
                 }
+                playProxy.setNextScheduledTimeForChannel(customerSpace, playId, channelId);
             }
         } catch (Exception e) {
             log.error("Failed to execute Listener for CampaignDeltaCalculationWorkflow successfully", e.getMessage());

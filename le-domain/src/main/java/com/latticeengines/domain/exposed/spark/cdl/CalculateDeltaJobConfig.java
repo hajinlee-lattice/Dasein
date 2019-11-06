@@ -74,6 +74,6 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
     @Override
     public String toString() {
         return String.format("NewData: %s, OldData: %s, JoinKey: %s, FilterJoinKeyNulls:%s", newData.toString(),
-                oldData.toString(), joinKey, filterJoinKeyNulls.toString());
+                oldData != null ? oldData.toString() : "{No Old Data}", joinKey, filterJoinKeyNulls);
     }
 }
