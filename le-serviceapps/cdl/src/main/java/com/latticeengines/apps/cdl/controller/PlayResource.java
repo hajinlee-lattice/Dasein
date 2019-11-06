@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -7,6 +8,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.workflow.CampaignDeltaCalculationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CampaignLaunchWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.DeltaCampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -86,6 +89,9 @@ public class PlayResource {
 
     @Inject
     private CampaignLaunchWorkflowSubmitter campaignLaunchWorkflowSubmitter;
+
+    @Inject
+    private DeltaCampaignLaunchWorkflowSubmitter deltaCampaignLaunchWorkflowSubmitter;
 
     @Inject
     private CampaignDeltaCalculationWorkflowSubmitter campaignDeltaCalculationWorkflowSubmitter;
@@ -468,8 +474,20 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { String
                     .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
         }
+
+        if (batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)
+                && hasDeltaTables(playLaunch)) {
+            return deltaCampaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
+        }
+
         return campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
 
+    }
+
+    private boolean hasDeltaTables(PlayLaunch playLaunch) {
+        return CollectionUtils.isNotEmpty(Arrays.asList(playLaunch.getAddAccountsTable(),
+                playLaunch.getRemoveAccountsTable(), playLaunch.getAddContactsTable(),
+                playLaunch.getRemoveContactsTable(), playLaunch.getCompleteContactsTable()));
     }
 
     @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
