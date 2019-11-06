@@ -806,21 +806,21 @@ public class CDLServiceImpl implements CDLService {
     }
 
     public boolean checkBundleUpload(String customerSpace) {
-        List<Action> actions = actionProxy.getActions(customerSpace);
-        if (CollectionUtils.isEmpty(actions)) {
-            return true;
-        }
-
         // get action without running PA
-        List<Action> importActionsBeforePA =
-                actions.stream().filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
-                        && ActionStatus.ACTIVE.equals(action.getActionStatus()) && action.getOwnerId() == null).collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(importActionsBeforePA)) {
+        List<Action> actionsWithoutPA = actionProxy.getActionsByOwnerId(customerSpace, null);
+        if (CollectionUtils.isEmpty(actionsWithoutPA)) {
             return true;
         }
 
-        for (Action action : importActionsBeforePA) {
+        List<Action> importActionsWithoutPA =
+                actionsWithoutPA.stream().filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
+                        && ActionStatus.ACTIVE.equals(action.getActionStatus())).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(importActionsWithoutPA)) {
+            return true;
+        }
+
+        for (Action action : importActionsWithoutPA) {
             ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
             String dataFeedTaskId = importActionConfiguration.getDataFeedTaskId();
             if (dataFeedTaskId == null) {
