@@ -2,6 +2,7 @@ package com.latticeengines.spark.testframework;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -402,6 +403,13 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
     public void setInputUnits(Map<String, DataUnit> inputUnits) {
         this.inputUnits = inputUnits;
+    }
+
+    protected String debugStr(GenericRecord record, Collection<String> fields) {
+        List<String> nameValues = fields.stream() //
+                .map(field -> String.format("%s=%s", field, record.get(field))) //
+                .collect(Collectors.toList());
+        return String.join(",", nameValues);
     }
 
 }

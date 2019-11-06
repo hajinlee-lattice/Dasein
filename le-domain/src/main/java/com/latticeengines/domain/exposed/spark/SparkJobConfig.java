@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJ
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
@@ -80,6 +81,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = DeriveActivityMetricGroupJobConfig.class, name = DeriveActivityMetricGroupJobConfig.NAME), //
         @JsonSubTypes.Type(value = DailyStoreToPeriodStoresJobConfig.class, name = DailyStoreToPeriodStoresJobConfig.NAME), //
         @JsonSubTypes.Type(value = ProcessDimensionConfig.class, name = ProcessDimensionConfig.NAME), //
+        @JsonSubTypes.Type(value = AggDailyActivityConfig.class, name = AggDailyActivityConfig.NAME), //
 })
 public abstract class SparkJobConfig implements Serializable {
 

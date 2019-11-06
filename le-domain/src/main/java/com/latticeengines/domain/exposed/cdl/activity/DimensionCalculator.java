@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -8,7 +10,10 @@ import com.google.common.base.Objects;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({ @JsonSubTypes.Type(value = DimensionCalculator.class, name = "DimensionCalculator"),
         @JsonSubTypes.Type(value = DimensionCalculatorRegexMode.class, name = "DimensionCalculatorRegexMode") })
-public class DimensionCalculator {
+public class DimensionCalculator implements Serializable {
+
+    private static final long serialVersionUID = -4708499649443194248L;
+
     @JsonProperty("name")
     protected String name;
 
