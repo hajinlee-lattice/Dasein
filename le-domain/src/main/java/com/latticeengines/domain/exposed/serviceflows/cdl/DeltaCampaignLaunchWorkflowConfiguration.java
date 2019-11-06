@@ -10,18 +10,25 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesGeneratorConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesToS3Configuration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportPublishToSNSConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesGeneratorConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesToS3Configuration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
 
 public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
-    public static final String RECOMMENDATION_EXPORT_FILES = "RECOMMENDATION_EXPORT_FILES";
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
+
+    // avro file path in hdfs
+    public static final String ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH = "ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH";
+    public static final String DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH = "DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH";
+    // csv/json file path in hdfs after file generation
+    public static final String ADD_CSV_EXPORT_FILES = "ADD_CSV_EXPORT_FILES";
+    public static final String DELETE_CSV_EXPORT_FILES = "DELETE_CSV_EXPORT_FILES";
+
     public static final String DATA_FRAME_NUM = "DATA_FRAME_NUM";
     public static final String CREATE_RECOMMENDATION_DATA_FRAME = "CREATE_RECOMMENDATION_DATA_FRAME";
     public static final String CREATE_ADD_CSV_DATA_FRAME = "CREATE_ADD_CSV_DATA_FRAME";
@@ -31,9 +38,9 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
         private DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration();
         private ImportDeltaCalculationResultsFromS3StepConfiguration importDeltaCalculationResultsFromS3Conf = new ImportDeltaCalculationResultsFromS3StepConfiguration();
         private DeltaCampaignLaunchInitStepConfiguration initStepConf = new DeltaCampaignLaunchInitStepConfiguration();
-        private PlayLaunchExportFilesGeneratorConfiguration exportFileGeneratorConf = new PlayLaunchExportFilesGeneratorConfiguration();
-        private PlayLaunchExportFilesToS3Configuration exportFilesToS3Conf = new PlayLaunchExportFilesToS3Configuration();
-        private PlayLaunchExportPublishToSNSConfiguration exportPublishToSNSConf = new PlayLaunchExportPublishToSNSConfiguration();
+        private DeltaCampaignLaunchExportFilesGeneratorConfiguration exportFileGeneratorConf = new DeltaCampaignLaunchExportFilesGeneratorConfiguration();
+        private DeltaCampaignLaunchExportFilesToS3Configuration exportFilesToS3Conf = new DeltaCampaignLaunchExportFilesToS3Configuration();
+        private DeltaCampaignLaunchExportPublishToSNSConfiguration exportPublishToSNSConf = new DeltaCampaignLaunchExportPublishToSNSConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("deltaCampaignLaunchWorkflow", customerSpace,

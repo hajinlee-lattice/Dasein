@@ -21,6 +21,7 @@ import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.Proces
 import com.latticeengines.cdl.workflow.steps.play.FrontEndQueryCreator;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -70,6 +71,14 @@ public class DeltaCampaignLaunchInitStep
     @Value("${datadb.datasource.password.encrypted}")
     private String dataDbPassword;
 
+    private PlayLaunchContext playLaunchContext;
+
+    private boolean createRecommendationDataFrame;
+
+    private boolean createAddCsvDataFrame;
+
+    private boolean createDeleteCsvDataFrame;
+
     @Override
     protected Class<CreateDeltaRecommendationsJob> getJobClz() {
         return CreateDeltaRecommendationsJob.class;
@@ -91,7 +100,7 @@ public class DeltaCampaignLaunchInitStep
                 + String.format("For playLaunchId: %s", playLaunchId));
 
         // TODO change the context to be more tight with (Delta)CampaignLaunch
-        PlayLaunchContext playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
+        playLaunchContext = campaignLaunchProcessor.initPlayLaunchContext(tenant, config);
         setCustomDisplayNames(playLaunchContext);
 
         ProcessedFieldMappingMetadata processedFieldMappingMetadata = new ProcessedFieldMappingMetadata();
@@ -131,13 +140,13 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setEncryptionKey(encryptionKey);
         deltaCampaignLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword, encryptionKey, saltHint));
 
-        boolean createRecommendationDataFrame = Boolean.toString(true).equals(
+        createRecommendationDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_RECOMMENDATION_DATA_FRAME));
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
-        boolean createAddCsvDataFrame = Boolean.toString(true)
+        createAddCsvDataFrame = Boolean.toString(true)
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
-        boolean createDeleteCsvDataFrame = Boolean.toString(true).equals(
+        createDeleteCsvDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
 
@@ -161,11 +170,6 @@ public class DeltaCampaignLaunchInitStep
                 return table.toHdfsDataUnit(tableName);
             }
         }).collect(Collectors.toList());
-    }
-
-    private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
-        playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Launched);
-        playProxy.publishTalkingPoints(customerSpace.toString(), playName);
     }
 
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
@@ -195,8 +199,55 @@ public class DeltaCampaignLaunchInitStep
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        // TODO Auto-generated method stub
+        // TODO define the launched account and contacts in the context of delta
 
+        int resultDataFrameNum = result.getTargets().size();
+        log.info("resultDataFrameNum=" + resultDataFrameNum);
+        if (createAddCsvDataFrame && !createDeleteCsvDataFrame) {
+            String addCsvTargetPath = result.getTargets().get(1).getPath();
+            log.info("addCsvTargetPath: " + addCsvTargetPath);
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(addCsvTargetPath));
+        } else if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            String addCsvTargetPath = result.getTargets().get(1).getPath();
+            log.info("addCsvTargetPath: " + addCsvTargetPath);
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(addCsvTargetPath));
+            String deleteCsvTargetPath = result.getTargets().get(2).getPath();
+            log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(deleteCsvTargetPath));
+        } else if (!createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            String deleteCsvTargetPath = result.getTargets().get(0).getPath();
+            log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
+                    PathUtils.toAvroGlob(deleteCsvTargetPath));
+        } else {
+            throw new RuntimeException("Illegial situation.");
+        }
+
+        // PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        // playLaunch.setAccountsLaunched(launchedAccountNum);
+        // playLaunch.setContactsLaunched(launchedContactNum);
+        // long suppressedAccounts = (totalAccountsAvailableForLaunch -
+        // launchedAccountNum);
+        // playLaunch.setAccountsSuppressed(suppressedAccounts);
+        // long suppressedContacts = (totalContactsAvailableForLaunch -
+        // launchedContactNum);
+        // playLaunch.setContactsSuppressed(suppressedContacts);
+        // campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
+        // log.info(String.format("Total suppressed account count for launch:
+        // %d", suppressedAccounts));
+        // log.info(String.format("Total suppressed contact count for launch:
+        // %d", suppressedContacts));
+        successUpdates(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
+    }
+
+    private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
+        playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Launched);
+        if (createRecommendationDataFrame) {
+            playProxy.publishTalkingPoints(customerSpace.toString(), playName);
+        }
     }
 
 }

@@ -40,14 +40,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
         @ParamDef(name = "tenantFilterId", type = "java.lang.Long") })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataIntegrationStatusMonitor
-        implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
+public class DataIntegrationStatusMonitor implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
     public DataIntegrationStatusMonitor() {
     }
 
-    public DataIntegrationStatusMonitor(DataIntegrationStatusMonitorMessage statusMessage,
-            Tenant tenant) {
+    public DataIntegrationStatusMonitor(DataIntegrationStatusMonitorMessage statusMessage, Tenant tenant) {
         this.tenant = tenant;
         this.workflowRequestId = statusMessage.getWorkflowRequestId();
         this.operation = statusMessage.getOperation();
@@ -55,6 +53,7 @@ public class DataIntegrationStatusMonitor
         this.entityId = statusMessage.getEntityId();
         this.externalSystemId = statusMessage.getExternalSystemId();
         this.sourceFile = statusMessage.getSourceFile();
+        this.deleteFile = statusMessage.getDeleteFile();
         this.status = statusMessage.getEventType();
     }
 
@@ -94,6 +93,10 @@ public class DataIntegrationStatusMonitor
     @JsonProperty("sourceFile")
     @Column(name = "SOURCE_FILE", nullable = true, length = 4096)
     private String sourceFile;
+
+    @JsonProperty("deleteFile")
+    @Column(name = "DELETE_FILE", nullable = true, length = 4096)
+    private String deleteFile;
 
     @JsonProperty("errorFile")
     @Column(name = "ERROR_FILE", nullable = true, length = 4096)
@@ -212,6 +215,14 @@ public class DataIntegrationStatusMonitor
 
     public void setSourceFile(String sourceFile) {
         this.sourceFile = sourceFile;
+    }
+
+    public String getDeleteFile() {
+        return this.deleteFile;
+    }
+
+    public void setDeleteFile(String deleteFile) {
+        this.deleteFile = deleteFile;
     }
 
     public String getErrorFile() {
