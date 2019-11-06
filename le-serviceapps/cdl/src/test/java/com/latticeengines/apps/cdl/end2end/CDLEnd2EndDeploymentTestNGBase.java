@@ -746,8 +746,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (feedType == null) {
             feedType = getFeedTypeByEntity(entity.name());
         }
-        if (s3FileName.endsWith(".gz"))
+        if (s3FileName.endsWith(".gz")) {
             outputFileName = s3FileName.substring(0, s3FileName.length() - 3);
+        }
         SourceFile template = fileUploadProxy.uploadFile(outputFileName, compressed, s3FileName, entity.name(),
                 csvResource, outsizeFlag);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name(),
@@ -1005,8 +1006,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private InputStream readCSVInputStreamFromS3(String fileName, boolean outsizeFlag) {
-        if (outsizeFlag)
+        if (outsizeFlag) {
             return testArtifactService.readTestArtifactAsStream(LARGE_CSV_DIR, LARGE_CSV_VERSION, fileName);
+        }
         return testArtifactService.readTestArtifactAsStream(S3_CSV_DIR, S3_CSV_VERSION, fileName);
     }
 
