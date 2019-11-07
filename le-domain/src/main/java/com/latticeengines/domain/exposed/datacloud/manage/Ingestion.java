@@ -35,6 +35,11 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
+/**
+ * Keep doc
+ * https://confluence.lattice-engines.com/display/ENG/DataCloud+Engine+Architecture#DataCloudEngineArchitecture-Ingestion
+ * up to date if there is any new change
+ */
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "Ingestion")
@@ -49,24 +54,36 @@ public class Ingestion implements HasPid, Serializable {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
+    // Unique ingestion job name
     @Column(name = "IngestionName", unique = true, nullable = false, length = 100)
     private String ingestionName;
 
     @Column(name = "Config", nullable = false, length = 1000)
     private String config;
 
+    // Only effective when SchedularEnabled is 1
+    // If provided with cron expression, ingestion job is only triggered by
+    // quartz when cron condition is satisfied
+    // If not provided, ingestion job is always triggered by quartz
     @Column(name = "CronExpression", length = 100)
     private String cronExpression;
 
+    // 1: Ingestion job is enabled to be triggered
+    // 0: Ingestion job is disabled
     @Column(name = "SchedularEnabled", nullable = false)
     private Boolean schedularEnabled;
 
+    @Deprecated
+    // Original definition: If a failed job needs to retry, waiting duration in
+    // milliseconds before starting next retry
     @Column(name = "NewJobRetryInterval", nullable = false)
     private Long newJobRetryInterval;
 
+    // If a job is failed, maximum number of times of retry
     @Column(name = "NewJobMaxRetry", nullable = false)
     private int newJobMaxRetry;
 
+    // Type of data provider
     @Enumerated(EnumType.STRING)
     @Column(name = "IngestionType", nullable = false, length = 100)
     private IngestionType ingestionType;

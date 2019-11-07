@@ -28,6 +28,7 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     private boolean keepTemp;
     private boolean enableSlack;
+    private boolean isAMJob;
 
     @Override
     public String getSourceName() {
@@ -131,5 +132,13 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     public void setContainerMemMB(Integer containerMemMB) {
         this.containerMemMB = containerMemMB;
+    }
+
+    public boolean isAMJob() {
+        return isAMJob;
+    }
+
+    public void setAMJob(boolean isAMJob) {
+        this.isAMJob = isAMJob;
     }
 }
