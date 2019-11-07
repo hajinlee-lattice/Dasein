@@ -6,6 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Usually API based data provider provides 2 API, one is to get current version
  * information (currently only support timestamp based version), the other is to
  * deliver file.
+ *
+ * Keep doc
+ * https://confluence.lattice-engines.com/display/ENG/DataCloud+Engine+Architecture#DataCloudEngineArchitecture-Ingestion
+ * up to date if there is any new change
  */
 public class ApiConfiguration extends ProviderConfiguration {
     // API to get current version info
