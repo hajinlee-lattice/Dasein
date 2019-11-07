@@ -109,11 +109,11 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                             ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
                             : null;
 
-            log.info(getHDFSDataUnitLogEntry("PreviousContactLaunchUniverse_", previousLaunchUniverse));
+            log.info(getHDFSDataUnitLogEntry("PreviousContactLaunchUniverse: ", previousLaunchUniverse));
         }
 
         HdfsDataUnit currentLaunchUniverse = getObjectFromContext(FULL_LAUNCH_UNIVERSE, HdfsDataUnit.class);
-        log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse_", currentLaunchUniverse));
+        log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse: ", currentLaunchUniverse));
 
         // 2) compare previous launch universe to current launch universe
 
@@ -130,7 +130,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             String joinKey, boolean filterJoinKeyNulls) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
                 joinKey, filterJoinKeyNulls, getRandomWorkspace());
-        log.info("Executing CalculateDeltaJob with config: " + config.toString());
+        log.info("Executing CalculateDeltaJob with config: " + JsonUtils.serialize(config));
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {

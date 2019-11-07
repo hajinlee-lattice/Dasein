@@ -261,6 +261,11 @@ public class PlayResource {
             if (playLaunchChannel.getLaunchType() != null && playLaunchChannel.getLaunchType() == LaunchType.DELTA
                     && batonService.isEnabled(CustomerSpace.parse(customerSpace),
                             LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
+                if (!playLaunchChannel.getIsAlwaysOn()) {
+                    throw new LedpException(LedpCode.LEDP_32000,
+                            new String[] { "Cannot keep one time launches in sync" });
+                }
+
                 launch = playLaunchChannelService.createNewLaunchForChannelByState(playLaunchChannel.getPlay(),
                         playLaunchChannel, LaunchState.UnLaunched, false);
                 Long workflowId = schedule(customerSpace, playName, channelId, launch.getLaunchId());
