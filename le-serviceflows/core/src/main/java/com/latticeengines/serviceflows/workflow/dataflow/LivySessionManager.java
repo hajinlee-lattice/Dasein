@@ -4,21 +4,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.spark.LivyConfigurer;
-import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.spark.LivyConfigurer;
+import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 @Component
 public class LivySessionManager {
-
-    private static final Logger log = LoggerFactory.getLogger(LivySessionManager.class);
 
     @Inject
     private LivySessionService sessionService;
