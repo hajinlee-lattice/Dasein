@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.util.Collections;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -48,6 +52,56 @@ public final class SparkUtils {
         }
 
         return table;
+    }
+
+    /*
+     * copy entire directory and preserve directory structure instead of using glob
+     */
+    public static Table hdfsUnitDirToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //
+            Configuration yarnConfiguration, //
+            String podId, CustomerSpace customerSpace) {
+        String srcPath = hdfsDataUnit.getPath();
+        String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
+        try {
+            // make sure target path dir exists
+            if (!HdfsUtils.fileExists(yarnConfiguration, tgtPath)) {
+                HdfsUtils.mkdir(yarnConfiguration, tgtPath);
+            }
+
+            int nCopied = copyAvroParquetFiles(yarnConfiguration, srcPath, tgtPath);
+            Preconditions.checkArgument(nCopied > 0,
+                    String.format("No avro/parquet files copied. src=%s, tgt=%s", srcPath, tgtPath));
+        } catch (IOException e) {
+            String msg = String.format("Failed to move data from %s to %s", srcPath, tgtPath);
+            throw new RuntimeException(msg, e);
+        }
+
+        Table table = MetadataConverter.getTableFromDir(yarnConfiguration, tgtPath, primaryKey, null, true);
+        table.setName(tableName);
+        if (hdfsDataUnit.getCount() != null) {
+            table.getExtracts().get(0).setProcessedRecords(hdfsDataUnit.getCount());
+        }
+
+        return table;
+    }
+
+    // return copied file count
+    private static int copyAvroParquetFiles(@NotNull Configuration yarnConfiguration, @NotNull String srcDir,
+            @NotNull String dstDir) throws IOException {
+        int fileCnt = 0;
+        for (String avroParquetPath : AvroParquetUtils.listAvroParquetFiles(yarnConfiguration, srcDir, false)) {
+            if (!HdfsUtils.isDirectory(yarnConfiguration, dstDir)) {
+                HdfsUtils.mkdir(yarnConfiguration, dstDir);
+            }
+            Path dstPath = new Path(avroParquetPath.replace(srcDir, dstDir));
+            Path parent = dstPath.getParent();
+            if (parent != null && !HdfsUtils.fileExists(yarnConfiguration, parent.toString())) {
+                HdfsUtils.mkdir(yarnConfiguration, parent.toString());
+            }
+            HdfsUtils.moveFile(yarnConfiguration, avroParquetPath, dstPath.toString());
+            fileCnt++;
+        }
+        return fileCnt;
     }
 
     public static Long countRecordsInGlobs(LivySessionService sessionService, SparkJobService sparkJobService,

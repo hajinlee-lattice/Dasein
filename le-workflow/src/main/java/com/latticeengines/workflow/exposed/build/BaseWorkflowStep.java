@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
@@ -540,6 +541,18 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                     .collect(Collectors.toList()));
         }
         return tables;
+    }
+
+    protected Map<String, Table> getTablesFromMapCtxKey(String customer, String tableMapCtxKey) {
+        if (!hasKeyInContext(tableMapCtxKey)) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> tableNames = getMapObjectFromContext(tableMapCtxKey, String.class, String.class);
+        return tableNames.entrySet() //
+                .stream() //
+                .map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameCtxKeys) {

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedActivityStream;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
@@ -101,6 +102,7 @@ public enum BusinessEntity implements GraphNode {
 
         Catalog.setBatchStore(ConsolidatedCatalog);
         ActivityStream.setBatchStore(ConsolidatedActivityStream);
+        ActivityStream.setServingStore(AggregatedActivityStream);
 
         PeriodTransaction.setBatchStore(ConsolidatedPeriodTransaction);
         PeriodTransaction.setServingStore(AggregatedPeriodTransaction);

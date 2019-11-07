@@ -45,12 +45,11 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.GenerateDimensionMetadataStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.ProcessDimensionJob;
@@ -59,14 +58,11 @@ import com.latticeengines.spark.exposed.job.cdl.ProcessDimensionJob;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Lazy
 public class GenerateDimensionMetadata
-        extends RunSparkJob<GenerateDimensionMetadataStepConfiguration, ProcessDimensionConfig> {
+        extends RunSparkJob<ActivityStreamSparkStepConfiguration, ProcessDimensionConfig> {
     private static final Logger log = LoggerFactory.getLogger(GenerateDimensionMetadata.class);
     private static final int DIMENSION_CARDINALITY_LIMIT = 10;
 
     static final String BEAN_NAME = "generateDimensionMetadata";
-
-    @Inject
-    private MetadataProxy metadataProxy;
 
     @Inject
     private ActivityStoreProxy activityStoreProxy;
@@ -82,10 +78,11 @@ public class GenerateDimensionMetadata
     private Map<String, String> streamErrorMsgs = new HashMap<>();
 
     @Override
-    protected ProcessDimensionConfig configureJob(GenerateDimensionMetadataStepConfiguration stepConfiguration) {
+    protected ProcessDimensionConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
-        Map<String, Table> catalogTableNames = getActivityStoreTables(CATALOG_TABLE_NAME);
-        Map<String, Table> rawStreamTableNames = getActivityStoreTables(RAW_ACTIVITY_STREAM_TABLE_NAME);
+        Map<String, Table> catalogTableNames = getTablesFromMapCtxKey(customerSpace.toString(), CATALOG_TABLE_NAME);
+        Map<String, Table> rawStreamTableNames = getTablesFromMapCtxKey(customerSpace.toString(),
+                RAW_ACTIVITY_STREAM_TABLE_NAME);
 
         ProcessDimensionConfig config = new ProcessDimensionConfig();
         config.collectMetadata = true;

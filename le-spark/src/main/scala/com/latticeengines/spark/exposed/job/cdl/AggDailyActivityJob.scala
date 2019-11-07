@@ -29,7 +29,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     val streamDfs = inputIdx.map { case (streamId, idx) =>
       val metadataInStream = metadataMap(streamId)
       val calculators = calculatorMap(streamId)
-      val attrs = metadataInStream.keys ++ calculators.keys
+      val attrs = metadataInStream.keys
       val additionalDimCols = entityIdColMap.getOrElse(streamId, Nil)
       val hashDimensions = hashDimensionMap.getOrElse(streamId, Set())
 

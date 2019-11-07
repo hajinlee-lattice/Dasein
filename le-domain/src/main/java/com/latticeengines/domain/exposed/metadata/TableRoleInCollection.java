@@ -31,6 +31,7 @@ public enum TableRoleInCollection {
     AggregatedPeriodTransaction, //
     CalculatedPurchaseHistory, //
     CalculatedDepivotedPurchaseHistory, //
+    AggregatedActivityStream, //
 
     // Curated Account Attribute
     // has only requires one table for serving for now.
@@ -66,6 +67,8 @@ public enum TableRoleInCollection {
         ConsolidatedCatalog.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
         ConsolidatedActivityStream.primaryKey = InterfaceName.InternalId;
         ConsolidatedActivityStream.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        AggregatedActivityStream.primaryKey = InterfaceName.__Composite_Key__;
+        AggregatedActivityStream.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
