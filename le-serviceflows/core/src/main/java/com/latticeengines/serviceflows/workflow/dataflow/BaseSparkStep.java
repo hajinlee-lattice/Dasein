@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -68,7 +69,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected LivySession createLivySession(String jobName) {
         return livySessionManager.createLivySession(jobName, //
-                new LivySessionConfig(scalingMultiplier, partitionMultiplier));
+                new LivyScalingConfig(scalingMultiplier, partitionMultiplier));
     }
 
     protected void killLivySession() {
