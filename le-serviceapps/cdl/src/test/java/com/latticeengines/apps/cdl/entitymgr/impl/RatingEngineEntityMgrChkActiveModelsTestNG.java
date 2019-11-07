@@ -135,7 +135,7 @@ public class RatingEngineEntityMgrChkActiveModelsTestNG extends CDLFunctionalTes
             if (!camille.exists(activeModelCntPath)) {
                 camille.create(activeModelCntPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             }
-            camille.set(activeModelCntPath, new Document("50"));
+            camille.set(activeModelCntPath, new Document("1"));
         } catch (Exception e) {
             System.out.println("Error Creating Zookeeper Path : " + e);
         }
