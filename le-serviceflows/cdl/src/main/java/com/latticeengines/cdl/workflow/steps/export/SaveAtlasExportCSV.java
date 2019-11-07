@@ -9,10 +9,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -137,26 +135,60 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         return null;
     }
 
+    private void renameDisplayNameMap(ExportEntity exportEntity, ColumnMetadata cm, String displayName, Map<String, String> displayNameMap) {
+        // need to rename contact column name
+        if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
+            displayNameMap.put(AccountContactExportConfig.CONTACT_ATTR_PREFIX + cm.getAttrName(), displayName);
+        } else {
+            displayNameMap.put(cm.getAttrName(), displayName);
+        }
+    }
+
+    private class DisplayData {
+
+        private ColumnMetadata columnMetadata;
+
+        private boolean displayNameUpdated;
+
+        private DisplayData(ColumnMetadata columnMetadata, boolean displayNameUpdated) {
+            this.columnMetadata = columnMetadata;
+            this.displayNameUpdated = displayNameUpdated;
+        }
+
+        public boolean isDisplayNameUpdated() {
+            return displayNameUpdated;
+        }
+
+        public void setDisplayNameUpdated(boolean displayNameUpdated) {
+            this.displayNameUpdated = displayNameUpdated;
+        }
+
+        public ColumnMetadata getColumnMetadata() {
+            return columnMetadata;
+        }
+    }
+
     private Map<String, String> getDisplayNameMap(ExportEntity exportEntity) {
         List<ColumnMetadata> schema = getExportSchema(exportEntity);
         Map<String, String> displayNameMap = new HashMap<>();
-        Set<String> outputCols = new HashSet<>();
+        Map<String, DisplayData> outputCols = new HashMap<>();
         schema.forEach(cm -> {
             String originalDisplayName = cm.getDisplayName();
             String displayName = originalDisplayName;
-            int suffix = 1;
-            while (outputCols.contains(displayName.toLowerCase())) {
-                log.warn("Displayname [" + displayName + "] has already been assigned to another attr, " +
-                        "cannot be assigned to [" + cm.getAttrName() + "]. Append a number to differentiate.");
-                displayName = originalDisplayName + " (" + (++suffix) + ")";
+            DisplayData displayData = outputCols.get(displayName.toLowerCase());
+            if (displayData != null) {
+                displayName = cm.getCategory().getName() + "_" + originalDisplayName;
+                log.warn(String.format("Display name [%s] has already been assigned to another attr, cannot be " +
+                        "assigned to [%s]. Display name changed to [%s].", originalDisplayName, cm.getAttrName(), displayName));
+                if (!displayData.isDisplayNameUpdated()) {
+                    displayData.setDisplayNameUpdated(true);
+                    ColumnMetadata columnMetadata = displayData.getColumnMetadata();
+                    renameDisplayNameMap(exportEntity, columnMetadata,
+                            columnMetadata.getCategory().getName() + "_" + columnMetadata.getDisplayName(), displayNameMap);
+                }
             }
-            // need to rename contact column name
-            if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
-                displayNameMap.put(AccountContactExportConfig.CONTACT_ATTR_PREFIX + cm.getAttrName(), displayName);
-            } else {
-                displayNameMap.put(cm.getAttrName(), displayName);
-            }
-            outputCols.add(displayName.toLowerCase());
+            renameDisplayNameMap(exportEntity, cm, displayName, displayNameMap);
+            outputCols.put(displayName.toLowerCase(), new DisplayData(cm, false));
         });
         return displayNameMap;
     }
