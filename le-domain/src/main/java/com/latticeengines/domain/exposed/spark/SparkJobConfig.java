@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConf
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
@@ -74,7 +75,9 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = TestPartitionJobConfig.class, name = TestPartitionJobConfig.NAME), //
         @JsonSubTypes.Type(value = AccountContactExportConfig.class, name = AccountContactExportConfig.NAME), //
         @JsonSubTypes.Type(value = AppendRawStreamConfig.class, name = AppendRawStreamConfig.NAME), //
-        @JsonSubTypes.Type(value = DailyStoreToPeriodStoresJobConfig.class, name = DailyStoreToPeriodStoresJobConfig.NAME) })
+        @JsonSubTypes.Type(value = DailyStoreToPeriodStoresJobConfig.class, name = DailyStoreToPeriodStoresJobConfig.NAME), //
+        @JsonSubTypes.Type(value = DeriveActivityMetricGroupJobConfig.class, name = DeriveActivityMetricGroupJobConfig.NAME)
+})
 public abstract class SparkJobConfig implements Serializable {
 
     /**

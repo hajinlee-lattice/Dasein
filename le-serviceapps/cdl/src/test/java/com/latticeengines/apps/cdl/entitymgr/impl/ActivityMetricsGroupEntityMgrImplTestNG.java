@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
@@ -40,6 +41,7 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
     private static final String DISPLAY_NAME_TMPL = StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME;
     private static final String SUBCATEGORY_TMPL = StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY;
     private static final String JAVA_CLASS_LONG = Long.class.getSimpleName();
+    private static final NullMetricsImputation NULL_IMPUTATION = NullMetricsImputation.ZERO;
 
     @Inject
     private ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
@@ -100,7 +102,7 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
 
     private ActivityTimeRange createTimeRollup() {
         ActivityTimeRange activityTimeRange = new ActivityTimeRange();
-        activityTimeRange.setOperator(ComparisonType.LAST);
+        activityTimeRange.setOperator(ComparisonType.WITHIN);
         activityTimeRange.setParamSet(new HashSet<>(Collections.singletonList(Collections.singletonList(2))));
         activityTimeRange.setPeriods(new HashSet<>(Collections.singletonList(PERIOD)));
         return activityTimeRange;
@@ -121,6 +123,7 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         group.setCategory(Category.WEBSITE_PROFILE);
         group.setSubCategoryTmpl(SUBCATEGORY_TMPL);
         group.setJavaClass(JAVA_CLASS_LONG);
+        group.setNullImputation(NULL_IMPUTATION);
 
         return group;
     }
@@ -141,5 +144,6 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         Assert.assertEquals(group.getCategory(), retrieved.getCategory());
         Assert.assertEquals(group.getSubCategoryTmpl(), retrieved.getSubCategoryTmpl());
         Assert.assertEquals(group.getJavaClass(), retrieved.getJavaClass());
+        Assert.assertEquals(group.getNullImputation(), retrieved.getNullImputation());
     }
 }

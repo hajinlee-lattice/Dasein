@@ -20,8 +20,15 @@ public class ActivityMetricsGroupUtils {
     private static final int GROUPID_LOWER_BOUND = 3;
     private static final Pattern VALID_GROUPID_CHAR = Pattern.compile("[0-9a-zA-Z]+");
     private static final Character FILL_CHAR = 'x';
-    private static final BiMap<String, Character> STRING_LETTER_RELATION = new ImmutableBiMap.Builder<String, Character>()
-            .put(ComparisonType.LAST.toString(), 'l').put(PeriodStrategy.Template.Week.toString(), 'w').build();
+    private static final BiMap<String, Character> RELATION_LETTER = new ImmutableBiMap.Builder<String, Character>().put(ComparisonType.WITHIN.toString(), 'w').build();
+    private static final BiMap<String, Character> PERIOD_LETTER = new ImmutableBiMap.Builder<String, Character>().put(PeriodStrategy.Template.Week.toString(), 'w').build();
+
+    // (operator in timeRange tmpl) <--> (description)
+    private static final BiMap<Character, String> RELATION_DESCRIPTION = new ImmutableBiMap.Builder<Character, String>()
+            .put('w', "in last") // within
+            .put('b', "between") // between
+            .build();
+
 
     // generate groupId from groupName
     public static String fromGroupNameToGroupIdBase(String groupName) {
@@ -39,24 +46,23 @@ public class ActivityMetricsGroupUtils {
         return groupId.toString();
     }
 
-    public static String timeFilterToTimeRangeInGroupId(TimeFilter timeFilter) {
+    public static String timeFilterToTimeRangeTemplate(TimeFilter timeFilter) {
         Map<String, Object> map = new HashMap<>();
-        map.put("operator", getValueFromBiMap(STRING_LETTER_RELATION, timeFilter.getRelation().toString()));
-        map.put("period", getValueFromBiMap(STRING_LETTER_RELATION, timeFilter.getPeriod()));
+        map.put("operator", getValueFromBiMap(RELATION_LETTER, timeFilter.getRelation().toString()));
+        map.put("period", getValueFromBiMap(PERIOD_LETTER, timeFilter.getPeriod()));
         map.put("params", timeFilter.getValues());
         return TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_TIME_RANGE, map);
     }
 
-    public static String timeRangeInGroupIdToDescription(String timeRange) {
+    public static String timeRangeTmplToDescription(String timeRange, String descTemplate) {
         String[] fragments = timeRange.split("_");
         Character operatorLetter = fragments[0].charAt(0);
         Character periodLetter = fragments[fragments.length - 1].charAt(0);
         Map<String, Object> map = new HashMap<>();
-        map.put("operator",
-                getValueFromBiMap(STRING_LETTER_RELATION.inverse(), operatorLetter).toString().toLowerCase());
-        map.put("period", getValueFromBiMap(STRING_LETTER_RELATION.inverse(), periodLetter).toString().toLowerCase());
+        map.put("operator", getValueFromBiMap(RELATION_DESCRIPTION, operatorLetter).toString().toLowerCase());
+        map.put("period", getValueFromBiMap(PERIOD_LETTER.inverse(), periodLetter).toString().toLowerCase());
         map.put("params", ArrayUtils.subarray(fragments, 1, fragments.length - 1));
-        return TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_TIME_RANGE_DESCRIPTION, map);
+        return TemplateUtils.renderByMap(descTemplate, map);
     }
 
     public static String generateSourceMediumDisplayName(String timeRange, Map<String, Object> sourceMedium) {

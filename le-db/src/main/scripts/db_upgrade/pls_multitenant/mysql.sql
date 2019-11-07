@@ -65,6 +65,7 @@ BEGIN
       `GROUP_ID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
       `GROUP_NAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
       `JAVA_CLASS` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+      `NULL_IMP` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
       `ROLLUP_DIMENSIONS` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
       `SUBCATEGORY_TMPL` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
       `FK_STREAM_ID` bigint(20) NOT NULL,
@@ -79,7 +80,7 @@ BEGIN
 
     ALTER TABLE `PLAY_LAUNCH`
       ADD COLUMN `COMPLETE_CONTACTS_TABLE_NAME` varchar(255);
-      
+
     ALTER TABLE `DATA_INTEG_STATUS_MONITORING`
       ADD COLUMN `DELETE_FILE` varchar(4096) COLLATE utf8mb4_unicode_ci DEFAULT NULL;
 
