@@ -38,7 +38,8 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
     public ApplicationId submit(CustomerSpace customerSpace, boolean hardDelete,
                                 SourceFile sourceFile, String user, WorkflowPidWrapper pidWrapper) {
         Action action = registerAction(customerSpace, sourceFile.getTableName(), hardDelete, user, pidWrapper.getPid());
-        RegisterDeleteDataWorkflowConfiguration configuration = generateConfig(customerSpace, sourceFile.getTableName(), sourceFile.getPath(), action.getPid());
+        RegisterDeleteDataWorkflowConfiguration configuration = generateConfig(customerSpace,
+                sourceFile.getTableName(), sourceFile.getPath(), user, action.getPid());
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
@@ -70,13 +71,14 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private RegisterDeleteDataWorkflowConfiguration generateConfig(CustomerSpace customerSpace, String tableName,
-                                                                   String filePath, Long actionPid) {
+                                                                   String filePath, String user, Long actionPid) {
         return new RegisterDeleteDataWorkflowConfiguration.Builder()
                 .customer(customerSpace)
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microserviceHostPort) //
                 .tableName(tableName)
                 .filePath(filePath)
+                .userId(user)
                 .inputProperties(ImmutableMap.<String, String>builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString())
                         .build())//
