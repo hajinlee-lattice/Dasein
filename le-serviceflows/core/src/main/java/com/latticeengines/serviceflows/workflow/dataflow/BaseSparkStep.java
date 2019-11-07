@@ -5,7 +5,6 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
