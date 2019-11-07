@@ -1,8 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -16,16 +14,10 @@ import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
-import com.amazonaws.services.dynamodbv2.model.InternalServerErrorException;
-import com.amazonaws.services.dynamodbv2.model.ItemCollectionSizeLimitExceededException;
-import com.amazonaws.services.dynamodbv2.model.LimitExceededException;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
-import com.amazonaws.services.dynamodbv2.model.ResourceInUseException;
-import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.aws.dynamo.DynamoRetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
@@ -43,22 +35,7 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     private static final long SEED_CACHE_MAX_MEMORY_MB = 2048; // 2G
     private static final long ANONYMOUS_SEED_CACHE_MAX_IDLE_SECONDS = 24 * 3600; // 1 day
     private static final long ANONYMOUS_SEED_CACHE_MAX_MEMORY_MB = 256; // 256M
-
-    private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
-
-    static {
-        // instantiate retry exception map
-
-        // exceptions that can be retried
-        RETRY_EXCEPTIONS.put(LimitExceededException.class, true);
-        RETRY_EXCEPTIONS.put(ProvisionedThroughputExceededException.class, true);
-        RETRY_EXCEPTIONS.put(ItemCollectionSizeLimitExceededException.class, true);
-        RETRY_EXCEPTIONS.put(InternalServerErrorException.class, true);
-        // exceptions that cannot be retried
-        RETRY_EXCEPTIONS.put(ResourceInUseException.class, false);
-        RETRY_EXCEPTIONS.put(ResourceNotFoundException.class, false);
-        RETRY_EXCEPTIONS.put(ConditionalCheckFailedException.class, false);
-    }
+    private static final long DEFAULT_MAX_WAIT_TIME = 30000L; // 30s
 
     @Value("${datacloud.match.entity.staging.shards:5}")
     private int numStagingShards;
@@ -88,12 +65,12 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     public String getTableName(@NotNull EntityMatchEnvironment environment) {
         Preconditions.checkNotNull(environment);
         switch (environment) {
-            case SERVING:
-                return servingTableName;
-            case STAGING:
-                return stagingTableName;
-            default:
-                throw new UnsupportedOperationException("Unsupported environment: " + environment);
+        case SERVING:
+            return servingTableName;
+        case STAGING:
+            return stagingTableName;
+        default:
+            throw new UnsupportedOperationException("Unsupported environment: " + environment);
         }
     }
 
@@ -150,8 +127,8 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
         if (retryTemplate == null) {
             synchronized (this) {
                 if (retryTemplate == null) {
-                    retryTemplate = RetryUtils.getExponentialBackoffRetryTemplate(
-                            maxAttempts, initialWaitMsec, multiplier, RETRY_EXCEPTIONS);
+                    retryTemplate = DynamoRetryUtils.getExponentialBackOffTemplate(maxAttempts, initialWaitMsec,
+                            DEFAULT_MAX_WAIT_TIME, multiplier);
                     retryTemplate.registerListener(getMetricsRetryListener(env));
                 }
             }
