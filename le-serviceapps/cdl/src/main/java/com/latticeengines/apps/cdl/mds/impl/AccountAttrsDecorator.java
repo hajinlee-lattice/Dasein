@@ -90,8 +90,10 @@ public class AccountAttrsDecorator implements Decorator {
             cm.setCanModel(false);
             if (onlyEntityMatchGAEnabled) {
                 cm.setCanEnrich(false);
+                cm.setAttrState(AttrState.Inactive);
             } else {
                 cm.setCanEnrich(true);
+                cm.setAttrState(AttrState.Active);
             }
             return cm;
         }

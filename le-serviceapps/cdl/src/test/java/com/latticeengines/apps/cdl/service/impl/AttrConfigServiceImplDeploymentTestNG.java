@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Active;
+import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Inactive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,8 +156,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 break;
             case Partition.ACCOUNT_ID:
                 boolean canChangeExport = !onlyEntityMatchGAEnabled;
+                AttrState state = onlyEntityMatchGAEnabled ? Inactive : Active;
                 verifyFlags(config, cat, partition, //
-                        Active, false, //
+                        state, false, //
                         false, false, //
                         false, canChangeExport, //
                         false, canChangeExport, //

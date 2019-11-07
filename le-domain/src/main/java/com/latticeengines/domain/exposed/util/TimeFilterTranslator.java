@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
@@ -57,7 +58,7 @@ public class TimeFilterTranslator implements Serializable {
     }
 
     public TimeFilter translate(TimeFilter timeFilter, AttributeLookup lookup) {
-        Pair<String, String> range = translateRange(timeFilter);
+        Pair<String, String> range = periodIdRangeToDateRange(timeFilter.getPeriod(), translateRange(timeFilter));
         List<Object> vals;
         if (range == null && ComparisonType.EVER.equals(timeFilter.getRelation())) {
             return new TimeFilter(ComparisonType.EVER, timeFilter.getPeriod(), null);
@@ -82,7 +83,32 @@ public class TimeFilterTranslator implements Serializable {
         return this.translate(timeFilter, null);
     }
 
-    public Pair<String, String> translateRange(TimeFilter timeFilter) {
+    public Pair<String, String> periodIdRangeToDateRange(String period, Pair<Integer, Integer> periodIdRange) {
+        if (periodIdRange == null) {
+            return null;
+        }
+        if (PeriodStrategy.Template.Date.name().equals(period) || PeriodStrategy.Template.Day.name().equals(period)) {
+            return Pair.of(DateTimeUtils.dayPeriodToDate(periodIdRange.getLeft()), DateTimeUtils.dayPeriodToDate(periodIdRange.getRight()));
+        }
+
+        PeriodBuilder builder = periodBuilders.get(period);
+        Pair<LocalDate, LocalDate> dateRange;
+        String start = null, end = null;
+        if (periodIdRange.getLeft() == null) {
+            dateRange = builder.toDateRange(periodIdRange.getRight(), periodIdRange.getRight());
+            end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
+        } else if (periodIdRange.getRight() == null) {
+            dateRange = builder.toDateRange(periodIdRange.getLeft(), periodIdRange.getRight());
+            start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
+        } else {
+            dateRange = builder.toDateRange(periodIdRange.getLeft(), periodIdRange.getRight());
+            start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
+            end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
+        }
+        return Pair.of(start, end);
+    }
+
+    public Pair<Integer, Integer> translateRange(TimeFilter timeFilter) {
         String period = timeFilter.getPeriod();
         if (PeriodStrategy.Template.Date.name().equals(period)) {
             return translateDateFilter(timeFilter);
@@ -116,41 +142,39 @@ public class TimeFilterTranslator implements Serializable {
         return periodBuilders.get(periodName).toPeriodId(date);
     }
 
-    private Pair<String, String> translateDateFilter(TimeFilter timeFilter) {
+
+
+    private Pair<Integer, Integer> translateDateFilter(TimeFilter timeFilter) {
         ComparisonType operator = timeFilter.getRelation();
         List<Object> vals = timeFilter.getValues();
         switch (operator) {
-        case BETWEEN:
-        case BETWEEN_DATE:
-            verifyDoubleVals(operator, vals);
-            List<String> dates = vals.stream().map(this::castToDate).collect(Collectors.toList());
-            return Pair.of(dates.get(0), dates.get(1));
-        case BEFORE:
-            verifySingleVal(operator, vals);
-            return Pair.of(null, castToDate(vals.get(0)));
-        case AFTER:
-            verifySingleVal(operator, vals);
-            return Pair.of(castToDate(vals.get(0)), null);
-        default:
-            throw new UnsupportedOperationException("Operator " + operator + " is not supported for date queries.");
+            case BETWEEN:
+            case BETWEEN_DATE:
+                verifyDoubleVals(operator, vals);
+                List<String> dates = vals.stream().map(this::castToDate).collect(Collectors.toList());
+                return Pair.of(DateTimeUtils.dateToDayPeriod(dates.get(0)), DateTimeUtils.dateToDayPeriod(dates.get(1)));
+            case BEFORE:
+                verifySingleVal(operator, vals);
+                return Pair.of(null, DateTimeUtils.dateToDayPeriod(castToDate(vals.get(0))));
+            case AFTER:
+                verifySingleVal(operator, vals);
+                return Pair.of(DateTimeUtils.dateToDayPeriod(castToDate(vals.get(0))), null);
+            default:
+                throw new UnsupportedOperationException("Operator " + operator + " is not supported for date queries.");
         }
     }
 
-    private Pair<String, String> translateWithInInclude(String period, List<Object> vals) {
+    private Pair<Integer, Integer> translateWithInInclude(String period, List<Object> vals) {
         verifyPeriodIsValid(period);
         int offset = parseSingleInteger(ComparisonType.WITHIN_INCLUDE, vals);
 
         int currentPeriodId = currentPeriodIds.get(period);
         int targetPeriod = currentPeriodId - offset;
 
-        PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, currentPeriodId);
-        String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
-        String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
-        return Pair.of(start, end);
+        return Pair.of(targetPeriod, currentPeriodId);
     }
 
-    private Pair<String, String> translateLast(String period, List<Object> vals) {
+    private Pair<Integer, Integer> translateLast(String period, List<Object> vals) {
         if (!PeriodStrategy.Template.Day.name().equals(period)) {
             throw new UnsupportedOperationException(String.format("We do not support %s", period));
         }
@@ -159,41 +183,32 @@ public class TimeFilterTranslator implements Serializable {
             throw new IllegalArgumentException(
                     "Operand has to be larger than or equal to 1, but " + vals + " was provided.");
         }
-        LocalDate endDate = LocalDate.parse(getEvaluationDate(), DateTimeFormatter.ISO_DATE);
-        LocalDate startDate = endDate.minusDays(lastDays - 1);
-        String end = endDate.format(DateTimeFormatter.ISO_DATE);
-        String start = startDate.format(DateTimeFormatter.ISO_DATE);
-        return Pair.of(start, end);
+        int currentPeriodId = PeriodStrategy.Template.Day.name().equals(period) ? DateTimeUtils.dateToDayPeriod(evaluationDate) : currentPeriodIds.get(period);
+        int targetPeriod = currentPeriodId - lastDays + 1;
+        return Pair.of(targetPeriod, currentPeriodId);
     }
 
-    private Pair<String, String> translateWithIn(String period, List<Object> vals) {
+    private Pair<Integer, Integer> translateWithIn(String period, List<Object> vals) {
         verifyPeriodIsValid(period);
         int offset = parseSingleInteger(ComparisonType.WITHIN, vals);
 
         int currentPeriodId = currentPeriodIds.get(period);
         int targetPeriod = currentPeriodId - offset;
 
-        PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, currentPeriodId - 1);
-        String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
-        String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
-        return Pair.of(start, end);
+        return Pair.of(targetPeriod, currentPeriodId - 1);
     }
 
-    private Pair<String, String> translatePrior(String period, List<Object> vals) {
+    private Pair<Integer, Integer> translatePrior(String period, List<Object> vals) {
         verifyPeriodIsValid(period);
         int offset = parseSingleInteger(ComparisonType.PRIOR_ONLY, vals);
 
         int currentPeriodId = currentPeriodIds.get(period);
         int targetPeriod = currentPeriodId - offset - 1;
 
-        PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, targetPeriod);
-        String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
-        return Pair.of(null, end);
+        return Pair.of(null, targetPeriod);
     }
 
-    private Pair<String, String> translateBetween(String period, List<Object> vals) {
+    private Pair<Integer, Integer> translateBetween(String period, List<Object> vals) {
         verifyPeriodIsValid(period);
         List<Integer> offsets = parseDoubleIntegers(ComparisonType.BETWEEN, vals);
         int offset1 = Math.max(offsets.get(0), offsets.get(1));
@@ -203,11 +218,7 @@ public class TimeFilterTranslator implements Serializable {
         int fromPeriod = currentPeriodId - offset1;
         int toPeriod = currentPeriodId - offset2;
 
-        PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(fromPeriod, toPeriod);
-        String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
-        String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
-        return Pair.of(start, end);
+        return Pair.of(fromPeriod, toPeriod);
     }
 
     private void verifyPeriodIsValid(String period) {
@@ -271,7 +282,7 @@ public class TimeFilterTranslator implements Serializable {
         return integer;
     }
 
-    private Pair<String, String> translateInCurrent(String period) {
+    private Pair<Integer, Integer> translateInCurrent(String period) {
         if (!periodBuilders.containsKey(period)) {
             throw new RuntimeException("Cannot find a period builder for period " + period);
         }
@@ -286,7 +297,7 @@ public class TimeFilterTranslator implements Serializable {
         Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(currentPeriodId, currentPeriodId);
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
-        return Pair.of(start, end);
+        return Pair.of(currentPeriodId, currentPeriodId);
     }
 
     private String getEvaluationDate() {

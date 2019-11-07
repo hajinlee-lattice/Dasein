@@ -51,7 +51,7 @@ public class EntityQueryServiceImplNegativeTxnTestNG extends QueryServiceImplTes
         MultiTenantContext.setTenant(tenant);
         TimeFilterTranslator timeTranslator = entityQueryService.getTransactionService()
                 .getTimeFilterTranslator(maxTransactionDate);
-        Pair<String, String> range = timeTranslator.translateRange(timeFilter);
+        Pair<String, String> range = timeTranslator.periodIdRangeToDateRange(timeFilter.getPeriod(), timeTranslator.translateRange(timeFilter));
 
         // 1. check positive case
         Restriction restriction = Restriction.builder() //

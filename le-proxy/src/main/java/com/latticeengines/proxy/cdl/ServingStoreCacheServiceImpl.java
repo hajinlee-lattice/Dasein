@@ -115,6 +115,12 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
     }
 
     private List<ColumnMetadata> loadServingColumnMetadata(String cacheKey) {
+        long estimatedSize = metadataCache.getWatcherCache().getEstimatedSize();
+        Runtime rt = Runtime.getRuntime();
+        long totalMb = rt.totalMemory() / 1024 / 1024;
+        long freeMb = rt.freeMemory() / 1024 / 1024;
+        log.info("Before inserting {}, approximately {} entries in the cache, total mem is {}, free mem is {}", //
+                cacheKey, estimatedSize, totalMb, freeMb);
         String[] tokens = cacheKey.split("\\|");
         String tenant = tokens[0];
         BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);

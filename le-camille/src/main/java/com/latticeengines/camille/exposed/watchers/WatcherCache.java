@@ -87,6 +87,10 @@ public class WatcherCache<K, V> {
         this.expireUnit = expireUnit;
     }
 
+    public long getEstimatedSize() {
+        return cache.estimatedSize();
+    }
+
     @SuppressWarnings("unchecked")
     public synchronized void initialize() {
         if (cache == null) {
