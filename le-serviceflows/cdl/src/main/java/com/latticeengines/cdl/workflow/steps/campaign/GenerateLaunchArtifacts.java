@@ -91,6 +91,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     @Override
     public void execute() {
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
 
         Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId());
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
