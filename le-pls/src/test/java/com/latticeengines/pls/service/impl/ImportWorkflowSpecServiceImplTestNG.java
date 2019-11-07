@@ -18,7 +18,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowSpecServiceImplTestNG.class);
 
     private static String testSpecFileName =
-            "com/latticeengines/pls/service/impl/importworkflowspecservice/expected-contact-spec.json";
+            "com/latticeengines/pls/service/impl/importworkflowspecservice/specfunctest-contacts-spec.json";
 
     private static String expectedTableFileName =
             "com/latticeengines/pls/service/impl/importworkflowspecservice/expected-spec-table.json";
@@ -41,7 +41,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
 
         ImportWorkflowSpec actualTestSpec = null;
         try {
-            actualTestSpec = importWorkflowSpecService.loadSpecFromS3("test", "contact");
+            actualTestSpec = importWorkflowSpecService.loadSpecFromS3("specfunctest", "contacts");
         } catch (Exception e) {
             log.error("Loading Spec from S3 failed with error:", e);
             throw e;
@@ -49,23 +49,20 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
         Assert.assertNotNull(actualTestSpec);
         log.error("Actual import workflow spec is:\n" + JsonUtils.pprint(actualTestSpec));
 
+        Assert.assertEquals(actualTestSpec, expectedTestSpec);
+
         // TODO(jwinter): Figure out the proper way to compare JSON objects for test.
+        // Below are some alternative equality checks.
         //Assert.assertEquals(JsonUtils.serialize(actualTestSpec), JsonUtils.serialize(expectedTestSpec));
         //ObjectMapper mapper = new ObjectMapper();
         //Assert.assertTrue(mapper.valueToTree(actualTestSpec).equals(mapper.valueToTree(expectedTestSpec)));
-        Assert.assertEquals(actualTestSpec, expectedTestSpec);
-
-        /*
-        Assert.assertEquals(actualTestSpec.getSystemType(), expectedTestSpec.getSystemType());
-        Assert.assertEquals(actualTestSpec.getSystemObject(), expectedTestSpec.getSystemObject());
-        */
     }
 
     @Test(groups = "functional")
     public void testTableFromSpec() throws Exception {
         ImportWorkflowSpec testSpec = null;
         try {
-            testSpec = importWorkflowSpecService.loadSpecFromS3("test", "contact");
+            testSpec = importWorkflowSpecService.loadSpecFromS3("specfunctest", "contacts");
         } catch (Exception e) {
             log.error("Loading Spec from S3 failed with error:", e);
             throw e;
@@ -78,6 +75,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends PlsFunctionalTestNGBase
         log.error("Expected table generated from import workflow spec is:\n" + JsonUtils.pprint(expectedTable));
 
         Assert.assertEquals(JsonUtils.serialize(actualTable), JsonUtils.serialize(expectedTable));
+        // TODO(jwinter): Figure out the proper way to compare JSON objects for test.
         //ObjectMapper mapper = new ObjectMapper();
         //Assert.assertTrue(mapper.valueToTree(actualTable).equals(mapper.valueToTree(expectedTable)));
     }

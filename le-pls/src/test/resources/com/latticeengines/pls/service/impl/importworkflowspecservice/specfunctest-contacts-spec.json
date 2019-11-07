@@ -1,5 +1,5 @@
 {
-    "systemType": "Test",
+    "systemType": "SpecFuncTest",
     "systemObject": "Contacts",
     "fieldDefinitionsRecordsMap": {
         "Unique ID": [

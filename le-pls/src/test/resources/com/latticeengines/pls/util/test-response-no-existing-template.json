@@ -1,7 +1,7 @@
 {
     "currentFieldDefinitionsRecord": {
         "systemName": "ImportWorkflowUtilsTest",
-        "systemType": "Test",
+        "systemType": "ImportFuncTest",
         "systemObject": "Contacts",
         "fieldDefinitionsRecordsMap": {
             "Unique ID": [
@@ -431,7 +431,7 @@
             ],
             "Custom Fields": []
         },
-        "systemType": "Test",
+        "systemType": "ImportFuncTest",
         "systemObject": "Contacts"
     },
     "existingFieldDefinitionsMap": {},

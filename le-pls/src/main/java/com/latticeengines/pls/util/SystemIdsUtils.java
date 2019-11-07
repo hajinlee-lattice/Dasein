@@ -51,6 +51,11 @@ public class SystemIdsUtils {
                                                   EntityType entityType, FieldDefinitionsRecord record,
                                                   CDLService cdlService) {
         S3ImportSystem importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+        if (importSystem == null) {
+            throw new RuntimeException("Failed to create import system for tenant " + customerSpace.toString() +
+                    " and system name " + systemName);
+        }
+
         List<FieldDefinition> fieldDefinitionList = record.getFieldDefinitionsRecords(UNIQUE_ID_SECTION);
         if (CollectionUtils.isEmpty(fieldDefinitionList)) {
             return importSystem;
@@ -61,6 +66,11 @@ public class SystemIdsUtils {
                     " and object " + entityType.getDisplayName() + " has more than one field");
         }
         FieldDefinition uniqueIdDefinition = fieldDefinitionList.get(0);
+
+        if (uniqueIdDefinition == null) {
+            throw new IllegalArgumentException(UNIQUE_ID_SECTION + " section of system name " + systemName +
+                    " and object " + entityType.getDisplayName() + " has null field");
+        }
 
         // Ignore the definition is no column is mapped in the current import.
         if (!uniqueIdDefinition.isInCurrentImport()) {

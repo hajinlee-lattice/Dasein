@@ -202,7 +202,7 @@ public class FieldDefinitionsRecord {
                 return false;
             }
             Map<String, List<FieldDefinition>> map2 = record.getFieldDefinitionsRecordsMap();
-            for (Map.Entry<String, List<FieldDefinition>> entry: this.getFieldDefinitionsRecordsMap().entrySet()) {
+            for (Map.Entry<String, List<FieldDefinition>> entry: fieldDefinitionsRecordsMap.entrySet()) {
                 if (!map2.containsKey(entry.getKey())) {
                     return false;
                 }
@@ -227,5 +227,4 @@ public class FieldDefinitionsRecord {
         }
         return false;
     }
-
 }
