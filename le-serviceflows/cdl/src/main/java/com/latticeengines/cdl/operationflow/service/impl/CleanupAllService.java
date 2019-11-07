@@ -2,9 +2,12 @@ package com.latticeengines.cdl.operationflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -29,8 +32,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -51,6 +58,9 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -166,6 +176,27 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
         log.info(String.format("begin clean up cdl metadata of CustomerSpace %s", customerSpace));
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
         List<DataFeedTask> tasks = dataFeed.getTasks();
+        Set<String> taskIds = CollectionUtils.isEmpty(tasks) ? Collections.emptySet() :
+                tasks.stream().map(DataFeedTask::getUniqueId).collect(Collectors.toSet());
+        List<Action> allActions = actionProxy.getActions(customerSpace);
+        List<Action> importActions = CollectionUtils.isEmpty(allActions) ? Collections.emptyList() :
+                allActions.stream().filter(action -> action.getType().equals(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW)).collect(Collectors.toList());
+        // delete action first
+        try {
+            if (CollectionUtils.isNotEmpty(importActions)) {
+                for (Action action : importActions) {
+                    if (action.getActionConfiguration() != null
+                            && action.getActionConfiguration() instanceof ImportActionConfiguration) {
+                        ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
+                        if (taskIds.contains(config.getDataFeedTaskId())) {
+                            actionProxy.deleteAction(customerSpace, action.getPid());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Cannot delete import action. " + e.getMessage());
+        }
         for (DataFeedTask task : tasks) {
             Table dataTable = task.getImportData();
             Table templateTable = task.getImportTemplate();

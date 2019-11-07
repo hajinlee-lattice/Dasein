@@ -12,6 +12,8 @@ public interface ActionProxy {
 
     Action cancelAction(String customerSpace, Long actionPid);
 
+    void deleteAction(String customerSpace, Long actionPid);
+
     List<Action> getActions(String customerSpace);
 
     List<Action> getActionsByOwnerId(String customerSpace, Long ownerId);
