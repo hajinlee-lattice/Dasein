@@ -112,6 +112,16 @@ public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         log.info(String.format("All actions are %s", Arrays.toString(actions.toArray())));
     }
 
+    @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
+    public void testDelete() {
+        List<Action> actions = findByOwnerId(NEW_OWNER_ID);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(actions));
+        for (Action action : actions) {
+            actionProxy.deleteAction(mainCustomerSpace, action.getPid());
+        }
+        Assert.assertTrue(CollectionUtils.isEmpty(findByOwnerId(NEW_OWNER_ID)));
+    }
+
     private void createAction(Action action) {
         actionProxy.createAction(CustomerSpace.parse(mainTestTenant.getId()).toString(), action);
     }

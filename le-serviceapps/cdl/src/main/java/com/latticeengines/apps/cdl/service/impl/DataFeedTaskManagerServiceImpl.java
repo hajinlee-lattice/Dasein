@@ -481,6 +481,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             entityList.add(BusinessEntity.Contact);
             entityList.add(BusinessEntity.Transaction);
             entityList.add(BusinessEntity.Product);
+            entityList.add(BusinessEntity.ActivityStream);
+            entityList.add(BusinessEntity.Catalog);
         } else {
             entityList.add(entity);
         }

@@ -126,7 +126,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         processDeltaCalculationResult(channel.getChannelConfig().getAudienceType(), deltaCalculationResult);
     }
 
-    private SparkJobResult executeSparkJob(HdfsDataUnit previousLaunchUniverse, HdfsDataUnit currentLaunchUniverse,
+    private SparkJobResult executeSparkJob(HdfsDataUnit currentLaunchUniverse, HdfsDataUnit previousLaunchUniverse,
             String joinKey, boolean filterJoinKeyNulls) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
                 joinKey, filterJoinKeyNulls, getRandomWorkspace());

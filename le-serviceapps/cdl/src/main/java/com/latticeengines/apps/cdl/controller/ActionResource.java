@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,25 +55,31 @@ public class ActionResource {
     }
 
     @PostMapping(value = "")
-    @ApiOperation(value = "Save purchase metrics")
+    @ApiOperation(value = "Create Action")
     public Action create(@PathVariable String customerSpace, @RequestBody Action action) {
         return actionService.create(action);
     }
 
     @PutMapping(value = "")
-    @ApiOperation(value = "Save purchase metrics")
+    @ApiOperation(value = "Update Action")
     public Action update(@PathVariable String customerSpace, @RequestBody Action action) {
         return actionService.update(action);
     }
 
     @GetMapping(value = "")
-    @ApiOperation(value = "Save purchase metrics")
+    @ApiOperation(value = "Cancel Action")
     public Action cancel(@PathVariable String customerSpace, @RequestParam(name = "actionPid") Long actionPid) {
         return actionService.cancel(actionPid);
     }
 
+    @DeleteMapping(value = "")
+    @ApiOperation(value = "Delete Action")
+    public void delete(@PathVariable String customerSpace, @RequestParam(name = "actionPid") Long actionPid) {
+        actionService.delete(actionPid);
+    }
+
     @PutMapping(value = "/ownerid")
-    @ApiOperation(value = "Save purchase metrics")
+    @ApiOperation(value = "Patch Owner Id")
     public void patchOwnerId(@PathVariable String customerSpace, //
                              @RequestParam(name = "pids", required = false) List<Long> pids, //
                              @RequestParam(name = "ownerId", required = false) Long ownerId) {
