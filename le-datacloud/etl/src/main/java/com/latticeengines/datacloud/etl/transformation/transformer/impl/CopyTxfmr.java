@@ -39,6 +39,11 @@ public class CopyTxfmr extends ConfigurableSparkJobTxfmr<CopyConfig> {
     }
 
     @Override
+    protected void modifySparkJobConfig(CopyConfig sparkJobConfig, TransformerConfig stepConfig) {
+        partitionMultiplier = 4;
+    }
+
+    @Override
     protected Schema getTargetSchema(HdfsDataUnit result, CopyConfig sparkJobConfig, //
                                      TransformerConfig configuration, List<Schema> baseSchemas) {
         Schema baseSchema = baseSchemas.get(0);

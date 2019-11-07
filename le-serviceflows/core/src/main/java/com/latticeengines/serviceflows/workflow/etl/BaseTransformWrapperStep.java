@@ -15,7 +15,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.yarn.client.YarnClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -58,9 +57,6 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
-    protected YarnClient yarnClient;
 
     @Inject
     protected MetadataProxy metadataProxy;
@@ -244,6 +240,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
+        engineConf.setScalingMultiplier(scalingMultiplier);
         return engineConf;
     }
 
@@ -264,6 +261,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scaleOut));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
+        engineConf.setScalingMultiplier(scalingMultiplier);
         return engineConf;
     }
 
@@ -279,6 +277,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         jobProperties.put("spark.dynamicAllocation.maxExecutors", String.valueOf(sparkExecutors * scalingMultiplier));
         engineConf.setJobProperties(jobProperties);
         engineConf.setPartitions(cascadingPartitions * scalingMultiplier);
+        engineConf.setScalingMultiplier(scalingMultiplier);
         return engineConf;
     }
 

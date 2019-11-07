@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -25,7 +24,6 @@ import org.springframework.retry.support.RetryTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -43,11 +41,12 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.spark.LivyConfigurer;
+import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -90,9 +89,6 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     @Inject
     private SparkJobService sparkJobService;
 
-    @Inject
-    private EMRCacheService emrCacheService;
-
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
@@ -100,22 +96,25 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     private String podId;
 
     @Value("${dataflowapi.spark.driver.cores}")
-    private String driverCores;
+    private int driverCores;
 
     @Value("${dataflowapi.spark.driver.mem}")
     private String driverMem;
 
     @Value("${dataflowapi.spark.executor.cores}")
-    private String executorCores;
+    private int executorCores;
 
     @Value("${dataflowapi.spark.executor.mem}")
     private String executorMem;
 
     @Value("${dataflowapi.spark.max.executors}")
-    private String maxExecutors;
+    private int maxExecutors;
 
     @Value("${dataflowapi.spark.min.executors}")
-    private String minExecutors;
+    private int minExecutors;
+
+    private int scalingMultiplier = 1; // can be overwrite by sub-class logic
+    protected int partitionMultiplier = 1; // can be overwrite by sub-class logic
 
     protected S sparkJobConfig;
 
@@ -154,6 +153,8 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
                 sparkProps.putAll(extraProps);
             }
 
+            final LivyScalingConfig scalingConfig = parseScalingConfig(step.getConfig());
+
             // log important spark configs in trace
             Map<String, String> configs = new HashMap<>();
             configs.put("transformerConfig", JsonUtils.serialize(configuration));
@@ -170,7 +171,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
                 if (sessionHolder.get() != null) {
                     livySessionService.stopSession(sessionHolder.get());
                 }
-                sessionHolder.set(createLivySession(step, progress, sparkProps));
+                sessionHolder.set(createLivySession(step, progress, sparkProps, scalingConfig));
                 span.log(Collections.singletonMap("livySession", JsonUtils.serialize(sessionHolder.get())));
                 return sparkJobService.runJob(sessionHolder.get(), getSparkJobClz(), sparkJobConfig);
             });
@@ -212,6 +213,25 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             }
         }
         return sparkProps;
+    }
+
+    private LivyScalingConfig parseScalingConfig(String confJson) {
+        if (StringUtils.isNotBlank(confJson)) {
+            JsonNode jsonNode = JsonUtils.deserialize(confJson, JsonNode.class);
+            try {
+                if (jsonNode.has(ENGINE_CONFIG)) {
+                    TransformationFlowParameters.EngineConfiguration engineConfig = OM.treeToValue(
+                            jsonNode.get(ENGINE_CONFIG), TransformationFlowParameters.EngineConfiguration.class);
+                    if (engineConfig.getScalingMultiplier() != null) {
+                        scalingMultiplier = Math.max(engineConfig.getScalingMultiplier(), 1);
+                        log.info("Set scalingMultiplier to " + scalingMultiplier + " based on engine config.");
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to parse " + ENGINE_CONFIG + " from conf json.", e);
+            }
+        }
+        return new LivyScalingConfig(scalingMultiplier, partitionMultiplier);
     }
 
     private List<DataUnit> getSparkInput(TransformStep step) {
@@ -294,74 +314,28 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     }
 
     private LivySession createLivySession(TransformStep step, TransformationProgress progress, //
-                                          Map<String, String> sparkProps) {
+                                          Map<String, String> sparkProps, LivyScalingConfig scalingConfig) {
         String creator = progress.getCreatedBy();
         String primaryJobName = creator + "~" + getName();
         String secondaryJobName = getSecondaryJobName(progress, step);
         String jobName = StringUtils.isNotBlank(secondaryJobName) //
                 ? primaryJobName + "~" + secondaryJobName : primaryJobName;
-        String livyHost;
-        if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
-        } else {
-            livyHost = "http://localhost:8998";
-        }
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        LivyConfigurer configurer = new LivyConfigurer() //
+                .withDriverMem(driverMem).withDriverCores(driverCores) //
+                .withExecutorMem(executorMem).withExecutorCores(executorCores) //
+                .withMinExecutors(minExecutors).withMaxExecutors(maxExecutors);
+        Map<String, String> sparkConf = configurer.getSparkConf(scalingConfig);
+        if (MapUtils.isNotEmpty(sparkProps)) {
+            sparkConf.putAll(sparkProps);
+        }
         return retry.execute(context -> livySessionService.startSession(jobName, //
-                getLivyConf(sparkProps), getSparkConf(sparkProps)));
+                configurer.getLivyConf(scalingConfig), sparkConf));
     }
 
     @Override
     public String outputSubDir() {
         return "Output1";
-    }
-
-    private Map<String, Object> getLivyConf(Map<String, String> sparkProps) {
-        Map<String, Object> conf = new HashMap<>();
-        conf.put("driverCores", Integer.valueOf(sparkProps.getOrDefault("spark.driver.cores", driverCores)));
-        conf.put("driverMemory", sparkProps.getOrDefault("spark.driver.memory", driverMem));
-        conf.put("executorCores", Integer.valueOf(sparkProps.getOrDefault("spark.executor.cores", executorCores)));
-        conf.put("executorMemory", sparkProps.getOrDefault("spark.executor.memory", executorMem));
-        return conf;
-    }
-
-    private Map<String, String> getSparkConf(Map<String, String> sparkProps) {
-        Map<String, String> conf = new HashMap<>();
-        int numExecutors = sparkProps.containsKey("spark.executor.instances") ? //
-                Math.max(1, Integer.valueOf(sparkProps.get("spark.executor.instances"))) : 1;
-        int adjustedMinExecutors = Math.min(Integer.valueOf(minExecutors), numExecutors);
-        if (sparkProps.containsKey("spark.dynamicAllocation.minExecutors")) {
-            adjustedMinExecutors = Math.max(0, Integer.valueOf(sparkProps.get("spark.dynamicAllocation.minExecutors")));
-        }
-        int adjustedMaxExecutors = Math.max(Integer.valueOf(maxExecutors), numExecutors);
-        if (sparkProps.containsKey("spark.dynamicAllocation.maxExecutors")) {
-            int customMaxExecutors = Math.max(1, Integer.valueOf(sparkProps.get("spark.dynamicAllocation.maxExecutors")));
-            if (customMaxExecutors >= adjustedMinExecutors) {
-                adjustedMaxExecutors = customMaxExecutors;
-            } else {
-                log.warn("Customized max executors " + customMaxExecutors //
-                        + " is too small, keep using " + adjustedMaxExecutors);
-            }
-        }
-        numExecutors = Math.max(numExecutors, adjustedMinExecutors);
-        conf.put("spark.executor.instances", String.valueOf(numExecutors));
-        conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(adjustedMinExecutors));
-        conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(adjustedMaxExecutors));
-        Set<String> skipKeys = Sets.newHashSet( //
-                "spark.driver.cores", //
-                "spark.driver.memory", //
-                "spark.executor.cores", //
-                "spark.executor.memory", //
-                "spark.executor.instances", //
-                "spark.dynamicAllocation.minExecutors", //
-                "spark.dynamicAllocation.maxExecutors"
-        );
-        sparkProps.forEach((key, value) -> {
-            if (!skipKeys.contains(key)) {
-                conf.put(key, value);
-            }
-        });
-        return conf;
     }
 
     private String getSecondaryJobName(TransformationProgress progress, TransformStep step) {
