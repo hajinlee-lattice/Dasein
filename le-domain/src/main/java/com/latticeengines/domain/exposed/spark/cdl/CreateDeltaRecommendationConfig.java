@@ -13,6 +13,7 @@ public class CreateDeltaRecommendationConfig extends SparkJobConfig {
 
     public static final String NAME = "createDeltaRecommendation";
 
+    @JsonProperty("TargetNums")
     private int targetNums;
 
     @JsonProperty("DeltaCampaignLaunchSparkContext")

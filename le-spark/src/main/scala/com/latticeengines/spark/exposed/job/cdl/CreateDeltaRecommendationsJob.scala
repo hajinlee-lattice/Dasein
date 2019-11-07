@@ -236,7 +236,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
             if (addContactTable != null) {
                 // replace contacts
                 val aggregatedContacts = aggregateContacts(addContactTable, contactCols, joinKey)
-                finalrecommendationDf = recommendationDf.drop("CONTACTS").join(aggregatedContacts, joinKey :: Nil, "left")
+                finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
             } else {
                 finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumn("CONTACTS", lit(""))
             }
