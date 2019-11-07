@@ -11,9 +11,15 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepository {
 
-    @Query("SELECT c FROM PlayLaunchChannel c INNER JOIN c.play p LEFT JOIN p.ratingEngine r "
-            + "WHERE c.isAlwaysOn = true " + "AND c.nextScheduledLaunch BETWEEN :startDate AND :endDate "
-            + "AND p.deleted = false " + "AND (p.ratingEngine is null OR r.status = 'ACTIVE') "
+    @Query("SELECT c FROM PlayLaunchChannel c " //
+            + "INNER JOIN c.play p " //
+            + "LEFT JOIN p.ratingEngine r " //
+            + "LEFT JOIN WorkflowJob w on w.pid = c.lastDeltaWorkflowId " //
+            + "WHERE c.isAlwaysOn = true " //
+            + "AND c.nextScheduledLaunch BETWEEN :startDate AND :endDate " //
+            + "AND p.deleted = false " //
+            + "AND (p.ratingEngine is null OR r.status = 'ACTIVE') " //
+            + "AND (w.status != 'ENQUEUED' AND TIMESTAMPDIFF(HOUR,FROM_UNIXTIME(w.startTimeInMillis/1000), CURRENT_TIMESTAMP())>=24) " //
             + "ORDER BY c.nextScheduledLaunch")
     List<PlayLaunchChannel> findAlwaysOnChannelsByNextScheduledTime(@Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
