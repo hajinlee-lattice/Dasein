@@ -81,6 +81,11 @@ public class PipelineTransformationReportByStep implements HasPid {
     @Column(name = "HdfsPod")
     private String hdfsPod;
 
+    // If the pipeline is for AM rebuild, log the version of AM being built
+    @JsonProperty("DataCloudVersion")
+    @Column(name = "DataCloudVersion")
+    private String datacloudVersion;
+
     @Override
     public Long getPid() {
         return pid;
@@ -201,4 +206,11 @@ public class PipelineTransformationReportByStep implements HasPid {
         this.hdfsPod = hdfsPod;
     }
 
+    public String getDatacloudVersion() {
+        return datacloudVersion;
+    }
+
+    public void setDatacloudVersion(String datacloudVersion) {
+        this.datacloudVersion = datacloudVersion;
+    }
 }

@@ -10,6 +10,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
+/**
+ * Keep doc
+ * https://confluence.lattice-engines.com/display/ENG/DataCloud+Engine+Architecture#DataCloudEngineArchitecture-Transformation
+ * up to date if there is any new change
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransformationStepConfig {

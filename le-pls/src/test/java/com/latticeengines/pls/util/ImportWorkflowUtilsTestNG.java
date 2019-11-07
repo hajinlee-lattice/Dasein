@@ -66,7 +66,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-contact-spec.json",
+                "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
 
         // Generate actual FieldDefinitionsRecord based on Contact import CSV and Spec.
@@ -96,7 +96,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-contact-spec.json",
+                "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
 
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
@@ -131,11 +131,11 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     public void testGenerateCurrentFieldDefinitionRecord_noExistingTemplate() throws IOException {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
         actualResponse.setCurrentFieldDefinitionsRecord(
-                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "ImportFuncTest", "Contacts"));
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-contact-spec.json",
+                "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
         actualResponse.setImportWorkflowSpec(importWorkflowSpec);
@@ -168,11 +168,11 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     public void testGenerateCurrentFieldDefinitionRecord_withExistingTemplate() throws IOException {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
         actualResponse.setCurrentFieldDefinitionsRecord(
-                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "ImportFuncTest", "Contacts"));
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-contact-spec.json",
+                "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
         actualResponse.setImportWorkflowSpec(importWorkflowSpec);
@@ -212,7 +212,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         // Generate Spec Java class from resource file.
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-contact-spec.json",
+                "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
 
@@ -222,7 +222,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         FetchFieldDefinitionsResponse fetchResponse = new FetchFieldDefinitionsResponse();
         fetchResponse.setCurrentFieldDefinitionsRecord(
-                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "ImportFuncTest", "Contacts"));
 
         fetchResponse.setAutodetectionResultsMap(autoDetectionResultsMap);
         fetchResponse.setImportWorkflowSpec(importWorkflowSpec);
@@ -263,11 +263,11 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     public void testIgnoredFlag() throws Exception {
         FetchFieldDefinitionsResponse actualResponse = new FetchFieldDefinitionsResponse();
         actualResponse.setCurrentFieldDefinitionsRecord(
-                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "Test", "Contacts"));
+                new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "ImportFuncTest", "Contacts"));
 
         // Generate Spec Java class from resource file
         ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
-                "com/latticeengines/pls/util/test-contact-spec.json", ImportWorkflowSpec.class);
+                "com/latticeengines/pls/util/importfunctest-contacts-spec.json", ImportWorkflowSpec.class);
 
         actualResponse.setImportWorkflowSpec(importWorkflowSpec);
 

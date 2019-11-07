@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.DataCloudNotificationService;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
@@ -91,6 +92,9 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     @Inject
     private DataCloudNotificationService notificationService;
+
+    @Inject
+    private DataCloudVersionService datacloudVersionService;
 
     private final String PIPELINE = DataCloudConstants.PIPELINE_TEMPSRC_PREFIX;
     private final String VERSION = "_version_";
@@ -483,7 +487,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                     report.setSteps(stepReports);
                     hdfsSourceEntityMgr.saveReport(pipelineSource, name, version, JsonUtils.serialize(report));
 
-                    reportStepToDB(name, version, step, stepConfig);
+                    reportStepToDB(name, version, step, stepConfig, transConf.isAMJob());
                 }
             } catch (Exception e) {
                 log.error("Failed to generate report of step " + step.getName(), e);
@@ -629,7 +633,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     }
 
     private void reportStepToDB(String pipelineName, String pipelineVersion, TransformStep step,
-            TransformationStepConfig stepConfig) {
+            TransformationStepConfig stepConfig, boolean isAMJob) {
         PipelineTransformationReportByStep stepReport = new PipelineTransformationReportByStep();
 
         stepReport.setPipeline(pipelineName);
@@ -662,6 +666,12 @@ public class PipelineTransformationService extends AbstractTransformationService
             stepReport.setElapsedTime(step.getElapsedTime());
         }
         stepReport.setHdfsPod(HdfsPodContext.getHdfsPodId());
+        if (isAMJob) {
+            String currVer = datacloudVersionService.currentApprovedVersion().getVersion();
+            // Log the version of AccountMaster being built which is always the
+            // next version of current approved version in production
+            stepReport.setDatacloudVersion(datacloudVersionService.nextMinorVersion(currVer));
+        }
         reportEntityMgr.insertReportByStep(stepReport);
     }
 
@@ -819,6 +829,7 @@ public class PipelineTransformationService extends AbstractTransformationService
         configuration.setKeepTemp(inputRequest.getKeepTemp());
         configuration.setSteps(steps);
         configuration.setEnableSlack(request.isEnableSlack());
+        configuration.setAMJob(request.isAMJob());
         configuration.setContainerMemMB(inputRequest.getContainerMemMB());
 
         return configuration;
