@@ -302,7 +302,7 @@ public class GenerateDimensionMetadata
             return Collections.emptyMap();
         }
 
-        Map<String, String> tableNames = getMapObjectFromContext(CATALOG_TABLE_NAME, String.class, String.class);
+        Map<String, String> tableNames = getMapObjectFromContext(ctxKey, String.class, String.class);
         return tableNames.entrySet() //
                 .stream() //
                 .map(entry -> Pair.of(entry.getKey(),
