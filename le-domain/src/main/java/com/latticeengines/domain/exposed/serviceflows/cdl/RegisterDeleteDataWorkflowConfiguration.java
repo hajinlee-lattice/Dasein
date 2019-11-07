@@ -31,6 +31,11 @@ public class RegisterDeleteDataWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
+        public Builder userId(String userId) {
+            configuration.setUserId(userId);
+            return this;
+        }
+
         public Builder tableName(String tableName) {
             deleteFileUploadStepConfiguration.setTableName(tableName);
             return this;
