@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -64,16 +65,20 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private BucketedScoreProxy bucketedScoreProxy;
 
     private String customerSpace;
+    private Map<String, List<BucketMetadata>> originalBucketMetadataMap;
 
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace().toString();
+        originalBucketMetadataMap =  new HashMap<>();
         List<RatingModelContainer> activeModels = readActiveRatingModels();
         log.info("Found " + CollectionUtils.size(activeModels) + " active rating models.");
         putObjectInContext(RATING_MODELS, activeModels);
 
         initializeRatingLifts();
-        initializeModelGuidToOriginalBucketMetadataMap(activeModels);
+        // TODO: remove this log later
+        log.info("ORIGINAL_BUCKET_METADATA is " + JsonUtils.serialize(originalBucketMetadataMap));
+        WorkflowStaticContext.putObject(ORIGINAL_BUCKET_METADATA, originalBucketMetadataMap);
 
         removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
         removeObjectFromContext(TABLES_GOING_TO_REDSHIFT);
@@ -166,11 +171,13 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 }
             }
 
-            if (CollectionUtils.isEmpty(scoringBucketMetadata)) {
-                scoringBucketMetadata = BucketMetadataUtils.getDefaultMetadata();
-            }
-
             if (isValid) {
+                if (CollectionUtils.isEmpty(scoringBucketMetadata)) {
+                    scoringBucketMetadata = BucketMetadataUtils.getDefaultMetadata();
+                } else if (ratingModel instanceof AIModel) {
+                    AIModel aiModel = (AIModel) ratingModel;
+                    originalBucketMetadataMap.put(aiModel.getModelSummaryId(), scoringBucketMetadata);
+                }
                 container = new RatingModelContainer(ratingModel, summary, scoringBucketMetadata);
             }
         }
@@ -228,20 +235,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         return true;
     }
 
-    private void initializeModelGuidToOriginalBucketMetadataMap(List<RatingModelContainer> models) {
-        Map<String, List<BucketMetadata>> bucketMetadataMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(models)) {
-            for (RatingModelContainer container : models) {
-                List<BucketMetadata> bucketMetadata = container.getScoringBucketMetadata();
-                if ((container.getModel() instanceof AIModel) && CollectionUtils.isNotEmpty(bucketMetadata)) {
-                    AIModel aiModel = (AIModel) container.getModel();
-                    bucketMetadataMap.put(aiModel.getModelSummaryId(), bucketMetadata);
-                }
-            }
-        }
-        WorkflowStaticContext.putObject(ORIGINAL_BUCKET_METADATA, bucketMetadataMap);
-    }
-
     private void initializeRatingLifts() {
         Map<String, Map<String, Double>> liftMap = new HashMap<>();
         DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
@@ -270,9 +263,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         } else {
             log.info("No stats at version " + inactive);
         }
-        if (MapUtils.isNotEmpty(liftMap)) {
-            putObjectInContext(RATING_LIFTS, liftMap);
-        }
+        putObjectInContext(RATING_LIFTS, liftMap);
     }
 
 }
