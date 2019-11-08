@@ -496,7 +496,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             throw new RuntimeException("Cannot update S3 Import System!");
         }
         if (!responseDoc.isSuccess()) {
-            throw new LedpException(LedpCode.LEDP_40061, responseDoc.getErrors().toArray());
+            throw new LedpException(LedpCode.LEDP_18234, responseDoc.getErrors().toArray());
         }
 
     }
