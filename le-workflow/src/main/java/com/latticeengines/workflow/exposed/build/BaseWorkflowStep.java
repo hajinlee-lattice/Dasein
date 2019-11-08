@@ -157,7 +157,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String HAS_CROSS_SELL_MODEL = "HAS_CROSS_SELL_MODEL";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
     protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
-    protected static final String BUCKET_METADATA_MAP = "BUCKET_METADATA_MAP";
     protected static final String MODEL_GUID_ENGINE_ID_MAP = "MODEL_GUID_ENGINE_ID_MAP";
     protected static final String BUCKETED_SCORE_SUMMARIES_AGG = "BUCKETED_SCORE_SUMMARIES_AGG";
     protected static final String BUCKET_METADATA_MAP_AGG = "BUCKET_METADATA_MAP_AGG";

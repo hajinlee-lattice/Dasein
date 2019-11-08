@@ -214,7 +214,6 @@ public class PivotScoreAndEventDataFlow
         });
         if (!Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
             putObjectInContext(BUCKETED_SCORE_SUMMARIES, bucketedScoreSummaryMap);
-            putObjectInContext(BUCKET_METADATA_MAP, modelGuidToBucketMetadataMap);
             putObjectInContext(MODEL_GUID_ENGINE_ID_MAP, modelGuidToEngineIdMap);
             mergeAggregatedMaps();
         }
@@ -333,7 +332,9 @@ public class PivotScoreAndEventDataFlow
         // read lift from original bucket metadata (the latest published version before scoring)
         modelGuidToEngineIdMap.forEach((modelGuid, engineId) -> {
             if (originalLiftMap.containsKey(modelGuid)) {
-                liftMap.put(engineId, originalLiftMap.get(modelGuid));
+                Map<String, Double> originalLifts = originalLiftMap.get(modelGuid);
+                log.info("Overwrite lifts for " + engineId + " to " + JsonUtils.serialize(originalLifts));
+                liftMap.put(engineId, originalLifts);
             } else {
                 List<BucketMetadata> bucketMetadata = modelGuidToBucketMetadataMap.get(modelGuid);
                 liftMap.put(engineId, new HashMap<>());
@@ -390,21 +391,29 @@ public class PivotScoreAndEventDataFlow
         }
 
         if (MapUtils.isNotEmpty(modelGuidToBucketMetadataMap)) {
+            Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMapAgg = new HashMap<>();
+
+            // reconstructing aggregated map from existing map
             @SuppressWarnings("rawtypes")
             Map<String, List> map = getMapObjectFromContext(BUCKET_METADATA_MAP_AGG, String.class, List.class);
-            Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMapAgg = new HashMap<>();
-            WorkflowStaticContext.getObject(ORIGINAL_BUCKET_METADATA, Map.class);
             if (MapUtils.isNotEmpty(map)) {
                 map.forEach((guid, val) -> {
                     List<BucketMetadata> bmList = JsonUtils.convertList(val, BucketMetadata.class);
-                    if (CollectionUtils.isNotEmpty(bmList)) {
-                        Map<String, Double> originalLift = originalLiftMap.get(guid);
-                        bmList.forEach(bm -> bm.setLift(originalLift.getOrDefault(bm.getBucketName(), bm.getLift())));
-                    }
                     modelGuidToBucketMetadataMapAgg.put(guid, bmList);
                 });
             }
-            modelGuidToBucketMetadataMapAgg.putAll(modelGuidToBucketMetadataMap);
+
+            // add new bmList to aggregated map, with modified lifts
+            modelGuidToBucketMetadataMap.forEach((guid, bmList) -> {
+                if (CollectionUtils.isNotEmpty(bmList)) {
+                    Map<String, Double> originalLift = originalLiftMap.get(guid);
+                    bmList.forEach(bm -> bm.setLift(originalLift.getOrDefault(bm.getBucketName(), bm.getLift())));
+                }
+                modelGuidToBucketMetadataMapAgg.put(guid, bmList);
+            });
+
+            // TODO: remove this log later
+            log.info("BUCKET_METADATA_MAP_AGG is " + JsonUtils.serialize(modelGuidToBucketMetadataMapAgg));
             putObjectInContext(BUCKET_METADATA_MAP_AGG, modelGuidToBucketMetadataMapAgg);
         }
     }
