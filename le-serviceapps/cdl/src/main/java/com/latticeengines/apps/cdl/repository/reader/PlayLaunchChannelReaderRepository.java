@@ -16,10 +16,11 @@ public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepo
             + "LEFT JOIN p.ratingEngine r " //
             + "LEFT JOIN WorkflowJob w on w.pid = c.lastDeltaWorkflowId " //
             + "WHERE c.isAlwaysOn = true " //
+            + "AND c.expirationDate > CURRENT_TIMESTAMP() " //
             + "AND c.nextScheduledLaunch BETWEEN :startDate AND :endDate " //
             + "AND p.deleted = false " //
             + "AND (p.ratingEngine is null OR r.status = 'ACTIVE') " //
-            + "AND (w.status != 'ENQUEUED' AND TIMESTAMPDIFF(HOUR,FROM_UNIXTIME(w.startTimeInMillis/1000), CURRENT_TIMESTAMP())>=24) " //
+            + "AND (c.lastDeltaWorkflowId is null OR (w.status != 'ENQUEUED' AND TIMESTAMPDIFF(HOUR,FROM_UNIXTIME(w.startTimeInMillis/1000), CURRENT_TIMESTAMP())>=6)) " //
             + "ORDER BY c.nextScheduledLaunch")
     List<PlayLaunchChannel> findAlwaysOnChannelsByNextScheduledTime(@Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
