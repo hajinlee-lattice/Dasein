@@ -2,6 +2,7 @@ package com.latticeengines.app.exposed.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +35,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
@@ -202,14 +205,18 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
 
-        List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
-                Collections.singletonList(accountId), lookupIdColumn);
-        String internalAccountId = CollectionUtils.isNotEmpty(internalAccountIds) ? internalAccountIds.get(0) : null;
+        String internalAccountId = getInternalIdViaAccountCache(customerSpace, lookupIdColumn, accountId);
 
+        if (StringUtils.isBlank(internalAccountId)) {
+            List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
+                    Collections.singletonList(accountId), lookupIdColumn);
+            internalAccountId = CollectionUtils.isNotEmpty(internalAccountIds) ? internalAccountIds.get(0) : null;
+        }
         DataPage dataPage;
 
         if (StringUtils.isNotBlank(internalAccountId)) {
-            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountIds, predefined);
+            dataPage = getAccountByIdViaMatchApi(customerSpace, Collections.singletonList(internalAccountId),
+                    predefined);
 
             if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
                 // if we didn't get any data from matchapi then it may be
@@ -331,6 +338,23 @@ public class DataLakeServiceImpl implements DataLakeService {
             return cubeMap;
         }
         return null;
+    }
+
+    @VisibleForTesting
+    String getInternalIdViaAccountCache(String customerSpace, String lookupIdColumn, String accountId) {
+        String internalAccountId = null;
+        try {
+            Item item = dynamoItemService.getItem(dynamoAccountLookupCacheTableName,
+                    new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD,
+                            MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
+                                    CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId)));
+            internalAccountId = (String) item.get(DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD);
+        } catch (Exception e) {
+            log.warn("Failed to lookup accountId in dynamo cache for the value "
+                    + MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
+                            CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId));
+        }
+        return internalAccountId;
     }
 
     private List<String> getInternalAccountsIdViaObjectApi(String customerSpace, List<String> accountIds,
@@ -610,6 +634,11 @@ public class DataLakeServiceImpl implements DataLakeService {
     @VisibleForTesting
     void setMatchProxy(MatchProxy matchProxy) {
         this.matchProxy = matchProxy;
+    }
+
+    @VisibleForTesting
+    void setAccountLookupCacheTable(String testTable) {
+        this.dynamoAccountLookupCacheTableName = testTable;
     }
 
     private ExecutorService getWorkers() {
