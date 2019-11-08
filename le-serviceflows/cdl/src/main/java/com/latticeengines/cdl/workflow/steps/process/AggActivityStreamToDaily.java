@@ -62,8 +62,6 @@ public class AggActivityStreamToDaily
 
     static final String BEAN_NAME = "aggActivityStreamToDaily";
 
-    // FIXME move to base
-    private static final String DAILY_AGG_STREAM_TABLE_KEY = "DAILY_AGG_STREAM_TABLE";
     private static final String DAILY_STORE_TABLE_FORMAT = "DailyStream_%s_%s";
     private static final TypeReference<Map<String, Map<String, DimensionMetadata>>> METADATA_MAP_TYPE = new TypeReference<Map<String, Map<String, DimensionMetadata>>>() {
     };
@@ -151,7 +149,8 @@ public class AggActivityStreamToDaily
 
         // link table to role in collection
         DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        Map<String, String> dailyTableNames = exportToS3AndAddToContext(dailyAggTables, DAILY_AGG_STREAM_TABLE_KEY);
+        Map<String, String> dailyTableNames = exportToS3AndAddToContext(dailyAggTables,
+                AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames,
                 AggregatedActivityStream, inactive);
         log.info("Daily aggregate activity stream tables = {}, version = {}", dailyTableNames, inactive);
