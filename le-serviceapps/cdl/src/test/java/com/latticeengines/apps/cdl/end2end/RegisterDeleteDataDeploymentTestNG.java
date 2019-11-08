@@ -75,6 +75,7 @@ public class RegisterDeleteDataDeploymentTestNG extends CDLEnd2EndDeploymentTest
         registerDeleteData();
         verifyRegister();
         processAnalyze();
+        verifyAfterPA();
     }
 
     private void registerDeleteData() {
@@ -101,15 +102,6 @@ public class RegisterDeleteDataDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 break;
             }
         }
-//        for (int i = 0; i < 10; i++) {
-//            String id = RandomStringUtils.randomAlphanumeric(12);
-//            sb.append(id);
-//            sb.append(',');
-//            sb.append(numRecordsInCsv);
-//            sb.append('\n');
-//            idSets.add(id);
-//            numRecordsInCsv++;
-//        }
         assert (numRecordsInCsv > 0);
         log.info("There are " + numRecordsInCsv + " rows in csv.");
         String fileName = "account_delete.csv";
@@ -145,6 +137,16 @@ public class RegisterDeleteDataDeploymentTestNG extends CDLEnd2EndDeploymentTest
         for (GenericRecord record : allDeletedRecords) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
             Assert.assertTrue(idSets.contains(accountId));
+        }
+    }
+
+    private void verifyAfterPA() {
+        log.info("Ids that needs to be removed: " + idSets.toString());
+        Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
+        List<GenericRecord> recordsAfterDelete = getRecords(table);
+        for (GenericRecord record : recordsAfterDelete) {
+            String accountId = record.get(InterfaceName.AccountId.name()).toString();
+            Assert.assertFalse(idSets.contains(accountId), "Should not contain id " + accountId);
         }
     }
 
