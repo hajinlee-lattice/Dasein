@@ -203,7 +203,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
         initializeScenario();
         jobConfig.setWorkspace(getWorkspace());
-        jobConfig.setInput(getInputUnits());
+        jobConfig.setInput(getInputUnitValues());
         return sparkJobService.runJob(session, jobClz, jobConfig);
     }
 
@@ -220,7 +220,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     protected SparkJobResult runSparkScript(SparkScript script, ScriptJobConfig jobConfig) {
         initializeScenario();
         jobConfig.setWorkspace(getWorkspace());
-        jobConfig.setInput(getInputUnits());
+        jobConfig.setInput(getInputUnitValues());
         return sparkJobService.runScript(session, script, jobConfig);
     }
 
@@ -287,7 +287,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         }
     }
 
-    private List<DataUnit> getInputUnits() {
+    private List<DataUnit> getInputUnitValues() {
         List<String> orderedInput = getInputOrder();
         return getInputUnits(orderedInput);
     }
@@ -394,6 +394,14 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     protected Boolean verifyMultipleTarget(HdfsDataUnit tgt,
             List<Pair<List<String>, Boolean>> accountAndContactExpectedCols) {
         return true;
+    }
+
+    public Map<String, DataUnit> getInputUnits() {
+        return this.inputUnits;
+    }
+
+    public void setInputUnits(Map<String, DataUnit> inputUnits) {
+        this.inputUnits = inputUnits;
     }
 
 }
