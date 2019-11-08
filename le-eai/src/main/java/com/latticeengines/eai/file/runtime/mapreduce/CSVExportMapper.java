@@ -141,7 +141,8 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             String fieldValue = String.valueOf(record.get(field.name()));
             Attribute attr = table.getAttribute(field.name());
             if (fieldValue.equals("null")) {
-                fieldValue = "";
+                // null can be converted to empty string and will not include quota in front of each line
+                fieldValue = null;
             } else if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                 Class<?> javaType = AvroUtils.getJavaType(AvroUtils.getType(field));
                 if (Long.class.equals(javaType) || Integer.class.equals(javaType)) {
