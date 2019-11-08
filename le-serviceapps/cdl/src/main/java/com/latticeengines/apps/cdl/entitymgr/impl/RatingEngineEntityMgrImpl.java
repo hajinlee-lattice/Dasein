@@ -46,7 +46,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
@@ -70,9 +69,6 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.CustomEventRatingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -89,7 +85,6 @@ public class RatingEngineEntityMgrImpl //
         implements RatingEngineEntityMgr, GraphVisitable {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImpl.class);
-    private static final String GET_ACTIVE_MODELS_ERR_MSG = "Too many Active Models.";
 
     @Inject
     private RatingEngineEntityMgrImpl _self;
@@ -260,15 +255,9 @@ public class RatingEngineEntityMgrImpl //
                 // Enforce quota limit
                 if (countActiveModelsForTenant >= quotaLimit) {
                     // throw exception
-                    LedpException tooManyActiveModelsError = new LedpException(LedpCode.LEDP_40074,
+                    throw new LedpException(LedpCode.LEDP_40074,
                             new String[] {
                             countActiveModelsForTenant.toString(), quotaLimit.toString() });
-                    UIAction uiAction = new UIAction();
-                    uiAction.setTitle(GET_ACTIVE_MODELS_ERR_MSG);
-                    uiAction.setView(View.Banner);
-                    uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(tooManyActiveModelsError.getMessage());
-                    throw new UIActionException(uiAction, tooManyActiveModelsError.getCode());
                 }
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {
