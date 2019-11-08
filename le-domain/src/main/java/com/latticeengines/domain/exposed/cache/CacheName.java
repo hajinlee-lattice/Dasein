@@ -53,6 +53,12 @@ public enum CacheName {
                 TimeTranslatorCache };
     }
 
+    public static CacheName[] getCdlServingCacheGroup() {
+        return new CacheName[] {
+                DataLakeCMCache, //
+                ServingMetadataLocalCache };
+    }
+
     public String getName() {
         return this.name;
     }
