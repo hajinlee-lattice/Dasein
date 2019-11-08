@@ -847,7 +847,7 @@ public enum LedpCode {
     LEDP_40072("Cannot get template for task {0}, backup file {1}"),
     LEDP_40073("Register delete data operation should have attribute {1} in template!"),
     LEDP_40074(
-            "There are already {0}/{1} Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model"),
+            "There are already {0} of {1} Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model"),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."),
