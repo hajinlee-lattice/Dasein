@@ -15,4 +15,7 @@ public class HdfsToDynamoConfiguration extends ExportConfiguration {
     public static final String CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED = "eai.export.aws.access.key.id";
     public static final String CONFIG_AWS_SECRET_KEY_ENCRYPTED = "eai.export.aws.secret.key";
 
+    public static final String CONFIG_TABLE_NAME = "eai.export.dynamo.table.name";
+    public static final String CONFIG_ATLAS_TENANT = "eai.export.dynamo.atlas.tenant";
+    public static final String CONFIG_ATLAS_LOOKUP_IDS = "eai.export.dynamo.atlas.lookup.ids";
 }

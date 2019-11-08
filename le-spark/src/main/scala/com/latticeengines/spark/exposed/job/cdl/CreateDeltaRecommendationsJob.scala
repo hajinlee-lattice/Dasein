@@ -196,32 +196,38 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
             
     logSpark(f"playId=$playId%s, playLaunchId=$playLaunchId%s, createRecommendationDataFrame=$createRecommendationDataFrame%s, createAddCsvDataFrame=$createAddCsvDataFrame%s, createDeleteCsvDataFrame=$createDeleteCsvDataFrame%s")
     
-    // Read Input
+    // Read Input, the order matters!
+    
     val listSize = lattice.input.size
     logSpark(s"input size is: $listSize")
     
+    // 0: addAccountTable
     val addAccountTable: DataFrame = lattice.input(0)
-    if (addAccountTable != null) {
+    if (!addAccountTable.rdd.isEmpty) {
         logDataFrame("addAccountTable", addAccountTable, joinKey, Seq(joinKey), limit = 30)
         addAccountTable.printSchema
     }
+    // 1: addContactTable
     val addContactTable: DataFrame = lattice.input(1)
-    if (addContactTable != null) {
+    if (!addContactTable.rdd.isEmpty) {
         logDataFrame("addContactTable", addContactTable, joinKey, Seq(joinKey), limit = 30)
         addContactTable.printSchema
     }
+    // 2: deleteAccountTable
     val deleteAccountTable: DataFrame = lattice.input(2)
-    if (deleteAccountTable != null) {
+    if (!deleteAccountTable.rdd.isEmpty) {
         logDataFrame("deleteAccountTable", deleteAccountTable, joinKey, Seq(joinKey), limit = 30)
         deleteAccountTable.printSchema
     }
+    // 3: deleteContactTable
     val deleteContactTable: DataFrame = lattice.input(3)
-    if (deleteContactTable != null) {
+    if (!deleteContactTable.rdd.isEmpty) {
         logDataFrame("deleteContactTable", deleteContactTable, joinKey, Seq(joinKey), limit = 30)
         deleteContactTable.printSchema
     }
+    // 4: completeContactTable
     val completeContactTable: DataFrame = lattice.input(4)
-    if (completeContactTable != null) {
+    if (!completeContactTable.rdd.isEmpty) {
         logDataFrame("completeContactTable", completeContactTable, joinKey, Seq(joinKey), limit = 30)
         completeContactTable.printSchema
     }
@@ -236,7 +242,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
             if (addContactTable != null) {
                 // replace contacts
                 val aggregatedContacts = aggregateContacts(addContactTable, contactCols, joinKey)
-                finalrecommendationDf = recommendationDf.drop("CONTACTS").join(aggregatedContacts, joinKey :: Nil, "left")
+                finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
             } else {
                 finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumn("CONTACTS", lit(""))
             }

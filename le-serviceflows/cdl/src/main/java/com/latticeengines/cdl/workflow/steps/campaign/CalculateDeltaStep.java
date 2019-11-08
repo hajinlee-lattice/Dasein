@@ -178,6 +178,12 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         processHDFSDataUnit(
                 String.format("Full%sUniverse_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
                 fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType));
+
+        try {
+            log.info("Counts: " + JsonUtils.serialize(getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class)));
+        } catch (Exception e) {
+            log.error("Failed to log counts due to" + e.getMessage());
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -187,7 +193,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         putObjectInContext(contextKey, tableName);
         putObjectInContext(contextKey + ATLAS_EXPORT_DATA_UNIT, dataUnit);
-        Map<String, Long> counts = getObjectFromContext(DELTA_TABLE_COUNTS, Map.class);
+        Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
         if (MapUtils.isEmpty(counts)) {
             counts = new HashMap<>();
         }

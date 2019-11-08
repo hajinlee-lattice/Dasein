@@ -256,7 +256,7 @@ public class SegmentServiceImpl implements SegmentService {
         String tenantId = MultiTenantContext.getShortTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
-        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataLakeCMCache);
+        cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
     }
 
     @Override

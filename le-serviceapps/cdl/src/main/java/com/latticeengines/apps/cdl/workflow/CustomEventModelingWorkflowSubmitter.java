@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.util.ArtifactUtils;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
@@ -75,6 +76,9 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
 
     @Value("${cdl.modeling.workflow.mem.mb}")
     protected int workflowMemMb;
+
+    @Inject
+    private S3ImportSystemService s3importSerice;
 
     @Inject
     private PlsInternalProxy plsInternalProxy;
@@ -174,6 +178,8 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 && CollectionUtils.isNotEmpty(trainingTable.getPrimaryKey().getAttributes())) {
             idColumnName = trainingTable.getPrimaryKey().getAttributes().get(0);
         }
+        boolean mapToLatticeAccount = s3importSerice
+                .hasSystemMapToLatticeAccount(getCustomerSpace().toString());
         CustomEventModelingWorkflowConfiguration configuration = new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -236,6 +242,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .saveBucketMetadata() //
                 .idColumnName(idColumnName, isLPI) //
                 .cdlMultiModel(!isLPI) //
+                .mapToLatticeAccount(mapToLatticeAccount) //
                 .dataCollectionVersion(version) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .modelIteration(parameters.getModelIteration()) //

@@ -358,6 +358,7 @@ public enum LedpCode {
     LEDP_18231("No attributes can be exported for export type: {0}."),
     LEDP_18232("Expiration Date {0} for PlayLaunchChannel is greater than allowed time of {1} months."),
     LEDP_18233("Outreach connection requires {0} to be mapped"), //
+    LEDP_18234("Failed to update import system: {0}"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -848,6 +849,7 @@ public enum LedpCode {
     LEDP_40073("Register delete data operation should have attribute {1} in template!"),
     LEDP_40074(
             "There are already {0} of {1} Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model"),
+    LEDP_40075("{0} is setup as your primary. This cannot be changed. Don't assign the unique ID of this system to Account ID and try again."),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."),
