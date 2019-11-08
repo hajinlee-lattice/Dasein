@@ -6,29 +6,11 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-
 public class AccessLevelUnitTestNG {
-
-    @Test(groups = "unit")
-    public void testRandome() {
-
-        Map<String, DataUnit> map = new HashMap<>();
-        map.put("0", new HdfsDataUnit());
-        map.put("1", null);
-
-        Map<String, DataUnit> inputUnits = new ConcurrentHashMap<>();
-        inputUnits.put("0", new HdfsDataUnit());
-        inputUnits.put("1", null);
-    }
 
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void parseString() {
