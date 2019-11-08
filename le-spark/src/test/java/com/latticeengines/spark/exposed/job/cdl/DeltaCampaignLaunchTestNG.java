@@ -1,21 +1,35 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext.DeltaCampaignLaunchSparkContextBuilder;
@@ -46,6 +60,10 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     private Object[][] deleteAccounts;
     private Object[][] deleteContacts;
     private Object[][] completeContacts;
+    private int targetNum;
+    private boolean createRecommendationDataFrame;
+    private boolean createAddCsvDataFrame;
+    private boolean createDeleteCsvDataFrame;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -54,13 +72,125 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         uploadInputAvro();
     }
 
-    @Test(groups = "functional")
-    public void runTest() {
+    @Test(groups = "functional", dataProvider = "dataFrameProvider")
+    public void runTest(boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
+            boolean createDeleteCsvDataFrameVal) {
+        createRecommendationDataFrame = createRecommendationDataFrameVal;
+        createAddCsvDataFrame = createAddCsvDataFrameVal;
+        createDeleteCsvDataFrame = createDeleteCsvDataFrameVal;
+        overwriteInputUnits();
+        CreateDeltaRecommendationConfig sparkConfig = generateCreateDeltaRecommendationConfig();
+        SparkJobResult result = runSparkJob(CreateDeltaRecommendationsJob.class, sparkConfig);
+        verifyResult(result);
+    }
+
+    private void overwriteInputUnits() {
+        if (createRecommendationDataFrame && createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            // do nothing
+        } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            // only have delete Accounts and delete contacts
+            Map<String, DataUnit> inputUnits = new HashMap<>();
+            Assert.assertNotNull(getInputUnits());
+            getInputUnits().forEach((k, v) -> {
+                inputUnits.put(k, v);
+            });
+            inputUnits.put("Input0", null);
+            inputUnits.put("Input1", null);
+            inputUnits.put("Input4", null);
+            setInputUnits(inputUnits);
+        }
+    }
+
+    private CreateDeltaRecommendationConfig generateCreateDeltaRecommendationConfig() {
+        if (createRecommendationDataFrame && createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            targetNum = 3;
+        } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            targetNum = 1;
+        }
         CreateDeltaRecommendationConfig sparkConfig = new CreateDeltaRecommendationConfig();
         DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext = generateDeltaCampaignLaunchSparkContextForS3();
         sparkConfig.setDeltaCampaignLaunchSparkContext(deltaCampaignLaunchSparkContext);
-        sparkConfig.setTargetNums(3);
-        SparkJobResult result = runSparkJob(CreateDeltaRecommendationsJob.class, sparkConfig);
+        sparkConfig.setTargetNums(targetNum);
+        return sparkConfig;
+    }
+
+    @Override
+    public void verifyResult(SparkJobResult result) {
+        Assert.assertEquals(result.getTargets().size(), targetNum);
+        if (createRecommendationDataFrame && createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            HdfsDataUnit recDf = result.getTargets().get(0);
+            HdfsDataUnit addCsvDf = result.getTargets().get(1);
+            HdfsDataUnit deleteCsvDf = result.getTargets().get(2);
+
+            // Account number assertion
+            Assert.assertEquals(recDf.getCount(), addCsvDf.getCount());
+            Assert.assertEquals(recDf.getCount().intValue(), addAccounts.length);
+            Assert.assertEquals(deleteCsvDf.getCount().intValue(), deleteAccounts.length);
+
+            // Contact number assertion
+            try {
+                Iterator<GenericRecord> recDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                        PathUtils.toAvroGlob(recDf.getPath()));
+                GenericRecord record = recDfIter.next();
+                Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
+                ObjectMapper jsonParser = new ObjectMapper();
+                JsonNode jsonObject = jsonParser.readTree(contactObject.toString());
+                Assert.assertTrue(jsonObject.isArray());
+                Assert.assertEquals(jsonObject.size(), completeContactPerAccount);
+
+                Iterator<GenericRecord> addCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                        PathUtils.toAvroGlob(addCsvDf.getPath()));
+                record = addCsvDfIter.next();
+                contactObject = record.get(RecommendationColumnName.CONTACTS.name());
+                jsonObject = jsonParser.readTree(contactObject.toString());
+                Assert.assertTrue(jsonObject.isArray());
+                Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
+
+                Iterator<GenericRecord> deleteCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                        PathUtils.toAvroGlob(deleteCsvDf.getPath()));
+                record = deleteCsvDfIter.next();
+                contactObject = record.get(RecommendationColumnName.CONTACTS.name());
+                jsonObject = jsonParser.readTree(contactObject.toString());
+                Assert.assertTrue(jsonObject.isArray());
+                Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // external Id assertion
+            Map<String, String> accountIdToExternalIdMap = new HashMap<>();
+            verifyAndReadTarget(recDf).forEachRemaining(record -> {
+                Object externalIdObject = record.get(RecommendationColumnName.EXTERNAL_ID.name());
+                Object accountIdObject = record.get(RecommendationColumnName.EXTERNAL_ID.name());
+                accountIdToExternalIdMap.put(accountIdObject.toString(), externalIdObject.toString());
+            });
+            verifyAndReadTarget(addCsvDf).forEachRemaining(record -> {
+                Object externalIdObject = record.get(RecommendationColumnName.EXTERNAL_ID.name());
+                Object accountIdObject = record.get(RecommendationColumnName.EXTERNAL_ID.name());
+                Assert.assertTrue(accountIdToExternalIdMap.containsKey(accountIdObject.toString()));
+                Assert.assertEquals(accountIdToExternalIdMap.get(accountIdObject.toString()),
+                        externalIdObject.toString());
+            });
+        } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
+            HdfsDataUnit deleteCsvDf = result.getTargets().get(0);
+            Assert.assertEquals(deleteCsvDf.getCount().intValue(), deleteAccounts.length);
+            Iterator<GenericRecord> deleteCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                    PathUtils.toAvroGlob(deleteCsvDf.getPath()));
+            GenericRecord record = deleteCsvDfIter.next();
+            record = deleteCsvDfIter.next();
+            Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
+            ObjectMapper jsonParser = new ObjectMapper();
+            JsonNode jsonObject;
+            try {
+                jsonObject = jsonParser.readTree(contactObject.toString());
+                Assert.assertTrue(jsonObject.isArray());
+                Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
     }
 
     private DeltaCampaignLaunchSparkContext generateDeltaCampaignLaunchSparkContextForS3() {
@@ -119,12 +249,8 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         deltaCampaignLaunchSparkContext
                 .setAccountColsRecNotIncludedNonStd(CampaignLaunchUtils.generateAccountColsRecNotIncludedNonStdForS3());
         deltaCampaignLaunchSparkContext.setContactCols(CampaignLaunchUtils.generateContactColsForS3());
-
-        boolean createRecommendationDataFrame = true;
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
-        boolean createAddCsvDataFrame = true;
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
-        boolean createDeleteCsvDataFrame = true;
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
 
         return deltaCampaignLaunchSparkContext;
@@ -264,6 +390,14 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             }
         }
         completeContactData = uploadHdfsDataUnit(completeContacts, contactFields);
+    }
+
+    @DataProvider
+    public Object[][] dataFrameProvider() {
+        return new Object[][] { //
+                { true, true, true }, // generate all three dataFrames
+                { false, false, true } // only generate delete csv dataFrame
+        };
     }
 
 }

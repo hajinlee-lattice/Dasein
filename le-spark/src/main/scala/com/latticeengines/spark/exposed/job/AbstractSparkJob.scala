@@ -49,10 +49,14 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       List()
     } else {
       jobConfig.getInput.asScala.map(dataUnit => {
-        val storage = dataUnit.getStorageType
-        storage match {
-          case StorageType.Hdfs => loadHdfsUnit(spark, dataUnit.asInstanceOf[HdfsDataUnit])
-          case _ => throw new UnsupportedOperationException(s"Unknown storage $storage")
+        if (dataUnit == null) {
+          spark.emptyDataFrame
+        } else {
+          val storage = dataUnit.getStorageType
+          storage match {
+            case StorageType.Hdfs => loadHdfsUnit(spark, dataUnit.asInstanceOf[HdfsDataUnit])
+            case _ => throw new UnsupportedOperationException(s"Unknown storage $storage")
+          }
         }
       }).toList
     }

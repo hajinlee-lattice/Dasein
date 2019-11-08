@@ -142,7 +142,7 @@ public class CampaignLaunchUtils {
                 RecommendationColumnName.LAST_UPDATED_TIMESTAMP.name(), RecommendationColumnName.MONETARY_VALUE.name(),
                 RecommendationColumnName.PRIORITY_ID.name(), RecommendationColumnName.PRIORITY_DISPLAY_NAME.name(),
                 RecommendationColumnName.LIKELIHOOD.name(), RecommendationColumnName.LIFT.name(),
-                RecommendationColumnName.RATING_MODEL_ID.name()).stream()
+                RecommendationColumnName.RATING_MODEL_ID.name(), RecommendationColumnName.EXTERNAL_ID.name()).stream()
                 .map(col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.getOrDefault(col, col))
                 .collect(Collectors.toList());
     }
