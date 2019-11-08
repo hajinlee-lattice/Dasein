@@ -226,6 +226,11 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
+            matchCdlAccount.setMapToLatticeAccount(mapToLatticeAccount);
+            return this;
+        }
+
         public CustomEventMatchWorkflowConfiguration build() {
             matchAccountWithIdBuilder.matchType(MatchStepConfiguration.LDC);
             matchAccountWithoutIdBuilder.matchType(MatchStepConfiguration.LDC);
