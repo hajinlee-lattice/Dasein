@@ -358,12 +358,13 @@ public class DataLakeServiceImpl implements DataLakeService {
             Item item = dynamoItemService.getItem(dynamoAccountLookupCacheTableName,
                     new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD,
                             MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
-                                    CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId)));
+                                    CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn,
+                                    accountId.toLowerCase())));
             internalAccountId = (String) item.get(DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD);
         } catch (Exception e) {
             log.warn("Failed to lookup accountId in dynamo cache for the value "
                     + MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
-                            CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId));
+                            CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId.toLowerCase()));
         }
         return internalAccountId;
     }

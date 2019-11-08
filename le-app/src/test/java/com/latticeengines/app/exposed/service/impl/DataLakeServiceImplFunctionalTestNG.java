@@ -17,6 +17,6 @@ public class DataLakeServiceImplFunctionalTestNG extends AppFunctionalTestNGBase
     public void testGetInternalIdViaAccountCache() {
         ((DataLakeServiceImpl) dataLakeService).setAccountLookupCacheTable("AtlasLookupCache_20191107");
         Assert.assertEquals(((DataLakeServiceImpl) dataLakeService).getInternalIdViaAccountCache("Dell_NA_Atlas",
-                "crmaccount_external_id", "0012g00001xeemxqab"), "123");
+                "crmaccount_external_id", "0012g00001xeEMxqAb"), "123");
     }
 }
