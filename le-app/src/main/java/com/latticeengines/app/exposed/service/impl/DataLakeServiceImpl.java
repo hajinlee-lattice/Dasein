@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.support.CompositeCacheManager;
@@ -40,6 +41,7 @@ import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
+import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -107,10 +109,19 @@ public class DataLakeServiceImpl implements DataLakeService {
     private ServingStoreProxy servingStoreProxy;
 
     @Inject
+    private DynamoItemService dynamoItemService;
+
+    @Inject
     private BatonService batonService;
 
     private final DataLakeServiceImpl _dataLakeService;
 
+    @Value("${eai.export.dynamo.atlas.lookup.table}")
+    private String dynamoAccountLookupCacheTableName;
+
+    private final String DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT = "{0}_{1}_{2}";
+    private final String DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD = "Key";
+    private final String DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD = "AccountId";
     private final List<String> LOOKUP_FIELDS;
     private final Map<MatchKey, List<String>> KEY_MAP;
 
