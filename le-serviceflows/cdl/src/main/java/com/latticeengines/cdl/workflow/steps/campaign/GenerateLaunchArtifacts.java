@@ -336,24 +336,24 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     @SuppressWarnings("unchecked")
     private boolean shouldSkipStep(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
-        Map<String, Long> counts = getObjectFromContext(DELTA_TABLE_COUNTS, Map.class);
+        Map<String, Integer> counts = getObjectFromContext(DELTA_TABLE_COUNTS, Map.class);
         switch (externalSystemName) {
         case Salesforce:
         case Eloqua:
             return MapUtils.isNotEmpty(counts) && //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0) > 0);
         case AWS_S3:
         case Marketo:
         case Facebook:
         case LinkedIn:
         case Outreach:
             return MapUtils.isNotEmpty(counts) && //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
-                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0) > 0
+                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0) > 0);
         default:
             return MapUtils.isNotEmpty(counts) && //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
-                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0) > 0
+                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0) > 0);
         }
     }
 
