@@ -58,6 +58,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         buildStreamImportColumnNames();
+        bumpEntityMatchStagingVersion();
     }
 
     @Override
