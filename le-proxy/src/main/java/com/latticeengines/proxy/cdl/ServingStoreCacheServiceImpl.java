@@ -100,8 +100,7 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         String tenantId = ProxyUtils.shortenCustomerSpace(customerSpace);
         String keyPrefix = tenantId + "|" + entity.name();
         CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(keyPrefix, CacheName.ServingMetadataCache);
-        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataLakeCMCache);
+        cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
     }
 
     private List<ColumnMetadata> getDecoratedMetadataFromApi(String key) {
