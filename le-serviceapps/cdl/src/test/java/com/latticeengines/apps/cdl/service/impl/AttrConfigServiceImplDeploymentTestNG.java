@@ -228,8 +228,9 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 break;
             case Partition.CONTACT_ID:
                 boolean canChangeExport = !onlyEntityMatchGAEnabled;
+                AttrState state = onlyEntityMatchGAEnabled ? Inactive : Active;
                 verifyFlags(config, cat, partition, //
-                        Active, false, //
+                        state, false, //
                         false, false, //
                         false, canChangeExport, //
                         false, canChangeExport, //
