@@ -92,7 +92,6 @@ public class AggActivityStreamToDaily
                 if (dimension.getGenerator().getOption() == HASH) {
                     hashDimensions.add(dimension.getName());
                 } else if (dimension.getUsages() != null && dimension.getUsages().contains(Dedup)) {
-                    // add to additional if
                     additionalDimAttrs.add(dimension.getName());
                 }
             });

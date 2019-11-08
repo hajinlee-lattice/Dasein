@@ -4,7 +4,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,11 +51,13 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
     private final Map<String, Set<String>> streamImportColumnNames = new HashMap<>();
     // streamId -> table prefix of raw streams processed by transformation request
     private final Map<String, String> rawStreamTablePrefixes = new HashMap<>();
-    private final long now = Instant.now().toEpochMilli();
+    private long paTimestamp;
 
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
+        paTimestamp = getLongValueFromContext(PA_TIMESTAMP);
+        log.info("Timestamp used as current time to build raw stream = {}", paTimestamp);
         buildStreamImportColumnNames();
         bumpEntityMatchStagingVersion();
     }
@@ -131,7 +132,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
         AppendRawStreamConfig config = new AppendRawStreamConfig();
         config.dateAttr = stream.getDateAttribute();
         config.retentionDays = stream.getRetentionDays();
-        config.currentEpochMilli = now;
+        config.currentEpochMilli = paTimestamp;
 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_APPEND_RAWSTREAM);
