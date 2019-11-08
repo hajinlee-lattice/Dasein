@@ -336,7 +336,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     @SuppressWarnings("unchecked")
     private boolean shouldSkipStep(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
-        Map<String, Long> counts = getObjectFromContext(DELTA_TABLE_COUNTS, Map.class);
+        Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
         switch (externalSystemName) {
         case Salesforce:
         case Eloqua:
