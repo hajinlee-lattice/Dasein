@@ -205,7 +205,11 @@ public class RatingEngineResource {
             res = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user, unlinkSegment,
                     createAction);
         } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+            LedpCode code = LedpCode.LEDP_40041;
+            if (ex instanceof LedpException) {
+                code = ((LedpException) ex).getCode();
+            }
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, code);
         }
         return res;
     }
