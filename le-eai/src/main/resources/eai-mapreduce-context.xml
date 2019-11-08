@@ -29,4 +29,12 @@
         <constructor-arg ref="hadoopConfiguration" />
         <constructor-arg ref="mapReduceCustomizationRegistry" />
     </bean>
+
+    <hdp:job id="atlasLookupCacheExportJob" mapper="com.latticeengines.eai.dynamodb.runtime.AtlasLookupCacheExportMapper" />
+
+    <bean id="atlasLookupCacheExportCustomization" class="com.latticeengines.eai.dynamodb.runtime.AtlasLookupCacheExportJob">
+        <constructor-arg ref="hadoopConfiguration" />
+        <constructor-arg ref="mapReduceCustomizationRegistry" />
+    </bean>
+
 </beans>

@@ -53,11 +53,18 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     private static final Logger log = LoggerFactory.getLogger(DynamoItemServiceImpl.class);
     private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(60);
 
+    private final DynamoDB dynamoDB;
     private final DynamoService dynamoService;
 
     @Inject
     public DynamoItemServiceImpl(DynamoService dynamoService) {
         this.dynamoService = dynamoService;
+        this.dynamoDB = dynamoService.getDynamo();
+    }
+
+    public DynamoItemServiceImpl(DynamoDB dynamoDB) {
+        this.dynamoService = null;
+        this.dynamoDB = dynamoDB;
     }
 
     @Override
@@ -65,7 +72,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
         List<Item> items = new ArrayList<>();
 
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DynamoDB dynamoDB = dynamoService.getDynamo();
             ItemCollection<QueryOutcome> itemCollection = dynamoDB.getTable(tableName).query(spec);
             for (Item anItemCollection : itemCollection) {
                 items.add(anItemCollection);
@@ -81,7 +87,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
         Preconditions.checkNotNull(tableName);
         Preconditions.checkNotNull(scanSpec);
         List<Item> items = new ArrayList<>();
-        DynamoDB dynamoDB = dynamoService.getDynamo();
         ItemCollection<ScanOutcome> itemCollection = dynamoDB.getTable(tableName).scan(scanSpec);
         for (Item anItemCollection : itemCollection) {
             items.add(anItemCollection);
@@ -93,13 +98,11 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     public Item getItem(@NotNull String tableName, @NotNull PrimaryKey key) {
         Preconditions.checkNotNull(tableName);
         Preconditions.checkNotNull(key);
-        DynamoDB dynamoDB = dynamoService.getDynamo();
         return dynamoDB.getTable(tableName).getItem(key);
     }
 
     @Override
     public void putItem(String tableName, Item item) {
-        DynamoDB dynamoDB = dynamoService.getDynamo();
         dynamoDB.getTable(tableName).putItem(item);
     }
 
@@ -121,7 +124,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     public PutItemOutcome put(@NotNull String tableName, @NotNull PutItemSpec putItemSpec) {
         Preconditions.checkNotNull(tableName);
         Preconditions.checkNotNull(putItemSpec);
-        DynamoDB dynamoDB = dynamoService.getDynamo();
         return dynamoDB.getTable(tableName).putItem(putItemSpec);
     }
 
@@ -129,7 +131,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     public UpdateItemOutcome update(@NotNull String tableName, @NotNull UpdateItemSpec updateItemSpec) {
         Preconditions.checkNotNull(tableName);
         Preconditions.checkNotNull(updateItemSpec);
-        DynamoDB dynamoDB = dynamoService.getDynamo();
         return dynamoDB.getTable(tableName).updateItem(updateItemSpec);
     }
 
@@ -138,14 +139,12 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     public DeleteItemOutcome delete(@NotNull String tableName, @NotNull DeleteItemSpec deleteItemSpec) {
         Preconditions.checkNotNull(tableName);
         Preconditions.checkNotNull(deleteItemSpec);
-        DynamoDB dynamoDB = dynamoService.getDynamo();
         return dynamoDB.getTable(tableName).deleteItem(deleteItemSpec);
     }
 
     @Override
     public void batchWrite(String tableName, List<Item> items) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DynamoDB dynamoDB = dynamoService.getDynamo();
             Pair<String, String> keys = findTableKeys(tableName);
             List<Item> batch = new ArrayList<>();
             for (Item item : items) {
@@ -166,7 +165,6 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     public List<Item> batchGet(String tableName, List<PrimaryKey> primaryKeys) {
         List<Item> results = new ArrayList<>();
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DynamoDB dynamoDB = dynamoService.getDynamo();
             List<PrimaryKey> batch = new ArrayList<>();
             for (PrimaryKey pk: primaryKeys) {
                 batch.add(pk);
@@ -228,10 +226,12 @@ public class DynamoItemServiceImpl implements DynamoItemService {
 
     private Pair<String, String> findTableKeys(String tableName) {
         TableDescription description = null;
-        try {
-            description = dynamoService.describeTable(tableName);
-        } catch (Exception e) {
-            log.warn("Failed to describe table " + tableName, e);
+        if (dynamoService != null) {
+            try {
+                description = dynamoService.describeTable(tableName);
+            } catch (Exception e) {
+                log.warn("Failed to describe table " + tableName, e);
+            }
         }
         String hashKey = "";
         String rangeKey = "";
