@@ -1170,8 +1170,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private void validateHardDelete(List<Action> actions, Boolean isFullRematch) {
         if (hasHardDelete(actions) && !Boolean.TRUE.equals(isFullRematch)) {
             throw new IllegalStateException("FullRematch flag is false, cannot submit PA, hardDelete should come up " +
-                    "with " +
-                    "FullRematch Flag");
+                    "with FullRematch Flag");
         }
     }
 
