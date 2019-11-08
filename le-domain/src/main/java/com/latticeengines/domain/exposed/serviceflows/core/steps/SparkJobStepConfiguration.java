@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = PrepareMatchDataConfiguration.class, name = "PrepareMatchDataConfiguration"), //
         @JsonSubTypes.Type(value = ProcessMatchResultConfiguration.class, name = "ProcessMatchResultConfiguration"), //
+        @JsonSubTypes.Type(value = CombineInputTableWithScoreDataFlowConfiguration.class, name = "CombineInputTableWithScoreDataFlowConfiguration"), //
         @JsonSubTypes.Type(value = ScoreAggregateFlowConfiguration.class, name = "ScoreAggregateFlowConfiguration"), //
         @JsonSubTypes.Type(value = PivotScoreAndEventConfiguration.class, name = "PivotScoreAndEventConfiguration"), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreDataFlowConfiguration.class, name = "CombineInputTableWithScoreDataFlowConfiguration") //

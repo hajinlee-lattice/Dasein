@@ -63,7 +63,11 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         parameters.setInputMatchFields(Arrays.asList(configuration.getMatchAccountIdColumn()));
         String customerAccountId = InterfaceName.AccountId.name();
         if (batonService.isEntityMatchEnabled(getConfiguration().getCustomerSpace())) {
-            hasCustomerAccountId = false;
+            if (getConfiguration().isMapToLatticeAccount()) {
+                customerAccountId = InterfaceName.CustomerAccountId.name();
+            } else {
+                hasCustomerAccountId = false;
+            }
         }
         parameters.setAccountMatchFields(Arrays.asList(customerAccountId));
         parameters.setHasAccountId(true);
