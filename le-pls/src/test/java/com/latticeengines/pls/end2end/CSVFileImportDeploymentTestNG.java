@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -91,6 +92,11 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
         String feedType = getFeedTypeByEntity("ExternalSystem", ENTITY_ACCOUNT);
+        S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), "ExternalSystem");
+        if(s3ImportSystem == null){
+            cdlService.createS3ImportSystem(mainTestTenant.getId(), "ExternalSystem",
+                    S3ImportSystem.SystemType.Other, false);
+        }
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
 
@@ -137,6 +143,11 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE_FROMATDATE,
                 ClassLoader
                         .getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE_FROMATDATE));
+        S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), "FormatDate");
+        if(s3ImportSystem == null){
+            cdlService.createS3ImportSystem(mainTestTenant.getId(), "FormatDate",
+                    S3ImportSystem.SystemType.Other, false);
+        }
         String feedType = getFeedTypeByEntity("FormatDate", ENTITY_ACCOUNT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_ACCOUNT, SOURCE,
@@ -296,6 +307,11 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
         String feedType = getFeedTypeByEntity("ExternalSystem", ENTITY_CONTACT);
+        S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), "ExternalSystem");
+        if(s3ImportSystem == null){
+            cdlService.createS3ImportSystem(mainTestTenant.getId(), "ExternalSystem",
+                    S3ImportSystem.SystemType.Other, false);
+        }
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(accountFile.getName(), ENTITY_CONTACT, SOURCE, feedType);
 
@@ -356,6 +372,11 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Small_Account.csv"));
 
+        S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), "TestSchemaUpdate");
+        if(s3ImportSystem == null){
+            cdlService.createS3ImportSystem(mainTestTenant.getId(), "TestSchemaUpdate",
+                    S3ImportSystem.SystemType.Other, false);
+        }
         String feedType = getFeedTypeByEntity("TestSchemaUpdate", ENTITY_ACCOUNT);
         boolean cityExist = false;
         boolean countryExist = false;
