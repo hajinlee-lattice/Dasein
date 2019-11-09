@@ -113,10 +113,6 @@ public class LocationToDunsMicroEngineActor extends DataSourceMicroEngineTemplat
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
         } else {
             matchKeyTuple.setDuns(res.getDuns());
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                            Collections.singletonList(traveler.getLatticeAccountId()))));
-
         }
         traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
                 Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
