@@ -63,7 +63,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
     @Override
     protected void onPostTransformationCompleted() {
         // TODO add diff report
-        List<String> rawStreamTables = buildRawStreamBatchStore();
+        Map<String, String> rawStreamTables = buildRawStreamBatchStore();
         exportToS3AndAddToContext(rawStreamTables, RAW_ACTIVITY_STREAM_TABLE_NAME);
     }
 
@@ -185,12 +185,12 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
         return steps.size() - 1;
     }
 
-    private List<String> buildRawStreamBatchStore() {
+    private Map<String, String> buildRawStreamBatchStore() {
         // tables in current active version will be processed since we need to drop old
         // data even if no import, so all tables will be included in prefix
         if (MapUtils.isEmpty(rawStreamTablePrefixes)) {
             // no import and no existing batch store
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         Map<String, String> rawStreamTableNames = rawStreamTablePrefixes.entrySet() //
                 .stream() //
@@ -202,7 +202,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
         // link all tables and use streamId as signature
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,
                 inactive);
-        return new ArrayList<>(rawStreamTableNames.values());
+        return rawStreamTableNames;
     }
 
     private void buildStreamImportColumnNames() {

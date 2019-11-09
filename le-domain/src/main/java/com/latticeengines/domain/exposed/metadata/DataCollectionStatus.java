@@ -286,6 +286,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         this.detail.setActivityStreamMap(activityStreamMap);
     }
 
+    @JsonProperty("DimensionMetadataSignature")
+    public String getDimensionMetadataSignature() {
+        return this.detail.getDimensionMetadataSignature();
+    }
+
+    @JsonProperty("DimensionMetadataSignature")
+    public void setDimensionMetadataSignature(String dimensionMetadataSignature) {
+        this.detail.setDimensionMetadataSignature(dimensionMetadataSignature);
+    }
+
     @JsonProperty("ServingStoreVersion")
     public int getServingStoreVersion() {
         return this.detail.getServingStoreVersion();
