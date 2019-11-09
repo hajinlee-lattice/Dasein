@@ -186,6 +186,9 @@ public abstract class RatingEngineTemplate {
 
     Date findLastRefreshedDate(String tenantId) {
         DataFeed dataFeed = dataFeedService.getDefaultDataFeed(CustomerSpace.parse(tenantId).toString());
+        if (dataFeed == null) {
+            return null;
+        }
         return dataFeed.getLastPublished();
     }
 
