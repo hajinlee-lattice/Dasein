@@ -67,7 +67,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         CalculateDeltaStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
 
-        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId());
+        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
                 config.getChannelId());
 
@@ -179,14 +179,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 String.format("Full%sUniverse_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
                 fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType));
 
-        try {
-            log.info("Counts: " + JsonUtils.serialize(getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class)));
-        } catch (Exception e) {
-            log.error("Failed to log counts due to" + e.getMessage());
-        }
+        log.info("Counts: "
+                + JsonUtils.serialize(getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class)));
     }
 
-    @SuppressWarnings("unchecked")
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
