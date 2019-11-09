@@ -183,7 +183,6 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 + JsonUtils.serialize(getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class)));
     }
 
-    @SuppressWarnings("unchecked")
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
