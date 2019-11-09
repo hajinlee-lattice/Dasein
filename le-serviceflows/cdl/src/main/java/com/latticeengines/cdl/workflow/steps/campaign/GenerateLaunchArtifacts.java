@@ -280,7 +280,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             if (CollectionUtils.isNotEmpty(unExportableFields)) {
                 log.warn("Unexportable columns found in columns received from FieldMetadata Service, "
                         + "following fields will be skipped!");
-                log.warn(Arrays.toString(unExportableFields.toArray()));
+                log.warn(Arrays.toString(unExportableFields.stream().map(ColumnMetadata::getAttrName).toArray()));
             }
 
             Set<Lookup> mergedLookups = fieldMappingMetadata.stream()
@@ -317,7 +317,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     InterfaceName.CompanyName.name(), //
                     InterfaceName.LDC_Name.name()));
         case Contact:
-            new HashSet<>(Arrays.asList(InterfaceName.AccountId.name(), //
+            return new HashSet<>(Arrays.asList(InterfaceName.AccountId.name(), //
                     InterfaceName.ContactId.name(), //
                     InterfaceName.CompanyName.name(), //
                     InterfaceName.Email.name(), //
