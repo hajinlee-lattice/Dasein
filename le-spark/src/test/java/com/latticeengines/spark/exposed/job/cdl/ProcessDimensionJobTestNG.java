@@ -9,7 +9,6 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMed
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -68,7 +68,7 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
 
         // path ptn, total 4 diff values, top 3 is chosen
         verifyMetadata(dimMetadata.get(PathPatternId.name()), 4L, PathPatternId.name(),
-                Arrays.asList("video_content_1", "video_content_2", "content"));
+                Arrays.asList("video content 1", "video content 2", "content"));
 
         // source medium, total 3
         verifyMetadata(dimMetadata.get(SourceMediumId.name()), 3L, SourceMediumId.name(),
@@ -93,7 +93,7 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
                 .map(value -> (String) value.get(idColumn)) //
                 .collect(Collectors.toSet());
         // hashed id
-        Assert.assertEquals(ids, new HashSet<>(expectedIds));
+        Assert.assertEquals(ids, expectedIds.stream().map(HashUtils::getShortHash).collect(Collectors.toSet()));
     }
 
     private Pair<ProcessDimensionConfig.Dimension, String> prepareWebVisitPtnData() {
@@ -150,12 +150,6 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
                 { "google/organic" }, //
                 { "google/organic" }, //
                 { "facebook/paid" }, //
-                /*-
-                 * duplicate after hashed
-                 */
-                { "google/paid  " }, //
-                { "  google/paid" }, //
-                { " google/paid " }, //
         };
 
         ProcessDimensionConfig.Dimension dim = new ProcessDimensionConfig.Dimension();

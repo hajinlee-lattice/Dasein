@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
+import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.domain.exposed.util.TypeConversionUtil;
 
 /**
@@ -117,11 +118,10 @@ public class DimensionGenerator {
 
     /*-
      * generate hashed dimension value
-     * TODO finalize this
      */
     public static String hashDimensionValue(Object origValue) {
         String str = TypeConversionUtil.toString(origValue);
-        return StringUtils.isNotBlank(str) ? str.trim().replaceAll("\\s+", "_") : null;
+        return StringUtils.isNotBlank(str) ? HashUtils.getShortHash(str) : null;
     }
 
     @Override
