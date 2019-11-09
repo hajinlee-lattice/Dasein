@@ -65,7 +65,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         GenerateLaunchUniverseStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
 
-        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId());
+        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(),false, false);
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
                 config.getChannelId());
         if (play == null) {

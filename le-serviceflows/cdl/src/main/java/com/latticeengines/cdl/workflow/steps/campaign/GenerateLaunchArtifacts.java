@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -93,7 +94,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
 
-        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId());
+        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
                 config.getChannelId());
 
@@ -334,26 +335,27 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private boolean shouldSkipStep(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
+    @VisibleForTesting
+    boolean shouldSkipStep(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
         Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
+        log.info("Counts: " + JsonUtils.serialize(counts));
+
         switch (externalSystemName) {
         case Salesforce:
         case Eloqua:
-            return MapUtils.isNotEmpty(counts) && //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+            return MapUtils.isEmpty(counts) || //
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L);
         case AWS_S3:
         case Marketo:
         case Facebook:
         case LinkedIn:
         case Outreach:
-            return MapUtils.isNotEmpty(counts) && //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
-                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+            return MapUtils.isEmpty(counts) || //
+                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L && //
+                            counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L);
         default:
-            return MapUtils.isNotEmpty(counts) && //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
-                            || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Channel of type " + externalSystemName + " not yet supported" });
         }
     }
 
