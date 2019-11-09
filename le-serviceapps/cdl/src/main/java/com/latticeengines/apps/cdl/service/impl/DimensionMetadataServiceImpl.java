@@ -39,9 +39,10 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 public class DimensionMetadataServiceImpl implements DimensionMetadataService {
     private static final Logger log = LoggerFactory.getLogger(DimensionMetadataServiceImpl.class);
 
+    private static final String PREFIX = "DIM_METADATA_";
     private static final String DELIMITER = "||";
-    private static final String PARTITION_KEY = "PartitionKey";
-    private static final String SORT_KEY = "SortKey";
+    private static final String PARTITION_KEY = "PID";
+    private static final String SORT_KEY = "SID";
     private static final String VALUE_KEY = "Record";
     private static final String STREAM_ID_KEY = "StreamId";
     private static final String DIM_NAME_KEY = "DimensionName";
@@ -173,7 +174,7 @@ public class DimensionMetadataServiceImpl implements DimensionMetadataService {
 
     private QuerySpec querySpec(String signature, String streamId) {
         QuerySpec spec = new QuerySpec() //
-                .withHashKey(PARTITION_KEY, signature);
+                .withHashKey(PARTITION_KEY, PREFIX + signature);
         if (StringUtils.isNotBlank(streamId)) {
             spec = spec.withRangeKeyCondition(new RangeKeyCondition(SORT_KEY).beginsWith(streamId));
         }
@@ -208,7 +209,7 @@ public class DimensionMetadataServiceImpl implements DimensionMetadataService {
     }
 
     /*-
-     * pk: signature
+     * pk: prefix + signature
      * sk: streamId||dimensionName
      *
      * 1. search all dimension in stream => sk.startsWith(streamId)
@@ -216,7 +217,7 @@ public class DimensionMetadataServiceImpl implements DimensionMetadataService {
      */
     private PrimaryKey getPrimaryKey(String signature, String streamId, String dimensionName) {
         String sortKey = streamId + DELIMITER + dimensionName;
-        return new PrimaryKey(PARTITION_KEY, signature, SORT_KEY, sortKey);
+        return new PrimaryKey(PARTITION_KEY, PREFIX + signature, SORT_KEY, sortKey);
     }
 
     private void check(String signature, String streamId, String dimensionName) {
