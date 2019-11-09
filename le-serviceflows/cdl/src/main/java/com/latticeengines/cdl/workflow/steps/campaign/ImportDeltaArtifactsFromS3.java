@@ -45,12 +45,18 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), configuration.getPlayId(),
                 configuration.getChannelId());
 
-        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
+        if (StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
+                && !channel.getResetDeltaCalculationData()) {
+            log.info("Importing PreviousAccountLaunchUniverse table: "
+                    + channel.getCurrentLaunchedAccountUniverseTable());
             addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
                     channel.getCurrentLaunchedAccountUniverseTable()), requests);
         }
 
-        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())) {
+        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
+                && !channel.getResetDeltaCalculationData()) {
+            log.info("Importing PreviousContactLaunchUniverse table: "
+                    + channel.getCurrentLaunchedContactUniverseTable());
             addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
                     channel.getCurrentLaunchedContactUniverseTable()), requests);
         }
