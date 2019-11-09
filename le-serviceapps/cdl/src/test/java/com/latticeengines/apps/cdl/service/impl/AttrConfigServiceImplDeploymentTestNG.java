@@ -188,6 +188,13 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 "DefaultSystem Account ID", attrConfig.getAttrName());
     }
 
+    private void verifyContactSystemID(AttrConfig attrConfig) {
+        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Subcategory).getSystemValue().toString(),
+                Category.SUB_CAT_ACCOUNT_IDS, attrConfig.getAttrName());
+        Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getSystemValue().toString(),
+                "DefaultSystem_2 Account ID", attrConfig.getAttrName());
+    }
+
     private String getMyAttributesPartition(String attrName, boolean entityMatchEnabled) {
         String partiion;
         if (entityMatchEnabled && InterfaceName.AccountId.name().equals(attrName)) {
@@ -228,13 +235,17 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 break;
             case Partition.CONTACT_ID:
                 boolean canChangeExport = !onlyEntityMatchGAEnabled;
+                AttrState state = onlyEntityMatchGAEnabled ? Inactive : Active;
                 verifyFlags(config, cat, partition, //
-                        Active, false, //
+                        state, false, //
                         false, false, //
                         false, canChangeExport, //
                         false, canChangeExport, //
                         false, canChangeExport, //
                         false, false);
+                break;
+            case Partition.SYSTEM_ID:
+                verifyContactSystemID(config);
                 break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
@@ -257,6 +268,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             partiion = Partition.SYSTEM;
         } else if (getContactStandardAttrs(entityMatchEnabled).contains(attrName)) {
             partiion = Partition.STD_ATTRS;
+        } else if (OTHERSYSTEM_ACCOUNT_SYSTEM_ID.equals(attrName)) {
+            partiion = Partition.SYSTEM_ID;
         } else {
             partiion = Partition.OTHERS;
         }

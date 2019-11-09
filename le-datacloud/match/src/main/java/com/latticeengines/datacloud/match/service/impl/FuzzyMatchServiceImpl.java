@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
-import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.LdcMatchType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -181,9 +180,13 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         copyFromEntityToInternalOutputRecord(traveler.getEntityMatchKeyRecord(), matchRecord);
 
         EntityMatchHistory entityMatchHistory = generateEntityMatchHistory(traveler);
-        MatchHistoryUtils.processPreferredIds(matchRecord, traveler, entityMatchHistory);
-        // Need to copy information from MatchTraveler to a place where we can add it to MatchHistory.
-        matchRecord.setEntityMatchHistory(entityMatchHistory);
+        if (entityMatchHistory != null) {
+            MatchHistoryUtils.processPreferredIds(matchRecord, traveler, entityMatchHistory);
+            // Need to copy information from MatchTraveler to a place where we can add it to MatchHistory.
+            matchRecord.setEntityMatchHistory(entityMatchHistory);
+        } else {
+            log.error("EntityMatchHistory generate encountered an error.  No history will be created.");
+        }
         if (StringUtils.isNotEmpty(result) && !DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(result)) {
             matchRecord.setMatched(true);
         }
@@ -419,6 +422,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return matchKeyTuple;
     }
 
+    // TODO(jwinter): Handle error conditions more gracefully.  Try to build as much of the EntityMatchHistory as
+    //     possible despite the error, rather than just returning null.  Also, provide log errors when returning
+    //     null explaining the issue, along with better debugging logs (print out data structures).
     private EntityMatchHistory generateEntityMatchHistory(MatchTraveler traveler) {
         EntityMatchHistory history = new EntityMatchHistory();
         log.debug("Generating EntityMatchHistory for Match Report.");
@@ -445,6 +451,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Get Full MatchKeyTuple for Business Entity.
         history.setFullMatchKeyTuple(extractFullMatchKeyTuple(traveler, history.getBusinessEntity()));
         if (history.getFullMatchKeyTuple() == null) {
+            log.error("Traveler missing FullMatchKeyTuple for entity " + history.getBusinessEntity());
             return null;
         }
 
@@ -454,22 +461,25 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         // Get MatchKeyTuple that found Entity ID, if a match was found.
         if (!checkEntityMatchLookupResults(traveler, history.getBusinessEntity())) {
+            log.error("Traveler EntityMatchLookupResults is malformed.");
             return null;
         }
         List<String> lookupResultList = new ArrayList<>();
         history.setMatchedEntityMatchKeyTuple(
                 extractMatchedMatchKeyTuple(traveler, history.getBusinessEntity(), lookupResultList));
         // Generate EntityMatchType Enum describing the match.
-        history.setEntityMatchType(extractEntityMatchType(history.getBusinessEntity(),
+        history.setEntityMatchType(MatchHistoryUtils.extractEntityMatchType(history.getBusinessEntity(),
                 history.getMatchedEntityMatchKeyTuple(), lookupResultList, inputDuns));
         if (history.getEntityMatchType() == null) {
+            log.error("Could not determine EntityMatchType");
             return null;
         }
 
         if (BusinessEntity.Account.name().equals(history.getBusinessEntity())) {
             // Now set the LdcMatchType and the MatchedLdcMatchKeyTuple if LDC Match succeeded.
-            Pair<LdcMatchType, MatchKeyTuple> typeTuplePair = extractLdcMatchTypeAndTuple(traveler);
+            Pair<LdcMatchType, MatchKeyTuple> typeTuplePair = MatchHistoryUtils.extractLdcMatchTypeAndTuple(traveler);
             if (typeTuplePair == null) {
+                log.error("Could not extract LDC Match Type and Tuple");
                 return null;
             }
             history.setLdcMatchType(typeTuplePair.getLeft());
@@ -477,18 +487,20 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
 
         // Generate list of all Existing Entity Lookup Keys.
-        history.setExistingLookupKeyList(extractExistingLookupKeyList(traveler, history.getBusinessEntity()));
+        history.setExistingLookupKeyList(MatchHistoryUtils.extractExistingLookupKeyList(
+                traveler, history.getBusinessEntity()));
 
         // Add LeadToAccount Matching Results for Contacts.
         if (BusinessEntity.Contact.name().equals(history.getBusinessEntity())) {
             log.debug("------------------------ BEGIN L2A Match History Debug Logs ------------------------");
             if (!generateL2aMatchHistory(traveler, history)) {
+                log.error("Failed to generate Lead-to-Account Entity Match History");
                 return null;
             }
         }
 
         // Log extra debug information about the match.
-        generateEntityMatchHistoryDebugLogs(traveler);
+        MatchHistoryUtils.generateEntityMatchHistoryDebugLogs(traveler);
 
         log.debug("------------------------ END Entity Match History Debug Logs ------------------------");
         return history;
@@ -511,6 +523,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Get Full MatchKeyTuple for Business Entity.
         history.setL2aFullMatchKeyTuple(extractFullMatchKeyTuple(traveler, accountEntity));
         if (history.getL2aFullMatchKeyTuple() == null) {
+            log.error("Traveler missing Lead-to-Account FullMatchKeyTuple");
             return false;
         }
 
@@ -519,27 +532,30 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         // Get MatchKeyTuple that found Entity ID, if a match was found.
         if (!checkEntityMatchLookupResults(traveler, accountEntity)) {
+            log.error("Traveler Lead-to-Account EntityMatchLookupResults is malformed.");
             return false;
         }
         List<String> lookupResultList = new ArrayList<>();
         history.setL2aMatchedEntityMatchKeyTuple(extractMatchedMatchKeyTuple(traveler, accountEntity, lookupResultList));
         // Generate L2A EntityMatchType Enum describing the match.
-        history.setL2aEntityMatchType(extractEntityMatchType(accountEntity, history.getL2aMatchedEntityMatchKeyTuple(),
-                lookupResultList, inputDuns));
+        history.setL2aEntityMatchType( MatchHistoryUtils.extractEntityMatchType(accountEntity,
+                history.getL2aMatchedEntityMatchKeyTuple(), lookupResultList, inputDuns));
         if (history.getL2aEntityMatchType() == null) {
+            log.error("Could not determine Lead-to-Account EntityMatchType");
             return false;
         }
 
         // Now set the L2aLdcMatchType and the L2aMatchedLdcMatchKeyTuple if LDC Match succeeded.
-        Pair<LdcMatchType, MatchKeyTuple> typeTuplePair = extractLdcMatchTypeAndTuple(traveler);
+        Pair<LdcMatchType, MatchKeyTuple> typeTuplePair = MatchHistoryUtils.extractLdcMatchTypeAndTuple(traveler);
         if (typeTuplePair == null) {
+            log.error("Could not extract Lead-to-Account LDC Match Type and Tuple");
             return false;
         }
         history.setL2aLdcMatchType(typeTuplePair.getLeft());
         history.setL2aMatchedLdcMatchKeyTuple(typeTuplePair.getRight());
 
         // Generate list of all Existing Entity Lookup Keys.
-        history.setL2aExistingLookupKeyList(extractExistingLookupKeyList(traveler, accountEntity));
+        history.setL2aExistingLookupKeyList(MatchHistoryUtils.extractExistingLookupKeyList(traveler, accountEntity));
         return true;
     }
 
@@ -690,306 +706,4 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return null;
     }
 
-    // Extract EntityMatchType Enum describing match.
-    private EntityMatchType extractEntityMatchType(String entity, MatchKeyTuple tuple, List<String> lookupResultList,
-                                                   String inputDuns) {
-        EntityMatchType entityMatchType;
-        if (tuple == null) {
-            entityMatchType = EntityMatchType.NO_MATCH;
-        } else {
-            entityMatchType = EntityMatchType.UNKNOWN;
-
-            boolean hasAccountId = false;
-            if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
-                if (lookupResultList.size() != tuple.getSystemIds().size()) {
-                    log.error("EntityMatchLookupResults results and MatchKeyTuple SystemIds sizes don't match");
-                    log.error("EntityMatchLookupResults: " + lookupResultList.toString());
-                    log.error("MatchKeyTuple SystemIds: " + tuple.getSystemIds().toString());
-                    return null;
-                }
-                int i = 0;
-                for (Pair<String, String> systemId : tuple.getSystemIds()) {
-                    if (InterfaceName.CustomerAccountId.name().equals(systemId.getKey())
-                            && StringUtils.isNotBlank(systemId.getValue())
-                            && StringUtils.isNotBlank(lookupResultList.get(i))
-                            && BusinessEntity.Account.name().equals(entity)) {
-                        entityMatchType = EntityMatchType.ACCOUNTID;
-                        // log.debug("MatchKeyTuple contains CustomerAccountId: " +
-                        // systemId.getValue());
-                        break;
-                    } else if (InterfaceName.CustomerContactId.name().equals(systemId.getKey())
-                            && StringUtils.isNotBlank(systemId.getValue())
-                            && StringUtils.isNotBlank(lookupResultList.get(i))
-                            && BusinessEntity.Contact.name().equals(entity)) {
-                        entityMatchType = EntityMatchType.CONTACTID;
-                        // log.debug("MatchKeyTuple contains CustomerContactId: " +
-                        // systemId.getValue());
-                        break;
-                    } else if (InterfaceName.AccountId.name().equals(systemId.getKey())
-                            && StringUtils.isNotBlank(systemId.getValue())
-                            && BusinessEntity.Contact.name().equals(entity)) {
-                        // log.debug("MatchKeyTuple contains AccountId: " + systemId.getValue());
-                        hasAccountId = true;
-                    } else if (StringUtils.isNotBlank(systemId.getKey()) && StringUtils.isNotBlank(systemId.getValue())
-                            && StringUtils.isNotBlank(lookupResultList.get(i))) {
-                        entityMatchType = EntityMatchType.SYSTEMID;
-                        // log.debug("MatchKeyTuple contains SystemId: " + systemId.getKey() + " with
-                        // value: "
-                        // + systemId.getValue());
-                        break;
-                    }
-                    i++;
-                }
-            }
-
-            if (entityMatchType == EntityMatchType.UNKNOWN) {
-                if (tuple.hasDomain()) {
-                    entityMatchType = EntityMatchType.DOMAIN_COUNTRY;
-                } else if (tuple.hasDuns()) {
-                    // Set the match type to DUNS if the input has a DUNS value and it equals the DUNS value
-                    // the Entity Match system stored in the MatchKeyTuple, which is the final DUNS result.
-                    if (StringUtils.isNotBlank(inputDuns) && inputDuns.equals(tuple.getDuns())) {
-                        entityMatchType = EntityMatchType.DUNS;
-                    } else {
-                        entityMatchType = EntityMatchType.LDC_MATCH;
-                    }
-                } else if (tuple.hasEmail()) {
-                    if (hasAccountId) {
-                        entityMatchType = EntityMatchType.EMAIL_ACCOUNTID;
-                    } else {
-                        entityMatchType = EntityMatchType.EMAIL;
-                    }
-                } else if (tuple.hasName()) {
-                    if (BusinessEntity.Account.name().equals(entity)) {
-                        entityMatchType = EntityMatchType.NAME_COUNTRY;
-                    } else if (tuple.hasPhoneNumber()) {
-                        if (hasAccountId) {
-                            entityMatchType = EntityMatchType.NAME_PHONE_ACCOUNTID;
-                        } else {
-                            entityMatchType = EntityMatchType.NAME_PHONE;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Log the EntityMatchType and matched Entity MatchKeyTuple.
-        log.debug("EntityMatchType is: " + entityMatchType);
-        log.debug("MatchedEntityMatchKeyTuple: " + tuple);
-        if (BusinessEntity.Account.name().equals(entity)) {
-            log.debug("    inputDuns: " + inputDuns + "  tupleDuns: " + (tuple == null ? "null" : tuple.getDuns()));
-        } else if (EntityMatchType.LDC_MATCH.equals(entityMatchType)) {
-            log.error("Found LDC Match type for entity " + entity + " which should not be possible");
-            return null;
-        }
-        return entityMatchType;
-    }
-
-    private Pair<LdcMatchType, MatchKeyTuple> extractLdcMatchTypeAndTuple(MatchTraveler traveler) {
-        // Get matched DUNS from traveler DUNS map for Account Master entry.
-        String matchedDuns = null;
-        String latticeAccountId = null;
-        if (MapUtils.isNotEmpty(traveler.getDunsOriginMap()) &&
-                traveler.getDunsOriginMap().containsKey(DataCloudConstants.ACCOUNT_MASTER)) {
-            matchedDuns = traveler.getDunsOriginMap().get(DataCloudConstants.ACCOUNT_MASTER);
-        }
-        if (traveler.getEntityIds().containsKey(BusinessEntity.LatticeAccount.name())) {
-            latticeAccountId = traveler.getEntityIds().get(BusinessEntity.LatticeAccount.name());
-        }
-        log.debug("    AM Matched DUNS: " + matchedDuns);
-        log.debug("    Lattice Account ID: " + latticeAccountId);
-
-        LdcMatchType ldcMatchType = LdcMatchType.NO_MATCH;
-        MatchKeyTuple ldcMatchedTuple = null;
-        // There must be a Lattice Account ID for LDC Match to have succeeded.
-        if (!StringUtils.isBlank(latticeAccountId)) {
-            if (CollectionUtils.isEmpty(traveler.getEntityLdcMatchTypeToTupleList())) {
-                log.error("LDC Match succeeded but entityLdcMatchTypeToTupleList is null or empty");
-                return null;
-            }
-
-            List<Pair<MatchKeyTuple, List<String>>> ldcMatchLookupResultList = traveler
-                    .getEntityMatchLookupResult(BusinessEntity.LatticeAccount.name());
-            if (CollectionUtils.isEmpty(ldcMatchLookupResultList)) {
-                log.error("LDC Match succeeded but EntityMatchLookupResult for LatticeAccount is null or empty");
-                return null;
-            }
-
-            if (ldcMatchLookupResultList.size() != traveler.getEntityLdcMatchTypeToTupleList().size()) {
-                log.error("EntityMatchLookupResult for {} and EntityLdcMatchTypeToTupleList are not equal length: " +
-                                "{} vs {}", BusinessEntity.LatticeAccount.name(), ldcMatchLookupResultList.size(),
-                        traveler.getEntityLdcMatchTypeToTupleList().size());
-                return null;
-            }
-
-            // Iterate through the lists of LDC Match Lookup Results and LDC Match Type /MatchKeyTuple pairs, to find
-            // the the first successful result. Then record the corresponding LDC Match Type and MatchKeyTuple of
-            // that result.
-            int i;
-            boolean foundResult = false;
-            for (i = 0; i < ldcMatchLookupResultList.size() && !foundResult; i++) {
-                if (CollectionUtils.isEmpty(ldcMatchLookupResultList.get(i).getValue())) {
-                    log.error("EntityMatchLookupResult for " + BusinessEntity.LatticeAccount.name()
-                            + " has list entry composed of a Pair with null value and key MatchKeyTuple: "
-                            + ldcMatchLookupResultList.get(i).getKey());
-                    return null;
-                }
-                for (String result : ldcMatchLookupResultList.get(i).getValue()) {
-                    if (result != null) {
-                        ldcMatchType = traveler.getEntityLdcMatchTypeToTupleList().get(i).getLeft();
-                        ldcMatchedTuple = traveler.getEntityLdcMatchTypeToTupleList().get(i).getRight();
-                        foundResult = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!foundResult) {
-                log.error("LDC Match succeeded but Lookup Results has no entry with non-null result");
-                return null;
-            } else if (ldcMatchType == null) {
-                log.error("EntityLdcMatchTypeToTupleList entry " + i + " has null LdcMatchType");
-                return null;
-            } else if (ldcMatchedTuple == null) {
-                log.error("EntityLdcMatchTypeToTupleList entry " + i + " has null MatchKeyTuple for type: " + ldcMatchType);
-                return null;
-            }
-
-            // If the MatchKeyTuple has a DUNS fields and the LdcMatchType is not LDC DUNS or DUNS plus Domain, then the
-            // LDC Match has stuck a DUNS value in the matched MatchKeyTuple that wasn't actually part of the input match
-            // tuple used for matching. In this case, a copy of the MatchKeyTuple without the DUNS field needs to be
-            // created and returned.
-            if (ldcMatchedTuple.hasDuns() && !LdcMatchType.DUNS.equals(ldcMatchType)
-                    && !LdcMatchType.DUNS_DOMAIN.equals(ldcMatchType)) {
-                ldcMatchedTuple = copyLdcTupleNoDuns(ldcMatchedTuple);
-            }
-        }
-        log.debug("LdcMatchType is: " + ldcMatchType);
-        log.debug("MatchedLdcMatchKeyTuple: " + ldcMatchedTuple);
-        return Pair.of(ldcMatchType, ldcMatchedTuple);
-    }
-
-    MatchKeyTuple copyLdcTupleNoDuns(MatchKeyTuple tuple) {
-        // Don't set System ID since it is not used in LDC match even if it is set.
-        return new MatchKeyTuple.Builder().withDomain(tuple.getDomain()).withName(tuple.getName())
-                .withCity(tuple.getCity()).withState(tuple.getState()).withCountry(tuple.getCountry())
-                .withCountryCode(tuple.getCountryCode()).withZipcode(tuple.getZipcode())
-                .withPhoneNumber(tuple.getPhoneNumber()).withEmail(tuple.getEmail()).build();
-    }
-
-    private List<Pair<String, MatchKeyTuple>> extractExistingLookupKeyList(MatchTraveler traveler, String entity) {
-        if (MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap())) {
-            log.debug("EntityExistingLookupEntryMap is null or empty");
-            return null;
-        } else if (!traveler.getEntityExistingLookupEntryMap().containsKey(entity)
-                || MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap().get(entity))) {
-            log.debug("EntityExistingLookupEntryMap for entity " + entity + " is null or empty");
-            return new ArrayList<>();
-        }
-        List<Pair<String, MatchKeyTuple>> existingLookupList = new ArrayList<>();
-        for (Map.Entry<EntityMatchType, List<MatchKeyTuple>> typeEntry : traveler.getEntityExistingLookupEntryMap()
-                .get(entity).entrySet()) {
-            if (CollectionUtils.isEmpty(typeEntry.getValue())) {
-                continue;
-            }
-            for (MatchKeyTuple tuple : typeEntry.getValue()) {
-                existingLookupList.add(Pair.of(typeEntry.getKey().name(), tuple));
-            }
-        }
-        return existingLookupList;
-    }
-
-    // Assumes traveler.getEntityIds(), traveler.getEntityMatchKeyTuples(), and
-    // traveler.getEntityMatchLookupResults() do not return null because they were
-    // checked by generateEntityMatchHistory().
-    private void generateEntityMatchHistoryDebugLogs(MatchTraveler traveler) {
-        log.debug("------------------------ Entity Match History Extra Debug Logs ------------------------");
-        log.debug("EntityIds are: ");
-        for (Map.Entry<String, String> entry : traveler.getEntityIds().entrySet()) {
-            log.debug("   Entity: " + entry.getKey() + "  EntityId: " + entry.getValue());
-        }
-
-        if (MapUtils.isEmpty(traveler.getNewEntityIds())) {
-            log.debug("NewEntityIds are: null or empty");
-        } else {
-            log.debug("NewEntityIds are: ");
-            for (Map.Entry<String, String> entry : traveler.getNewEntityIds().entrySet()) {
-                log.debug("    Entity: " + entry.getKey() + "  NewEntityId: " + entry.getValue());
-            }
-        }
-
-        log.debug("EntityMatchKeyTuples is: ");
-        for (Map.Entry<String, MatchKeyTuple> entry : traveler.getEntityMatchKeyTuples().entrySet()) {
-            log.debug("    Entity: " + entry.getKey());
-            log.debug("      MatchKeyTuple: " + entry.getValue().toString());
-        }
-
-        log.debug("Iterate through EntityMatchLookupResults:");
-        for (Map.Entry<String, List<Pair<MatchKeyTuple, List<String>>>> entry : traveler.getEntityMatchLookupResults()
-                .entrySet()) {
-            boolean foundResult = false;
-            log.debug("    MatchKeyTuple Lookup Results for " + entry.getKey());
-            for (Pair<MatchKeyTuple, List<String>> pair : entry.getValue()) {
-                if (pair.getKey() == null) {
-                    log.debug("        MatchKeyTuple: null");
-                } else {
-                    log.debug("        MatchKeyTuple: " + pair.getKey().toString());
-                }
-
-                String resultList = "";
-                for (String result : pair.getValue()) {
-                    if (result != null) {
-                        if (!foundResult) {
-                            foundResult = true;
-                            resultList += ">>> " + result + " <<< ";
-                        } else {
-                            resultList += result + " ";
-                        }
-                    } else {
-                        resultList += "null ";
-                    }
-                }
-                log.debug("        Results: " + resultList);
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(traveler.getEntityLdcMatchTypeToTupleList())) {
-            log.debug("Iterate through EntityLdcMatchTypeToTupleList:");
-            for (Pair<LdcMatchType, MatchKeyTuple> pair : traveler.getEntityLdcMatchTypeToTupleList()) {
-                log.debug("    LdcMatchType: " + pair.getLeft() + "  LdcMatchKeyTuple: " + pair.getRight());
-            }
-        } else {
-            log.debug("EntityLdcMatchTypeToTupleList is empty");
-        }
-
-        generateDebugExistingMatchKeyLookups(traveler);
-        // log.debug("------------------------ END Entity Match History Extra Debug Logs ------------------------");
-    }
-
-    private void generateDebugExistingMatchKeyLookups(MatchTraveler traveler) {
-        log.debug("Iterate through existing Entity Match Lookup Keys");
-        if (MapUtils.isEmpty(traveler.getEntityExistingLookupEntryMap())) {
-            log.debug("   EntityExistingLookupEntryMap is null or empty");
-            return;
-        }
-
-        for (Map.Entry<String, Map<EntityMatchType, List<MatchKeyTuple>>> entityEntry : traveler
-                .getEntityExistingLookupEntryMap().entrySet()) {
-            log.debug("  " + entityEntry.getKey() + " - Existing Lookup Entries");
-            if (MapUtils.isEmpty(entityEntry.getValue())) {
-                log.debug("    <empty>");
-                continue;
-            }
-            for (Map.Entry<EntityMatchType, List<MatchKeyTuple>> typeEntry : entityEntry.getValue().entrySet()) {
-                log.debug("    " + typeEntry.getKey() + ":");
-                if (CollectionUtils.isEmpty(typeEntry.getValue())) {
-                    log.debug("      <empty> (for " + typeEntry.getKey() + ")");
-                    continue;
-                }
-                for (MatchKeyTuple tuple : typeEntry.getValue()) {
-                    log.debug("      " + tuple);
-                }
-            }
-        }
-    }
 }
