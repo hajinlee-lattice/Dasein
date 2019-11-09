@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -82,6 +83,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         totalVisit.setSubCategoryTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY);
         totalVisit.setDisplayNameTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME);
         totalVisit.setDescriptionTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION);
+        totalVisit.setNullImputation(NullMetricsImputation.ZERO);
         return totalVisit;
     }
 
@@ -107,6 +109,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         sourceMedium.setSubCategoryTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY);
         sourceMedium.setDisplayNameTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME);
         sourceMedium.setDescriptionTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION);
+        sourceMedium.setNullImputation(NullMetricsImputation.ZERO);
         return sourceMedium;
     }
 
