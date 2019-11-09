@@ -171,6 +171,7 @@ public class DataFeedTaskController {
             }
             return ResponseDocument.successResponse(Boolean.FALSE);
         } catch (RuntimeException e) {
+            log.error("Create WebVisit template failed with error: {}", e.toString());
             return ResponseDocument.failedResponse(e);
         }
     }
