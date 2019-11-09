@@ -39,6 +39,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
     static final String CRM_ID = "CrmAccount_External_ID";
     static final String ACCOUNT_SYSTEM_ID = "ACCT_INTESTCASE8_D8D0DCAADB";
+    static final String OTHERSYSTEM_ACCOUNT_SYSTEM_ID = "Fax";
     private static final String DEFAULT_SYSTEM = "DefaultSystem";
 
     @Inject
@@ -106,7 +107,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
         // setup external id attrs
         createExternalSystem();
-        updateDefaultSystem();
+        updateDefaultSystemAndCreateNew();
 
         // TODO: setup rating engines and rating attrs
     }
@@ -121,10 +122,17 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
                 BusinessEntity.Account);
     }
 
-    private void updateDefaultSystem() {
+    private void updateDefaultSystemAndCreateNew() {
         S3ImportSystem defaultSystem = s3ImportSystemService.getS3ImportSystem(mainCustomerSpace, DEFAULT_SYSTEM);
         defaultSystem.setAccountSystemId(ACCOUNT_SYSTEM_ID);
         s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, defaultSystem);
+        S3ImportSystem otherSystem = new S3ImportSystem();
+        otherSystem.setAccountSystemId(OTHERSYSTEM_ACCOUNT_SYSTEM_ID);
+        otherSystem.setSystemType(S3ImportSystem.SystemType.Other);
+        otherSystem.setName(DEFAULT_SYSTEM + "_2");
+        otherSystem.setDisplayName(DEFAULT_SYSTEM + "_2");
+        otherSystem.setTenant(mainTestTenant);
+        s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, otherSystem);
     }
 
     protected void testAccountMetadata() {

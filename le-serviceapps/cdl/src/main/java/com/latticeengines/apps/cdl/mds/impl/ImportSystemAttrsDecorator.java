@@ -64,7 +64,7 @@ public class ImportSystemAttrsDecorator implements Decorator {
     }
 
     private ColumnMetadata process(ColumnMetadata cm) {
-        if (isAccountSystemId(cm)) {
+        if (isAccountSystemId(cm) || isAccountSystemIdInContactTemplate(cm)) {
             return processAccountSystemId(cm);
         } else if (isContactSystemId(cm)) {
             return processContactSystemId(cm);
@@ -104,5 +104,9 @@ public class ImportSystemAttrsDecorator implements Decorator {
 
     private boolean isContactSystemId(ColumnMetadata cm) {
         return BusinessEntity.Contact.equals(cm.getEntity()) && contactSystemIdMap.containsKey(cm.getAttrName());
+    }
+
+    private boolean isAccountSystemIdInContactTemplate(ColumnMetadata cm) {
+        return BusinessEntity.Contact.equals(cm.getEntity()) && accountSystemIdMap.containsKey(cm.getAttrName());
     }
 }
