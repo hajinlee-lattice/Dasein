@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStreamWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
+import com.latticeengines.cdl.workflow.steps.process.GenerateDimensionMetadata;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessActivityStreamWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -27,11 +28,15 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     @Inject
     private BuildRawActivityStreamWrapper buildRawActivityStreamWrapper;
 
+    @Inject
+    private GenerateDimensionMetadata generateDimensionMetadata;
+
     @Override
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(prepareForActivityStream) //
                 .next(buildRawActivityStreamWrapper) //
+                .next(generateDimensionMetadata) //
                 .build();
     }
 }

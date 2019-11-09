@@ -1,8 +1,13 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.ActivityStoreService;
+import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 
 import io.swagger.annotations.Api;
@@ -29,6 +36,10 @@ public class ActivityStoreResource {
 
     @Inject
     private ActivityStoreService activityStoreService;
+
+    @Inject
+    @Lazy
+    private DimensionMetadataService dimensionMetadataService;
 
     @PostMapping("/catalogs")
     @ResponseBody
@@ -80,5 +91,53 @@ public class ActivityStoreResource {
         Preconditions.checkArgument(dimension.getName().equals(dimensionName),
                 "Dimension name should match the one in update dimension object");
         return activityStoreService.updateStreamDimension(customerSpace, streamName, dimension);
+    }
+
+    @PostMapping("/dimensionMetadata")
+    @ResponseBody
+    @ApiOperation("Save dimension metadata with generated signature")
+    public String saveDimensionMetadata( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @RequestBody Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+        return activityStoreService.saveDimensionMetadata(customerSpace, null, dimensionMetadataMap);
+    }
+
+    @PostMapping("/dimensionMetadata/{signature}")
+    @ResponseBody
+    @ApiOperation("Save dimension metadata with given signature, return final signature after combining with tenant namespace")
+    public String saveDimensionMetadataWithSignature( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @PathVariable(value = "signature") String signature, //
+            @RequestBody Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+        return activityStoreService.saveDimensionMetadata(customerSpace, signature, dimensionMetadataMap);
+    }
+
+    @GetMapping("/dimensionMetadata")
+    @ResponseBody
+    @ApiOperation("Retrieve all dimension metadata with target signature and tenant")
+    public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata( //
+            @PathVariable(value = "customerSpace") String customerSpace,
+            @RequestParam(value = "signature", required = false) String signature) {
+        return activityStoreService.getDimensionMetadata(customerSpace, signature);
+    }
+
+    @GetMapping("/dimensionMetadata/streams/{streamName}")
+    @ResponseBody
+    @ApiOperation("Retrieve dimension metadata of given stream with target signature and tenant")
+    public Map<String, DimensionMetadata> getDimensionMetadataInStream( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @PathVariable(value = "streamName") String streamName, //
+            @RequestParam(value = "signature", required = false) String signature) {
+        return activityStoreService.getDimensionMetadataInStream(customerSpace, streamName, signature);
+    }
+
+    @DeleteMapping("/dimensionMetadata/{signature}")
+    @ResponseBody
+    @ApiOperation("Clear all dimension metadata associated with given signature")
+    public void deleteDimensionMetadataWithSignature( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @PathVariable(value = "signature") String signature) {
+        // TODO make sure signaute belongs to tenant
+        dimensionMetadataService.delete(signature);
     }
 }

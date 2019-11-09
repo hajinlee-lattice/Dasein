@@ -1,29 +1,47 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityStoreService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.cdl.service.DimensionMetadataService;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("catalogService")
+@Lazy
 public class ActivityStoreServiceImpl implements ActivityStoreService {
+
+    private static final Logger log = LoggerFactory.getLogger(ActivityStoreServiceImpl.class);
 
     @Inject
     private DataFeedTaskService dataFeedTaskService;
@@ -36,6 +54,16 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     @Inject
     private StreamDimensionEntityMgr dimensionEntityMgr;
+
+    @Inject
+    @Lazy
+    private DimensionMetadataService dimensionMetadataService;
+
+    @Inject
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
+
+    @Inject
+    private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
 
     @Override
     public Catalog createCatalog(@NotNull String customerSpace, @NotNull String catalogName, String taskUniqueId,
@@ -129,6 +157,82 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         return dimensionEntityMgr.findByNameAndTenantAndStream(dimension.getName(), tenant, stream);
     }
 
+    @Override
+    public String saveDimensionMetadata(@NotNull String customerSpace, String signature,
+            @NotNull Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+        Preconditions.checkNotNull(dimensionMetadataMap,
+                String.format("Dimension metadata map for tenant %s should not be null", customerSpace));
+        signature = newDimensionSignature(MultiTenantContext.getShortTenantId(), signature);
+        log.info("Save dimension metadata for tenant {} with signature {}, # of streams = {}", customerSpace, signature,
+                dimensionMetadataMap);
+        dimensionMetadataService.put(signature, dimensionMetadataMap);
+        return signature;
+    }
+
+    @Override
+    public Map<String, DimensionMetadata> getDimensionMetadataInStream(@NotNull String customerSpace,
+            @NotNull String streamName, String signature) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(streamName), "activity stream name should not be blank");
+
+        String streamId = getStreamId(streamName);
+        if (StringUtils.isBlank(signature)) {
+            signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
+        }
+        return dimensionMetadataService.getMetadataInStream(signature, streamId);
+    }
+
+    @Override
+    public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
+            String signature) {
+        if (StringUtils.isBlank(signature)) {
+            signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
+        }
+        Map<String, String> streamNameMap = getStreamNameMap();
+
+        Map<String, Map<String, DimensionMetadata>> metadata = dimensionMetadataService.getMetadata(signature);
+
+        // from streamId to streamName as key
+        return metadata.entrySet().stream() //
+                .filter(entry -> streamNameMap.containsKey(entry.getKey())) //
+                .map(entry -> Pair.of(streamNameMap.get(entry.getKey()), entry.getValue())) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    }
+
+    // streamId -> streamName
+    private Map<String, String> getStreamNameMap() {
+        List<AtlasStream> streams = streamEntityMgr.findByTenant(MultiTenantContext.getTenant());
+        if (CollectionUtils.isEmpty(streams)) {
+            return Collections.emptyMap();
+        }
+
+        return streams.stream()
+                .collect(Collectors.toMap(AtlasStream::getStreamId, AtlasStream::getName, (v1, v2) -> v1));
+    }
+
+    private String getStreamId(@NotNull String streamName) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        AtlasStream stream = streamEntityMgr.findByNameAndTenant(streamName, MultiTenantContext.getTenant());
+        Preconditions.checkArgument(stream != null && streamName.equals(stream.getName()),
+                String.format("No activity stream found with name %s in tenant %s", streamName, tenantId));
+        return stream.getStreamId();
+    }
+
+    private String getDimensionMetadataSignature(@NotNull String customerSpace) {
+        DataCollection.Version activeVersion = dataCollectionEntityMgr.findActiveVersion();
+        Preconditions.checkNotNull(activeVersion,
+                String.format("No current active version found for tenant %s", customerSpace));
+        DataCollectionStatus status = dataCollectionStatusEntityMgr
+                .findByTenantAndVersion(MultiTenantContext.getTenant(), activeVersion);
+        Preconditions.checkNotNull(status, "No datacollection status for active version found in tenant %s",
+                customerSpace);
+        String signature = status.getDimensionMetadataSignature();
+        Preconditions.checkNotNull(signature,
+                String.format("No dimension metadata signature found in tenant %s", customerSpace));
+        log.info("Found dimension metadata signature in tenant {}, activeVersion = {}, signature = {}", customerSpace,
+                activeVersion, signature);
+        return signature;
+    }
+
     private DataFeedTask getDataFeedTask(@NotNull Tenant tenant, String taskId) {
         if (StringUtils.isBlank(taskId)) {
             return null;
@@ -145,5 +249,12 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
                     .format("Tenant for input DataFeedTask %s is not the same as input tenant %s", taskTenant, tenant));
         }
         return dataFeedTask;
+    }
+
+    private String newDimensionSignature(@NotNull String tenantId, String signature) {
+        if (StringUtils.isEmpty(signature)) {
+            signature = UuidUtils.shortenUuid(UUID.randomUUID());
+        }
+        return String.format("%s_%s", tenantId, signature);
     }
 }

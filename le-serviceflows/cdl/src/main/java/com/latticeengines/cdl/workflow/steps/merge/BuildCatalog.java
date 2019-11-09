@@ -63,7 +63,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
     protected void onPostTransformationCompleted() {
         // not executing base method since no diff report for now
         // TODO add diff report if necessary later
-        List<String> tableNames = buildCatalogBatchStore();
+        Map<String, String> tableNames = buildCatalogBatchStore();
         exportToS3AndAddToContext(tableNames, CATALOG_TABLE_NAME);
     }
 
@@ -171,10 +171,10 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
      * If there is a new import for certain catalog, use that import to replace existing table
      * Otherwise use the existing table (link from active version)
      */
-    private List<String> buildCatalogBatchStore() {
+    private Map<String, String> buildCatalogBatchStore() {
         if (MapUtils.isEmpty(finalCatalogTablePrefixes) && MapUtils.isEmpty(configuration.getCatalogTables())) {
             // no import and no existing batch store
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         Map<String, String> finalCatalogTables = new HashMap<>(finalCatalogTablePrefixes.entrySet() //
@@ -188,7 +188,7 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
         // link all tables and use catalogId as signature
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), finalCatalogTables, batchStore,
                 inactive);
-        return new ArrayList<>(finalCatalogTables.values());
+        return finalCatalogTables;
     }
 
     /*-

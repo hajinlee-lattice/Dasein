@@ -297,6 +297,17 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         putStringValueInContext(contextKey, tableName);
     }
 
+    protected void exportToS3AndAddToContext(Map<String, String> tableNames, String contextKey) {
+        if (MapUtils.isEmpty(tableNames)) {
+            log.warn("Tries to export empty tableName map for contextKey = {}", contextKey);
+            return;
+        }
+
+        tableNames.values().forEach(tableName -> exportTableToS3(tableName, contextKey));
+        log.info("Published tables = {}, contextKey = {}", tableNames, contextKey);
+        putObjectInContext(contextKey, tableNames);
+    }
+
     protected void exportToS3AndAddToContext(List<String> tableNames, String contextKey) {
         if (CollectionUtils.isEmpty(tableNames)) {
             log.warn("Tries to export empty tableName list for contextKey = {}", contextKey);

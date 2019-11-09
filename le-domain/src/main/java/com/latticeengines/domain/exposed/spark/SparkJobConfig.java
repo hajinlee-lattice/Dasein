@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobCon
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
@@ -76,7 +77,10 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = AccountContactExportConfig.class, name = AccountContactExportConfig.NAME), //
         @JsonSubTypes.Type(value = AppendRawStreamConfig.class, name = AppendRawStreamConfig.NAME), //
         @JsonSubTypes.Type(value = DailyStoreToPeriodStoresJobConfig.class, name = DailyStoreToPeriodStoresJobConfig.NAME), //
-        @JsonSubTypes.Type(value = DeriveActivityMetricGroupJobConfig.class, name = DeriveActivityMetricGroupJobConfig.NAME) })
+        @JsonSubTypes.Type(value = DeriveActivityMetricGroupJobConfig.class, name = DeriveActivityMetricGroupJobConfig.NAME), //
+        @JsonSubTypes.Type(value = DailyStoreToPeriodStoresJobConfig.class, name = DailyStoreToPeriodStoresJobConfig.NAME), //
+        @JsonSubTypes.Type(value = ProcessDimensionConfig.class, name = ProcessDimensionConfig.NAME), //
+})
 public abstract class SparkJobConfig implements Serializable {
 
     /**
