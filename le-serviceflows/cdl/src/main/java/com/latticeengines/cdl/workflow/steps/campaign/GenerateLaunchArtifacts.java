@@ -182,7 +182,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 query.setMainEntity(BusinessEntity.Contact);
                 HdfsDataUnit contactDataUnit = getEntityQueryData(query);
                 GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
-                        contactDataUnit, positiveDeltaDataUnit, negativeDeltaDataUnit, mainEntity,
+                        contactDataUnit, negativeDeltaDataUnit,positiveDeltaDataUnit, mainEntity,
                         getRandomWorkspace());
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
@@ -203,7 +203,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     AudienceType.ACCOUNTS.getInterfaceName(),
                     getAddDeltaTableContextKeyByAudienceType(AudienceType.ACCOUNTS));
         } else {
-            log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+            log.info(String.format("No new Added %ss", AudienceType.ACCOUNTS.asBusinessEntity().name()));
         }
 
         HdfsDataUnit removedAccountsDataUnit = sparkJobResult.getTargets().get(1);
@@ -212,7 +212,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     AudienceType.ACCOUNTS.getInterfaceName(),
                     getRemoveDeltaTableContextKeyByAudienceType(AudienceType.ACCOUNTS));
         } else {
-            log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+            log.info(String.format("No Removed %ss", AudienceType.ACCOUNTS.asBusinessEntity().name()));
         }
 
         HdfsDataUnit fullContactsDataUnit = sparkJobResult.getTargets().get(2);
@@ -220,7 +220,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             processHDFSDataUnit(String.format("AccountsWithFullContacts_%s", config.getExecutionId()),
                     fullContactsDataUnit, AudienceType.ACCOUNTS.getInterfaceName(), ADDED_ACCOUNTS_FULL_CONTACTS_TABLE);
         } else {
-            log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+            log.info("No Full contacts");
         }
 
         if (audienceType == AudienceType.CONTACTS) {
@@ -238,7 +238,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                         removedContactsDataUnit, audienceType.getInterfaceName(),
                         getRemoveDeltaTableContextKeyByAudienceType(audienceType));
             } else {
-                log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+                log.info(String.format("No new Removed %ss", audienceType.asBusinessEntity().name()));
             }
         }
     }
