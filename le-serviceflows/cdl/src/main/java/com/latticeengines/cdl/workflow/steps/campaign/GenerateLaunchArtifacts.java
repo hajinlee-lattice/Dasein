@@ -157,7 +157,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
         SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
                 positiveDeltaDataUnit, negativeDeltaDataUnit, channelConfig.getAudienceType().asBusinessEntity());
-
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
     }
 
@@ -182,10 +181,13 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 query.setLookups(new ArrayList<>(contactLookups));
                 query.setMainEntity(BusinessEntity.Contact);
                 HdfsDataUnit contactDataUnit = getEntityQueryData(query);
-
-                return executeSparkJob(GenerateLaunchArtifactsJob.class,
-                        new GenerateLaunchArtifactsJobConfig(accountDataUnit, contactDataUnit, positiveDeltaDataUnit,
-                                negativeDeltaDataUnit, mainEntity, getRandomWorkspace()));
+                GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
+                        contactDataUnit, positiveDeltaDataUnit, negativeDeltaDataUnit, mainEntity,
+                        getRandomWorkspace());
+                log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
+                SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
+                log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
+                return result;
             } finally {
                 stopSparkSQLSession();
             }
