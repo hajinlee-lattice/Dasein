@@ -130,8 +130,6 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             String joinKey, boolean filterJoinKeyNulls) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
                 joinKey, filterJoinKeyNulls, getRandomWorkspace());
-        log.info("Executing CalculateDeltaJob with config: " + JsonUtils.serialize(config));
-
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -140,9 +138,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-
+                log.info("Executing CalculateDeltaJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(CalculateDeltaJob.class, config);
                 result.getTargets().add(currentLaunchUniverse);
+                log.info("CalculateDeltaJob Results: " + JsonUtils.serialize(result));
                 return result;
             } finally {
                 stopSparkSQLSession();
