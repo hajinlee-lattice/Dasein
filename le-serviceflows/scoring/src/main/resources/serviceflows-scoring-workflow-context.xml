@@ -7,6 +7,7 @@
       default-lazy-init="true">
 
     <context:component-scan base-package="com.latticeengines.scoring.workflow"/>
+    <context:component-scan base-package="com.latticeengines.domain.exposed.cdl.util"/>
     <import resource="classpath:serviceflows-core-workflow-context.xml"/>
 
 </beans>

@@ -1,5 +1,7 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.Set;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -60,7 +62,19 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
     }
 
     protected String getInclusionColumns() {
-        return getConfiguration().getExportInclusionColumns();
+
+        String existingColumns = getConfiguration().getExportInclusionColumns();
+
+        Set<String> features = getObjectFromContext(SCORE_TRAINING_FILE_INCLUDED_FEATURES, Set.class);
+        if (features == null)//will not be set when it is LPI model
+            return existingColumns;
+
+        String featureListStr = StringUtils.join(features, ';');
+        if (!StringUtils.isEmpty(existingColumns))
+            return existingColumns + ";" + featureListStr;
+        else
+            return featureListStr;
+
     }
 
     protected String getExclusionColumns() {
