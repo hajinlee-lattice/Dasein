@@ -181,6 +181,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACTIVITY_STREAMS_SKIP_AGG = "ACTIVITY_STREAMS_SKIP_AGG";
     protected static final String STREAM_DIMENSION_METADATA_MAP = "STREAM_DIMENSION_METADATA_MAP";
 
+    protected static final String SCORE_TRAINING_FILE_INCLUDED_FEATURES = "SCORE_TRAINING_FILE_INCLUDED_FEATURES";
+
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";
     protected static final String ENTITY_MATCH_COMPLETED = "ENTITY_MATCH_COMPLETED";
