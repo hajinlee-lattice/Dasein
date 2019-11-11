@@ -1778,13 +1778,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     void runTestWithRetry(List<String> candidateFailingSteps) {
         Random rand = new Random(System.currentTimeMillis());
         String randomStepToFail = candidateFailingSteps.get(rand.nextInt(candidateFailingSteps.size()));
-        runTestWithRetry(randomStepToFail);
+        runTestWithRetry(randomStepToFail, false);
     }
 
-    private void runTestWithRetry(String failingAtStep) {
+    void runTestWithRetry(List<String> candidateFailingSteps, boolean isFullRematch) {
+        Random rand = new Random(System.currentTimeMillis());
+        String randomStepToFail = candidateFailingSteps.get(rand.nextInt(candidateFailingSteps.size()));
+        runTestWithRetry(randomStepToFail, isFullRematch);
+    }
+
+    private void runTestWithRetry(String failingAtStep, boolean isFullRematch) {
         log.info("Testing failing PA at " + failingAtStep + " and retry ");
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(isLocalEnvironment());
+        request.setFullRematch(isFullRematch);
         FailingStep failingStep = new FailingStep();
         failingStep.setName(failingAtStep);
         request.setFailingStep(failingStep);

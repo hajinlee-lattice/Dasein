@@ -280,6 +280,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PH_DEPIVOTED_TABLE_NAME, //
             PH_PROFILE_TABLE_NAME, //
             PH_STATS_TABLE_NAME, //
+            REMATCH_TABLE_NAME,
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME);
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME,
