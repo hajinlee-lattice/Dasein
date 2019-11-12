@@ -250,14 +250,11 @@ public class RatingEngineEntityMgrImpl //
                 Long quotaLimit = ratingEngineService
                         .getActiveRatingEngineQuotaLimit(new CustomerSpace(space.getContractId(),
                                 space.getTenantId(), space.getSpaceId()));
-                Long countActiveModelsForTenant = ratingEngineService
-                        .getActiveRatingEnginesCount();
                 // Enforce quota limit
-                if (countActiveModelsForTenant >= quotaLimit) {
+                if (ratingEngineService.getActiveRatingEnginesCount() >= quotaLimit) {
                     // throw exception
                     throw new LedpException(LedpCode.LEDP_40074,
-                            new String[] {
-                            countActiveModelsForTenant.toString(), quotaLimit.toString() });
+                            new String[] { quotaLimit.toString() });
                 }
                 setActivationActionContext(retrievedRatingEngine);
                 if (retrievedRatingEngine.getScoringIteration() == null) {

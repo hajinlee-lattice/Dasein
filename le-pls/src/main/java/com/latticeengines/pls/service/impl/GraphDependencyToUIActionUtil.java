@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.pls.frontend.View;
 public class GraphDependencyToUIActionUtil {
 
     private static final String TITLE_DEFAULT_UPDATE_FAILED = "Update failed as system detected potential circular dependency";
-    private static final String TITLE_MODELS_EXCEED_LIMIT = "Too many Active Models";
+    private static final String TITLE_MODELS_EXCEED_LIMIT = "Limit Reached";
 
     public UIAction processUpdateSegmentResponse(MetadataSegment segment, Map<String, List<String>> dependencies) {
         UIAction uiAction;
