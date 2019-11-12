@@ -82,7 +82,7 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
         long successfullyQueuedForDelta = deltaLaunchChannels.stream().map(this::queueNewDeltaCalculationJob)
                 .filter(x -> x).count();
 
-        long successfullyQueuedForFull = deltaLaunchChannels.stream().map(this::queueNewFullCampaignLaunch)
+        long successfullyQueuedForFull = fullLaunchChannels.stream().map(this::queueNewFullCampaignLaunch)
                 .filter(x -> x).count();
 
         log.info(String.format(

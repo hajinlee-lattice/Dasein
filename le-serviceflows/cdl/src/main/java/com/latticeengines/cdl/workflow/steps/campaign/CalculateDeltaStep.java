@@ -130,8 +130,6 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             String joinKey, boolean filterJoinKeyNulls) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
                 joinKey, filterJoinKeyNulls, getRandomWorkspace());
-        log.info("Executing CalculateDeltaJob with config: " + JsonUtils.serialize(config));
-
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -140,9 +138,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-
+                log.info("Executing CalculateDeltaJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(CalculateDeltaJob.class, config);
                 result.getTargets().add(currentLaunchUniverse);
+                log.info("CalculateDeltaJob Results: " + JsonUtils.serialize(result));
                 return result;
             } finally {
                 stopSparkSQLSession();
@@ -159,7 +158,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             processHDFSDataUnit(
                     String.format("Added%ss_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
                     positiveDelta, audienceType.getInterfaceName(),
-                    getAddDeltaTableContextKeyByAudienceType(audienceType));
+                    getAddDeltaTableContextKeyByAudienceType(audienceType), false);
         } else {
             log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
         }
@@ -169,7 +168,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
             processHDFSDataUnit(
                     String.format("Removed%ss_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
                     negativeDelta, audienceType.getInterfaceName(),
-                    getRemoveDeltaTableContextKeyByAudienceType(audienceType));
+                    getRemoveDeltaTableContextKeyByAudienceType(audienceType), false);
         } else {
             log.info(String.format("No %ss to be removed", audienceType.asBusinessEntity().name()));
         }
@@ -177,17 +176,22 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         HdfsDataUnit fullUniverse = deltaCalculationResult.getTargets().get(2);
         processHDFSDataUnit(
                 String.format("Full%sUniverse_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
-                fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType));
+                fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType),
+                true);
 
         log.info("Counts: "
                 + JsonUtils.serialize(getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class)));
     }
 
-    private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
+    private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey,
+            boolean createTable) {
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
-        Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
-        metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
-        putObjectInContext(contextKey, tableName);
+        if (createTable) {
+            Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
+            metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
+            putObjectInContext(contextKey, tableName);
+            log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
+        }
         putObjectInContext(contextKey + ATLAS_EXPORT_DATA_UNIT, dataUnit);
         Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
         if (MapUtils.isEmpty(counts)) {
@@ -196,7 +200,6 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         counts.put(contextKey, dataUnit.getCount());
         putObjectInContext(DELTA_TABLE_COUNTS, counts);
 
-        log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
     private String getHDFSDataUnitLogEntry(String tag, HdfsDataUnit dataUnit) {

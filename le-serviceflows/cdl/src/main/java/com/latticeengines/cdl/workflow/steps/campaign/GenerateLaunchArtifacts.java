@@ -157,7 +157,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
         SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
                 positiveDeltaDataUnit, negativeDeltaDataUnit, channelConfig.getAudienceType().asBusinessEntity());
-
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
     }
 
@@ -182,10 +181,13 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 query.setLookups(new ArrayList<>(contactLookups));
                 query.setMainEntity(BusinessEntity.Contact);
                 HdfsDataUnit contactDataUnit = getEntityQueryData(query);
-
-                return executeSparkJob(GenerateLaunchArtifactsJob.class,
-                        new GenerateLaunchArtifactsJobConfig(accountDataUnit, contactDataUnit, positiveDeltaDataUnit,
-                                negativeDeltaDataUnit, mainEntity, getRandomWorkspace()));
+                GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
+                        contactDataUnit, negativeDeltaDataUnit,positiveDeltaDataUnit, mainEntity,
+                        getRandomWorkspace());
+                log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
+                SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
+                log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
+                return result;
             } finally {
                 stopSparkSQLSession();
             }
@@ -201,7 +203,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     AudienceType.ACCOUNTS.getInterfaceName(),
                     getAddDeltaTableContextKeyByAudienceType(AudienceType.ACCOUNTS));
         } else {
-            log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+            log.info(String.format("No new Added %ss", AudienceType.ACCOUNTS.asBusinessEntity().name()));
         }
 
         HdfsDataUnit removedAccountsDataUnit = sparkJobResult.getTargets().get(1);
@@ -210,7 +212,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     AudienceType.ACCOUNTS.getInterfaceName(),
                     getRemoveDeltaTableContextKeyByAudienceType(AudienceType.ACCOUNTS));
         } else {
-            log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+            log.info(String.format("No Removed %ss", AudienceType.ACCOUNTS.asBusinessEntity().name()));
         }
 
         HdfsDataUnit fullContactsDataUnit = sparkJobResult.getTargets().get(2);
@@ -218,7 +220,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             processHDFSDataUnit(String.format("AccountsWithFullContacts_%s", config.getExecutionId()),
                     fullContactsDataUnit, AudienceType.ACCOUNTS.getInterfaceName(), ADDED_ACCOUNTS_FULL_CONTACTS_TABLE);
         } else {
-            log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+            log.info("No Full contacts");
         }
 
         if (audienceType == AudienceType.CONTACTS) {
@@ -236,7 +238,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                         removedContactsDataUnit, audienceType.getInterfaceName(),
                         getRemoveDeltaTableContextKeyByAudienceType(audienceType));
             } else {
-                log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
+                log.info(String.format("No new Removed %ss", audienceType.asBusinessEntity().name()));
             }
         }
     }

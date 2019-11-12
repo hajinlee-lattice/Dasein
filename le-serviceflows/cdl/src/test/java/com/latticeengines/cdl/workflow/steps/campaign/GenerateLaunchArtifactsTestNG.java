@@ -49,6 +49,7 @@ public class GenerateLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
         audienceType = AudienceType.CONTACTS;
         channelType = CDLExternalSystemName.Marketo;
+        counts = new HashMap<>();
         counts.put("FULL_CONTACTS_UNIVERSE", 81541L);
         counts.put("REMOVED_CONTACTS_DELTA_TABLE", 81541L);
         Assert.assertFalse(invokeShouldSkipStep(audienceType, channelType, counts));

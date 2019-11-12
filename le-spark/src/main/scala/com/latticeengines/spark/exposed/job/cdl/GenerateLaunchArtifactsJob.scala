@@ -30,15 +30,15 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
       distinctNegativeAccountsDf = negativeDeltaDf.select(negativeDeltaDf(accountId)).distinct()
     }
 
-    val addedAccountsData = distinctPositiveAccountsDf.join(accountsDf.alias(accountAlias), Seq(accountId)).select(accountAlias + ".*")
-    val removedAccountsData = distinctNegativeAccountsDf.join(accountsDf.alias(accountAlias), Seq(accountId)).select(accountAlias + ".*")
-    val fullContactsData = distinctPositiveAccountsDf.join(contactsDf.alias(contactAlias), Seq(accountId)).select(contactAlias + ".*")
+    val addedAccountsData = accountsDf.alias(accountAlias).join(distinctPositiveAccountsDf, Seq(accountId)).select(accountAlias + ".*")
+    val removedAccountsData = accountsDf.alias(accountAlias).join(distinctNegativeAccountsDf, Seq(accountId)).select(accountAlias + ".*")
+    val fullContactsData = contactsDf.alias(contactAlias).join(distinctPositiveAccountsDf, Seq(accountId)).select(contactAlias + ".*")
 
     lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData)
 
     if (mainEntity == BusinessEntity.Contact) {
-      val addedContactsData = positiveDeltaDf.join(contactsDf.alias(contactAlias), Seq(contactId)).select(contactAlias + ".*")
-      val removedContactsData = negativeDeltaDf.join(contactsDf.alias(contactAlias), Seq(contactId)).select(contactAlias + ".*")
+      val addedContactsData = contactsDf.alias(contactAlias).join(positiveDeltaDf, Seq(contactId)).select(contactAlias + ".*")
+      val removedContactsData = contactsDf.alias(contactAlias).join(negativeDeltaDf, Seq(contactId)).select(contactAlias + ".*")
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)
     }
   }

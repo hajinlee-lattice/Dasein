@@ -130,6 +130,27 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
             log.error(e.getMessage());
         }
         super.setup();
+
+        // Spark repl setup
+        // val accountId = "AccountId"
+        //
+        // val contactId = "ContactId"
+        //
+        // val accountAlias = "account"
+        //
+        // val contactAlias = "contact"
+        //
+        // val accountsDf =
+        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactsaccount.avro")
+        //
+        // val contactsDf =
+        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactscontact.avro")
+        //
+        // val positiveDeltaDf =
+        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactspositiveContacts.avro")
+        //
+        // val negativeDeltaDf =
+        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactsnegativeContacts.avro")
     }
 
     @Test(groups = "functional")
@@ -140,9 +161,12 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         config.setPositiveDelta(positiveAccounts);
         config.setNegativeDelta(negativeAccounts);
         config.setMainEntity(BusinessEntity.Account);
-        log.info(JsonUtils.serialize(config));
+        config.setWorkspace("testGenerateLaunchArtifactsForAccountEntity");
 
+        log.info("Config: " + JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("Results: " + JsonUtils.serialize(result));
+
         Assert.assertEquals(result.getTargets().size(), 3);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 4);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
@@ -157,8 +181,12 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         config.setPositiveDelta(positiveContacts);
         config.setNegativeDelta(negativeContacts);
         config.setMainEntity(BusinessEntity.Contact);
-        log.info(JsonUtils.serialize(config));
+        config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
+
+        log.info("Config: " + JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("Results: " + JsonUtils.serialize(result));
+
         Assert.assertEquals(result.getTargets().size(), 5);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 3);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
