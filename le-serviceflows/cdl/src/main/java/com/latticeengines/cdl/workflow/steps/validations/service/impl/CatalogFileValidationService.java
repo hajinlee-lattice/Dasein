@@ -2,8 +2,9 @@ package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -70,8 +71,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                     String pathStr = getFieldValue(record, pathPattern.name());
                                     if (StringUtils.isNotBlank(pathStr)) {
                                         // validate url legacy
-                                        Matcher matcher = PATH_PATTERN.matcher(pathStr);
-                                        if (!urlValidator.isValid(pathStr) && !matcher.find()) {
+                                        if (!urlValidator.isValid(pathStr) && !isValidPath(pathStr)) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                             rowError = true;
                                             fileError = true;
@@ -117,5 +117,43 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
             copyErrorFileBackToHdfs(errorFile);
         }
         return errorLine;
+    }
+
+    // this part was from UrlValidator, check regex, then check if the path can generate URI and count of "//" in
+    // path
+    private boolean isValidPath(String path) {
+        if (path == null) {
+            return false;
+        } else if (!PATH_PATTERN.matcher(path).matches()) {
+            return false;
+        } else {
+            try {
+                URI uri = new URI((String)null, (String)null, path, (String)null);
+                String norm = uri.normalize().getPath();
+                if (norm.startsWith("/../") || norm.equals("/..")) {
+                    return false;
+                }
+            } catch (URISyntaxException var4) {
+                return false;
+            }
+
+            int slash2Count = countToken("//", path);
+            return slash2Count <= 0;
+        }
+    }
+
+    private int countToken(String token, String target) {
+        int tokenIndex = 0;
+        int count = 0;
+
+        while(tokenIndex != -1) {
+            tokenIndex = target.indexOf(token, tokenIndex);
+            if (tokenIndex > -1) {
+                ++tokenIndex;
+                ++count;
+            }
+        }
+
+        return count;
     }
 }
