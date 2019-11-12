@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -24,9 +23,6 @@ public class FinishMockActivityStore extends BaseWorkflowStep<MockActivityStoreC
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    @Resource(name = "localCacheService")
-    private CacheService localCacheService;
-
     @Override
     public void execute() {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
@@ -44,7 +40,6 @@ public class FinishMockActivityStore extends BaseWorkflowStep<MockActivityStoreC
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
-        localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
 
 }

@@ -212,8 +212,7 @@ public class CDLServiceImpl implements CDLService {
             CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
         UIAction uiAction = new UIAction();
-        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace));
-        if (!Boolean.TRUE.equals(entityMatchEnabled)) {
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
             uiAction.setTitle(DELETE_FAIL_TITLE);
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Error);

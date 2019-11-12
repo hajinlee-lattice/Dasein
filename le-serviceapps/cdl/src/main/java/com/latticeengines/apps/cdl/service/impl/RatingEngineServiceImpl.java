@@ -11,13 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,7 +49,6 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -167,18 +164,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
 
-    private ForkJoinPool tpForParallelStream;
-
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
     @Inject
     private BatonService batonService;
-
-    @PostConstruct
-    public void postConstruct() {
-        tpForParallelStream = ThreadPoolUtils.getForkJoinThreadPool("rating-details-fetcher", fetcherNum);
-    }
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -1143,11 +1133,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         return replicaName;
-    }
-
-    @VisibleForTesting
-    void setTpForParallelStream(ForkJoinPool tpForParallelStream) {
-        this.tpForParallelStream = tpForParallelStream;
     }
 
 }

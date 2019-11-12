@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -62,7 +61,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("dataCollectionService")
@@ -90,16 +88,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Inject
-    private MigrationTrackEntityMgr migrationTrackEntityMgr;
-
-    @Inject
     private S3Service s3Service;
 
     @Inject
     private BatonService batonService;
-
-    @Resource(name = "localCacheService")
-    private CacheService localCacheService;
 
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
@@ -470,7 +462,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
-        localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
 
     @Override

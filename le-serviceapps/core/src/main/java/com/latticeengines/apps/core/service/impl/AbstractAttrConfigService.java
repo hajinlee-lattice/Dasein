@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -75,6 +76,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Inject
     protected BatonService batonService;
+
+    @Resource(name = "localCacheService")
+    private CacheService localCacheService;
 
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
@@ -437,8 +441,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 String shortTenantId = MultiTenantContext.getShortTenantId();
                 attrConfigEntityMgr.save(shortTenantId, entity, trim(configList));
                 // clear serving metadata cache
-                String key = shortTenantId + "|" + entity.name() + "|decoratedmetadata";
-                cacheService.refreshKeysByPattern(key, CacheName.ServingMetadataCache);
+                String keyPrefix = shortTenantId + "|" + entity.name();
+                cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
             });
             cacheService.refreshKeysByPattern(MultiTenantContext.getShortTenantId(), CacheName.DataLakeStatsCubesCache);
         }
