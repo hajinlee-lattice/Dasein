@@ -43,20 +43,29 @@ public enum CacheName {
                 DataLakeCMCache, //
                 ObjectApiCache, //
                 ServingMetadataCache, //
-                TableRoleMetadataCache };
-    }
-
-    public static CacheName[] getCdlLocalCacheGroup() {
-        return new CacheName[] {
+                TableRoleMetadataCache, //
+                DataLakeCMCache, //
                 AttrRepoCache, //
                 ServingMetadataLocalCache, //
                 TimeTranslatorCache };
     }
 
-    public static CacheName[] getCdlServingCacheGroup() {
+    public static CacheName[] getCdlLocalCacheGroup() {
         return new CacheName[] {
                 DataLakeCMCache, //
-                ServingMetadataLocalCache };
+                AttrRepoCache, //
+                ServingMetadataLocalCache, //
+                TimeTranslatorCache //
+        };
+    }
+
+    // should all key-ed by tenantId|entity|*
+    public static CacheName[] getCdlServingCacheGroup() {
+        return new CacheName[] {
+                ServingMetadataCache, //
+                ServingMetadataLocalCache, //
+                DataLakeCMCache //
+        };
     }
 
     public String getName() {
@@ -69,11 +78,6 @@ public enum CacheName {
         public static final String DataLakeCMCacheName = "DataLakeCMCache";
         public static final String DataLakeStatsCubesCache = "DataLakeStatsCubesCache";
         public static final String ObjectApiCacheName = "ObjectApiCache";
-        public static final String EntityCountCacheName = "EntityCountCache";
-        public static final String EntityDataCacheName = "EntityDataCache";
-        public static final String EntityRatingCountCacheName = "EntityRatingCountCache";
-        public static final String RatingDataCacheName = "RatingDataCache";
-        public static final String RatingCoverageCacheName = "RatingCoverageCache";
         public static final String JobsCacheName = "JobsCache";
         public static final String MetadataCacheName = "MetadataCache";
         public static final String SessionCacheName = "SessionCache";
@@ -87,7 +91,6 @@ public enum CacheName {
         public static final String TableRoleMetadataCacheName = "TableRoleMetadataCache";
         public static final String DantePreviewTokenCacheName = "DantePreviewTokenCache";
         public static final String EMRClusterCacheName = "EMRClusterCache";
-        public static final String CSVImportMapperCacheName = "CSVImportMapperCache";
         public static final String ModelSummaryCacheName = "ModelSummaryCache";
         public static final String ActiveStackInfoCacheName = "ActiveStackInfoCache";
     }

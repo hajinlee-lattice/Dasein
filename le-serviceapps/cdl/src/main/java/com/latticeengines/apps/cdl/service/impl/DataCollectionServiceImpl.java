@@ -62,7 +62,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("dataCollectionService")
@@ -88,9 +87,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Inject
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
-
-    @Inject
-    private MigrationTrackEntityMgr migrationTrackEntityMgr;
 
     @Inject
     private S3Service s3Service;

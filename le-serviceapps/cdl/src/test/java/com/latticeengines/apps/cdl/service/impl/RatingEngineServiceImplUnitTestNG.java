@@ -64,8 +64,6 @@ public class RatingEngineServiceImplUnitTestNG {
         mockRatingEngineEntityMgr();
         mockRatingEngineService();
         mockTenantContext();
-        ForkJoinPool tpForParallelStream = ThreadPoolUtils.getForkJoinThreadPool("rating-details-fetcher", 2);
-        ratingEngineService.setTpForParallelStream(tpForParallelStream);
     }
 
     @Test(groups = "unit")
