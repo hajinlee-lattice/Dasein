@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cache.CacheType;
@@ -27,6 +29,9 @@ public class RedisCacheService extends CacheServiceBase {
 
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Resource(name = "localCacheService")
+    private CacheService localCacheService;
 
     protected RedisCacheService() {
         super(CacheType.Redis);
@@ -53,6 +58,7 @@ public class RedisCacheService extends CacheServiceBase {
             });
             return null;
         });
+        localCacheService.refreshKeysByPattern(pattern, cacheNames);
     }
 
     private RetryTemplate getRetryTemplate() {

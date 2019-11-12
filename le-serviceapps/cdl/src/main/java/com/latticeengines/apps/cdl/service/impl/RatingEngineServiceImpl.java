@@ -167,18 +167,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;
 
-    private ForkJoinPool tpForParallelStream;
-
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
     @Inject
     private BatonService batonService;
-
-    @PostConstruct
-    public void postConstruct() {
-        tpForParallelStream = ThreadPoolUtils.getForkJoinThreadPool("rating-details-fetcher", fetcherNum);
-    }
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -1143,11 +1136,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         return replicaName;
-    }
-
-    @VisibleForTesting
-    void setTpForParallelStream(ForkJoinPool tpForParallelStream) {
-        this.tpForParallelStream = tpForParallelStream;
     }
 
 }
