@@ -38,14 +38,14 @@ public enum CacheName {
 
     public static CacheName[] getCdlCacheGroup() {
         return new CacheName[] { //
+                TableRoleMetadataCache, //
+                ServingMetadataLocalCache, //
+                AttrRepoCache, //
+                DataLakeCMCache, //
                 DataLakeStatsCubesCache, //
                 DataLakeTopNTreeCache, //
-                DataLakeCMCache, //
                 ObjectApiCache, //
                 ServingMetadataCache, //
-                TableRoleMetadataCache, //
-                AttrRepoCache, //
-                ServingMetadataLocalCache, //
                 TimeTranslatorCache };
     }
 
