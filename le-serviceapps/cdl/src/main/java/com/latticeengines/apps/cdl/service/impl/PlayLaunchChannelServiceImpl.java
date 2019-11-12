@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
@@ -28,6 +29,9 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
+import com.latticeengines.domain.exposed.cdl.EventDetail;
+import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -78,6 +82,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
     @Value("${cdl.play.service.default.types.user}")
     private String serviceUser;
@@ -187,7 +194,17 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     public List<PlayLaunchChannel> getPlayLaunchChannels(String playName, Boolean includeUnlaunchedChannels) {
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.findByPlayName(playName);
         for (PlayLaunchChannel playLaunchChannel : channels) {
-            playLaunchChannel.setLastLaunch(playLaunchService.findLatestByChannel(playLaunchChannel.getPid()));
+            PlayLaunch playLaunch = playLaunchService.findLatestByChannel(playLaunchChannel.getPid());
+            playLaunchChannel.setLastLaunch(playLaunch);
+            DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessageByLaunchId(playLaunch.getLaunchId());
+            if(audienceState != null && audienceState.getEventDetail() != null && audienceState.getEventDetail() != null){
+                EventDetail details = audienceState.getEventDetail();
+                if(details instanceof ProgressEventDetail){
+                    playLaunch.setAudienceState(((ProgressEventDetail)details).getStatus());
+                }
+
+            }
+
         }
         if (includeUnlaunchedChannels) {
             addUnlaunchedChannels(channels);
