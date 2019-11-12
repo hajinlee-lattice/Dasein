@@ -44,19 +44,9 @@ public enum CacheName {
                 ObjectApiCache, //
                 ServingMetadataCache, //
                 TableRoleMetadataCache, //
-                DataLakeCMCache, //
                 AttrRepoCache, //
                 ServingMetadataLocalCache, //
                 TimeTranslatorCache };
-    }
-
-    public static CacheName[] getCdlLocalCacheGroup() {
-        return new CacheName[] {
-                DataLakeCMCache, //
-                AttrRepoCache, //
-                ServingMetadataLocalCache, //
-                TimeTranslatorCache //
-        };
     }
 
     // should all key-ed by tenantId|entity|*

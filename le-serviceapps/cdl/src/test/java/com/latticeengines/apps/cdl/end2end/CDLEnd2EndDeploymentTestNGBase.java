@@ -436,9 +436,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     @Value("${common.le.environment}")
     private String leEnv;
 
-    @javax.annotation.Resource(name = "localCacheService")
-    private CacheService localCacheService;
-
     protected String processAnalyzeAppId;
     protected DataCollection.Version initialVersion;
 
@@ -523,7 +520,6 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
-        localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
 
     void retryProcessAnalyze() {

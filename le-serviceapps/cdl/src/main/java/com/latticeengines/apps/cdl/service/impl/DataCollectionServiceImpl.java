@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -93,9 +92,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Inject
     private BatonService batonService;
-
-    @Resource(name = "localCacheService")
-    private CacheService localCacheService;
 
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
@@ -466,7 +462,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
-        localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
 
     @Override
