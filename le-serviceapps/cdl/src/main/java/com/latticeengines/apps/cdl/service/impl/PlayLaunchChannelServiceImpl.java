@@ -197,7 +197,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             PlayLaunch playLaunch = playLaunchService.findLatestByChannel(playLaunchChannel.getPid());
             playLaunchChannel.setLastLaunch(playLaunch);
             DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessageByLaunchId(playLaunch.getLaunchId());
-            if(audienceState != null && audienceState.getEventDetail() != null && audienceState.getEventDetail() != null){
+            if(audienceState != null && audienceState.getEventDetail() != null){
                 EventDetail details = audienceState.getEventDetail();
                 if(details instanceof ProgressEventDetail){
                     playLaunch.setAudienceState(((ProgressEventDetail)details).getStatus());
