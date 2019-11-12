@@ -266,6 +266,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Transient
     private String audienceState;
 
+    @JsonProperty("matchedRate")
+    @Transient
+    private Long matchedRate;
+
     public PlayLaunch() {
     }
 
@@ -680,5 +684,13 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public String getAudienceState() {
         return audienceState;
+    }
+
+    public void setMatchedRate(Long matchedRate) {
+        this.matchedRate = matchedRate;
+    }
+
+    public Long getMatchedRate() {
+        return matchedRate;
     }
 }
