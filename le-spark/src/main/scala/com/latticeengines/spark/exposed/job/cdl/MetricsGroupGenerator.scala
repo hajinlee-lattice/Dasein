@@ -2,7 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import java.util
 
-import com.latticeengines.common.exposed.util.TemplateUtils
+import com.latticeengines.common.exposed.util.{JsonUtils, TemplateUtils}
 import com.latticeengines.domain.exposed.StringTemplates
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
@@ -11,7 +11,8 @@ import com.latticeengines.domain.exposed.cdl.activity.{ActivityMetricsGroup, Act
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
 import com.latticeengines.domain.exposed.query.{ComparisonType, TimeFilter}
-import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig
+import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
+import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DeriveActivityMetricGroupJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils
@@ -32,35 +33,68 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   override def runJob(spark: SparkSession, lattice: LatticeContext[DeriveActivityMetricGroupJobConfig]): Unit = {
     val config: DeriveActivityMetricGroupJobConfig = lattice.config
     val evaluationDate = config.evaluationDate // yyyy-mm-dd
-    val periodStores = config.periodStoreMap
     val input: Seq[DataFrame] = lattice.input
-    val groupConfig: ActivityMetricsGroup = config.activityMetricsGroup
-    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groupConfig.getActivityTimeRange), evaluationDate)
+    val groups: Seq[ActivityMetricsGroup] = asScalaIteratorConverter(config.activityMetricsGroups.iterator).asScala.toSeq
+    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups), evaluationDate)
+    val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
 
     // run defined aggregation on period stores, remove null entries that have no meaning
-    val aggregatedPeriodStores: Seq[DataFrame] = input.map(df => df.na.drop)
+    val aggregatedPeriodStores: Seq[DataFrame] = input.map(df => DeriveAttrsUtils.dropPartitionColumns(df.na.drop))
+
+    val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
+    val detailsMap = new util.HashMap[String, Details]() // groupId -> details
+    var index: Int = 0
+    val metrics: Seq[DataFrame] = groups.map((group: ActivityMetricsGroup) => {
+      val details: Details = new Details()
+      details.setStartIdx(index)
+      detailsMap.put(group.getGroupId, details)
+      index += 1
+
+      val metadata = inputMetadata.getMetadata.get(group.getStream.getStreamId)
+      processGroup(group, evaluationDate, aggregatedPeriodStores, translator, metadata)
+    })
+    outputMetadata.setMetadata(detailsMap)
+
+    lattice.outputStr = JsonUtils.serialize(outputMetadata)
+    lattice.output = metrics.toList
+  }
+
+  private def processGroup(group: ActivityMetricsGroup,
+                           evaluationDate: String,
+                           aggregatedPeriodStores: Seq[DataFrame],
+                           translator: TimeFilterTranslator,
+                           metadata: ActivityStoreSparkIOMetadata.Details): DataFrame = {
+
+    // construct period map: period -> inx
+    var offsetMap: Map[String, Int] = Map()
+    for (idx <- 0 until metadata.getLabels.size) {
+      offsetMap += (metadata.getLabels.get(idx) -> idx)
+    }
 
     // divide dataframe by time filters defined in TimeRange SQL column
-    val filteredByTime: Seq[(DataFrame, String)] = createTimeFilters(groupConfig.getActivityTimeRange)
-      .map(tf => separateByTimeFilter(aggregatedPeriodStores(periodStores.get(tf.getPeriod)), tf, translator))
+    val filteredByTime: Seq[(DataFrame, String)] = createTimeFilters(group.getActivityTimeRange)
+      .map(tf => {
+        val periodStoreIndex: Int = metadata.getStartIdx + offsetMap(tf.getPeriod)
+        separateByTimeFilter(aggregatedPeriodStores.get(periodStoreIndex), tf, translator)
+      })
 
     // rollup by (entityId, rollupDimensions), pivot and rename pivoted attribute following attrName template
-    val attrRolledUp: Seq[DataFrame] = filteredByTime.map(item => rollupAndCreateAttr(item._1, item._2, groupConfig))
+    val attrRolledUp: Seq[DataFrame] = filteredByTime.map(item => rollupAndCreateAttr(item._1, item._2, group))
 
     // join dataframes from all time filters
-    val entityIdColName = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(groupConfig.getEntity)
+    val entityIdColName = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(group.getEntity)
     val joined: DataFrame = attrRolledUp.reduce((df1, df2) => {
       df1.join(df2, Seq(entityIdColName), "fullouter")
     })
 
     // replace null values with defined method
-    val replaceNull: DataFrame = groupConfig.getNullImputation match {
+    val replaceNull: DataFrame = group.getNullImputation match {
       case NULL => joined // no operation needed
       case ZERO => joined.na.fill(0) // fill with 0
       case _ => throw new UnsupportedOperationException("Unknown null imputation method")
     }
 
-    lattice.output = replaceNull :: Nil
+    replaceNull
   }
 
   // return: (dataframe, TimeRange string used for attribute name template)
@@ -77,8 +111,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val targetAttr: String = groupConfig.getAggregation.getTargetAttribute
     val entityIdColName: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(groupConfig.getEntity)
     val rollupDimNames: Seq[String] = groupConfig.getRollupDimensions.split(",") :+ entityIdColName
-    val pivotDimNames: Seq[String] = groupConfig.getRollupDimensions.split(",")
-    val pivotCols: Seq[String] = df.columns.filter(colName => pivotDimNames.contains(colName)).toSeq
+    val pivotCols: Seq[String] = groupConfig.getRollupDimensions.split(",")
     val calc = groupConfig.getAggregation.getCalculation
 
     val rollupAggr = (calc match {
@@ -140,9 +173,11 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     new PeriodStrategy(Template.fromName(name))
   }
 
-  private def getPeriodStrategies(timeRange: ActivityTimeRange): util.List[PeriodStrategy] = {
+  private def getPeriodStrategies(groups: Seq[ActivityMetricsGroup]): util.List[PeriodStrategy] = {
+    val periodSets: Seq[Set[String]] = groups.map((group: ActivityMetricsGroup) => asScalaIteratorConverter(group.getActivityTimeRange.getPeriods.iterator).asScala.toSet)
+    val periodNames: Seq[String] = periodSets.reduce((masterSet, nextSet) => masterSet ++ nextSet).toSeq
     scala.collection.JavaConversions.seqAsJavaList(
-      asScalaIteratorConverter(timeRange.getPeriods.iterator).asScala.toSeq.map(name => toPeriodStrategy(name))
+      periodNames.map(name => toPeriodStrategy(name))
     )
   }
 }

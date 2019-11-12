@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.process;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
@@ -11,6 +12,10 @@ public class ActivityStreamSparkStepConfiguration extends SparkJobStepConfigurat
     // streamId -> stream object
     @JsonProperty("activity_stream_map")
     private Map<String, AtlasStream> activityStreamMap;
+
+    // groupId -> metricsGroup obj
+    @JsonProperty("activity_metrics_group_map")
+    private Map<String, ActivityMetricsGroup> activityMetricsGroupMap;
 
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
@@ -24,6 +29,14 @@ public class ActivityStreamSparkStepConfiguration extends SparkJobStepConfigurat
 
     public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
         this.activityStreamMap = activityStreamMap;
+    }
+
+    public Map<String, ActivityMetricsGroup> getActivityMetricsGroupMap() {
+        return activityMetricsGroupMap;
+    }
+
+    public void setActivityMetricsGroupMap(Map<String, ActivityMetricsGroup> activityMetricsGroupMap) {
+        this.activityMetricsGroupMap = activityMetricsGroupMap;
     }
 
     public boolean isEntityMatchEnabled() {

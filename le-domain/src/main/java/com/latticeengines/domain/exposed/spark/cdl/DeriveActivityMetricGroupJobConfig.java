@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -13,12 +13,11 @@ public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implement
 
     public static final String NAME = "DeriveActivityMetricGroupJobConfig";
 
-    @JsonProperty("metricsGroupConfigs")
-    public ActivityMetricsGroup activityMetricsGroup;
+    @JsonProperty("groups")
+    public List<ActivityMetricsGroup> activityMetricsGroups;
 
-    @JsonProperty("periodStoreMap")
-    // period -> idx of dataframe list from input
-    public Map<String, Integer> periodStoreMap;
+    @JsonProperty("inputMetadata")
+    public ActivityStoreSparkIOMetadata inputMetadata; // describe streamId -> period stores
 
     @JsonProperty("evaluationDate")
     // period -> current period Id
@@ -28,5 +27,10 @@ public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implement
     @JsonProperty("Name")
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public int getNumTargets() {
+        return activityMetricsGroups.size();
     }
 }

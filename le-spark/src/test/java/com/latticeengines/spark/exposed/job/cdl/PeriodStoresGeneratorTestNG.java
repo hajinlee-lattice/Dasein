@@ -34,7 +34,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String PathPatternId = "PathPatternId";
     private static final String AccountId = "AccountId";
     private static final String ContactId = "ContactId";
-    private static final String Count = "Count";
+    private static final String Count = InterfaceName.__Row_Count__.name();
     private static final String SOME_DIM = "SomeDimension";
     private static final String Date = InterfaceName.__StreamDate.name();
     private static final String PeriodIdForPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + "PeriodId";
@@ -106,8 +106,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         stream.setPeriods(PERIODS);
         stream.setDimensions(prepareDimensions());
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
-        stream.setAttributeDerivers(Arrays.asList(
-                createAttributeDeriver(null, Count, StreamAttributeDeriver.Calculation.SUM), //
+        stream.setAttributeDerivers(Collections.singletonList(
                 createAttributeDeriver(null, SOME_DIM, StreamAttributeDeriver.Calculation.MIN) //
         ));
 

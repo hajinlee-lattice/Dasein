@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -13,6 +14,10 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
     // streamId -> stream object
     @JsonProperty("activity_stream_map")
     private Map<String, AtlasStream> activityStreamMap;
+
+    // groupId -> metricsGroup obj
+    @JsonProperty("activity_metrics_group_map")
+    private Map<String, ActivityMetricsGroup> activityMetricsGroupMap;
 
     // streamId -> list({ tableName, original import file name })
     @JsonProperty("stream_imports")
@@ -34,6 +39,14 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
 
     public void setActivityStreamMap(Map<String, AtlasStream> activityStreamMap) {
         this.activityStreamMap = activityStreamMap;
+    }
+
+    public Map<String, ActivityMetricsGroup> getActivityMetricsGroupMap() {
+        return activityMetricsGroupMap;
+    }
+
+    public void setActivityMetricsGroupMap(Map<String, ActivityMetricsGroup> activityMetricsGroupMap) {
+        this.activityMetricsGroupMap = activityMetricsGroupMap;
     }
 
     public Map<String, List<ActivityImport>> getStreamImports() {

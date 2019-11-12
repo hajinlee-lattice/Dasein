@@ -11,6 +11,7 @@ import com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStreamWrapper
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.cdl.workflow.steps.process.AggActivityStreamToDaily;
 import com.latticeengines.cdl.workflow.steps.process.GenerateDimensionMetadata;
+import com.latticeengines.cdl.workflow.steps.process.MetricsGroupsGenerationStep;
 import com.latticeengines.cdl.workflow.steps.process.PeriodStoresGenerationStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessActivityStreamWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -39,6 +40,9 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     @Inject
     private PeriodStoresGenerationStep periodStoresGenerationStep;
 
+    @Inject
+    private MetricsGroupsGenerationStep metricsGroupsGenerationStep;
+
     @Override
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -47,6 +51,7 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
                 .next(generateDimensionMetadata) //
                 .next(aggActivityStreamToDaily) //
                 .next(periodStoresGenerationStep) //
+                .next(metricsGroupsGenerationStep) //
                 .build();
     }
 }
