@@ -847,8 +847,7 @@ public enum LedpCode {
     LEDP_40071("Cannot create External System Authentication, because connection with the same orgId and system type already exists"),
     LEDP_40072("Cannot get template for task {0}, backup file {1}"),
     LEDP_40073("Register delete data operation should have attribute {1} in template!"),
-    LEDP_40074(
-            "There are already {0} of {1} Active Models scoring in the system. Please Deactivate some to free capacity to Activate this Model"),
+    LEDP_40074("You can only activate {0} models at a time."),
     LEDP_40075("{0} is setup as your primary. This cannot be changed. Don't assign the unique ID of this system to Account ID and try again."),
 
     // le-domain
