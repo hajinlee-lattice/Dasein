@@ -2,7 +2,9 @@ package com.latticeengines.cdl.workflow.steps.play;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -44,7 +46,11 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     private List<String> s3ExportFilePaths = new ArrayList<>();
 
-    private String CSV = "csv";
+    private static final String CSV = "csv";
+
+    private static final String ADD = "add";
+
+    private static final String DEL = "del";
 
     @Value("${cdl.atlas.export.dropfolder.tag}")
     private String expire30dTag;
@@ -65,6 +71,8 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     private boolean createDeleteCsvDataFrame;
 
+    private Map<String, List<String>> exportFiles = new HashMap<>();
+
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         createAddCsvDataFrame = Boolean.toString(true)
@@ -78,41 +86,50 @@ public class DeltaCampaignLaunchExportFilesToS3Step
             return;
         }
 
-        List<String> exportFiles = new ArrayList<>();
         if (createAddCsvDataFrame) {
-            exportFiles.addAll(getListObjectFromContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES,
+            exportFiles.put(ADD, getListObjectFromContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES,
                     String.class));
         }
         if (createDeleteCsvDataFrame) {
-            exportFiles.addAll(getListObjectFromContext(
+            exportFiles.put(DEL, getListObjectFromContext(
                     DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, String.class));
         }
-        log.info("Uploading all HDFS files to S3. {}", exportFiles);
+        log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();
         ExternalSystemAuthentication externalAuth = lookupIdMap.getExternalAuthentication();
         if (externalAuth != null && !StringUtils.isBlank(externalAuth.getTrayAuthenticationId())) {
-            exportFiles.forEach(hdfsFilePath -> {
-                ImportExportRequest request = new ImportExportRequest();
-                request.srcPath = hdfsFilePath;
-                request.tgtPath = pathBuilder.convertAtlasFileExport(hdfsFilePath, podId, tenantId, dropBoxSummary,
-                        exportS3Bucket);
-                requests.add(request);
-                // Collect all S3 FilePaths
-                s3ExportFilePaths.add(request.tgtPath);
+            exportFiles.keySet().forEach(k -> {
+                List<String> sourcePaths = exportFiles.get(k);
+                List<String> targetPaths = new ArrayList<>();
+                sourcePaths.stream().forEach(path -> {
+                    ImportExportRequest request = new ImportExportRequest();
+                    request.srcPath = path;
+                    request.tgtPath = pathBuilder.convertAtlasFileExport(path, podId, tenantId, dropBoxSummary,
+                            exportS3Bucket);
+                    requests.add(request);
+                    targetPaths.add(request.tgtPath);
+                    s3ExportFilePaths.add(request.tgtPath);
+                });
+                exportFiles.put(k, targetPaths);
             });
         } else {
-            exportFiles.forEach(hdfsFilePath -> {
-                ImportExportRequest request = new ImportExportRequest();
-                request.srcPath = hdfsFilePath;
-                request.tgtPath = pathBuilder.convertS3CampaignExportDir(hdfsFilePath, s3Bucket,
-                        dropBoxSummary.getDropBox(), getConfiguration().getPlayName(),
-                        getConfiguration().getPlayDisplayName());
-                requests.add(request);
-                // Collect all S3 FilePaths
-                s3ExportFilePaths.add(request.tgtPath);
+            exportFiles.keySet().forEach(k -> {
+                List<String> sourcePaths = exportFiles.get(k);
+                List<String> targetPaths = new ArrayList<>();
+                sourcePaths.stream().forEach(path -> {
+                    ImportExportRequest request = new ImportExportRequest();
+                    request.srcPath = path;
+                    request.tgtPath = pathBuilder.convertS3CampaignExportDir(path, s3Bucket,
+                            dropBoxSummary.getDropBox(), getConfiguration().getPlayName(),
+                            getConfiguration().getPlayDisplayName());
+                    requests.add(request);
+                    targetPaths.add(request.tgtPath);
+                    s3ExportFilePaths.add(request.tgtPath);
+                });
+                exportFiles.put(k, targetPaths);
             });
         }
-
+        log.info("After processing, Uploading all HDFS files to S3. {}", exportFiles);
         log.info("Uploaded S3 Files. {}", s3ExportFilePaths);
 
     }
@@ -133,15 +150,13 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         message.setEntityName(PlayLaunch.class.getSimpleName());
         message.setExternalSystemId(lookupIdMap.getOrgId());
         if (createAddCsvDataFrame) {
-            String sourceFile = getListObjectFromContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES,
-                    String.class).stream().filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst()
-                            .get();
+            String sourceFile = exportFiles.get(ADD).stream()
+                    .filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst().get();
             message.setSourceFile(sourceFile.substring(sourceFile.indexOf("dropfolder")));
         }
         if (createDeleteCsvDataFrame) {
-            String deleteFile = getListObjectFromContext(
-                    DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, String.class).stream()
-                            .filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst().get();
+            String deleteFile = exportFiles.get(DEL).stream()
+                    .filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst().get();
             message.setDeleteFile(deleteFile.substring(deleteFile.indexOf("dropfolder")));
         }
         message.setEventType(DataIntegrationEventType.WorkflowSubmitted.toString());
