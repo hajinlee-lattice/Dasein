@@ -46,6 +46,9 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
+        if (isShortCutMode()) {
+            return null;
+        }
         PipelineTransformationRequest request = generateRequest();
         return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request, configuration.getPodId());
     }
@@ -67,6 +70,17 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         rematchTables.put(configuration.getEntity().name(), migratedImportTableName);
         log.info("rematchTables : {}, config : {}.", rematchTables, convertServiceConfig.getClass());
         putObjectInContext(REMATCH_TABLE_NAME, rematchTables);
+    }
+
+    private boolean isShortCutMode() {
+        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
+        if (rematchTables == null) {
+            return false;
+        }
+        if (rematchTables.get(configuration.getEntity().name()) != null) {
+            return true;
+        }
+        return false;
     }
 
     @SuppressWarnings("unchecked")

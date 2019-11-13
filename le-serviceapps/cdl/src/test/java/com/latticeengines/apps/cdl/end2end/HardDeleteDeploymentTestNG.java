@@ -43,6 +43,8 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(HardDeleteDeploymentTestNG.class);
 
+    private final String DeleteJoinId = "AccountId";
+
     @Inject
     private ActionProxy actionProxy;
 
@@ -93,7 +95,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         int numRecordsInCsv = 0;
         String fieldName = table.getAttribute(InterfaceName.AccountId.name()).getName();
         StringBuilder sb = new StringBuilder();
-        sb.append("id");
+        sb.append(DeleteJoinId);
         sb.append(',');
         sb.append("index");
         sb.append('\n');
@@ -123,7 +125,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
                 JobStatus status = waitForWorkflowStatus(appId.toString(), false);
                 Assert.assertEquals(JobStatus.COMPLETED, status);
                 sb = new StringBuilder();
-                sb.append("id");
+                sb.append(DeleteJoinId);
                 sb.append(',');
                 sb.append("index");
                 sb.append('\n');

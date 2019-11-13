@@ -249,6 +249,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ATTRIBUTE_QUOTA_LIMIT = "ATTRIBUTE_QUOTA_LIMIT";
 
     public static final String REMATCH_TABLE_NAME = "REMATCH_TABLE_NAME";
+    public static final String DELETED_TABLE_NAME = "DELETED_TABLE_NAME";
     public static final String ENTITY_MATCH_SERVING_VERSION = "ENTITY_MATCH_SERVING_VERSION";
 
     public static final String TRACING_CONTEXT = "TRACING_CONTEXT";
@@ -281,6 +282,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PH_PROFILE_TABLE_NAME, //
             PH_STATS_TABLE_NAME, //
             REMATCH_TABLE_NAME,
+            DELETED_TABLE_NAME,
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME);
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME,

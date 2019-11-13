@@ -11,10 +11,13 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
@@ -35,6 +38,8 @@ import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadStepConfiguration> {
 
+    protected static final Logger log = LoggerFactory.getLogger(DeleteByUploadStep.class);
+
     private static final String CLEANUP_TABLE_PREFIX = "DeleteByFile";
 
     static final String BEAN_NAME = "deleteByUploadStep";
@@ -46,6 +51,9 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         intializeConfiguration();
+        if (isShortCutMode()) {
+            return null;
+        }
         PipelineTransformationRequest request = generateRequest();
         return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request, configuration.getPodId());
     }
@@ -53,7 +61,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
     @Override
     protected void onPostTransformationCompleted() {
         String cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, pipelineVersion);
-        setRematchTableName(cleanupTableName);
+        setDeletedTableName(cleanupTableName);
     }
 
     private void intializeConfiguration() {
@@ -82,7 +90,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
             TransformationStepConfig hardDelete = hardDelete(mergeStep);
             steps.add(mergeDelete);
             steps.add(hardDelete);
-
+            log.info(JsonUtils.serialize(steps));
             request.setSteps(steps);
             return request;
 
@@ -139,10 +147,21 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
                 rematchTables.get(configuration.getEntity().name()) : null;
     }
 
-    private void setRematchTableName(String tableName) {
-        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
-        rematchTables.put(configuration.getEntity().name(), tableName);
-        putObjectInContext(REMATCH_TABLE_NAME, rematchTables);
+    private void setDeletedTableName(String tableName) {
+        Map<String, String> deletedTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
+        deletedTables.put(configuration.getEntity().name(), tableName);
+        putObjectInContext(DELETED_TABLE_NAME, deletedTables);
+    }
+
+    private boolean isShortCutMode() {
+        Map<String, String> deletedTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
+        if (deletedTables == null) {
+            return false;
+        }
+        if (deletedTables.get(configuration.getEntity().name()) != null) {
+            return true;
+        }
+        return false;
     }
 
     protected void addBaseTables(TransformationStepConfig step, String... sourceTableNames) {
