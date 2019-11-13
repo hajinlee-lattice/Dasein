@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
@@ -281,12 +282,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PH_DEPIVOTED_TABLE_NAME, //
             PH_PROFILE_TABLE_NAME, //
             PH_STATS_TABLE_NAME, //
-            REMATCH_TABLE_NAME,
-            DELETED_TABLE_NAME,
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME);
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME,
             CATALOG_TABLE_NAME);
+
+    protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet(REMATCH_TABLE_NAME,
+            DELETED_TABLE_NAME);
 
     // extra context keys to be carried over in restarted PA, beyond table names
     // above
@@ -453,7 +455,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected void skipEmbeddedWorkflow(String parentNamespace, String workflowName,
-            Class<? extends WorkflowConfiguration> workflowClass) {
+                                        Class<? extends WorkflowConfiguration> workflowClass) {
         Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowName,
                 workflowClass);
         stepConfigMap.forEach((name, step) -> {
@@ -464,7 +466,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected void skipEmbeddedWorkflowSteps(String parentNamespace, String workflowName,
-            Class<? extends WorkflowConfiguration> workflowClass, List<String> stepNames) {
+                                             Class<? extends WorkflowConfiguration> workflowClass, List<String> stepNames) {
         Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowName,
                 workflowClass);
         String newParentNamespace = StringUtils.isEmpty(parentNamespace) ? "" : parentNamespace + ".";
@@ -477,7 +479,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected void enableEmbeddedWorkflow(String parentNamespace, String workflowName,
-            Class<? extends WorkflowConfiguration> workflowClass) {
+                                          Class<? extends WorkflowConfiguration> workflowClass) {
         Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowName,
                 workflowClass);
         stepConfigMap.forEach((name, step) -> {
@@ -490,7 +492,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     public Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(String parentNamespace, String workflowName,
-            Class<? extends WorkflowConfiguration> workflowConfigClass) {
+                                                                         Class<? extends WorkflowConfiguration> workflowConfigClass) {
         String newParentNamespace = StringUtils.isEmpty(parentNamespace) ? "" : parentNamespace + ".";
         String ns = newParentNamespace + workflowConfigClass.getSimpleName();
         WorkflowConfiguration workflowConfig = getObjectFromContext(ns, workflowConfigClass);
@@ -535,7 +537,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
      *         not exist
      */
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
-            List<String> tableNameListCtxKeys) {
+                                                       List<String> tableNameListCtxKeys) {
         List<Table> tables = new ArrayList<>(getTableSummariesFromCtxKeys(customer, tableNameStrCtxKeys));
         if (CollectionUtils.isNotEmpty(tableNameListCtxKeys)) {
             tables.addAll(tableNameListCtxKeys.stream() //
@@ -591,24 +593,35 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected Set<String> getTableNamesForPaRetry() {
-        return Stream.concat( //
-                TABLE_NAMES_FOR_PA_RETRY.stream() //
-                        .map(this::getStringValueFromContext), //
-                TABLE_NAME_LISTS_FOR_PA_RETRY.stream() //
-                        .flatMap(key -> {
-                            List<String> tableNames = getListObjectFromContext(key, String.class);
-                            if (CollectionUtils.isEmpty(tableNames)) {
-                                return Stream.empty();
-                            } else {
-                                return tableNames.stream();
-                            }
-                        }) //
-        ).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+        Stream<String> strTableStream = TABLE_NAMES_FOR_PA_RETRY.stream().map(this::getStringValueFromContext);
+        Stream<String> listTableStream = TABLE_NAME_LISTS_FOR_PA_RETRY.stream() //
+                .flatMap(key -> {
+                    List<String> tableNames = getListObjectFromContext(key, String.class);
+                    if (CollectionUtils.isEmpty(tableNames)) {
+                        return Stream.empty();
+                    } else {
+                        return tableNames.stream();
+                    }
+                });
+        Stream<String> mapTableStream = TABLE_NAME_MAPS_FOR_PA_RETRY.stream() //
+                .filter(this::hasKeyInContext) //
+                .flatMap(key -> {
+                    Map<Object, String> tableNames = getMapObjectFromContext(key, Object.class, String.class);
+                    if (MapUtils.isEmpty(tableNames)) {
+                        return Stream.empty();
+                    } else {
+                        return tableNames.values().stream();
+                    }
+                });
+        return Stream.concat(Stream.concat(strTableStream, listTableStream), mapTableStream) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toSet());
     }
 
     protected Set<String> getRenewableCtxKeys() {
         Set<String> renewableKeys = new HashSet<>(TABLE_NAMES_FOR_PA_RETRY);
         renewableKeys.addAll(TABLE_NAME_LISTS_FOR_PA_RETRY);
+        renewableKeys.addAll(TABLE_NAME_MAPS_FOR_PA_RETRY);
         renewableKeys.addAll(EXTRA_KEYS_FOR_PA_RETRY);
         return renewableKeys;
     }
