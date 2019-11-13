@@ -62,8 +62,11 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String VIDEO_CTN_PAGE_PTN_NAME = "all video content pages";
     private static final String VIDEO_CTN_PAGE_PTN_ID = DimensionGenerator.hashDimensionValue(VIDEO_CTN_PAGE_PTN_NAME);
     private static final String GOOGLE_PAID_SRC = "Google/Paid";
+    private static final String GOOGLE_PAID_SRC_HASH = DimensionGenerator.hashDimensionValue(GOOGLE_PAID_SRC);
     private static final String GOOGLE_ORGANIC_SRC = "Google/Organic";
+    private static final String GOOGLE_ORGANIC_SRC_HASH = DimensionGenerator.hashDimensionValue(GOOGLE_ORGANIC_SRC);
     private static final String FACEBOOK_PAID_SRC = "Facebook/Paid";
+    private static final String FACEBOOK_PAID_SRC_HASH = DimensionGenerator.hashDimensionValue(FACEBOOK_PAID_SRC);
 
     @Test(groups = "functional")
     private void test() {
@@ -95,15 +98,15 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Map<String, Long> getExpectedRowCounts() {
         Object[][] expectedResults = new Object[][] { //
-                { "a1", "u1", GOOGLE_PAID_SRC, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L }, //
-                { "a1", "u1", GOOGLE_PAID_SRC, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_PAID_SRC, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_ORGANIC_SRC, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_PAID_SRC, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_ORGANIC_SRC, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", GOOGLE_PAID_SRC, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_ORGANIC_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_PAID_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_ORGANIC_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u1", FACEBOOK_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u1", FACEBOOK_PAID_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L }, //
                 /*-
                  * source null
                  */
@@ -115,8 +118,8 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 /*-
                  * url null
                  */
-                { "a1", "u1", GOOGLE_PAID_SRC, null, DAY_2, 2L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC, null, DAY_2, 1L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_HASH, null, DAY_2, 2L }, //
+                { "a1", "u1", FACEBOOK_PAID_SRC_HASH, null, DAY_2, 1L }, //
                 /*-
                  * both null
                  */
@@ -172,14 +175,14 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                  * 8. a1,u1,Facebook/Paid,all_video_content_pages,Day1 => row=1
                  * 9. a1,u1,Google/Paid,all_content_pages,Day2 => row=3
                  */
-                { "a1", "u1", "Google/Paid ", "/contents/audios/1", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "Facebook/Paid ", "/contents/videos/1", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", " Google/Paid", "/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", " Google/Organic", "/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", " Google/Paid", "/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "Google/Paid ", "/contents/audios/1", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Google/Paid ", "/contents/audios/3", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Google/Paid ", "/contents/audios/5", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_PERIOD_1, DAY_1 }, //
+                { "a1", "u1", "Facebook/Paid", "https://dnb.com/contents/videos/1", DAY_PERIOD_1, DAY_1 }, //
+                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
+                { "a1", "u2", "Google/Organic", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
+                { "a1", "u2", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
+                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/3", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/5", DAY_PERIOD_2, DAY_2 }, //
                 /*-
                  * only source not match
                  * 1. a1,u1,null,all_content_pages,Day2 => row=2
@@ -188,21 +191,21 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                  * 4. a1,u2,null,all_content_pages,Day2 => row=3
                  * 5. a1,u2,null,all_video_content_pages,Day2 => row=2
                  */
-                { "a1", "u1", "Netflix/Paid", "/contents/videos/4", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "", "/contents/audio/5", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u2", null, "/contents/images/3", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", "sdkljflsjk", "/contents/audios/5", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", "sdkljflsjk", "/contents/audios/5", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u2", "", "/contents/videos/6", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u2", "", "/contents/videos/9", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "Netflix/Paid", "https://dnb.com/contents/videos/4", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "", "https://dnb.com/contents/audio/5", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u2", null, "https://dnb.com/contents/images/3", DAY_PERIOD_1, DAY_1 }, //
+                { "a1", "u2", "sdkljflsjk", "https://dnb.com/contents/audios/5", DAY_PERIOD_1, DAY_1 }, //
+                { "a1", "u2", "sdkljflsjk", "https://dnb.com/contents/audios/5", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u2", "", "https://dnb.com/contents/videos/6", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u2", "", "https://dnb.com/contents/videos/9", DAY_PERIOD_2, DAY_2 }, //
                 /*-
                  * only url not match
                  * 1. a1,u1,Google/Paid,null,Day2 => row=2
                  * 2. a1,u1,Facebook/Paid,null,Day2 => row=1
                  */
-                { "a1", "u1", "Google/Paid ", "/users/5", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Facebook/Paid ", "/users/4", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Google/Paid ", "/users/3", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "Google/Paid", "https://dnb.com/users/5", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "Facebook/Paid", "https://dnb.com/users/4", DAY_PERIOD_2, DAY_2 }, //
+                { "a1", "u1", "Google/Paid", "https://dnb.com/users/3", DAY_PERIOD_2, DAY_2 }, //
                 /*-
                  * both url & source not match any value in dimension value space
                  * 1. a1,u1,null,null,Day1 => row=3
@@ -253,8 +256,8 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private DimensionMetadata ptnMetadata() {
         DimensionMetadata metadata = new DimensionMetadata();
-        Map<String, Object> content = pathPtnValue("^/contents/.*$", ALL_CTN_PAGE_PTN_NAME);
-        Map<String, Object> video = pathPtnValue("^/contents/videos/.*$", VIDEO_CTN_PAGE_PTN_NAME);
+        Map<String, Object> content = pathPtnValue(".*dnb\\.com/contents/.*", ALL_CTN_PAGE_PTN_NAME);
+        Map<String, Object> video = pathPtnValue(".*dnb\\.com/contents/videos/.*", VIDEO_CTN_PAGE_PTN_NAME);
         metadata.setDimensionValues(Arrays.asList(content, video));
         metadata.setCardinality(2);
         return metadata;

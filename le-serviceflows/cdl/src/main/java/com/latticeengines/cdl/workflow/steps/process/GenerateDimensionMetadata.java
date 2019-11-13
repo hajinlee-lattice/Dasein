@@ -41,7 +41,6 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMo
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -127,12 +126,10 @@ public class GenerateDimensionMetadata
     }
 
     private void saveDimensionMetadataSignature(@NotNull String signature) {
-        String customerSpace = configuration.getCustomer();
-        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, inactive);
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         status.setDimensionMetadataSignature(signature);
-        log.info("Save dimension metadata signature {} to version {}", signature, inactive);
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace, status, inactive);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
+        log.info("Save dimension metadata signature {}", signature);
     }
 
     private void recordStreamSkippedForAgg() {

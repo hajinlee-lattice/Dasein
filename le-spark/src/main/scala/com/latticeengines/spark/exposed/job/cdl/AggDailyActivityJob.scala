@@ -110,7 +110,7 @@ object DimensionValueHelper extends Serializable {
     // can match multiple patterns
     df.flatMap(row => {
       val values = row.toSeq
-      val targetStr = getValueFn(row.getAs[String](regexCalculator.getAttribute))
+      val targetStr = row.getAs[String](regexCalculator.getAttribute)
       if (StringUtils.isBlank(targetStr)) {
         Row.fromSeq(values :+ null) :: Nil
       } else {
