@@ -149,6 +149,9 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
 
     private void setDeletedTableName(String tableName) {
         Map<String, String> deletedTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
+        if (deletedTables == null) {
+            deletedTables = new HashMap<>();
+        }
         deletedTables.put(configuration.getEntity().name(), tableName);
         putObjectInContext(DELETED_TABLE_NAME, deletedTables);
         addToListInContext(TEMPORARY_CDL_TABLES, tableName, String.class);
