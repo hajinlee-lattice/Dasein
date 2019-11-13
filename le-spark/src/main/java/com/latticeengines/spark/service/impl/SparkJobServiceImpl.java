@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -64,6 +66,9 @@ public class SparkJobServiceImpl implements SparkJobService {
 
     @Inject
     private Configuration yarnConfiguration;
+
+    private Cache<String, SparkScriptClient> clientCache = //
+            Caffeine.newBuilder().initialCapacity(100).expireAfterWrite(20, TimeUnit.HOURS).build();
 
     public <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
     SparkJobResult runJob(LivySession session, Class<J> jobClz, C config) {
@@ -194,8 +199,13 @@ public class SparkJobServiceImpl implements SparkJobService {
         String host = session.getHost();
         int id = session.getSessionId();
         String url = host + URI_SESSIONS + "/" + id;
-        SparkInterpreter interpreter = script.getInterpreter();
-        return new SparkScriptClient(interpreter, url);
+        SparkScriptClient client = clientCache.getIfPresent(url);
+        if (client == null) {
+            SparkInterpreter interpreter = script.getInterpreter();
+            client = new SparkScriptClient(interpreter, url);
+            clientCache.put(url, client);
+        }
+        return client;
     }
 
     private LivySession verifySession(LivySession session) {

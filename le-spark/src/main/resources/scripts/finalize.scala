@@ -54,3 +54,12 @@ result.set("Output", mapper.valueToTree(finalTargets))
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(mapper.writeValueAsString(result))
 
+// -----CELL BREAKER----
+// clean up all variables to avoid memory leak
+// https://gist.github.com/dragos/77b048c2baba93d36cd8
+
+val targets = null
+val output = null
+val finalTargets = null
+val result = null
+

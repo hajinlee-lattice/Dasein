@@ -11,7 +11,7 @@ val viewDfs: List[DataFrame] = bktViews map {viewName =>
 
 val result =
   if (viewDfs.length == 1) {
-    viewDfs.head.withColumn("Rating", lit(defaultBkt));
+    viewDfs.head.withColumn("Rating", lit(defaultBkt))
   } else {
     val merged: DataFrame = viewDfs.reduce(_ union _)
     merged.groupBy("AccountId")

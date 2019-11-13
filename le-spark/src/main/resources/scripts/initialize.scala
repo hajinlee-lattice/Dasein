@@ -26,7 +26,7 @@ if (checkpointDir.length > 0) {
   println("----- END SCRIPT OUTPUT -----")
 }
 
-val rawInput = mapper.readValue[List[JsonNode]]("""{{INPUT}}""")
+var rawInput = mapper.readValue[List[JsonNode]]("""{{INPUT}}""")
 
 def loadHdfsUnit(unit: JsonNode): DataFrame = {
   var path = unit.get("Path").asText()
@@ -46,7 +46,7 @@ def loadHdfsUnit(unit: JsonNode): DataFrame = {
   spark.read.format(fmt).load("hdfs://" + path)
 }
 
-val scriptInput = rawInput map { input => {
+var scriptInput = rawInput map { input => {
   val storage = input.get("StorageType").asText().toLowerCase()
   storage match {
     case "hdfs" => loadHdfsUnit(input)
@@ -59,19 +59,19 @@ println("----- BEGIN SCRIPT OUTPUT -----")
 println(s"Input: $scriptInput")
 println("----- END SCRIPT OUTPUT -----")
 
-val scriptParams = mapper.readValue[JsonNode]("""{{PARAMS}}""")
+var scriptParams = mapper.readValue[JsonNode]("""{{PARAMS}}""")
 
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(s"Params: $scriptParams")
 println("----- END SCRIPT OUTPUT -----")
 
-val scriptTargets = mapper.readValue[List[ObjectNode]]("""{{TARGETS}}""")
+var scriptTargets = mapper.readValue[List[ObjectNode]]("""{{TARGETS}}""")
 
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(s"Targets: $scriptTargets")
 println("----- END SCRIPT OUTPUT -----")
 
-val lattice: LatticeContext = new LatticeContext(scriptInput, scriptParams, scriptTargets)
+var lattice: LatticeContext = new LatticeContext(scriptInput, scriptParams, scriptTargets)
 
 def setPartitionTargets(index: Int, partitionKeys: Seq[String], lattice: LatticeContext): Unit = {
   if (index >= 0 && index < lattice.targets.size) {
