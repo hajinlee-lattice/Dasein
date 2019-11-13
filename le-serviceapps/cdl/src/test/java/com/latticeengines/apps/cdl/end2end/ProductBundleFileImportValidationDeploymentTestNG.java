@@ -5,7 +5,9 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -26,6 +28,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -86,7 +89,10 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     @Override
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
-        setupEnd2EndTestEnvironment();
+        log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        setupEnd2EndTestEnvironment(featureFlagMap);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
 
     }
