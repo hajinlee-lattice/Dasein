@@ -131,7 +131,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
 
         List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
-                launch == null ? channel.getId() : launch.getPlayLaunchChannel().getId());
+                channel.getId());
         if (fieldMappingMetadata != null) {
             log.info("For tenant= " + config.getCustomerSpace().getTenantId() + ", playChannelId= " + channel.getId()
                     + ", the columnMetadata size is=" + fieldMappingMetadata.size());
@@ -182,7 +182,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 query.setMainEntity(BusinessEntity.Contact);
                 HdfsDataUnit contactDataUnit = getEntityQueryData(query);
                 GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
-                        contactDataUnit, negativeDeltaDataUnit,positiveDeltaDataUnit, mainEntity,
+                        contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity,
                         getRandomWorkspace());
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
