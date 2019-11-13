@@ -86,10 +86,10 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
                 .filter(x -> x).count();
 
         log.info(String.format(
-                "Total Delta Calculation Jobs to be Scheduled: %s, Queued Delta: %s, Queued Full Launches: %s Job Submissions failed: %s",
+                "Total Delta Calculation Jobs to be Scheduled: %d, Queued Delta: %d, Queued Full Launches: %d Job Submissions failed: %d",
                 channels.size(), //
                 successfullyQueuedForDelta, //
-                successfullyQueuedForFull, channels.size() - successfullyQueuedForDelta));
+                successfullyQueuedForFull, channels.size() - successfullyQueuedForDelta - successfullyQueuedForFull));
         return true;
     }
 
