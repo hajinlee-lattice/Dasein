@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.play;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 if (exportFiles.size() != fileExporters.size()) {
                     throw new RuntimeException("Failed to generate some of the export files");
                 }
+                log.info("Export files for add csv " + Arrays.toString(exportFiles.toArray()));
                 putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, exportFiles);
             }
 
@@ -106,6 +108,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 if (exportFiles.size() != fileExporters.size()) {
                     throw new RuntimeException("Failed to generate some of the export files");
                 }
+                log.info("Export files for delete csv " + Arrays.toString(exportFiles.toArray()));
                 putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, exportFiles);
             }
 
