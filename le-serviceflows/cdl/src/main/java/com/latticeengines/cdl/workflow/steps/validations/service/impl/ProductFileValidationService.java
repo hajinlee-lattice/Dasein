@@ -97,9 +97,9 @@ public class ProductFileValidationService
     @Override
     public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
             List<String> processedRecords, StringBuilder statistics) {
-        Map<String, Product> inputProducts = new HashMap<>();
+        List<Product> inputProducts = new ArrayList<>();
         List<String> pathList = productFileValidationServiceConfiguration.getPathList();
-        pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
+        pathList.forEach(path -> inputProducts.addAll(loadProducts(yarnConfiguration, path, null, null)));
 
         Table currentTable = getCurrentConsolidateProductTable(
                 productFileValidationServiceConfiguration.getCustomerSpace());
@@ -145,11 +145,11 @@ public class ProductFileValidationService
     }
 
 
-    private static Map<String, Product> loadProducts(Configuration yarnConfiguration, String filePath,
+    private static List<Product> loadProducts(Configuration yarnConfiguration, String filePath,
             List<String> productTypes, List<String> productStatuses) {
         filePath = getPath(filePath);
         log.info("Load products from " + filePath + "/*.avro");
-        Map<String, Product> productMap = new HashMap<>();
+        List<Product> productList = new ArrayList<>();
 
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
         while (iter.hasNext()) {
@@ -180,12 +180,12 @@ public class ProductFileValidationService
                 continue;
             }
             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-            productMap.put(lineId, product);
+            productList.add(product);
         }
-        return productMap;
+        return productList;
     }
 
-    private long mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
+    private long mergeProducts(List<Product> inputProducts, List<Product> currentProducts,
             CSVPrinter csvFilePrinter, CustomerSpace space, StringBuilder statistics, String dataFeedTaskId) throws IOException {
         long errorLine = 0L;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
@@ -193,8 +193,8 @@ public class ProductFileValidationService
         // the product map after rollup
         Map<String, Product> inputProductMap = new HashMap<>();
         boolean foundProductBundle = false;
-        for (Map.Entry<String, Product> entry : inputProducts.entrySet()) {
-            Product inputProduct = entry.getValue();
+        for (Product inputProduct: inputProducts) {
+            String productId = inputProduct.getProductId();
             if (inputProduct.getProductId() == null) {
                 continue;
             }
@@ -203,7 +203,7 @@ public class ProductFileValidationService
                 errorLine++;
                 String message = String.format("product name is required for product %s in the upload file.",
                         inputProduct.getProductId());
-                csvFilePrinter.printRecord(entry.getKey(), "", message);
+                csvFilePrinter.printRecord("", productId, message);
             }
 
             if (inputProduct.getProductBundle() != null) {
@@ -217,7 +217,7 @@ public class ProductFileValidationService
                     mergeBundleProduct(inputProduct, inputProductMap);
                 } catch(RuntimeException e) {
                     errorLine++;
-                    csvFilePrinter.printRecord(entry.getKey(), "", e.getMessage());
+                    csvFilePrinter.printRecord("", productId, e.getMessage());
                 }
             }
 
@@ -252,7 +252,7 @@ public class ProductFileValidationService
                     mergeHierarchyProduct(inputProduct, inputProductMap);
                 } catch (RuntimeException e) {
                     errorLine++;
-                    csvFilePrinter.printRecord(entry.getKey(), "", e.getMessage());
+                    csvFilePrinter.printRecord("", productId, e.getMessage());
                 }
             }
 
@@ -262,7 +262,7 @@ public class ProductFileValidationService
                             "Product name, bundle and hierarchy can't be all empty for product with id = %s",
                             inputProduct.getProductId());
                     errorLine++;
-                    csvFilePrinter.printRecord(entry.getKey(), "", errMsg);
+                    csvFilePrinter.printRecord("", productId, errMsg);
                 }
 
                 // ProductId will be used in avro schema in curated metrics.
@@ -270,7 +270,7 @@ public class ProductFileValidationService
                 if (!AvroUtils.isValidColumn(inputProduct.getProductId())) {
                     String errMsg = String.format("Product has invalid id = %s", inputProduct.getProductId());
                     errorLine++;
-                    csvFilePrinter.printRecord(entry.getKey(), "", errMsg);
+                    csvFilePrinter.printRecord("", productId, errMsg);
                 }
 
                 foundProductBundle = true;
