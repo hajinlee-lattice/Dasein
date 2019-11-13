@@ -67,4 +67,6 @@ public interface CDLService {
     void updateS3ImportSystemPriorityBasedOnSequence(String customerSpace, List<S3ImportSystem> systemList);
 
     boolean createWebVisitProfile(String customerSpace, EntityType entityType, InputStream inputStream);
+
+    boolean checkBundleUpload(String customerSpace);
 }

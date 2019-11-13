@@ -5,7 +5,9 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -26,6 +28,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -86,7 +89,11 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     @Override
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
-        setupEnd2EndTestEnvironment();
+        log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        setupEnd2EndTestEnvironment(featureFlagMap);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
 
     }
@@ -99,8 +106,11 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         } catch (Exception e) {
             Assert.assertTrue(e instanceof  RuntimeException);
         }
+
+        Assert.assertTrue(checkBundleUpload());
         importData(BusinessEntity.Product, "ProductBundles.csv", null,
                 false, false, DataFeedTask.SubType.Bundle.name());
+        Assert.assertFalse(checkBundleUpload());
         processAnalyze();
         // get current bundle after PA
         try {
@@ -122,6 +132,12 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         String fileName = response.getHeaders().getFirst("Content-Disposition");
         Assert.assertTrue(fileName.contains(".csv"));
         return response.getBody();
+    }
+
+    private boolean checkBundleUpload () {
+        RestTemplate template = testBed.getRestTemplate();
+        String url = String.format("%s/pls/cdl/bundle/upload", deployedHostPort);
+        return template.getForObject(url, Boolean.class);
     }
 
     @Test(groups = "end2end")

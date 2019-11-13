@@ -506,4 +506,20 @@ public class CDLResource {
             return false;
         }
     }
+
+    @GetMapping(value = "/bundle/upload")
+    @ResponseBody
+    @ApiOperation("")
+    public boolean checkUploadBundleFile() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        try {
+            return cdlService.checkBundleUpload(customerSpace.toString());
+        } catch(Exception e) {
+            log.error("Can't upload bundle file due to {}", e.getMessage());
+        }
+        return false;
+    }
 }
