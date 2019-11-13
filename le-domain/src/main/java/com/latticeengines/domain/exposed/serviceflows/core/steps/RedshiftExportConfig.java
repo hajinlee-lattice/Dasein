@@ -33,6 +33,9 @@ public class RedshiftExportConfig {
     @JsonProperty("update_mode")
     private boolean updateMode;
 
+    @JsonProperty("expected_count")
+    private Long expectedCount;
+
     public String getTableName() {
         return tableName;
     }
@@ -84,6 +87,14 @@ public class RedshiftExportConfig {
 
     public void setUpdateMode(boolean updateMode) {
         this.updateMode = updateMode;
+    }
+
+    public Long getExpectedCount() {
+        return expectedCount;
+    }
+
+    public void setExpectedCount(Long expectedCount) {
+        this.expectedCount = expectedCount;
     }
 
     @Override
