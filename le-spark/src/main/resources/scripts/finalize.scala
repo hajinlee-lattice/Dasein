@@ -13,15 +13,15 @@
 //}
 //val lattice: LatticeContext = new LatticeContext(Nil, null, List[ObjectNode]())
 
-val targets = lattice.targets
-val output = lattice.output
+var targets = lattice.targets
+var output = lattice.output
 
 if (targets.length != output.length) {
   throw new IllegalArgumentException(s"${targets.length} targets are declared " //
     + s"but ${output.length} outputs are generated!")
 }
 
-val finalTargets: List[JsonNode] = targets.zip(output).par.map { t =>
+var finalTargets: List[JsonNode] = targets.zip(output).par.map { t =>
   val tgt = t._1
   val df = t._2
   val path = tgt.get("Path").asText()
@@ -47,19 +47,18 @@ val finalTargets: List[JsonNode] = targets.zip(output).par.map { t =>
 
 lattice.orphanViews.map { view => spark.catalog.dropTempView(view) }
 
-val result = mapper.createObjectNode()
+var result = mapper.createObjectNode()
 result.put("OutputStr", lattice.outputStr)
 result.set("Output", mapper.valueToTree(finalTargets))
 
 println("----- BEGIN SCRIPT OUTPUT -----")
 println(mapper.writeValueAsString(result))
 
-// -----CELL BREAKER----
 // clean up all variables to avoid memory leak
 // https://gist.github.com/dragos/77b048c2baba93d36cd8
 
-val targets = null
-val output = null
-val finalTargets = null
-val result = null
+targets = null
+output = null
+finalTargets = null
+result = null
 
