@@ -151,6 +151,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         Map<String, String> deletedTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
         deletedTables.put(configuration.getEntity().name(), tableName);
         putObjectInContext(DELETED_TABLE_NAME, deletedTables);
+        addToListInContext(TEMPORARY_CDL_TABLES, tableName, String.class);
     }
 
     private boolean isShortCutMode() {

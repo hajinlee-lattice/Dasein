@@ -70,6 +70,7 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         rematchTables.put(configuration.getEntity().name(), migratedImportTableName);
         log.info("rematchTables : {}, config : {}.", rematchTables, convertServiceConfig.getClass());
         putObjectInContext(REMATCH_TABLE_NAME, rematchTables);
+        addToListInContext(TEMPORARY_CDL_TABLES, migratedImportTableName, String.class);
     }
 
     private boolean isShortCutMode() {
