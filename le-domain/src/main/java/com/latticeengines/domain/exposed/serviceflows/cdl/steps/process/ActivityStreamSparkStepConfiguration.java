@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
-public class GenerateDimensionMetadataStepConfiguration extends SparkJobStepConfiguration {
+public class ActivityStreamSparkStepConfiguration extends SparkJobStepConfiguration {
 
     // streamId -> stream object
     @JsonProperty("activity_stream_map")

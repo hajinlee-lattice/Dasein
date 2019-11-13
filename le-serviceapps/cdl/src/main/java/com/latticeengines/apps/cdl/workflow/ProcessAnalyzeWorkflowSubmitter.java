@@ -680,6 +680,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         // streamId -> stream obj
         Map<String, AtlasStream> streams = streamEntityMgr.findByTenant(tenant, true).stream()
                 .collect(Collectors.toMap(AtlasStream::getStreamId, stream -> stream));
+        cleanupActivityStreams(streams);
         log.info("ActivityStreams for tenant {} are {}", customerSpace, JsonUtils.serialize(streams));
 
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,

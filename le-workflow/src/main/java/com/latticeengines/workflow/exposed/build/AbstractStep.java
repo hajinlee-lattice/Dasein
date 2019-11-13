@@ -18,6 +18,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.InjectableFailure;
@@ -167,6 +168,14 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     public <K, V> Map<K, V> getMapObjectFromContext(String key, Class<K> keyClazz, Class<V> valueClazz) {
         Map<?, ?> map = getObjectFromContext(key, Map.class);
         return JsonUtils.convertMap(map, keyClazz, valueClazz);
+    }
+
+    public <V> V getTypedObjectFromContext(String key, TypeReference<V> type) {
+        if (!hasKeyInContext(key)) {
+            return null;
+        }
+        String str = getStringValueFromContext(key);
+        return JsonUtils.deserialize(str, type);
     }
 
     public <V> void putObjectInContext(String key, V val) {

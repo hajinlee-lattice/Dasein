@@ -1,10 +1,13 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +102,14 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         return PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString();
     }
 
+    protected Table dirToTable(String tableName, HdfsDataUnit jobTarget) {
+        return dirToTable(tableName, null, jobTarget);
+    }
+
+    protected Table dirToTable(String tableName, String primaryKey, HdfsDataUnit jobTarget) {
+        return SparkUtils.hdfsUnitDirToTable(tableName, primaryKey, jobTarget, yarnConfiguration, podId, customerSpace);
+    }
+
     protected Table toTable(String tableName, String primaryKey, HdfsDataUnit jobTarget) {
         return SparkUtils.hdfsUnitToTable(tableName, primaryKey, jobTarget, yarnConfiguration, podId, customerSpace);
     }
@@ -107,7 +118,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         return toTable(tableName, null, jobTarget);
     }
 
-    protected void exportToS3AndAddToContext(Table table, String contextKey) {
+    protected boolean exportToS3(Table table) {
         String tableName = table.getName();
         boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
         if (!shouldSkip) {
@@ -125,7 +136,30 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             HdfsS3ImporterExporter exporter = new HdfsS3ImporterExporter( //
                     customerSpace.toString(), distCpConfiguration, queueName, dataUnitProxy, batchStoreRequest);
             exporter.run();
-        } else {
+        }
+        return shouldSkip;
+    }
+
+    protected Map<String, String> exportToS3AndAddToContext(Map<String, Table> tables, String contextKey) {
+        Map<String, String> tableNames = tables.entrySet() //
+                .stream() //
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue().getName())) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        for (Map.Entry<String, Table> entry : tables.entrySet()) {
+            boolean skipped = exportToS3(entry.getValue());
+            if (skipped) {
+                log.info("Skip publish {} ({}) to S3.", contextKey, tables.keySet());
+                break;
+            }
+        }
+        putObjectInContext(contextKey, tableNames);
+        return tableNames;
+    }
+
+    protected void exportToS3AndAddToContext(Table table, String contextKey) {
+        String tableName = table.getName();
+        boolean skipped = exportToS3(table);
+        if (skipped) {
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }
         putStringValueInContext(contextKey, tableName);
