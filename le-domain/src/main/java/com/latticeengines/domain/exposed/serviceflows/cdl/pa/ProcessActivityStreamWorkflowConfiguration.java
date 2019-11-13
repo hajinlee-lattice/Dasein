@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.GenerateDimensionMetadataStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 
 public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -15,33 +15,33 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
     public static class Builder {
         private ProcessActivityStreamWorkflowConfiguration configuration = new ProcessActivityStreamWorkflowConfiguration();
         private ProcessActivityStreamStepConfiguration processStepConfiguration = new ProcessActivityStreamStepConfiguration();
-        private GenerateDimensionMetadataStepConfiguration generateDimMetadataConfig = new GenerateDimensionMetadataStepConfiguration();
+        private ActivityStreamSparkStepConfiguration activityStreamSparkConfiguration = new ActivityStreamSparkStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             processStepConfiguration.setCustomerSpace(customerSpace);
-            generateDimMetadataConfig.setCustomer(customerSpace.toString());
+            activityStreamSparkConfiguration.setCustomer(customerSpace.toString());
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            generateDimMetadataConfig.setInternalResourceHostPort(internalResourceHostPort);
+            activityStreamSparkConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
             processStepConfiguration.setSkipStep(!entityMatchEnabled);
-            generateDimMetadataConfig.setSkipStep(!entityMatchEnabled);
+            activityStreamSparkConfiguration.setSkipStep(!entityMatchEnabled);
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
-            generateDimMetadataConfig.setEntityMatchEnabled(entityMatchEnabled);
+            activityStreamSparkConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;
         }
 
         public Builder entityMatchGAOnly(boolean entityMatchGAOnly) {
             processStepConfiguration.setEntityMatchGAOnly(entityMatchGAOnly);
-            generateDimMetadataConfig.setEntityMatchGAOnly(entityMatchGAOnly);
+            activityStreamSparkConfiguration.setEntityMatchGAOnly(entityMatchGAOnly);
             return this;
         }
 
@@ -52,7 +52,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder activityStreams(Map<String, AtlasStream> activityStreams) {
             processStepConfiguration.setActivityStreamMap(activityStreams);
-            generateDimMetadataConfig.setActivityStreamMap(activityStreams);
+            activityStreamSparkConfiguration.setActivityStreamMap(activityStreams);
             return this;
         }
 
@@ -65,7 +65,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             configuration.setContainerConfiguration("processActivityStreamWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processStepConfiguration);
-            configuration.add(generateDimMetadataConfig);
+            configuration.add(activityStreamSparkConfiguration);
             return configuration;
         }
     }
