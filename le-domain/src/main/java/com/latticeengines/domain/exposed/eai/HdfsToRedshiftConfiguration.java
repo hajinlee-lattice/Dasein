@@ -11,19 +11,22 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     private RedshiftTableConfiguration redshiftTableConfiguration;
 
     @JsonProperty("create_new")
-    private boolean createNew = false;
+    private boolean createNew;
 
     @JsonProperty("append")
-    private boolean append = false;
+    private boolean append;
 
     @JsonProperty("skip_s3_upload")
-    private boolean skipS3Upload = false;
+    private boolean skipS3Upload;
 
     @JsonProperty("cleanup_s3")
-    private boolean cleanupS3 = false;
+    private boolean cleanupS3;
 
     @JsonProperty("no_split")
-    private boolean noSplit = false;
+    private boolean noSplit;
+
+    @JsonProperty("expected_count")
+    private Long expectedCount;
 
     public RedshiftTableConfiguration getRedshiftTableConfiguration() {
         return redshiftTableConfiguration;
@@ -73,4 +76,13 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     public void setNoSplit(boolean noSplit) {
         this.noSplit = noSplit;
     }
+
+    public Long getExpectedCount() {
+        return expectedCount;
+    }
+
+    public void setExpectedCount(Long expectedCount) {
+        this.expectedCount = expectedCount;
+    }
+
 }

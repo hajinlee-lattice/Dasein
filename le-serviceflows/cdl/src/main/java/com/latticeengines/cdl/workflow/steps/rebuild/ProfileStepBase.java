@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
@@ -70,6 +72,9 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     @Inject
     private CloneTableService cloneTableService;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     protected abstract BusinessEntity getEntity();
 
@@ -223,6 +228,15 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         config.setSortKeys(sortKeys);
         config.setInputPath(getInputPath(tableName) + "/*.avro");
         config.setUpdateMode(false);
+
+        Table summary = metadataProxy.getTableSummary(customerSpace.toString(), tableName);
+        if (CollectionUtils.isNotEmpty(summary.getExtracts())) {
+            Extract extract = summary.getExtracts().get(0);
+            Long count = extract.getProcessedRecords();
+            if (count != null && count > 0) {
+                config.setExpectedCount(count);
+            }
+        }
 
         addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
     }
