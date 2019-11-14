@@ -351,6 +351,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         List<String> versions = new ArrayList<>();
         try {
+            if (!HdfsUtils.isDirectory(yarnConfiguration, basePath)) {
+                return versions;
+            }
             List<String> dirs = HdfsUtils.getFilesForDir(yarnConfiguration, basePath);
             if (CollectionUtils.isEmpty(dirs)) {
                 return versions;

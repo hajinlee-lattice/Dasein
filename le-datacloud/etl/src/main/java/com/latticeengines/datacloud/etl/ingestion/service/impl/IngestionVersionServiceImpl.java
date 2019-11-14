@@ -1,20 +1,13 @@
 package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +15,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -45,101 +37,27 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine
 public class IngestionVersionServiceImpl implements IngestionVersionService, DataCloudEngineService {
     private static Logger log = LoggerFactory.getLogger(IngestionVersionServiceImpl.class);
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private IngestionEntityMgr ingestionEntityMgr;
 
-    @Autowired
+    @Inject
     private IngestionProgressEntityMgr ingestionProgressEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceService sourceService;
 
     @Override
     public DataCloudEngine getEngine() {
         return DataCloudEngine.INGESTION;
-    }
-
-    @Override
-    public List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion) {
-        com.latticeengines.domain.exposed.camille.Path ingestionDir = hdfsPathBuilder
-                .constructIngestionDir(ingestionName);
-        List<String> versions = new ArrayList<>();
-        try {
-            if (HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())) {
-                List<String> fullPaths = HdfsUtils.getFilesForDir(yarnConfiguration,
-                        ingestionDir.toString());
-                for (String fullPath : fullPaths) {
-                    if (!fullPath.contains(HdfsPathBuilder.VERSION_FILE)
-                            && fullPath.startsWith(ingestionDir.toString())) {
-                        versions.add(new Path(fullPath).getName());
-                    } else if (!fullPath.contains(HdfsPathBuilder.VERSION_FILE)
-                            && fullPath.contains(ingestionDir.toString())) {
-                        versions.add(new Path(fullPath.substring(fullPath.indexOf(ingestionDir.toString()))).getName());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to scan hdfs directory %s", ingestionDir.toString()), e);
-        }
-        List<String> mostRecentVersions = new ArrayList<>();
-        if (versions.size() <= checkVersion) {
-            mostRecentVersions.addAll(versions);
-        } else {
-            Collections.sort(versions, Collections.reverseOrder());
-            for (int i = 0; i < checkVersion; i++) {
-                mostRecentVersions.add(versions.get(i));
-            }
-        }
-        return mostRecentVersions;
-    }
-
-    @Override
-    public String extractVersion(String timestampFormat, String str) {
-        String timestampPattern = timestampFormat.replace("d", "\\d").replace("y", "\\d").replace("M", "\\d");
-        Pattern pattern = Pattern.compile(timestampPattern);
-        Matcher matcher = pattern.matcher(str);
-        if (matcher.find()) {
-            String timestampStr = matcher.group();
-            DateFormat df = new SimpleDateFormat(timestampFormat);
-            TimeZone timezone = TimeZone.getTimeZone("UTC");
-            df.setTimeZone(timezone);
-            try {
-                return HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
-            } catch (ParseException e) {
-                throw new RuntimeException(String.format("Failed to parse timestamp %s", timestampStr), e);
-            }
-        } else {
-            throw new RuntimeException(String.format("Failed to extract version from %s", str));
-        }
-    }
-
-    @Override
-    public String getFileNamePattern(String version, String fileNamePrefix, String fileNamePostfix,
-            String fileExtension, String fileTimestamp) {
-        String fileVersion = "";
-        if (!StringUtils.isEmpty(fileTimestamp)) {
-            DateFormat dateFormat = new SimpleDateFormat(HdfsPathBuilder.DATE_FORMAT_STRING);
-            dateFormat.setTimeZone(TimeZone.getTimeZone(HdfsPathBuilder.UTC));
-            Date timestamp = null;
-            try {
-                timestamp = dateFormat.parse(version);
-            } catch (ParseException e) {
-                throw new RuntimeException(String.format("Failed to parse version %s", version), e);
-            }
-            DateFormat df = new SimpleDateFormat(fileTimestamp);
-            df.setTimeZone(TimeZone.getTimeZone(HdfsPathBuilder.UTC));
-            fileVersion = df.format(timestamp);
-        }
-        return fileNamePrefix + fileVersion + fileNamePostfix + fileExtension;
     }
 
     @Override

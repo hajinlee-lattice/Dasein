@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfigur
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.matchapi.PatchProxy;
 
 @Component("ingestionValidator")
 public class IngestionValidatorImpl implements IngestionValidator {
@@ -53,9 +52,6 @@ public class IngestionValidatorImpl implements IngestionValidator {
 
     @Inject
     private ColumnMetadataProxy metadataProxy;
-
-    @Inject
-    private PatchProxy patchProxy;
 
     @Override
     public boolean isIngestionTriggered(Ingestion ingestion) {
