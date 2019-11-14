@@ -3,8 +3,9 @@ package com.latticeengines.datacloud.etl.ingestion.entitymgr.impl;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 @Component("ingestionProgressEntityMgr")
 public class IngestionProgressEntityMgrImpl implements IngestionProgressEntityMgr {
-    @Autowired
+    @Inject
     private IngestionProgressDao ingestionProgressDao;
 
     @Override

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -17,7 +18,6 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.exceptions.ApplicationNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
@@ -42,25 +42,25 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class IngestionServiceImpl implements IngestionService {
     private static Logger log = LoggerFactory.getLogger(IngestionServiceImpl.class);
 
-    @Autowired
+    @Inject
     IngestionEntityMgr ingestionEntityMgr;
 
-    @Autowired
+    @Inject
     private IngestionProgressService ingestionProgressService;
 
-    @Autowired
+    @Inject
     private IngestionValidator ingestionValidator;
 
-    @Autowired
+    @Inject
     private DataCloudTenantService dataCloudTenantService;
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
     @Resource(name = "ingestionAPIProviderService")
@@ -168,12 +168,14 @@ public class IngestionServiceImpl implements IngestionService {
     private void ingestAll() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
         List<IngestionProgress> progresses = new ArrayList<>();
+        List<String> triggeredIngestions = new ArrayList<>();
         for (Ingestion ingestion : ingestions) {
             if (ingestionValidator.isIngestionTriggered(ingestion)) {
-                log.info("Triggered Ingestion: " + ingestion.toString());
+                triggeredIngestions.add(ingestion.getIngestionName());
                 progresses.addAll(createDraftProgresses(ingestion));
             }
         }
+        log.info("Triggered ingestions: " + String.join(",", triggeredIngestions));
         progresses = ingestionValidator.cleanupDuplicateProgresses(progresses);
         ingestionProgressService.saveProgresses(progresses);
     }

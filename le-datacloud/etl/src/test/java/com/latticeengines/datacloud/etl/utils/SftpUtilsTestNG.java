@@ -5,9 +5,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -19,17 +21,8 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SftpUtilsTestNG.class);
 
-    @Value("${datacloud.test.sftp.host}")
-    private String sftpHost;
-
-    @Value("${datacloud.test.sftp.port}")
-    private int sftpPort;
-
-    @Value("${datacloud.test.sftp.username}")
-    private String sftpUserName;
-
-    @Value("${datacloud.test.sftp.password}")
-    private String sftpPassword;
+    @Inject
+    private TestSftpProvider sftpProvider;
 
     private static final Calendar BOMBORA_CALENDAR = getBomboraCalendar();
 
@@ -51,22 +44,36 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testGetFileNames() {
-        SftpConfiguration config = getBomboraSftpConfig();
-        String fileNamePattern = config.getFileNamePrefix() + "(.*)" + config.getFileNamePostfix()
-                + config.getFileExtension();
-        List<String> fileNames = SftpUtils.getFileNames(config, fileNamePattern, BOMBORA_CALENDAR);
+        SftpConfiguration config = getTestBomboraSftpConfig1();
+        List<String> fileNames = SftpUtils.getFileList(config, BOMBORA_CALENDAR);
         Collections.sort(fileNames);
         Assert.assertEquals(BOMBORA_FILES.toArray(new String[0]), fileNames.toArray(new String[0]),
                 String.format("Expected Bombora files: %s, actual Bombora files: %s", String.join(",", BOMBORA_FILES),
                         String.join(",", fileNames)));
 
-        config = getDnBSftpConfig();
-        fileNamePattern = config.getFileNamePrefix() + "(.*)" + config.getFileNamePostfix() + config.getFileExtension();
-        fileNames = SftpUtils.getFileNames(config, fileNamePattern, DNB_CALENDAR);
+        config = getTestBomboraSftpConfig2();
+        fileNames = SftpUtils.getFileList(config, BOMBORA_CALENDAR);
+        Collections.sort(fileNames);
+        Assert.assertEquals(BOMBORA_FILES.toArray(new String[0]), fileNames.toArray(new String[0]),
+                String.format("Expected Bombora files: %s, actual Bombora files: %s", String.join(",", BOMBORA_FILES),
+                        String.join(",", fileNames)));
+
+        config = getTestDnBSftpConfig();
+        fileNames = SftpUtils.getFileList(config, DNB_CALENDAR);
         Collections.sort(fileNames);
         Assert.assertEquals(
                 DNB_FILES.toArray(new String[0]), fileNames.toArray(new String[0]), String.format("Expected DnB files: %s, actual DnB files: %s", String.join(",", DNB_FILES),
                         String.join(",", fileNames)));
+    }
+
+    @Test(groups = "functional")
+    public void testBomboraSFTP() {
+        SftpConfiguration config = getBomboraSftpConfig();
+        List<String> fileNames = SftpUtils.getFileList(config, null);
+        // Just verify we are able to get file list from real Bombora SFTP. Data
+        // correctness verification is covered in testGetFileNames() with
+        // testing SFTP
+        Assert.assertTrue(CollectionUtils.isNotEmpty(fileNames));
     }
 
     private static Calendar getBomboraCalendar() {
@@ -81,25 +88,28 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
         return calendar;
     }
 
-    private SftpConfiguration getBomboraSftpConfig() {
+    private SftpConfiguration getTestBomboraSftpConfig1() {
         SftpConfiguration config = new SftpConfiguration();
-        config.setSftpHost(sftpHost);
-        config.setSftpPort(sftpPort);
-        config.setSftpUserName(sftpUserName);
-        config.setSftpPasswordEncrypted(sftpPassword);
+        config.setSftpHost(sftpProvider.getSftpHost());
+        config.setSftpPort(sftpProvider.getSftpPort());
+        config.setSftpUserName(sftpProvider.getSftpUserName());
+        config.setSftpPasswordEncrypted(sftpProvider.getSftpPassword());
         config.setSftpDir("ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip");
 
         config.setCheckStrategy(VersionCheckStrategy.WEEK);
         config.setCheckVersion(1);
 
-        config.setHasSubFolder(true);
-        config.setSubFolderTSPattern("yyyyMMdd");
+        config.setHasSubfolder(true);
+        config.setSubfolderTSPattern("yyyyMMdd");
+        config.setFileRegexPattern("AllDomainsAllTopicsZips_(.*).csv.gz");
+        config.setFileTSPattern("yyyyMMdd");
 
-        config.setFileNamePrefix("AllDomainsAllTopicsZips_");
-        config.setFileNamePostfix("(.*)");
-        config.setFileExtension("csv.gz");
-        config.setFileTimestamp("yyyyMMdd");
+        return config;
+    }
 
+    private SftpConfiguration getTestBomboraSftpConfig2() {
+        SftpConfiguration config = getTestBomboraSftpConfig1();
+        config.setSubfolderRegexPattern("\\d{8}");
         return config;
     }
 
@@ -115,23 +125,39 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
         return calendar;
     }
 
-    private SftpConfiguration getDnBSftpConfig() {
+    private SftpConfiguration getTestDnBSftpConfig() {
         SftpConfiguration config = new SftpConfiguration();
-        config.setSftpHost(sftpHost);
-        config.setSftpPort(sftpPort);
-        config.setSftpUserName(sftpUserName);
-        config.setSftpPasswordEncrypted(sftpPassword);
+        config.setSftpHost(sftpProvider.getSftpHost());
+        config.setSftpPort(sftpProvider.getSftpPort());
+        config.setSftpUserName(sftpProvider.getSftpUserName());
+        config.setSftpPasswordEncrypted(sftpProvider.getSftpPassword());
         config.setSftpDir("/ingest_test/SftpUtilsTestNG/DnB/gets");
 
         config.setCheckStrategy(VersionCheckStrategy.MONTH);
         config.setCheckVersion(0);
 
-        config.setHasSubFolder(false);
+        config.setHasSubfolder(false);
+        config.setFileRegexPattern("LE_SEED_OUTPUT_(.*).OUT.gz");
+        config.setFileTSPattern("yyyy_MM");
 
-        config.setFileNamePrefix("LE_SEED_OUTPUT_");
-        config.setFileNamePostfix("(.*)");
-        config.setFileExtension("OUT.gz");
-        config.setFileTimestamp("yyyy_MM");
+        return config;
+    }
+
+    private SftpConfiguration getBomboraSftpConfig() {
+        SftpConfiguration config = new SftpConfiguration();
+        config.setSftpHost(sftpProvider.getBomboraSftpHost());
+        config.setSftpPort(sftpProvider.getBomboraSftpPort());
+        config.setSftpUserName(sftpProvider.getBomboraSftpUsername());
+        config.setSftpPasswordEncrypted(sftpProvider.getBomboraSftpPassword());
+        config.setSftpDir("/bombora-clientfiles-adat_zip");
+
+        config.setCheckStrategy(VersionCheckStrategy.WEEK);
+        config.setCheckVersion(1);
+
+        config.setHasSubfolder(true);
+        config.setSubfolderTSPattern("yyyyMMdd");
+        config.setFileRegexPattern("AllDomainsAllTopicsZips_(.*).csv.gz");
+        config.setFileTSPattern("yyyyMMdd");
 
         return config;
     }

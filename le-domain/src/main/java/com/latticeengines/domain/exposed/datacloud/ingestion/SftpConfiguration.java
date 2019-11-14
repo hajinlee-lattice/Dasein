@@ -4,7 +4,6 @@ package com.latticeengines.domain.exposed.datacloud.ingestion;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 
 /**
  * Keep doc
@@ -15,60 +14,59 @@ import com.google.common.base.Preconditions;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SftpConfiguration extends ProviderConfiguration {
 
+    // SFTP url
     @JsonProperty("SftpHost")
     private String sftpHost;
 
+    // SFTP port
     @JsonProperty("SftpPort")
     private Integer sftpPort;
 
+    // SFTP username
     @JsonProperty("SftpUsername")
     private String sftpUserName;
 
+    // SFTP password encrypted by {@link CipherUtils}
     @JsonProperty("SftpPassword")
     private String sftpPasswordEncrypted;
 
+    // SFTP root folder path
     @JsonProperty("SftpDir")
     private String sftpDir;
 
     // When backtracking versions to check missing files, the number of versions
-    // is defined by day, week or month, or all -- checking all the versions
-    // with {@link #checkVersion} ignored
+    // is defined by day, week, month, or all(checking all the versions
+    // with {@link #checkVersion} ignored)
     @JsonProperty("CheckStrategy")
     private VersionCheckStrategy checkStrategy;
 
-    // When checking missing files, only look at files with specific extension;
-    // Must provide; Currently only allow single kind of extension
-    @JsonProperty("FileExtension")
-    private String fileExtension;
+    // Whether there are sub-folders under root folder, eg. different versions
+    // of files are in different sub-folders
+    @JsonProperty("HasSubfolder")
+    private boolean hasSubfolder;
 
-    // Filename prefix is filename part before timestamp section; When checking
-    // missing files, only look at files with prefix satisfying specific regex;
-    // If no such restriction, fine to not provide
-    @JsonProperty("FileNamePrefix")
-    private String fileNamePrefix;
+    // Regex pattern of subfolder name, eg. \\d{4}-\\d{2}-\\d{2}
+    // Only effective when {@link #hasSubfolder} is true
+    @JsonProperty("SubfolderRegexPattern")
+    private String subfolderRegexPattern;
 
-    // Filename prefix is filename part (excluding extension) after timestamp
-    // section; When checking missing files, only look at files with postfix
-    // satisfying specific regex; If no such restriction, fine to not provide
-    @JsonProperty("FileNamePostfix")
-    private String fileNamePostfix;
+    // If subfolder is versioned with timestamp (currently only timestamp format
+    // version is supported), provider pattern for timestamp part, eg. yyyyMMdd
+    // Timezone info will be ignored and use local timezone
+    @JsonProperty("SubfolderTSPattern")
+    private String subfolderTSPattern;
 
-    // Only effective when {@link #checkStrategy} is not ALL; If {@link
-    // #checkStrategy} is not ALL, version info must be provided in either file
-    // name or subfolder name;
-    // If file version is defined in file name, provide timestamp format string,
-    // eg. yyyy-MM-dd
-    @JsonProperty("FileTimestamp")
-    private String fileTimestamp;
+    // Regex pattern of file name, eg.
+    // AllDomainsAllTopicsZips_\\d{4}-\\d{2}-\\d{2}_\\d+.csv.gz
+    // If not provided, default value is (.)* to match all the files
+    @JsonProperty("FileRegexPattern")
+    private String fileRegexPattern;
 
-    // whether different versions of files are separate sub-folders under
-    // sftpDir
-    @JsonProperty("HasSubFolder")
-    private boolean hasSubFolder;
-
-    // timestamp pattern in sub-folder name
-    @JsonProperty("SubFolderTSPattern")
-    private String subFolderTSPattern;
+    // If file name is versioned with timestamp (currently only timestamp format
+    // version is supported), provider pattern for timestamp part, eg. yyyyMMdd
+    // Timezone info will be ignored and use local timezone
+    @JsonProperty("FileTSPattern")
+    private String fileTSPattern;
 
     public String getSftpHost() {
         return sftpHost;
@@ -118,55 +116,44 @@ public class SftpConfiguration extends ProviderConfiguration {
         this.checkStrategy = checkStrategy;
     }
 
-    public String getFileExtension() {
-        Preconditions.checkNotNull(fileExtension);
-        if (!fileExtension.startsWith(".")) {
-            fileExtension = "." + fileExtension;
-        }
-        return fileExtension;
+    public boolean hasSubfolder() {
+        return hasSubfolder;
     }
 
-    public void setFileExtension(String fileExtension) {
-        this.fileExtension = fileExtension;
+    public void setHasSubfolder(boolean hasSubfolder) {
+        this.hasSubfolder = hasSubfolder;
     }
 
-    public String getFileNamePrefix() {
-        return fileNamePrefix == null ? "(.*)" : fileNamePrefix;
+    public String getSubfolderRegexPattern() {
+        return subfolderRegexPattern == null ? "(.+)" : subfolderRegexPattern;
     }
 
-    public void setFileNamePrefix(String fileNamePrefix) {
-        this.fileNamePrefix = fileNamePrefix;
+    public void setSubfolderRegexPattern(String subfolderRegexPattern) {
+        this.subfolderRegexPattern = subfolderRegexPattern;
     }
 
-    public String getFileNamePostfix() {
-        return fileNamePostfix == null ? "(.*)" : fileNamePostfix;
+    public String getSubfolderTSPattern() {
+        return subfolderTSPattern;
     }
 
-    public void setFileNamePostfix(String fileNamePostfix) {
-        this.fileNamePostfix = fileNamePostfix;
+    public void setSubfolderTSPattern(String subfolderTSPattern) {
+        this.subfolderTSPattern = subfolderTSPattern;
     }
 
-    public String getFileTimestamp() {
-        return fileTimestamp == null ? "" : fileTimestamp;
+    public String getFileRegexPattern() {
+        return fileRegexPattern == null ? "(.+)" : fileRegexPattern;
     }
 
-    public void setFileTimestamp(String fileTimestamp) {
-        this.fileTimestamp = fileTimestamp;
+    public void setFileRegexPattern(String fileRegexPattern) {
+        this.fileRegexPattern = fileRegexPattern;
     }
 
-    public boolean hasSubFolder() {
-        return hasSubFolder;
+    public String getFileTSPattern() {
+        return fileTSPattern;
     }
 
-    public void setHasSubFolder(boolean hasSubFolder) {
-        this.hasSubFolder = hasSubFolder;
+    public void setFileTSPattern(String fileTSPattern) {
+        this.fileTSPattern = fileTSPattern;
     }
 
-    public String getSubFolderTSPattern() {
-        return subFolderTSPattern;
-    }
-
-    public void setSubFolderTSPattern(String subFolderTSPattern) {
-        this.subFolderTSPattern = subFolderTSPattern;
-    }
 }

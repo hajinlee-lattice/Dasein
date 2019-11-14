@@ -96,7 +96,10 @@ public class IngestionServiceTestNG extends PropDataEngineFunctionalTestNGBase {
         ingestion = testIngestionService
                 .createIngestions(
                         Collections.singletonList(Triple.of(PREFIX + "_Ingestion",
-                                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpDir\":\"/ingest_test/IngestionResourceDeploymentTestNG/DnB\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,"
+                                        + "\"SftpDir\":\"/ingest_test/IngestionResourceDeploymentTestNG/DnB\","
+                                        + "\"CheckVersion\":1,\"CheckStrategy\":\"ALL\","
+                                        + "\"FileTSPattern\":\"yyyy_MM\",\"FileRegexPattern\":\"LE_SEED_OUTPUT_(.+).OUT.gz\"}",
                                 IngestionType.SFTP)))
                 .get(0);
         Assert.assertNotNull(ingestion.getPid());

@@ -73,39 +73,35 @@ public class SftpUtils {
     }
 
     /**
-     * Get file list from SFTP which satisfies directory/file naming pattern and
-     * version check strategy
+     * Get file list from SFTP which satisfies subfolder/file naming pattern and
+     * version check strategy configured
      *
-     * @param config
-     * @param fileNamePattern
-     * @return
+     * @param config:
+     *            SFTP configuration
+     * @return file list (relative path under SFTP root dir)
      */
-    public static final List<String> getFileNames(SftpConfiguration config, final String fileNamePattern) {
+    public static final List<String> getFileList(SftpConfiguration config) {
         validateSftpConfig(config);
-        return getFileNames(config, fileNamePattern, null);
+        return getFileList(config, null);
     }
 
     /**
      * For testing purpose, pass in Calendar instance instead of always using
      * current time base
-     * 
-     * TODO: Could get rid of parameter fileNamePattern and derive it from
-     * SftpConfiguration
      *
-     * @param config
-     * @param fileNamePattern
-     * @param calendar
-     * @return
+     * @param config:
+     *            SFTP configuration
+     * @param calendar:
+     *            calendar to compare with timestamp
+     * @return file list (relative path under SFTP root dir)
      */
     @VisibleForTesting
-    static final List<String> getFileNames(@NotNull SftpConfiguration config, final String fileNamePattern,
-            Calendar calendar) {
+    static final List<String> getFileList(@NotNull SftpConfiguration config, Calendar calendar) {
         try {
             log.info(String.format("Connecting to SFTP %s... ", config.getSftpHost()));
 
             JSch jsch = new JSch();
-            Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
-                    config.getSftpPort());
+            Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(), config.getSftpPort());
             session.setConfig("StrictHostKeyChecking", "no");
             session.setPassword(CipherUtils.decrypt(config.getSftpPasswordEncrypted()));
             session.connect();
@@ -115,7 +111,7 @@ public class SftpUtils {
             sftpChannel.cd("." + getSanityPath(config.getSftpDir(), true));
 
             List<String> scanDirs = getScanDirs(config, sftpChannel, calendar);
-            List<String> scanFiles = getScanFiles(config, sftpChannel, calendar, fileNamePattern, scanDirs);
+            List<String> scanFiles = getScanFiles(config, sftpChannel, calendar, scanDirs);
 
             sftpChannel.exit();
             session.disconnect();
@@ -142,19 +138,21 @@ public class SftpUtils {
         Preconditions.checkNotNull(config);
         Preconditions.checkNotNull(channel);
 
-        if (!config.hasSubFolder()) {
+        if (!config.hasSubfolder()) {
             return Arrays.asList("");
         }
+        Pattern pattern = Pattern.compile(config.getSubfolderRegexPattern());
         try {
             List<String> scanDirs = new ArrayList<>();
             Vector<ChannelSftp.LsEntry> paths = channel.ls(".");
             for (ChannelSftp.LsEntry path : paths) {
-                if (path.getAttrs().isDir()) {
+                Matcher matcher = pattern.matcher(path.getFilename());
+                if (path.getAttrs().isDir() && matcher.find()) {
                     scanDirs.add(getSanityPath(path.getFilename(), true));
                 }
             }
             return VersionUtils.getMostRecentVersionPaths(scanDirs, config.getCheckVersion(), config.getCheckStrategy(),
-                    config.getSubFolderTSPattern(), calendar);
+                    config.getSubfolderTSPattern(), null, calendar);
         } catch (SftpException e) {
             throw new RuntimeException(e);
         }
@@ -164,24 +162,24 @@ public class SftpUtils {
      * Get file list under scanned directory which satisfies file name pattern.
      * If file is under sub-folder, append sub-folder before file name too. No
      * recursive searching.
-     * 
-     * TODO: Get rid of parameter fileNamePattern which could be derived from
-     * SftpConfiguration
      *
-     * @param config
-     * @param channel
-     * @param calendar
-     * @param fileNamePattern
-     * @param scanDirs
+     * @param config:
+     *            SFTP configuration
+     * @param channel:
+     *            SFTP connection channel
+     * @param calendar:
+     *            calendar to compare with timestamps
+     * @param scanDirs:
+     *            folders to scan files
      * @return
      */
     @SuppressWarnings("unchecked")
     private static List<String> getScanFiles(@NotNull SftpConfiguration config, @NotNull ChannelSftp channel,
-            Calendar calendar, String fileNamePattern, @NotNull List<String> scanDirs) {
+            Calendar calendar, @NotNull List<String> scanDirs) {
         Preconditions.checkNotNull(config);
         Preconditions.checkNotNull(channel);
         Preconditions.checkNotNull(scanDirs);
-        Pattern pattern = fileNamePattern != null ? Pattern.compile(fileNamePattern) : null;
+        Pattern pattern = Pattern.compile(config.getFileRegexPattern());
 
         List<String> scanFiles = new ArrayList<>();
         try {
@@ -196,10 +194,6 @@ public class SftpUtils {
                     if (file.getAttrs().isDir()) {
                         continue;
                     }
-                    if (pattern == null) {
-                        scanFiles.add(getSanityPath(appendPath(dir, file.getFilename()), false));
-                        continue;
-                    }
                     Matcher matcher = pattern.matcher(file.getFilename());
                     if (matcher.find()) {
                         scanFiles.add(getSanityPath(appendPath(dir, file.getFilename()), false));
@@ -210,7 +204,34 @@ public class SftpUtils {
             throw new RuntimeException(e);
         }
         return VersionUtils.getMostRecentVersionPaths(scanFiles, config.getCheckVersion(), config.getCheckStrategy(),
-                config.getFileTimestamp(), calendar);
+                config.getFileTSPattern(), null, calendar);
+    }
+
+    public static final void renamePath(@NotNull SftpConfiguration config, @NotNull String oldPath,
+            @NotNull String newPath) {
+        validateSftpConfig(config);
+        Preconditions.checkArgument(StringUtils.isNotBlank(oldPath));
+        Preconditions.checkArgument(StringUtils.isNotBlank(newPath));
+
+        try {
+            log.info("Connecting to SFTP...");
+            JSch jsch = new JSch();
+            Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(), config.getSftpPort());
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.setPassword(CipherUtils.decrypt(config.getSftpPasswordEncrypted()));
+            session.connect();
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            sftpChannel.cd("." + getSanityPath(config.getSftpDir(), true));
+
+            sftpChannel.rename(oldPath, newPath);
+
+            sftpChannel.exit();
+            session.disconnect();
+        } catch (JSchException | SftpException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void validateSftpConfig(SftpConfiguration config) {

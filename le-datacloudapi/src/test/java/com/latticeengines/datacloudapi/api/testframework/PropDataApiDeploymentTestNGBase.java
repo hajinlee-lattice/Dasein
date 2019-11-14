@@ -1,12 +1,17 @@
 package com.latticeengines.datacloudapi.api.testframework;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -17,13 +22,16 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.yarn.exposed.service.JobService;
 
@@ -32,13 +40,19 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
     @Value("${common.test.microservice.url}")
     private String hostPort;
 
-    @Autowired
+    @Inject
+    protected HdfsPathBuilder hdfsPathBuilder;
+
+    @Inject
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     protected JobService jobService;
 
     protected String getRestAPIHostPort() {
@@ -154,6 +168,35 @@ public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstrac
             }
         } catch (Exception e) {
             Assert.fail("Failed to clean up " + avroDir, e);
+        }
+    }
+
+    protected void uploadBaseSourceFile(Source baseSource, String baseSourceFile, String baseSourceVersion) {
+        InputStream baseSourceStream = null;
+        String targetPath = null;
+        String successPath = null;
+        if (!(baseSource instanceof IngestionSource)) {
+            baseSourceFile += ".avro";
+        }
+        baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile);
+        targetPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion)
+                .append(baseSourceFile).toString();
+        successPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion).append("_SUCCESS")
+                .toString();
+        uploadToHdfs(targetPath, successPath, baseSourceStream);
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
+    private void uploadToHdfs(String targetPath, String successPath, InputStream baseSourceStream) {
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetPath);
+            }
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseSourceStream, targetPath);
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

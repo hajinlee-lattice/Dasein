@@ -51,7 +51,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
 
 public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(IngestionVersionServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImplTestNG.class);
 
     // Test normal mode for domain patch
     private static List<PatchBook> MOCK_DOMAIN_BOOKS;

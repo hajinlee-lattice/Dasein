@@ -5,11 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +19,8 @@ import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEnt
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionAPIProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressUpdater;
-import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
+import com.latticeengines.datacloud.etl.utils.VersionUtils;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.BWRawDestination;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
@@ -39,23 +38,17 @@ import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 @Component("ingestionProgressService")
 public class IngestionProgressServiceImpl implements IngestionProgressService {
 
-    private static final Logger log = LoggerFactory.getLogger(IngestionProgressServiceImpl.class);
-
-
-    @Autowired
+    @Inject
     private IngestionProgressEntityMgr ingestionProgressEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private IngestionAPIProviderService apiProviderService;
 
-    @Autowired
+    @Inject
     private SourceService sourceService;
-
-    @Autowired
-    private IngestionVersionService ingestionVersionService;
 
     @Value("${datacloud.collection.s3bucket}")
     private String defaultBucket;
@@ -89,12 +82,17 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         switch (ingestion.getIngestionType()) {
         case SFTP:
             SftpConfiguration sftpConfig = (SftpConfiguration) ingestion.getProviderConfiguration();
+            // If sftpConfig.hasSubfolder() is true, file is in format
+            // "subfolder/filename"; otherwise it's purely file name
             String fileName = new Path(file).getName();
             String source = StringUtils.isBlank(sftpConfig.getSftpDir()) ? file
                     : new Path(sftpConfig.getSftpDir(), file).toString();
             progress.setSource(source);
             // Arbitrary set version will not be respected
-            progress.setVersion(ingestionVersionService.extractVersion(sftpConfig.getFileTimestamp(), fileName));
+            progress.setVersion(VersionUtils.extractTSVersion(file,
+                    StringUtils.isNotBlank(sftpConfig.getSubfolderTSPattern()) ? sftpConfig.getSubfolderTSPattern()
+                            : sftpConfig.getFileTSPattern(),
+                    null, HdfsPathBuilder.DATE_FORMAT_STRING, HdfsPathBuilder.UTC));
             progress.setDestination(ingestionDir.append(progress.getVersion()).append(fileName).toString());
             break;
         case API:
