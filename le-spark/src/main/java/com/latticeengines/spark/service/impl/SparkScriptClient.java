@@ -44,6 +44,8 @@ class SparkScriptClient {
     private final SparkInterpreter interpreter;
     private final ObjectMapper om = new ObjectMapper();
 
+    private boolean initialized = false;
+
     SparkScriptClient(SparkInterpreter interpreter, String url) {
         this.interpreter = interpreter;
         webClient = WebClient.builder() //
@@ -76,7 +78,12 @@ class SparkScriptClient {
                 JsonUtils.serialize(params),
                 checkpointDir);
         runStatement(statement);
-        log.info("Script env initialized.");
+        if (initialized) {
+            log.info("Script env re-initialized.");
+        } else {
+            log.info("Script env initialized.");
+            initialized = true;
+        }
     }
 
     SparkScriptOutput runPostScript() {
@@ -164,12 +171,20 @@ class SparkScriptClient {
     }
 
     private String getInitializeTemplate(String targets, String input, String params, String checkpointDir) {
-        return getTemplate("initialize", ImmutableMap.of( //
-                "{{TARGETS}}", targets, //
-                "{{INPUT}}", input, //
-                "{{PARAMS}}", params, //
-                "{{CHECKPOINT_DIR}}", checkpointDir //
-        ));
+        if (initialized) {
+            return getTemplate("reinitialize", ImmutableMap.of( //
+                    "{{TARGETS}}", targets, //
+                    "{{INPUT}}", input, //
+                    "{{PARAMS}}", params //
+            ));
+        } else {
+            return getTemplate("initialize", ImmutableMap.of( //
+                    "{{TARGETS}}", targets, //
+                    "{{INPUT}}", input, //
+                    "{{PARAMS}}", params, //
+                    "{{CHECKPOINT_DIR}}", checkpointDir //
+            ));
+        }
     }
 
     private String getFinalizeTemplate() {

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -122,6 +123,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     private final String DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT = "{0}_{1}_{2}";
     private final String DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD = "Key";
     private final String DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD = "AccountId";
+    private final String DYNAMO_ACCOUNT_LOOKUP_CACHE_ACCOUNTID_FIELD = InterfaceName.AccountId.name();
     private final List<String> LOOKUP_FIELDS;
     private final Map<MatchKey, List<String>> KEY_MAP;
 
@@ -355,16 +357,25 @@ public class DataLakeServiceImpl implements DataLakeService {
     String getInternalIdViaAccountCache(String customerSpace, String lookupIdColumn, String accountId) {
         String internalAccountId = null;
         try {
-            Item item = dynamoItemService.getItem(dynamoAccountLookupCacheTableName,
-                    new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD,
-                            MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
-                                    CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn,
-                                    accountId.toLowerCase())));
-            internalAccountId = (String) item.get(DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD);
+            String lookupIdKey = MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
+                    CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId.toLowerCase());
+            String accountIdKey = MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
+                    CustomerSpace.parse(customerSpace).getTenantId(), DYNAMO_ACCOUNT_LOOKUP_CACHE_ACCOUNTID_FIELD,
+                    accountId.toLowerCase());
+            List<Item> items = dynamoItemService
+                    .batchGet(dynamoAccountLookupCacheTableName,
+                            Arrays.asList(new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, accountIdKey),
+                                    new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, lookupIdKey)))
+                    .stream().filter(Objects::nonNull).collect(Collectors.toList());
+
+            if (CollectionUtils.isNotEmpty(items)) {
+                internalAccountId = (String) items.get(0).get(DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD);
+            } else {
+                log.warn("Failed to lookup accountId in dynamo cache by LookupIdkey: " + lookupIdKey
+                        + " and AccountIdkey: " + accountIdKey);
+            }
         } catch (Exception e) {
-            log.warn("Failed to lookup accountId in dynamo cache for the value "
-                    + MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
-                            CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId.toLowerCase()));
+            log.error("Failed to lookup accountId in dynamo cache due to " + e.getMessage());
         }
         return internalAccountId;
     }
