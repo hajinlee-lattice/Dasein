@@ -152,10 +152,11 @@ public class ProductFileValidationService
         Map<String, Product> productMap = new HashMap<>();
 
         Iterator<GenericRecord> iter = AvroUtils.iterateAvroFiles(yarnConfiguration, filePath + "/*.avro");
+        int index = 0;
         while (iter.hasNext()) {
+            index++;
             GenericRecord record = iter.next();
             Product product = new Product();
-
             String productId = getFieldValue(record, InterfaceName.Id.name());
             if (productId == null) {
                 productId = getFieldValue(record, InterfaceName.ProductId.name());
@@ -180,7 +181,11 @@ public class ProductFileValidationService
                 continue;
             }
             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-            productMap.put(lineId, product);
+            if (StringUtils.isNotEmpty(lineId)) {
+                productMap.put(lineId, product);
+            } else {
+                productMap.put(String.valueOf(index), product);
+            }
         }
         return productMap;
     }
