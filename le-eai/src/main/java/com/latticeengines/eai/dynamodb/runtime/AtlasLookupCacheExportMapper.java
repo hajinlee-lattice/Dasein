@@ -77,6 +77,9 @@ public class AtlasLookupCacheExportMapper extends AvroExportMapper implements Av
         if (StringUtils.isNotBlank(lookupIdsStr)) {
             lookupIds.addAll(Arrays.asList(lookupIdsStr.split(",")));
         }
+        if (!lookupIds.contains(InterfaceName.AccountId.name())) {
+            lookupIds.add(InterfaceName.AccountId.name());
+        }
         log.info("lookupIds=[" + StringUtils.join(lookupIds, ",") + "]");
 
         String endpoint = config.get(HdfsToDynamoConfiguration.CONFIG_ENDPOINT);
@@ -158,6 +161,10 @@ public class AtlasLookupCacheExportMapper extends AvroExportMapper implements Av
                 String lookupIdVal = obj.toString();
                 String pk = String.format("%s_%s_%s", tenant, lookupId, lookupIdVal.toLowerCase());
                 recordBuffer.add(Pair.of(pk, accountId));
+                if (!InterfaceName.AccountId.name().equals(lookupId)) {
+                    pk = String.format("%s_%s_%s", tenant, lookupId, accountId.toLowerCase());
+                    recordBuffer.add(Pair.of(pk, accountId));
+                }
             }
         }
     }
