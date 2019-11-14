@@ -28,6 +28,9 @@ class AccountContactExportJob extends AbstractSparkJob[AccountContactExportConfi
       var joinResult: DataFrame = accountTable.join(contactTable, accountTable(joinKey) === contactTable(contactJoinKey), "right")
       // drop the join key
       joinResult = joinResult.drop(contactJoinKey)
+      if (accountContactExportContext.isEntityMatchEnabled) {
+        joinResult = joinResult.drop(joinKey)
+      }
       lattice.output = joinResult :: Nil
     }
   }
