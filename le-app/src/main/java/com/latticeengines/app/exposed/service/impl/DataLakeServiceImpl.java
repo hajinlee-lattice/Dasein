@@ -355,24 +355,21 @@ public class DataLakeServiceImpl implements DataLakeService {
     @VisibleForTesting
     String getInternalIdViaAccountCache(String customerSpace, String lookupIdColumn, String accountId) {
         String internalAccountId = null;
-        String lookupIdKey = null, accountIdKey = null;
         try {
-            lookupIdKey = MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
+            String lookupIdKey = MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
                     CustomerSpace.parse(customerSpace).getTenantId(), lookupIdColumn, accountId.toLowerCase());
-            Item item = dynamoItemService.getItem(dynamoAccountLookupCacheTableName,
-                    new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, lookupIdKey));
-
-            if (item == null) {
-                accountIdKey = MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
-                        CustomerSpace.parse(customerSpace).getTenantId(), DYNAMO_ACCOUNT_LOOKUP_CACHE_ACCOUNTID_FIELD,
-                        accountId.toLowerCase());
-                item = dynamoItemService.getItem(dynamoAccountLookupCacheTableName,
-                        new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, accountIdKey));
+            String accountIdKey = MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
+                    CustomerSpace.parse(customerSpace).getTenantId(), DYNAMO_ACCOUNT_LOOKUP_CACHE_ACCOUNTID_FIELD,
+                    accountId.toLowerCase());
+            List<Item> items = dynamoItemService.batchGet(dynamoAccountLookupCacheTableName,
+                    Arrays.asList(new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, accountIdKey),
+                            new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, lookupIdKey)));
+            if (CollectionUtils.isNotEmpty(items)) {
+                internalAccountId = (String) items.get(0).get(DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD);
+            } else {
+                log.warn("Failed to lookup accountId in dynamo cache by LookupIdkey: " + lookupIdKey
+                        + " and AccountIdkey: " + accountIdKey);
             }
-            internalAccountId = (String) item.get(DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD);
-        } catch (NullPointerException e) {
-            log.warn("Failed to lookup accountId in dynamo cache by LookupIdkey: " + lookupIdKey + " and AccountIdkey: "
-                    + accountIdKey);
         } catch (Exception e) {
             log.error("Failed to lookup accountId in dynamo cache due to " + e.getMessage());
         }
