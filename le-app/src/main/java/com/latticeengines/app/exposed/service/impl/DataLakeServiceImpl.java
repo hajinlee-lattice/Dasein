@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -361,9 +362,12 @@ public class DataLakeServiceImpl implements DataLakeService {
             String accountIdKey = MessageFormat.format(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FORMAT,
                     CustomerSpace.parse(customerSpace).getTenantId(), DYNAMO_ACCOUNT_LOOKUP_CACHE_ACCOUNTID_FIELD,
                     accountId.toLowerCase());
-            List<Item> items = dynamoItemService.batchGet(dynamoAccountLookupCacheTableName,
-                    Arrays.asList(new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, accountIdKey),
-                            new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, lookupIdKey)));
+            List<Item> items = dynamoItemService
+                    .batchGet(dynamoAccountLookupCacheTableName,
+                            Arrays.asList(new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, accountIdKey),
+                                    new PrimaryKey(DYNAMO_ACCOUNT_LOOKUP_CACHE_KEY_FIELD, lookupIdKey)))
+                    .stream().filter(Objects::nonNull).collect(Collectors.toList());
+
             if (CollectionUtils.isNotEmpty(items)) {
                 internalAccountId = (String) items.get(0).get(DYNAMO_ACCOUNT_LOOKUP_CACHE_VALUE_FIELD);
             } else {
