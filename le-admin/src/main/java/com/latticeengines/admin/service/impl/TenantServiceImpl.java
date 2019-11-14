@@ -69,9 +69,13 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -107,6 +111,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private Oauth2RestApiProxy oauthProxy;
+
+    @Inject
+    private MatchProxy matchProxy;
 
     @Inject
     private FeatureFlagService featureFlagService;
@@ -178,10 +185,22 @@ public class TenantServiceImpl implements TenantService {
             props.put(serviceName, flatDir);
         }
 
-        boolean allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenantId),
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+        boolean allowAutoSchedule = batonService.isEnabled(customerSpace,
                 LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
         serviceConfigService.verifyInvokeTime(allowAutoSchedule, props);
         preinstall(spaceConfig, configSDirs);
+
+        // make sure no match entries leftover
+        if (batonService.isEntityMatchEnabled(customerSpace)) {
+            BumpVersionRequest request = new BumpVersionRequest();
+            request.setTenant(new Tenant(tenantId));
+            request.setEnvironments(Arrays.asList(EntityMatchEnvironment.SERVING, EntityMatchEnvironment.STAGING));
+            BumpVersionResponse response = matchProxy.bumpVersion(request);
+            log.info(
+                    "Entity match is enabled for tenant {}, bumping up version to have a clean state. Current version = {}",
+                    tenantId, response.getVersions());
+        }
 
         // change components in orchestrator based on selected product
         // retrieve mappings from Camille
