@@ -65,7 +65,6 @@ public class EntityMatchRematchDeploymentTestNG extends CDLEnd2EndDeploymentTest
 
     private List<String> getCandidateFailingSteps() {
         return Arrays.asList(
-                "deleteByUploadStep",
                 "matchAccount",
                 "mergeAccount", //
                 "mergeContact");
