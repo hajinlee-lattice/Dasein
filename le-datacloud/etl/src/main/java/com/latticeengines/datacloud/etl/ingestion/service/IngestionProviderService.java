@@ -9,5 +9,11 @@ public interface IngestionProviderService {
 
     void ingest(IngestionProgress progress) throws Exception;
 
+    /**
+     * Find files to ingest
+     *
+     * @param ingestion
+     * @return file list to ingest
+     */
     List<String> getMissingFiles(Ingestion ingestion);
 }

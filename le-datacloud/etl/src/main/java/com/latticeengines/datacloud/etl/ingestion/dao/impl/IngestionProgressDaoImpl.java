@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.etl.ingestion.dao.impl;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -94,15 +92,12 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         Session session = getSessionFactory().getCurrentSession();
         Class<IngestionProgress> entityClz = getEntityClass();
         String queryStr = String
-                .format("select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND LastestStatusUpdateTime >= :latestScheduledTime",
+                .format("select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND StartTime >= :latestScheduledTime",
                         entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("ingestionId", ingestion.getPid());
         query.setParameter("triggeredBy", PropDataConstants.SCAN_SUBMITTER);
         Date latestScheduledTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression()).toDate();
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        log.debug("Latest scheduled time: " + latestScheduledTime == null ? "null" : df.format(latestScheduledTime)
-                + " for ingestion " + ingestion.toString());
         query.setParameter("latestScheduledTime", latestScheduledTime);
         if (CollectionUtils.isEmpty(query.list())) {
             return true;
