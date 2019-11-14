@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -42,6 +43,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -61,9 +63,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.format.number.NumberStyleFormatter;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -134,6 +145,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private ExecutorService service;
 
+    private AmazonS3 s3Client;
+
+    private boolean useS3Input;
+
     private volatile boolean finishReading = false;
 
     private volatile boolean uploadErrorRecord = false;
@@ -142,6 +157,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     protected void setup(Context context) throws IOException, InterruptedException {
         LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
         LogManager.getLogger(TimeStampConvertUtils.class).setLevel(Level.WARN);
+
         conf = context.getConfiguration();
         schema = AvroJob.getOutputKeySchema(conf);
         LOG.info("schema is: " + schema.toString());
@@ -155,6 +171,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
+        useS3Input = conf.getBoolean("eai.import.use.s3.input", false);
+        if (useS3Input) {
+            String region = conf.get("eai.import.aws.region");
+            String awsKey = CipherUtils.decrypt(conf.get("eai.import.aws.access.key")).replace("\n", "");
+            String awsSecret = CipherUtils.decrypt(conf.get("eai.import.aws.secret.key")).replace("\n", "");
+            s3Client = AmazonS3ClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsKey, awsSecret)))
+                    .withRegion(Regions.fromName(region))
+                    .build();
+        }
     }
 
     @Override
@@ -211,11 +237,45 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
     }
 
-    private void process(Context context) throws IOException {
-        String csvFileName = getCSVFilePath(context.getCacheFiles());
-        if (csvFileName == null) {
-            throw new RuntimeException("Not able to find csv file from localized files");
+    private InputStream getInputFileStream(Context context) throws IOException {
+        if (useS3Input) {
+            String s3Bucket = conf.get("eai.import.aws.s3.bucket");
+            String objectKey = sanitizePathToKey(conf.get("eai.import.aws.s3.object.key"));
+            if (s3Client.doesObjectExist(s3Bucket, objectKey)) {
+                GetObjectRequest getObjectRequest = new GetObjectRequest(s3Bucket, objectKey);
+                try {
+                    S3Object s3Object = s3Client.getObject(getObjectRequest);
+                    LOG.info(String.format("Reading the object %s of type %s and size %s", objectKey,
+                            s3Object.getObjectMetadata().getContentType(),
+                            FileUtils.byteCountToDisplaySize(s3Object.getObjectMetadata().getContentLength())));
+                    return s3Object.getObjectContent();
+                } catch (AmazonS3Exception e) {
+                    throw new RuntimeException("Failed to get object " + objectKey + " from S3 bucket " + s3Bucket, e);
+                }
+            } else {
+                LOG.error("Object " + objectKey + " does not exist in bucket " + s3Bucket);
+                throw new RuntimeException("Not able to find csv file from s3!");
+            }
+        } else {
+            String csvFileName = getCSVFilePath(context.getCacheFiles());
+            if (csvFileName == null) {
+                throw new RuntimeException("Not able to find csv file from localized files");
+            }
+            return new FileInputStream(csvFileName);
         }
+    }
+
+    private String sanitizePathToKey(String path) {
+        while (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        while (path.endsWith("/")) {
+            path = path.substring(0, path.lastIndexOf("/"));
+        }
+        return path;
+    }
+
+    private void process(Context context) throws IOException {
         if (StringUtils.isEmpty(table.getName())) {
             avroFile = "file";
         } else {
@@ -225,7 +285,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         int cores = conf.getInt("mapreduce.map.cpu.vcores", 1);
         CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
         try (CSVParser parser = new CSVParser(new BufferedReader(new InputStreamReader(
-                new BOMInputStream(new FileInputStream(csvFileName), false, ByteOrderMark.UTF_8,
+                new BOMInputStream(getInputFileStream(context), false, ByteOrderMark.UTF_8,
                         ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
                         ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
             headers = Sets.newHashSet(new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[]{}));

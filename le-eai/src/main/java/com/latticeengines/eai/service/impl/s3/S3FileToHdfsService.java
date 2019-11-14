@@ -1,5 +1,7 @@
 package com.latticeengines.eai.service.impl.s3;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -39,7 +41,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("s3FileToHdfsService")
@@ -61,6 +62,18 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${cdl.s3.import.failed.tag}")
+    private String s3ImportFailedTag;
+
+    @Value("${cdl.s3.import.failed.tag.value}")
+    private String s3ImportFailedTagValue;
+
+    @Value("${cdl.s3.import.succeed.tag}")
+    private String s3ImportSucceedTag;
+
+    @Value("${cdl.s3.import.succeed.tag.value}")
+    private String s3ImportSucceedTagValue;
+
     private String hdfsFilePath;
 
     @Override
@@ -70,7 +83,7 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             copyToHdfs(config);
             importFile(config);
         } catch (Exception e) {
-            s3Service.moveObject(s3Bucket, config.getS3FilePath(), s3Bucket, config.getFailedPath());
+            s3Service.addTagToObject(s3Bucket, config.getS3FilePath(), s3ImportFailedTag, s3ImportFailedTagValue);
             throw e;
         }
     }
@@ -91,20 +104,19 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             String fileName = config.getS3FileName();
             if (StringUtils.isNotEmpty(fileName) && fileName.toLowerCase().endsWith(S3_FILE_SUFFIX)) {
                 fileName = fileName.substring(0, fileName.length() - S3_FILE_SUFFIX.length());
-                fileName = fileName.replaceAll("[^A-Za-z0-9_]", "_") + S3_FILE_SUFFIX;
+                fileName = fileName.replaceAll("[^A-Za-z0-9_]", "_") + "_fake" + S3_FILE_SUFFIX;
             } else {
                 log.error("Error when processing file: " + fileName);
                 throw new RuntimeException("Filename from s3 is empty or not a csv file!");
             }
             hdfsFilePath = getHdfsFilePath(hdfsPath, String.valueOf(new Date().getTime()), fileName);
-            String queue = LedpQueueAssigner.getEaiQueueNameForSubmission();
-            String overwriteQueue = LedpQueueAssigner.overwriteQueueAssignment(queue,
-                    emrEnvService.getYarnQueueScheme());
             log.info("hdfsPath: " + hdfsFilePath);
             log.info("s3nPath: " + s3nPath);
-            HdfsUtils.distcp(yarnConfiguration, s3nPath, hdfsFilePath, overwriteQueue);
+            String content = "Real S3 path: " + s3nPath;
+            InputStream fakeStream = new ByteArrayInputStream(content.getBytes());
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fakeStream, hdfsFilePath);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot copy s3 file to hdfs!" + e.getMessage());
+            throw new RuntimeException("Cannot create fake csv file to hdfs!" + e.getMessage());
         }
     }
 
@@ -156,6 +168,9 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             // CDL import won't update the attribute name to interface name.
             context.setProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, Boolean.TRUE.toString());
             context.setProperty(ImportProperty.ID_COLUMN_NAME, config.getBusinessEntity().name() + InterfaceName.Id.name());
+            context.setProperty(ImportProperty.USE_S3_INPUT, Boolean.TRUE.toString());
+            context.setProperty(ImportProperty.S3_BUCKET, config.getS3Bucket());
+            context.setProperty(ImportProperty.S3_OBJECT_KEY, config.getS3FilePath());
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
 
             if (dataFeedTask == null) {
@@ -194,7 +209,7 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
                 importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
 
                 waitAndFinalizeJob(context, template.getName(), eaiJobDetailIds.get(0));
-                s3Service.moveObject(s3Bucket, config.getS3FilePath(), s3Bucket, config.getSucceedPath());
+                s3Service.addTagToObject(s3Bucket, config.getS3FilePath(), s3ImportSucceedTag, s3ImportSucceedTagValue);
             }
         } catch (RuntimeException e) {
             updateJobDetailStatus(jobDetailId, ImportStatus.FAILED);

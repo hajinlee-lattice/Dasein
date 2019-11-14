@@ -24,6 +24,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
@@ -39,7 +40,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.PrepareImportConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -68,6 +68,18 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
     @Inject
     private TenantService tenantService;
 
+    @Value("${cdl.s3.import.failed.tag}")
+    private String s3ImportFailedTag;
+
+    @Value("${cdl.s3.import.failed.tag.value}")
+    private String s3ImportFailedTagValue;
+
+    @Value("${cdl.s3.import.backup.tag}")
+    private String importBackupTag;
+
+    @Value("${cdl.s3.import.backup.tag.value}")
+    private String importBackupTagValue;
+
     @Override
     public void execute() {
         copyToSystemFolder();
@@ -81,7 +93,6 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
 
     private void validateFile() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Tenant tenant = tenantService.findByTenantId(customerSpace);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, configuration.getDataFeedTaskId());
         S3ImportEmailInfo emailInfo = configuration.getEmailInfo();
         Table template = dataFeedTask.getImportTemplate();
@@ -228,17 +239,18 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         String sourceBucket = configuration.getSourceBucket();
         String targetBucket = configuration.getDestBucket();
         String target = configuration.getDestKey();
-        String backupTarget = configuration.getBackupKey();
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AmazonS3Exception.class), null);
         retry.execute(context -> {
             if (context.getRetryCount() > 0) {
-                log.info(String.format("(Attempt=%d) Retry copying object from %s:%s to %s%s", //
+                log.info(String.format("(Attempt=%d) Retry copying object from %s:%s to %s:%s", //
                         context.getRetryCount() + 1, sourceBucket, sourceKey, targetBucket, target));
             }
             s3Service.copyObject(sourceBucket, sourceKey, targetBucket, target);
-            s3Service.copyObject(sourceBucket, sourceKey, targetBucket, backupTarget);
+            log.info(String.format("(Attempt=%d) Retry add tag %s:%s to target %s:%s", context.getRetryCount() + 1,
+                    importBackupTag, importBackupTagValue, targetBucket, target));
+            s3Service.addTagToObject(targetBucket, target, importBackupTag, importBackupTagValue);
             return true;
         });
     }
@@ -247,10 +259,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         if (!key.contains(IN_PROGRESS)) {
             return;
         }
-        String[] parts = getParts(key);
-        String target = parts[0] + INPUT_ROOT + COMPLETED + FAILED + "/" + parts[4] + "/" + parts[5] + "/"  +
-                getFileName(key);
-        s3Service.moveObject(configuration.getDestBucket(), key, configuration.getDestBucket(), target);
+        s3Service.addTagToObject(configuration.getDestBucket(), key, s3ImportFailedTag, s3ImportFailedTagValue);
     }
 
     private String getFileName(String key) {
@@ -264,7 +273,6 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         while (key.startsWith("/")) {
             key = key.substring(1);
         }
-        String[] parts = key.split("/");
-        return parts;
+        return key.split("/");
     }
 }
