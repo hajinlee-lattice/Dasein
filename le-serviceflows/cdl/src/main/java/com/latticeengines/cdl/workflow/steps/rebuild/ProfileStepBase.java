@@ -74,7 +74,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     private CloneTableService cloneTableService;
 
     @Inject
-    private MetadataProxy metadataProxy;
+    protected MetadataProxy metadataProxy;
 
     protected abstract BusinessEntity getEntity();
 
