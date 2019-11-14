@@ -1,0 +1,37 @@
+{
+    "systemType": "Website",
+    "systemObject": "Web Visit Path Pattern",
+    "fieldDefinitionsRecordsMap": {
+        "General": [
+            {
+                "fieldName": "PathPatternName",
+                "fieldType": "TEXT",
+                "screenName": "Path Pattern Name",
+                "matchingColumnNames": [
+                    "NAME",
+                    "PATH PATTERN NAME"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "PathPattern",
+                "fieldType": "TEXT",
+                "screenName": "Path Pattern",
+                "matchingColumnNames": [
+                    "PATTERN",
+                    "PATH PATTERN"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            }
+        ],
+        "Custom Fields": []
+    }
+}
