@@ -182,8 +182,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         // in old but not new
         Set<String> diffAttrs2 = oldAttrs.stream().filter(attr -> !newAttrs.contains(attr)).collect(Collectors.toSet());
         if (!diffAttrs1.isEmpty() || !diffAttrs2.isEmpty()) {
-            log.info("These attributes are in the active batch store but not the inactive one: " + diffAttrs1);
-            log.info("These attributes are in the inactive batch store but not the active one: " + diffAttrs2);
+            log.info("These attributes are in the active batch store but not the inactive one: " + diffAttrs2);
+            log.info("These attributes are in the inactive batch store but not the active one: " + diffAttrs1);
             return true;
         }
 
