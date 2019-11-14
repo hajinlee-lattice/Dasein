@@ -178,8 +178,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     public void testIngestions() {
         // no sequential dependencies among groups
         // can comment out any group(s)
-        // testIngestions1();
-        // testIngestions2();
+        testIngestions1();
+        testIngestions2();
         testIngestion3();
     }
 

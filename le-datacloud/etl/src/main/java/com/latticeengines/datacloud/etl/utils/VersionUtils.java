@@ -50,7 +50,7 @@ public class VersionUtils {
         if (StringUtils.isBlank(tsRegex)) {
             if (!tsPattern.matches("[yMd_\\W]+")) {
                 throw new IllegalArgumentException(
-                        "Only support to parse timestamp pattern consisted of year, month and day without timezone info");
+                        "Only support to derive timestamp regex from timestamp pattern consisted of year, month and day without timezone info");
             }
             tsRegex = tsPattern.replace("d", "\\d").replace("y", "\\d").replace("M", "\\d");
         }
@@ -120,7 +120,7 @@ public class VersionUtils {
         if (StringUtils.isBlank(tsRegex)) {
             if (!originTSPattern.matches("[yMd_\\W]+")) {
                 throw new IllegalArgumentException(
-                        "Only support to parse timestamp pattern consisted of year, month and day without timezone info");
+                        "Only support to derive timestamp regex from timestamp pattern consisted of year, month and day without timezone info");
             }
             tsRegex = originTSPattern.replace("d", "\\d").replace("y", "\\d").replace("M", "\\d");
         }

@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.etl.utils;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -207,11 +208,23 @@ public class SftpUtils {
                 config.getFileTSPattern(), null, calendar);
     }
 
+    /**
+     * Rename folder/file name on SFTP. Only support single layer path.
+     *
+     * @param config:
+     *            SFTP configuration
+     * @param oldPath:
+     *            old folder/file name
+     * @param newPath:
+     *            new folder/file name
+     */
     public static final void renamePath(@NotNull SftpConfiguration config, @NotNull String oldPath,
             @NotNull String newPath) {
         validateSftpConfig(config);
         Preconditions.checkArgument(StringUtils.isNotBlank(oldPath));
         Preconditions.checkArgument(StringUtils.isNotBlank(newPath));
+        Preconditions.checkArgument(!oldPath.contains(File.separator));
+        Preconditions.checkArgument(!newPath.contains(File.separator));
 
         try {
             log.info("Connecting to SFTP...");

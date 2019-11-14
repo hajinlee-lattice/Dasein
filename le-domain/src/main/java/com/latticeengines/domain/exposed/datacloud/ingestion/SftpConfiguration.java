@@ -58,7 +58,7 @@ public class SftpConfiguration extends ProviderConfiguration {
 
     // Regex pattern of file name, eg.
     // AllDomainsAllTopicsZips_\\d{4}-\\d{2}-\\d{2}_\\d+.csv.gz
-    // If not provided, default value is (.)* to match all the files
+    // If not provided, default value is (.+) to match all the files
     @JsonProperty("FileRegexPattern")
     private String fileRegexPattern;
 

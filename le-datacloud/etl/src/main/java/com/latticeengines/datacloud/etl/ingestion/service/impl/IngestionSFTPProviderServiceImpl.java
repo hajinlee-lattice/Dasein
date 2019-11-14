@@ -161,6 +161,7 @@ public class IngestionSFTPProviderServiceImpl extends IngestionProviderServiceIm
      * Compare target files got from getTargetFiles() and existing files got
      * from getExistingFiles() and return files to ingest
      *
+     * @param ingestion
      * @param targetFiles:
      *            files on target SFTP
      * @param existingFiles:
@@ -284,7 +285,7 @@ public class IngestionSFTPProviderServiceImpl extends IngestionProviderServiceIm
 
     /**
      * Get all the files under specified hdfs path whose names match provided
-     * regex Pattern
+     * regex pattern
      *
      * @param hdfsDir:
      *            hdfs path
