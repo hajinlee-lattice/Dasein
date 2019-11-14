@@ -359,7 +359,7 @@ public enum LedpCode {
     LEDP_18232("Expiration Date {0} for PlayLaunchChannel is greater than allowed time of {1} months."),
     LEDP_18233("Outreach connection requires {0} to be mapped"), //
     LEDP_18234("Failed to update import system: {0}"),
-    LEDP_18235("SchemaInterpretation RegisterDeleteDataTemplate is the only supported schema for entity match tenant!"),
+    LEDP_18235("RegisterDeleteDataTemplate is the only supported schema for delete operation with entity match tenant!"),
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
