@@ -199,11 +199,12 @@ public class SparkJobServiceImpl implements SparkJobService {
         String host = session.getHost();
         int id = session.getSessionId();
         String url = host + URI_SESSIONS + "/" + id;
-        SparkScriptClient client = clientCache.getIfPresent(url);
+        SparkInterpreter interpreter = script.getInterpreter();
+        String cacheKey = interpreter.name() + "|" + url;
+        SparkScriptClient client = clientCache.getIfPresent(cacheKey);
         if (client == null) {
-            SparkInterpreter interpreter = script.getInterpreter();
             client = new SparkScriptClient(interpreter, url);
-            clientCache.put(url, client);
+            clientCache.put(cacheKey, client);
         }
         return client;
     }
