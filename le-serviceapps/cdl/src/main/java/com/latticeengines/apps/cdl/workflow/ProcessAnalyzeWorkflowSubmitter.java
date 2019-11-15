@@ -268,6 +268,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                     currentDataCloudBuildNumber,
                     pidWrapper.getPid());
 
+            if (request.getCurrentPATimestamp() != null) {
+                log.info("Setting current PA timestamp to {}", request.getCurrentPATimestamp());
+                // set provided timestamp
+                configuration.setInitialContext(Collections.singletonMap(WorkflowContextConstants.Inputs.PA_TIMESTAMP,
+                        String.valueOf(request.getCurrentPATimestamp())));
+            }
+
             configuration.setFailingStep(request.getFailingStep());
 
             return workflowJobService.submit(configuration, pidWrapper.getPid());
