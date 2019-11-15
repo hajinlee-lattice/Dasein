@@ -30,6 +30,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -50,8 +51,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
-
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(IngestionVersionServiceImplTestNG.class);

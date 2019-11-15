@@ -99,7 +99,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             // compute total num of records if minPid and maxPid provided
             if (minPid != null && maxPid != null) {
                 // validate provided minPid & maxPid
-                if (minPid < 0 || maxPid < minPid) {
+                if (minPid < 0 || maxPid <= minPid) {
                     throw new RuntimeException(String.format("Invalid MinPid or MaxPid provided: MinPid=%d, MaxPid=%d",
                             patchConfig.getMinPid(), patchConfig.getMaxPid()));
                 }
