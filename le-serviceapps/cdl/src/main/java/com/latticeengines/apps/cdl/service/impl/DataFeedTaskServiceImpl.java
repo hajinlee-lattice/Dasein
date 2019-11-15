@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.persistence.RollbackException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -130,7 +132,9 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
-        dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
+        DatabaseUtils.retry("Update DataFeedTask", 10,
+                RollbackException.class, "RollbackException detected when", null,
+                input -> dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask));
     }
 
     @Override
