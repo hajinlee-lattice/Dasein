@@ -1,0 +1,22 @@
+{
+    "systemType": "Website",
+    "systemObject": "Web Visit Source Medium",
+    "fieldDefinitionsRecordsMap": {
+        "General": [
+            {
+                "fieldName": "SourceMedium",
+                "fieldType": "TEXT",
+                "screenName": "Source Medium",
+                "matchingColumnNames": [
+                    "SOURCE MEDIUM"
+                ],
+                "required": true,
+                "approvedUsage": [
+                    "NONE_APPROVED_USAGE"
+                ],
+                "fundamentalType": "ALPHA"
+            }
+        ],
+        "Custom Fields": []
+    }
+}
