@@ -104,7 +104,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
 
     @AfterClass(groups = "functional")
     public void destroy() {
-        // prepareCleanPod(this.getClass().getSimpleName());
+        prepareCleanPod(this.getClass().getSimpleName());
     }
 
     @Test(groups = "functional", dataProvider = "Ingestions")
