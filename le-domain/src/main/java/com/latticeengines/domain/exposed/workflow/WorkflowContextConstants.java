@@ -49,5 +49,6 @@ public class WorkflowContextConstants {
         public static final String PLAY_NAME = "PLAY_NAME";
         public static final String PLAY_LAUNCH_ID = "PLAY_LAUNCH_ID";
         public static final String PLAY_LAUNCH_CHANNEL_ID = "PLAY_LAUNCH_CHANNEL_ID";
+        public static final String PA_TIMESTAMP = "PA_TIMESTAMP";
     }
 }

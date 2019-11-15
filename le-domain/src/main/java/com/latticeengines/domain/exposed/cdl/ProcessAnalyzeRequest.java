@@ -81,6 +81,9 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("SkipMigrationCheck")
     public Boolean skipMigrationCheck = false;
 
+    @JsonProperty("CurrentPATimestamp")
+    private Long currentPATimestamp;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
@@ -191,5 +194,13 @@ public class ProcessAnalyzeRequest {
 
     public void setSkipDynamoExport(Boolean skipDynamoExport) {
         this.skipDynamoExport = skipDynamoExport;
+    }
+
+    public Long getCurrentPATimestamp() {
+        return currentPATimestamp;
+    }
+
+    public void setCurrentPATimestamp(Long currentPATimestamp) {
+        this.currentPATimestamp = currentPATimestamp;
     }
 }
