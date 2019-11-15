@@ -10,9 +10,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.PatchBook.Type;
 
 public interface PatchBookDao extends BaseDao<PatchBook> {
 
-    String MIN_PID = "MIN";
-    String MAX_PID = "MAX";
-
     /**
      * Update specified field of all the entities that have primary ID in the given list to the given value
      * @param pIds given list of primary IDs

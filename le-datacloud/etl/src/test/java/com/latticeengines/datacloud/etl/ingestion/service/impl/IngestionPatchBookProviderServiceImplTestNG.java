@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +50,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.patch.PatchMode;
+
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(IngestionVersionServiceImplTestNG.class);
@@ -102,7 +105,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
 
     @AfterClass(groups = "functional")
     public void destroy() {
-        prepareCleanPod(this.getClass().getSimpleName());
+        // prepareCleanPod(this.getClass().getSimpleName());
     }
 
     @Test(groups = "functional", dataProvider = "Ingestions")
@@ -140,12 +143,11 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         String version = ingestionVersionService.findCurrentVersion(ingestion);
         String hdfsPath = hdfsPathBuilder.constructIngestionDir(ingestion.getIngestionName(), version).toString();
         String glob = new Path(hdfsPath, "*.avro").toString();
+
         switch (patchConfig.getBookType()) {
             case Domain:
             List<PatchBook> activeDomainBooks = MOCK_DOMAIN_BOOKS.stream() //
-                        .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)
-                                && book.getPid() >= 0
-                                && book.getPid() < MOCK_DOMAIN_BOOKS.size()) //
+                    .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)) //
                     .collect(Collectors.toList());
                 Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
                         (long) activeDomainBooks.size());
@@ -153,9 +155,7 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             break;
         case Attribute:
             List<PatchBook> activeAttrBooks = MOCK_ATTR_BOOKS.stream() //
-                        .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)
-                                && book.getPid() >= 0
-                                && book.getPid() < MOCK_ATTR_BOOKS.size()) //
+                    .filter(book -> !PatchBookUtils.isEndOfLife(book, CURRENT_DATE)) //
                     .collect(Collectors.toList());
                 Assert.assertEquals((long) AvroUtils.count(yarnConfiguration, glob),
                         (long) activeAttrBooks.size());
@@ -256,14 +256,6 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
         ingestion.setIngestionType(Ingestion.IngestionType.PATCH_BOOK);
         PatchBookConfiguration conf = new PatchBookConfiguration();
         conf.setBookType(type);
-        conf.setBatchSize(5);
-        conf.setMinPid(0L);
-        if (type.equals(PatchBook.Type.Attribute)) {
-            conf.setMaxPid((long) MOCK_ATTR_BOOKS.size());
-        }
-        if (type.equals(PatchBook.Type.Domain)) {
-            conf.setMaxPid((long) MOCK_DOMAIN_BOOKS.size());
-        }
         conf.setEmailEnabled(false);
         conf.setSkipValidation(true);
         // Test HotFix mode for Attribute patch type
@@ -412,6 +404,10 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
                         (boolean) inv.getArguments()[3]);
             }).when(patchBookEntityMgr).findByTypeAndHotFixWithPaginNoSort(any(int.class),
                     any(int.class), any(), any(boolean.class));
+
+            doAnswer(inv -> {
+                return mockFindMinMaxPid((PatchBook.Type) inv.getArguments()[0]);
+            }).when(patchBookEntityMgr).findMinMaxPid(any());
         } catch (Exception e) {
             log.error("Mock patchBookEntityMgr failed", e);
             throw e;
@@ -479,6 +475,25 @@ public class IngestionPatchBookProviderServiceImplTestNG extends DataCloudEtlFun
             toReturn.add(books.get(i));
         }
         return toReturn;
+    }
+
+    private Map<String, Long> mockFindMinMaxPid(PatchBook.Type type) {
+        switch (type) {
+        case Attribute:
+            return ImmutableMap.of(//
+                    PatchBookUtils.MIN_PID,
+                    MOCK_ATTR_BOOKS.stream().min(Comparator.comparing(PatchBook::getPid)).get().getPid(), //
+                    PatchBookUtils.MAX_PID,
+                    MOCK_ATTR_BOOKS.stream().max(Comparator.comparing(PatchBook::getPid)).get().getPid());
+        case Domain:
+            return ImmutableMap.of(//
+                    PatchBookUtils.MIN_PID,
+                    MOCK_DOMAIN_BOOKS.stream().min(Comparator.comparing(PatchBook::getPid)).get().getPid(), //
+                    PatchBookUtils.MAX_PID,
+                    MOCK_DOMAIN_BOOKS.stream().max(Comparator.comparing(PatchBook::getPid)).get().getPid());
+        default:
+            throw new UnsupportedOperationException("Unsupported PatchBook type in mockFindMinMaxPid: " + type);
+        }
     }
 
 }

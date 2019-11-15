@@ -8,6 +8,21 @@ public class BatchUtils {
 
     private static Logger log = LoggerFactory.getLogger(BatchUtils.class);
 
+    /**
+     * Based on total number of records, minimum number of records per batch,
+     * maximum number of records per batch and maximum number of batches being
+     * processed concurrently, determine total number of batches to divide to
+     *
+     * @param totalSize:
+     *            total number of records
+     * @param minBatchSize:
+     *            minimum number of records per batch
+     * @param maxBatchSize:
+     *            maximum number of records per batch
+     * @param maxConcurrentBatchCnt:
+     *            maximum number of batches being processed concurrently
+     * @return: total number of batches to divide to
+     */
     public static int determineBatchCnt(long totalSize, int minBatchSize, int maxBatchSize, int maxConcurrentBatchCnt) {
         int batchCnt;
         if (totalSize < ((long) minBatchSize * maxConcurrentBatchCnt)) {
@@ -20,6 +35,16 @@ public class BatchUtils {
         return batchCnt;
     }
 
+    /**
+     * Based on total number of records and total number of batches to divide
+     * to, determine number of records for each batch
+     *
+     * @param totalSize:
+     *            total number of records
+     * @param batchCnt:
+     *            total number of batches
+     * @return: a list of record numbers for each batch
+     */
     public static int[] divideBatches(long totalSize, int batchCnt) {
         long batchSize = totalSize / batchCnt;
         int[] batches = new int[batchCnt];
@@ -29,7 +54,7 @@ public class BatchUtils {
             sum += (int) batchSize;
         }
         batches[batchCnt - 1] = (int) (totalSize - sum);
-        log.info("Divide input into blocks [" + StringUtils.join(batches, ", ") + "]");
+        log.info("Divide input into batches [" + StringUtils.join(batches, ", ") + "]");
         return batches;
     }
 }
