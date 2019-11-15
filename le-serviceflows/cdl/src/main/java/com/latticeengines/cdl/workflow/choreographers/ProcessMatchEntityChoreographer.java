@@ -48,13 +48,14 @@ public class ProcessMatchEntityChoreographer extends BaseChoreographer {
                 log.info("Enforced to rematch account.");
             }
             return !shouldRematch;
-        } else if (step.name().equalsIgnoreCase(matchAccount.name()) && hasNoImports(step, BusinessEntity.Account)) {
+        } else if (step.name().equalsIgnoreCase(matchAccount.name()) && hasNoImports(step, BusinessEntity.Account) && !isEntityMatchRematch(step)) {
             log.info("Skip matchAccount, because no imports for Account");
             return true;
-        } else if (step.name().equalsIgnoreCase(matchContact.name()) && hasNoImports(step, BusinessEntity.Contact)) {
+        } else if (step.name().equalsIgnoreCase(matchContact.name()) && hasNoImports(step, BusinessEntity.Contact) && !isEntityMatchRematch(step)) {
             log.info("Skip matchContact, because no imports for Contact");
             return true;
-        } else if (step.name().equalsIgnoreCase(matchTransaction.name()) && hasNoImports(step, BusinessEntity.Transaction)) {
+        } else if (step.name().equalsIgnoreCase(matchTransaction.name()) && hasNoImports(step,
+                BusinessEntity.Transaction) && !isEntityMatchRematch(step)) {
             log.info("Skip matchTransaction, because no imports for Transaction");
             return true;
         } else {
@@ -78,6 +79,13 @@ public class ProcessMatchEntityChoreographer extends BaseChoreographer {
                 ChoreographerContext.class);
         //if this tenant is entityMatchTenant, skip RematchAccount step
         return grapherContext.isFullRematch() && !grapherContext.isEntityMatchEnabled();
+    }
+
+    private boolean isEntityMatchRematch(AbstractStep<? extends BaseStepConfiguration> step) {
+        //entityMatch Tenant should do match step even if no importAction
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        return grapherContext.isFullRematch() && (grapherContext.isEntityMatchEnabled());
     }
 
 }
