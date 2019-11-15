@@ -209,13 +209,13 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     }
 
     protected void verifyReport(Report report1, long ignored, long failed, long imported) {
-        Report report = restTemplate
-                .getForObject(getRestAPIHostPort() + String.format("/pls/reports/%s", report1.getName()), Report.class);
+        Report report = restTemplate.getForObject(getRestAPIHostPort() + String.format("/pls/reports/%s",
+                report1.getName()), Report.class);
         Assert.assertNotNull(report.getJson());
-        ObjectNode accountNode = JsonUtils.deserialize(report.getJson().getPayload(), ObjectNode.class);
-        Assert.assertEquals(accountNode.get("ignored_rows").longValue(), ignored);
-        Assert.assertEquals(accountNode.get("total_failed_rows").longValue(), failed);
-        Assert.assertEquals(accountNode.get("imported_rows").longValue(), imported);
+        ObjectNode node = JsonUtils.deserialize(report.getJson().getPayload(), ObjectNode.class);
+        Assert.assertEquals(node.get("ignored_rows").longValue(), ignored);
+        Assert.assertEquals(node.get("total_failed_rows").longValue(), failed);
+        Assert.assertEquals(node.get("imported_rows").longValue(), imported);
     }
 
     protected void verifyEaiJobDetail(EaiImportJobDetail detail, Long ignored, int processed) {

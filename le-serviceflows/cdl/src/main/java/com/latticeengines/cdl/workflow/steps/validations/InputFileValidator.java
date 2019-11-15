@@ -18,6 +18,8 @@ import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
+import com.latticeengines.domain.exposed.pls.ProductValidationSummary;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.InputFileValidatorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationConfiguration;
@@ -71,12 +73,11 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
                 String.valueOf(enableEntityMatch)));
         boolean enableEntityMatchGA = configuration.isEnableEntityMatchGA();
-        // errorLine is used to count number of error found in this step
+        // generate summary for validation step
+        EntityValidationSummary entityValidationSummary = null;
         long errorLineInValidationStep;
         InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList,
                 enableEntityMatch, enableEntityMatchGA);
-        // this variable is used to generate statistics for product
-        StringBuilder statistics = new StringBuilder();
         if (fileConfiguration == null) {
             log.info(String.format(
                     "skip validation as file configuration is null, the validation for this file with %s waiting to be implemented.",
@@ -85,7 +86,8 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         } else {
             InputFileValidationService fileValidationService = InputFileValidationService
                     .getValidationService(fileConfiguration.getClass());
-            errorLineInValidationStep = fileValidationService.validate(fileConfiguration, processedRecords, statistics);
+            entityValidationSummary = fileValidationService.validate(fileConfiguration, processedRecords);
+            errorLineInValidationStep = entityValidationSummary.getErrorLineNumber();
         }
         // update eaiJobDetail if found error in validations
         if (errorLineInValidationStep != 0L) {
@@ -104,7 +106,9 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
                             .put("total_rows", eaiImportJobDetail.getTotalRows())
                             .put("ignored_rows", 0L)
                             .put("imported_rows", 0L)
-                            .put("deduped_rows", 0L).put("total_failed_rows", totalFailed);
+                            .put("deduped_rows", 0L)
+                            .putPOJO("product_summary", entityValidationSummary).put("total_failed_rows",
+                    totalFailed);
         } else {
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
             totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
@@ -117,27 +121,40 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         super.execute();
         // make sure report first, then fail work flow if necessary
         failWorkflowIfNeeded(entity, errorLineInValidationStep, totalFailed, eaiImportJobDetail.getProcessedRecords()
-                , statistics);
+                , entityValidationSummary);
     }
 
     private void failWorkflowIfNeeded(BusinessEntity entity, long errorLineInValidationStep, long totalFailed,
-                                      long totalRows,
-                                      StringBuilder statistics) {
+                                      long totalRows, EntityValidationSummary entityValidationSummary) {
         if (errorLineInValidationStep != 0 && BusinessEntity.Product.equals(entity)) {
+            ProductValidationSummary summary = (ProductValidationSummary) entityValidationSummary;
+            String statistics = generateStatisticsForProduct(summary);
             String errorMessage = String.format("Import failed because there were %s errors : %s",
-                    String.valueOf(totalFailed), statistics.toString());
+                    String.valueOf(totalFailed), statistics);
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
         if (totalRows > 10 && BusinessEntity.Catalog.equals(entity)) {
-            String errorMessage = String.format("%s Exceeds platform Limit - Please retry with no more than 10 path " +
+            String errorMessage = String.format("%s exceeds platform Limit - Please retry with no more than 10 path " +
                     "patterns", String.valueOf(totalRows));
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
     }
 
-
+    private String generateStatisticsForProduct(ProductValidationSummary summary) {
+        Integer missingBundleInUse = summary.getMissingBundleInUse(), bundleWithDiffSku = summary.getDifferentSKU();
+        StringBuilder statistics = new StringBuilder();
+        if (missingBundleInUse != null) {
+            statistics.append(String.format("%s missing product bundles in use (this import will " +
+                    "completely replace the previous one), ", String.valueOf(missingBundleInUse)));
+        }
+        if (bundleWithDiffSku != null) {
+            statistics.append(String.format("%s product bundle has different product SKUs. Dependant models will " +
+                    "need to be remodelled to get accurate scores.", String.valueOf(bundleWithDiffSku)));
+        }
+        return statistics.toString();
+    }
 
     private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList,
             boolean enableEntityMatch, boolean enableEntityMatchGA) {

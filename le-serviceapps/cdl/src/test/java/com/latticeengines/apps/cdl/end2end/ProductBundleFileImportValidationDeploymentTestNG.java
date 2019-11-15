@@ -5,9 +5,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -25,10 +23,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -38,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProductValidationSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -45,6 +44,7 @@ import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequ
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
@@ -90,12 +90,8 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
         log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
-        Map<String, Boolean> featureFlagMap = new HashMap<>();
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
-        setupEnd2EndTestEnvironment(featureFlagMap);
+        setupEnd2EndTestEnvironment();
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-
     }
 
     @Test(groups = "end2end")
@@ -175,6 +171,24 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), customerSpace);
         Assert.assertEquals(job.getErrorMsg(), "Import failed because there were 4 errors : 3 missing product bundles" +
                 " in use (this import will completely replace the previous one), 2 product bundle has different product SKUs. Dependant models will need to be remodelled to get accurate scores. error when validating with input file, please reference error.csv for details.");
+        RestTemplate template = testBed.getRestTemplate();
+        List<?> list = template.getForObject(deployedHostPort + "/pls/reports", List.class);
+        List<Report> reports = JsonUtils.convertList(list, Report.class);
+        Assert.assertNotNull(reports);
+        Report report = reports.get(0);
+        report = template.getForObject(deployedHostPort + String.format("/pls/reports/%s", report.getName()), Report.class);
+        Assert.assertNotNull(report.getJson());
+        ObjectNode node = JsonUtils.deserialize(report.getJson().getPayload(), ObjectNode.class);
+        ProductValidationSummary productValidationSummary = JsonUtils.getOrDefault(node.get("product_summary"),
+                ProductValidationSummary.class, null);
+        Assert.assertNotNull(productValidationSummary);
+        Assert.assertEquals(productValidationSummary.getErrorLineNumber(), 4L);
+        Assert.assertEquals(productValidationSummary.getDifferentSKU(), 2);
+        Assert.assertEquals(productValidationSummary.getMissingBundleInUse(), 3);
+        Assert.assertNotNull(productValidationSummary.getMissingBundles());
+        Assert.assertNotNull(productValidationSummary.getProcessedBundles());
+        Assert.assertNotNull(productValidationSummary.getAddedBundles());
+
         List<?> rawList = JsonUtils.deserialize(job.getOutputs().get("DATAFEEDTASK_IMPORT_ERROR_FILES"), List.class);
         String errorFile = JsonUtils.convertList(rawList, String.class).get(0);
         Assert.assertNotNull(errorFile);
@@ -235,4 +249,5 @@ public class ProductBundleFileImportValidationDeploymentTestNG extends CDLEnd2En
         buckets.forEach(bkt -> bkt.setCreationTimestamp(currentTime));
         return buckets;
     }
+
 }

@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.InputFileValidationConfiguration;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 
@@ -39,8 +40,7 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
 
     private static final Logger log = LoggerFactory.getLogger(InputFileValidationService.class);
 
-    public abstract long validate(T inputFileValidationServiceConfiguration, List<String> processedRecords,
-                                  StringBuilder statistics);
+    public abstract EntityValidationSummary validate(T inputFileValidationServiceConfiguration, List<String> processedRecords);
 
     @SuppressWarnings("unchecked")
     public InputFileValidationService() {
