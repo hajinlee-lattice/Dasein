@@ -58,6 +58,13 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 public abstract class AbstractAttrConfigService implements AttrConfigService {
 
@@ -403,30 +410,58 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             // Render the system metadata decorated by existing custom data
             List<AttrConfig> existingAttrConfigs = Collections.synchronizedList(new ArrayList<>());
 
+            Tracer tracer = GlobalTracer.get();
             try (PerformanceTimer timer = new PerformanceTimer()) {
-                final Tenant tenant = MultiTenantContext.getTenant();
-                List<Runnable> runnables = new ArrayList<>();
-                BusinessEntity.SEGMENT_ENTITIES.stream().forEach(entity -> {
-                    Runnable runnable = () -> {
-                        MultiTenantContext.setTenant(tenant);
-                        List<ColumnMetadata> systemMetadataCols = getSystemMetadata(entity);
-                        List<AttrConfig> existingCustomConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId,
-                                entity);
-                        existingAttrConfigs
-                                .addAll(render(systemMetadataCols, existingCustomConfig, entityMatchEnabled));
-                    };
-                    runnables.add(runnable);
-                });
-                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
-                int count = CollectionUtils.isNotEmpty(existingAttrConfigs) ? existingAttrConfigs.size() : 0;
-                String msg = String.format("Rendered %d attr configs for tenant %s", count, tenantId);
-                timer.setTimerMessage(msg);
+                Span renderSpan = tracer //
+                        .buildSpan("renderAttrConfig") //
+                        .withTag(TracingTags.TENANT_ID, tenantId) //
+                        .withTag(TracingTags.Attribute.ATTR_CONFIG_UPDATE_MODE, mode == null ? "" : mode.name()) //
+                        .start();
+                try (Scope renderScope = tracer.activateSpan(renderSpan)) {
+                    final Tenant tenant = MultiTenantContext.getTenant();
+                    List<Runnable> runnables = new ArrayList<>();
+                    BusinessEntity.SEGMENT_ENTITIES.forEach(entity -> {
+                        Runnable runnable = () -> {
+                            Span renderEntitySpan = tracer.buildSpan("renderAttrConfigForEntity") //
+                                    .withTag(TracingTags.ENTITY, entity.name()) //
+                                    .asChildOf(renderSpan) //
+                                    .start();
+                            try (Scope scope = tracer.activateSpan(renderEntitySpan)) {
+                                MultiTenantContext.setTenant(tenant);
+                                List<ColumnMetadata> systemMetadataCols = getSystemMetadataCols(entity, tracer);
+                                List<AttrConfig> existingCustomConfig = attrConfigEntityMgr
+                                        .findAllForEntityInReader(tenantId, entity);
+                                renderEntitySpan
+                                        .log(String.format("start rendering with # of system metadata cols = %d",
+                                                CollectionUtils.size(systemMetadataCols)));
+                                List<AttrConfig> configs = render(systemMetadataCols, existingCustomConfig,
+                                        entityMatchEnabled);
+                                renderEntitySpan
+                                        .log(String.format("# of attr configs is %d", CollectionUtils.size(configs)));
+                                existingAttrConfigs.addAll(configs);
+                            } finally {
+                                TracingUtils.finish(renderEntitySpan);
+                            }
+                        };
+                        runnables.add(runnable);
+                    });
+                    ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+                    int count = CollectionUtils.isNotEmpty(existingAttrConfigs) ? existingAttrConfigs.size() : 0;
+                    String msg = String.format("Rendered %d attr configs for tenant %s", count, tenantId);
+                    renderSpan.log(msg);
+                    timer.setTimerMessage(msg);
+                } finally {
+                    TracingUtils.finish(renderSpan);
+                }
             }
 
             ValidationDetails details = attrValidationService.validate(existingAttrConfigs, userProvidedList, mode);
             toReturn.setDetails(details);
+            TracingUtils.logInActiveSpan(Collections.singletonMap("validationDetails", JsonUtils.serialize(details)));
             if (toReturn.hasWarning() || toReturn.hasError()) {
                 log.warn("current attribute configs has warnings or errors:" + JsonUtils.serialize(details));
+                TracingUtils.logError(tracer.activeSpan(), null,
+                        "attr config validation result has warnings or errors");
                 return toReturn;
             }
 
@@ -439,7 +474,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
                 String shortTenantId = MultiTenantContext.getShortTenantId();
-                attrConfigEntityMgr.save(shortTenantId, entity, trim(configList));
+                saveAttrConfigs(shortTenantId, entity, configList);
                 // clear serving metadata cache
                 String keyPrefix = shortTenantId + "|" + entity.name();
                 cacheService.refreshKeysByPattern(keyPrefix, CacheName.getCdlServingCacheGroup());
@@ -448,6 +483,34 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         }
 
         return toReturn;
+    }
+
+    private List<ColumnMetadata> getSystemMetadataCols(BusinessEntity entity, Tracer tracer) {
+        Span getMetadataSpan = tracer //
+                .buildSpan("getSystemMetadataCols") //
+                .withTag(TracingTags.ENTITY, entity == null ? "" : entity.name()) //
+                .start();
+        try {
+            return getSystemMetadata(entity);
+        } catch (Exception e) {
+            TracingUtils.logError(getMetadataSpan, e,
+                    String.format("Failed to get metadata columns for entity %s", entity));
+            throw e;
+        } finally {
+            TracingUtils.finish(getMetadataSpan);
+        }
+    }
+
+    private void saveAttrConfigs(String shortTenantId, BusinessEntity entity, List<AttrConfig> configList) {
+        Span saveSpan = GlobalTracer.get().buildSpan("saveAttrConfigList").start();
+        try {
+            attrConfigEntityMgr.save(shortTenantId, entity, trim(configList));
+            saveSpan.log(String.format("Save attr config list (size=%d)", CollectionUtils.size(configList)));
+        } catch (Exception e) {
+            TracingUtils.logError(saveSpan, e, "Failed to save attr configs");
+        } finally {
+            TracingUtils.finish(saveSpan);
+        }
     }
 
     private List<AttrConfig> generateListFromMap(Map<BusinessEntity, List<AttrConfig>> map) {

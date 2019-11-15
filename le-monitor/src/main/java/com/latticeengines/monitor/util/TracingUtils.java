@@ -6,8 +6,6 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
-
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -85,15 +83,17 @@ public class TracingUtils {
     /*
      * helper to log error in span
      */
-    public static void logError(Span span, @NotNull Exception e, String msg) {
+    public static void logError(Span span, Exception e, String msg) {
         if (span == null || GlobalTracer.get() == null) {
             return;
         }
 
         Map<String, Object> fields = new HashMap<>();
         fields.put(Fields.EVENT, "error");
-        fields.put(Fields.ERROR_OBJECT, e);
-        fields.put(Fields.ERROR_KIND, e.getClass().getSimpleName());
+        if (e != null) {
+            fields.put(Fields.ERROR_OBJECT, e);
+            fields.put(Fields.ERROR_KIND, e.getClass().getSimpleName());
+        }
         if (StringUtils.isNotBlank(msg)) {
             fields.put(Fields.MESSAGE, msg);
         }
