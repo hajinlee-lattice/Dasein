@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -50,15 +51,19 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
             Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
-            merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(), null, -1);
-            // if we have convertBatchStore, we should merge and match new import first
-            // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
-            if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                TransformationStepConfig match = matchAccount(mergeStep++, null, null);
-                steps.add(merge);
-                steps.add(match);
-                merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
-                        convertBatchStoreTableName, mergeStep++);
+            if (CollectionUtils.isEmpty(inputTableNames) && StringUtils.isNotEmpty(convertBatchStoreTableName)) {
+                merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(), convertBatchStoreTableName, -1);
+            } else {
+                merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(), null, -1);
+                // if we have convertBatchStore, we should merge and match new import first
+                // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
+                if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
+                    TransformationStepConfig match = matchAccount(mergeStep++, null, null);
+                    steps.add(merge);
+                    steps.add(match);
+                    merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
+                            convertBatchStoreTableName, mergeStep++);
+                }
             }
         } else {
             merge = dedupAndConcatImports(InterfaceName.AccountId.name());
