@@ -533,9 +533,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void processAnalyzeSkipPublishToS3() {
+        processAnalyzeSkipPublishToS3(null);
+    }
+
+    void processAnalyzeSkipPublishToS3(Long currentPATimestamp) {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(true);
         request.setSkipDynamoExport(true);
+        request.setCurrentPATimestamp(currentPATimestamp);
         processAnalyze(request);
     }
 

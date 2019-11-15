@@ -168,7 +168,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
         if (!hasKeyInContext(PA_TIMESTAMP)) {
             putLongValueInContext(PA_TIMESTAMP, System.currentTimeMillis());
+        } else if (StringUtils.isNotBlank(getStringValueFromContext(PA_TIMESTAMP))) {
+            parsePATimestampString();
         }
+
         putObjectInContext(PA_SKIP_ENTITIES, configuration.getSkipEntities());
 
         setupDataCollectionStatus(evaluationDate);
@@ -184,6 +187,19 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setAttributeQuotaLimit();
         setDataQuotaLimit();
         reachTransactionLimit();
+    }
+
+    /*-
+     * PA_TIMESTAMP should exist as string in context
+     */
+    private void parsePATimestampString() {
+        String timestampStr = getStringValueFromContext(PA_TIMESTAMP);
+        try {
+            putLongValueInContext(PA_TIMESTAMP, Long.parseLong(timestampStr));
+        } catch (NumberFormatException e) {
+            String msg = String.format("PA timestamp string %s is not a valid number", timestampStr);
+            throw new IllegalArgumentException(msg, e);
+        }
     }
 
     private void updateDataFeed() {
