@@ -47,12 +47,13 @@ public class SftpConfiguration extends ProviderConfiguration {
 
     // Regex pattern of subfolder name, eg. \\d{4}-\\d{2}-\\d{2}
     // Only effective when {@link #hasSubfolder} is true
+    // If not provided when {@link #hasSubfolder} is true, default value is (.+)
+    // to match all the subfolders
     @JsonProperty("SubfolderRegexPattern")
     private String subfolderRegexPattern;
 
     // If subfolder is versioned with timestamp (currently only timestamp format
     // version is supported), provider pattern for timestamp part, eg. yyyyMMdd
-    // Timezone info will be ignored and use local timezone
     @JsonProperty("SubfolderTSPattern")
     private String subfolderTSPattern;
 
@@ -64,7 +65,6 @@ public class SftpConfiguration extends ProviderConfiguration {
 
     // If file name is versioned with timestamp (currently only timestamp format
     // version is supported), provider pattern for timestamp part, eg. yyyyMMdd
-    // Timezone info will be ignored and use local timezone
     @JsonProperty("FileTSPattern")
     private String fileTSPattern;
 
