@@ -133,6 +133,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${common.le.environment}")
     private String leEnv;
 
+    @Value("${cdl.processAnalyze.job.autoschedule.failcount:3}")
+    private int autoScheduleMaxFailCount;
+
+    @Value("${cdl.processAnalyze.job.datacloudrefresh.failcount:3}")
+    private int dataCloudRefreshMaxFailCount;
+
     private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
     @Override
@@ -233,7 +239,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                                 || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
                             dataFeedService.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                         }
-                        tenantActivity.setAutoSchedule(true);
+                        tenantActivity.setAutoSchedule(!reachFailCountLimit(tenantId, autoScheduleMaxFailCount));
                         tenantActivity.setInvokeTime(invokeTime.getTime());
                         ActionStat stat = actionStats.get(tenant.getPid());
                         if (stat.getFirstActionTime() != null) {
@@ -246,8 +252,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 }
 
                 // dc refresh
-                tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, dcStatus));
-
+                tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, dcStatus) &&
+                        !reachFailCountLimit(tenantId, dataCloudRefreshMaxFailCount));
                 // add to list
                 tenantActivityList.add(tenantActivity);
             }
@@ -484,6 +490,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
         }
         if (allowAutoSchedule) {
+            log.info("Tenant {} allow auto scheduling ", customerSpace);
             int invokeHour = zkConfigService.getInvokeTime(customerSpace, CDLComponent.componentName);
             Tenant tenantInContext = MultiTenantContext.getTenant();
             try {
@@ -596,4 +603,20 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         nonIngestAndReplaceActionType.remove(ActionType.CDL_OPERATION_WORKFLOW);
         return nonIngestAndReplaceActionType;
     }
+
+    public boolean reachFailCountLimit(String tenantId, int maxFailCount) {
+        try {
+            Integer currentCount = (Integer) redisTemplate.opsForValue().get(tenantId);
+            if (currentCount == null) {
+                log.info("tenantId = {} and failcount is 0", tenantId);
+                return true;
+            }
+            log.info("tenantId = {} and failcount is {}", tenantId, currentCount);
+            return currentCount >= maxFailCount;
+        } catch (Exception e) {
+            log.error("get redis cache fail.", e);
+        }
+        return false;
+    }
+
 }
