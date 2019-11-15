@@ -7,8 +7,7 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
 import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver, StreamDimension}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId, PeriodId, __StreamDate}
-import com.latticeengines.domain.exposed.query.BusinessEntity
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{PeriodId, __StreamDate}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DailyStoreToPeriodStoresJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
@@ -22,8 +21,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
 class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJobConfig] {
-
-  private val PeriodIdForPartition: String = PeriodId.name + "Partition"
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[DailyStoreToPeriodStoresJobConfig]): Unit = {
     val config: DailyStoreToPeriodStoresJobConfig = lattice.config
@@ -80,8 +77,8 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     })
     val columns: Seq[String] = DeriveAttrsUtils.getGroupByEntityColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
     val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*)
-      .agg(aggrProcs.head, aggrProcs.tail: _*).withColumn(PeriodIdForPartition, df(PeriodId.name)))
-    groupedByPeriodId
+      .agg(aggrProcs.head, aggrProcs.tail: _*))
+    groupedByPeriodId.map((df: DataFrame) => DeriveAttrsUtils.appendPartitionColumns(df, Seq(PeriodId.name)))
   }
 
   private def generatePeriodId(dailyStore: DataFrame, periodName: String, translator: TimeFilterTranslator): DataFrame = {

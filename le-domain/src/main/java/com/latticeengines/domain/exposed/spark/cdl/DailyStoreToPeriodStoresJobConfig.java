@@ -11,7 +11,7 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
 
     private static final long serialVersionUID = 0L;
 
-    public static final String NAME = "DailyStoreToPeriodStoresJobConfig";
+    public static final String NAME = "dailyStoreToPeriodStoresJob";
 
     @JsonProperty("streams")
     public List<AtlasStream> streams;

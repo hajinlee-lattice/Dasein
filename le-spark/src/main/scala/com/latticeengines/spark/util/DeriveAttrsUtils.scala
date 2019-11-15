@@ -9,6 +9,8 @@ import org.apache.spark.sql.DataFrame
 
 private[spark] object DeriveAttrsUtils {
 
+  val PARTITION_COL_PREFIX: String = "PK_"
+
   def getDeriverFunction(deriver: StreamAttributeDeriver): (DataFrame, Seq[String], String, Boolean, String) => DataFrame = {
     val calculation: Calculation = deriver.getCalculation
     calculation match {
@@ -66,5 +68,17 @@ private[spark] object DeriveAttrsUtils {
     } else {
       Seq(AccountId.name)
     }
+  }
+
+  def appendPartitionColumns(df: DataFrame, colsPartition: Seq[String]): DataFrame = {
+    var newDF: DataFrame = df
+    colsPartition.foreach((colName: String) => newDF = newDF.withColumn(PARTITION_COL_PREFIX + colName, newDF(colName)))
+    newDF
+  }
+
+  def dropPartitionColumns(df: DataFrame): DataFrame = {
+    var newDF: DataFrame = df
+    df.columns.foreach((colName: String) => if (colName.startsWith(PARTITION_COL_PREFIX)) newDF = newDF.drop(colName))
+    newDF
   }
 }

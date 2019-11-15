@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
+import com.latticeengines.spark.util.DeriveAttrsUtils;
 
 public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
@@ -36,7 +37,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String Count = "Count";
     private static final String SOME_DIM = "SomeDimension";
     private static final String Date = InterfaceName.__StreamDate.name();
-    private static final String PeriodIdForPartition = "PeriodIdPartition";
+    private static final String PeriodIdForPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + "PeriodId";
     // DateId in daily store table is not used while generating period stores
 
     private static List<Pair<String, Class<?>>> INPUT_FIELDS;
