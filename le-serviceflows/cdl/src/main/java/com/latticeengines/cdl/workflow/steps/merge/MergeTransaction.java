@@ -229,15 +229,21 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         if (noImports) { // then there must have soft delete actions. Else there will be exception when init.
             softDeleteMergeStep = 0;
             softDeleteStep = softDeleteMergeStep + 1;
-            int dayPeriodAgainStep = softDeleteStep + 1;
+            int collectRawStep = softDeleteStep + 1;
+            int cleanupAgainStep = collectRawStep + 1;
+            int dayPeriodAgainStep = cleanupAgainStep + 1;
             TransformationStepConfig softDeleteMerge = mergeSoftDelete(softDeleteActions);
             TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, rawTable);
+            TransformationStepConfig collectRaw = collectRaw();
+            TransformationStepConfig cleanupRaw = cleanupRaw(rawTable, collectRawStep);
             TransformationStepConfig dayPeriodsAgain = collectDays(softDeleteStep);
             TransformationStepConfig dailyPartitionAgain = partitionDaily(dayPeriodAgainStep, softDeleteStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(softDeleteMerge);
             steps.add(softDelete);
+            steps.add(collectRaw);
+            steps.add(cleanupRaw);
             steps.add(dayPeriodsAgain);
             steps.add(dailyPartitionAgain);
 
@@ -250,22 +256,29 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             dayPeriodStep = 3;
             softDeleteMergeStep = dayPeriodStep + 3;
             softDeleteStep = softDeleteMergeStep + 1;
-            int dayPeriodAgainStep = softDeleteStep + 1;
+            int collectRawStep = softDeleteStep + 1;
+            int cleanupAgainStep = collectRawStep + 1;
+            int dayPeriodAgainStep = cleanupAgainStep + 1;
+
 
             TransformationStepConfig daily = addTrxDate();
             TransformationStepConfig rawMerge = mergeRaw();
             TransformationStepConfig standardize = standardizeTrx(mergeRawStep);
             TransformationStepConfig dayPeriods = collectDays(standardizeStep);
-            TransformationStepConfig rawCleanup = cleanupRaw(rawTable);
+            TransformationStepConfig rawCleanup = cleanupRaw(rawTable, dayPeriodStep);
             TransformationStepConfig dailyPartition = partitionDaily(dayPeriodStep, standardizeStep);
 
             TransformationStepConfig softDeleteMerge = null;
             TransformationStepConfig softDelete = null;
+            TransformationStepConfig collectRaw = null;
+            TransformationStepConfig cleanupRawAgain = null;
             TransformationStepConfig dayPeriodsAgain = null;
             TransformationStepConfig dailyPartitionAgain = null;
             if (!skipSoftDelete) {
                 softDeleteMerge = mergeSoftDelete(softDeleteActions);
                 softDelete = softDelete(softDeleteMergeStep, rawTable);
+                collectRaw = collectRaw();
+                cleanupRawAgain = cleanupRaw(rawTable, collectRawStep);
                 dayPeriodsAgain = collectDays(softDeleteStep);
                 dailyPartitionAgain = partitionDaily(dayPeriodAgainStep, softDeleteStep);
             }
@@ -281,6 +294,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             if (!skipSoftDelete) {
                 steps.add(softDeleteMerge);
                 steps.add(softDelete);
+                steps.add(collectRaw);
+                steps.add(cleanupRawAgain);
                 steps.add(dayPeriodsAgain);
                 steps.add(dailyPartitionAgain);
             }
@@ -315,15 +330,21 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         if (noImports) {
             softDeleteMergeStep = 0;
             softDeleteStep = softDeleteMergeStep + 1;
-            int dayPeriodAgainStep = softDeleteStep + 1;
+            int collectRawStep = softDeleteStep + 1;
+            int cleanupAgainStep = collectRawStep + 1;
+            int dayPeriodAgainStep = cleanupAgainStep + 1;
             TransformationStepConfig softDeleteMerge = mergeSoftDelete(softDeleteActions);
             TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, rawTable);
+            TransformationStepConfig collectRaw = collectRaw();
+            TransformationStepConfig cleanupRaw = cleanupRaw(rawTable, collectRawStep);
             TransformationStepConfig dayPeriodsAgain = collectDays(softDeleteStep);
             TransformationStepConfig dailyPartitionAgain = partitionDaily(dayPeriodAgainStep, softDeleteStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(softDeleteMerge);
             steps.add(softDelete);
+            steps.add(collectRaw);
+            steps.add(cleanupRaw);
             steps.add(dayPeriodsAgain);
             steps.add(dailyPartitionAgain);
 
@@ -335,7 +356,9 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
             softDeleteMergeStep = dayPeriodStep + 2;
             softDeleteStep = softDeleteMergeStep + 1;
-            int dayPeriodAgainStep = softDeleteStep + 1;
+            int collectRawStep = softDeleteStep + 1;
+            int cleanupAgainStep = collectRawStep + 1;
+            int dayPeriodAgainStep = cleanupAgainStep + 1;
 
             TransformationStepConfig daily = addTrxDate();
             TransformationStepConfig standardize = standardizeTrx(dailyStep);
@@ -343,11 +366,15 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             TransformationStepConfig dailyPartition = partitionDaily(dayPeriodStep, standardizeStep);
             TransformationStepConfig softDeleteMerge = null;
             TransformationStepConfig softDelete = null;
+            TransformationStepConfig collectRaw = null;
+            TransformationStepConfig cleanupRawAgain = null;
             TransformationStepConfig dayPeriodsAgain = null;
             TransformationStepConfig dailyPartitionAgain = null;
             if (!skipSoftDelete) {
                 softDeleteMerge = mergeSoftDelete(softDeleteActions);
                 softDelete = softDelete(softDeleteMergeStep, rawTable);
+                collectRaw = collectRaw();
+                cleanupRawAgain = cleanupRaw(rawTable, collectRawStep);
                 dayPeriodsAgain = collectDays(softDeleteStep);
                 dailyPartitionAgain = partitionDaily(dayPeriodAgainStep, softDeleteStep);
             }
@@ -361,6 +388,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             if (!skipSoftDelete) {
                 steps.add(softDeleteMerge);
                 steps.add(softDelete);
+                steps.add(collectRaw);
+                steps.add(cleanupRawAgain);
                 steps.add(dayPeriodsAgain);
                 steps.add(dailyPartitionAgain);
             }
@@ -429,7 +458,26 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         return step;
     }
 
-    private TransformationStepConfig cleanupRaw(Table periodTable) {
+    private TransformationStepConfig collectRaw() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.PERIOD_COLLECTOR);
+
+        List<String> sourceNames = new ArrayList<>();
+        Map<String, SourceTable> sourceTables = new HashMap<>();
+        sourceNames.add(rawTable.getName());
+        SourceTable sourceTable = new SourceTable(rawTable.getName(), customerSpace);
+        sourceTables.put(rawTable.getName(), sourceTable);
+
+        PeriodCollectorConfig config = new PeriodCollectorConfig();
+        config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
+
+        step.setBaseSources(sourceNames);
+        step.setBaseTables(sourceTables);
+        step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig cleanupRaw(Table periodTable, int dayPeriodStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_CLEANER);
         step.setInputSteps(Collections.singletonList(dayPeriodStep));
