@@ -65,7 +65,6 @@ public class SftpConfiguration extends ProviderConfiguration {
 
     // If file name is versioned with timestamp (currently only timestamp format
     // version is supported), provider pattern for timestamp part, eg. yyyyMMdd
-    // Timezone info will be ignored and use local timezone
     @JsonProperty("FileTSPattern")
     private String fileTSPattern;
 
