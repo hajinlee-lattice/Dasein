@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.elasticache.ElasticCacheService;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
@@ -72,11 +73,17 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Value("${eai.import.csv.mappers.cores}")
     private int csvImportMapperCores;
 
+    @Value("${aws.region}")
+    private String awsRegion;
+
+    @Value("${aws.default.access.key}")
+    private String awsAccessKey;
+
+    @Value("${aws.default.secret.key.encrypted}")
+    private String awsSecretKey;
+
     @Inject
     private ElasticCacheService elastiCacheService;
-
-    // @Autowired
-    // private SparkImport sparkImport;
 
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
@@ -117,7 +124,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put(MapReduceProperty.OUTPUT.name(), new HdfsUriGenerator().getHdfsUriForSqoop(ctx, table));
 
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
-        props.put(MapReduceProperty.INPUT.name(), hdfsFileToImport);
+
         props.put("eai.table.schema", JsonUtils.serialize(table));
         String idColumnName = ctx.getProperty(ImportProperty.ID_COLUMN_NAME, String.class);
         if (StringUtils.isEmpty(idColumnName)) {
@@ -128,6 +135,13 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("eai.redis.timeout", String.valueOf(redisTimeout));
         props.put("eai.redis.endpoint", elastiCacheService.getPrimaryEndpointAddress());
         props.put("eai.redis.local", String.valueOf(localRedis));
+        props.put("eai.import.use.s3.input", ctx.getProperty(ImportProperty.USE_S3_INPUT, String.class, "false"));
+        props.put("eai.import.aws.s3.bucket", ctx.getProperty(ImportProperty.S3_BUCKET, String.class, ""));;
+        props.put("eai.import.aws.s3.object.key", ctx.getProperty(ImportProperty.S3_OBJECT_KEY, String.class, ""));;
+        props.put("eai.import.aws.region", awsRegion);
+        props.put("eai.import.aws.access.key", CipherUtils.encrypt(awsAccessKey));
+        props.put("eai.import.aws.secret.key", CipherUtils.encrypt(awsSecretKey));
+        props.put(MapReduceProperty.INPUT.name(), hdfsFileToImport);
         List<String> cacheFiles = new ArrayList<>();
         try {
             cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
