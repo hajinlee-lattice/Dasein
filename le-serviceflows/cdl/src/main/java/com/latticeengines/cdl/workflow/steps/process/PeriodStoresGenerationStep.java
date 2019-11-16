@@ -108,7 +108,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 Table periodStoreTable = dirToTable(name, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), name, periodStoreTable);
                 signatureTableNames.put(details.getLabels().get(offset), name); // use period name as signature
-                exportToS3AndAddToContext(periodStoreTable, name);
+                putStringValueInContext(name, periodStoreTable.getName());
             }
         });
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
