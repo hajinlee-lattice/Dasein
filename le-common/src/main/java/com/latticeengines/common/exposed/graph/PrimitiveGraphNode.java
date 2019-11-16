@@ -14,6 +14,10 @@ public abstract class PrimitiveGraphNode<T> implements GraphNode {
         this.children = new HashSet<>();
     }
 
+    public String getId() {
+        return String.valueOf(val);
+    }
+
     public T getVal() {
         return val;
     }

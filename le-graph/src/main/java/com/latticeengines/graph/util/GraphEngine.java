@@ -70,10 +70,10 @@ public class GraphEngine implements AutoCloseable {
     }
 
     private Vertex addOrGetNode(GraphNode graphNode) {
-        int id = System.identityHashCode(graphNode);
+        String id = graphNode.getId();
         String clz = graphNode.getClass().getSimpleName();
         Vertex vertex;
-        if (g.V().has(clz,PROPERTY_ID, id).hasNext()) {
+        if (g.V().has(clz, PROPERTY_ID, id).hasNext()) {
             vertex = g.V().has(clz, PROPERTY_ID, id).next();
         } else {
             vertex = g.addV(clz).property(PROPERTY_ID, id).property(PROPERTY_VALUE, graphNode).next();
