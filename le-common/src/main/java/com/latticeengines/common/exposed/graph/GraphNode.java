@@ -10,6 +10,9 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public interface GraphNode extends Visitable {
 
+    // to determine if two GraphNodes of the same type (Class) should be the same Vertex in a graph
+    default String getId() { return String.valueOf(System.identityHashCode(this)); }
+
     default Collection<? extends GraphNode> getChildren() {
         return Collections.emptyList();
     }
@@ -21,4 +24,5 @@ public interface GraphNode extends Visitable {
     default void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
     }
+
 }
