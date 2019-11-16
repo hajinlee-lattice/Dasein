@@ -103,6 +103,8 @@ public class GraphEngineUnitTestNG {
             StringGraphNode n4 = new StringGraphNode("4");
             StringGraphNode n5 = new StringGraphNode("5");
 
+            StringGraphNode n11 = new StringGraphNode("1");
+
             n1.addChild(n2);
             n2.addChild(n3);
             n2.addChild(n4);
@@ -110,8 +112,11 @@ public class GraphEngineUnitTestNG {
             n5.addChild(n1);
             n3.addChild(n1);
 
-            List<GraphNode> graphNodes = Arrays.asList(n1, n2, n3, n4, n5);
+            List<GraphNode> graphNodes = Arrays.asList(n1, n11, n2, n3, n4, n5);
             graphEngine.loadGraphNodes(graphNodes);
+
+            GraphTraversalSource g = graphEngine.getTraverser();
+            Assert.assertEquals(g.V().toList().size(), 5);
 
             cycles= graphEngine.getCycles();
             Assert.assertEquals(cycles.size(), 2);

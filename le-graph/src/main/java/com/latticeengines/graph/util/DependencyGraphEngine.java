@@ -26,8 +26,8 @@ public class DependencyGraphEngine extends GraphEngine implements AutoCloseable 
         return divideToLayers(depthMap, maxLayers);
     }
 
-    public <T extends GraphNode> List<Set<T>> getDependencyLayersForSubDAG(Class<T> nodeClz, int maxLayers, //
-                                                                             Collection<T> seed) {
+    public <T extends GraphNode> List<Set<T>> getDependencyLayersForSubDAG(Class<T> nodeClz, int maxLayers,
+            Collection<T> seed) {
         Map<T, Integer> depthMap = seed == null //
                 ? getDependencyDepth(nodeClz, Collections.emptyList()) //
                 : getDependencyDepth(nodeClz, seed);
