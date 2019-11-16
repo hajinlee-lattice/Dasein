@@ -48,7 +48,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val attrRolledUp: Seq[DataFrame] = filteredByTime.map(item => rollupAndCreateAttr(item._1, item._2, groupConfig))
 
     // join dataframes from all time filters
-    val entityIdColName = DeriveAttrsUtils.getEntityIdColumnName(groupConfig.getEntity)
+    val entityIdColName = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(groupConfig.getEntity)
     val joined: DataFrame = attrRolledUp.reduce((df1, df2) => {
       df1.join(df2, Seq(entityIdColName), "fullouter")
     })
@@ -75,7 +75,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
   def rollupAndCreateAttr(df: DataFrame, timeRangeName: String, groupConfig: ActivityMetricsGroup): DataFrame = {
     val targetAttr: String = groupConfig.getAggregation.getTargetAttribute
-    val entityIdColName: String = DeriveAttrsUtils.getEntityIdColumnName(groupConfig.getEntity)
+    val entityIdColName: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(groupConfig.getEntity)
     val rollupDimNames: Seq[String] = groupConfig.getRollupDimensions.split(",") :+ entityIdColName
     val pivotDimNames: Seq[String] = groupConfig.getRollupDimensions.split(",")
     val pivotCols: Seq[String] = df.columns.filter(colName => pivotDimNames.contains(colName)).toSeq

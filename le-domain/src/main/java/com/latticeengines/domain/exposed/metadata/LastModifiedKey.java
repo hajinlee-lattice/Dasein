@@ -5,12 +5,14 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_LASTMODIFIED_KEY")
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@JsonIgnoreProperties(value = { "hibernateLazyInitializer", "handler" }, ignoreUnknown = true)
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class LastModifiedKey extends AttributeOwner {
 
     @Column(name = "LAST_MODIFIED_TS", nullable = false)

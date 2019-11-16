@@ -36,7 +36,6 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
-
     @Override
     public void initialize(String tenantId) {
         if (!s3Service.objectExist(s3Bucket, tenantId)) {
@@ -76,16 +75,11 @@ public class S3ImportFolderServiceImpl implements S3ImportFolderService {
         String date = dateFormat.format(new Date());
         String prefix = System.currentTimeMillis() / 1000L + "-" + entity;
         String path = tenantId + INPUT_ROOT + IN_PROGRESS + "/" + date + "/" + prefix + "/";
-        String backupPath = tenantId + INPUT_ROOT + BACKUP + "/" + date + "/" + prefix + "/";
         if (!s3Service.objectExist(s3Bucket, path)) {
             s3Service.createFolder(s3Bucket, path);
         }
-        if (!s3Service.objectExist(s3Bucket, backupPath)) {
-            s3Service.createFolder(s3Bucket, backupPath);
-        }
         String target = path + getFileName(sourceKey);
-        String backupTarget = backupPath + getFileName(sourceKey);
-        return Pair.of(target, backupTarget);
+        return Pair.of(target, target);
     }
 
     private String getFileName(String key) {

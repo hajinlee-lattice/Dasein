@@ -30,6 +30,9 @@ public class ImportProperty extends BaseProperty {
     public static final String DUPLICATE_ROWS = "duplciateRows";
     public static final String SKIP_UPDATE_ATTR_NAME = "skipUpdateAttrName";
     public static final String BUSINESS_ENTITY = "businessEntity";
+    public static final String USE_S3_INPUT = "useS3Input";
+    public static final String S3_BUCKET = "s3Bucket";
+    public static final String S3_OBJECT_KEY = "s3ObjectKey";
     public static final String ERROR_FILE = "error.csv";
     public static final String[] ERROR_HEADER = new String[] { "LineNumber", "Id", "ErrorMessage" };
 }

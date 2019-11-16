@@ -33,7 +33,6 @@ public class ImportConfigurationUnitTestNG {
         importConfig.addSourceConfiguration(marketoImportConfig);
 
         String importConfigStr = importConfig.toString();
-        System.out.println(importConfigStr);
 
         ImportConfiguration deserializedImportConfig = JsonUtils.deserialize(importConfigStr,
                 ImportConfiguration.class);

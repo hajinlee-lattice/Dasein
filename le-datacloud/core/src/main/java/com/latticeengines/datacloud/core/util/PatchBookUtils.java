@@ -41,6 +41,8 @@ public class PatchBookUtils {
             "ExpireAfter date should not be earlier than EffectiveSince date";
     public static final String UNSUPPORTED_MATCH_KEY_ERROR = "Unsupported match key combination found. We do not support following combination : ";
     public static final String INVALID_PATCH_ITEMS = "Invalid Patch Items : Empty Patch Item Object Found.";
+    public static final String MIN_PID = "MIN";
+    public static final String MAX_PID = "MAX";
 
     // Key: patch book type, Value: set of supported match key tuple (in serialized format)
     private static final Map<PatchBook.Type, Set<String>> SUPPORTED_MATCH_KEY_MAP = new HashMap<>();

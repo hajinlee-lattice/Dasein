@@ -43,6 +43,7 @@ public enum TableRoleInCollection {
     AccountExport, //
 
     WebVisitProfile, //
+    PeriodStores, //
 
     AccountMaster;
 
