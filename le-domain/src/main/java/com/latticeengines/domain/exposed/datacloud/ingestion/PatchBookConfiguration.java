@@ -15,12 +15,26 @@ public class PatchBookConfiguration extends ProviderConfiguration {
     @JsonProperty("SkipValidation")
     private boolean skipValidation;
 
-    @JsonProperty("BatchSize")
-    private Integer batchSize = 0;
+    // Total number of batches in ingestion job.
+    // Only for testing purpose, don't recommend to have a fixed value for
+    // production
+    // job
+    @JsonProperty("BatchCnt")
+    private Integer batchCnt;
 
+    // Min PID in PatchBook table
+    // Only for testing purpose, don't recommend to have a fixed value for
+    // production job
+    // Only when both minPid and maxPid are provided, they will be honored,
+    // otherwise get minPid and maxPid from PatchBook table
     @JsonProperty("MinPid")
     private Long minPid;
 
+    // Max PID in PatchBook table
+    // Only for testing purpose, don't recommend to have a fixed value for
+    // production job
+    // Only when both minPid and maxPid are provided, they will be honored,
+    // otherwise get minPid and maxPid from PatchBook table
     @JsonProperty("MaxPid")
     private Long maxPid;
 
@@ -37,12 +51,12 @@ public class PatchBookConfiguration extends ProviderConfiguration {
         this.concurrentNum = 1;
     }
 
-    public int getBatchSize() {
-        return batchSize;
+    public Integer getBatchCnt() {
+        return batchCnt;
     }
 
-    public void setBatchSize(Integer batchSize) {
-        this.batchSize = batchSize;
+    public void setBatchCnt(Integer batchCnt) {
+        this.batchCnt = batchCnt;
     }
 
     public PatchBook.Type getBookType() {

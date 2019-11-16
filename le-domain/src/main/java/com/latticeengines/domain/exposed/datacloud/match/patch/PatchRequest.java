@@ -30,6 +30,7 @@ public class PatchRequest {
     @JsonProperty("StartPid")
     private Long startPid;
 
+    // endPid is exclusive
     @JsonProperty("EndPid")
     private Long endPid;
 

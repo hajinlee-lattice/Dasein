@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.core.dao.impl;
 
+import static com.latticeengines.datacloud.core.util.PatchBookUtils.MAX_PID;
+import static com.latticeengines.datacloud.core.util.PatchBookUtils.MIN_PID;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
