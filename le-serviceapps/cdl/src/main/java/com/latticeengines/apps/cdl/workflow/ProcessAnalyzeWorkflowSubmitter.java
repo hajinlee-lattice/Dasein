@@ -653,9 +653,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace, Tenant tenant,
             ProcessAnalyzeRequest request, List<Action> completedActions, List<Long> actionIds,
-                                                                      Set<BusinessEntity> needDeletedEntities,
-                                                                      Status status,
-            String currentDataCloudBuildNumber, long workflowPid) {
+            Set<BusinessEntity> replaceEntities, Status status, String currentDataCloudBuildNumber, long workflowPid) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
 
@@ -703,8 +701,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             needSkipConvertEntities.add(BusinessEntity.Contact);
             needSkipConvertEntities.add(BusinessEntity.Transaction);
         } else {
-            if (CollectionUtils.isNotEmpty(needDeletedEntities)) {
-                needSkipConvertEntities.addAll(needDeletedEntities);
+            if (CollectionUtils.isNotEmpty(replaceEntities)) {
+                needSkipConvertEntities.addAll(replaceEntities);
             }
             needSkipConvertEntities.addAll(getNonBatchStoreEntities(customerSpace, needConvertBatchStoreMap));
         }
@@ -724,7 +722,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .ownerId(workflowPid) //
                 .rebuildEntities(request.getRebuildEntities()) //
                 .rebuildSteps(request.getRebuildSteps()) //
-                .replaceEntities(needDeletedEntities) //
+                .replaceEntities(replaceEntities) //
                 .ignoreDataCloudChange(request.getIgnoreDataCloudChange()) //
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
@@ -948,7 +946,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         String currentDataCloudBuildNumber = columnMetadataProxy.latestBuildNumber();
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, tenant, request,
-                Collections.emptyList(), actionIds, new HashSet<>(),
+                Collections.emptyList(), actionIds,
+                Sets.newHashSet(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Transaction),
                 initialStatus, currentDataCloudBuildNumber, pidWrapper.getPid());
 
         configuration.setFailingStep(request.getFailingStep());
