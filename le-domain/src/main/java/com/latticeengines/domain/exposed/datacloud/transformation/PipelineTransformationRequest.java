@@ -26,9 +26,9 @@ public class PipelineTransformationRequest {
     private String name;
 
     // Target version of a pipeline job
-    // If provided, all the target sources in the pipeline job are generated
-    // with the specified version
-    // If not provided, use current timestamp to generate target version
+    // All the target sources in the pipeline are generated with same target
+    // version
+    // If not provided, use current timestamp to create target version
     @JsonProperty("Version")
     private String version;
 
