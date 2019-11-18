@@ -350,7 +350,14 @@ public class AttributePatchTestNG extends PipelineTransformationTestNGBase {
 
     private String getConfigStr() {
         TransformerConfig config = new TransformerConfig();
-        // need to retain json properties from AM
+        // Need to retain json properties from AM
+        // Pipeline steps in AccountMaster rebuild pipeline (target source of
+        // final step is AccountMaster) should mark this flag as true
+        // Reason: 0th step of AccountMaster rebuild pipeline -- mapAttribute --
+        // generates a property called "DataCloudVersion" in avsc schema file.
+        // Any later steps should inherit this property to make sure avsc schema
+        // of final AccountMaster source has this property which is critical for
+        // AccountMaster Weekly Refresh pipeline
         config.setShouldInheritSchemaProp(true);
         return JsonUtils.serialize(config);
     }
