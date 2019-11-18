@@ -10,9 +10,6 @@ public class AMCleanerConfig extends TransformerConfig {
     @JsonProperty("DataCloudVersion")
     private String dataCloudVersion;
 
-    @JsonProperty("IsMini")
-    private boolean isMini; // Indicate it's full AM or mini AM
-
     public boolean getIsUpdate() {
         return isUpdate;
     }
@@ -27,13 +24,5 @@ public class AMCleanerConfig extends TransformerConfig {
 
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
-    }
-
-    public boolean getIsMini() {
-        return isMini;
-    }
-
-    public void setIsMini(boolean isMini) {
-        this.isMini = isMini;
     }
 }

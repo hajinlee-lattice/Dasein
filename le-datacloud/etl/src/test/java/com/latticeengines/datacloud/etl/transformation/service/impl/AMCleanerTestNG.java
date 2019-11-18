@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -18,18 +21,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AMCleaner;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.MapAttributeTransformer;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -37,7 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AM
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class AMCleanerTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AMCleanerTestNG.class);
     private GeneralSource baseSourceAccMaster1 = new GeneralSource("AccountMaster");
     private GeneralSource accMasterCleaned = new GeneralSource("AccountMasterCleaned");
@@ -51,25 +53,12 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
                     "BmbrSurge_BucketCode", "BmbrSurge_CompositeScore", "BuiltWith_TechIndicators",
                     "HGData_SupplierTechIndicators", "HGData_SegmentTechIndicators"));
 
-    @Autowired
+    @Inject
     private SourceAttributeEntityMgr srcAttrEntityMgr;
 
-    @Autowired
-    private AccountMaster am;
-
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Test(groups = "pipeline1")
@@ -84,6 +73,7 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         confirmResultFile(progress);
         cleanupProgressTables();
     }
+
 
     private void prepareAM() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
@@ -102,13 +92,15 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         schema.add(Pair.of("IsMatched", Boolean.class)); // Drop
         schema.add(Pair.of("IsPublicDomain", Boolean.class)); // Drop
         schema.add(Pair.of("ExtraColumn", String.class)); // not present in source attribute, should be dropped
-        uploadBaseSourceData(am.getSourceName(), baseSourceVersion, schema, amData);
+        uploadBaseSourceData(baseSourceAccMaster1.getSourceName(), baseSourceVersion, schema, amData);
         try {
-            extractSchema(am, baseSourceVersion,
-                    hdfsPathBuilder.constructSnapshotDir(am.getSourceName(), baseSourceVersion).toString());
+            extractSchema(baseSourceAccMaster1, baseSourceVersion,
+                    hdfsPathBuilder.constructSnapshotDir(baseSourceAccMaster1.getSourceName(), baseSourceVersion)
+                            .toString(),
+                    ImmutableMap.of(MapAttributeTransformer.DATA_CLOUD_VERSION, DATA_CLOUD_VERSION));
         } catch (Exception e) {
-            log.error(String.format("Fail to extract schema for source %s at version %s", am.getSourceName(),
-                    baseSourceVersion));
+            log.error(String.format("Fail to extract schema for source %s at version %s",
+                    baseSourceAccMaster1.getSourceName(), baseSourceVersion));
         }
     }
 
@@ -178,7 +170,14 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
     private String getAMCleanerConfigStep1() throws JsonProcessingException {
         AMCleanerConfig conf = new AMCleanerConfig();
         conf.setDataCloudVersion(DATA_CLOUD_VERSION);
-        conf.setIsMini(true);
+        // Pipeline steps in AccountMaster rebuild pipeline (target source of
+        // final step is AccountMaster) should mark this flag as true
+        // Reason: 0th step of AccountMaster rebuild pipeline -- mapAttribute --
+        // generates a property called "DataCloudVersion" in avsc schema file.
+        // Any later steps should inherit this property to make sure avsc schema
+        // of final AccountMaster source has this property which is critical for
+        // AccountMaster Weekly Refresh pipeline
+        conf.setShouldInheritSchemaProp(true);
         return JsonUtils.serialize(conf);
     }
 
@@ -187,7 +186,14 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
         String latestDataCloudVersion = srcAttrEntityMgr.getLatestDataCloudVersion(
                 AMCleaner.ACCOUNT_MASTER, AMCleaner.CLEAN, AMCleaner.TRANSFORMER_NAME);
         conf.setDataCloudVersion(latestDataCloudVersion);
-        conf.setIsMini(true);
+        // Pipeline steps in AccountMaster rebuild pipeline (target source of
+        // final step is AccountMaster) should mark this flag as true
+        // Reason: 0th step of AccountMaster rebuild pipeline -- mapAttribute --
+        // generates a property called "DataCloudVersion" in avsc schema file.
+        // Any later steps should inherit this property to make sure avsc schema
+        // of final AccountMaster source has this property which is critical for
+        // AccountMaster Weekly Refresh pipeline
+        conf.setShouldInheritSchemaProp(true);
         return JsonUtils.serialize(conf);
     }
 
@@ -222,6 +228,14 @@ public class AMCleanerTestNG extends TransformationServiceImplTestNGBase<Pipelin
             rowNum++;
         }
         Assert.assertEquals(rowNum, expectedData.length);
+        verifySchemaProperties(source, version);
+    }
+
+    private void verifySchemaProperties(String source, String version) {
+        Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source, version);
+        Assert.assertNotNull(schema);
+        Assert.assertNotNull(schema.getObjectProps());
+        Assert.assertEquals(schema.getProp(MapAttributeTransformer.DATA_CLOUD_VERSION), DATA_CLOUD_VERSION);
     }
 
     private void verifySourceAttrs(GenericRecord record, List<Field> amfields,

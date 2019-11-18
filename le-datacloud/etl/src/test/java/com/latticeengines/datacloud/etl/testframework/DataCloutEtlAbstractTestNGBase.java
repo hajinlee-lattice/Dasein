@@ -16,6 +16,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -187,6 +188,11 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
     }
 
     protected void extractSchema(Source source, String version, String avroDir) throws Exception {
+        extractSchema(source, version, avroDir, null);
+    }
+
+    protected void extractSchema(Source source, String version, String avroDir, Map<String, String> extraProps)
+            throws Exception {
         String avscPath;
         if (source instanceof TableSource) {
             TableSource tableSource = (TableSource) source;
@@ -206,6 +212,12 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
             parsedSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
         } else {
             throw new IllegalStateException("No avro file found at " + avroDir);
+        }
+
+        if (MapUtils.isNotEmpty(extraProps)) {
+            for (Map.Entry<String, String> prop : extraProps.entrySet()) {
+                parsedSchema.addProp(prop.getKey(), prop.getValue());
+            }
         }
 
         HdfsUtils.writeToFile(yarnConfiguration, avscPath, parsedSchema.toString());

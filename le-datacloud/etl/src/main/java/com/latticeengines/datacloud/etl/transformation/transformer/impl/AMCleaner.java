@@ -3,17 +3,14 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.AMCleaner.TRANSFORMER_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CLEANER;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
@@ -22,7 +19,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.AMCleanerParameters.
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMCleanerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(TRANSFORMER_NAME)
 public class AMCleaner extends AbstractDataflowTransformer<AMCleanerConfig, AMCleanerParameters> {
@@ -80,25 +76,4 @@ public class AMCleaner extends AbstractDataflowTransformer<AMCleanerConfig, AMCl
         }
         parameters.setAttrOpts(mapAttr);
     }
-
-    protected Schema getTargetSchema(Table result, AMCleanerParameters parameters, AMCleanerConfig config,
-            List<Schema> baseSchemas) {
-        String extractPath = result.getExtracts().get(0).getPath();
-        String glob;
-        if (extractPath.endsWith(".avro")) {
-            glob = extractPath;
-        } else if (extractPath.endsWith(File.pathSeparator)) {
-            glob = extractPath + "*.avro";
-        } else {
-            glob = extractPath + File.separator + "*.avro";
-        }
-        Schema parsed = AvroUtils.getSchemaFromGlob(yarnConfiguration, glob);
-        String version = parameters.getDataCloudVersion();
-        if (Boolean.TRUE.equals(config.getIsMini())) {
-            version = MINI_PREFIX + version;
-        }
-        parsed.addProp(DATA_CLOUD_VERSION, version);
-        return parsed;
-    }
-
 }

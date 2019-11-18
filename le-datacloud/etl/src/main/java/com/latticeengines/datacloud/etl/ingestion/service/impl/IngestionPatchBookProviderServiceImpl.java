@@ -182,11 +182,9 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         private void validate() {
             try (PerformanceTimer timer = new PerformanceTimer(
                     String.format(
-                            "Validated PatchBook with type=%s, mode=%s, minPid=%d, batch size = %d",
+                            "Validated PatchBook with type=%s, mode=%s, minPid=%d, maxPid(exclusive)=%d",
                             patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
                             maxPid))) {
-                log.info(String.format("Validating PatchBook with type=%s, mode=%s, offset=%d, batch size = %d",
-                        patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
                 PatchRequest patchRequest = new PatchRequest();
                 patchRequest.setMode(patchConfig.getPatchMode());
                 patchRequest.setDataCloudVersion(progress.getDataCloudVersion());

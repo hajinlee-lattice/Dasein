@@ -22,12 +22,23 @@ public class TransformationStepConfig {
     public static final String SIMPLE = "Simple";
     public static final String ITERATIVE = "Iterative";
 
+    // Transformer name for the pipeline step which identifies which job to run
     @JsonProperty("Transformer")
     private String transformer;
 
+    // A pipeline step has 2 types of input source:
+    // -- Output of preceding step within same pipeline by providing step
+    // sequence number
+    // -- Source with specified name
+    // "InputSteps" is a list of step sequence numbers which is the 1st type of
+    // input source
+    // When transformation dataflow takes input list, 1st type of input sources
+    // are listed before 2nd type of input sources
     @JsonProperty("InputSteps")
     private List<Integer> inputSteps;
 
+    // "BaseSources" is a list of source names is the 2nd type of input source
+    // (See comments for "InputSteps" for the other type of input source)
     @JsonProperty("BaseSources")
     private List<String> baseSources;
 
@@ -48,27 +59,44 @@ public class TransformationStepConfig {
     @JsonProperty("BaseIngestions")
     private Map<String, SourceIngestion> baseIngestions;
 
+    // If provided, read base sources with specified base versions
+    // If not provided, read base sources with current version
     @JsonProperty("BaseVersions")
     private List<String> baseVersions;
 
     @JsonProperty("BaseTemplates")
     private List<String> baseTemplates;
 
+    // If output of the step needs to be persisted, provide target source name
+    // for output
+    // If not provided, output of the step could be used as input for subsequent
+    // steps within same pipeline, and will be deleted when the pipeline job is
+    // finished if "KeepTemp" is false
     @JsonProperty("TargetSource")
     private String targetSource;
 
+    // If output of the step is a table source, provide TargetTable instead of
+    // TargetSource
     @JsonProperty("TargetTable")
     private TargetTable targetTable;
 
+    // If provided, target source is generated with specified version
+    // If not provided (general use case), target source is generated with
+    // pipeline version
     @JsonProperty("TargetVersion")
     private String targetVersion;
 
     @JsonProperty("TargetTemplate")
     private String targetTemplate;
 
+    // Simple: The pipeline step runs once
+    // Iterative: The pipeline step runs repeatedly until the output count is no
+    // longer changed
     @JsonProperty("StepType")
     private String stepType = SIMPLE;
 
+    // This transformer doesn't need input. "BaseSources", "BaseTables",
+    // "BaseIngestions" and "BaseVersions" are all ignored
     @JsonProperty("NoInput")
     private Boolean noInput = null;
 
