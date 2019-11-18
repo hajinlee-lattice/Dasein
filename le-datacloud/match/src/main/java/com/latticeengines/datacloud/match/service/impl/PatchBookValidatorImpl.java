@@ -53,7 +53,8 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
 
     private static final Logger log = LoggerFactory.getLogger(PatchBookValidatorImpl.class);
 
-    private static final long AM_COL_CACHE_TTL_IN_HRS = 1L; // 1 hr ttl, add to property file later if needed
+    // 15 mins ttl, add to property file later if needed
+    private static final long AM_COL_CACHE_TTL_IN_MINS = 15L;
     // TODO remove dummy version after source attr table has versioning
     private static final String DUMMY_SRC_ATTR_DC_VERSION = "2.0.999"; // dummy version for src attr cache
 
@@ -480,7 +481,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             if (amColumnCache == null) {
                 log.info("Instantiating AM column cache");
                 amColumnCache = Caffeine.newBuilder() //
-                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_HRS, TimeUnit.HOURS) //
+                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_MINS, TimeUnit.MINUTES) //
                         .build((dataCloudVersion) -> {
                             log.info("Loading AM columns for datacloud version {}", dataCloudVersion);
                             List<AccountMasterColumn> amCols = columnEntityMgr.findAll(dataCloudVersion) //
@@ -520,7 +521,7 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
             if (srcAttrCache == null) {
                 log.info("Instantiating source attribute cache");
                 srcAttrCache = Caffeine.newBuilder() //
-                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_HRS, TimeUnit.HOURS) //
+                        .expireAfterAccess(AM_COL_CACHE_TTL_IN_MINS, TimeUnit.MINUTES) //
                         .build((dataCloudVersion) -> {
                             log.info("Loading source attributes for datacloud version {}", dataCloudVersion);
                             // TODO use datacloud version after the table supports it
