@@ -261,7 +261,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                         !reachFailCountLimit(tenantId, dataCloudRefreshMaxFailCount));
                 // add to list
                 tenantActivityList.add(tenantActivity);
-                log.info("tenantActivity = {}", JsonUtils.pprint(tenantActivity));
             }
         }
 
