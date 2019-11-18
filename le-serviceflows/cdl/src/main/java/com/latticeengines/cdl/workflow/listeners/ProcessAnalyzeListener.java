@@ -15,6 +15,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
@@ -142,20 +143,17 @@ public class ProcessAnalyzeListener extends LEJobListener {
 
     private void updateFailCountInCache(BatchStatus status) {
         try {
-            Integer currentCount = (Integer) redisTemplate.opsForValue().get(customerSpace);
-            if (currentCount == null) {
-                redisTemplate.opsForValue().set(customerSpace, 0);
-                redisTemplate.expire(customerSpace, 7, TimeUnit.DAYS);
-            }
+            String failCountKey = CacheName.Constants.PAFailCountCacheName + "_" + customerSpace;
             if (status == BatchStatus.COMPLETED) {
-                log.info(String.format("Workflow COMPLETED. clean failcount of %s",
-                        customerSpace));
-                redisTemplate.opsForValue().set(customerSpace, 0);
+                log.info("Workflow COMPLETED. clean failcount of {}",
+                        customerSpace);
+                redisTemplate.opsForValue().set(failCountKey, 0);
             } else {
-                log.info(String.format("Workflow FAILED. increase failcount of %s",
-                        customerSpace));
-                redisTemplate.opsForValue().increment(customerSpace, 1);
+                log.info("Workflow FAILED. increase failcount of {}",
+                        customerSpace);
+                redisTemplate.opsForValue().increment(failCountKey, 1);
             }
+            redisTemplate.expire(failCountKey, 7, TimeUnit.DAYS);
         } catch (Exception e) {
             log.error("update redis cache fail.", e);
         }

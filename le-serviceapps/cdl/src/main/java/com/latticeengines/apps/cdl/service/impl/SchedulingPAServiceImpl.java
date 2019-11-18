@@ -43,6 +43,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
@@ -239,7 +240,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                                 || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
                             dataFeedService.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                         }
-                        tenantActivity.setAutoSchedule(!reachFailCountLimit(tenantId, autoScheduleMaxFailCount));
                         tenantActivity.setInvokeTime(invokeTime.getTime());
                         ActionStat stat = actionStats.get(tenant.getPid());
                         if (stat.getFirstActionTime() != null) {
@@ -247,6 +247,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                         }
                         if (stat.getLastActionTime() != null) {
                             tenantActivity.setLastActionTime(stat.getLastActionTime().getTime());
+                        }
+                        if(isNewActionAdded(tenantId, stat.getLastActionTime())){
+                            tenantActivity.setAutoSchedule(true);
+                        } else {
+                            tenantActivity.setAutoSchedule(!reachFailCountLimit(tenantId, autoScheduleMaxFailCount));
                         }
                     }
                 }
@@ -256,6 +261,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                         !reachFailCountLimit(tenantId, dataCloudRefreshMaxFailCount));
                 // add to list
                 tenantActivityList.add(tenantActivity);
+                log.info("tenantActivity = {}", JsonUtils.pprint(tenantActivity));
             }
         }
 
@@ -490,7 +496,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
         }
         if (allowAutoSchedule) {
-            log.info("Tenant {} allow auto scheduling ", customerSpace);
+            log.debug("Tenant {} allow auto scheduling ", customerSpace);
             int invokeHour = zkConfigService.getInvokeTime(customerSpace, CDLComponent.componentName);
             Tenant tenantInContext = MultiTenantContext.getTenant();
             try {
@@ -606,17 +612,47 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     public boolean reachFailCountLimit(String tenantId, int maxFailCount) {
         try {
-            Integer currentCount = (Integer) redisTemplate.opsForValue().get(tenantId);
+            String failCountKey = CacheName.Constants.PAFailCountCacheName + "_" + tenantId;
+            Integer currentCount = (Integer) redisTemplate.opsForValue().get(failCountKey);
             if (currentCount == null) {
-                log.info("tenantId = {} and failcount is 0", tenantId);
-                return true;
+                log.debug("tenantId = {} and failcount is 0", tenantId);
+                return false;
             }
-            log.info("tenantId = {} and failcount is {}", tenantId, currentCount);
+            log.debug("tenantId = {} and failcount is {}", tenantId, currentCount);
             return currentCount >= maxFailCount;
         } catch (Exception e) {
             log.error("get redis cache fail.", e);
         }
         return false;
+    }
+
+
+    private boolean isNewActionAdded(String tenantId, Date lastActionTimeInDB) {
+        try {
+            String lastActionTimeKey = CacheName.Constants.LastActionTimeCacheName + "_" + tenantId;
+            String failCountKey = CacheName.Constants.PAFailCountCacheName + "_" + tenantId;
+            Date lastActionTimeInCache = (Date) redisTemplate.opsForValue().get(lastActionTimeKey);
+            if(lastActionTimeInCache == null || lastActionTimeInCache.before(lastActionTimeInDB)){
+                log.info("New Action added for {}", tenantId);
+                Integer currentCount = (Integer) redisTemplate.opsForValue().get(failCountKey);
+                if (currentCount == null || currentCount <= 2) {
+                    log.debug("FailCount of {} lower than 3, Clean failcount in cache", tenantId);
+                    redisTemplate.opsForValue().set(failCountKey, 0);
+                } else {
+                    currentCount= (currentCount>autoScheduleMaxFailCount?autoScheduleMaxFailCount:currentCount) - 2;
+                    redisTemplate.opsForValue().set(failCountKey, currentCount);
+                    log.debug("FailCount of {} bigger than 2, minus 2 for failcount in cache", tenantId);
+                }
+                redisTemplate.opsForValue().set(lastActionTimeKey, lastActionTimeInDB);
+                return true;
+            } else {
+                log.debug("No new Action added for {}", tenantId);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("get redis cache fail.", e);
+            return false;
+        }
     }
 
 }

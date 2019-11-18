@@ -83,5 +83,7 @@ public enum CacheName {
         public static final String EMRClusterCacheName = "EMRClusterCache";
         public static final String ModelSummaryCacheName = "ModelSummaryCache";
         public static final String ActiveStackInfoCacheName = "ActiveStackInfoCache";
+        public static final String LastActionTimeCacheName = "LastActionTimeCache";
+        public static final String PAFailCountCacheName = "PAFailCountCache";
     }
 }
