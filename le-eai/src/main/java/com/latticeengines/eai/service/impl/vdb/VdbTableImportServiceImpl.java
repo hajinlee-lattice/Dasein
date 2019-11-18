@@ -79,6 +79,7 @@ public class VdbTableImportServiceImpl extends ImportService {
     }
 
     public static final String EXTRACT_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
+    private static final int RECORDS_PER_EXTRACT_MIN = 1000000;
 
     @Autowired
     private VdbTableToAvroTypeConverter vdbTableToAvroTypeConverter;
@@ -92,13 +93,16 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Autowired
     private EaiImportJobDetailService eaiImportJobDetailService;
 
-    @Value("${eai.vdb.extract.size:1000000}")
+    @Value("${eai.vdb.extract.size}")
     private int recordsPerExtract;
 
-    @Value("${eai.vdb.transaction.batch.size:100000}")
+    @Value("${eai.vdb.transaction.extract.size}")
+    private int transactionRecordsPerExtract;
+
+    @Value("${eai.vdb.transaction.batch.size}")
     private int transactionBatchSize;
 
-    @Value("${eai.vdb.batch.size:50000}")
+    @Value("${eai.vdb.batch.size}")
     private int batchSize;
 
     @Autowired
@@ -443,7 +447,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     importJobDetail.setProcessedRecords(0);
                 }
                 int startRow = 0;
-
+                int recordsPerExtractByEntity = getRecordsPerExtract(businessEntity);
                 VdbGetQueryData vdbGetQueryData = new VdbGetQueryData();
                 vdbGetQueryData.setVdbQueryHandle(queryHandle);
                 vdbGetQueryData.setStartRow(startRow);
@@ -471,11 +475,11 @@ public class VdbTableImportServiceImpl extends ImportService {
                             FileUtils.writeStringToFile(new File(dataFileName),
                                     JsonUtils.serialize(vdbQueryDataResult), Charset.defaultCharset());
 
-                            String targetPath = getTargetPath(startRow, customerSpace, yarnConfiguration,
-                                    businessEntity);
-                            VdbDataProcessCallable callable = getDataProcessCallable(startRow, avroFileName,
-                                    targetPath, businessEntity != BusinessEntity.Transaction, table,
-                                    yarnConfiguration);
+                            String targetPath = getTargetPath(startRow, recordsPerExtractByEntity, customerSpace,
+                                    yarnConfiguration, businessEntity);
+                            VdbDataProcessCallable callable = getDataProcessCallable(startRow,
+                                    recordsPerExtractByEntity, avroFileName, targetPath,
+                                    businessEntity != BusinessEntity.Transaction, table, yarnConfiguration);
                             callable.addDataFile(dataFileName);
                             log.info(String.format("Add %s datafile in queue. ", dataFileName));
                             startRow += rowsToGet;
@@ -546,6 +550,15 @@ public class VdbTableImportServiceImpl extends ImportService {
         }
     }
 
+    private int getRecordsPerExtract(BusinessEntity businessEntity) {
+        if (BusinessEntity.Transaction.equals(businessEntity)) {
+            return transactionRecordsPerExtract < RECORDS_PER_EXTRACT_MIN ? RECORDS_PER_EXTRACT_MIN :
+                    transactionRecordsPerExtract;
+        } else {
+            return recordsPerExtract < RECORDS_PER_EXTRACT_MIN ? RECORDS_PER_EXTRACT_MIN : recordsPerExtract;
+        }
+    }
+
     private int getBatchSize(BusinessEntity businessEntity, int columnCount) {
         int scale;
         switch (businessEntity) {
@@ -564,8 +577,8 @@ public class VdbTableImportServiceImpl extends ImportService {
         }
     }
 
-    private String getTargetPath(int startRow, CustomerSpace customerSpace, Configuration yarnConfiguration,
-                                 BusinessEntity businessEntity) {
+    private String getTargetPath(int startRow, int recordsPerExtract, CustomerSpace customerSpace,
+                                 Configuration yarnConfiguration, BusinessEntity businessEntity) {
         int index = startRow / recordsPerExtract;
         if (targetPathMap.containsKey(index)) {
             return targetPathMap.get(index);
@@ -576,8 +589,9 @@ public class VdbTableImportServiceImpl extends ImportService {
         }
     }
 
-    private VdbDataProcessCallable getDataProcessCallable(int startRow, String avroFileName, String extractPath,
-                                                      boolean needDedup, Table table, Configuration yarnConfiguration) {
+    private VdbDataProcessCallable getDataProcessCallable(int startRow, int recordsPerExtract, String avroFileName,
+                                                          String extractPath, boolean needDedup, Table table,
+                                                          Configuration yarnConfiguration) {
         int index = startRow / recordsPerExtract;
         if (callableMap.containsKey(index)) {
             return callableMap.get(index);
