@@ -292,7 +292,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_COMPLETED, //
             NEW_ENTITY_MATCH_ENVS, //
             FULL_REMATCH_PA, //
-            NEW_RECORD_CUT_OFF_TIME);
+            NEW_RECORD_CUT_OFF_TIME, //
+            PROCESS_ACCOUNT_STATS_MERGE);
 
     @Autowired
     protected Configuration yarnConfiguration;
