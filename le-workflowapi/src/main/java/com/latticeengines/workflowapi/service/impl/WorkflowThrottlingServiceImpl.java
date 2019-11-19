@@ -196,6 +196,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             logGlobalStatus(status.getRunningWorkflowInEnv(),
                     String.format("WorkflowThrottling Global Running Status on environment=%s stack=%s cluster=%s: ",
                             podid, division, emrCacheService.getClusterId()));
+            logTenantQueueStatus(status, podid, division);
             List<WorkflowThrottlingConstraint> constraintList = Arrays.asList(new NotExceedingEnvQuota(),
                     new NotExceedingTenantQuota(), new IsForCurrentStack());
             List<WorkflowJobSchedulingObject> enqueuedWorkflowSchedulingObjects = status.getEnqueuedWorkflowJobs()
@@ -206,6 +207,16 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             log.error("Failed to get workflow throttling result.", e);
             throw e;
         }
+    }
+
+    private void logTenantQueueStatus(WorkflowThrottlingSystemStatus status, String podid, String division) {
+        status.getTenantEnqueuedWorkflow().forEach((customerSpace, workflowTypeMap) -> {
+            customerSpace = CustomerSpace.shortenCustomerSpace(customerSpace);
+            String label = String.format("WorkflowThrottling Tenant Queue Status on environment=%s stack=%s cluster=%s tenant=%s: ",
+                    podid, division, emrCacheService.getClusterId(), customerSpace);
+            StringBuilder builder = new StringBuilder(label);
+            log.info(builder.append(JsonUtils.serialize(workflowTypeMap)).toString());
+        });
     }
 
     private void logGlobalStatus(Map<String, Integer> workflowMap, String label) {
