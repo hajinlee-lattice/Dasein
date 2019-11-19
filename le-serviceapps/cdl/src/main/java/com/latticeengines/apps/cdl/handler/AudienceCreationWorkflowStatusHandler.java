@@ -58,6 +58,7 @@ public class AudienceCreationWorkflowStatusHandler implements WorkflowStatusHand
                     playLaunch.setChannelConfig(channelConfig);
                     PlayLaunchChannel channelConfigChannel = playLaunch.getPlayLaunchChannel();
                     ((MarketoChannelConfig) channelConfigChannel.getChannelConfig()).setAudienceId(eventDetail.getAudienceId());
+                    channelConfigChannel.setChannelConfig(channelConfig);
                     playLaunchChannelService.update(playLaunch.getPlay().getName(), channelConfigChannel);
                 }
                 playLaunchService.update(playLaunch);
