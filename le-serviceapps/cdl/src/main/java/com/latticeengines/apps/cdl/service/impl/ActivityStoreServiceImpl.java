@@ -4,9 +4,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,7 @@ import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityStoreService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
+import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -42,6 +45,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     private static final Logger log = LoggerFactory.getLogger(ActivityStoreServiceImpl.class);
+
+    private static final int MAX_FIND_RETRY = 5;
 
     @Inject
     private DataFeedTaskService dataFeedTaskService;
@@ -86,7 +91,11 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         Preconditions.checkArgument(StringUtils.isNotBlank(catalogName),
                 String.format("CatalogName %s should not be blank", catalogName));
         Tenant tenant = MultiTenantContext.getTenant();
-        return catalogEntityMgr.findByNameAndTenant(catalogName, tenant);
+        AtomicReference<Catalog> catalog = new AtomicReference<>();
+        DatabaseUtils.retry("findCatalogByTenantAndName", MAX_FIND_RETRY, EntityNotFoundException.class,
+                "EntityNotFoundException detected", null,
+                input -> catalog.set(catalogEntityMgr.findByNameAndTenant(catalogName, tenant)));
+        return catalog.get();
     }
 
     @Override
@@ -94,7 +103,11 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         Preconditions.checkArgument(StringUtils.isNotBlank(catalogId),
                 String.format("CatalogId %s should not be blank", catalogId));
         Tenant tenant = MultiTenantContext.getTenant();
-        return catalogEntityMgr.findByCatalogIdAndTenant(catalogId, tenant);
+        AtomicReference<Catalog> catalog = new AtomicReference<>();
+        DatabaseUtils.retry("findByCatalogIdAndTenant", MAX_FIND_RETRY, EntityNotFoundException.class,
+                "EntityNotFoundException detected", null,
+                input -> catalog.set(catalogEntityMgr.findByCatalogIdAndTenant(catalogId, tenant)));
+        return catalog.get();
     }
 
     @Override
