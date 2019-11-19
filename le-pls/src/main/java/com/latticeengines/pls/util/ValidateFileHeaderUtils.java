@@ -33,6 +33,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.csv.CSVConstants;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -46,9 +47,7 @@ public class ValidateFileHeaderUtils {
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;
     public static final int MAX_NUM_ROWS = 100;
-    public static final int MAX_HEADER_LENGTH = 63;
     public static final String AVRO_FIELD_NAME_PREFIX = "avro_";
-    public static final String CSV_INJECTION_CHARACHTERS = "@+-=";
 
     @Inject
     private CommonTenantConfigServiceImpl appTenantConfigService;
@@ -164,14 +163,14 @@ public class ValidateFileHeaderUtils {
     }
 
     /**
-     * Check if any CSV header name is longer than {@link ValidateFileHeaderUtils#MAX_HEADER_LENGTH}
+     * Check if any CSV header name is longer than {@link ValidateFileHeaderUtils}
      * @param headerFields set of csv header names to be checked
      * @throws LedpException with code {@link LedpCode#LEDP_18188} if any of the headers too long
      */
     public static void checkForLongHeaders(Set<String> headerFields) {
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<>();
         for (String field : headerFields) {
-            if (StringUtils.length(field) > MAX_HEADER_LENGTH) {
+            if (StringUtils.length(field) > CSVConstants.MAX_HEADER_LENGTH) {
                 map.put(field, StringUtils.length(field));
             }
         }
@@ -180,7 +179,7 @@ public class ValidateFileHeaderUtils {
             map.entrySet().forEach(
                     entry -> sb.append(String.format("\nfield: %s, length: %s", entry.getKey(), entry.getValue())));
             throw new LedpException(LedpCode.LEDP_18188,
-                    new String[] { String.valueOf(MAX_HEADER_LENGTH), sb.toString() });
+                    new String[] { String.valueOf(CSVConstants.MAX_HEADER_LENGTH), sb.toString() });
         }
     }
 
@@ -268,11 +267,11 @@ public class ValidateFileHeaderUtils {
     }
 
     public static void checkForCSVInjectionInFileNameAndHeaders(String fileDisplayName, Set<String> headers) {
-        if (CSV_INJECTION_CHARACHTERS.indexOf(fileDisplayName.charAt(0)) != -1) {
+        if (CSVConstants.CSV_INJECTION_CHARACHTERS.indexOf(fileDisplayName.charAt(0)) != -1) {
             throw new LedpException(LedpCode.LEDP_18208);
         }
         for (String header : headers) {
-            if (StringUtils.isNotBlank(header) && CSV_INJECTION_CHARACHTERS.indexOf(header.charAt(0)) != -1) {
+            if (StringUtils.isNotBlank(header) && CSVConstants.CSV_INJECTION_CHARACHTERS.indexOf(header.charAt(0)) != -1) {
                 throw new LedpException(LedpCode.LEDP_18208);
             }
         }
