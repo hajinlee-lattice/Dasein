@@ -3,6 +3,7 @@ package com.latticeengines.pls.end2end;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -263,6 +265,29 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 otherSystemContactTable.getAttribute(InterfaceName.CustomerAccountId);
         Assert.assertNotNull(otherSystemCustomerAccountIdAttr);
         Assert.assertEquals(otherSystemCustomerAccountIdAttr.getDisplayName(), "Account_ID");
+
+        // check upload file again and can get system name this time
+        otherContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+        otherContactFeedType = getFeedTypeByEntity(otherSystemName, ENTITY_CONTACT);
+        fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(otherContactFile.getName(), ENTITY_CONTACT, SOURCE, otherContactFeedType);
+        Map<String, FieldMapping> fieldMappingMapFromReImport =
+                fieldMappingDocument.getFieldMappings().stream()
+                        .filter(fieldMapping -> StringUtils.isNotEmpty(fieldMapping.getMappedField()))
+                        .collect(Collectors.toMap(FieldMapping::getMappedField, fieldMapping -> fieldMapping));
+        Assert.assertTrue(fieldMappingMapFromReImport.containsKey(sfSystem.getAccountSystemId()));
+        Assert.assertTrue(fieldMappingMapFromReImport.containsKey(sfSystem.getContactSystemId()));
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getAccountSystemId()).getSystemName(),
+                sfSystem.getName());
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getContactSystemId()).getSystemName(),
+                sfSystem.getName());
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getAccountSystemId()).getIdType(),
+                FieldMapping.IdType.Account);
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getContactSystemId()).getIdType(),
+                FieldMapping.IdType.Contact);
+
 
         // exception when double primary system.
         defaultAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",

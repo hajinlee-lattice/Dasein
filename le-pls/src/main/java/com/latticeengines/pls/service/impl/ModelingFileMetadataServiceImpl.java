@@ -210,12 +210,45 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         }
                     }
                 }
+                setSystemMapping(customerSpace.toString(), systemName, fieldMappingFromTemplate);
             }
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
                     templateTable, table);
         }
         EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument);
         return resultDocument;
+    }
+
+    private void setSystemMapping(String customerSpace,
+                                  String currentSystem, FieldMappingDocument fieldMappingDocument) {
+        List<S3ImportSystem> allImportSystem = cdlService.getAllS3ImportSystem(customerSpace);
+        if (CollectionUtils.isEmpty(allImportSystem)) {
+            return;
+        }
+        Map<String, S3ImportSystem> accountSystemIdMap =
+                allImportSystem.stream()
+                        .filter(s3ImportSystem -> StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId()))
+                        .collect(Collectors.toMap(S3ImportSystem::getAccountSystemId, s3ImportSystem -> s3ImportSystem));
+
+        Map<String, S3ImportSystem> contactSystemIdMap =
+                allImportSystem.stream()
+                        .filter(s3ImportSystem -> StringUtils.isNotEmpty(s3ImportSystem.getContactSystemId()))
+                        .collect(Collectors.toMap(S3ImportSystem::getContactSystemId, s3ImportSystem -> s3ImportSystem));
+
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (StringUtils.isNotEmpty(fieldMapping.getMappedField())) {
+                if (accountSystemIdMap.containsKey(fieldMapping.getMappedField())
+                        && !currentSystem.equals(accountSystemIdMap.get(fieldMapping.getMappedField()).getName())) {
+                    fieldMapping.setSystemName(accountSystemIdMap.get(fieldMapping.getMappedField()).getName());
+                    fieldMapping.setIdType(FieldMapping.IdType.Account);
+                } else if (contactSystemIdMap.containsKey(fieldMapping.getMappedField())
+                        && !currentSystem.equals(contactSystemIdMap.get(fieldMapping.getMappedField()).getName())) {
+                    fieldMapping.setSystemName(contactSystemIdMap.get(fieldMapping.getMappedField()).getName());
+                    fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                }
+            }
+
+        }
     }
 
     private void generateExtraFieldMappingInfo(FieldMappingDocument fieldMappingDocument, boolean standard) {
