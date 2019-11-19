@@ -393,12 +393,12 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     // Schema: TestId, CustomerAccountId, PreferredEntityId
     private static final Object[][] DATA_PREFERRED_ID = { //
             /*-
-             * valid preferred IDs
+             * valid preferred IDs (original case should be preserved)
              */
-            { "C15_01", "caid_1", "acc_1", TRUE.toString() }, //
-            { "C15_02", "caid_2", "acc_2", TRUE.toString() }, //
-            { "C15_03", "caid_3", "acc_3", TRUE.toString() }, //
-            { "C15_04", "caid_4", "acc_4", TRUE.toString() }, //
+            { "C15_01", "caid_1", "AcC_1", TRUE.toString() }, //
+            { "C15_02", "caid_2", "aCc_2", TRUE.toString() }, //
+            { "C15_03", "caid_3", "aCC_3", TRUE.toString() }, //
+            { "C15_04", "caid_4", "AcC_4", TRUE.toString() }, //
             /*-
              * blank preferred IDs, will get random ID
              */

@@ -75,13 +75,18 @@ public class StringStandardizationUtils {
 
     // TODO(jwinter): Complete implementation of this function according to PM requirements.
     public static String getStandardizedSystemId(String systemId) {
+        // system ID matching are case in-sensitive
+        return getStandardizedSystemId(systemId, false);
+    }
+
+    public static String getStandardizedSystemId(String systemId, boolean preserveCase) {
         if (StringUtils.isBlank(systemId)) {
             return null;
         }
 
-        // system ID matching are case in-sensitive. also remove consecutive spaces and
-        // trim leading/trailing spaces
-        return StringUtils.normalizeSpace(systemId).toLowerCase();
+        // remove consecutive spaces and trim leading/trailing spaces
+        systemId = StringUtils.normalizeSpace(systemId);
+        return preserveCase ? systemId : systemId.toLowerCase();
     }
 
     public static String getStandardizedOutputLatticeID(String latticeId) {

@@ -264,8 +264,8 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     } else {
                         return null;
                     }
-                }).filter(StringUtils::isNotBlank) //
-                .map(origId -> Pair.of(origId, StringStandardizationUtils.getStandardizedSystemId(origId))) //
+                }).filter(StringUtils::isNotBlank) // keep original case for preferred entity ID
+                .map(origId -> Pair.of(origId, StringStandardizationUtils.getStandardizedSystemId(origId, true))) //
                 .collect(Collectors.toList());
         Optional<Pair<String, String>> chosenId = standardizedIds.stream() //
                 .filter(pair -> StringUtils.isNotBlank(pair.getRight())) // find first non-blank id
