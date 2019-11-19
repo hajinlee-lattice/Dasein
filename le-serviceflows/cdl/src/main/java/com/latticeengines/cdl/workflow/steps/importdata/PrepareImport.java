@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.csv.CSVConstants;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
@@ -50,9 +51,6 @@ import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 @Component("prepareImport")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
-
-    private static final int MAX_HEADER_LENGTH = 63;
-    private static final String CSV_INJECTION_CHARACHTERS = "@+-=";
 
     private static final String INPUT_ROOT = "/atlas/rawinput";
     private static final String IN_PROGRESS = "/inprogress";
@@ -112,7 +110,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             checkForCSVInjectionInFileNameAndHeaders(configuration.getSourceFileName(), headerFields);
             Map<String, Integer> longFieldMap = new HashMap<String, Integer>();
             for (String field : headerFields) {
-                if (StringUtils.length(field) > MAX_HEADER_LENGTH) {
+                if (StringUtils.length(field) > CSVConstants.MAX_HEADER_LENGTH) {
                     longFieldMap.put(field, StringUtils.length(field));
                 }
             }
@@ -121,7 +119,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
                 longFieldMap.entrySet().forEach(
                         entry -> sb.append(String.format("\nfield: %s, length: %s", entry.getKey(), entry.getValue())));
                 throw new LedpException(LedpCode.LEDP_18188,
-                        new String[] { String.valueOf(MAX_HEADER_LENGTH), sb.toString() });
+                        new String[] { String.valueOf(CSVConstants.MAX_HEADER_LENGTH), sb.toString() });
             }
             Map<String, String> headerCaseMapping = new HashMap<>();
             for (String field : headerFields) {
@@ -224,11 +222,11 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
     }
 
     private void checkForCSVInjectionInFileNameAndHeaders(String fileDisplayName, Set<String> headers) {
-        if (CSV_INJECTION_CHARACHTERS.indexOf(fileDisplayName.charAt(0)) != -1) {
+        if (CSVConstants.CSV_INJECTION_CHARACHTERS.indexOf(fileDisplayName.charAt(0)) != -1) {
             throw new LedpException(LedpCode.LEDP_18208);
         }
         for (String header : headers) {
-            if (StringUtils.isNotBlank(header) && CSV_INJECTION_CHARACHTERS.indexOf(header.charAt(0)) != -1) {
+            if (StringUtils.isNotBlank(header) && CSVConstants.CSV_INJECTION_CHARACHTERS.indexOf(header.charAt(0)) != -1) {
                 throw new LedpException(LedpCode.LEDP_18208);
             }
         }

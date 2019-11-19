@@ -100,8 +100,12 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
-        String[] expectedDuns = { "980565675", "980565683", "980565688", "980565691", "980565696", "980565626",
-                "980565634", "980565639", "980565642", null };
+        String[] expectedDuns = { "972058411", "972058412", "972058413", "972058414", "972058415",
+                "972058416", "972058417", "972058418", "972058419", "972058420", "972058421",
+                "972058431", "972058432", "972058433", "972058434", "972058435", "972058436",
+                "972058437", "972058438", "972058439", "972058440", "972058441", "972058421",
+                "972058422", "972058423", "972058424", "972058425", "972058426", "972058427",
+                "972058428", "972058429", "972058430", "972058431" };
         Set<String> set = new HashSet<>(Arrays.asList(expectedDuns));
         int rowNum = 0;
         while (records.hasNext()) {
@@ -113,6 +117,6 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
             Assert.assertTrue(set.contains(duns));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 15);
+        Assert.assertEquals(rowNum, 33);
     }
 }
