@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +40,25 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
+        if (hasNoImportAndNoBatchStore()) {
+            log.info("no Import and no batchStore, skip this step.");
+            return null;
+        }
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("MatchTransaction");
         matchTargetTablePrefix = entity.name() + "_Matched";
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
-        TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                ETLEngineLoad.LIGHT, null, -1);
+        TransformationStepConfig merge;
+        if (configuration.isEntityMatchEnabled() && CollectionUtils.isEmpty(inputTableNames)) {
+            String convertBatchStoreTableName = getConvertBatchStoreTableName();
+            merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+                    ETLEngineLoad.LIGHT, convertBatchStoreTableName, -1);
+        } else {
+            merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+                    ETLEngineLoad.LIGHT, null, -1);
+        }
         steps.add(merge);
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();

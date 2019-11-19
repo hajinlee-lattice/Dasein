@@ -143,10 +143,16 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void verifyHardDelete() {
+        verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedAccount);
+        verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedContact);
+        verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedRawTransaction);
+    }
+
+    private void verifyHardDeleteByRole(TableRoleInCollection tableRoleInCollection) {
         Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
         List<GenericRecord> recordsAfterDelete = getRecords(table);
         int originalNumRecords = recordsAfterDelete.size();
-        log.info("There are " + originalNumRecords + " rows in avro after delete.");
+        log.info("There are {} rows in avro after delete. table role is {}.", originalNumRecords, tableRoleInCollection);
         for (GenericRecord record : recordsAfterDelete) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
             Assert.assertTrue(!idSets.contains(accountId));

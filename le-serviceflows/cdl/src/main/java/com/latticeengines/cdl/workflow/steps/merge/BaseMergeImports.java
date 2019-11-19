@@ -533,4 +533,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                 rematchTables.get(configuration.getMainEntity().name()) : null;
     }
 
+    protected boolean hasNoImportAndNoBatchStore() {
+        if (CollectionUtils.isNotEmpty(inputTableNames)) {
+            return false;
+        }
+        String convertBatchStoreTableName = getConvertBatchStoreTableName();
+        return convertBatchStoreTableName == null;
+    }
+
 }
