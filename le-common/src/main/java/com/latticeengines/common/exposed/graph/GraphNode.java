@@ -13,6 +13,11 @@ public interface GraphNode extends Visitable {
     // to determine if two GraphNodes of the same type (Class) should be the same Vertex in a graph
     default String getId() { return String.valueOf(System.identityHashCode(this)); }
 
+    default void setId(String id) {
+        // default noop, added for JSON deserialization, not ignoring getId cuz it might
+        // be useful later
+    }
+
     default Collection<? extends GraphNode> getChildren() {
         return Collections.emptyList();
     }
