@@ -47,6 +47,8 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
+import com.latticeengines.domain.exposed.pls.ProductValidationSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -95,8 +97,8 @@ public class ProductFileValidationService
     protected String podId;
 
     @Override
-    public long validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
-            List<String> processedRecords, StringBuilder statistics) {
+    public EntityValidationSummary validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
+                                            List<String> processedRecords) {
         Map<String, Product> inputProducts = new HashMap<>();
         List<String> pathList = productFileValidationServiceConfiguration.getPathList();
         pathList.forEach(path -> inputProducts.putAll(loadProducts(yarnConfiguration, path, null, null)));
@@ -110,10 +112,11 @@ public class ProductFileValidationService
 
         // append error message to error file
         long errorLine = 0L;
+        ProductValidationSummary productValidationSummary = new ProductValidationSummary();
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
             errorLine = mergeProducts(inputProducts, currentProducts, csvFilePrinter,
-                    productFileValidationServiceConfiguration.getCustomerSpace(), statistics,
-                    productFileValidationServiceConfiguration.getDataFeedTaskId());
+                    productFileValidationServiceConfiguration.getCustomerSpace(),
+                    productFileValidationServiceConfiguration.getDataFeedTaskId(), productValidationSummary);
         } catch (IOException ex) {
             log.info("Error when writing error message to error file");
         }
@@ -141,7 +144,7 @@ public class ProductFileValidationService
                 log.info("Error when copying file to hdfs");
             }
         }
-        return errorLine;
+        return productValidationSummary;
     }
 
 
@@ -191,7 +194,7 @@ public class ProductFileValidationService
     }
 
     private long mergeProducts(Map<String, Product> inputProducts, List<Product> currentProducts,
-            CSVPrinter csvFilePrinter, CustomerSpace space, StringBuilder statistics, String dataFeedTaskId) throws IOException {
+            CSVPrinter csvFilePrinter, CustomerSpace space, String dataFeedTaskId, ProductValidationSummary productValidationSummary) throws IOException {
         long errorLine = 0L;
         Map<String, Product> currentProductMap = ProductUtils.getProductMapByCompositeId(currentProducts);
         boolean existProductNameInTemplate = checkExistProductNameInTemplate(space, dataFeedTaskId);
@@ -298,6 +301,13 @@ public class ProductFileValidationService
             // input intersect the current to get attrs to be removed
             Set<String> bundleToBeRemoved =
                     currentBundleToProductList.keySet().stream().filter(bundle -> !inputBundleToProductList.containsKey(bundle)).collect(Collectors.toSet());
+            Set<String> newAddedBundles =
+                    inputBundleToProductList.keySet().stream().filter(bundle -> !currentBundleToProductList.containsKey(bundle)).collect(Collectors.toSet());
+
+
+            productValidationSummary.setMissingBundles(bundleToBeRemoved);
+            productValidationSummary.setAddedBundles(newAddedBundles);
+            productValidationSummary.setProcessedBundles(currentBundleToProductList.keySet());
 
             List<MetadataSegment> segments = segmentProxy.getMetadataSegments(space.toString());
             Map<String, Set<String>> attrToSegName = new HashMap<>();
@@ -460,38 +470,23 @@ public class ProductFileValidationService
                     }
                 }
             }
-            // generate statistics info
-            if (errorLine != 0L) {
-                generateStatistics(missingBundleInUse, bundleWithDiffSku, statistics);
-            }
+            productValidationSummary.setDifferentSKU(bundleWithDiffSku);
+            productValidationSummary.setMissingBundleInUse(missingBundleInUse);
 
         }
+        productValidationSummary.setErrorLineNumber(errorLine);
         return errorLine;
     }
 
-    private void generateStatistics(int missingBundleInUse, int bundleWithDiffSku,
-                                    StringBuilder statistics) {
-        if (missingBundleInUse != 0) {
-            statistics.append(String.format("%s missing product bundles in use (this import will " +
-            "completely replace the previous one), ", String.valueOf(missingBundleInUse)));
-        }
-        if (bundleWithDiffSku != 0) {
-            statistics.append(String.format("%s product bundle has different product SKUs. Dependant models will " +
-                    "need" +
-                    " to be remodelled to get accurate" +
-                    " scores.", String.valueOf(bundleWithDiffSku)));
-        }
-    }
-
-    boolean checkExistProductNameInTemplate(CustomerSpace space, String dataFeedTaskId) {
+    private boolean checkExistProductNameInTemplate(CustomerSpace space, String dataFeedTaskId) {
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(space.toString(), dataFeedTaskId);
         if (dataFeedTask == null) {
-            log.info(String.format("dataFeedTask is null for space %s and task id %s."), space.toString(), dataFeedTaskId);
+            log.info(String.format("dataFeedTask is null for space %s and task id %s.", space.toString(), dataFeedTaskId));
             return false;
         }
         Table table = dataFeedTask.getImportTemplate();
         if (table == null) {
-            log.info(String.format("template table is null for task id %s."), dataFeedTaskId);
+            log.info(String.format("template table is null for task id %s.", dataFeedTaskId));
             return false;
         }
         Attribute attr = table.getAttribute(InterfaceName.ProductName.name());

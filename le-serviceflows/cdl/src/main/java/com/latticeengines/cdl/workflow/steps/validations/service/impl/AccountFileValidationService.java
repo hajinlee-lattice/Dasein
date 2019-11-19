@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationConfiguration;
 
 
@@ -37,8 +38,8 @@ public class AccountFileValidationService
     private static Logger log = LoggerFactory.getLogger(AccountFileValidationService.class);
 
     @Override
-    public long validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration,
-            List<String> processedRecords, StringBuilder statistics) {
+    public EntityValidationSummary validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration,
+                                            List<String> processedRecords) {
 
         // check entity match, change name to transformed name
         boolean enableEntityMatch = accountFileValidationServiceConfiguration.isEnableEntityMatch();
@@ -149,6 +150,8 @@ public class AccountFileValidationService
         if (errorLine != 0L) {
             copyErrorFileBackToHdfs(errorFile);
         }
-        return errorLine;
+        EntityValidationSummary summary = new EntityValidationSummary();
+        summary.setErrorLineNumber(errorLine);
+        return summary;
     }
 }

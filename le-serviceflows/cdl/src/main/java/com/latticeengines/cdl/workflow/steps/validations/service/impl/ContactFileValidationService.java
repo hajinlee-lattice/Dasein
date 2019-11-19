@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ContactFileValidationConfiguration;
 
 @Component("contactFileValidationService")
@@ -36,8 +37,8 @@ public class ContactFileValidationService
     private static final Logger log = LoggerFactory.getLogger(ContactFileValidationService.class);
 
     @Override
-    public long validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration,
-            List<String> processedRecords, StringBuilder statistics) {
+    public EntityValidationSummary validate(ContactFileValidationConfiguration contactFileValidationServiceConfiguration,
+                                            List<String> processedRecords) {
         // first check entity match
 
         boolean enableEntityMatch = contactFileValidationServiceConfiguration.isEnableEntityMatch();
@@ -129,7 +130,9 @@ public class ContactFileValidationService
         if (errorLine != 0) {
             copyErrorFileBackToHdfs(errorFile);
         }
-        return errorLine;
+        EntityValidationSummary summary = new EntityValidationSummary();
+        summary.setErrorLineNumber(errorLine);
+        return summary;
     }
 
     private String getContactId(GenericRecord record, boolean enableEntityMatch, boolean enableEntityMatchGA) {
