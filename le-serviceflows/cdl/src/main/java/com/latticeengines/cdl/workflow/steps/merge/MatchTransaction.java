@@ -50,26 +50,33 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
-        TransformationStepConfig merge;
-        if (configuration.isEntityMatchEnabled() && CollectionUtils.isEmpty(inputTableNames)) {
-            String convertBatchStoreTableName = getConvertBatchStoreTableName();
-            merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                    ETLEngineLoad.LIGHT, convertBatchStoreTableName, -1);
-        } else {
-            merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+        if (!configuration.isEntityMatchEnabled()) {
+            TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
                     ETLEngineLoad.LIGHT, null, -1);
-        }
-        steps.add(merge);
-        if (configuration.isEntityMatchEnabled()) {
+            steps.add(merge);
+        } else {
             bumpEntityMatchStagingVersion();
             String convertBatchStoreTableName = getConvertBatchStoreTableName();
             // if we have convertBatchStore, we should merge and match new import first
             // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
             if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                TransformationStepConfig match = matchTransaction(mergeStep++, null, null);
-                merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                        ETLEngineLoad.LIGHT, convertBatchStoreTableName, mergeStep++);
-                steps.add(match);
+                if (CollectionUtils.isNotEmpty(inputTableNames)) {
+                    TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), null,
+                            ETLEngineLoad.LIGHT, null, -1);
+                    steps.add(merge);
+                    TransformationStepConfig match = matchTransaction(mergeStep++, null, null);
+                    merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+                            ETLEngineLoad.LIGHT, convertBatchStoreTableName, mergeStep++);
+                    steps.add(match);
+                    steps.add(merge);
+                } else {// if no import, we just need the 1 merge and 1 match step, no need 2 merge and 2 match
+                    TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+                            ETLEngineLoad.LIGHT, convertBatchStoreTableName, -1);
+                    steps.add(merge);
+                }
+            } else {
+                TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
+                        ETLEngineLoad.LIGHT, null, -1);
                 steps.add(merge);
             }
             TransformationStepConfig match = matchTransaction(mergeStep, matchTargetTablePrefix,
