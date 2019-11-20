@@ -292,8 +292,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     public PlayLaunchChannel updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
         PlayLaunch playLaunchRetrieved = playLaunchEntityMgr.getLaunchFullyLoaded(playLaunch);
         if(playLaunchRetrieved != null) {
-            PlayLaunchChannel playLaunchChannel = playLaunch.getPlayLaunchChannel();
-            Play play = playLaunch.getPlay();
+            PlayLaunchChannel playLaunchChannel = playLaunchRetrieved.getPlayLaunchChannel();
+            Play play = playLaunchRetrieved.getPlay();
             if (playLaunchChannel != null && play != null) {
                 playLaunchChannel.getChannelConfig().setAudienceName(audienceName);
                 playLaunchChannel.getChannelConfig().setAudienceId(audienceId);
