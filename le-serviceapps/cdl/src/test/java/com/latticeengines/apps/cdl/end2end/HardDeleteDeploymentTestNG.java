@@ -70,7 +70,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        importData();
+//        importData();
         registerDeleteData();
         EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace,
                 EntityMatchEnvironment.SERVING, false);

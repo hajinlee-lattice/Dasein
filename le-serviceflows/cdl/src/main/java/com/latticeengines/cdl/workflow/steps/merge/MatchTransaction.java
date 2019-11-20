@@ -49,39 +49,28 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         matchTargetTablePrefix = entity.name() + "_Matched";
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-        int mergeStep = 0;
-        if (!configuration.isEntityMatchEnabled()) {
-            TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                    ETLEngineLoad.LIGHT, null, -1);
-            steps.add(merge);
-        } else {
+
+        if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
             String convertBatchStoreTableName = getConvertBatchStoreTableName();
-            // if we have convertBatchStore, we should merge and match new import first
-            // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
-            if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                if (CollectionUtils.isNotEmpty(inputTableNames)) {
-                    TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), null,
-                            ETLEngineLoad.LIGHT, null, -1);
-                    steps.add(merge);
-                    TransformationStepConfig match = matchTransaction(mergeStep++, null, null);
-                    merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                            ETLEngineLoad.LIGHT, convertBatchStoreTableName, mergeStep++);
-                    steps.add(match);
-                    steps.add(merge);
-                } else {// if no import, we just need the 1 merge and 1 match step, no need 2 merge and 2 match
-                    TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                            ETLEngineLoad.LIGHT, convertBatchStoreTableName, -1);
-                    steps.add(merge);
+            if (CollectionUtils.isNotEmpty(inputTableNames)) {
+                steps.add(mergeInputs(getConsolidateDataTxmfrConfig(), null, ETLEngineLoad.LIGHT, null, -1));
+                if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+                    steps.add(matchTransaction(steps.size() - 1, null, null));
                 }
-            } else {
-                TransformationStepConfig merge = mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix,
-                        ETLEngineLoad.LIGHT, null, -1);
-                steps.add(merge);
             }
-            TransformationStepConfig match = matchTransaction(mergeStep, matchTargetTablePrefix,
+            if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+                // when there is no batch store, steps.size() - 1 will be -1
+                steps.add(mergeInputs(getConsolidateDataTxmfrConfig(), null, ETLEngineLoad.LIGHT,
+                        convertBatchStoreTableName, steps.size() - 1));
+            }
+            TransformationStepConfig match = matchTransaction(steps.size() - 1, matchTargetTablePrefix,
                     convertBatchStoreTableName);
             steps.add(match);
+        } else {
+            // legacy tenants, just merge imports
+            steps.add(mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix, ETLEngineLoad.LIGHT, null,
+                    -1));
         }
         log.info("steps are {}.", steps);
         request.setSteps(steps);
