@@ -7,9 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationResponse;
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -20,6 +20,7 @@ public class PublicationProxy extends MicroserviceRestApiProxy implements Public
         super("datacloudapi/publications");
     }
 
+    @Deprecated // No use in production
     @Override
     public List<PublicationProgress> scan(String hdfsPod) {
         String url;
@@ -39,14 +40,14 @@ public class PublicationProxy extends MicroserviceRestApiProxy implements Public
     }
 
     @Override
-    public AppSubmission publish(String publicationName, PublicationRequest publicationRequest, String hdfsPod) {
+    public PublicationResponse publish(String publicationName, PublicationRequest publicationRequest, String hdfsPod) {
         String url;
         if (StringUtils.isBlank(hdfsPod)) {
             url = constructUrl("/{pubName}", publicationName);
         } else {
             url = constructUrl("/{pubName}?podid={hdfsPod}", publicationName, hdfsPod);
         }
-        return post("publish", url, publicationRequest, AppSubmission.class);
+        return post("publish", url, publicationRequest, PublicationResponse.class);
     }
 
 }

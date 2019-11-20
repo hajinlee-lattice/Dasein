@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.DataCloudTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationResponse;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -72,6 +74,9 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
     @Override
     public PublicationProgress kickoff(String publicationName, PublicationRequest request) {
         Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
+        if (publication == null) {
+            throw new IllegalArgumentException("Cannot find publication named " + publicationName);
+        }
         PublicationProgress progress = publicationProgressService.publishVersion(publication,
                 request.getSourceVersion(), request.getSubmitter());
         if (progress == null) {
@@ -81,16 +86,20 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
     }
 
     @Override
-    public AppSubmission publish(String publicationName, PublicationRequest request) {
+    public PublicationResponse publish(String publicationName, PublicationRequest request) {
         Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
         if (publication == null) {
             throw new IllegalArgumentException("Cannot find publication named " + publicationName);
         }
         PublicationProgress progress = publicationProgressService.publishVersion(publication, request.getDestination(),
                 request.getSourceVersion(), request.getSubmitter());
+        if (progress == null) {
+            return new PublicationResponse(request, null,
+                    "There is already a progress for version " + request.getSourceVersion());
+        }
         ApplicationId appId = submitWorkflow(progress);
         publicationProgressService.update(progress).applicationId(appId).commit();
-        return new AppSubmission(appId);
+        return new PublicationResponse(request, new AppSubmission(appId), null);
     }
 
     private void publishAll() {
@@ -168,7 +177,8 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
         return progresses;
     }
 
-    private ApplicationId submitWorkflow(PublicationProgress progress) {
+    @VisibleForTesting
+    ApplicationId submitWorkflow(PublicationProgress progress) {
         Publication publication = progress.getPublication();
         return new PublishWorkflowSubmitter() //
                 .hdfsPodId(HdfsPodContext.getHdfsPodId()) //

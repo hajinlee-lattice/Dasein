@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchKeyTuple implements Fact {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchKeyTuple.class);
 
     @JsonProperty("Domain")
@@ -239,7 +240,6 @@ public class MatchKeyTuple implements Fact {
     @Override
     public String toString() {
         if (serializedFormat == null) {
-            log.warn("serializedFormat was null.  Refreshing cached strings");
             refreshCachedStrings();
         }
         return serializedFormat;

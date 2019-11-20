@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.entitymgr.DunsGuideBookEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.impl.DunsGuideBookEntityMgrImpl;
 import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
@@ -44,6 +44,9 @@ public class DunsGuideBookServiceImpl implements DunsGuideBookService {
 
     @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
+
+    @Inject
+    private DataCloudVersionService versionService;
 
 
     @Override
@@ -138,10 +141,7 @@ public class DunsGuideBookServiceImpl implements DunsGuideBookService {
         Preconditions.checkArgument(dataCloudVersion != null,
                 "Cannot find the specified data cloud version " + version);
         String signature = dataCloudVersion.getDynamoTableSignatureDunsGuideBook();
-        if (StringUtils.isNotEmpty(signature)) {
-            version += "_" + signature;
-        }
-        return version;
+        return versionService.constructDynamoVersion(version, signature);
     }
 
     private void check(List<String> dunsList) {
