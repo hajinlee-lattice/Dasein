@@ -769,7 +769,7 @@ public class MetadataResolver {
 
             }
         }
-        Boolean isCorrectUserFormat = conformingDateCount > dateThreshold ? Boolean.TRUE : Boolean.FALSE;
+        Boolean isCorrectUserFormat = conformingDateCount >= dateThreshold ? Boolean.TRUE : Boolean.FALSE;
         Boolean isCorrectTimeZone = nonConformingTimeZoneCount > 0 ? Boolean.FALSE : Boolean.TRUE;
         return new ImmutableTriple<>(isCorrectUserFormat, isCorrectTimeZone, errorValue);
 
