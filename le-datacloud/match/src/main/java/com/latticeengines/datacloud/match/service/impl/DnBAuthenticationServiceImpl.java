@@ -177,7 +177,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             }
         }
 
-        String redisToken = redisRequest(type);
+        String redisToken = redisRequest(type, false);
         if (redisToken != null && !redisToken.equals(expiredToken)) {
             return redisToken;
         }
@@ -196,7 +196,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             }
             // Fetch token from redis again in case other applications already
             // refreshed redis cache
-            redisToken = redisRequest(type);
+            redisToken = redisRequest(type, false);
             if (redisToken != null && !redisToken.equals(expiredToken)) {
                 return redisToken;
             }
@@ -208,7 +208,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         }
         // Fetch token from redis again in case other applications already
         // refreshed redis cache
-        redisToken = redisRequest(type);
+        redisToken = redisRequest(type, true);
         if (redisToken != null && !redisToken.equals(expiredToken)) {
             redisLock.releaseLock(lockKey, reqId);
             return redisToken;
@@ -227,12 +227,14 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      *
      * @param type:
      *            DnB key type -- realtime/batch
+     * @param logIfExpire:
+     *            when redis cache is expired, only log when this flag is true
      * @return token
      */
-    private String redisRequest(DnBKeyType type) {
+    private String redisRequest(DnBKeyType type, boolean logIfExpire) {
         try {
             DnBTokenCache cache = (DnBTokenCache) redisTemplate.opsForValue().get(DNB_KEY_PREFIX + type);
-            if (cache != null && !isTimestampExpired(cache)) {
+            if (cache != null && !isTimestampExpired(cache, logIfExpire)) {
                 return cache.getToken();
             } else {
                 return null;
@@ -259,11 +261,13 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      *
      * @param timestamp:
      *            create timestamp of token
+     * @param logIfExpire:
+     *            when redis cache is expired, only log when this flag is true
      * @return
      */
-    private boolean isTimestampExpired(DnBTokenCache cache) {
+    private boolean isTimestampExpired(DnBTokenCache cache, boolean logIfExpire) {
         boolean expired = (System.currentTimeMillis() - cache.getCreatedAt()) > expireTimeInMin * 60_000;
-        if (expired) {
+        if (expired && logIfExpire) {
             log.info("DnB token in redis {} has existed for more than 23hrs, updating token from dnb.",
                     cache.getToken());
         }

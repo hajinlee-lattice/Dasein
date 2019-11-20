@@ -228,7 +228,7 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         PublicationRequest request = new PublicationRequest();
         request.setSubmitter(ORCHESTRATION);
         request.setSourceVersion(stage.getVersion());
-        publicationService.kickoff(stage.getEngineName(), request);
+        publicationService.publish(stage.getEngineName(), request);
     }
 
     @Override

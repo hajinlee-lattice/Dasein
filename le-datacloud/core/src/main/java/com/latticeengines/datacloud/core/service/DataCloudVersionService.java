@@ -18,4 +18,6 @@ public interface DataCloudVersionService {
     void updateRefreshVersion();
 
     String currentDynamoVersion(String sourceName);
+
+    String constructDynamoVersion(String datacloudVersion, String dynamoSignature);
 }
