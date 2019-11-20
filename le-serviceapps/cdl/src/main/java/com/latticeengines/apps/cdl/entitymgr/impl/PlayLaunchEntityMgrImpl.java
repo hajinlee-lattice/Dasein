@@ -281,13 +281,22 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp,
                 orgId, externalSysType);
     }
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunch getLaunchFullyLoaded(PlayLaunch playLaunch){
+        if(playLaunch != null && playLaunch.getLaunchId() != null) {
+            PlayLaunch launchRetrieved = this.findByLaunchId(playLaunch.getLaunchId());
+            Hibernate.initialize(launchRetrieved.getPlayLaunchChannel());
+            Hibernate.initialize(launchRetrieved.getPlay());
+            return launchRetrieved;
+        }
+        throw new NullPointerException(String.format("Play launch can not be found"));
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PlayLaunch updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
         if(playLaunch != null) {
-            Hibernate.initialize(playLaunch.getPlayLaunchChannel());
-            Hibernate.initialize(playLaunch.getPlay());
             playLaunch.setAudienceId(audienceId);
             playLaunch.setAudienceName(audienceName);
             ChannelConfig channelConfig = playLaunch.getChannelConfig();

@@ -290,8 +290,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public PlayLaunchChannel updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
-
-        if(playLaunch != null) {
+        PlayLaunch playLaunchRetrieved = playLaunchEntityMgr.getLaunchFullyLoaded(playLaunch);
+        if(playLaunchRetrieved != null) {
             PlayLaunchChannel playLaunchChannel = playLaunch.getPlayLaunchChannel();
             Play play = playLaunch.getPlay();
             if (playLaunchChannel != null && play != null) {

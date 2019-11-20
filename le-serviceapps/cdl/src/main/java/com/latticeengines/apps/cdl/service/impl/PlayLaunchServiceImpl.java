@@ -248,11 +248,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     @Override
     public PlayLaunch updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
 
-        PlayLaunch ret = playLaunchEntityMgr.updateAudience(audienceId, audienceName, playLaunch);
-        if(ret != null){
-            playLaunchChannelService.updateAudience(audienceId, audienceName, ret);
+        PlayLaunch updatedPlayLaunch = playLaunchEntityMgr.updateAudience(audienceId, audienceName, playLaunch);
+        if(updatedPlayLaunch != null){
+            playLaunchChannelService.updateAudience(audienceId, audienceName, updatedPlayLaunch);
         }
-        return ret;
+        return updatedPlayLaunch;
     }
 
     private Map<String, List<LookupIdMap>> calculateUniqueLookupIdMapping(Long playId, List<LaunchState> launchStates,
