@@ -26,7 +26,7 @@ public final class ColumnMetadataUtils {
         if (StringUtils.isNotBlank(overwriter.getSecondaryDisplayName())) {
             overwritee.setSecondaryDisplayName(overwriter.getSecondaryDisplayName());
         }
-        if (StringUtils.isNotBlank(overwriter.getDescription())) {
+        if (overwriter.getDescription() != null) {
             overwritee.setDescription(overwriter.getDescription());
         }
         if (overwriter.getCategory() != null) {
