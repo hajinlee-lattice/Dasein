@@ -44,6 +44,11 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             return null;
         }
 
+        if (hasNoImportAndNoBatchStore()) {
+            log.info("no Import and no batchStore, skip this step.");
+            return null;
+        }
+
     List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeStep = 0;
         TransformationStepConfig merge;
