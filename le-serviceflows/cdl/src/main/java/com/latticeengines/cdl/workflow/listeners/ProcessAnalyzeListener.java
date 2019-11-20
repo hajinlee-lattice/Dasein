@@ -143,7 +143,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
 
     private void updateFailCountInCache(BatchStatus status) {
         try {
-            String failCountKey = CacheName.Constants.PAFailCountCacheName + "_" + customerSpace;
+            String failCountKey = CacheName.PAFailCountCache.getKeyForCache(customerSpace);
             if (status == BatchStatus.COMPLETED) {
                 log.info("Workflow COMPLETED. clean failcount of {}",
                         customerSpace);

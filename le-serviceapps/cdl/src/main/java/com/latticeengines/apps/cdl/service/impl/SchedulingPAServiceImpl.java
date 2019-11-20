@@ -248,11 +248,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                         if (stat.getLastActionTime() != null) {
                             tenantActivity.setLastActionTime(stat.getLastActionTime().getTime());
                         }
-                        if(isNewActionAdded(tenantId, stat.getLastActionTime())){
-                            tenantActivity.setAutoSchedule(true);
-                        } else {
-                            tenantActivity.setAutoSchedule(!reachFailCountLimit(tenantId, autoScheduleMaxFailCount));
-                        }
+                        tenantActivity.setAutoSchedule(isNewActionAdded(tenantId, stat.getLastActionTime())
+                                || !reachFailCountLimit(tenantId, autoScheduleMaxFailCount));
                     }
                 }
 
@@ -628,21 +625,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private boolean isNewActionAdded(String tenantId, Date lastActionTimeInDB) {
         try {
-            String lastActionTimeKey = CacheName.Constants.LastActionTimeCacheName + "_" + tenantId;
-            String failCountKey = CacheName.Constants.PAFailCountCacheName + "_" + tenantId;
-            Date lastActionTimeInCache = (Date) redisTemplate.opsForValue().get(lastActionTimeKey);
-            if(lastActionTimeInCache == null || lastActionTimeInCache.before(lastActionTimeInDB)){
-                log.info("New Action added for {}", tenantId);
-                Integer currentCount = (Integer) redisTemplate.opsForValue().get(failCountKey);
-                if (currentCount == null || currentCount <= 2) {
-                    log.debug("FailCount of {} lower than 3, Clean failcount in cache", tenantId);
-                    redisTemplate.opsForValue().set(failCountKey, 0);
-                } else {
-                    currentCount= (currentCount>autoScheduleMaxFailCount?autoScheduleMaxFailCount:currentCount) - 2;
-                    redisTemplate.opsForValue().set(failCountKey, currentCount);
-                    log.debug("FailCount of {} bigger than 2, minus 2 for failcount in cache", tenantId);
-                }
-                redisTemplate.opsForValue().set(lastActionTimeKey, lastActionTimeInDB);
+            String lastActionTimeKey = CacheName.LastActionTimeCache.getKeyForCache(tenantId);
+            Long lastActionTimeInCache = (Long) redisTemplate.opsForValue().get(lastActionTimeKey);
+            if(lastActionTimeInCache == null || !lastActionTimeInCache.equals(lastActionTimeInDB.getTime())){
+                log.debug("New Action added for {}", tenantId);
                 return true;
             } else {
                 log.debug("No new Action added for {}", tenantId);
