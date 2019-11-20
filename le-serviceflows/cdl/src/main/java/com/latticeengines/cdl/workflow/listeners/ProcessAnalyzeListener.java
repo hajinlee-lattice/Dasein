@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.listeners;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -11,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
@@ -52,6 +55,9 @@ public class ProcessAnalyzeListener extends LEJobListener {
     @Inject
     private PlsInternalProxy plsInternalProxy;
 
+    @Inject
+    private RedisTemplate<String, Object> redisTemplate;
+
     private String customerSpace;
 
     @Override
@@ -68,6 +74,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
         String userId = jobExecution.getJobParameters().getString("User_Id");
         log.info(String.format("tenantId %s, userId %s", tenantId, userId));
 
+        updateFailCountInCache(jobExecution.getStatus());
         if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.info(String.format("Workflow failed. Update datafeed status for customer %s with status of %s",
                     customerSpace, initialDataFeedStatus));
@@ -132,6 +139,24 @@ public class ProcessAnalyzeListener extends LEJobListener {
             }
         }
         return false;
+    }
+
+    private void updateFailCountInCache(BatchStatus status) {
+        try {
+            String failCountKey = CacheName.PAFailCountCache.getKeyForCache(customerSpace);
+            if (status == BatchStatus.COMPLETED) {
+                log.info("Workflow COMPLETED. clean failcount of {}",
+                        customerSpace);
+                redisTemplate.opsForValue().set(failCountKey, 0);
+            } else {
+                log.info("Workflow FAILED. increase failcount of {}",
+                        customerSpace);
+                redisTemplate.opsForValue().increment(failCountKey, 1);
+            }
+            redisTemplate.expire(failCountKey, 7, TimeUnit.DAYS);
+        } catch (Exception e) {
+            log.error("update redis cache fail.", e);
+        }
     }
 
 }

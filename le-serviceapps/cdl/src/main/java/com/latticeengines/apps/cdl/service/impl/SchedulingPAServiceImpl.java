@@ -43,6 +43,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
@@ -132,6 +133,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Value("${common.le.environment}")
     private String leEnv;
+
+    @Value("${cdl.processAnalyze.job.autoschedule.failcount:3}")
+    private int autoScheduleMaxFailCount;
+
+    @Value("${cdl.processAnalyze.job.datacloudrefresh.failcount:3}")
+    private int dataCloudRefreshMaxFailCount;
 
     private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
@@ -233,7 +240,6 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                                 || !simpleDataFeed.getNextInvokeTime().equals(invokeTime)) {
                             dataFeedService.updateDataFeedNextInvokeTime(tenant.getId(), invokeTime);
                         }
-                        tenantActivity.setAutoSchedule(true);
                         tenantActivity.setInvokeTime(invokeTime.getTime());
                         ActionStat stat = actionStats.get(tenant.getPid());
                         if (stat.getFirstActionTime() != null) {
@@ -242,12 +248,14 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                         if (stat.getLastActionTime() != null) {
                             tenantActivity.setLastActionTime(stat.getLastActionTime().getTime());
                         }
+                        tenantActivity.setAutoSchedule(isNewActionAdded(tenantId, stat.getLastActionTime())
+                                || !reachFailCountLimit(tenantId, autoScheduleMaxFailCount));
                     }
                 }
 
                 // dc refresh
-                tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, dcStatus));
-
+                tenantActivity.setDataCloudRefresh(isDataCloudRefresh(tenant, currentBuildNumber, dcStatus) &&
+                        !reachFailCountLimit(tenantId, dataCloudRefreshMaxFailCount));
                 // add to list
                 tenantActivityList.add(tenantActivity);
             }
@@ -484,6 +492,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
         }
         if (allowAutoSchedule) {
+            log.debug("Tenant {} allow auto scheduling ", customerSpace);
             int invokeHour = zkConfigService.getInvokeTime(customerSpace, CDLComponent.componentName);
             Tenant tenantInContext = MultiTenantContext.getTenant();
             try {
@@ -596,4 +605,39 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         nonIngestAndReplaceActionType.remove(ActionType.CDL_OPERATION_WORKFLOW);
         return nonIngestAndReplaceActionType;
     }
+
+    public boolean reachFailCountLimit(String tenantId, int maxFailCount) {
+        try {
+            String failCountKey = CacheName.Constants.PAFailCountCacheName + "_" + tenantId;
+            Integer currentCount = (Integer) redisTemplate.opsForValue().get(failCountKey);
+            if (currentCount == null) {
+                log.debug("tenantId = {} and failcount is 0", tenantId);
+                return false;
+            }
+            log.debug("tenantId = {} and failcount is {}", tenantId, currentCount);
+            return currentCount >= maxFailCount;
+        } catch (Exception e) {
+            log.error("get redis cache fail.", e);
+        }
+        return false;
+    }
+
+
+    private boolean isNewActionAdded(String tenantId, Date lastActionTimeInDB) {
+        try {
+            String lastActionTimeKey = CacheName.LastActionTimeCache.getKeyForCache(tenantId);
+            Long lastActionTimeInCache = (Long) redisTemplate.opsForValue().get(lastActionTimeKey);
+            if(lastActionTimeInCache == null || !lastActionTimeInCache.equals(lastActionTimeInDB.getTime())){
+                log.debug("New Action added for {}", tenantId);
+                return true;
+            } else {
+                log.debug("No new Action added for {}", tenantId);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("get redis cache fail.", e);
+            return false;
+        }
+    }
+
 }
