@@ -24,7 +24,10 @@ public enum CacheName {
 
     ActiveStackInfoCache(Constants.ActiveStackInfoCacheName), //
 
-    SessionCache(Constants.SessionCacheName);//
+    SessionCache(Constants.SessionCacheName), //
+
+    LastActionTimeCache(Constants.LastActionTimeCacheName),//
+    PAFailCountCache(Constants.PAFailCountCacheName);//
 
     private String name;
 
@@ -83,5 +86,11 @@ public enum CacheName {
         public static final String EMRClusterCacheName = "EMRClusterCache";
         public static final String ModelSummaryCacheName = "ModelSummaryCache";
         public static final String ActiveStackInfoCacheName = "ActiveStackInfoCache";
+        public static final String LastActionTimeCacheName = "LastActionTimeCache";
+        public static final String PAFailCountCacheName = "PAFailCountCache";
+    }
+
+    public String getKeyForCache(String tenantId) {
+        return this.name + "_" + tenantId;
     }
 }

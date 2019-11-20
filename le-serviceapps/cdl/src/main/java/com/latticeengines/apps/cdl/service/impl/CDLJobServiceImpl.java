@@ -54,6 +54,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
@@ -447,6 +448,10 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
 
         SchedulingResult.Detail detail = result.getDetails().get(tenantId);
+        if(!isRetry){
+            String lastActionTimeKey = CacheName.LastActionTimeCache.getKeyForCache(tenantId);
+            redisTemplate.opsForValue().set(lastActionTimeKey, detail.getTenantActivity().getLastActionTime());
+        }
         log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}', schedulerName='{}'",
                 tenantId, appId.toString(), isRetry, JsonUtils.serialize(detail), schedulerName);
     }
