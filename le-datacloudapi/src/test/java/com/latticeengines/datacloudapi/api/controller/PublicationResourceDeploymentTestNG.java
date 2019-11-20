@@ -1,5 +1,7 @@
 package com.latticeengines.datacloudapi.api.controller;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
+
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +48,6 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
     private static final String SUBMITTER = DataCloudConstants.SERVICE_TENANT;
 
     private static final String SQL_SOURCE = "BuiltWithPivoted";
-    private static final String DYNAMO_SOURCE = "AccountMaster";
 
     private static final String DYNAMO_RECORD_TYPE = "LatticeAccount";
 
@@ -111,11 +112,11 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
 
     @Test(groups = "deployment")
     public void testPublishDynamo() {
-        publicationName.set("Test" + DYNAMO_SOURCE + "Publication");
+        publicationName.set("Test" + ACCOUNT_MASTER + "Publication");
 
         prepareCleanPod(POD_ID);
-        uploadSourceAtVersion("AccountMaster", CURRENT_VERSION);
-        hdfsSourceEntityMgr.setCurrentVersion("AccountMaster", CURRENT_VERSION);
+        uploadSourceAtVersion(ACCOUNT_MASTER, CURRENT_VERSION);
+        hdfsSourceEntityMgr.setCurrentVersion(ACCOUNT_MASTER, CURRENT_VERSION);
 
         PublicationRequest publicationRequest = new PublicationRequest();
         publicationRequest.setSubmitter(SUBMITTER);
@@ -128,7 +129,8 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         publicationEntityMgr.removePublication(publicationName.get());
         Publication publication = registerDynamoPublication(publicationName.get());
 
-        AppSubmission appSubmission = publicationProxy.publish(publicationName.get(), publicationRequest, POD_ID);
+        AppSubmission appSubmission = publicationProxy.publish(publicationName.get(), publicationRequest, POD_ID)
+                .getAppSubmissions();
         Assert.assertNotNull(appSubmission);
 
         JobStatus jobStatus = jobService.waitFinalJobStatus(appSubmission.getApplicationIds().get(0), 3600);
@@ -161,7 +163,7 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
     private Publication registerDynamoPublication(String publicationName) {
         Publication publication = new Publication();
         publication.setPublicationName(publicationName);
-        publication.setSourceName(DYNAMO_SOURCE);
+        publication.setSourceName(ACCOUNT_MASTER);
         publication.setNewJobMaxRetry(1);
         publication.setPublicationType(Publication.PublicationType.DYNAMO);
         publication.setMaterialType(Publication.MaterialType.SOURCE);

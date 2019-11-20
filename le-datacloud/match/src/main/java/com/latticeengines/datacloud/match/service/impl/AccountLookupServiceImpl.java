@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
 import com.latticeengines.datacloud.match.entitymgr.LatticeAccountMgr;
 import com.latticeengines.datacloud.match.entitymgr.impl.AccountLookupEntryMgrImpl;
@@ -41,6 +42,9 @@ public class AccountLookupServiceImpl implements AccountLookupService {
 
     @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
+
+    @Inject
+    private DataCloudVersionService versionService;
 
     public AccountLookupServiceImpl() {
         lookupMgrs = new HashMap<>();
@@ -100,6 +104,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         }
     }
 
+    @Override
     public AccountLookupEntryMgr getLookupMgr(String version) {
         AccountLookupEntryMgr lookupMgr = lookupMgrs.get(version);
         if (lookupMgr == null) {
@@ -118,10 +123,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
                         "Cannot find the specified data cloud version " + version);
             }
             String signature = dataCloudVersion.getDynamoTableSignatureLookup();
-            String fullVersion = version;
-            if (StringUtils.isNotEmpty(signature)) {
-                fullVersion += "_" + signature;
-            }
+            String fullVersion = versionService.constructDynamoVersion(version, signature);
             log.info("Use " + fullVersion + " as full version of AccountLookup for " + version);
             lookupMgr = new AccountLookupEntryMgrImpl(messageService, dataService, fullVersion);
             lookupMgr.init();
@@ -131,6 +133,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         return lookupMgr;
     }
 
+    @Override
     public LatticeAccountMgr getAccountMgr(String version) {
         LatticeAccountMgr accountMgr = accountMgrs.get(version);
 
@@ -149,10 +152,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
                         "Cannot find the specified data cloud version " + version);
             }
             String signature = dataCloudVersion.getDynamoTableSignature();
-            String fullVersion = version;
-            if (StringUtils.isNotEmpty(signature)) {
-                fullVersion += "_" + signature;
-            }
+            String fullVersion = versionService.constructDynamoVersion(version, signature);
             log.info("Use " + fullVersion + " as full version of LatticeAccount for " + version);
             accountMgr = new LatticeAccountMgrImpl(messageService, dataService, fullVersion);
             accountMgr.init();

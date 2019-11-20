@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.service.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER_DIFF;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER_LOOKUP;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.DUNS_GUIDE_BOOK;
 
@@ -73,6 +74,7 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         DataCloudVersion latestVersion = latestApprovedForMajorVersion(latestMajorVersion);
         switch (sourceName) {
         case ACCOUNT_MASTER:
+        case ACCOUNT_MASTER_DIFF:
             return constructDynamoVersion(latestVersion.getVersion(), latestVersion.getDynamoTableSignature());
         case ACCOUNT_MASTER_LOOKUP:
             return constructDynamoVersion(latestVersion.getVersion(), latestVersion.getDynamoTableSignatureLookup());
@@ -84,7 +86,8 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         }
     }
 
-    private String constructDynamoVersion(String datacloudVersion, String dynamoSignature) {
+    @Override
+    public String constructDynamoVersion(String datacloudVersion, String dynamoSignature) {
         if (StringUtils.isBlank(dynamoSignature)) {
             return datacloudVersion;
         } else {
