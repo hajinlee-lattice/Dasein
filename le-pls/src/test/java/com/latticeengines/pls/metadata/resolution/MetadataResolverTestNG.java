@@ -20,10 +20,12 @@ import javax.annotation.Nullable;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -60,6 +62,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     String hdfsPath2 = "/tmp/test_metadata_resolution2";
 
+    String hdfsPath3 = "/tmp/test_metadata_resolution3";
+
 
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {
@@ -73,12 +77,18 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath2);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath2);
+
+        path = ClassLoader.getSystemResource("com/latticeengines/pls/metadata/csvfiles/contact_upload_date.csv").getPath();
+
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath3);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, path, hdfsPath3);
     }
 
     @AfterClass(groups = "functional")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath2);
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPath3);
     }
 
 
@@ -305,5 +315,21 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         assertEquals(table.getAttributes().get(0).getDisplayName(), "LEAD");
         assertEquals(table.getAttributes().get(1).getDisplayName(), "1to300");
         assertEquals(table.getAttributes().get(33).getDisplayName(), "SourceColumn");
+    }
+
+    @Test(groups = "functional")
+    void testCheckUserFormatAndTimeZone() {
+        MetadataResolver resolver = new MetadataResolver(hdfsPath2, yarnConfiguration, null);
+        ImmutableTriple<Boolean, Boolean, String> triple = resolver.checkUserFormatAndTimeZone("Created Date", "MM/DD" +
+                        "/YYYY", null, null);
+        Assert.assertTrue(triple.getLeft());
+        Assert.assertTrue(triple.getMiddle());
+        Assert.assertNull(triple.getRight());
+
+        triple = resolver.checkUserFormatAndTimeZone("Last Modified Date", "MM/DD" +
+                "/YYYY", null, null);
+        Assert.assertTrue(triple.getLeft());
+        Assert.assertTrue(triple.getMiddle());
+        Assert.assertNull(triple.getRight());
     }
 }
