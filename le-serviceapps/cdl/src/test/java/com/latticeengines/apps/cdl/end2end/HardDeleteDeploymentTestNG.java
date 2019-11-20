@@ -150,7 +150,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void verifyHardDeleteByRole(TableRoleInCollection tableRoleInCollection) {
-        Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
+        Table table = dataCollectionProxy.getTable(customerSpace, tableRoleInCollection);
         List<GenericRecord> recordsAfterDelete = getRecords(table);
         int originalNumRecords = recordsAfterDelete.size();
         log.info("There are {} rows in avro after delete. table role is {}.", originalNumRecords, tableRoleInCollection);
