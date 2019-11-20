@@ -28,7 +28,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -39,7 +38,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -123,7 +121,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     private BusinessEntity getOwnerEntity(TableRoleInCollection role) {
         BusinessEntity owner = Arrays.stream(BusinessEntity.values()).filter(entity -> //
-        role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
+                role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
                 .findFirst().orElse(null);
         if (owner == null) {
             switch (role) {
@@ -259,7 +257,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts,
-            Map<OrphanRecordsType, Long> orphanCnts) {
+                                        Map<OrphanRecordsType, Long> orphanCnts) {
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
         detail.setContactCount(currentCnts.get(BusinessEntity.Contact));
@@ -372,11 +370,12 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     if (StringUtils.isNotBlank(servingStoreTable)) {
                         frontEndQuery = new FrontEndQuery();
                         frontEndQuery.setMainEntity(BusinessEntity.Contact);
-                        frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountNotNullBucket()));
-                        long nonOrphanContacts = ratingProxy.getCountFromObjectApi(customerSpace.toString(), //
-                                frontEndQuery, inactive);
-                        log.debug("There are " + nonOrphanContacts + " non-orphan contacts in redshift.");
-                        long orphanContacts = allContacts - nonOrphanContacts;
+                        long orphanContacts = 0;
+                        DataCollectionStatus dataCollectionStatus =
+                                dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(), null);
+                        if (dataCollectionStatus != null && dataCollectionStatus.getDetail() != null) {
+                            orphanContacts = dataCollectionStatus.getOrphanContactCount();
+                        }
                         log.debug("There are " + orphanContacts + " orphan contacts.");
                         return orphanContacts;
                     } else {
@@ -449,11 +448,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             }
         }
         return deleteCounts;
-    }
-
-    private BucketRestriction accountNotNullBucket() {
-        Bucket bkt = Bucket.notNullBkt();
-        return new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt);
     }
 
     private List<Action> getDeleteActions() {
