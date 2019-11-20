@@ -392,13 +392,19 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         return SessionFactoryUtils.getDataSource(getSessionFactory());
     }
 
+    protected boolean updateCreated(T entity) {
+        return true;
+    }
+
     private void setAuditingFields(T entity) {
         if (entity instanceof HasAuditingFields) {
             Date now = new Date();
-            if (entity.getPid() == null) {
-                ((HasAuditingFields) entity).setCreated(now);
+            HasAuditingFields auditingFields = (HasAuditingFields) entity;
+            // when update table entity, will not set created time
+            if (entity.getPid() == null && updateCreated(entity)) {
+                auditingFields.setCreated(now);
             }
-            ((HasAuditingFields) entity).setUpdated(now);
+            auditingFields.setUpdated(now);
         }
     }
 

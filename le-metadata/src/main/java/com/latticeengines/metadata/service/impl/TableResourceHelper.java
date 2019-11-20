@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.MetadataService;
 
@@ -189,6 +190,12 @@ public class TableResourceHelper {
     public Boolean fixTableAttributes(String customerSpace, String tableName, List<AttributeFixer> attributeFixerList) {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.fixAttributes(space, tableName, attributeFixerList);
+    }
+
+    public boolean updateTableRetentionPolicy(String customerSpace, String tableName, RetentionPolicy retentionPolicy) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        mdService.updateTableRetentionPolicy(space, tableName, retentionPolicy);
+        return true;
     }
 
 }

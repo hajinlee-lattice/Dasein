@@ -9,6 +9,7 @@ import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
+import com.latticeengines.apps.cdl.service.MetadataTableCleanupService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
@@ -24,6 +25,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     private S3ImportService s3ImportService;
     private CampaignLaunchTriggerService campaignLaunchTriggerService;
     private DeltaCalculationService deltaCalculationService;
+    private MetadataTableCleanupService metadataTableCleanupService;
     private String jobArguments;
 
     public CDLQuartzJobCallable(Builder builder) {
@@ -34,7 +36,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         this.s3ImportService = builder.s3ImportService;
         this.campaignLaunchTriggerService = builder.campaignLaunchTriggerService;
         this.deltaCalculationService = builder.deltaCalculationService;
-        this.jobArguments = builder.jobArguments;
+        this.metadataTableCleanupService = builder.metadataTableCleanupService;
+                this.jobArguments = builder.jobArguments;
     }
 
     @Override
@@ -51,6 +54,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
                 return campaignLaunchTriggerService.triggerQueuedLaunches();
             case DELTACALCULATION:
                 return deltaCalculationService.triggerScheduledCampaigns();
+            case MDTABLECLEANUP:
+                return metadataTableCleanupService.cleanup();
             default:
                 return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
@@ -65,6 +70,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private S3ImportService s3ImportService;
         private CampaignLaunchTriggerService campaignLaunchTriggerService;
         private DeltaCalculationService deltaCalculationService;
+        private MetadataTableCleanupService metadataTableCleanupService;
 
         private String jobArguments;
 
@@ -105,6 +111,11 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
 
         public Builder deltaCalculationService(DeltaCalculationService deltaCalculationService) {
             this.deltaCalculationService = deltaCalculationService;
+            return this;
+        }
+
+        public Builder metadataTableCleanupService(MetadataTableCleanupService metadataTableCleanupService) {
+            this.metadataTableCleanupService = metadataTableCleanupService;
             return this;
         }
 

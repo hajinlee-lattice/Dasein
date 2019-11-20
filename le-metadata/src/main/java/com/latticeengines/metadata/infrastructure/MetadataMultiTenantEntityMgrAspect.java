@@ -37,7 +37,8 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
     @Qualifier(value = "entityManagerFactoryReader")
     private EntityManager entityManagerReader;
 
-    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.TableEntityMgrImpl.*(..))")
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.TableEntityMgrImpl.*(..)) && " +
+            "!@annotation(com.latticeengines.metadata.annotation.NoCustomSpaceAndType)")
     public void allTableMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
         log.info("Table type = " + tableTypeHolder.getTableType());

@@ -10,6 +10,7 @@ import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
+import com.latticeengines.apps.cdl.service.MetadataTableCleanupService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.impl.CDLQuartzJobCallable;
@@ -38,6 +39,9 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
     @Inject
     private DeltaCalculationService deltaCalculationService;
 
+    @Inject
+    private MetadataTableCleanupService metadataTableCleanupService;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         CDLQuartzJobCallable.Builder builder = new CDLQuartzJobCallable.Builder();
@@ -45,7 +49,8 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
                 .dataFeedExecutionCleanupService(dataFeedExecutionCleanupService)
                 .redshiftCleanupService(redShiftCleanupService).s3ImportService(s3ImportService)
                 .campaignLaunchTriggerService(campaignLaunchTriggerService)
-                .deltaCalculationService(deltaCalculationService).jobArguments(jobArguments);
+                .deltaCalculationService(deltaCalculationService).metadataTableCleanupService(metadataTableCleanupService)
+                .jobArguments(jobArguments);
         return new CDLQuartzJobCallable(builder);
     }
 

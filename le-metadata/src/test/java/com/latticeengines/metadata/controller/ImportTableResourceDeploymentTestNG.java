@@ -15,7 +15,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 
 public class ImportTableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
@@ -64,15 +67,21 @@ public class ImportTableResourceDeploymentTestNG extends MetadataDeploymentTestN
         table.addAttribute(attribute);
         table.setDisplayName(TABLE2 + "test");
         metadataProxy.updateImportTable(customerSpace1, TABLE2, table);
-
+        Table srcTable = table;
         table = metadataProxy.getImportTable(customerSpace1, TABLE2);
+        assertEquals(srcTable.getRetentionPolicy(), table.getRetentionPolicy());
+        assertEquals(srcTable.getCreated(), table.getCreated());
         assertNotNull(table);
-        assertEquals(table.getDisplayName(),TABLE2 + "test");
+        assertEquals(table.getDisplayName(), TABLE2 + "test");
 
         attribute = table.getAttribute("Name1");
         assertNotNull(attribute);
-        assertEquals(attribute.getDisplayName(),"DisplayName1");
-        assertEquals(attribute.getPhysicalDataType(),"PhysicalDataType1");
+        assertEquals(attribute.getDisplayName(), "DisplayName1");
+        assertEquals(attribute.getPhysicalDataType(), "PhysicalDataType1");
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK);
+        metadataProxy.updateImportDataTablePolicy(customerSpace1, TABLE2, retentionPolicy);
+        table = metadataProxy.getImportTable(customerSpace1, TABLE2);
+        assertEquals(table.getRetentionPolicy(), "KEEP_3_WEEKS");
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testUpdateTable")

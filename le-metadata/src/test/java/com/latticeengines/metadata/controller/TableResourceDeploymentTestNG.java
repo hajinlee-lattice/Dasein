@@ -23,7 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
@@ -107,7 +110,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         assertNotNull(srcTable);
 
         // Update the table by adding 1 attribute
-        log.info("Updating {} for {}", TABLE_NAME,  customerSpace1);
+        log.info("Updating {} for {}", TABLE_NAME, customerSpace1);
         Attribute attribute = new Attribute();
         attribute.setName("Name1");
         attribute.setDisplayName("DisplayName1");
@@ -119,6 +122,8 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         metadataProxy.updateTable(customerSpace1, TABLE_NAME, srcTable);
 
         final Table updatedTable = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(srcTable.getRetentionPolicy(), updatedTable.getRetentionPolicy());
+        assertEquals(srcTable.getCreated(), updatedTable.getCreated());
         assertNotNull(updatedTable);
         assertEquals(updatedTable.getDisplayName(), tableDisplayName);
         logTableSummary("Updated Table from DB", updatedTable);
@@ -131,7 +136,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
 
         // Update the table by deleting 5 attributes
         List<String> deletedAttributes = new ArrayList<>();
-        IntStream.range(0 , 5).forEach(ctr -> {
+        IntStream.range(0, 5).forEach(ctr -> {
             Attribute delAttr = updatedTable.getAttributes().get(new Random().nextInt(updatedTable.getAttributes().size()));
             updatedTable.removeAttribute(delAttr.getName());
             deletedAttributes.add(delAttr.getName());
@@ -169,6 +174,11 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         updatedTable2.getAttributes().forEach(attr -> {
             assertTrue(attr.getDisplayName().endsWith(updateSuffix));
         });
+
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(2, RetentionPolicyTimeUnit.MONTH);
+        metadataProxy.updateDataTablePolicy(customerSpace1, srcTable.getName(), retentionPolicy);
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_2_MONTHS");
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testUpdateTable")

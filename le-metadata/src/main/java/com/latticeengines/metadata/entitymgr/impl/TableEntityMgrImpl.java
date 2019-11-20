@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
@@ -27,6 +28,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -38,12 +40,15 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.metadata.annotation.NoCustomSpaceAndType;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.DataRuleDao;
 import com.latticeengines.metadata.dao.ExtractDao;
@@ -107,6 +112,10 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
+
+    private static final int NUM_THREADS = 8;
+
+    private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("table-mgr", NUM_THREADS);
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
@@ -473,7 +482,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     private void deleteExtractsInBackend(List<String> extractPaths) {
         final ImmutableList<String> finalPaths = ImmutableList.copyOf(extractPaths);
-        new Thread(() -> finalPaths.forEach(p -> {
+        Runnable runnable = () -> finalPaths.forEach(p -> {
             String avroDir = p.substring(0, p.lastIndexOf("/"));
             try {
                 HdfsUtils.rmdir(yarnConfiguration, avroDir);
@@ -488,7 +497,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             } catch (IOException e) {
                 log.error(String.format("Failed to delete extract schema %s", schemaPath), e);
             }
-        })).start();
+        });
+        service.submit(runnable);
     }
 
     private void deleteExternalStorage(String tableName) {
@@ -526,4 +536,21 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void updateTableRetentionPolicy(String tableName, RetentionPolicy retentionPolicy) {
+        Table existing = tableDao.findByName(tableName);
+        if (existing == null) {
+            throw new RuntimeException(String.format("No such table with name %s", existing.getName()));
+        }
+        existing.setRetentionPolicy(RetentionPolicyUtil.retentionPolicyToStr(retentionPolicy));
+        tableDao.update(existing);
+    }
+
+    @NoCustomSpaceAndType
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Table> findAllWithExpireRetentionPolicy(int index, int max) {
+        return tableDao.findAllWithExpireRetentionPolicy(index, max);
+    }
 }

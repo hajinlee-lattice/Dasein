@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
 
@@ -84,6 +85,14 @@ public class ImportTableResource {
     public Boolean deleteTable(@PathVariable String customerSpace, //
             @PathVariable String tableName) {
         return tableResourceHelper.deleteImportTableAndCleanup(customerSpace, tableName);
+    }
+
+    @PostMapping(value = "/importtables/{tableName}/policy")
+    @ResponseBody
+    @ApiOperation(value = "Update import table retention policy")
+    public Boolean updateTableRetentionPolicy(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName,
+                                              @RequestBody RetentionPolicy retentionPolicy) {
+        return tableResourceHelper.updateTableRetentionPolicy(customerSpace, tableName, retentionPolicy);
     }
 
 }

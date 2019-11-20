@@ -5,6 +5,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +53,7 @@ import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -65,6 +67,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE", //
@@ -75,7 +78,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @EntityListeners(TableListener.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Table implements HasPid, HasName, HasTenantId, GraphNode {
+public class Table implements HasPid, HasName, HasTenantId, GraphNode, HasAuditingFields {
 
     private static final Logger log = LoggerFactory.getLogger(Table.class);
 
@@ -157,7 +160,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     private StorageMechanism storageMechanism = null;
 
     @JsonProperty("namespace")
-    @Column(name = "NAMESPACE", nullable = true)
+    @Column(name = "NAMESPACE")
     private String namespace;
 
     @JsonProperty("count")
@@ -165,8 +168,20 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     private Long count;
 
     @JsonProperty("updatedby")
-    @Column(name = "UPDATEDBY", nullable = true)
+    @Column(name = "UPDATEDBY")
     private String updatedBy;
+
+    @JsonProperty("created")
+    @Column(name = "CREATED", nullable = false)
+    private Date created;
+
+    @JsonProperty("updated")
+    @Column(name = "UPDATED", nullable = false)
+    private Date updated;
+
+    @JsonProperty("retentionPolicy")
+    @Column(name = "RETENTION_POLICY")
+    private String retentionPolicy = RetentionPolicyUtil.NEVER_EXPIRE_POLICY;
 
     public Table() {
     }
@@ -775,4 +790,31 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     public String getUpdatedBy() {
         return updatedBy;
     }
+
+    public String getRetentionPolicy() {
+        return retentionPolicy;
+    }
+
+    public void setRetentionPolicy(String retentionPolicy) {
+        this.retentionPolicy = retentionPolicy;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return updated;
+    }
+
+    @Override
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
 }

@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
 
 public interface TableEntityMgr {
 
@@ -61,4 +62,9 @@ public interface TableEntityMgr {
     void fixAttributes(String name, List<AttributeFixer> attributeFixerList);
 
     void update(Table table);
+
+    void updateTableRetentionPolicy(String tableName, RetentionPolicy retentionPolicy);
+
+    List<Table> findAllWithExpireRetentionPolicy(int index, int max);
+
 }

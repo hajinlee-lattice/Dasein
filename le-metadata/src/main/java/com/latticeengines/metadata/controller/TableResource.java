@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
 
@@ -170,5 +171,13 @@ public class TableResource extends BaseRestResource {
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
             @RequestBody ModelingMetadata metadata) {
         return tableResourceHelper.validateMetadata(customerSpace, metadata);
+    }
+
+    @PostMapping(value = "/tables/{tableName}/policy")
+    @ResponseBody
+    @ApiOperation(value = "Update table retention policy")
+    public Boolean updateTableRetentionPolicy(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName,
+                                              @RequestBody RetentionPolicy retentionPolicy) {
+        return tableResourceHelper.updateTableRetentionPolicy(customerSpace, tableName, retentionPolicy);
     }
 }

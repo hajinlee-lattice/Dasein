@@ -30,6 +30,11 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
+import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
 
@@ -39,6 +44,9 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Autowired
     private MetadataService mdService;
+
+    @Autowired
+    private TableTypeHolder tableTypeHolder;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -50,6 +58,7 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
     public void getTable(String customerSpace, String tableName) {
         Table table = mdService.getTable(CustomerSpace.parse(customerSpace), tableName, true);
         assertNotNull(table);
+        assertEquals(table.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
         assertEquals(table.getName(), tableName);
         assertNotNull(table.getLastModifiedKey());
         assertNotNull(table.getPrimaryKey());
@@ -112,7 +121,34 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(storageMechanism.getDatabaseName(), JdbcStorage.DatabaseName.REDSHIFT);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "addStorageMechanism" })
+    private Table updateTableRetentionPolicy(CustomerSpace customerSpace, Table table, int count, RetentionPolicyTimeUnit retentionPolicyTimeUnit) {
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(count, retentionPolicyTimeUnit);
+        mdService.updateTableRetentionPolicy(customerSpace, table.getName(), retentionPolicy);
+        return mdService.getTable(customerSpace, table.getName());
+    }
+
+    @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = "addStorageMechanism")
+    public void testTableRetentionPolicy(String customerSpaceStr, String tableName) {
+        CustomerSpace customerSpace = CustomerSpace.parse(customerSpaceStr);
+        Table table = mdService.getTable(customerSpace, tableName);
+        assertEquals(table.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+        Table result = updateTableRetentionPolicy(customerSpace, table, 2, RetentionPolicyTimeUnit.DAY);
+        assertEquals(result.getRetentionPolicy(), "KEEP_2_DAYS");
+        result = updateTableRetentionPolicy(customerSpace, table, -1, RetentionPolicyTimeUnit.WEEK);
+        assertEquals(result.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+        result = updateTableRetentionPolicy(customerSpace, table, 1, RetentionPolicyTimeUnit.YEAR);
+        assertEquals(result.getRetentionPolicy(), "KEEP_1_YEAR");
+
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        result = updateTableRetentionPolicy(customerSpace, table, 2, RetentionPolicyTimeUnit.MONTH);
+        assertEquals(result.getTableType(), TableType.IMPORTTABLE);
+        assertEquals(result.getRetentionPolicy(), "KEEP_2_MONTHS");
+        tableTypeHolder.setTableType(TableType.DATATABLE);
+        List<Table> tables = mdService.findAllWithExpireRetentionPolicy(0, 10);
+        assertTrue(tables.size() > 0);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testTableRetentionPolicy" })
     public void cloneTable() throws IOException {
         Table cloned = mdService.cloneTable(CustomerSpace.parse(customerSpace1), TABLE1, false);
         assertNotNull(cloned);

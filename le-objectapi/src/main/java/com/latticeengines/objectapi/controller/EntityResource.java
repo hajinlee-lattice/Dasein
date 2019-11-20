@@ -32,6 +32,7 @@ public class EntityResource {
 
     private final EntityQueryService entityQueryService;
 
+
     @Autowired
     public EntityResource(EntityQueryService entityQueryService) {
         this.entityQueryService = entityQueryService;
