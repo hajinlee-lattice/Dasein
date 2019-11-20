@@ -56,7 +56,5 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
     List<Pair<String, String>> findDashboardOrgIdWithLaunches(Long playId, List<LaunchState> launchStates,
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType);
 
-    PlayLaunch updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch);
-
-    PlayLaunch getLaunchFullyLoaded(PlayLaunch playLaunch);
+    PlayLaunch getLaunchFullyLoaded(String playLaunchId);
 }

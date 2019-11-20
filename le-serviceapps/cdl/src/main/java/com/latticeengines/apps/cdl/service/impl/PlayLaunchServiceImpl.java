@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("playLaunchService")
@@ -246,13 +247,21 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
-    public PlayLaunch updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
+    public PlayLaunch updateAudience(String audienceId, String audienceName, String playLaunchId){
 
-        PlayLaunch updatedPlayLaunch = playLaunchEntityMgr.updateAudience(audienceId, audienceName, playLaunch);
-        if(updatedPlayLaunch != null){
-            playLaunchChannelService.updateAudience(audienceId, audienceName, updatedPlayLaunch);
+        if(playLaunchId != null) {
+            PlayLaunch playLaunch = playLaunchEntityMgr.findByLaunchId(playLaunchId);
+            playLaunch.setAudienceId(audienceId);
+            playLaunch.setAudienceName(audienceName);
+            ChannelConfig channelConfig = playLaunch.getChannelConfig();
+            channelConfig.setAudienceId(audienceId);
+            channelConfig.setAudienceName(audienceName);
+            playLaunch.setChannelConfig(channelConfig);
+            playLaunchEntityMgr.update(playLaunch);
+            playLaunchChannelService.updateAudience(audienceId, audienceName, playLaunchId);
+            return playLaunch;
         }
-        return updatedPlayLaunch;
+        throw new LedpException(LedpCode.LEDP_18235, new String[] {});
     }
 
     private Map<String, List<LookupIdMap>> calculateUniqueLookupIdMapping(Long playId, List<LaunchState> launchStates,

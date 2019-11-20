@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -289,17 +290,20 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public PlayLaunchChannel updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
-        PlayLaunch playLaunchRetrieved = playLaunchEntityMgr.getLaunchFullyLoaded(playLaunch);
+    public PlayLaunchChannel updateAudience(String audienceId, String audienceName, String playLaunchId){
+        PlayLaunch playLaunchRetrieved = playLaunchEntityMgr.getLaunchFullyLoaded(playLaunchId);
         if(playLaunchRetrieved != null) {
             PlayLaunchChannel playLaunchChannel = playLaunchRetrieved.getPlayLaunchChannel();
             Play play = playLaunchRetrieved.getPlay();
             if (playLaunchChannel != null && play != null) {
-                playLaunchChannel.getChannelConfig().setAudienceName(audienceName);
-                playLaunchChannel.getChannelConfig().setAudienceId(audienceId);
-                update(play.getName(), playLaunchChannel);
+                ChannelConfig channlConfigUpdated = playLaunchChannel.getChannelConfig();
+                channlConfigUpdated.setAudienceName(audienceName);
+                channlConfigUpdated.setAudienceId(audienceId);
+                playLaunchChannel.setChannelConfig(channlConfigUpdated);
+                playLaunchChannel = update(play.getName(), playLaunchChannel);
+                return playLaunchChannel;
             }
-            return playLaunchChannel;
+            throw new LedpException(LedpCode.LEDP_18236, new String[] { playLaunchId, (play == null ? "true" : "false"), (playLaunchChannel == null ? "true" : "false") });
         }
         throw new LedpException(LedpCode.LEDP_18234, new String[] { audienceName, audienceId });
     }

@@ -11,7 +11,6 @@ import com.latticeengines.domain.exposed.cdl.AudienceCreationEventDetail;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
-import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @Component
 public class AudienceCreationWorkflowStatusHandler implements WorkflowStatusHandler {
@@ -42,11 +41,7 @@ public class AudienceCreationWorkflowStatusHandler implements WorkflowStatusHand
 
         switch (statusMonitor.getEntityName()) {
         case "PlayLaunch":
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
-            if(playLaunch != null) {
-                playLaunchService.updateAudience(eventDetail.getAudienceId(), eventDetail.getAudienceName(), playLaunch);
-            }
-
+            playLaunchService.updateAudience(eventDetail.getAudienceId(), eventDetail.getAudienceName(), statusMonitor.getEntityId());
         }
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
