@@ -31,4 +31,3 @@ services:
     image: latticeengines/tez-ui
     ports:
     - '8001:8080'
-
