@@ -67,6 +67,26 @@ public class EloquaChannelConfig implements ChannelConfig {
     }
 
     @Override
+    public void setAudienceName(String audienceName) {
+
+    }
+
+    @Override
+    public String getAudienceName() {
+        return "";
+    }
+
+    @Override
+    public void setAudienceId(String audienceId) {
+
+    }
+
+    @Override
+    public String getAudienceId() {
+        return "";
+    }
+
+    @Override
     public ChannelConfig copyConfig(ChannelConfig config) {
         EloquaChannelConfig eloquaChannelConfig = this;
         EloquaChannelConfig newEloquaChannelConfig = (EloquaChannelConfig) config;

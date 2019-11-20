@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 
 @Component("playLaunchEntityMgr")
 public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> implements PlayLaunchEntityMgr {
@@ -279,6 +280,23 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             Long endTimestamp, String orgId, String externalSysType) {
         return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp,
                 orgId, externalSysType);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public PlayLaunch updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
+        if(playLaunch != null) {
+            Hibernate.initialize(playLaunch.getPlayLaunchChannel());
+            Hibernate.initialize(playLaunch.getPlay());
+            playLaunch.setAudienceId(audienceId);
+            playLaunch.setAudienceName(audienceName);
+            ChannelConfig channelConfig = playLaunch.getChannelConfig();
+            channelConfig.setAudienceId(audienceId);
+            channelConfig.setAudienceName(audienceName);
+            playLaunch.setChannelConfig(channelConfig);
+            playLaunchDao.update(playLaunch);
+        }
+        return playLaunch;
     }
 
 }

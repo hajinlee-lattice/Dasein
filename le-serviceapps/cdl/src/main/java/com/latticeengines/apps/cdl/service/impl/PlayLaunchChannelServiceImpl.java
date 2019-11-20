@@ -288,6 +288,22 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         return queueNewLaunchForChannel(play, playLaunchChannel, null, null, null, null, null, false);
     }
 
+    @Override
+    public PlayLaunchChannel updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
+
+        if(playLaunch != null) {
+            PlayLaunchChannel playLaunchChannel = playLaunch.getPlayLaunchChannel();
+            Play play = playLaunch.getPlay();
+            if (playLaunchChannel != null && play != null) {
+                playLaunchChannel.getChannelConfig().setAudienceName(audienceName);
+                playLaunchChannel.getChannelConfig().setAudienceId(audienceId);
+                update(play.getName(), playLaunchChannel);
+            }
+            return playLaunchChannel;
+        }
+        throw new LedpException(LedpCode.LEDP_18234, new String[] { audienceName, audienceId });
+    }
+
     private void runValidations(String customerSpace, Play play, PlayLaunchChannel playLaunchChannel) {
         PlayUtils.validatePlay(play);
         validatePlayAndChannelBeforeLaunch(customerSpace, play, playLaunchChannel);

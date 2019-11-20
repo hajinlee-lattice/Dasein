@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.handler;
 
 import javax.inject.Inject;
 
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
@@ -13,9 +12,6 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 
 @Component
 public class AudienceCreationWorkflowStatusHandler implements WorkflowStatusHandler {
@@ -48,20 +44,7 @@ public class AudienceCreationWorkflowStatusHandler implements WorkflowStatusHand
         case "PlayLaunch":
             PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
             if(playLaunch != null) {
-                playLaunch.setAudienceId(eventDetail.getAudienceId());
-                playLaunch.setAudienceName(eventDetail.getAudienceName());
-                ChannelConfig channelConfig = playLaunch.getChannelConfig();
-                if (channelConfig != null && channelConfig instanceof MarketoChannelConfig) {
-                    Hibernate.initialize(playLaunch.getPlayLaunchChannel());
-                    Hibernate.initialize(playLaunch.getPlay());
-                    ((MarketoChannelConfig) channelConfig).setAudienceId(eventDetail.getAudienceId());
-                    playLaunch.setChannelConfig(channelConfig);
-                    PlayLaunchChannel channelConfigChannel = playLaunch.getPlayLaunchChannel();
-                    ((MarketoChannelConfig) channelConfigChannel.getChannelConfig()).setAudienceId(eventDetail.getAudienceId());
-                    channelConfigChannel.setChannelConfig(channelConfig);
-                    playLaunchChannelService.update(playLaunch.getPlay().getName(), channelConfigChannel);
-                }
-                playLaunchService.update(playLaunch);
+                playLaunchService.updateAudience(eventDetail.getAudienceId(), eventDetail.getAudienceName(), playLaunch);
             }
 
         }

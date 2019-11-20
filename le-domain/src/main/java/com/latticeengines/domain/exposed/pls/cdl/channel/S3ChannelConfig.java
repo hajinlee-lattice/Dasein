@@ -31,6 +31,26 @@ public class S3ChannelConfig implements ChannelConfig {
         this.accountLimit = accountLimit;
     }
 
+    @Override
+    public void setAudienceId(String audienceId) {
+
+    }
+
+    @Override
+    public String getAudienceId() {
+        return "";
+    }
+
+    @Override
+    public void setAudienceName(String audienceName) {
+
+    }
+
+    @Override
+    public String getAudienceName() {
+        return "";
+    }
+
     public String getS3CampaignExportDir() {
         return s3CampaignExportDir;
     }

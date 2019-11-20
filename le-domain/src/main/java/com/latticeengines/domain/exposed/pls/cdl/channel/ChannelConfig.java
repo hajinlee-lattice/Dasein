@@ -29,6 +29,14 @@ public interface ChannelConfig {
 
     AudienceType getAudienceType();
 
+    String getAudienceId();
+
+    void setAudienceId(String audienceId);
+
+    String getAudienceName();
+
+    void setAudienceName(String audienceName);
+
     boolean shouldResetDeltaCalculations(ChannelConfig channelConfig);
 
     boolean isSuppressAccountsWithoutContacts();

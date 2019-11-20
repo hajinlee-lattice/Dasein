@@ -245,6 +245,16 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
                 externalSysType);
     }
 
+    @Override
+    public PlayLaunch updateAudience(String audienceId, String audienceName, PlayLaunch playLaunch){
+
+        PlayLaunch ret = playLaunchEntityMgr.updateAudience(audienceId, audienceName, playLaunch);
+        if(ret != null){
+            playLaunchChannelService.updateAudience(audienceId, audienceName, ret);
+        }
+        return ret;
+    }
+
     private Map<String, List<LookupIdMap>> calculateUniqueLookupIdMapping(Long playId, List<LaunchState> launchStates,
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType,
             boolean skipLoadingAllLookupIdMapping) {
