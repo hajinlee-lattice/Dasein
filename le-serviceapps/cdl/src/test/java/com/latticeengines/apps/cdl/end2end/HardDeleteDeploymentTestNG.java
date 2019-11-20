@@ -143,6 +143,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void verifyHardDelete() {
+        log.info("idSet is {}", idSets);
         verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedAccount);
         verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedContact);
         verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedRawTransaction);
@@ -155,6 +156,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         log.info("There are {} rows in avro after delete. table role is {}.", originalNumRecords, tableRoleInCollection);
         for (GenericRecord record : recordsAfterDelete) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
+            log.info("accountId is {}.", accountId);
             Assert.assertTrue(!idSets.contains(accountId));
         }
     }
