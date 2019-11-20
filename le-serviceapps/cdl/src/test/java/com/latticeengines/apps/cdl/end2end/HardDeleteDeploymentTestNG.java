@@ -70,7 +70,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        importData();
+//        importData();
         registerDeleteData();
         EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace,
                 EntityMatchEnvironment.SERVING, false);
@@ -143,12 +143,20 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void verifyHardDelete() {
-        Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
+        log.info("idSet is {}", idSets);
+        verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedAccount);
+        verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedContact);
+        verifyHardDeleteByRole(TableRoleInCollection.ConsolidatedRawTransaction);
+    }
+
+    private void verifyHardDeleteByRole(TableRoleInCollection tableRoleInCollection) {
+        Table table = dataCollectionProxy.getTable(customerSpace, tableRoleInCollection);
         List<GenericRecord> recordsAfterDelete = getRecords(table);
         int originalNumRecords = recordsAfterDelete.size();
-        log.info("There are " + originalNumRecords + " rows in avro after delete.");
+        log.info("There are {} rows in avro after delete. table role is {}.", originalNumRecords, tableRoleInCollection);
         for (GenericRecord record : recordsAfterDelete) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
+            log.info("accountId is {}.", accountId);
             Assert.assertTrue(!idSets.contains(accountId));
         }
     }
