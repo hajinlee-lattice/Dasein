@@ -4,6 +4,8 @@ package com.latticeengines.monitor.tracing;
  * Tag constants for distributed tracing
  */
 public class TracingTags {
+    public static final String TENANT_ID = "tenant.id";
+    public static final String ENTITY = "entity";
 
     public static class Workflow {
         public static final String PID = "workflow.pid";
@@ -21,5 +23,9 @@ public class TracingTags {
     public static class DataCloud {
         public static final String ROOT_OPERATION_UID = "datacloud.root_operation_uid";
         public static final String BLOCK_OPERATION_UID = "datacloud.block_operation_uid";
+    }
+
+    public static class Attribute {
+        public static final String ATTR_CONFIG_UPDATE_MODE = "attr.config.update_mode";
     }
 }

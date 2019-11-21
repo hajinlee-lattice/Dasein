@@ -16,6 +16,12 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
+import com.latticeengines.monitor.util.TracingUtils;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Component("attrValidationService")
 public class AttrValidationServiceImpl implements AttrValidationService {
@@ -77,13 +83,21 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         AttrValidation validation = new AttrValidation();
         for (String validatorName : validatorList) {
             AttrValidator validator = AttrValidator.getValidator(validatorName);
-            try (PerformanceTimer timer = new PerformanceTimer()) {
-                if (validator != null) {
-                    validator.validate(existingAttrConfigs, userProvidedAttrConfigs, validation);
+            Tracer tracer = GlobalTracer.get();
+            Span validatorSpan = tracer //
+                    .buildSpan(validatorName + ".validate") //
+                    .start();
+            try (Scope scope = tracer.activateSpan(validatorSpan)) {
+                try (PerformanceTimer timer = new PerformanceTimer()) {
+                    if (validator != null) {
+                        validator.validate(existingAttrConfigs, userProvidedAttrConfigs, validation);
+                    }
+                    String msg = String.format("Validator %s for tenant %s", validatorName,
+                            MultiTenantContext.getShortTenantId());
+                    timer.setTimerMessage(msg);
                 }
-                String msg = String.format("Validator %s for tenant %s", validatorName,
-                        MultiTenantContext.getShortTenantId());
-                timer.setTimerMessage(msg);
+            } finally {
+                TracingUtils.finish(validatorSpan);
             }
         }
         return generateReport(userProvidedAttrConfigs, validation);
