@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 
 public interface TableEntityMgr {
 

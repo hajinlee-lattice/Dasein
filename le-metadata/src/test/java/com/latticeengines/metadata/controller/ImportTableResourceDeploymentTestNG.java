@@ -15,8 +15,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
-import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;

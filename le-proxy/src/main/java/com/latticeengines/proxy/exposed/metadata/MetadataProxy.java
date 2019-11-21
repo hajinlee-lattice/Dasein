@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;

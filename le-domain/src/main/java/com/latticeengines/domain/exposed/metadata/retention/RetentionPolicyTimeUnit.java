@@ -1,20 +1,21 @@
-package com.latticeengines.domain.exposed.metadata.rention;
+package com.latticeengines.domain.exposed.metadata.retention;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 public enum RetentionPolicyTimeUnit {
 
-    DAY(24 * 60 * 60 * 1000l),
-    WEEK(7 * 24 * 60 * 60 * 1000l),
-    MONTH(30 * 24 * 60 * 60 * 1000l),
-    YEAR(365 * 24 * 60 * 60 * 1000l);
+    DAY(TimeUnit.DAYS.toMillis(1)),
+    WEEK(TimeUnit.DAYS.toMillis(7)),
+    MONTH(TimeUnit.DAYS.toMillis(30)),
+    YEAR(TimeUnit.DAYS.toMillis(365));
 
     public long getMilliseconds() {
         return milliseconds;
@@ -37,7 +38,7 @@ public enum RetentionPolicyTimeUnit {
         } else if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else {
-            throw new IllegalArgumentException("Cannot find a RetentionPolicyTimeUnit with name " + name);
+            return null;
         }
     }
 

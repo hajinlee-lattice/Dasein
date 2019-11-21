@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicy;
-import com.latticeengines.domain.exposed.metadata.rention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 
 public class RetentionPolicyUtil {
 

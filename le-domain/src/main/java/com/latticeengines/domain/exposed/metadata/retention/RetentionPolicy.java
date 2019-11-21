@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.metadata.rention;
+package com.latticeengines.domain.exposed.metadata.retention;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
