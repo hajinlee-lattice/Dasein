@@ -155,7 +155,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
             }
             redisTemplate.expire(failCountKey, 7, TimeUnit.DAYS);
         } catch (Exception e) {
-            log.error("update redis cache fail.", e);
+            log.error("update redis cache fail for tenant " + customerSpace, e);
         }
     }
 

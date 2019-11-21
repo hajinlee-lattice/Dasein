@@ -6,21 +6,52 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
+/**
+ * Keep doc
+ * https://confluence.lattice-engines.com/display/ENG/DataCloud+Engine+Architecture#DataCloudEngineArchitecture-Orchestration
+ * up to date if there is any new change
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataCloudEngineStage {
+    // Type of engine job
     @JsonProperty("Engine")
     private DataCloudEngine engine;
+
+    // Engine job name: Existed ingestion name / transformation pipeline name /
+    // publication name
     @JsonProperty("EngineName")
     private String engineName;
+
+    // If single job step in the pipeline runs longer than defined timeout (in
+    // minutes), treat the step as failed
     @JsonProperty("Timeout")
     private long timeout; // in minute
+
+    // Version of the engine job pipeline
+    // -- Different OrchestrationConfig has different strategy to decide version
+    // for an engine job pipeline
+    // -- If the pipeline step is an transformation job, the version is set for
+    // transformation pipeline version
+    // -- If the pipeline step is a publication job, the version is set for
+    // "SourceVersion" in publication API body
+    // -- Timestamp-format defined in {@link
+    // #HdfsPathBuilder.DATA_FORMAT_STRING}
     @JsonProperty("Version")
     private String version;
+
+    // Status of current pipeline step; Not used for configuration; Only for
+    // internal tracking
     @JsonProperty("Status")
     private ProgressStatus status;
+
+    // Progress percentage of current pipeline step; Not used for configuration;
+    // Only for internal tracking
     @JsonProperty("Progress")
     private Float progress;
+
+    // Tracking message of current pipeline step if it encounters any issue; Not
+    // used for configuration; Only for internal tracking
     @JsonProperty("Message")
     private String message;
 

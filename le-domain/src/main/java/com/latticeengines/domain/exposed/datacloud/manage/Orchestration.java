@@ -28,6 +28,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.orchestration.OrchestrationConfig;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
+/**
+ * Keep doc
+ * https://confluence.lattice-engines.com/display/ENG/DataCloud+Engine+Architecture#DataCloudEngineArchitecture-Orchestration
+ * up to date if there is any new change
+ */
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "Orchestration")
@@ -42,15 +47,21 @@ public class Orchestration implements HasPid, Serializable {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
+    // Orchestration (engine job pipeline) name
     @Column(name = "Name", unique = true, nullable = false, length = 100)
     private String name;
 
+    // Configuration of orchestration
+    // Serialized json from subclasses of {@link #OrchestrationConfig}
     @Column(name = "Config", nullable = false, length = 1000)
     private String configStr;
 
+    // Whether Orchestration is enabled to be triggered
     @Column(name = "SchedularEnabled", nullable = false)
     private boolean schedularEnabled;
 
+    // If a engine job pipeline is failed, maximum number of times of automated
+    // retry
     @Column(name = "MaxRetries", nullable = false)
     private int maxRetries;
 

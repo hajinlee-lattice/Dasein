@@ -29,6 +29,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
+/**
+ * Keep doc
+ * https://confluence.lattice-engines.com/display/ENG/DataCloud+Engine+Architecture#DataCloudEngineArchitecture-Publication
+ * up to date if there is any new change
+ */
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "Publication")
@@ -36,30 +41,69 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Publication implements HasPid {
 
-    @Column(name = "CronExpression", length = 20)
-    protected String cronExpression;
-    @Column(name = "SchedularEnabled")
-    protected Boolean schedularEnabled;
-    @Column(name = "NewJobRetryInterval")
-    protected Long newJobRetryInterval;
-    @Column(name = "NewJobMaxRetry")
-    protected Integer newJobMaxRetry;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", nullable = true)
     private Long pid;
+
+    // Unique publication job name
     @Column(name = "PublicationName", unique = true, nullable = false, length = 100)
     private String publicationName;
+
+    // Source to publish
+    // Each publication job is defined to only publish single source
     @Column(name = "SourceName", nullable = false, length = 100)
     private String sourceName;
+
     @Column(name = "DestinationConfig", nullable = false, length = 1000)
     private String destConfigString;
+
+    // Type of publication destination
+    // Currently only DYNAMO is actively used in production
     @Enumerated(EnumType.STRING)
     @Column(name = "PublicationType", nullable = false, length = 20)
     private PublicationType publicationType;
+
+    // Source to publish is a general source or ingestion source
+    // Currently only general source is actively used in production
     @Enumerated(EnumType.STRING)
     @Column(name = "MaterialType", nullable = false, length = 20)
     private MaterialType materialType;
+
+    // Only effective when SchedularEnabled is 1.
+    // As SchedularEnabled is of no use in production now, same for
+    // CronExpression. Recommend to leave empty to avoid unexpected behavior.
+    // If provided with cron expression, publication job is only triggered in
+    // publication job scanning when cron condition is satisfied.
+    // If not provided, publication job is always triggered in publication job
+    // scanning.
+    @Column(name = "CronExpression", length = 20)
+    protected String cronExpression;
+
+    // Publication job is enabled to be triggered in scanning
+    // Due to scanning functionality {@link #PublicationResource.scan()} is
+    // deprecated, currently publication job is always triggered by
+    // {@link #PublicationResource.publish()} manually or from DataCloud
+    // orchestrator, this property SchedularEnabled is actually of no use now.
+    // Recommend to put 0 to avoid unexpected behavior.
+    @Column(name = "SchedularEnabled")
+    protected Boolean schedularEnabled;
+
+    // Original definition: If a failed job needs to retry, waiting duration in
+    // milliseconds before starting next retry
+    @Deprecated
+    @Column(name = "NewJobRetryInterval")
+    protected Long newJobRetryInterval;
+
+    // If a job is failed, maximum number of times of retry in publication job
+    // scanning.
+    // Due to scanning functionality is deprecated (no longer called by quartz
+    // in production), this property NewJobMaxRetry is of no use in production
+    // now.
+    // Recommend to put 0 to avoid unexpected behavior.
+    @Column(name = "NewJobMaxRetry")
+    protected Integer newJobMaxRetry;
+
     @JsonIgnore
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "publication")
     @OnDelete(action = OnDeleteAction.CASCADE)

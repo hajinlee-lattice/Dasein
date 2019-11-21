@@ -617,7 +617,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             log.debug("tenantId = {} and failcount is {}", tenantId, currentCount);
             return currentCount >= maxFailCount;
         } catch (Exception e) {
-            log.error("get redis cache fail.", e);
+            log.error("get redis cache fail for tenant " + tenantId, e);
         }
         return false;
     }
@@ -635,7 +635,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 return false;
             }
         } catch (Exception e) {
-            log.error("get redis cache fail.", e);
+            log.error("get redis cache fail for tenant " + tenantId, e);
             return false;
         }
     }
