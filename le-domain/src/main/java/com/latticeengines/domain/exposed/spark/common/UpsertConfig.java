@@ -23,6 +23,12 @@ public class UpsertConfig extends SparkJobConfig {
     @JsonProperty("NotOverwriteByNull")
     private Boolean notOverwriteByNull; // if new data is null, it won't overwrite old data
 
+    @JsonProperty("Systems")
+    private List<String> systems;
+
+    @JsonProperty("SystemBatch")
+    private boolean systemBatch;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -66,4 +72,21 @@ public class UpsertConfig extends SparkJobConfig {
     public void setNotOverwriteByNull(Boolean notOverwriteByNull) {
         this.notOverwriteByNull = notOverwriteByNull;
     }
+
+    public List<String> getSystems() {
+        return systems;
+    }
+
+    public void setSystems(List<String> systems) {
+        this.systems = systems;
+    }
+
+    public boolean isSystemBatch() {
+        return systemBatch;
+    }
+
+    public void setSystemBatch(boolean systemBatch) {
+        this.systemBatch = systemBatch;
+    }
+
 }

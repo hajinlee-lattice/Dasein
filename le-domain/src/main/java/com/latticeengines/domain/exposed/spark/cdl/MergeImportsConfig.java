@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,6 +21,9 @@ public class MergeImportsConfig extends SparkJobConfig {
 
     @JsonProperty("DedupSrc")
     private boolean dedupSrc; // dedupe each input by srcId
+
+    @JsonProperty("Systems")
+    private List<String> systems;
 
     @JsonProperty("AddTimestamps")
     private boolean addTimestamps; // add cdl timestamp cols
@@ -116,4 +120,13 @@ public class MergeImportsConfig extends SparkJobConfig {
     public void setCloneSrcFields(String[][] cloneSrcFields) {
         this.cloneSrcFields = cloneSrcFields;
     }
+
+    public List<String> getSystems() {
+        return systems;
+    }
+
+    public void setSystems(List<String> systems) {
+        this.systems = systems;
+    }
+
 }

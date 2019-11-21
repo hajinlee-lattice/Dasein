@@ -12,15 +12,27 @@ import scala.collection.JavaConverters._
 
 class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
+  private val systemColumn = "__system__"
+  
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeImportsConfig]): Unit = {
     val config: MergeImportsConfig = lattice.config
     val inputDfs = lattice.input
     val joinKey = config.getJoinKey
     val srcId = config.getSrcId
-
-    val processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
+    val systems = config.getSystems
+    var processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
         config.getRenameSrcFields, config.getCloneSrcFields) }
+    println("----- BEGIN SCRIPT OUTPUT -----")
+    println(s"systems is: $systems")
+    println("----- END SCRIPT OUTPUT -----")
 
+    if (systems != null) {
+        processedInputs = processedInputs.zip(systems.asScala.toList) map { e =>
+          val df = e._1
+          val system = e._2
+          addSystemColumn(df, system) 
+        }
+    }
     val merged = processedInputs.zipWithIndex.reduce((l, r) => {
       val lhsDf = l._1
       val lhsIdx = l._2
@@ -147,4 +159,12 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     }
   }
 
+   private def addSystemColumn(df: DataFrame, system: String): DataFrame = {
+    if (df.columns.contains(systemColumn)) {
+      df
+    } else {
+      df.withColumn(systemColumn, lit(system))
+    }
+  }
+   
 }

@@ -35,18 +35,18 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     // All the schema should have AccountId field as row identifier for result
     // verification
     private static final String[] FIELDS1 = { InterfaceName.Id.name(), "AID1" };
+    private static final String[] FIELDS1_EXPECTED = { InterfaceName.Id.name(), "AID1", "__system__" };
     private static final String[] FIELDS3 = { InterfaceName.Id.name(), "AID1", "AID2" };
     private static final String[] FIELDS4 = { InterfaceName.Id.name(), InterfaceName.AccountId.name(), "AID1", "AID2" };
-
     @Test(groups = "functional")
     public void test() {
         ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("merge-imports-test", 2);
 
         List<Runnable> runnables = new ArrayList<>();
-//        runnables.add(this::test1);
-        runnables.add(this::test2);
-//        runnables.add(this::test3);
-//        runnables.add(this::test4);
+        runnables.add(this::test1);
+        // runnables.add(this::test2);
+        // runnables.add(this::test3);
+        // runnables.add(this::test4);
 
         ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
 
@@ -62,6 +62,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setDedupSrc(false);
         config.setJoinKey(null);
         config.setAddTimestamps(false);
+        config.setSystems(Arrays.asList("system1", "system2"));
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace1());
         verify(result, Collections.singletonList(this::verifyTarget1));
     }
@@ -92,17 +93,17 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyTarget1(HdfsDataUnit tgt) {
         Object[][] expectedResult = new String[][] { //
-                { "1", "A1" }, //
-                { "2", "A2" }, //
-                { "3", "A1" }, //
-                { "4", "A3" }, //
+                { "1", "A1", "system1" }, //
+                { "2", "A2", "system1" }, //
+                { "3", "A1", "system2" }, //
+                { "4", "A3", "system2" }, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
-            verifyTargetData(FIELDS1, expectedMap, record);
+            verifyTargetData(FIELDS1_EXPECTED, expectedMap, record);
             rows++;
         }
         Assert.assertEquals(rows, expectedResult.length);
@@ -118,6 +119,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setJoinKey(InterfaceName.Id.name());
         config.setAddTimestamps(true);
         config.setRequiredColumns(ImmutableMap.of("Id1", "string", "Id2", "long"));
+        config.setSystems(Arrays.asList("system1", "system2"));
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace2());
         verify(result, Collections.singletonList(this::verifyTarget2));
     }
@@ -148,16 +150,16 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyTarget2(HdfsDataUnit tgt) {
         Object[][] expectedResult = new String[][] { //
-                { "1", "A1"}, //
-                { "2", "A2"}, //
-                { "3", "A3"}, //
+                { "1", "A1", "system2" }, //
+                { "2", "A2", "system1"}, //
+                { "3", "A3", "system2"}, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
-            verifyTargetData(FIELDS1, expectedMap, record);
+            verifyTargetData(FIELDS1_EXPECTED, expectedMap, record);
             Schema schema = record.getSchema();
             verifyFieldOfType(schema, "Id1", String.class);
             verifyFieldOfType(schema, "Id2", Long.class);
