@@ -326,6 +326,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             return false;
         }
         if (replace) {
+            log.info("Has replace action in " + mainEntity() + ", going to rebuild");
             return true;
         }
         if (enforceRebuild) {
