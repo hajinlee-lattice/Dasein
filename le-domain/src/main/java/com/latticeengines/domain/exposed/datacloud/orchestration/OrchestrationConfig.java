@@ -10,14 +10,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+/**
+ * Keep doc
+ * https://confluence.lattice-engines.com/display/ENG/DataCloud+Engine+Architecture#DataCloudEngineArchitecture-Orchestration
+ * up to date if there is any new change
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ClassName")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PredefinedScheduleConfig.class, name = "PredefinedScheduleConfig"),
-        @JsonSubTypes.Type(value = ExternalTriggerConfig.class, name = "ExternalTriggerConfig") })
+        @JsonSubTypes.Type(value = ExternalTriggerConfig.class, name = "ExternalTriggerConfig"),
+        @JsonSubTypes.Type(value = ExternalTriggerWithScheduleConfig.class, name = "ExternalTriggerWithScheduleConfig") })
 public abstract class OrchestrationConfig {
+
+    // Names of subclass extending OrchestrationConfig
     @JsonProperty("ClassName")
     private String className;
 
+    // Define a sequence of engine jobs to construct the pipeline
     @JsonProperty("PipelineConfig")
     private List<DataCloudEngineStage> pipeline;
 

@@ -17,23 +17,11 @@ public abstract class PublicationConfiguration {
 
     @JsonProperty("Destination")
     protected PublicationDestination destination;
-    @JsonProperty("SourceName")
-    private String sourceName;
     @JsonProperty("Strategy")
     private PublicationStrategy publicationStrategy;
 
     @JsonIgnore
     protected abstract String getConfigurationType();
-
-    // should get source name from publication
-    @Deprecated
-    public String getSourceName() {
-        return sourceName;
-    }
-
-    public void setSourceName(String sourceName) {
-        this.sourceName = sourceName;
-    }
 
     public PublicationDestination getDestination() {
         return destination;
