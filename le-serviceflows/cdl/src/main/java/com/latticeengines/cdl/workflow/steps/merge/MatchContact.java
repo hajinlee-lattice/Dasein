@@ -81,36 +81,31 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     private List<TransformationStepConfig> entityMatchSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
-        int mergeStep = 0;
-        int concatenateStep = 1;
         String convertBatchStoreTableName = getConvertBatchStoreTableName();
         Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
-        TransformationStepConfig merge;
-        TransformationStepConfig concatenate;
-        if (CollectionUtils.isEmpty(inputTableNames) && StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-            merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
-                    convertBatchStoreTableName, -1);
-            concatenate = concatenateContactName(mergeStep, null);
-        } else {
-            merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
+
+        if (CollectionUtils.isNotEmpty(inputTableNames)) {
+            TransformationStepConfig mergeImport = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
                     null, -1);
-            concatenate = concatenateContactName(mergeStep, null);
-            // if we have convertBatchStore, we should merge and match new import first
-            // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
-            if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                TransformationStepConfig entityMatch = matchContact(concatenateStep++, null, null);
-                steps.add(merge);
-                steps.add(concatenate);
-                steps.add(entityMatch);
-                merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
-                        convertBatchStoreTableName, concatenateStep++);
-                concatenate = concatenateContactName(concatenateStep++, null);
+            steps.add(mergeImport);
+            TransformationStepConfig concatenateImportContactName = concatenateContactName(steps.size() - 1, null);
+            steps.add(concatenateImportContactName);
+            if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+                TransformationStepConfig entityMatchImport = matchContact(steps.size() - 1, null, null);
+                steps.add(entityMatchImport);
             }
         }
-        TransformationStepConfig entityMatch = matchContact(concatenateStep, matchTargetTablePrefix,
+        if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+            // when there is no inpot table, steps.size() - 1 will be -1
+            TransformationStepConfig mergeBatchStore = concatImports(null, preProcessFlds.getLeft(),
+                    preProcessFlds.getRight(),
+                    null, steps.size() - 1);
+            steps.add(mergeBatchStore);
+            TransformationStepConfig concatenateBatchStoreContactName = concatenateContactName(steps.size() - 1, null);
+            steps.add(concatenateBatchStoreContactName);
+        }
+        TransformationStepConfig entityMatch = matchContact(steps.size() - 1, matchTargetTablePrefix,
                 convertBatchStoreTableName);
-        steps.add(merge);
-        steps.add(concatenate);
         steps.add(entityMatch);
         log.info("steps are {}.", steps);
         return steps;

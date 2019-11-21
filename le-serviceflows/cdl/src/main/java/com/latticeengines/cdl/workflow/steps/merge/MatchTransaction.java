@@ -60,7 +60,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
                 }
             }
             if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
-                // when there is no batch store, steps.size() - 1 will be -1
+                // when there is no input table, steps.size() - 1 will be -1
                 steps.add(mergeInputs(getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
                         convertBatchStoreTableName, steps.size() - 1));
             }

@@ -104,7 +104,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
             sb.append('\n');
             idSets.add(id);
             numRecordsInCsv++;
-            if (numRecordsInCsv == recordsBeforeDelete.size()/2 || numRecordsInCsv == recordsBeforeDelete.size() - 1) {
+            if (numRecordsInCsv == 10 || numRecordsInCsv == 20) {
 
                 log.info("There are " + numRecordsInCsv + " rows in csv.");
                 String fileName = "account_delete_" + numRecordsInCsv + ".csv";
@@ -121,6 +121,9 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
                         sourceFile.getName(), true);
                 JobStatus status = waitForWorkflowStatus(appId.toString(), false);
                 Assert.assertEquals(JobStatus.COMPLETED, status);
+                if (numRecordsInCsv == 20) {
+                    break;
+                }
                 sb = new StringBuilder();
                 sb.append("id");
                 sb.append(',');

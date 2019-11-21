@@ -226,7 +226,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info(String.format("Found %d hard delete actions", hardDeletes.size()));
         }
         hasSoftDelete = CollectionUtils.isNotEmpty(softDeletes);
-        if (hasHardDelete) {
+        if (hasSoftDelete) {
             log.info(String.format("Found %d soft delete actions", softDeletes.size()));
         }
     }
@@ -300,7 +300,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports || hasSoftDelete;
+        return hasImports || hasSoftDelete || hasHardDelete;
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
