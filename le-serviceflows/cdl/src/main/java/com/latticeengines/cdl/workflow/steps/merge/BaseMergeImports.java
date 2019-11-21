@@ -94,6 +94,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
     boolean skipSoftDelete = true;
+    boolean skipHardDelete = true;
     List<Action> softDeleteActions;
 
     @Override
@@ -114,6 +115,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
         softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
         skipSoftDelete = CollectionUtils.isEmpty(softDeleteActions);
+
+        skipHardDelete = CollectionUtils.isEmpty(getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class));
 
         entity = configuration.getMainEntity();
         batchStore = entity.getBatchStore();

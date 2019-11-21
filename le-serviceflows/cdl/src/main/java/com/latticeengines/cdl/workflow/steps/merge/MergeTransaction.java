@@ -166,6 +166,9 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
+        if (StringUtils.isBlank(mergedImportTable) && !skipHardDelete) {
+            return null;
+        }
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("MergeTransaction");
         List<TransformationStepConfig> steps;
