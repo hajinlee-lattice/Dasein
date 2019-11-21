@@ -83,8 +83,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             if (dailyStoreTable == null) {
                 throw new IllegalStateException(String.format("Cannot find the daily store table for stream %s", streamId));
             }
-            DataUnit tableDU = dailyStoreTable.toHdfsDataUnit(String.format(INPUT_TABLE_PREFIX, streamId) + dailyStoreTable.getName());
-            tableDU.setPartitionKeys(Collections.singletonList(InterfaceName.PeriodId.name()));
+            DataUnit tableDU = dailyStoreTable.partitionedToHdfsDataUnit(String.format(INPUT_TABLE_PREFIX, streamId) + dailyStoreTable.getName(), Collections.singletonList(InterfaceName.__StreamDateId.name()));
             inputs.add(tableDU);
 
             Details details = new Details();

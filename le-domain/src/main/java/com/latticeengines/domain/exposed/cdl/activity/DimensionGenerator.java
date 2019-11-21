@@ -121,7 +121,7 @@ public class DimensionGenerator {
      */
     public static String hashDimensionValue(Object origValue) {
         String str = TypeConversionUtil.toString(origValue);
-        return StringUtils.isNotBlank(str) ? HashUtils.getShortHash(str) : null;
+        return StringUtils.isNotBlank(str) ? HashUtils.getCleanedString(HashUtils.getShortHash(str)) : null;
     }
 
     @Override

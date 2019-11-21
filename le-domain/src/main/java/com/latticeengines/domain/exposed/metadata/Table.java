@@ -754,6 +754,20 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return unit;
     }
 
+    @JsonProperty
+    public HdfsDataUnit partitionedToHdfsDataUnit(String alias, List<String> partitionKeys) {
+        if (StringUtils.isBlank(alias)) {
+            alias = this.getName();
+        }
+        Extract extract = this.getExtracts().get(0);
+        HdfsDataUnit unit = new HdfsDataUnit();
+        unit.setName(alias);
+        unit.setPath(extract.getPath());
+        unit.setCount(extract.getProcessedRecords());
+        unit.setPartitionKeys(partitionKeys);
+        return unit;
+    }
+
     public void setUpdatedBy(String updateBy) {
         this.updatedBy = updateBy;
     }
