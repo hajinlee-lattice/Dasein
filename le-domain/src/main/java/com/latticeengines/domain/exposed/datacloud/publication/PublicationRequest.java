@@ -5,6 +5,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class PublicationRequest {
 
+    // Timestamp-format version of the source to be published; Must be provided
     @JsonProperty("SourceVersion")
     private String sourceVersion;
 

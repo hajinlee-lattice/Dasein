@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PublishToDynamoConfiguration extends PublicationConfiguration {
 
+    // Env of Dynamo table
     @JsonProperty("Alias")
     private Alias alias;
 
+    // Class path of data fabric entity
     @JsonProperty("EntityClass")
     private String entityClass;
 
