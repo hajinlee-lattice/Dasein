@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
@@ -61,6 +62,7 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMa
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
@@ -139,6 +141,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final AtlasStreamEntityMgr streamEntityMgr;
 
+    private final ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
+
     private final ColumnMetadataProxy columnMetadataProxy;
 
     private final ActionService actionService;
@@ -158,6 +162,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                                            DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
                                            WorkflowProxy workflowProxy, CatalogEntityMgr catalogEntityMgr,
                                            AtlasStreamEntityMgr streamEntityMgr,
+                                           ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy,
                                            S3ImportSystemService s3ImportSystemService) {
@@ -166,6 +171,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.workflowProxy = workflowProxy;
         this.catalogEntityMgr = catalogEntityMgr;
         this.streamEntityMgr = streamEntityMgr;
+        this.activityMetricsGroupEntityMgr = activityMetricsGroupEntityMgr;
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
         this.batonService = batonService;
@@ -688,6 +694,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         cleanupActivityStreams(streams);
         log.info("ActivityStreams for tenant {} are {}", customerSpace, JsonUtils.serialize(streams));
 
+        // groupId -> group obj
+        Map<String, ActivityMetricsGroup> groups = new HashMap<>();
+        streams.values().forEach(stream -> activityMetricsGroupEntityMgr.findByStream(stream).forEach(group -> groups.put(group.getGroupId(), group)));
+        cleanupMetricsGroups(groups);
+        log.info("Activity metrics groups for tenant {} are {}", customerSpace, JsonUtils.serialize(groups));
+
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
         boolean skipReMatchFlag = true;
@@ -741,6 +753,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .catalogIngestionBehaivors(getCatalogIngestionBehavior(customerSpace, catalogs)) //
                 .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
                 .activityStreams(streams) //
+                .activityMetricsGroups(groups) //
                 .activeRawStreamTables(getActiveActivityStreamTables(customerSpace, new ArrayList<>(streams.values()))) //
                 .activityStreamImports(
                         getActivityStreamImports(tenant, completedActions, new ArrayList<>(streams.values()))) //
@@ -1147,6 +1160,28 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             }
             stream.getDimensions().forEach(this::cleanupDimension);
         });
+    }
+
+    // remove members not needed to generate metrics groups
+    private void cleanupMetricsGroups(Map<String, ActivityMetricsGroup> groups) {
+        groups.values().forEach(group -> {
+            removeMetricsGroupTmpl(group);
+            cleanupMetricsGroupStream(group);
+        });
+    }
+
+    private void removeMetricsGroupTmpl(ActivityMetricsGroup group) {
+        group.setDisplayNameTmpl(null);
+        group.setDescriptionTmpl(null);
+        group.setSubCategoryTmpl(null);
+    }
+
+    private void cleanupMetricsGroupStream(ActivityMetricsGroup group) {
+        AtlasStream strippedStream = new AtlasStream();
+        AtlasStream originStream = group.getStream();
+        strippedStream.setStreamId(originStream.getStreamId());
+        strippedStream.setPeriods(originStream.getPeriods());
+        group.setStream(strippedStream);
     }
 
     private void cleanupDimension(StreamDimension dimension) {

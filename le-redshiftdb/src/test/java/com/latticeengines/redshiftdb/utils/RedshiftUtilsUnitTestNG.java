@@ -18,8 +18,7 @@ public class RedshiftUtilsUnitTestNG {
         String statement = RedshiftUtils.unloadTableStatement(TABLE_NAME, S3_PATH, AUTHORIZATION, unloader);
         Assert.assertNotNull(statement);
         Assert.assertTrue(statement.contains("HEADER"), statement);
-        Assert.assertTrue(statement.contains("DELIMITER AS ','"), statement);
-        Assert.assertTrue(statement.contains("ESCAPE AS '\"'"), statement);
+        Assert.assertTrue(statement.contains("CSV"), statement);
         Assert.assertFalse(statement.contains("GZIP"), statement);
     }
 
@@ -30,8 +29,7 @@ public class RedshiftUtilsUnitTestNG {
         String statement = RedshiftUtils.unloadTableStatement(TABLE_NAME, S3_PATH, AUTHORIZATION, unloader);
         Assert.assertNotNull(statement);
         Assert.assertTrue(statement.contains("HEADER"), statement);
-        Assert.assertTrue(statement.contains("DELIMITER AS ','"), statement);
-        Assert.assertTrue(statement.contains("ESCAPE AS '\"'"), statement);
+        Assert.assertTrue(statement.contains("CSV"), statement);
         Assert.assertTrue(statement.contains("GZIP"), statement);
     }
 
@@ -42,8 +40,7 @@ public class RedshiftUtilsUnitTestNG {
         String statement = RedshiftUtils.unloadTableStatement(TABLE_NAME, S3_PATH, AUTHORIZATION, unloader);
         Assert.assertNotNull(statement);
         Assert.assertFalse(statement.contains("HEADER"), statement);
-        Assert.assertTrue(statement.contains("DELIMITER AS ','"), statement);
-        Assert.assertTrue(statement.contains("ESCAPE AS '\"'"), statement);
+        Assert.assertTrue(statement.contains("CSV"), statement);
         Assert.assertFalse(statement.contains("GZIP"), statement);
     }
 

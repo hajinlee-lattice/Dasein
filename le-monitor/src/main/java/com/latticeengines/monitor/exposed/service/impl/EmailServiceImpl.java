@@ -43,7 +43,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${monitor.email.enabled:true}")
     private boolean emailEnabled;
 
-    @Value("${monitor.email.businessops:businessops@lattice-engines.com}")
+    @Value("${monitor.email.businessops:LatticePODs@dnb.com}")
     private String businessOpsEmail;
 
     @Value("${monitor.email.pm:dev@lattice-engines.com}")

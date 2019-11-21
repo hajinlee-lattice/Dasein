@@ -1,8 +1,7 @@
 package com.latticeengines.spark.util
 
-import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver}
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
-import com.latticeengines.domain.exposed.metadata.InterfaceName
+import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver}
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId}
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import org.apache.spark.sql.DataFrame

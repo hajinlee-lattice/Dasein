@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
@@ -53,6 +54,12 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
         public Builder activityStreams(Map<String, AtlasStream> activityStreams) {
             processStepConfiguration.setActivityStreamMap(activityStreams);
             activityStreamSparkConfiguration.setActivityStreamMap(activityStreams);
+            return this;
+        }
+
+        public Builder activityMetricsGroups(Map<String, ActivityMetricsGroup> groups) {
+            processStepConfiguration.setActivityMetricsGroupMap(groups);
+            activityStreamSparkConfiguration.setActivityMetricsGroupMap(groups);
             return this;
         }
 

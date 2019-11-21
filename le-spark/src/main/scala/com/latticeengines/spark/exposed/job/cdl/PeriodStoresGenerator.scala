@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
 import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver, StreamDimension}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{PeriodId, __StreamDate}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{PeriodId, __StreamDate, __Row_Count__}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DailyStoreToPeriodStoresJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
@@ -56,7 +56,9 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
   private def processStream(dailyStore: DataFrame, stream: AtlasStream, evaluationDate: String): Seq[DataFrame] = {
     val periods: Seq[String] = asScalaIteratorConverter(stream.getPeriods.iterator).asScala.toSeq
     val dimensions: Seq[StreamDimension] = asScalaIteratorConverter(stream.getDimensions.iterator).asScala.toSeq
-    val aggregators: Seq[StreamAttributeDeriver] = asScalaIteratorConverter(stream.getAttributeDerivers.iterator).asScala.toSeq
+    val aggregators: Seq[StreamAttributeDeriver] =
+      if (stream.getAttributeDerivers == null) Seq()
+      else asScalaIteratorConverter(stream.getAttributeDerivers.iterator).asScala.toSeq
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods), evaluationDate)
 
     // 1: for each requested period (week, month, etc.):
@@ -74,7 +76,7 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
         case MAX => max(dailyStore(targetAttr))
         case _ => throw new UnsupportedOperationException("Unsupported operation")
       }).alias(targetAttr)
-    })
+    }) :+ sum(dailyStore(__Row_Count__.name)).alias(__Row_Count__.name) // Default row count must exist
     val columns: Seq[String] = DeriveAttrsUtils.getGroupByEntityColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
     val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*)
       .agg(aggrProcs.head, aggrProcs.tail: _*))

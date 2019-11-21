@@ -44,6 +44,7 @@ public enum TableRoleInCollection {
 
     WebVisitProfile, //
     PeriodStores, //
+    MetricsGroup, //
 
     AccountMaster;
 

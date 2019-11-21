@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface ActivityMetricsGroupRepository extends BaseJpaRepository<ActivityMetricsGroup, Long> {
@@ -17,4 +18,6 @@ public interface ActivityMetricsGroupRepository extends BaseJpaRepository<Activi
     List<String> findGroupIdsByBase(@Param("tenant") Tenant tenant, @Param("base") String base);
 
     List<ActivityMetricsGroup> findByTenant(@Param("tenant") Tenant tenant);
+
+    List<ActivityMetricsGroup> findByStream(@Param("stream") AtlasStream stream);
 }

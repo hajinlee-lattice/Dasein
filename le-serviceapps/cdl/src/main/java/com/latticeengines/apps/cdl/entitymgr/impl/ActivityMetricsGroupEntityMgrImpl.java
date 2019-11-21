@@ -17,6 +17,7 @@ import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("activityMetricsGroupEntityMgr")
@@ -55,6 +56,12 @@ public class ActivityMetricsGroupEntityMgrImpl extends JpaEntityMgrRepositoryImp
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ActivityMetricsGroup> findByTenant(Tenant tenant) {
         return readerRepository.findByTenant(tenant);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ActivityMetricsGroup> findByStream(AtlasStream stream) {
+        return readerRepository.findByStream(stream);
     }
 
     private Long getNextIndex(String base, String groupIds) {

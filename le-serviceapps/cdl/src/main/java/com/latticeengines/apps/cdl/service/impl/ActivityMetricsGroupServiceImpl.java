@@ -34,8 +34,8 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
 
     private static final String TOTAL_VISIT_GROUPNAME = "Total Web Visits";
     private static final String SOURCE_MEDIUM_GROUPNAME = "Web Visits By Source Medium";
-    private static final String DIM_NAME_PATH_PATTERN = "PathPattern";
-    private static final String DIM_NAME_SOURCEMEDIUM = "SourceMedium";
+    private static final String DIM_NAME_PATH_PATTERN = InterfaceName.PathPatternId.name();
+    private static final String DIM_NAME_SOURCEMEDIUM = InterfaceName.SourceMediumId.name();
 
     @Inject
     private ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
@@ -61,6 +61,12 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         return Arrays.asList(totalVisit, sourceMedium);
     }
 
+    @Override
+    @WithCustomerSpace
+    public List<ActivityMetricsGroup> findByStream(String customerSpace, AtlasStream stream) {
+        return activityMetricsGroupEntityMgr.findByStream(stream);
+    }
+
     private ActivityMetricsGroup setupDefaultTotalVisitGroup(Tenant tenant, AtlasStream stream) {
         ActivityMetricsGroup totalVisit = new ActivityMetricsGroup();
         totalVisit.setStream(stream);
@@ -74,7 +80,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         paramSet.add(Collections.singletonList(4));
         paramSet.add(Collections.singletonList(8));
         paramSet.add(Collections.singletonList(12));
-        totalVisit.setActivityTimeRange(createActivityTimeRange(ComparisonType.LAST,
+        totalVisit.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
                 Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
         totalVisit.setRollupDimensions(DIM_NAME_PATH_PATTERN);
         totalVisit.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
@@ -100,7 +106,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         paramSet.add(Collections.singletonList(4));
         paramSet.add(Collections.singletonList(8));
         paramSet.add(Collections.singletonList(12));
-        sourceMedium.setActivityTimeRange(createActivityTimeRange(ComparisonType.LAST,
+        sourceMedium.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
                 Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
         sourceMedium.setRollupDimensions(String.join(",", Arrays.asList(DIM_NAME_SOURCEMEDIUM, DIM_NAME_PATH_PATTERN)));
         sourceMedium.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),

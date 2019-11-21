@@ -88,6 +88,14 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         groups.forEach(g -> Assert.assertEquals(g.getTenant().getPid(), mainTestTenant.getPid()));
     }
 
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
+    public void testFindByStream() {
+        List<ActivityMetricsGroup> groups = activityMetricsGroupEntityMgr.findByStream(STREAM_WEBVISIT);
+        Assert.assertNotNull(groups);
+        Assert.assertEquals(groups.size(), 1);
+        groups.forEach(g -> Assert.assertEquals(g.getStream().getPid(), STREAM_WEBVISIT.getPid()));
+    }
+
     @DataProvider(name = "testGroupsDataProvider")
     public Object[][] testGroupsDataProvider() {
         return new Object[][] {

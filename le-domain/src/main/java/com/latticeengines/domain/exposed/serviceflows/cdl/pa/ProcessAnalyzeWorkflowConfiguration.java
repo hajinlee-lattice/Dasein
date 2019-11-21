@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -271,6 +272,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder activityStreams(Map<String, AtlasStream> streams) {
             processActivityStreamWorkflowBuilder.activityStreams(streams);
+            return this;
+        }
+
+        public Builder activityMetricsGroups(Map<String, ActivityMetricsGroup> groups) {
+            processActivityStreamWorkflowBuilder.activityMetricsGroups(groups);
             return this;
         }
 

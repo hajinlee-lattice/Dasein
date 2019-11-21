@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,14 +20,19 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
+import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
+import com.latticeengines.spark.util.DeriveAttrsUtils;
 
 public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
@@ -45,16 +51,19 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static List<Pair<String, Class<?>>> FIELDS;
 
     // column names
-    private static final String PathPatternId = "PathPatternId";
-    private static final String AccountId = "AccountId";
-    private static final String ContactId = "ContactId";
-    private static final String PeriodId = "PeriodId";
-    private static final String TotalVisits = "TotalVisits";
+    private static final String PathPatternId = InterfaceName.PathPatternId.name();
+    private static final String AccountId = InterfaceName.AccountId.name();
+    private static final String ContactId = InterfaceName.ContactId.name();
+    private static final String PeriodId = InterfaceName.PeriodId.name();
+    private static final String __Row_Count__ = InterfaceName.__Row_Count__.name();
     private static final String SomeRollupDim = "SomeRollupDim";
+    private static final String PeriodIdPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + PeriodId;
 
     private static final String ENTITY_ID_COL = AccountId;
 
     private static ActivityMetricsGroup TEST_METRICS_GROUP_CONFIG;
+    private static AtlasStream STREAM;
+    private static final String STREAM_ID = "TEST_STREAM_123";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -66,12 +75,22 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void test() {
         DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
-        config.activityMetricsGroup = TEST_METRICS_GROUP_CONFIG;
-        config.periodStoreMap = new HashMap<>();
-        config.periodStoreMap.put(PeriodStrategy.Template.Week.name(), 0); // weekly period store
+        config.activityMetricsGroups = Collections.singletonList(TEST_METRICS_GROUP_CONFIG);
+        config.inputMetadata = constructInputMetadata();
         config.evaluationDate = EVAL_DATE;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config);
         verify(result, Collections.singletonList(this::verifyMetrics));
+    }
+
+    private ActivityStoreSparkIOMetadata constructInputMetadata() {
+        ActivityStoreSparkIOMetadata metadata = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> detailsMap = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        details.setLabels(new ArrayList<>(TIMEFILTER_PERIODS));
+        detailsMap.put(STREAM.getStreamId(), details);
+        metadata.setMetadata(detailsMap);
+        return metadata;
     }
 
     private void setupData() {
@@ -80,27 +99,32 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of(ContactId, String.class), //
                 Pair.of(PeriodId, Integer.class), //
                 Pair.of(PathPatternId, String.class), //
-                Pair.of(TotalVisits, Integer.class), //
-                Pair.of(SomeRollupDim, Integer.class) //
+                Pair.of(__Row_Count__, Integer.class), //
+                Pair.of(SomeRollupDim, Integer.class), //
+                Pair.of(PeriodIdPartition, Integer.class)
         );
 
         Object[][] data = new Object[][]{ //
-                {"1", "1", TWO_WEEKS_AGO, null, 5, 11}, // should be dropped after runAggregation step
-                {"1", "1", TWO_WEEKS_AGO, "pp1", 5, 11}, //
-                {"1", "1", ONE_WEEK_AGO, "pp2", 3, 11}, //
-                {"1", "1", ONE_WEEK_AGO, "pp1", 7, 11}, //
-                {"1", "1", CUR_PERIODID, "pp3", 4, 11}, //
-                {"1", "1", CUR_PERIODID, "pp5", 3, 11}, //
-                {"2", "6", TWO_WEEKS_AGO, "pp1", 2, 11}, //
-                {"2", "5", TWO_WEEKS_AGO, "pp4", 6, 11}, //
-                {"2", "4", ONE_WEEK_AGO, "pp3", 1, 22}
+                {"1", "1", TWO_WEEKS_AGO, null, 5, 11, TWO_WEEKS_AGO}, // should be dropped after runAggregation step
+                {"1", "1", TWO_WEEKS_AGO, "pp1", 5, 11, TWO_WEEKS_AGO}, //
+                {"1", "1", ONE_WEEK_AGO, "pp2", 3, 11, ONE_WEEK_AGO}, //
+                {"1", "1", ONE_WEEK_AGO, "pp1", 7, 11, ONE_WEEK_AGO}, //
+                {"1", "1", CUR_PERIODID, "pp3", 4, 11, CUR_PERIODID}, //
+                {"1", "1", CUR_PERIODID, "pp5", 3, 11, CUR_PERIODID}, //
+                {"2", "6", TWO_WEEKS_AGO, "pp1", 2, 11, TWO_WEEKS_AGO}, //
+                {"2", "5", TWO_WEEKS_AGO, "pp4", 6, 11, TWO_WEEKS_AGO}, //
+                {"2", "4", ONE_WEEK_AGO, "pp3", 1, 22, ONE_WEEK_AGO}
         };
         uploadHdfsDataUnit(data, FIELDS);
+
+        STREAM = new AtlasStream();
+        STREAM.setStreamId(STREAM_ID);
     }
 
     private void setupMetricsGroupConfig() {
         // Tenant and Stream are ignored as not needed for this test
         ActivityMetricsGroup group = new ActivityMetricsGroup();
+        group.setStream(STREAM);
         group.setGroupId(GROUP_ID);
         group.setGroupName(TOTAL_VISIT_GROUPNAME);
         group.setJavaClass(Long.class.getSimpleName());
@@ -108,7 +132,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         group.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
                 TIMEFILTER_PERIODS, TIMEFILTER_PARAMS));
         group.setRollupDimensions(String.format("%s,%s", PathPatternId, SomeRollupDim));
-        group.setAggregation(createAttributeDeriver(null, TotalVisits, StreamAttributeDeriver.Calculation.SUM));
+        group.setAggregation(createAttributeDeriver(null, __Row_Count__, StreamAttributeDeriver.Calculation.SUM));
         group.setNullImputation(NullMetricsImputation.ZERO);
         TEST_METRICS_GROUP_CONFIG = group;
     }

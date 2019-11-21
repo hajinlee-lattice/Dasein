@@ -96,7 +96,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
             34);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-            24);
+            23);
 
 
     }
@@ -133,7 +133,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         assertEquals(defaultS3ExportFields.size(), 41);
         assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 34);
         assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-            41);
+            33);
 
     }
 
@@ -175,10 +175,10 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     public void testOutreach() {
         defaultOutreachExportFields = exportService.getAllAttributes(CDLExternalSystemName.Outreach);
 
-        assertEquals(defaultOutreachExportFields.size(), 42);
+        assertEquals(defaultOutreachExportFields.size(), 37);
         assertEquals(
             defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-            34);
+            27);
         assertEquals(defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
             27);
 
