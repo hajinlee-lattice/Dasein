@@ -118,8 +118,7 @@ public class RedshiftUtils {
         if (Boolean.TRUE.equals(unloader.getCompress())) {
             sb.append("GZIP\n");
         }
-        sb.append("DELIMITER AS '").append(unloader.getDelimiter()).append("'\n");
-        sb.append("ESCAPE AS '\"'\n");
+        sb.append("CSV");
         return sb.toString();
     }
 
