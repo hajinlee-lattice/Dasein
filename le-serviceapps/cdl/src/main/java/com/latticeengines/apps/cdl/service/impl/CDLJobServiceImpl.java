@@ -449,8 +449,12 @@ public class CDLJobServiceImpl implements CDLJobService {
 
         SchedulingResult.Detail detail = result.getDetails().get(tenantId);
         if(!isRetry){
-            String lastActionTimeKey = CacheName.LastActionTimeCache.getKeyForCache(tenantId);
-            redisTemplate.opsForValue().set(lastActionTimeKey, detail.getTenantActivity().getLastActionTime());
+            try {
+                String lastActionTimeKey = CacheName.LastActionTimeCache.getKeyForCache(tenantId);
+                redisTemplate.opsForValue().set(lastActionTimeKey, detail.getTenantActivity().getLastActionTime());
+            } catch (Exception e) {
+                log.error("set redis cache fail for tenant " + tenantId, e);
+            }
         }
         log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}', schedulerName='{}'",
                 tenantId, appId.toString(), isRetry, JsonUtils.serialize(detail), schedulerName);
