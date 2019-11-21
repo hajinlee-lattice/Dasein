@@ -99,7 +99,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             // when there is no inpot table, steps.size() - 1 will be -1
             TransformationStepConfig mergeBatchStore = concatImports(null, preProcessFlds.getLeft(),
                     preProcessFlds.getRight(),
-                    null, steps.size() - 1);
+                    convertBatchStoreTableName, steps.size() - 1);
             steps.add(mergeBatchStore);
             TransformationStepConfig concatenateBatchStoreContactName = concatenateContactName(steps.size() - 1, null);
             steps.add(concatenateBatchStoreContactName);
