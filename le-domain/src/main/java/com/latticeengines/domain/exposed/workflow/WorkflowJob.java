@@ -106,6 +106,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "CONFIGURATION", columnDefinition = "'JSON'")
     private WorkflowConfiguration workflowConfiguration;
 
+    @Column(name = "ENQUEUED_TIME")
+    private Long enqueuedTime;
+
     @Override
     public Long getPid() {
         return pid;
@@ -369,5 +372,13 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     public void setWorkflowConfiguration(WorkflowConfiguration workflowConfiguration) {
         this.workflowConfiguration = workflowConfiguration;
+    }
+
+    public Long getEnqueuedTime() {
+        return enqueuedTime;
+    }
+
+    public void setEnqueuedTime(Long enqueuedTime) {
+        this.enqueuedTime = enqueuedTime;
     }
 }
