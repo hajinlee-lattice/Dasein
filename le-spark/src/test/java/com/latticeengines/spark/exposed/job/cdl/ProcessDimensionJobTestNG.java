@@ -23,8 +23,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
-import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -93,7 +93,8 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
                 .map(value -> (String) value.get(idColumn)) //
                 .collect(Collectors.toSet());
         // hashed id
-        Assert.assertEquals(ids, expectedIds.stream().map(HashUtils::getShortHash).collect(Collectors.toSet()));
+        Assert.assertEquals(ids,
+                expectedIds.stream().map(DimensionGenerator::hashDimensionValue).collect(Collectors.toSet()));
     }
 
     private Pair<ProcessDimensionConfig.Dimension, String> prepareWebVisitPtnData() {
