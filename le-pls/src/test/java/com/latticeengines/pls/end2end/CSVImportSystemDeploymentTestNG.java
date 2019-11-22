@@ -402,6 +402,10 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
     @Test(groups = "deployment", dependsOnMethods = "testMultipleSubType")
     public void testGetSystemList() {
+        // Right now there should be 4 systems: DefaultSystem, Test_SalesforceSystem, Test_OtherSystem, Test_SalesforceSystemLead
+        // Three of them have Account System Id : DefaultSystem, Test_SalesforceSystem, Test_OtherSystem
+        // Two of them have Contact System Id : Test_SalesforceSystem, Test_SalesforceSystemLead
+        // One of them has Leads System Id(secondary Id) : Test_SalesforceSystemLead
         List<S3ImportTemplateDisplay> templateList = cdlService.getS3ImportTemplate(mainTestTenant.getId(), "", null);
         S3ImportTemplateDisplay otherSystemAccount =
                 templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
