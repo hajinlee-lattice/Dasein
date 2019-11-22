@@ -1,5 +1,6 @@
 package com.latticeengines.workflowapi.service.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -569,6 +570,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     ApplicationId appId = workflowContainerService.submitWorkflow(workflowConfiguration, o.getPid());
                     submitted.add(appId);
                     log.info("WorkflowThrottling Submitted workflow job pid={} tenant={} ApplicationId={}", o.getPid(), o.getTenant().getId(), appId);
+                    logWaitTime(o, podid, division, o.getTenant());
                 } catch (Exception e) {
                     log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);
                 }
@@ -616,6 +618,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJob.setType(workflowConfig.getWorkflowName());
         workflowJob.setStack(division);
         workflowJob.setWorkflowConfiguration(workflowConfig);
+        trackEnqueueTime(workflowJob);
 
         workflowJobEntityMgr.createOrUpdate(workflowJob);
 
@@ -814,6 +817,26 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
         }
     }
+
+    @Override
+    public void trackEnqueueTime(WorkflowJob workflowJob) {
+        workflowJob.setEnqueuedTime(Instant.now().toEpochMilli());
+    }
+
+    @Override
+    public Long logWaitTime(WorkflowJob workflow, String podid, String division, Tenant tenant) {
+        Long now = Instant.now().toEpochMilli();
+        Long enqueuedTime = workflow.getEnqueuedTime();
+        if (enqueuedTime == null) {
+            throw new IllegalStateException(String.format("Enqueue time for workflowPid=%s is never tracked", workflow.getPid()));
+        }
+        Long waitTime = now - enqueuedTime;
+        String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
+        log.info("WorkflowThrottling waitTime environment={} stack={} cluster={} workflowPid={} appId={} type={} tenant={} waitTime={}",
+                podid, division, workflow.getEmrClusterId(), workflow.getPid(), workflow.getApplicationId(), workflow.getType(),tenantId, waitTime);
+        return waitTime;
+    }
+
 
     private List<WorkflowJob> checkExecutionId(List<WorkflowJob> workflowJobs) {
         if (workflowJobs == null) {

@@ -7,6 +7,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -151,4 +152,9 @@ public interface WorkflowJobService {
     int clearAllJobCaches();
 
     void scheduledDrainQueueWrapper();
+
+    void trackEnqueueTime(WorkflowJob workflowJob);
+
+    Long logWaitTime(WorkflowJob workflow, String podid, String division, Tenant tenant);
+
 }
