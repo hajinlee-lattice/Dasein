@@ -40,11 +40,19 @@ public class TransactionTemplateMigrateStep extends BaseImportTemplateMigrateSte
         Preconditions.checkNotNull(templateTable);
         Attribute accountId = templateTable.getAttribute(InterfaceName.AccountId);
         if (accountId != null) {
+            Attribute customerAccountId = templateTable.getAttribute(InterfaceName.CustomerAccountId);
+            if (customerAccountId != null) {
+                throw new IllegalArgumentException("Migrated tenant Transaction template already have CustomerAccountId!");
+            }
             templateTable.removeAttribute(InterfaceName.AccountId.name());
             templateTable.addAttribute(getCustomerAccountId(accountId.getDisplayName()));
         }
         Attribute contactId = templateTable.getAttribute(InterfaceName.ContactId);
         if (contactId != null) {
+            Attribute customerContactId = templateTable.getAttribute(InterfaceName.CustomerContactId);
+            if (customerContactId != null) {
+                throw new IllegalArgumentException("Migrated tenant Transaction template already have CustomerContactId!");
+            }
             templateTable.removeAttribute(InterfaceName.ContactId.name());
             templateTable.addAttribute(getCustomerContactId(contactId.getDisplayName()));
         }

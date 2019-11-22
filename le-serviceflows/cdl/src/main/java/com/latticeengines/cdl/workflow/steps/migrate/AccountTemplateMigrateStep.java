@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -39,7 +40,15 @@ public class AccountTemplateMigrateStep extends BaseImportTemplateMigrateStep<Ac
     protected void updateTemplate(Table templateTable, S3ImportSystem s3ImportSystem) {
         Preconditions.checkNotNull(s3ImportSystem);
         Preconditions.checkNotNull(templateTable);
-        String displayName = templateTable.getAttribute(InterfaceName.AccountId).getDisplayName();
+        Attribute accountId = templateTable.getAttribute(InterfaceName.AccountId);
+        if (accountId == null) {
+            throw new IllegalArgumentException("Migrated tenant Account template does not have AccountId!");
+        }
+        Attribute customerAccountId = templateTable.getAttribute(InterfaceName.CustomerAccountId);
+        if (customerAccountId != null) {
+            throw new IllegalArgumentException("Migrated tenant Account template already have CustomerAccountId!");
+        }
+        String displayName = accountId.getDisplayName();
         templateTable.removeAttribute(InterfaceName.AccountId.name());
         templateTable.addAttribute(getCustomerAccountId(displayName));
         if (StringUtils.isNotEmpty(s3ImportSystem.getAccountSystemId())) {
