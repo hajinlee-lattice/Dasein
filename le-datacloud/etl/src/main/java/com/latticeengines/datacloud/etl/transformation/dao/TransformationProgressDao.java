@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.transformation.dao;
 
 import java.util.List;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.etl.dao.ProgressDao;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 
@@ -14,4 +15,5 @@ public interface TransformationProgressDao extends ProgressDao<TransformationPro
     List<TransformationProgress> findUnfinishedPipelines(String pipelineName);
     List<TransformationProgress> findAllforPipeline(String pipelineName);
 
+    String getLatestSuccessVersion(@NotNull String pipelineName);
 }

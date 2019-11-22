@@ -25,4 +25,12 @@ public interface OrchestrationProgressEntityMgr extends BaseEntityMgr<Orchestrat
     boolean hasJobInProgress(String orchName);
 
     boolean hasTriggeredSince(String orchName, Date since);
+
+    /**
+     * Delete progress with PID. Only for testing purpose
+     * 
+     * @param progress:
+     *            orchestration progress with PID populated
+     */
+    void deleteProgress(OrchestrationProgress progress);
 }
