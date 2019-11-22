@@ -2,7 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import java.util
 
-import com.latticeengines.common.exposed.util.{JsonUtils, TemplateUtils}
+import com.latticeengines.common.exposed.util.TemplateUtils
 import com.latticeengines.domain.exposed.StringTemplates
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
@@ -55,7 +55,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     })
     outputMetadata.setMetadata(detailsMap)
 
-    lattice.outputStr = JsonUtils.serialize(outputMetadata)
+    lattice.outputStr = serializeJson(outputMetadata)
     lattice.output = metrics.toList
   }
 

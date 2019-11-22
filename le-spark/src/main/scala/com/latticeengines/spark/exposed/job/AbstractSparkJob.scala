@@ -1,6 +1,11 @@
 package com.latticeengines.spark.exposed.job
 
+import java.io.StringWriter
+
 import com.fasterxml.jackson.core.`type`.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit.StorageType
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
@@ -16,6 +21,19 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
 
   var serializedConfig: String = "{}"
   var applicationId: String = ""
+
+  def serializeJson(obj: Any): String = {
+    val mapper = getObjectMapper()
+    val stringWriter: StringWriter = new StringWriter
+    mapper.writeValue(stringWriter, obj)
+    stringWriter.toString
+  }
+
+  private def getObjectMapper(): ObjectMapper = {
+    val mapper = new ObjectMapper() with ScalaObjectMapper
+    mapper.registerModule(DefaultScalaModule)
+    mapper
+  }
 
   def configure(jobConfig: C): Unit = {
     serializedConfig = JsonUtils.serialize(jobConfig)
@@ -118,7 +136,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   def logSpark(message: String): Unit = {
     println(s"[$applicationId]: $message")
   }
-  
+
   def logDataFrame(dfName: String, df: DataFrame, sortKey: String, selection: Seq[String], limit: Int) = {
     logSpark("==========" + dfName + "==========")
     logSpark(selection mkString ",")

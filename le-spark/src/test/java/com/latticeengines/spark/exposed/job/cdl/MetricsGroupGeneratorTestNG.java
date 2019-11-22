@@ -17,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
@@ -79,6 +80,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.inputMetadata = constructInputMetadata();
         config.evaluationDate = EVAL_DATE;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config);
+        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyMetrics));
     }
 
