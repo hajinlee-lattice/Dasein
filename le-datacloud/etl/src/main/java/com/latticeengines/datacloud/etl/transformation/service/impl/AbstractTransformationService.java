@@ -7,13 +7,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.AvroParquetUtils;
@@ -28,7 +29,6 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloud.etl.transformation.ProgressHelper;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -52,28 +52,25 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     private static final String WILD_CARD = "*";
     protected static final String VERSION = "VERSION";
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected TransformationProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    @Autowired
+    @Inject
     private ProgressHelper progressHelper;
 
-    @Autowired
-    private HiveTableService hiveTableService;
-
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     abstract Logger getLogger();

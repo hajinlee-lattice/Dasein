@@ -18,7 +18,7 @@ import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationEnt
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationProgressService;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationValidator;
-import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineVersionService;
 import com.latticeengines.datacloudapi.engine.ingestion.service.IngestionService;
 import com.latticeengines.datacloudapi.engine.orchestration.service.OrchestrationService;
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
@@ -60,16 +60,16 @@ public class OrchestrationServiceImpl implements OrchestrationService {
     private PublicationService publicationService;
 
     @Inject
-    private List<DataCloudEngineService> engineServices;
+    private List<DataCloudEngineVersionService> engineServices;
 
-    private Map<DataCloudEngine, DataCloudEngineService> serviceMap;
+    private Map<DataCloudEngine, DataCloudEngineVersionService> serviceMap;
 
     private static final String ORCHESTRATION = "Orchestration";
 
     @PostConstruct
     private void postConstruct() {
         serviceMap = new HashMap<>();
-        for (DataCloudEngineService service : engineServices) {
+        for (DataCloudEngineVersionService service : engineServices) {
             serviceMap.put(service.getEngine(), service);
         }
     }
@@ -108,7 +108,7 @@ public class OrchestrationServiceImpl implements OrchestrationService {
                 continue;
             }
             DataCloudEngineStage currentStage = progress.getCurrentStage();
-            DataCloudEngineService engineService = serviceMap.get(currentStage.getEngine());
+            DataCloudEngineVersionService engineService = serviceMap.get(currentStage.getEngine());
             if (engineService == null) {
                 throw new UnsupportedOperationException(
                         String.format("Not support to execute orchestration pipeline from %s engine",
@@ -238,7 +238,7 @@ public class OrchestrationServiceImpl implements OrchestrationService {
             throw new RuntimeException(
                     "Required fields are not populated. Expected fields are engineName, engine and version");
         }
-        DataCloudEngineService engineService = serviceMap.get(stage.getEngine());
+        DataCloudEngineVersionService engineService = serviceMap.get(stage.getEngine());
         if (engineService == null) {
             throw new UnsupportedOperationException(String
                     .format("Specified engine name %s is not supported.", stage.getEngine().name()));

@@ -92,6 +92,12 @@ public class OrchestrationProgressEntityMgrImpl extends BaseEntityMgrImpl<Orches
     }
 
     @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    public void deleteProgress(OrchestrationProgress progress) {
+        orchestrationProgressDao.delete(progress);
+    }
+
+    @Override
     public BaseDao<OrchestrationProgress> getDao() {
         return orchestrationProgressDao;
     }

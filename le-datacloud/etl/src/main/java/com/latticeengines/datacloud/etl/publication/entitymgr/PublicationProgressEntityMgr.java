@@ -2,30 +2,33 @@ package com.latticeengines.datacloud.etl.publication.entitymgr;
 
 import java.util.List;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
 
 public interface PublicationProgressEntityMgr {
 
-    PublicationProgress findBySourceVersionUnderMaximumRetry(Publication publication, String sourceVersion);
+    PublicationProgress findBySourceVersionUnderMaximumRetry(@NotNull Publication publication,
+            @NotNull String sourceVersion);
 
-    PublicationProgress findLatestUnderMaximumRetry(Publication publication);
+    PublicationProgress findLatestUnderMaximumRetry(@NotNull Publication publication);
 
-    PublicationProgress startNewProgress(Publication publication, PublicationDestination destination,
-                                         String sourceVersion, String creator);
+    PublicationProgress startNewProgress(@NotNull Publication publication, @NotNull PublicationDestination destination,
+            @NotNull String sourceVersion, @NotNull String creator);
 
-    PublicationProgress runNewProgress(Publication publication, PublicationDestination destination,
-                                       String sourceVersion, String creator);
+    PublicationProgress runNewProgress(@NotNull Publication publication, @NotNull PublicationDestination destination,
+            @NotNull String sourceVersion, @NotNull String creator);
 
-    PublicationProgress updateProgress(PublicationProgress progress);
+    PublicationProgress updateProgress(@NotNull PublicationProgress progress);
 
-    PublicationProgress findLatestNonTerminalProgress(Publication publication);
+    PublicationProgress findLatestNonTerminalProgress(@NotNull Publication publication);
 
-    List<PublicationProgress> findAllForPublication(Publication publication);
+    List<PublicationProgress> findAllForPublication(@NotNull Publication publication);
 
-    PublicationProgress findByPid(Long pid);
+    PublicationProgress findByPid(@NotNull Long pid);
 
-    List<PublicationProgress> findStatusByPublicationVersion(Publication publication, String version);
+    List<PublicationProgress> findStatusByPublicationVersion(@NotNull Publication publication, String version);
 
+    String getLatestSuccessVersion(@NotNull String publicationName);
 }

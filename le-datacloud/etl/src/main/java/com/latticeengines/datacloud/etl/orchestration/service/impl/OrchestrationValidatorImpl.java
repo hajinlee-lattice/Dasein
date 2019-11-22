@@ -6,18 +6,18 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationValidator;
-import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineVersionService;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig;
@@ -29,18 +29,18 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(OrchestrationValidatorImpl.class);
 
-    @Autowired
+    @Inject
     private OrchestrationProgressEntityMgr orchestrationProgressEntityMgr;
 
-    @Autowired
-    private List<DataCloudEngineService> engineServices;
+    @Inject
+    private List<DataCloudEngineVersionService> engineServices;
 
-    private Map<DataCloudEngine, DataCloudEngineService> serviceMap;
+    private Map<DataCloudEngine, DataCloudEngineVersionService> serviceMap;
 
     @PostConstruct
     private void postConstruct() {
         serviceMap = new HashMap<>();
-        for (DataCloudEngineService service : engineServices) {
+        for (DataCloudEngineVersionService service : engineServices) {
             serviceMap.put(service.getEngine(), service);
         }
     }
@@ -82,7 +82,7 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
     }
 
     private boolean isExternalTriggered(ExternalTriggerConfig config, String orchName, List<String> triggeredVersions) {
-        DataCloudEngineService service = serviceMap.get(config.getEngine());
+        DataCloudEngineVersionService service = serviceMap.get(config.getEngine());
         if (service == null) {
             throw new UnsupportedOperationException(
                     String.format("Not support to trigger orchestration from %s engine", config.getEngine().name()));
