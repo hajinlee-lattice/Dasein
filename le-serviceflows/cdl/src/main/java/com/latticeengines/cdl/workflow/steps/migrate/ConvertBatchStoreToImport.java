@@ -95,8 +95,6 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
             request.setKeepTemp(false);
             request.setEnableSlack(false);
 
-//            migrateStep = 0;
-
             List<TransformationStepConfig> steps = new ArrayList<>();
             TransformationStepConfig migrate = migrate();
             steps.add(migrate);
