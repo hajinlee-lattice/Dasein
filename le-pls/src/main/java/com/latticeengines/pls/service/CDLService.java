@@ -54,6 +54,9 @@ public interface CDLService {
 
     List<S3ImportSystem> getAllS3ImportSystem(String customerSpace);
 
+    List<S3ImportSystem> getS3ImportSystemWithFilter(String customerSpace, boolean filterAccount,
+                                                     boolean filterContact, S3ImportTemplateDisplay templateDisplay);
+
     List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable);
 
     boolean autoImport(String templateFileName);
