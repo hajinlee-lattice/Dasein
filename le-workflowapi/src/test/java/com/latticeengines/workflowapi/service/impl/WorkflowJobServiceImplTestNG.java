@@ -3,6 +3,7 @@ package com.latticeengines.workflowapi.service.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -71,6 +72,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplTestNG.class);
 
     private static final String TEST_WF_NAME = "testWorkflowName";
+    private static final String TEST_PODID = "podid";
+    private static final String TEST_DIV = "division";
 
     @Inject
     TenantEntityMgr tenantEntityMgr;
@@ -744,6 +747,30 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         } catch (Exception exc) {
             Assert.fail("Shoud not throw exception.");
         }
+    }
+
+    @Test(groups = "functional")
+    public void testWorkflowWaitTimeTracking() throws Exception {
+        Long now = Instant.now().toEpochMilli();
+        WorkflowJob workflow = createWorkflowJobForTimeTrack();
+        workflowJobService.trackEnqueueTime(workflow);
+
+        Assert.assertNotNull(workflow.getEnqueuedTime());
+        Assert.assertTrue(workflow.getEnqueuedTime() >= now);
+
+        Thread.sleep(1000L);
+
+        Long waitTime = workflowJobService.logWaitTime(workflow, TEST_PODID, TEST_DIV, tenant);
+        Assert.assertNotNull(waitTime);
+        Assert.assertTrue(waitTime >= 1000L);
+    }
+
+    private WorkflowJob createWorkflowJobForTimeTrack() {
+        WorkflowJob workflow = new WorkflowJob();
+        workflow.setPid(999L);
+        workflow.setType("workflowType");
+        workflow.setApplicationId("applicationId");
+        return workflow;
     }
 
     private void createWorkflowJobs() {
