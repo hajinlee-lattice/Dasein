@@ -303,9 +303,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                 playLaunchChannel = update(play.getName(), playLaunchChannel);
                 return playLaunchChannel;
             }
-            throw new LedpException(LedpCode.LEDP_18236, new String[] { playLaunchId, (play == null ? "true" : "false"), (playLaunchChannel == null ? "true" : "false") });
+            throw new LedpException(LedpCode.LEDP_18237, new String[] { playLaunchId, (play == null ? "true" : "false"), (playLaunchChannel == null ? "true" : "false") });
         }
-        throw new LedpException(LedpCode.LEDP_18234, new String[] { audienceName, audienceId });
+        throw new LedpException(LedpCode.LEDP_18238, new String[] { audienceName, audienceId });
     }
 
     private void runValidations(String customerSpace, Play play, PlayLaunchChannel playLaunchChannel) {
