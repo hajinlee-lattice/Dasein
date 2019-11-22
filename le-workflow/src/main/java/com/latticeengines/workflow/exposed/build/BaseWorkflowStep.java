@@ -217,7 +217,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PH_DEPIVOTED_TABLE_NAME = "PH_DEPIVOTED_TABLE_NAME";
     protected static final String CURATED_ACCOUNT_SERVING_TABLE_NAME = "CURATED_ACCOUNT_SERVING_TABLE_NAME";
     protected static final String CURATED_ACCOUNT_STATS_TABLE_NAME = "CURATED_ACCOUNT_STATS_TABLE_NAME";
-    protected static final String FULL_REMATCH_PA = "FULL_REMATCH_PA";
+    public static final String FULL_REMATCH_PA = "FULL_REMATCH_PA";
     protected static final String REMATCHED_ACCOUNT_TABLE_NAME = "REMATCHED_ACCOUNT_TABLE_NAME";
     protected static final String ENRICHED_ACCOUNT_DIFF_TABLE_NAME = "ENRICHED_ACCOUNT_DIFF_TABLE_NAME";
 

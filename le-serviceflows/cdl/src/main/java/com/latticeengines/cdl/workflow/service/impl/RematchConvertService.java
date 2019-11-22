@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,10 +88,14 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
 
     @Override
     public List<String> getAttributes(String customerSpace, Table templateTable,
-                                      Table masterTable, RematchConvertServiceConfiguration config) {
+                                      Table masterTable,
+                                      List<String> discardFields, RematchConvertServiceConfiguration config) {
         Set<Attribute> attributeSet = new HashSet<>(masterTable.getAttributes());
         List<String> attributeNameList = attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
         attributeNameList.removeAll(getNeedDropColumn());
+        if (CollectionUtils.isNotEmpty(discardFields)) {
+            attributeNameList.removeAll(discardFields);
+        }
         return attributeNameList;
     }
 

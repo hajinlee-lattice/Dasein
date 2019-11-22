@@ -1,11 +1,14 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -63,10 +66,17 @@ public class ConvertBatchStoreToDataTableWorkflowConfiguration extends BaseCDLWo
         public ConvertBatchStoreToDataTableWorkflowConfiguration build() {
             configuration.setContainerConfiguration("convertBatchStoreToDataTableWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
+            setDiscardFields();
             configuration.add(convertAccountWorkflowBuilder.build());
             configuration.add(convertContactWorkflowBuilder.build());
             configuration.add(convertTransactionWorkflowBuilder.build());
             return configuration;
+        }
+
+        private void setDiscardFields() {
+            List<String> discardFields = new ArrayList<>();
+            discardFields.add(InterfaceName.TransactionDate.name());
+            convertTransactionWorkflowBuilder.setDiscardFields(discardFields);
         }
     }
 }

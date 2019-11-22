@@ -8,6 +8,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIE
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DEELETE_ACTIONS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.FULL_REMATCH_PA;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -300,7 +301,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports || hasSoftDelete || hasHardDelete;
+        return hasImports || hasSoftDelete || checkHasEntityMatchRematch(step);
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -383,6 +384,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("No account batch store.");
         }
         return hasAccounts;
+    }
+
+    protected boolean checkHasEntityMatchRematch(AbstractStep<? extends BaseStepConfiguration> step) {
+        boolean entityMatchEnabled =
+                ((BaseProcessEntityStepConfiguration) step.getConfiguration()).isEntityMatchEnabled();
+        return step.getObjectFromContext(FULL_REMATCH_PA, Boolean.class) && entityMatchEnabled;
     }
 
     /**

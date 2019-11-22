@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -239,12 +240,14 @@ public class MigrateImportService
 
     @Override
     public List<String> getAttributes(String customerSpace, Table templateTable, 
-                                      Table masterTable, MigrateImportServiceConfiguration config) {
-        return templateTable.getAttributes().stream()
-                .map(Attribute::getName)
-                .distinct()
-                .filter(attrName -> masterTable.getAttribute(attrName) == null)
-                .collect(Collectors.toList());
+                                      Table masterTable,
+                                      List<String> discardFields, MigrateImportServiceConfiguration config) {
+        List<String> allAttributes =
+                templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(discardFields)) {
+            allAttributes.removeAll(discardFields);
+        }
+        return allAttributes;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch;
 
 import java.util.HashMap;
+import java.util.List;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -43,6 +44,11 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             serviceConfiguration.setEntity(BusinessEntity.Transaction);
             serviceConfiguration.setBatchstoresToConvert(batchStoresToConvert);
             convertBatchStoreStepConfiguration.setConvertServiceConfig(serviceConfiguration);
+            return this;
+        }
+
+        public Builder setDiscardFields(List<String> discardFields) {
+            convertBatchStoreStepConfiguration.setDiscardFields(discardFields);
             return this;
         }
 

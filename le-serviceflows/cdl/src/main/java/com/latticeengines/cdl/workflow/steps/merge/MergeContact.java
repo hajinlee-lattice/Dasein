@@ -78,9 +78,6 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 int softDeleteStep = softDeleteMergeStep + 1;
                 diffStep = softDeleteStep + 1;
                 if (skipSoftDelete) {
-                    if (skipHardDelete) {
-                        return null;
-                    }
                     throw new IllegalArgumentException("There's no merge or soft delete!");
                 } else {
                     mergeSoftDelete = mergeSoftDelete(softDeleteActions);
