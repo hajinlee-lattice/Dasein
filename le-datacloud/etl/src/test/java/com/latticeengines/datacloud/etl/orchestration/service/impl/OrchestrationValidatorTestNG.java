@@ -14,25 +14,38 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationProgressService;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationValidator;
+import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
+import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication.PublicationType;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig.TriggerStrategy;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerWithScheduleConfig;
 import com.latticeengines.domain.exposed.datacloud.orchestration.PredefinedScheduleConfig;
+import com.latticeengines.domain.exposed.datacloud.publication.DynamoDestination;
+import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
 
 public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBase {
     private static final String POD_ID = OrchestrationValidatorTestNG.class.getSimpleName();
@@ -42,6 +55,15 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
 
     @Inject
     private IngestionVersionService ingestionVersionService;
+
+    @Inject
+    private TransformationProgressEntityMgr transformationProgressEntityMgr;
+
+    @Inject
+    private PublicationEntityMgr publicationEntityMgr;
+
+    @Inject
+    private PublicationProgressEntityMgr publicationProgressEntityMgr;
 
     @Inject
     private OrchestrationProgressEntityMgr orchestrationProgressEntityMgr;
@@ -55,7 +77,11 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
     @Inject
     private OrchestrationProgressService orchestrationProgressService;
 
+    private static final String NAME_PREFIX = OrchestrationValidatorTestNG.class.getSimpleName();;
+
     private List<Ingestion> ingestions = new ArrayList<>();
+    private List<Publication> publications = new ArrayList<>();
+    private List<TransformationProgress> transformProgresses = new ArrayList<>();
     private List<Orchestration> orchestrations = new ArrayList<>();
 
     @BeforeClass(groups = "functional")
@@ -69,6 +95,12 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         ingestions.forEach(ingestion -> {
             ingestionEntityMgr.delete(ingestion);
         });
+        transformProgresses.forEach(progress -> {
+            transformationProgressEntityMgr.deleteProgress(progress);
+        });
+        publications.forEach(publication -> {
+            publicationEntityMgr.removePublication(publication.getPublicationName());
+        });
         orchestrations.forEach(orchestration -> {
             orchestrationEntityMgr.delete(orchestration);
         });
@@ -76,8 +108,8 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
     
     @Test(groups = "functional")
     public void testScheduledTrigger() {
-        Orchestration orchestration = createOrchestration(
-                OrchestrationValidatorTestNG.class.getSimpleName() + "_TestScheduledTrigger");
+        String commonName = NAME_PREFIX + "_TestScheduledTrigger";
+        Orchestration orchestration = createOrchestration(commonName);
 
         PredefinedScheduleConfig config = new PredefinedScheduleConfig();
         orchestration.setConfig(config);
@@ -88,10 +120,9 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void testExternalTrigger() {
-        Orchestration orchestration = createOrchestration(
-                OrchestrationValidatorTestNG.class.getSimpleName() + "_TestExternalTrigger");
-        Ingestion ingestion = createIngestion(
-                OrchestrationValidatorTestNG.class.getSimpleName() + "_TestExternalTrigger");
+        String commonName = NAME_PREFIX + "_TestExternalTrigger";
+        Orchestration orchestration = createOrchestration(commonName);
+        Ingestion ingestion = createIngestion(commonName);
 
         ExternalTriggerConfig config = new ExternalTriggerConfig();
         config.setEngine(DataCloudEngine.INGESTION);
@@ -105,23 +136,17 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void testExternalWithScheduleTrigger() {
-        Orchestration orchestration = createOrchestration(
-                OrchestrationValidatorTestNG.class.getSimpleName() + "_TestExternalWithScheduleTrigger");
-        Ingestion ingestion = createIngestion(
-                OrchestrationValidatorTestNG.class.getSimpleName() + "_TestExternalWithScheduleTrigger");
-
-        ExternalTriggerWithScheduleConfig config = new ExternalTriggerWithScheduleConfig();
-        ExternalTriggerConfig externalConfig = new ExternalTriggerConfig();
-        externalConfig.setEngine(DataCloudEngine.INGESTION);
-        externalConfig.setEngineName(ingestion.getIngestionName());
-        externalConfig.setStrategy(TriggerStrategy.LATEST_VERSION);
-        config.setExternalTriggerConfig(externalConfig);
-        PredefinedScheduleConfig scheduleConfig = new PredefinedScheduleConfig();
-        config.setScheduleConfig(scheduleConfig);
-        orchestration.setConfig(config);
+        String commonName = NAME_PREFIX + "_TestExternalWithScheduleTrigger";
+        Orchestration orchestration = createOrchestration(commonName);
+        Ingestion ingestion = createIngestion(commonName);
+        Publication publication = createPublication(commonName);
 
         verifyDisabledSchedular(orchestration);
-        verifyExternalWithScheduleTrigger(orchestration, ingestion);
+        verifyExternalWithScheduleTrigger(orchestration, commonName, DataCloudEngine.INGESTION, ingestion, publication);
+        verifyExternalWithScheduleTrigger(orchestration, commonName, DataCloudEngine.TRANSFORMATION, ingestion,
+                publication);
+        verifyExternalWithScheduleTrigger(orchestration, commonName, DataCloudEngine.PUBLICATION, ingestion,
+                publication);
     }
 
     private void verifyDisabledSchedular(Orchestration orchestration) {
@@ -200,9 +225,11 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertEquals(triggeredVersions.get(0), version);
     }
 
-    private void verifyExternalWithScheduleTrigger(Orchestration orchestration, Ingestion ingestion) {
+    private void verifyExternalWithScheduleTrigger(Orchestration orchestration, String commonName, DataCloudEngine externalTriggerBy,
+            Ingestion ingestion, Publication publication) {
         List<String> triggeredVersions = new ArrayList<>();
-        ExternalTriggerWithScheduleConfig config = (ExternalTriggerWithScheduleConfig) orchestration.getConfig();
+        ExternalTriggerWithScheduleConfig config = createExternalTriggerWithScheduleConfig(externalTriggerBy, commonName);
+        orchestration.setConfig(config);
 
         // cron expression is empty, not trigger
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
@@ -214,9 +241,22 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertTrue(triggeredVersions.isEmpty());
 
-        // create a version to ingestion, trigger with same version
+        // create a version to engine job which triggers orchestration, expect
+        // orchestration being triggered with same version
         String version = "2019-01-01_00-00-00_UTC";
-        ingestionVersionService.updateCurrentVersion(ingestion, version);
+        switch (externalTriggerBy) {
+        case INGESTION:
+            ingestionVersionService.updateCurrentVersion(ingestion, version);
+            break;
+        case TRANSFORMATION:
+            createTransformationProgress(commonName, version);
+            break;
+        case PUBLICATION:
+            createPublicationProgress(publication, version);
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported engine type to trigger orchestration");
+        }
         Assert.assertTrue(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertEquals(triggeredVersions.size(), 1);
         Assert.assertEquals(triggeredVersions.get(0), version);
@@ -229,10 +269,23 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertTrue(triggeredVersions.isEmpty());
 
-        // update current version for ingestion, but already triggered since
-        // previous fire time of cron expression, not trigger
+        // update current version for engine job which triggers orchestration,
+        // but orchestration is already triggered since previous fire time of
+        // cron expression, will not trigger orchestration again
         version = "2019-02-01_00-00-00_UTC";
-        ingestionVersionService.updateCurrentVersion(ingestion, version);
+        switch (externalTriggerBy) {
+        case INGESTION:
+            ingestionVersionService.updateCurrentVersion(ingestion, version);
+            break;
+        case TRANSFORMATION:
+            createTransformationProgress(commonName, version);
+            break;
+        case PUBLICATION:
+            createPublicationProgress(publication, version);
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported engine type to trigger orchestration");
+        }
         triggeredVersions.clear();
         Assert.assertFalse(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertTrue(triggeredVersions.isEmpty());
@@ -250,6 +303,8 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         Assert.assertTrue(orchestrationValidator.isTriggered(orchestration, triggeredVersions));
         Assert.assertEquals(triggeredVersions.size(), 1);
         Assert.assertEquals(triggeredVersions.get(0), version);
+
+        orchestrationProgressEntityMgr.deleteProgress(progress);
     }
 
     private Ingestion createIngestion(String ingestionName) {
@@ -264,6 +319,22 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         ingestion = ingestionEntityMgr.getIngestionByName(ingestion.getIngestionName());
         ingestions.add(ingestion);
         return ingestion;
+    }
+
+    private Publication createPublication(String publicationName) {
+        Publication publication = new Publication();
+        publication.setPublicationName(publicationName);
+        publication.setSourceName(DataCloudConstants.ACCOUNT_MASTER);
+        publication.setDestinationConfiguration(new PublishToDynamoConfiguration());
+        publication.setPublicationType(PublicationType.DYNAMO);
+        publication.setMaterialType(MaterialType.SOURCE);
+        publication.setSchedularEnabled(false);
+        publication.setNewJobMaxRetry(0);
+        publication.setNewJobRetryInterval(0L);
+        publicationEntityMgr.addPublication(publication);
+        publication = publicationEntityMgr.findByPublicationName(publicationName);
+        publications.add(publication);
+        return publication;
     }
 
     private Orchestration createOrchestration(String orchName) {
@@ -288,6 +359,34 @@ public class OrchestrationValidatorTestNG extends DataCloudEtlFunctionalTestNGBa
         orchestrationprogress.setOrchestration(orchestration);
         orchestrationProgressEntityMgr.saveProgress(orchestrationprogress);
         return orchestrationprogress;
+    }
+
+    private ExternalTriggerWithScheduleConfig createExternalTriggerWithScheduleConfig(
+            DataCloudEngine triggerByEngineType, String triggerByEngineName) {
+        ExternalTriggerWithScheduleConfig config = new ExternalTriggerWithScheduleConfig();
+        ExternalTriggerConfig externalConfig = new ExternalTriggerConfig();
+        externalConfig.setEngine(triggerByEngineType);
+        externalConfig.setEngineName(triggerByEngineName);
+        externalConfig.setStrategy(TriggerStrategy.LATEST_VERSION);
+        config.setExternalTriggerConfig(externalConfig);
+        PredefinedScheduleConfig scheduleConfig = new PredefinedScheduleConfig();
+        config.setScheduleConfig(scheduleConfig);
+        return config;
+    }
+
+    private void createTransformationProgress(String pipelineName, String version) {
+        TransformationProgress progress = transformationProgressEntityMgr.insertNewProgress(pipelineName,
+                new GeneralSource(DataCloudConstants.ACCOUNT_MASTER), version, PropDataConstants.SCAN_SUBMITTER);
+        progress = transformationProgressEntityMgr.updateStatus(progress, ProgressStatus.FINISHED);
+        transformProgresses.add(progress);
+    }
+
+    private void createPublicationProgress(Publication publication, String version) {
+        PublicationProgress progress = publicationProgressEntityMgr.startNewProgress(publication,
+                new DynamoDestination(), version,
+                PropDataConstants.SCAN_SUBMITTER);
+        progress.setStatus(ProgressStatus.FINISHED);
+        publicationProgressEntityMgr.updateProgress(progress);
     }
 
 }

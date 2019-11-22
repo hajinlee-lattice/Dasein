@@ -3,11 +3,15 @@ package com.latticeengines.datacloud.etl.transformation.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.transformation.dao.TransformationProgressDao;
@@ -23,7 +27,7 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
     private static final long TIME_24_HOUR_IN_MILLISECONDS = 24 * 60 * 60 * 1000L;
     private static final int MAX_RETRIES = 3;
 
-    @Autowired
+    @Inject
     private TransformationProgressDao progressDao;
 
     @Override
@@ -170,5 +174,13 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
     @Transactional(value = "propDataManage")
     public List<TransformationProgress> findAllforPipeline(String pipelineName) {
         return progressDao.findAllforPipeline(pipelineName);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public String getLatestSuccessVersion(@NotNull String pipelineName) {
+        Preconditions.checkNotNull(pipelineName);
+
+        return progressDao.getLatestSuccessVersion(pipelineName);
     }
 }

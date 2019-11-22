@@ -24,7 +24,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
-import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToSourceConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 
 @Component("ingestionVersionService")
-public class IngestionVersionServiceImpl implements IngestionVersionService, DataCloudEngineService {
+public class IngestionVersionServiceImpl implements IngestionVersionService, DataCloudEngineVersionService {
     private static Logger log = LoggerFactory.getLogger(IngestionVersionServiceImpl.class);
 
     @Inject

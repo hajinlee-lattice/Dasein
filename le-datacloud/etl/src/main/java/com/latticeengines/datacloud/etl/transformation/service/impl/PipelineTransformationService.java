@@ -31,7 +31,6 @@ import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
-import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -43,8 +42,6 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PipelineTransformationReportByStep;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
-import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationReport;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepReport;
@@ -70,7 +67,7 @@ import io.opentracing.util.GlobalTracer;
  */
 @Component("pipelineTransformationService")
 public class PipelineTransformationService extends AbstractTransformationService<PipelineTransformationConfiguration>
-        implements TransformationService<PipelineTransformationConfiguration>, DataCloudEngineService {
+        implements TransformationService<PipelineTransformationConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PipelineTransformationService.class);
     private static final String SLACK_BOT = "PipelineTransformer";
@@ -855,30 +852,6 @@ public class PipelineTransformationService extends AbstractTransformationService
         }
     }
 
-    @Override
-    public DataCloudEngineStage findProgressAtVersion(DataCloudEngineStage stage) {
-        stage.setEngine(DataCloudEngine.TRANSFORMATION);
-        TransformationProgress progress = progressEntityMgr.findPipelineProgressAtVersion(stage.getEngineName(),
-                stage.getVersion());
-        if (progress == null) {
-            stage.setStatus(ProgressStatus.NOTSTARTED);
-        } else {
-            stage.setStatus(progress.getStatus());
-            stage.setMessage(progress.getErrorMessage());
-        }
-        return stage;
-    }
-
-    @Override
-    public DataCloudEngine getEngine() {
-        return DataCloudEngine.TRANSFORMATION;
-    }
-
-    @Override
-    public String findCurrentVersion(String pipelineName) {
-        return null;
-    }
-
     private String getWorkflowOutputDir(TransformStep step, String workflowDir) {
         String subDir = step.getTransformer().outputSubDir();
         if (StringUtils.isNotBlank(subDir)) {
@@ -887,5 +860,4 @@ public class PipelineTransformationService extends AbstractTransformationService
             return workflowDir;
         }
     }
-
 }

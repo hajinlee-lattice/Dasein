@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.publication.dao.PublicationDao;
 import com.latticeengines.datacloud.etl.publication.dao.PublicationProgressDao;
@@ -32,7 +34,11 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public PublicationProgress findBySourceVersionUnderMaximumRetry(Publication publication, String sourceVersion) {
+    public PublicationProgress findBySourceVersionUnderMaximumRetry(@NotNull Publication publication,
+            @NotNull String sourceVersion) {
+        Preconditions.checkNotNull(publication);
+        Preconditions.checkNotNull(publication.getPublicationName());
+        Preconditions.checkNotNull(sourceVersion);
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
         for (PublicationProgress progress : progressList) {
@@ -45,36 +51,49 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
 
     @Override
     @Transactional(value = "propDataManage")
-    public PublicationProgress startNewProgress(Publication publication, PublicationDestination destination,
-                                                String sourceVersion, String creator) {
+    public PublicationProgress startNewProgress(@NotNull Publication publication,
+            @NotNull PublicationDestination destination, @NotNull String sourceVersion, @NotNull String creator) {
+        Preconditions.checkNotNull(publication);
+        Preconditions.checkNotNull(destination);
+        Preconditions.checkNotNull(sourceVersion);
+        Preconditions.checkNotNull(creator);
+
         PublicationProgress progress = newProgress(publication, destination, sourceVersion, creator);
         progress.setStatus(ProgressStatus.NEW);
         progressDao.create(progress);
-
         return findBySourceVersionUnderMaximumRetry(publication, sourceVersion);
     }
 
     @Override
     @Transactional(value = "propDataManage")
-    public PublicationProgress runNewProgress(Publication publication, PublicationDestination destination,
-                                                String sourceVersion, String creator) {
+    public PublicationProgress runNewProgress(@NotNull Publication publication,
+            @NotNull PublicationDestination destination, @NotNull String sourceVersion, @NotNull String creator) {
+        Preconditions.checkNotNull(publication);
+        Preconditions.checkNotNull(destination);
+        Preconditions.checkNotNull(sourceVersion);
+        Preconditions.checkNotNull(creator);
+
         PublicationProgress progress = newProgress(publication, destination, sourceVersion, creator);
         progress.setStatus(ProgressStatus.PROCESSING);
         progressDao.create(progress);
-
         return findBySourceVersionUnderMaximumRetry(publication, sourceVersion);
     }
 
     @Override
     @Transactional(value = "propDataManage")
-    public PublicationProgress updateProgress(PublicationProgress progress) {
+    public PublicationProgress updateProgress(@NotNull PublicationProgress progress) {
+        Preconditions.checkNotNull(progress);
+
         progressDao.update(progress);
         return progressDao.findByKey(progress);
     }
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public PublicationProgress findLatestNonTerminalProgress(Publication publication) {
+    public PublicationProgress findLatestNonTerminalProgress(@NotNull Publication publication) {
+        Preconditions.checkNotNull(publication);
+        Preconditions.checkNotNull(publication.getPublicationName());
+
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
         Collections.sort(progressList, Comparator.comparing(PublicationProgress::getCreateTime));
@@ -88,7 +107,10 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public PublicationProgress findLatestUnderMaximumRetry(Publication publication) {
+    public PublicationProgress findLatestUnderMaximumRetry(@NotNull Publication publication) {
+        Preconditions.checkNotNull(publication);
+        Preconditions.checkNotNull(publication.getPublicationName());
+
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
         Collections.sort(progressList, Comparator.comparing(PublicationProgress::getCreateTime));
@@ -102,7 +124,10 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<PublicationProgress> findAllForPublication(Publication publication) {
+    public List<PublicationProgress> findAllForPublication(@NotNull Publication publication) {
+        Preconditions.checkNotNull(publication);
+        Preconditions.checkArgument(publication.getPid() != null || publication.getPublicationName() != null);
+
         if (publication.getPid() == null) {
             publication = publicationDao.findByField("PublicationName", publication.getPublicationName());
         }
@@ -111,8 +136,29 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public PublicationProgress findByPid(Long pid) {
+    public PublicationProgress findByPid(@NotNull Long pid) {
+        Preconditions.checkNotNull(pid);
+
         return progressDao.findByKey(PublicationProgress.class, pid);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public List<PublicationProgress> findStatusByPublicationVersion(@NotNull Publication publication,
+            @NotNull String version) {
+        Preconditions.checkNotNull(publication);
+        Preconditions.checkNotNull(version);
+
+        return progressDao.getStatusForLatestVersion(publication, version);
+    }
+
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public String getLatestSuccessVersion(@NotNull String publicationName) {
+        Preconditions.checkNotNull(publicationName);
+
+        return progressDao.getLatestSuccessVersion(publicationName);
     }
 
     private Boolean canBeIgnored(Publication publication, PublicationProgress progress) {
@@ -127,13 +173,6 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
         return ProgressStatus.NEW.equals(progress.getStatus()) || (ProgressStatus.FAILED.equals(progress.getStatus())
                 && progress.getRetries() < publication.getNewJobMaxRetry());
     }
-
-    @Override
-    @Transactional(value = "propDataManage")
-    public List<PublicationProgress> findStatusByPublicationVersion(Publication publication, String version) {
-        return progressDao.getStatusForLatestVersion(publication, version);
-    }
-
 
     private PublicationProgress newProgress(Publication publication, PublicationDestination destination,
                                             String sourceVersion, String creator) {

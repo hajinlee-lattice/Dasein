@@ -22,7 +22,7 @@ import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
-import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineVersionService;
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.ingestion.BWRawConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
@@ -47,7 +47,7 @@ public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGB
     private IngestionVersionService ingestionVersionService;
 
     @Resource(name = "ingestionVersionService")
-    private DataCloudEngineService datacloudEngineService;
+    private DataCloudEngineVersionService datacloudEngineService;
 
     @Autowired
     private IngestionProviderService ingestionBWRawProviderService;

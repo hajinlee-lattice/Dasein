@@ -175,6 +175,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
             Assert.assertEquals(progress.getStatus(), ProgressStatus.FINISHED);
         }
         // Test failed progress
+        log.info("Testing retry for failure");
         OrchestrationProgress progressToFail = orchestrationProgressEntityMgr.findProgress(pidToFail);
         stageToFail.setStatus(ProgressStatus.FAILED);
         progressToFail = orchProgressService.updateProgress(progressToFail).status(ProgressStatus.FAILED)
