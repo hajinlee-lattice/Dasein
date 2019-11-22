@@ -54,7 +54,6 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         setupTemplates();
-        // webVisit_8a6d017b-9d47-45ef-832d-9655751fd6a2.csv
         mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 1,
                 generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
         Thread.sleep(2000);
