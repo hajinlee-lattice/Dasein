@@ -241,10 +241,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         && !currentSystem.equals(accountSystemIdMap.get(fieldMapping.getMappedField()).getName())) {
                     fieldMapping.setSystemName(accountSystemIdMap.get(fieldMapping.getMappedField()).getName());
                     fieldMapping.setIdType(FieldMapping.IdType.Account);
+                    fieldMapping.setMappedToLatticeSystem(true);
                 } else if (contactSystemIdMap.containsKey(fieldMapping.getMappedField())
                         && !currentSystem.equals(contactSystemIdMap.get(fieldMapping.getMappedField()).getName())) {
                     fieldMapping.setSystemName(contactSystemIdMap.get(fieldMapping.getMappedField()).getName());
                     fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                    fieldMapping.setMappedToLatticeSystem(true);
                 }
             }
 
@@ -710,7 +712,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
             List<FieldMapping> customerLatticeIdList = new ArrayList<>();
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                if (fieldMapping.getIdType() != null) {
+                if (fieldMapping.getIdType() != null && !fieldMapping.isMappedToLatticeSystem()) {
                     setSystemIdMapping(customerSpace, feedType, customerLatticeIdList, fieldMapping);
                 }
             }

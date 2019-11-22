@@ -32,6 +32,12 @@ public class FieldMapping {
     @JsonProperty
     private IdType idType;
 
+    /**
+     * True means if from existing template, won't set system mapping again.
+     */
+    @JsonProperty
+    private boolean mappedToLatticeSystem = false;
+
     @JsonProperty
     private boolean mapToLatticeId;
 
@@ -124,6 +130,14 @@ public class FieldMapping {
 
     public void setIdType(IdType idType) {
         this.idType = idType;
+    }
+
+    public boolean isMappedToLatticeSystem() {
+        return mappedToLatticeSystem;
+    }
+
+    public void setMappedToLatticeSystem(boolean mappedToLatticeSystem) {
+        this.mappedToLatticeSystem = mappedToLatticeSystem;
     }
 
     public String toString() {

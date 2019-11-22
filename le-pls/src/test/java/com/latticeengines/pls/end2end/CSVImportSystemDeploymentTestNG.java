@@ -13,7 +13,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -288,6 +287,13 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getContactSystemId()).getIdType(),
                 FieldMapping.IdType.Contact);
 
+        modelingFileMetadataService.resolveMetadata(otherContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                otherContactFeedType);
+        otherContactFile = sourceFileService.findByName(otherContactFile.getName());
+        otherContactDFId = cdlService.createS3Template(customerSpace, otherContactFile.getName(),
+                SOURCE, ENTITY_CONTACT, otherContactFeedType, null, ENTITY_CONTACT + "Data");
+        Assert.assertNotNull(otherContactFile);
+        Assert.assertNotNull(otherContactDFId);
 
         // exception when double primary system.
         defaultAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
