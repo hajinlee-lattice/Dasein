@@ -24,12 +24,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.hadoop.configuration.ConfigurationUtils;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.util.IOUtils;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.Source;
@@ -194,15 +196,22 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     }
 
     private void validateCopySuccess(String hdfsDir, List<String> files) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         files.forEach(file -> {
-            try {
-                if (!s3Service.objectExist(s3Bucket, file)) {
-                    throw new RuntimeException(file + " wasn't successfully copied to S3 bucket " + s3Bucket);
+            retry.execute(ctx -> {
+                try {
+                    // Due to s3Client.doesObjectExist() intermittently returns
+                    // false even if the object does exist on S3, add retry for
+                    // checking object existence
+                    if (!s3Service.objectExist(s3Bucket, file)) {
+                        throw new RuntimeException(file + " wasn't successfully copied to S3 bucket " + s3Bucket);
+                    }
+                    validateFileSize(file);
+                } catch (Exception e) {
+                    throw new RuntimeException("Fail to validate files under: " + hdfsDir, e);
                 }
-                validateFileSize(file);
-            } catch (Exception e) {
-                throw new RuntimeException("Fail to validate files under: " + hdfsDir, e);
-            }
+                return true;
+            });
         });
     }
 
