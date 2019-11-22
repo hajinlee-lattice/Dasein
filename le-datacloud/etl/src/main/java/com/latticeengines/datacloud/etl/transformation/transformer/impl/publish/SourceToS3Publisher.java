@@ -201,7 +201,7 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
             retry.execute(ctx -> {
                 try {
                     // Due to s3Client.doesObjectExist() intermittently returns
-                    // false even if the object does exist, add retry for
+                    // false even if the object does exist on S3, add retry for
                     // checking object existence
                     if (!s3Service.objectExist(s3Bucket, file)) {
                         throw new RuntimeException(file + " wasn't successfully copied to S3 bucket " + s3Bucket);
