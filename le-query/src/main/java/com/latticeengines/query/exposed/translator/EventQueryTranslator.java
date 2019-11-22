@@ -2,6 +2,7 @@ package com.latticeengines.query.exposed.translator;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -546,9 +547,19 @@ public class EventQueryTranslator extends TranslatorCommon {
             subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression)
                     .from(keysPath, Expressions.stringPath(MAX_PID));
         } else {
-            NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
-            subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression)
-                    .from(keysPath);
+            if (SPARK_BATCH_USER.equals(sqlUser)) {
+                // M32: a work around to spark not being able to parse "distinct" correctly
+                NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
+                SQLQuery distinctIds = factory.query()
+                        .distinct().select(Expressions.stringPath(ACCOUNT_ID)).from(keysPath);
+                subQueryExpression = factory.query() //
+                        .select(Expressions.stringPath(ACCOUNT_ID), periodIdExpression) //
+                        .from(distinctIds);
+            } else {
+                NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
+                subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression)
+                        .from(keysPath);
+            }
         }
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(subQueryExpression);
