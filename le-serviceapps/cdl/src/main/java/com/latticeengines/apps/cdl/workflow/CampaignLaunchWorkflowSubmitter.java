@@ -53,10 +53,6 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
                 playLaunch.getDestinationSysType());
 
-        boolean enableExport = batonService.isEnabled(getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION)
-                || batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION);
-        boolean canBeLaunchedToExternal = enableExport && isValidDestination(playLaunch, lookupIdMap);
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
         CampaignLaunchWorkflowConfiguration configuration = new CampaignLaunchWorkflowConfiguration.Builder()
                 .workflow("campaignLaunchWorkflow") //
@@ -70,7 +66,7 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                         getAccountDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
                 .contactAttributeExportDiplayNames(
                         getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
-                .exportPublishPlayLaunch(playLaunch, canBeLaunchedToExternal).build();
+                .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap)).build();
         return workflowJobService.submit(configuration);
     }
 
@@ -118,27 +114,40 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     }
 
-    private boolean isValidDestination(PlayLaunch playLaunch, LookupIdMap lookupIdMap) {
+    private boolean enableExternalLaunch(PlayLaunch playLaunch, LookupIdMap lookupIdMap) {
         if (StringUtils.isAllBlank(playLaunch.getDestinationOrgId()) || playLaunch.getDestinationSysType() == null) {
-            log.debug("Skipping Data Export as Destination Org-{} or Destination Type-{} is empty",
+            log.info("Skipping Data Export as Destination Org-{} or Destination Type-{} is empty",
                     playLaunch.getDestinationOrgId(), playLaunch.getDestinationSysType());
             return false;
         }
 
         if (lookupIdMap == null || lookupIdMap.getIsRegistered() == null || !lookupIdMap.getIsRegistered()) {
-            log.debug("Skipping Data Export as Destination org not found or de-registered - {}",
+            log.info("Skipping Data Export as Destination org not found or de-registered - {}",
                     lookupIdMap != null ? lookupIdMap.getIsRegistered() : null);
             return false;
         }
         ExternalSystemAuthentication extSysAuth = lookupIdMap.getExternalAuthentication();
         if (extSysAuth == null || StringUtils.isBlank(extSysAuth.getTrayAuthenticationId())
                 || extSysAuth.getTrayWorkflowEnabled() == null || !extSysAuth.getTrayWorkflowEnabled()) {
-            log.debug("Skipping Data Export as Destination org is not fully configured: {}",
+            log.info("Skipping Data Export as Destination org is not fully configured: {}",
                     extSysAuth != null
                             ? extSysAuth.getTrayAuthenticationId() + "-" + extSysAuth.getTrayWorkflowEnabled()
                             : "Not Configured");
             return false;
         }
+
+        if (lookupIdMap.getExternalSystemName() == CDLExternalSystemName.LinkedIn
+                && !batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_LINKEDIN_INTEGRATION)) {
+            log.info("Skipping Data Export as LinkedIn Integration is disabled for this tenant");
+            return false;
+        }
+
+        if (lookupIdMap.getExternalSystemName() == CDLExternalSystemName.Facebook
+                && !batonService.isEnabled(getCustomerSpace(), LatticeFeatureFlag.ENABLE_FACEBOOK_INTEGRATION)) {
+            log.info("Skipping Data Export as Facebook Integration is disabled for this tenant");
+            return false;
+        }
+
         return true;
     }
 }
