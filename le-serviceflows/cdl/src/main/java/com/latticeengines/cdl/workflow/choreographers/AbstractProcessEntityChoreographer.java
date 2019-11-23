@@ -387,8 +387,11 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean checkHasEntityMatchRematch(AbstractStep<? extends BaseStepConfiguration> step) {
-        boolean entityMatchEnabled =
-                ((BaseProcessEntityStepConfiguration) step.getConfiguration()).isEntityMatchEnabled();
+        boolean entityMatchEnabled = false;
+        if (step.getConfiguration() instanceof BaseProcessEntityStepConfiguration) {
+            entityMatchEnabled =
+                    ((BaseProcessEntityStepConfiguration) step.getConfiguration()).isEntityMatchEnabled();
+        }
         return step.getObjectFromContext(FULL_REMATCH_PA, Boolean.class) && entityMatchEnabled;
     }
 
