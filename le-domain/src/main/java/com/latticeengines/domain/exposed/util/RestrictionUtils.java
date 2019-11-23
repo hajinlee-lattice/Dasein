@@ -226,7 +226,7 @@ public class RestrictionUtils {
     public static Restriction convertUnencodedBooleanBucketRestriction(BucketRestriction bucketRestriction,
             ColumnMetadata cm, boolean translatePriorOnly) {
         Bucket bkt = bucketRestriction.getBkt();
-        if (bkt.getTransaction() != null) {
+        if (bkt.getTransaction() == null) {
             if (ComparisonType.EQUAL.equals(bkt.getComparisonType())) {
                 if ("Yes".equals(bkt.getValues().get(0))) {
                     return equalsAny(bucketRestriction.getAttr(), getTrueVals(cm.getJavaClass()));

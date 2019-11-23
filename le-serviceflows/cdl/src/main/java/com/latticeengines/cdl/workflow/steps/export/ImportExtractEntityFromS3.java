@@ -33,7 +33,7 @@ public class ImportExtractEntityFromS3 extends BaseImportExportS3<ImportExportS3
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-    
+
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
