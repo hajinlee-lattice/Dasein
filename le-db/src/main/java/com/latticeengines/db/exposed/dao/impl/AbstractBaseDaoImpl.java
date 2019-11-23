@@ -40,7 +40,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     protected Session getCurrentSession() {
         return getSessionFactory().getCurrentSession();
     }
-    
+
     @Deprecated
     // This is a temporary workaround to get the entity class from outside
     // When we migrate to pure JPA, we will delete this method
@@ -193,7 +193,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @SuppressWarnings("unchecked")
     public final List<T> findByFieldsWithPagination(long minPid, long maxPid, String primIdField,
-            Object... fieldsAndValues) {
+                                                    Object... fieldsAndValues) {
         Session session = getCurrentSession();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fieldsAndValues.length / 2; i++) {
@@ -214,7 +214,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @SuppressWarnings("unchecked")
     public final List<T> findAllSortedByFieldWithPagination(int offset, int limit,
-            String sortByField, Object... fieldsAndValues) {
+                                                            String sortByField, Object... fieldsAndValues) {
         // verify offset and limit
         if (offset < 0 || limit < 0) {
             throw new IllegalArgumentException("Value of Offset and limit should be >= 0");
@@ -392,19 +392,13 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         return SessionFactoryUtils.getDataSource(getSessionFactory());
     }
 
-    protected boolean updateCreated(T entity) {
-        return true;
-    }
-
     private void setAuditingFields(T entity) {
         if (entity instanceof HasAuditingFields) {
             Date now = new Date();
-            HasAuditingFields auditingFields = (HasAuditingFields) entity;
-            // when update table entity, will not set created time
-            if (entity.getPid() == null && updateCreated(entity)) {
-                auditingFields.setCreated(now);
+            if (entity.getPid() == null) {
+                ((HasAuditingFields) entity).setCreated(now);
             }
-            auditingFields.setUpdated(now);
+            ((HasAuditingFields) entity).setUpdated(now);
         }
     }
 
@@ -417,7 +411,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public void clearSession() {
         getCurrentSession().clear();
     }
-    
+
     @Override
     public int getBatchSize() {
         Object batch_size = getSessionFactory().getProperties().get(Environment.STATEMENT_BATCH_SIZE);

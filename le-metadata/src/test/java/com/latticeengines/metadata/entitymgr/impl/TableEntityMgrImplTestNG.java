@@ -2,6 +2,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -85,8 +86,8 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
         Table table = tableEntityMgr.findByName(tableName);
         assertEquals(table.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
-        Date createTime = table.getCreated();
-        assertNotNull(createTime);
+        Date updateTime = table.getUpdated();
+        assertNotNull(updateTime);
         addDataRules(table);
         metadataService.updateTable(CustomerSpace.parse(customerSpace), table);
         validateTable(table);
@@ -98,7 +99,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
         Table deserializedTable = JsonUtils.deserialize(serializedStr, Table.class);
         validateTable(deserializedTable);
-        assertEquals(createTime, retrievedTable.getCreated());
+        assertNotEquals(updateTime, retrievedTable.getUpdated());
     }
 
     @Test(groups = "functional")

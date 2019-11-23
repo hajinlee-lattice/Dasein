@@ -19,11 +19,6 @@ public class TableDaoImpl extends BaseDaoImpl<Table> implements TableDao {
         return Table.class;
     }
 
-    @Override
-    protected boolean updateCreated(Table table) {
-        return table.getCreated() == null;
-    }
-
     @SuppressWarnings("rawtypes")
     @Override
     public Table findByName(String name) {

@@ -171,7 +171,6 @@ public class MetadataServiceImpl implements MetadataService {
                         }
                         Table tableToClone = TableUtils.clone(table, table.getName());
                         if (found != null) {
-                            tableToClone.setCreated(found.getCreated());
                             tableToClone.setRetentionPolicy(found.getRetentionPolicy());
                         }
                         tableEntityMgr.create(tableToClone);

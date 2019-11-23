@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.controller;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -123,7 +124,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
 
         final Table updatedTable = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(srcTable.getRetentionPolicy(), updatedTable.getRetentionPolicy());
-        assertEquals(srcTable.getCreated(), updatedTable.getCreated());
+        assertNotEquals(srcTable.getUpdated(), updatedTable.getUpdated());
         assertNotNull(updatedTable);
         assertEquals(updatedTable.getDisplayName(), tableDisplayName);
         logTableSummary("Updated Table from DB", updatedTable);

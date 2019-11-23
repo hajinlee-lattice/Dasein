@@ -12,5 +12,4 @@ public enum CDLJobType {
     CAMPAIGNlAUNCH, //
     DELTACALCULATION,
     SCHEDULINGPA,
-    MDTABLECLEANUP
 }

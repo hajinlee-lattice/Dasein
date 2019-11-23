@@ -182,17 +182,6 @@
         <property name="jobTimeout" value="${quartz.cdl.profile.job.timeout:3600}"/>
     </bean>
 
-    <bean name="cdlMetadataTableCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="cdlMetadataTableCleanupJob"/>
-        <property name="cronTrigger" value="${quartz.cdl.execution.mdtablecleanup.job.cron:0 0 2 * * ?}"/>
-        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}"/>
-        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}"/>
-        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}"/>
-        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}"/>
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlMetadataTableCleanupJob&quot;}"/>
-        <property name="jobTimeout" value="${quartz.cdl.mdtablecleanup.job.timeout:3600}"/>
-    </bean>
-
     <bean name="cdlRedShiftCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="cdlRedShiftCleanupJob"/>
         <property name="cronTrigger" value="${quartz.cdl.execution.cleanup.job.cron:0 0 3 * * ?}"/>
@@ -292,6 +281,17 @@
         <property name="jobTimeout" value="${quartz.workflowapi.statuschange.job.timeout}"/>
     </bean>
 
+    <bean name="metadataTableCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="metadataTableCleanupJob"/>
+        <property name="cronTrigger" value="${quartz.metadata.execution.tablecleanup.job.cron:0 0 2 * * ?}"/>
+        <property name="destUrl" value="${quartz.metadata.predefined.job.primary.url:}"/>
+        <property name="secondaryDestUrl" value="${quartz.metadata.predefined.job.secondary.url:}"/>
+        <property name="queryApi" value="${quartz.metadata.predefined.job.query.api:}"/>
+        <property name="checkJobBeanUrl" value="${quartz.metadata.predefined.job.check.bean.url:}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;metadataTableCleanupJob&quot;}"/>
+        <property name="jobTimeout" value="${quartz.metadata.tablecleanup.job.timeout:3600}"/>
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="lpModelSummaryFullDownload"/>
         <ref bean="lpModelSummaryDownload"/>
@@ -318,7 +318,7 @@
         <ref bean="adminRecycleTenantJob"/>
         <ref bean="adminCleanupErrorTenantJob"/>
         <ref bean="workflowJobStatusChangeJob"/>
-        <ref bean="cdlMetadataTableCleanupJob"/>
+        <ref bean="metadataTableCleanupJob"/>
     </util:list>
 
 </beans>

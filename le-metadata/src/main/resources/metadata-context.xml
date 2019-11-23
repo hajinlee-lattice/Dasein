@@ -22,4 +22,5 @@
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:redshiftdb-context.xml"/>
     <import resource="classpath:cache-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
 </beans>

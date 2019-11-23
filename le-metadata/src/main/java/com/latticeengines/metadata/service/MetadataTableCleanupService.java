@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service;
+package com.latticeengines.metadata.service;
 
 public interface MetadataTableCleanupService {
     Boolean cleanup();

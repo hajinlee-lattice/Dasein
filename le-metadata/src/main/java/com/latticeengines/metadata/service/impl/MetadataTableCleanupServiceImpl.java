@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service.impl;
+package com.latticeengines.metadata.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.service.MetadataTableCleanupService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.MetadataService;
+import com.latticeengines.metadata.service.MetadataTableCleanupService;
 
 @Component("metadataTableCleanupServiceImpl")
 public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupService {
@@ -27,7 +27,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
     @Autowired
     private MetadataService metadataService;
 
-    @Value("${cdl.table.cleanup.size}")
+    @Value("${metadata.table.cleanup.size}")
     private int maxCleanupSize;
 
     private int batchSize = 2500;
@@ -51,7 +51,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                     index++;
                     long expireTime = RetentionPolicyUtil.getExpireTimeByRetentionPolicyStr(table.getRetentionPolicy());
                     if (expireTime > 0) {
-                        if (System.currentTimeMillis() > table.getCreated().getTime() + expireTime) {
+                        if (System.currentTimeMillis() > table.getUpdated().getTime() + expireTime) {
                             tablesToDelete.add(table);
                         }
                         if (tablesToDelete.size() >= maxCleanupSize) {
@@ -74,7 +74,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                 }
             }
             if (CollectionUtils.isNotEmpty(tablesToDelete)) {
-                log.info(String.format("Size of table needs to be deleted is %d and scan index is %d.", tablesToDelete.size()), lastIndex);
+                log.info(String.format("Size of table needs to be deleted is %d and scan index is %d.", tablesToDelete.size(), lastIndex));
                 tablesToDelete.forEach(table -> {
                     cleanupTable(table);
                 });
