@@ -15,10 +15,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
 public class RestrictionUtilsUnitTestNG {
@@ -87,6 +90,20 @@ public class RestrictionUtilsUnitTestNG {
                 { Arrays.asList("1", 2.D), Float.class, false },
                 { Arrays.asList(">1", "2"), Integer.class, true }
         };
+    }
+
+
+    @Test(groups = "unit")
+    public void testConvertUnencodedBooleanBucket() {
+        Bucket bkt = Bucket.valueBkt("Yes");
+        BucketRestriction bucketRestriction = //
+                new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "Attr"), bkt);
+        ColumnMetadata cm = new ColumnMetadata();
+        Restriction restriction = //
+                RestrictionUtils.convertUnencodedBooleanBucketRestriction(bucketRestriction, cm, false);
+        Assert.assertTrue(restriction instanceof ConcreteRestriction);
+        ConcreteRestriction concreteRestriction = (ConcreteRestriction) restriction;
+        Assert.assertEquals(concreteRestriction.getRelation(), ComparisonType.IN_COLLECTION);
     }
 
 }
