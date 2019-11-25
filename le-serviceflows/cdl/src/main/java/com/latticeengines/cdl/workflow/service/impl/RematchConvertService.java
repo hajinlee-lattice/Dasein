@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,7 +90,7 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
     public List<String> getAttributes(String customerSpace, Table templateTable,
                                       Table masterTable,
                                       List<String> discardFields, RematchConvertServiceConfiguration config) {
-        List<String> attributeNameList = Arrays.asList(masterTable.getAttributeNames());
+        List<String> attributeNameList = new ArrayList<>(Arrays.asList(masterTable.getAttributeNames()));
         attributeNameList.removeAll(getNeedDropColumn());
         if (CollectionUtils.isNotEmpty(discardFields)) {
             attributeNameList.removeAll(discardFields);

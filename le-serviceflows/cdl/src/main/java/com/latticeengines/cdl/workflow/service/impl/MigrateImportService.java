@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -241,7 +242,7 @@ public class MigrateImportService
     public List<String> getAttributes(String customerSpace, Table templateTable, 
                                       Table masterTable,
                                       List<String> discardFields, MigrateImportServiceConfiguration config) {
-        List<String> allAttributes = Arrays.asList(templateTable.getAttributeNames());
+        List<String> allAttributes = new ArrayList<>(Arrays.asList(templateTable.getAttributeNames()));
         if (CollectionUtils.isNotEmpty(discardFields)) {
             allAttributes.removeAll(discardFields);
         }
