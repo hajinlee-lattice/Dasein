@@ -47,7 +47,7 @@ public class ConvertTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             return this;
         }
 
-        public Builder setDiscardFields(List<String> discardFields) {
+        public Builder withDiscardFields(List<String> discardFields) {
             convertBatchStoreStepConfiguration.setDiscardFields(discardFields);
             return this;
         }

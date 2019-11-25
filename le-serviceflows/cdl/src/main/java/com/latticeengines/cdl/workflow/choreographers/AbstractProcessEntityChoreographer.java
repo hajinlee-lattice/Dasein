@@ -5,6 +5,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOG
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_ENABLED;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DEELETE_ACTIONS;
@@ -387,12 +388,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean checkHasEntityMatchRematch(AbstractStep<? extends BaseStepConfiguration> step) {
-        boolean entityMatchEnabled = false;
-        if (step.getConfiguration() instanceof BaseProcessEntityStepConfiguration) {
-            entityMatchEnabled =
-                    ((BaseProcessEntityStepConfiguration) step.getConfiguration()).isEntityMatchEnabled();
-        }
-        return step.getObjectFromContext(FULL_REMATCH_PA, Boolean.class) && entityMatchEnabled;
+        return step.getObjectFromContext(FULL_REMATCH_PA, Boolean.class) && step.getObjectFromContext(ENTITY_MATCH_ENABLED, Boolean.class);
     }
 
     /**

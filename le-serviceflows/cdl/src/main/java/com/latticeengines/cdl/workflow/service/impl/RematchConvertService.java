@@ -1,11 +1,11 @@
 package com.latticeengines.cdl.workflow.service.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -90,8 +89,7 @@ public class RematchConvertService extends ConvertBatchStoreService<RematchConve
     public List<String> getAttributes(String customerSpace, Table templateTable,
                                       Table masterTable,
                                       List<String> discardFields, RematchConvertServiceConfiguration config) {
-        Set<Attribute> attributeSet = new HashSet<>(masterTable.getAttributes());
-        List<String> attributeNameList = attributeSet.stream().map(Attribute::getName).collect(Collectors.toList());
+        List<String> attributeNameList = Arrays.asList(masterTable.getAttributeNames());
         attributeNameList.removeAll(getNeedDropColumn());
         if (CollectionUtils.isNotEmpty(discardFields)) {
             attributeNameList.removeAll(discardFields);
