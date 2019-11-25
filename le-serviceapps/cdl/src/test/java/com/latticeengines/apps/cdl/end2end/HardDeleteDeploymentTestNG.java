@@ -139,8 +139,12 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         List<Extract> extracts = table.getExtracts();
         Assert.assertNotNull(extracts);
         List<String> paths = new ArrayList<>();
-        for (Extract e : extracts) {
-            paths.add(e.getPath());
+        for (Extract extract : table.getExtracts()) {
+            if (!extract.getPath().endsWith("avro")) {
+                paths.add(extract.getPath() + "/*.avro");
+            } else {
+                paths.add(extract.getPath());
+            }
         }
         return AvroUtils.getDataFromGlob(yarnConfiguration, paths);
     }
@@ -159,7 +163,6 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         log.info("There are {} rows in avro after delete. table role is {}.", originalNumRecords, tableRoleInCollection);
         for (GenericRecord record : recordsAfterDelete) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            log.info("accountId is {}.", accountId);
             Assert.assertTrue(!idSets.contains(accountId));
         }
     }
