@@ -134,7 +134,7 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
      *    (_CURRENT_VERSION on s3 should not be updated)
      * 4. Rename files on s3
      * 5. Copy PREV_VER from s3 back to hdfs -- verify success
-     *    (existed files on hdfs should be deleted; _CURRENT_VERSION on s3 should not be updated)
+     *    (existed files on hdfs should be deleted; _CURRENT_VERSION on hdfs should not be updated)
      */
     @Test(groups = "functional")
     public void testGeneralSource2() {

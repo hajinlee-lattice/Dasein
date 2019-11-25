@@ -126,7 +126,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * For source with schema file (general source), copy schema file
      *
      * @param hdfsToS3:
-     *            transfer schema file from hdfs to s3, or from s3 to hdfs
+     *            true: transfer schema file from hdfs to s3; false: from s3 to
+     *            hdfs
      * @param source:
      *            source to transfer
      * @param version:
@@ -184,8 +185,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * Whether source schema file exists at origin
      *
      * @param hdfsToS3:
-     *            transfer source from hdfs to s3, or from s3 to hdfs; if true,
-     *            origin is hdfs, otherwise, origin is s3
+     *            true: transfer source from hdfs to s3, origin is hdfs; false:
+     *            from s3 to hdfs, origin is s3
      * @param schemaPath:
      *            sanity path of source schema file
      * @return: Whether source schema file exists at origin
@@ -198,7 +199,7 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
         if (hdfsToS3) {
             return HdfsUtils.fileExists(yarnConfiguration, schemaPath);
         } else {
-            return s3Service.isNonEmptyDirectory(s3Bucket, schemaPath);
+            return s3Service.objectExist(s3Bucket, schemaPath);
         }
     }
 
@@ -206,7 +207,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * Copy data files of source
      *
      * @param hdfsToS3:
-     *            transfer data file from hdfs to s3, or from s3 to hdfs
+     *            true: transfer data file from hdfs to s3; false: from s3 to
+     *            hdfs
      * @param source:
      *            source to transfer
      * @param version:
@@ -263,8 +265,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * Copy _CURRENT_VERSION file of source
      *
      * @param hdfsToS3:
-     *            transfer _CURRENT_VERSION file from hdfs to s3, or from s3 to
-     *            hdfs
+     *            true: transfer _CURRENT_VERSION file from hdfs to s3; false:
+     *            from s3 to hdfs
      * @param source:
      *            source to transfer
      * @param version:
@@ -317,8 +319,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * transfer _CURRENT_VERSION file, otherwise, do not transfer
      *
      * @param hdfsToS3:
-     *            transfer _CURRENT_VERSION file from hdfs to s3, or from s3 to
-     *            hdfs
+     *            true: transfer _CURRENT_VERSION file from hdfs to s3; false:
+     *            from s3 to hdfs
      * @param source:
      *            source to transfer
      * @param version:
@@ -333,7 +335,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
         if (versionFilePath == null) {
             return false;
         }
-        if (!s3Service.objectExist(s3Bucket, versionFilePath)) {
+        if ((hdfsToS3 && !s3Service.objectExist(s3Bucket, versionFilePath))
+                || (!hdfsToS3 && !HdfsUtils.fileExists(yarnConfiguration, versionFilePath))) {
             return true;
         }
         String destinationVersion = hdfsToS3
@@ -346,8 +349,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * Check whether the path to transfer exists at destination
      *
      * @param hdfsToS3:
-     *            transfer source from hdfs to s3, or from s3 to hdfs; if true,
-     *            destination is s3, otherwise, destination is hdfs
+     *            true: transfer source from hdfs to s3, destination is s3;
+     *            false: from s3 to hdfs, destination is hdfs
      * @param sanityPath:
      *            sanity path to transfer
      * @param failIfExisted:
@@ -376,7 +379,8 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * Run distcp to copy specified path
      *
      * @param hdfsToS3:
-     *            transfer specified path from hdfs to s3, or from s3 to hdfs
+     *            true: transfer specified path from hdfs to s3; false: from s3
+     *            to hdfs
      * @param sourceName:
      *            source to transfer
      * @param sanityPath:
@@ -402,7 +406,7 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * Create distcp configuration
      *
      * @param hdfsToS3:
-     *            transfer source from hdfs to s3, or from s3 to hdfs
+     *            true: transfer source from hdfs to s3; false: from s3 to hdfs
      * @param sourceName:
      *            source to transfer
      * @return: distcp configuration
@@ -464,9 +468,9 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
      * size at destination are same as that at origin
      *
      * @param hdfsToS3:
-     *            transfer sanity path from hdfs to s3, or from s3 to hdfs; if
-     *            true, origin is hdfs and destination is s3, otherwise, origin
-     *            is s3 and destination is hdfs
+     *            true: transfer sanity path from hdfs to s3, origin is hdfs and
+     *            destination is s3; false: from s3 to hdfs, origin is s3 and
+     *            destination is hdfs
      * @param sanityPath:
      *            sanity path to transfer
      * @throws IOException

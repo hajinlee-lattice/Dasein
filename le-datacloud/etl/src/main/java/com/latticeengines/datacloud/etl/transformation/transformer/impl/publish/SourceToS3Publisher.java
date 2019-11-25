@@ -34,6 +34,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.PurgeStrategyUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
@@ -99,6 +100,13 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
                 String version = step.getBaseVersions().get(i);
                 List<Pair<String, String>> tags = getPurgeStrategyTags(source);
                 sourceHdfsS3TransferService.transfer(true, source, version, tags, false, false);
+                // _CURRENT_VERSION file should not be tagged with purge
+                // strategy, remove tags on _CURRENT_VERSION
+                String versionPath = hdfsPathBuilder.constructVersionFile(source).toString();
+                log.info("ZDD: _CURRENT_VERSION path=" + versionPath);
+                if (!(source instanceof TableSource)) {
+                    s3Service.deleteObjectTags(s3Bucket, versionPath);
+                }
 
 //                String sourceName = step.getBaseSources()[i].getSourceName();
 //                Source source = step.getBaseSources()[i];

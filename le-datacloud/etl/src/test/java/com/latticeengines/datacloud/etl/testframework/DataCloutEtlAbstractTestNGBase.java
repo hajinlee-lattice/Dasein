@@ -270,7 +270,8 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
      *            folder under "test/resources" directory)
      * @param extractSchema:
      *            whether to generate avsc schema file from avro files uploaded;
-     *            require all the avro files uploaded have same schema
+     *            require all the uploaded files uploaded are in avro format and
+     *            have same schema
      */
     protected void uploadSourceToHdfs(Source source, String version, List<String> fileNames, boolean extractSchema) {
         try {
