@@ -153,10 +153,16 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         }
         saveAccountIdInContactMatch(extraAttributes, traveler);
 
+        int lookupSizeBefore = lookupResults.size();
+        List<Pair<MatchKeyTuple, String>> postProcessedResults = postProcessLookupResults(traveler, lookupResults);
+        // anything added by post processing is considered dummy
+        List<Integer> dummyResultIndices = IntStream.range(lookupSizeBefore, postProcessedResults.size()).boxed()
+                .collect(Collectors.toList());
+
         Integer servingVersion = traveler.getMatchInput() == null ? null : traveler.getMatchInput().getServingVersion();
         return new EntityAssociationRequest(standardizedTenant, entity, servingVersion,
                 getPreferredEntityId(traveler.getEntity(), traveler.getEntityMatchKeyRecord()),
-                postProcessLookupResults(traveler, lookupResults), extraAttributes);
+                postProcessedResults, extraAttributes, dummyResultIndices);
     }
 
     /*
