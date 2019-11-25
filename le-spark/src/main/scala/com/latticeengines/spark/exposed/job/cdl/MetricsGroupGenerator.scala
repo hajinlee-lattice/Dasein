@@ -2,7 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import java.util
 
-import com.latticeengines.common.exposed.util.{JsonUtils, TemplateUtils}
+import com.latticeengines.common.exposed.util.TemplateUtils
 import com.latticeengines.domain.exposed.StringTemplates
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
@@ -44,18 +44,16 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]() // groupId -> details
     var index: Int = 0
-    val metrics: Seq[DataFrame] = groups.map((group: ActivityMetricsGroup) => {
-      val details: Details = new Details()
-      details.setStartIdx(index)
-      detailsMap.put(group.getGroupId, details)
+    var metrics: Seq[DataFrame] = Seq()
+    for (group: ActivityMetricsGroup <- groups) {
+      detailsMap.put(group.getGroupId, setDetails(index))
       index += 1
-
       val metadata = inputMetadata.getMetadata.get(group.getStream.getStreamId)
-      processGroup(group, evaluationDate, aggregatedPeriodStores, translator, metadata)
-    })
+      metrics :+= processGroup(group, evaluationDate, aggregatedPeriodStores, translator, metadata)
+    }
     outputMetadata.setMetadata(detailsMap)
 
-    lattice.outputStr = JsonUtils.serialize(outputMetadata)
+    lattice.outputStr = serializeJson(outputMetadata)
     lattice.output = metrics.toList
   }
 
@@ -179,5 +177,11 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     scala.collection.JavaConversions.seqAsJavaList(
       periodNames.map(name => toPeriodStrategy(name))
     )
+  }
+
+  def setDetails(index: Int): Details = {
+    val details = new Details()
+    details.setStartIdx(index)
+    details
   }
 }
