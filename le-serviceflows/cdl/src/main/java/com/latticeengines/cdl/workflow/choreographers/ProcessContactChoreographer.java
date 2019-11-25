@@ -101,8 +101,8 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
 
     @Override
     protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
-        if (!hasAccounts) {
-            log.info("Should not rebuild, since no accounts.");
+        if (!hasAccounts && !replace) {
+            log.info("Should not rebuild, since no accounts and no need to replace.");
             return false;
         } else {
             boolean commonRebuild = super.shouldRebuild(step);

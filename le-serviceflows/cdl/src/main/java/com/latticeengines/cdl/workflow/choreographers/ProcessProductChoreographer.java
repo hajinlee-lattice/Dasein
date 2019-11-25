@@ -85,6 +85,10 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
             log.info("Going to reset " + mainEntity() + ", skipping rebuild.");
             return false;
         }
+        if (replace) {
+            log.info("Has replace in " + mainEntity() + ", going to rebuild.");
+            return true;
+        }
         if (enforceRebuild) {
             log.info("Enforced to rebuild " + mainEntity());
             return true;
