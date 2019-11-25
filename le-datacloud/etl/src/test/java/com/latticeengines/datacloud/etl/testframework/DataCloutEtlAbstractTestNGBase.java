@@ -333,8 +333,7 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
             s3Service.uploadInputStream(s3Bucket, successObjectKey, successStream, true);
 
             InputStream currVersionStream = new ByteArrayInputStream(version.getBytes(StandardCharsets.UTF_8));
-            String currVersionObjectKey = hdfsPathBuilder.constructTransformationSourceDir(source).toString()
-                    + HdfsPathBuilder.VERSION_FILE;
+            String currVersionObjectKey = hdfsPathBuilder.constructVersionFile(source).toString();
             s3Service.uploadInputStream(s3Bucket, currVersionObjectKey, currVersionStream, true);
         } catch (Exception e) {
             throw new RuntimeException(e);

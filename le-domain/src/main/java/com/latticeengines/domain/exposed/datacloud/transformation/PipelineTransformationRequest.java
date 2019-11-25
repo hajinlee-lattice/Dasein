@@ -55,9 +55,13 @@ public class PipelineTransformationRequest {
     @JsonProperty("ContainerMemMB")
     private Integer containerMemMB;
 
-    // Whether the pipeline is for AM rebuild; If true, will set {@link
+    // Whether the pipeline is for AM rebuild
+    // If true:
+    // 1. Will set {@link
     // PipelineTransformationReportByStep#setDatacloudVersion(String)} with
     // version of AccountMaster being built
+    // 2. If base source of specific base version doesn't exist on HDFS, will
+    // attempt to copy the version from S3
     @JsonProperty("IsAMJob")
     private boolean isAMJob;
 

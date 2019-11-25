@@ -12,8 +12,8 @@ public interface SourceHdfsS3TransferService {
     /**
      * Transfer specified DataCloud source between HDFS and S3
      * 
-     * Currently supported source type: DerivedSource, IngestionSource
-     * (Ingestion) and TableSource
+     * Currently supported source type: DerivedSource &
+     * IngestionSource(Ingestion)
      *
      * @param hdfsToS3:
      *            true: transfer source from hdfs to s3; false: from s3 to hdfs

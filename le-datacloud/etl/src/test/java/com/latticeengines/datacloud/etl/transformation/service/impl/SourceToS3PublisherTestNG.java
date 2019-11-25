@@ -142,8 +142,9 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         cleanupProgressTables();
     }
 
+    @Override
     @AfterClass(groups = "pipeline1", enabled = true)
-    private void destroy() {
+    public void destroy() {
         cleanupPods();
         cleanupPurgeStrategy();
     }

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.fs.FileStatus;
@@ -224,6 +225,7 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
 
         // Verify _CURRENT_VERSION file
         String currVerPath = hdfsPathBuilder.constructVersionFile(source).toString();
+
         try {
             String currVer = IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, currVerPath),
                     Charset.defaultCharset());
@@ -232,7 +234,11 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
         } catch (IOException e) {
             Assert.fail(e.getMessage(), e);
         }
-        verifyTags(s3Service.getObjectTags(s3Bucket, currVerPath), expectedTags);
+        if (expectedCurrVer.equals(version)) {
+            verifyTags(s3Service.getObjectTags(s3Bucket, currVerPath), expectedTags);
+        } else {
+            verifyTags(s3Service.getObjectTags(s3Bucket, currVerPath), null);
+        }
     }
 
     /**
@@ -307,6 +313,10 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
     }
 
     private void verifyTags(List<Tag> actualTags, List<Pair<String, String>> expectedTags) {
+        if (CollectionUtils.isEmpty(expectedTags)) {
+            Assert.assertTrue(CollectionUtils.isEmpty(actualTags));
+            return;
+        }
         Map<String, String> actualMap = actualTags.stream().collect(Collectors.toMap(Tag::getKey, Tag::getValue));
         Map<String, String> expectedMap = expectedTags.stream().collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         Assert.assertEquals(actualMap.size(), expectedMap.size());
