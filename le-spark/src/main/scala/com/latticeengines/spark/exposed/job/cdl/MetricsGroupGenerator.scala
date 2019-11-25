@@ -44,15 +44,13 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]() // groupId -> details
     var index: Int = 0
-    val metrics: Seq[DataFrame] = groups.map((group: ActivityMetricsGroup) => {
-      val details: Details = new Details()
-      details.setStartIdx(index)
-      detailsMap.put(group.getGroupId, details)
+    var metrics: Seq[DataFrame] = Seq()
+    for (group: ActivityMetricsGroup <- groups) {
+      detailsMap.put(group.getGroupId, setDetails(index))
       index += 1
-
       val metadata = inputMetadata.getMetadata.get(group.getStream.getStreamId)
-      processGroup(group, evaluationDate, aggregatedPeriodStores, translator, metadata)
-    })
+      metrics :+= processGroup(group, evaluationDate, aggregatedPeriodStores, translator, metadata)
+    }
     outputMetadata.setMetadata(detailsMap)
 
     lattice.outputStr = serializeJson(outputMetadata)
@@ -179,5 +177,11 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     scala.collection.JavaConversions.seqAsJavaList(
       periodNames.map(name => toPeriodStrategy(name))
     )
+  }
+
+  def setDetails(index: Int): Details = {
+    val details = new Details()
+    details.setStartIdx(index)
+    details
   }
 }
