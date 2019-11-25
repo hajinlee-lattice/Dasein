@@ -56,6 +56,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean rebuild = false;
     boolean update = false;
     boolean reset = false;
+    boolean replace = false;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -77,7 +78,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             reset = shouldReset(step);
             rebuild = shouldRebuild(step);
             update = shouldUpdate(step);
-            log.info("reset=" + reset + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
+            log.info("reset=" + reset + ", replace=" + replace + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
             saveDecisions(step);
             if (reset && (rebuild || update)) {
                 throw new IllegalStateException("When reset, neither rebuild nor update can be true.");
@@ -124,6 +125,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         TreeSet<String> decisions = new TreeSet<>();
         decisions.add(reset ? "reset=true" : (update ? "update=true" : "rebuild=true"));
         decisions.add(enforceRebuild ? "enforceRebuild=true" : "");
+        decisions.add(replace ? "replace=true" : "");
         decisions.add(hasSchemaChange ? "hasSchemaChange=true" : "");
         decisions.add(hasImports ? "hasImports=true" : "");
         decisions.add(hasSoftDelete ? "hasSoftDelete=true" : "");
@@ -188,6 +190,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         checkActiveServingStore(step);
         checkHasBatchStore(step);
         checkRebuildDueToActions(step);
+        checkHasReplace(step);
     }
 
     void checkRebuildDueToActions(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -272,6 +275,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
+    private void checkHasReplace(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (step.getConfiguration() instanceof BaseProcessEntityStepConfiguration) {
+            replace = ((BaseProcessEntityStepConfiguration)step.getConfiguration()).getNeedReplace();
+        }
+    }
+
     void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         Long existingCount = null;
         Long updateCount = null;
@@ -316,6 +325,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("Going to reset " + mainEntity() + ", skipping rebuild.");
             return false;
         }
+        if (replace) {
+            log.info("Has replace action in " + mainEntity() + ", going to rebuild");
+            return true;
+        }
         if (enforceRebuild) {
             log.info("Enforced to rebuild " + mainEntity());
             return true;
@@ -338,6 +351,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping update.");
+            return false;
+        }
+        if (replace) {
+            log.info("Going to replace  " + mainEntity() + ", skipping update.");
             return false;
         }
         if (!rebuild && hasImports) {
