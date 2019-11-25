@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,12 +30,12 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SourceHdfsS3TransferServiceImplTestNG.class);
 
     @Inject
@@ -43,7 +44,8 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
     @Inject
     private SourceHdfsS3TransferServiceImpl sourceHdfsS3TransferService;
 
-    private static final String POD = SourceHdfsS3TransferServiceImplTestNG.class.getSimpleName();
+    private static final String POD = SourceHdfsS3TransferServiceImplTestNG.class.getSimpleName()
+            + UUID.randomUUID().toString();
     private static final String S3_FILE_PREFIX = "S3_";
     private static final String SOURCE = "BomboraFirehose";
     private static final IngestionSource INGESTION_SOURCE = new IngestionSource(SOURCE);
@@ -65,7 +67,6 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsPodContext.changeHdfsPodId(POD);
         prepareCleanPod(s3Bucket, POD);
     }
 
