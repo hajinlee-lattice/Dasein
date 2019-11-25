@@ -14,13 +14,14 @@ import javax.inject.Inject;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
@@ -29,9 +30,6 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     @Inject
     private CDLProxy cdlProxy;
-
-    @Inject
-    private PeriodProxy periodProxy;
 
     @BeforeClass(groups = { "end2end" })
     @Override
@@ -45,16 +43,45 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     @Test(groups = "end2end")
     private void test() throws Exception {
-        // resume from process account checkpoint to make matching stream faster
         resumeCheckpoint(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT);
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         setupTemplates();
-        importActivityStoreFiles();
+        // webVisit_d5c08346-1489-4390-b495-59d043305dde.csv
+        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 1,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
+        Thread.sleep(2000);
+        // webVisitPathPtn.csv
+        mockCSVImport(BusinessEntity.Catalog, ADVANCED_MATCH_SUFFIX, 2,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisitPathPattern));
+        Thread.sleep(2000);
+        // webVisitSrcMedium.csv
+        mockCSVImport(BusinessEntity.Catalog, ADVANCED_MATCH_SUFFIX, 3,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisitSourceMedium));
+        Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
 
         // run PA with fake current time
         processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
+    }
+
+    @Test(groups = "end2end", dependsOnMethods = "test")
+    private void testRematch() throws Exception {
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
+        // webVisit_01d55da4-02f9-45b4-9232-09ea59ec2635.csv
+        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 2,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
+        Thread.sleep(2000);
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
+
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        request.setSkipPublishToS3(true);
+        request.setSkipDynamoExport(true);
+        request.setFullRematch(true);
+        request.setSkipEntities(
+                Sets.newHashSet(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Transaction));
+        request.setCurrentPATimestamp(CURRENT_PA_TIME.toEpochMilli());
+        processAnalyze(request);
     }
 
     private void setupTemplates() {
@@ -69,30 +96,5 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         SimpleTemplateMetadata sm = new SimpleTemplateMetadata();
         sm.setEntityType(EntityType.WebVisitSourceMedium);
         cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(sm));
-    }
-
-    private void importActivityStoreFiles() {
-        // import visit/ptn/source files (20k streams, 4 accounts, 450 days)
-        String webVisitCsvFile = "webVisit_d5c08346-1489-4390-b495-59d043305dde.csv";
-        String ptnCsvFile = "webVisitPathPtn.csv";
-        String smCsvFile = "webVisitSrcMedium.csv";
-        importSourceMediumData(smCsvFile);
-        importWebVisitData(webVisitCsvFile);
-        importWebVisitPtnData(ptnCsvFile);
-    }
-
-    private void importWebVisitData(String csvFilename) {
-        importData(BusinessEntity.ActivityStream, csvFilename,
-                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit), false, false);
-    }
-
-    private void importSourceMediumData(String csvFilename) {
-        importData(BusinessEntity.Catalog, csvFilename,
-                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisitSourceMedium), false, false);
-    }
-
-    private void importWebVisitPtnData(String csvFilename) {
-        importData(BusinessEntity.Catalog, csvFilename,
-                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisitPathPattern), false, false);
     }
 }

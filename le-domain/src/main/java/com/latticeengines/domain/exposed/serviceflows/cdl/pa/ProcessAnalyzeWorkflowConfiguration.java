@@ -329,6 +329,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder fullRematch(boolean fullRematch) {
             processStepConfiguration.setFullRematch(fullRematch);
+            processActivityStreamWorkflowBuilder.setRematchMode(fullRematch);
             return this;
         }
 
@@ -346,6 +347,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processAccountWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Account));
             processContactWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Contact));
             processProductWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Product));
+            processActivityStreamWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             processTransactionWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Transaction));
             return this;
         }

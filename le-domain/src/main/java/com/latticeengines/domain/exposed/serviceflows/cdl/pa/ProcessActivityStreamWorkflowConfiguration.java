@@ -68,6 +68,16 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder setReplaceMode(boolean isReplaceMode) {
+            processStepConfiguration.setReplaceMode(isReplaceMode);
+            return this;
+        }
+
+        public Builder setRematchMode(boolean isRematchMode) {
+            processStepConfiguration.setRematchMode(isRematchMode);
+            return this;
+        }
+
         public ProcessActivityStreamWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processActivityStreamWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
