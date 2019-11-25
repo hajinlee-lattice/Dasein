@@ -12,15 +12,14 @@ import java.util.Set;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.IngestionNames;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
-import com.latticeengines.datacloud.core.source.impl.OrbCompanyRaw;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.IngestedFileToSourceTransformer;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
@@ -35,8 +34,7 @@ public class OrbFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(OrbFileToSourceTestNG.class);
 
-    @Autowired
-    private OrbCompanyRaw source;
+    private GeneralSource source = new GeneralSource("OrbCompanyRaw");
 
     private IngestionSource baseSource = new IngestionSource(IngestionNames.ORB_INTELLIGENCE);
 
