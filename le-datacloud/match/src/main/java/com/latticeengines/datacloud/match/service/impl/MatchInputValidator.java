@@ -430,10 +430,7 @@ public class MatchInputValidator {
         AvroInputBuffer avroInputBuffer = (AvroInputBuffer) buffer;
         String avroDir = avroInputBuffer.getAvroDir();
         try {
-            if (!HdfsUtils.fileExists(yarnConfiguration, avroDir)) {
-                throw new IllegalStateException("Cannot find avro dir " + avroDir);
-            }
-
+            // support glob as avroDir in input buffer
             Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
             if (!iterator.hasNext()) {
                 throw new IllegalArgumentException("0 rows in input avro(s).");

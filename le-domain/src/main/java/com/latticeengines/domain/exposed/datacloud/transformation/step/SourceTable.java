@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.step;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,6 +14,9 @@ public class SourceTable {
 
     @JsonProperty("TableName")
     private String tableName;
+
+    @JsonProperty("PartitionKeys")
+    private List<String> partitionKeys;
 
     @JsonIgnore
     private CustomerSpace customerSpace;
@@ -54,4 +59,11 @@ public class SourceTable {
         this.customerSpace = CustomerSpace.parse(customerSpace);
     }
 
+    public List<String> getPartitionKeys() {
+        return partitionKeys;
+    }
+
+    public void setPartitionKeys(List<String> partitionKeys) {
+        this.partitionKeys = partitionKeys;
+    }
 }

@@ -80,6 +80,10 @@ public class TransformationStepConfig {
     @JsonProperty("TargetTable")
     private TargetTable targetTable;
 
+    // partition keys used in target table source
+    @JsonProperty("TargetPartitionKeys")
+    private List<String> targetPartitionKeys;
+
     // If provided, target source is generated with specified version
     // If not provided (general use case), target source is generated with
     // pipeline version
@@ -226,5 +230,13 @@ public class TransformationStepConfig {
 
     public void setBaseIngestions(Map<String, SourceIngestion> baseIngestions) {
         this.baseIngestions = baseIngestions;
+    }
+
+    public List<String> getTargetPartitionKeys() {
+        return targetPartitionKeys;
+    }
+
+    public void setTargetPartitionKeys(List<String> targetPartitionKeys) {
+        this.targetPartitionKeys = targetPartitionKeys;
     }
 }

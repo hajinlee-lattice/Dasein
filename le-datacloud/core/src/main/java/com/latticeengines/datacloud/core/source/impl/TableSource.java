@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -20,6 +22,7 @@ public class TableSource implements Source {
     private Table table;
     private String primaryKey;
     private String lastModifiedKey;
+    private List<String> partitionKeys;
     private boolean expandBucketedAttrs = false;
 
     private final CustomerSpace customerSpace;
@@ -29,8 +32,13 @@ public class TableSource implements Source {
     }
 
     public TableSource(Table table, CustomerSpace customerSpace) {
+        this(table, customerSpace, null);
+    }
+
+    public TableSource(Table table, CustomerSpace customerSpace, List<String> partitionKeys) {
         this.table = table;
         this.customerSpace = customerSpace;
+        this.partitionKeys = partitionKeys;
     }
 
     public Table getTable() {
@@ -125,4 +133,11 @@ public class TableSource implements Source {
         return TableUtils.getFullTableName(tableNamePrefix, version);
     }
 
+    public List<String> getPartitionKeys() {
+        return partitionKeys;
+    }
+
+    public void setPartitionKeys(List<String> partitionKeys) {
+        this.partitionKeys = partitionKeys;
+    }
 }
