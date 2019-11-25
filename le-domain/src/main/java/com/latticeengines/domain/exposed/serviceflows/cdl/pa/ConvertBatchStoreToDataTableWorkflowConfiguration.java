@@ -76,6 +76,7 @@ public class ConvertBatchStoreToDataTableWorkflowConfiguration extends BaseCDLWo
         private void withDiscardFields() {
             List<String> discardFields = new ArrayList<>();
             discardFields.add(InterfaceName.TransactionDate.name());
+            discardFields.add(InterfaceName.TransactionDayPeriod.name());
             convertTransactionWorkflowBuilder.withDiscardFields(discardFields);
         }
     }
