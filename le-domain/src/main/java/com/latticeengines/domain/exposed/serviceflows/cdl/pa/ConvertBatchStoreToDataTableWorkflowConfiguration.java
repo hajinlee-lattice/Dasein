@@ -66,14 +66,14 @@ public class ConvertBatchStoreToDataTableWorkflowConfiguration extends BaseCDLWo
         public ConvertBatchStoreToDataTableWorkflowConfiguration build() {
             configuration.setContainerConfiguration("convertBatchStoreToDataTableWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-            withDiscardFields();
+            setDiscardFields();
             configuration.add(convertAccountWorkflowBuilder.build());
             configuration.add(convertContactWorkflowBuilder.build());
             configuration.add(convertTransactionWorkflowBuilder.build());
             return configuration;
         }
 
-        private void withDiscardFields() {
+        private void setDiscardFields() {
             List<String> discardFields = new ArrayList<>();
             discardFields.add(InterfaceName.TransactionDate.name());
             discardFields.add(InterfaceName.TransactionDayPeriod.name());

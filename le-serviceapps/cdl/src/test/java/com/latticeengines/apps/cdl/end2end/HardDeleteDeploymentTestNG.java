@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -140,11 +141,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         Assert.assertNotNull(extracts);
         List<String> paths = new ArrayList<>();
         for (Extract extract : table.getExtracts()) {
-            if (!extract.getPath().endsWith("avro")) {
-                paths.add(extract.getPath() + "/*.avro");
-            } else {
-                paths.add(extract.getPath());
-            }
+            paths.add(PathUtils.toAvroGlob(extract.getPath()));
         }
         return AvroUtils.getDataFromGlob(yarnConfiguration, paths);
     }
