@@ -528,6 +528,35 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
+    public List<S3ImportSystem> getS3ImportSystemWithFilter(String customerSpace, boolean filterAccount,
+                                                            boolean filterContact, S3ImportTemplateDisplay templateDisplay) {
+        List<S3ImportSystem> allSystems = getAllS3ImportSystem(customerSpace);
+        if (filterAccount) {
+            allSystems = allSystems.stream().filter(system -> system.getAccountSystemId() != null).collect(Collectors.toList());
+            if (templateDisplay != null) {
+                EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
+                if (EntityType.Accounts.equals(entityType) && CollectionUtils.isNotEmpty(allSystems)) {
+                    allSystems = allSystems.stream()
+                            .filter(system -> !system.getName().equals(templateDisplay.getS3ImportSystem().getName()))
+                            .collect(Collectors.toList());
+                }
+            }
+        }
+        if (filterContact) {
+            allSystems = allSystems.stream().filter(system -> system.getContactSystemId() != null).collect(Collectors.toList());
+            if (templateDisplay != null) {
+                EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
+                if (EntityType.Contacts.equals(entityType) && CollectionUtils.isNotEmpty(allSystems)) {
+                    allSystems = allSystems.stream()
+                            .filter(system -> !system.getName().equals(templateDisplay.getS3ImportSystem().getName()))
+                            .collect(Collectors.toList());
+                }
+            }
+        }
+        return allSystems;
+    }
+
+    @Override
     public List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable,
             Table standardTable) {
         List<TemplateFieldPreview> templatePreview = templateTable.getAttributes().stream()

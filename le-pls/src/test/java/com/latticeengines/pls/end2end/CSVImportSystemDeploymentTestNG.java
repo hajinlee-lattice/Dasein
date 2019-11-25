@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -273,7 +274,6 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
-//                fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
                 fieldMapping.setMapToLatticeId(true);
             }
@@ -399,4 +399,35 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertNotNull(sfLeadTable.getAttribute(sfSystem.getContactSystemId()));
 
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "testMultipleSubType")
+    public void testGetSystemList() {
+        // Right now there should be 4 systems: DefaultSystem, Test_SalesforceSystem, Test_OtherSystem, Test_SalesforceSystemLead
+        // Three of them have Account System Id : DefaultSystem, Test_SalesforceSystem, Test_OtherSystem
+        // Two of them have Contact System Id : Test_SalesforceSystem, Test_SalesforceSystemLead
+        // One of them has Leads System Id(secondary Id) : Test_SalesforceSystemLead
+        List<S3ImportTemplateDisplay> templateList = cdlService.getS3ImportTemplate(mainTestTenant.getId(), "", null);
+        S3ImportTemplateDisplay otherSystemAccount =
+                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
+                        "Test_OtherSystem_AccountData")).findFirst().get();
+        Assert.assertNotNull(otherSystemAccount);
+        List<S3ImportSystem> filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                true, false, otherSystemAccount);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 2);
+
+        S3ImportTemplateDisplay sfSystemContact =
+                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
+                        "Test_SalesforceSystemLead_ContactData")).findFirst().get();
+        filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                false, true, sfSystemContact);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 1);
+
+        S3ImportTemplateDisplay sfSystemLead =
+                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
+                        "Test_SalesforceSystemLead_LeadsData")).findFirst().get();
+        filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                false, true, sfSystemLead);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 2);
+    }
+
 }
