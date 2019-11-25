@@ -1,0 +1,233 @@
+{
+  "systemType": "Other",
+  "systemObject": "Contacts",
+  "fieldDefinitionsRecordsMap": {
+    "Unique ID": [
+      {
+        "fieldName": "CustomerContactId",
+        "fieldType": "TEXT",
+        "screenName": "Contact ID",
+        "matchingColumnNames": [
+          "ID",
+          "CONTACT",
+          "CONTACT ID",
+          "EXTERNAL ID"
+        ],
+        "required": false
+      }
+    ],
+    "Match IDs": [],
+    "Other IDs": [],
+    "Contact Fields": [
+      {
+        "fieldName": "FirstName",
+        "fieldType": "TEXT",
+        "screenName": "First Name",
+        "matchingColumnNames": [
+          "FIRST NAME"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "LastName",
+        "fieldType": "TEXT",
+        "screenName": "Last Name",
+        "matchingColumnNames": [
+          "LAST NAME"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "Title",
+        "fieldType": "TEXT",
+        "screenName": "Title",
+        "matchingColumnNames": [
+          "TITLE"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "Email",
+        "fieldType": "TEXT",
+        "screenName": "Email",
+        "matchingColumnNames": [
+          "EMAIL",
+          "EMAIL ADDRESS"
+        ],
+        "required": false
+      }
+    ],
+    "Analysis Fields": [
+      {
+        "fieldName": "LeadStatus",
+        "fieldType": "TEXT",
+        "screenName": "Lead Status",
+        "matchingColumnNames": [
+          "LEAD STATUS"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "LeadSource",
+        "fieldType": "TEXT",
+        "screenName": "Lead Source",
+        "matchingColumnNames": [
+          "LEAD SOURCE"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "LeadType",
+        "fieldType": "TEXT",
+        "screenName": "Lead Type",
+        "matchingColumnNames": [
+          "LEAD TYPE"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "DoNotMail",
+        "fieldType": "BOOLEAN",
+        "screenName": "Has Opted Out of Email",
+        "matchingColumnNames": [
+          "DO NOT MAIL",
+          "EMAIL OPT OUT"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "DoNotCall",
+        "fieldType": "BOOLEAN",
+        "screenName": "Has Opted Out of Phone Calls",
+        "matchingColumnNames": [
+          "DO NOT CALL"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "CreatedDate",
+        "fieldType": "DATE",
+        "screenName": "Created Date",
+        "matchingColumnNames": [
+          "CREATED DATE"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "LastModifiedDate",
+        "fieldType": "DATE",
+        "screenName": "Last Modified Date",
+        "matchingColumnNames": [
+          "LAST MODIFIED DATE",
+          "LAST MODIFIED"
+        ],
+        "required": false
+      }
+    ],
+    "Match to Accounts - ID": [
+      {
+        "fieldName": "CustomerAccountId",
+        "fieldType": "TEXT",
+        "screenName": "Unique Account Identifier",
+        "matchingColumnNames": [
+          "ACCOUNT ID",
+          "ACCOUNT EXTERNAL ID",
+          "ACCOUNT"
+        ],
+        "required": false
+      }
+    ],
+    "Match to Accounts - Fields": [
+      {
+        "fieldName": "Website",
+        "fieldType": "TEXT",
+        "screenName": "Website",
+        "matchingColumnNames": [
+          "WEBSITE",
+          "DOMAIN"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "CompanyName",
+        "fieldType": "TEXT",
+        "screenName": "Company Name",
+        "matchingColumnNames": [
+          "COMPANY",
+          "COMPANY NAME",
+          "ACCOUNT NAME"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "DUNS",
+        "fieldType": "TEXT",
+        "screenName": "D-U-N-S",
+        "matchingColumnNames": [
+          "DUNS",
+          "DUNS NUMBER"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "City",
+        "fieldType": "TEXT",
+        "screenName": "City",
+        "matchingColumnNames": [
+          "CITY",
+          "BILLING CITY"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "State",
+        "fieldType": "TEXT",
+        "screenName": "State",
+        "matchingColumnNames": [
+          "STATE",
+          "PROVINCE",
+          "STATE PROVINCE",
+          "PROVINCE STATE",
+          "BILLING STATE",
+          "BILLING PROVINCE"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "Country",
+        "fieldType": "TEXT",
+        "screenName": "Country",
+        "matchingColumnNames": [
+          "COUNTRY",
+          "BILLING COUNTRY"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "PostalCode",
+        "fieldType": "TEXT",
+        "screenName": "Postal Code",
+        "matchingColumnNames": [
+          "ZIP",
+          "ZIP CODE",
+          "POSTAL CODE",
+          "BILLING ZIP",
+          "BILLING ZIP CODE",
+          "BILLING POSTAL CODE"
+        ],
+        "required": false
+      },
+      {
+        "fieldName": "PhoneNumber",
+        "fieldType": "TEXT",
+        "screenName": "Phone Number",
+        "matchingColumnNames": [
+          "PHONE",
+          "PHONE NUMBER"
+        ],
+        "required": false
+      }
+    ],
+    "Custom Fields": []
+  }
+}
