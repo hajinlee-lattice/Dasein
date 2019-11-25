@@ -203,7 +203,7 @@ public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNG
 
         uploadBaseSourceData(am.getSourceName(), baseSourceVersion, schema, amData);
         try {
-            extractSchema(am, baseSourceVersion,
+            extractSchemaOnHdfs(am, baseSourceVersion,
                     hdfsPathBuilder.constructSnapshotDir(am.getSourceName(), baseSourceVersion).toString());
         } catch (Exception e) {
             log.error(String.format("Fail to extract schema for source %s at version %s", am.getSourceName(),

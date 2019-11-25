@@ -33,12 +33,12 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.PurgeStrategyUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
+import com.latticeengines.datacloud.etl.service.SourceHdfsS3TransferService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
@@ -71,6 +71,9 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     @Inject
     private S3Service s3Service;
 
+    @Inject
+    private SourceHdfsS3TransferService sourceHdfsS3TransferService;
+
     @Value("${datacloud.collection.s3bucket}")
     private String s3Bucket;
 
@@ -92,32 +95,37 @@ public class SourceToS3Publisher extends AbstractTransformer<TransformerConfig> 
     protected boolean transformInternal(TransformationProgress progress, String workflowDir, TransformStep step) {
         try {
             for (int i = 0; i < step.getBaseSources().length; i++) {
-                String sourceName = step.getBaseSources()[i].getSourceName();
                 Source source = step.getBaseSources()[i];
-
-                String schemaPath = (source instanceof DerivedSource) ? getBaseSourceSchemaDir(step, i) : null;
-                String dataPath = getSourceHdfsDir(step, i);
-                String versionFilePath = getBaseSourceVersionFilePath(step, i);
-
+                String version = step.getBaseVersions().get(i);
                 List<Pair<String, String>> tags = getPurgeStrategyTags(source);
+                sourceHdfsS3TransferService.transfer(true, source, version, tags, false, false);
 
-                List<String> files = getDirFiles(dataPath);
-                copyAndValidate(sourceName, dataPath, files, true);
-                cleanupS3Path(dataPath + "_$folder$");
-                objectTagging(tags, dataPath, files);
-
-                if (schemaPath != null && HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
-                    files = getDirFiles(schemaPath);
-                    copyAndValidate(sourceName, schemaPath, files, true);
-                    cleanupS3Path(schemaPath + "_$folder$");
-                    objectTagging(tags, dataPath, files);
-
-                }
-
-                if (shouldCopyVersionFile(source, versionFilePath)) {
-                    files = getDirFiles(versionFilePath);
-                    copyAndValidate(sourceName, versionFilePath, files, false);
-                }
+//                String sourceName = step.getBaseSources()[i].getSourceName();
+//                Source source = step.getBaseSources()[i];
+//
+//                String schemaPath = (source instanceof DerivedSource) ? getBaseSourceSchemaDir(step, i) : null;
+//                String dataPath = getSourceHdfsDir(step, i);
+//                String versionFilePath = getBaseSourceVersionFilePath(step, i);
+//
+//                List<Pair<String, String>> tags = getPurgeStrategyTags(source);
+//
+//                List<String> files = getDirFiles(dataPath);
+//                copyAndValidate(sourceName, dataPath, files, true);
+//                cleanupS3Path(dataPath + "_$folder$");
+//                objectTagging(tags, dataPath, files);
+//
+//                if (schemaPath != null && HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
+//                    files = getDirFiles(schemaPath);
+//                    copyAndValidate(sourceName, schemaPath, files, true);
+//                    cleanupS3Path(schemaPath + "_$folder$");
+//                    objectTagging(tags, dataPath, files);
+//
+//                }
+//
+//                if (shouldCopyVersionFile(source, versionFilePath)) {
+//                    files = getDirFiles(versionFilePath);
+//                    copyAndValidate(sourceName, versionFilePath, files, false);
+//                }
             }
             step.setTarget(null);
             step.setCount(0L);
