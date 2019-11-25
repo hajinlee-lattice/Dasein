@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -374,19 +373,16 @@ public class CDLResource {
     @ApiOperation("create new S3 Import system")
     public List<S3ImportSystem> getS3ImportSystemList(
             @RequestParam(value = "Account", required = false, defaultValue = "false") Boolean filterByAccountSystemId,
-            @RequestParam(value = "Contact", required = false, defaultValue = "false") Boolean filterByContactSystemId) {
+            @RequestParam(value = "Contact", required = false, defaultValue = "false") Boolean filterByContactSystemId,
+            @RequestBody S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
-        List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(customerSpace.toString());
-        if (Boolean.TRUE.equals(filterByAccountSystemId)) {
-            allSystems = allSystems.stream().filter(system -> system.getAccountSystemId() != null).collect(Collectors.toList());
-        }
-        if (Boolean.TRUE.equals(filterByContactSystemId)) {
-            allSystems = allSystems.stream().filter(system -> system.getContactSystemId() != null).collect(Collectors.toList());
-        }
-        return allSystems;
+        return cdlService.getS3ImportSystemWithFilter(customerSpace.toString(),
+                Boolean.TRUE.equals(filterByAccountSystemId),
+                Boolean.TRUE.equals(filterByContactSystemId),
+                templateDisplay);
     }
 
     @PostMapping(value = "/s3import/system/list")
