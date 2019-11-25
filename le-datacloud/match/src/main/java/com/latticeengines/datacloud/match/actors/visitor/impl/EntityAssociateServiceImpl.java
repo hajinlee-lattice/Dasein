@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLoo
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
@@ -114,6 +115,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         EntityAssociationRequest associationReq = (EntityAssociationRequest) request.getInputData();
         Map<EntityMatchEnvironment, Integer> versionMap = associationReq.getServingVersion() == null ? null
                 : Collections.singletonMap(EntityMatchEnvironment.SERVING, associationReq.getServingVersion());
+        associationReq = lookupNotMappedEntries(associationReq, versionMap);
         EntityRawSeed targetSeed = getOrAllocate(associationReq, pickTargetEntity(associationReq), versionMap);
         if (targetSeed == null) {
             // no target seed, just return
@@ -143,18 +145,21 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         String tenantId = tenant.getId();
 
         try {
-            List<String> targetSeedIds = pairs
-                    .stream()
-                    .map(Pair::getValue)
-                    .map(this::pickTargetEntity)
+            List<Pair<String, EntityAssociationRequest>> updatedPairs = pairs.stream() //
+                    .map(pair -> Pair.of(pair.getKey(), lookupNotMappedEntries(pair.getValue(), versionMap))) //
+                    .collect(toList());
+            List<String> targetSeedIds = updatedPairs.stream() //
+                    .map(Pair::getValue) //
+                    .map(this::pickTargetEntity) //
                     .collect(Collectors.toList());
-            List<EntityAssociationRequest> requests = pairs.stream().map(Pair::getValue).collect(toList());
+            List<EntityAssociationRequest> requests = updatedPairs.stream().map(Pair::getValue).collect(toList());
             List<EntityRawSeed> targetSeeds = getOrAllocate(tenant, requests, targetSeedIds, versionMap);
-            IntStream.range(0, pairs.size())
+            IntStream.range(0, updatedPairs.size())
                     .forEach(idx ->
-                    associateAsync(pairs.get(idx).getKey(), pairs.get(idx).getValue(), targetSeeds.get(idx),
+                    associateAsync(updatedPairs.get(idx).getKey(), updatedPairs.get(idx).getValue(),
+                            targetSeeds.get(idx),
                             versionMap));
-            log.debug("Handled {} requests for tenant (ID={})", pairs.size(), tenantId);
+            log.debug("Handled {} requests for tenant (ID={})", updatedPairs.size(), tenantId);
         } catch (Exception e) {
             log.error("Failed to handle {} requests for tenant (ID={})", pairs.size(), tenantId);
             // fail all requests
@@ -434,6 +439,46 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 conflictEntries, //
                 getConflictMessages(targetEntitySeed.getId(), request, null, mappingConflictEntries,
                         seedConflictEntries));
+    }
+
+    /*-
+     * redundant read to lower the chance of splitting entity
+     */
+    private EntityAssociationRequest lookupNotMappedEntries(@NotNull EntityAssociationRequest request,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
+        int size = request.getLookupResults().size();
+        // find all entries not mapped to any entity
+        Map<Integer, EntityLookupEntry> notMappedResults = IntStream.range(0, size) //
+                .filter(idx -> request.getLookupResults().get(idx) != null
+                        && request.getLookupResults().get(idx).getValue() == null) //
+                .filter(idx -> !request.getDummyLookupResultIndices().contains(idx)) // not re-lookup artificial result
+                .mapToObj(idx -> Pair.of(getEntry(request.getEntity(), request.getLookupResults().get(idx).getKey()),
+                        idx)) //
+                .collect(toMap(Pair::getValue, Pair::getKey));
+        if (MapUtils.isEmpty(notMappedResults)) {
+            return request;
+        }
+
+        // lookup again for less stale data
+        List<EntityLookupEntry> notMappedEntries = new ArrayList<>(notMappedResults.values());
+        List<String> ids = entityMatchInternalService.getIds(request.getTenant(), notMappedEntries, versionMap);
+        if (ids.stream().anyMatch(StringUtils::isNotBlank)) {
+            // some entries got mapped
+            List<Pair<MatchKeyTuple, String>> newLookupResults = IntStream.range(0, size).mapToObj(idx -> {
+                if (!notMappedResults.containsKey(idx)) {
+                    return request.getLookupResults().get(idx);
+                } else {
+                    int idIdx = notMappedEntries.indexOf(notMappedResults.get(idx));
+                    // get original tuple and new ID
+                    return Pair.of(request.getLookupResults().get(idx).getKey(), ids.get(idIdx));
+                }
+            }).collect(toList());
+            // copy request with new result
+            return new EntityAssociationRequest(request.getTenant(), request.getEntity(), request.getServingVersion(),
+                    request.getPreferredEntityId(), newLookupResults, request.getExtraAttributes());
+        } else {
+            return request;
+        }
     }
 
     /*
