@@ -26,7 +26,6 @@ public class TableUtils {
         clone.setTableType(source.getTableType());
         clone.setName(name);
         clone.setExtracts(ignoreExtracts ? null : clone.getExtracts());
-        // don't clone create time and retention policy
         return clone;
     }
 

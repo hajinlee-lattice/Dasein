@@ -11,5 +11,5 @@ public enum CDLJobType {
     EXPORT, //
     CAMPAIGNlAUNCH, //
     DELTACALCULATION,
-    SCHEDULINGPA,
+    SCHEDULINGPA
 }

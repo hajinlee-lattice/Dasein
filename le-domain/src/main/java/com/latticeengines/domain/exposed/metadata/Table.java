@@ -67,7 +67,6 @@ import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE", //
@@ -181,7 +180,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, HasAuditi
 
     @JsonProperty("retentionPolicy")
     @Column(name = "RETENTION_POLICY")
-    private String retentionPolicy = RetentionPolicyUtil.NEVER_EXPIRE_POLICY;
+    private String retentionPolicy;
 
     public Table() {
     }

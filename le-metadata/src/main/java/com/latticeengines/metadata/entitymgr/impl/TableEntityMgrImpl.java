@@ -3,12 +3,14 @@ package com.latticeengines.metadata.entitymgr.impl;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -547,10 +549,22 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         tableDao.update(existing);
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void updateTableRetentionPolicies(Map<String, RetentionPolicy> policyMap) {
+        List<Table> tables = tableDao.findByNames(policyMap.keySet());
+        if (CollectionUtils.isNotEmpty(tables)) {
+            tables.forEach(table -> {
+                table.setRetentionPolicy(RetentionPolicyUtil.retentionPolicyToStr(policyMap.get(table.getName())));
+            });
+            tableDao.update(tables, true);
+        }
+    }
+
     @NoCustomSpaceAndType
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Table> findAllWithExpireRetentionPolicy(int index, int max) {
-        return tableDao.findAllWithExpireRetentionPolicy(index, max);
+    public List<Table> findAllWithExpiredRetentionPolicy(int index, int max) {
+        return tableDao.findAllWithExpiredRetentionPolicy(index, max);
     }
 }

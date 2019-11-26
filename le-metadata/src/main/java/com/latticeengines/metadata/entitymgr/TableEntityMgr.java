@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr;
 
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +66,8 @@ public interface TableEntityMgr {
 
     void updateTableRetentionPolicy(String tableName, RetentionPolicy retentionPolicy);
 
-    List<Table> findAllWithExpireRetentionPolicy(int index, int max);
+    List<Table> findAllWithExpiredRetentionPolicy(int index, int max);
 
+    void updateTableRetentionPolicies(Map<String, RetentionPolicy> policyMap);
 }
+

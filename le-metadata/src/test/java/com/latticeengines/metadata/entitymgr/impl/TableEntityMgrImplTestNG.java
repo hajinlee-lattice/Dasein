@@ -85,10 +85,16 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     public void findByName(String customerSpace, String tableName) {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
         Table table = tableEntityMgr.findByName(tableName);
-        assertEquals(table.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+        assertNull(table.getRetentionPolicy());
         Date updateTime = table.getUpdated();
         assertNotNull(updateTime);
         addDataRules(table);
+        try {
+            // sleep 1s let the update time different
+            Thread.sleep(1000l);
+        } catch (InterruptedException e) {
+
+        }
         metadataService.updateTable(CustomerSpace.parse(customerSpace), table);
         validateTable(table);
 
@@ -183,7 +189,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     public void testTableRetentionPolicy(String customerSpace, String tableName) {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
         Table table = tableEntityMgr.findByName(tableName);
-        assertEquals(table.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+        assertNull(table.getRetentionPolicy());
         Table result = updateTableRetentionPolicy(table, 2, RetentionPolicyTimeUnit.DAY);
         assertEquals(result.getRetentionPolicy(), "KEEP_2_DAYS");
         result = updateTableRetentionPolicy(table, -1, RetentionPolicyTimeUnit.WEEK);
@@ -191,14 +197,19 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         result = updateTableRetentionPolicy(table, 1, RetentionPolicyTimeUnit.YEAR);
         assertEquals(result.getRetentionPolicy(), "KEEP_1_YEAR");
 
-        List<Table> tables = tableEntityMgr.findAllWithExpireRetentionPolicy(0, 10);
+        List<Table> tables = tableEntityMgr.findAllWithExpiredRetentionPolicy(0, 10);
         assertTrue(tables.size() > 0);
+
+        Map<String, RetentionPolicy> policyMap = new HashMap<>();
+        policyMap.put(tableName, RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
+        tableEntityMgr.updateTableRetentionPolicies(policyMap);
+        result = tableEntityMgr.findByName(tableName);
+        assertEquals(result.getRetentionPolicy(), "KEEP_3_WEEKS");
     }
 
     @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = {"findAll", "findByName", "testTableRetentionPolicy"})
     public void testClone(String customerSpace, String tableName) throws IOException {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
-
         Table table = tableEntityMgr.findByName(tableName);
         String extractPath = "/tmp/data.txt";
         HdfsUtils.writeToFile(yarnConfiguration, extractPath, "test data\ntest data");

@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.SoftDeletable;
 public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
     protected static final int DEFAULT_JDBC_BATCH_SIZE = 50;
+    protected static final int DEFAULT_JDBC_FETCH_SIZE = 200;
     private static final Logger log = LoggerFactory.getLogger(AbstractBaseDaoImpl.class);
 
     protected abstract SessionFactory getSessionFactory();
@@ -65,23 +66,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @Override
     public void create(Collection<T> entities, boolean setAuditFields) {
-        Session session = getCurrentSession();
-        int batchSize = getBatchSize();
-
-        Iterator<T> iterator = entities.iterator();
-        for (int i = 0; iterator.hasNext(); i++) {
-            if (i > 0 && i % batchSize == 0) {
-                //flush a batch of inserts and release memory
-                session.flush();
-                session.clear();
-            }
-
-            T entity = iterator.next();
-            if (setAuditFields) {
-                setAuditingFields(entity);
-            }
-            session.persist(entity);
-        }
+        batchSaveOrUpdate(entities, setAuditFields, true);
     }
 
     @Override
@@ -287,6 +272,33 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         setAuditingFields(entity);
         Session currSession = getCurrentSession();
         currSession.update(entity);
+    }
+
+    private void batchSaveOrUpdate(Collection<T> entities, boolean setAuditFields, boolean save) {
+        Session session = getCurrentSession();
+        int batchSize = getBatchSize();
+        Iterator<T> iterator = entities.iterator();
+        for (int i = 0; iterator.hasNext(); i++) {
+            if (i > 0 && i % batchSize == 0) {
+                //flush a batch of inserts and release memory
+                session.flush();
+                session.clear();
+            }
+            T entity = iterator.next();
+            if (setAuditFields) {
+                setAuditingFields(entity);
+            }
+            if (save) {
+                session.persist(entity);
+            } else {
+                session.update(entity);
+            }
+        }
+    }
+
+    @Override
+    public void update(Collection<T> entities, boolean setAuditFields) {
+        batchSaveOrUpdate(entities, setAuditFields, false);
     }
 
     @SuppressWarnings("unchecked")

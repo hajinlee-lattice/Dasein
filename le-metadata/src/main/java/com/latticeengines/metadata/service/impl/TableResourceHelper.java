@@ -198,4 +198,10 @@ public class TableResourceHelper {
         return true;
     }
 
+    public boolean updateTableRetentionPolicies(String customerSpace, Map<String, RetentionPolicy> policyMap) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        mdService.updateTableRetentionPolicies(space, policyMap);
+        return true;
+    }
+
 }

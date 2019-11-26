@@ -11,6 +11,13 @@ public class RetentionPolicyUtil {
 
     public static String NEVER_EXPIRE_POLICY = "KEEP_FOREVER";
 
+    public static RetentionPolicy noExpireRetentionPolicy;
+
+    static {
+        noExpireRetentionPolicy = new RetentionPolicy();
+        noExpireRetentionPolicy.setNoExpire(true);
+    }
+
     private static final Logger log = LoggerFactory.getLogger(RetentionPolicyUtil.class);
 
     public static long getExpireTimeByRetentionPolicyStr(String retentionPolicyStr) {
@@ -21,11 +28,6 @@ public class RetentionPolicyUtil {
         }
         expireTime = retentionPolicy.getCount() * retentionPolicy.getRetentionPolicyTimeUnit().getMilliseconds();
         return expireTime;
-    }
-
-    public static RetentionPolicy noExpireRetentionPolicy(RetentionPolicy retentionPolicy) {
-        retentionPolicy.setNoExpire(true);
-        return retentionPolicy;
     }
 
     public static long getExpireTimeByRetentionPolicy(RetentionPolicy retentionPolicy) {
@@ -49,29 +51,29 @@ public class RetentionPolicyUtil {
         RetentionPolicy retentionPolicy = new RetentionPolicy();
         try {
             if (StringUtils.isEmpty(retentionPolicyStr) || NEVER_EXPIRE_POLICY.equals(retentionPolicyStr)) {
-                return noExpireRetentionPolicy(retentionPolicy);
+                return noExpireRetentionPolicy;
             }
             String[] parts = retentionPolicyStr.split("_");
             if (parts.length != 3) {
                 log.info(String.format("Invalid retention policy %s found.", retentionPolicy));
-                return noExpireRetentionPolicy(retentionPolicy);
+                return noExpireRetentionPolicy;
             }
             int count = Integer.valueOf(parts[1]);
             RetentionPolicyTimeUnit retentionPolicyTimeUnit = RetentionPolicyTimeUnit.fromName(parts[2]);
             return toRetentionPolicy(count, retentionPolicyTimeUnit);
         } catch (Exception e) {
             log.error(String.format("Exception %s found when parse retention policy.", e.getMessage()));
-            return noExpireRetentionPolicy(retentionPolicy);
+            return noExpireRetentionPolicy;
         }
     }
 
     public static RetentionPolicy toRetentionPolicy(int count, RetentionPolicyTimeUnit retentionPolicyTimeUnit) {
         RetentionPolicy retentionPolicy = new RetentionPolicy();
         if (count <= 0) {
-            return noExpireRetentionPolicy(retentionPolicy);
+            return noExpireRetentionPolicy;
         }
         if (retentionPolicyTimeUnit == null) {
-            return noExpireRetentionPolicy(retentionPolicy);
+            return noExpireRetentionPolicy;
         }
         retentionPolicy.setCount(count);
         retentionPolicy.setRetentionPolicyTimeUnit(retentionPolicyTimeUnit);
@@ -107,4 +109,5 @@ public class RetentionPolicyUtil {
         RetentionPolicyTimeUnit retentionPolicyTimeUnit = retentionPolicy.getRetentionPolicyTimeUnit();
         return toRetentionPolicyStr(count, retentionPolicyTimeUnit);
     }
+
 }

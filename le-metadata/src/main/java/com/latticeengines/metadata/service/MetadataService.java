@@ -56,5 +56,7 @@ public interface MetadataService {
 
     void updateTableRetentionPolicy(CustomerSpace customerSpace, String tableName, RetentionPolicy retentionPolicy);
 
-    List<Table> findAllWithExpireRetentionPolicy(int index, int max);
+    List<Table> findAllWithExpiredRetentionPolicy(int index, int max);
+
+    void updateTableRetentionPolicies(CustomerSpace customerSpace, Map<String, RetentionPolicy> policyMap);
 }

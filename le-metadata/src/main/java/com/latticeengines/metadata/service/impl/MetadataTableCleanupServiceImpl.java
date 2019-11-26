@@ -43,9 +43,10 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         // only query 50000 records per clean up job
         int count = 0;
         int preLastIndex = lastIndex;
-        try (PerformanceTimer timer = new PerformanceTimer("Metadata table cleanup task")) {
+        try (PerformanceTimer timer =
+                     new PerformanceTimer("Metadata table cleanup task at step find tables to delete")) {
             while (count < searchCount) {
-                List<Table> tables = metadataService.findAllWithExpireRetentionPolicy(lastIndex, batchSize);
+                List<Table> tables = metadataService.findAllWithExpiredRetentionPolicy(lastIndex, batchSize);
                 int index = 0;
                 for (Table table : tables) {
                     index++;
@@ -73,6 +74,8 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                     break;
                 }
             }
+        }
+        try (PerformanceTimer timer = new PerformanceTimer("Metadata table cleanup task at step delete tables")) {
             if (CollectionUtils.isNotEmpty(tablesToDelete)) {
                 log.info(String.format("Size of table needs to be deleted is %d and scan index is %d.", tablesToDelete.size(), lastIndex));
                 tablesToDelete.forEach(table -> {

@@ -249,9 +249,14 @@ public class MetadataServiceImpl implements MetadataService {
         tableEntityMgr.updateTableRetentionPolicy(tableName, retentionPolicy);
     }
 
+    @Override
+    public void updateTableRetentionPolicies(CustomerSpace customerSpace, Map<String, RetentionPolicy> policyMap) {
+        tableEntityMgr.updateTableRetentionPolicies(policyMap);
+    }
+
     @NoCustomSpaceAndType
     @Override
-    public List<Table> findAllWithExpireRetentionPolicy(int index, int max) {
-        return tableEntityMgr.findAllWithExpireRetentionPolicy(index, max);
+    public List<Table> findAllWithExpiredRetentionPolicy(int index, int max) {
+        return tableEntityMgr.findAllWithExpiredRetentionPolicy(index, max);
     }
 }

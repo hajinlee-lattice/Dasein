@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -24,7 +25,9 @@ import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
 
 import io.swagger.annotations.Api;
@@ -179,5 +182,27 @@ public class TableResource extends BaseRestResource {
     public Boolean updateTableRetentionPolicy(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName,
                                               @RequestBody RetentionPolicy retentionPolicy) {
         return tableResourceHelper.updateTableRetentionPolicy(customerSpace, tableName, retentionPolicy);
+    }
+
+    @PostMapping(value = "/tables/{tableName}/policy/keepforever")
+    @ResponseBody
+    @ApiOperation(value = "set table retention policy to KEEP_FOREVER")
+    public Boolean keepTableForever(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName) {
+        return tableResourceHelper.updateTableRetentionPolicy(customerSpace, tableName, RetentionPolicyUtil.noExpireRetentionPolicy);
+    }
+
+    @PostMapping(value = "/tables/{tableName}/policy/keep7days")
+    @ResponseBody
+    @ApiOperation(value = "set table retention policy to KEEP_7_DAYS")
+    public Boolean keepTableFor7Days(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName) {
+        return tableResourceHelper.updateTableRetentionPolicy(customerSpace, tableName, RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY));
+    }
+
+    @PostMapping(value = "/tables/policy/updatepolicies")
+    @ResponseBody
+    @ApiOperation(value = "batch update table retention policy")
+    public Boolean updateTableRetentionPolicies(@PathVariable String customerSpace,
+                                                @RequestBody Map<String, RetentionPolicy> policyMap) {
+        return tableResourceHelper.updateTableRetentionPolicies(customerSpace, policyMap);
     }
 }

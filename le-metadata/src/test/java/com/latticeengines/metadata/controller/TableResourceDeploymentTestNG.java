@@ -9,7 +9,9 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -180,6 +182,20 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         metadataProxy.updateDataTablePolicy(customerSpace1, srcTable.getName(), retentionPolicy);
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_2_MONTHS");
+
+        metadataProxy.keepTableFor7Days(customerSpace1, srcTable.getName());
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_7_DAYS");
+
+        metadataProxy.keepTableForever(customerSpace1, srcTable.getName());
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+
+        Map<String, RetentionPolicy> policyMap = new HashMap<>();
+        policyMap.put(TABLE_NAME, RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
+        metadataProxy.uppdateTableRetentionPolicies(customerSpace1, policyMap);
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_3_WEEKS");
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testUpdateTable")
