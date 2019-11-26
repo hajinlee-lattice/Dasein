@@ -145,7 +145,7 @@ public class FieldMapping {
     }
 
     public enum IdType {
-        Account, Contact
+        Account, Contact, Lead
     }
 
     public boolean isMapToLatticeId() {
