@@ -170,7 +170,7 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
 
         EntityMatchImportMigrateConfig config = new EntityMatchImportMigrateConfig();
         config.setTransformer(TRANSFORMER);
-        config.setRetainFields(templateTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList()));
+        config.setRetainFields(getRetainFields(templateTable, masterTable));
         config.setDuplicateMap(getDuplicateMap());
         config.setRenameMap(getRenameMap());
 
@@ -186,6 +186,14 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
         step.setTargetTable(targetTable);
 
         return step;
+    }
+
+    private List<String> getRetainFields(Table templateTable, Table masterTable) {
+        return templateTable.getAttributes().stream()
+                .map(Attribute::getName)
+                .distinct()
+                .filter(attrName -> masterTable.getAttribute(attrName) == null)
+                .collect(Collectors.toList());
     }
 
     private Long getTableDataLines(Table table) {
