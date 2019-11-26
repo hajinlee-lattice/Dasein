@@ -535,6 +535,9 @@ public class CDLServiceImpl implements CDLService {
             allSystems = allSystems.stream().filter(system -> system.getAccountSystemId() != null).collect(Collectors.toList());
             if (templateDisplay != null) {
                 EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
+                // There should be 2 use cases here:
+                // 1. EntityType=Accounts, means filter out the system pointing to itself
+                // 2. EntityType=Contacts/Leads, means return all systems that have SystemAccountId.
                 if (EntityType.Accounts.equals(entityType) && CollectionUtils.isNotEmpty(allSystems)) {
                     allSystems = allSystems.stream()
                             .filter(system -> !system.getName().equals(templateDisplay.getS3ImportSystem().getName()))
@@ -546,6 +549,9 @@ public class CDLServiceImpl implements CDLService {
             allSystems = allSystems.stream().filter(system -> system.getContactSystemId() != null).collect(Collectors.toList());
             if (templateDisplay != null) {
                 EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
+                // There should be 2 use cases here:
+                // 1. EntityType=Contacts, means filter out the system pointing to itself
+                // 2. EntityType=Leads, means return all systems that have SystemContactId.
                 if (EntityType.Contacts.equals(entityType) && CollectionUtils.isNotEmpty(allSystems)) {
                     allSystems = allSystems.stream()
                             .filter(system -> !system.getName().equals(templateDisplay.getS3ImportSystem().getName()))

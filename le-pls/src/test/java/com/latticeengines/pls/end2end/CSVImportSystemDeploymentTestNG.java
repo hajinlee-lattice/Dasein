@@ -422,6 +422,10 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 false, true, sfSystemContact);
         Assert.assertEquals(filteredS3ImportSystems.size(), 1);
 
+        filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                true, false, sfSystemContact);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 3);
+
         S3ImportTemplateDisplay sfSystemLead =
                 templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
                         "Test_SalesforceSystemLead_LeadsData")).findFirst().get();
