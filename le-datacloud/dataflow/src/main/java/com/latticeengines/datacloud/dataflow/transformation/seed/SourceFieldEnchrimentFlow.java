@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,17 +6,25 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.FieldEnrichmentFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceFieldEnrichmentTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceFieldEnrichmentTransformerConfig;
 
 import cascading.tuple.Fields;
 
-@Component("sourceFieldEnrichmentFlow")
+/**
+ * A pipeline step in seeds rebuild pipelines, eg. OrbCacheSeed, HGCacheSeed,
+ * RTSCacheSeed, etc
+ */
+@Component(SourceFieldEnchrimentFlow.DATAFLOW_BEAN)
 public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldEnrichmentTransformerConfig> {
+
+    public static final String DATAFLOW_BEAN = "sourceFieldEnrichmentFlow";
+    public static final String TRANSFORMER = "sourceFieldEnrichmentTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -47,12 +55,12 @@ public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldE
 
     @Override
     public String getDataFlowBeanName() {
-        return "sourceFieldEnrichmentFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "sourceFieldEnrichmentTransformer";
+        return TRANSFORMER;
 
     }
 }

@@ -19,8 +19,11 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
-@Component("sourceFirmoGraphEnrichmentFlow")
+@Component(SourceFirmoGraphEnchrimentFlow.DATAFLOW_BEAN)
 public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceFirmoGraphEnrichmentTransformerConfig> {
+
+    public static final String DATAFLOW_BEAN = "sourceFirmoGraphEnrichmentFlow";
+    public static final String TRANSFORMER = "sourceFirmoGraphEnrichmentTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -119,12 +122,12 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
 
     @Override
     public String getDataFlowBeanName() {
-        return "sourceFirmoGraphEnrichmentFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "sourceFirmoGraphEnrichmentTransformer";
+        return TRANSFORMER;
 
     }
 }
