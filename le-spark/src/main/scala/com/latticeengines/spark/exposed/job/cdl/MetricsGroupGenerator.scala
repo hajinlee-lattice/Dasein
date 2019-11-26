@@ -26,9 +26,9 @@ import scala.collection.JavaConverters.asScalaIteratorConverter
 class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJobConfig] {
   // generate a group of metrics based on ActivityMetricsGroup definition (aggregated to defined business entity)
 
-  private val TMPLKEY_GROUPID = "GroupId";
-  private val TMPLKEY_ROLLUP_DIM_IDs = "RollupDimIds";
-  private val TMPLKEY_TIMERANGE = "TimeRange";
+  private val TMPLKEY_GROUPID = "GroupId"
+  private val TMPLKEY_ROLLUP_DIM_IDs = "RollupDimIds"
+  private val TMPLKEY_TIMERANGE = "TimeRange"
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[DeriveActivityMetricGroupJobConfig]): Unit = {
     val config: DeriveActivityMetricGroupJobConfig = lattice.config
