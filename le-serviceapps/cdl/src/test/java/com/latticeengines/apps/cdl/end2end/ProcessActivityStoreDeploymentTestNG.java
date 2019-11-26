@@ -19,14 +19,21 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
+
+    @Inject
+    private ActionProxy actionProxy;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -65,14 +72,9 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
     }
 
-    @Test(groups = "end2end", dependsOnMethods = "test")
+    @Test(groups = "end2end", dependsOnMethods = "test", enabled = false)
     private void testRematch() throws Exception {
-        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        // webVisit_01d55da4-02f9-45b4-9232-09ea59ec2635.csv
-        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 2,
-                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
-        Thread.sleep(2000);
-        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
+        importSmallWebVisitFile();
 
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(true);
@@ -82,6 +84,33 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
                 Sets.newHashSet(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Transaction));
         request.setCurrentPATimestamp(CURRENT_PA_TIME.toEpochMilli());
         processAnalyze(request);
+    }
+
+    @Test(groups = "end2end", dependsOnMethods = "test")
+    private void testReplace() throws Exception {
+        importSmallWebVisitFile();
+        createReplaceWebVisitAction();
+        processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
+    }
+
+    private void createReplaceWebVisitAction() {
+        Action action = new Action();
+        action.setType(ActionType.DATA_REPLACE);
+        action.setActionInitiator("e2e-test");
+        CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
+        cleanupActionConfiguration.addImpactEntity(BusinessEntity.ActivityStream);
+        action.setActionConfiguration(cleanupActionConfiguration);
+        action.setTenant(mainTestTenant);
+        actionProxy.createAction(mainCustomerSpace, action);
+    }
+
+    private void importSmallWebVisitFile() throws Exception {
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
+        // webVisit_01d55da4-02f9-45b4-9232-09ea59ec2635.csv
+        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 2,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
+        Thread.sleep(2000);
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
     private void setupTemplates() {
