@@ -444,8 +444,8 @@ public final class JobStepDisplayInfoMapping {
             steps[step++] = merge;
         }
 
-        // Analyze Phase: until [84] combineStatistics
-        while (step <= 84) {
+        // Analyze Phase: until [107] combineStatistics
+        while (step <= 107) {
             steps[step++] = analyze;
         }
 
