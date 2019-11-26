@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 
 @Component
@@ -97,7 +98,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             AudienceType audienceType) {
         switch (systemName) {
         case Marketo:
-        case GoogleAds:
         case Outreach:
             return audienceType == AudienceType.CONTACTS;
         case LinkedIn:
@@ -106,6 +106,9 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         case Facebook:
             FacebookChannelConfig fbConfig = (FacebookChannelConfig) channelConfig;
             return fbConfig.getAudienceType() == audienceType;
+        case GoogleAds:
+            GoogleChannelConfig googleConfig = (GoogleChannelConfig) channelConfig;
+            return googleConfig.getAudienceType() == audienceType;
         default:
             return null;
         }

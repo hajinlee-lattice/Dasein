@@ -66,13 +66,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.*;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -378,6 +372,10 @@ public class TestPlayCreationHelper {
             config = new LinkedInChannelConfig();
             ((LinkedInChannelConfig) config).setAudienceType(testPlayChannelConfig.getAudienceType());
             break;
+        case GoogleAds:
+            config = new GoogleChannelConfig();
+            ((GoogleChannelConfig) config).setAudienceType(testPlayChannelConfig.getAudienceType());
+            break;
         default:
             config = new SalesforceChannelConfig();
             break;
@@ -492,6 +490,9 @@ public class TestPlayCreationHelper {
             break;
         case LinkedIn:
             channel.setChannelConfig(new LinkedInChannelConfig());
+            break;
+        case GoogleAds:
+            channel.setChannelConfig(new GoogleChannelConfig());
             break;
         default:
             channel.setChannelConfig(new SalesforceChannelConfig());
