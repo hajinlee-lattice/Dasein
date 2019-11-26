@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
@@ -53,8 +52,8 @@ public class ActivityMetricDecorator implements Decorator {
     private ConcurrentMap<String, ActivityMetricsGroup> groupCache = new ConcurrentHashMap<>();
 
     ActivityMetricDecorator(String signature, //
-                            DimensionMetadataService dimensionMetadataService, //
-                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr) {
+            DimensionMetadataService dimensionMetadataService, //
+            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr) {
         this.signature = signature;
         this.dimensionMetadataService = dimensionMetadataService;
         this.activityMetricsGroupEntityMgr = activityMetricsGroupEntityMgr;
@@ -77,10 +76,10 @@ public class ActivityMetricDecorator implements Decorator {
 
     private ColumnMetadata filter(ColumnMetadata cm) {
         switch (cm.getEntity()) {
-            case WebVisitProfile:
-                cm.setCategory(Category.WEB_VISIT_PROFILE);
-                break;
-            default:
+        case WebVisitProfile:
+            cm.setCategory(Category.WEB_VISIT_PROFILE);
+            break;
+        default:
         }
         if (systemAttrs.contains(cm.getAttrName())) {
             return cm;
@@ -124,15 +123,16 @@ public class ActivityMetricDecorator implements Decorator {
     }
 
     private Map<String, Object> getRenderParams(String attrName, ActivityMetricsGroup group, //
-                                                String[] rollupDimVals, String timeRange) {
+            String[] rollupDimVals, String timeRange) {
         String groupId = group.getGroupId();
         String streamId = group.getStream().getStreamId();
 
         Map<String, Object> params = new HashMap<>();
         String[] rollupDimNames = group.getRollupDimensions().split(",");
         if (rollupDimNames.length != rollupDimVals.length) {
-            throw new IllegalArgumentException(String.format("There are %d dimensions in attribute %s, but only %d was defined in group %s", //
-                    rollupDimVals.length, attrName, rollupDimNames.length, groupId));
+            throw new IllegalArgumentException(
+                    String.format("There are %d dimensions in attribute %s, but only %d was defined in group %s", //
+                            rollupDimVals.length, attrName, rollupDimNames.length, groupId));
         }
 
         for (int i = 0; i < rollupDimNames.length; i++) {

@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DummyDecorator;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 
-
 @Component("activityMetricDecorator")
 public class ActivityMetricDecoratorFacImpl implements ActivityMetricDecoratorFac {
 
