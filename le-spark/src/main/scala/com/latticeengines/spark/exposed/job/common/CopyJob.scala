@@ -16,7 +16,7 @@ class CopyJob extends AbstractSparkJob[CopyConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[CopyConfig]): Unit = {
     val config: CopyConfig = lattice.config
     val inputs: List[DataFrame] = lattice.input
-    val concatenated = CopyUtils.copy(spark, config, inputs)
+    val concatenated = CopyUtils.copy(config, inputs)
     lattice.output = concatenated :: Nil
   }
 
