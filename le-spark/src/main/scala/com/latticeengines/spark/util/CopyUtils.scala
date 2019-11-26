@@ -2,18 +2,16 @@ package com.latticeengines.spark.util
 
 import com.latticeengines.domain.exposed.spark.common.CopyConfig
 import org.apache.commons.collections4.MapUtils
-import org.apache.spark.sql.catalyst.encoders.RowEncoder
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions.col
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ArrayBuffer
 
 private[spark] object CopyUtils {
 
   def copy(config: CopyConfig, inputs: List[DataFrame]): DataFrame = {
-    val dfs = inputs map { df => processDf(df, config) }
-    dfs reduce { (d1, d2) => MergeUtils.concat2(d1, d2) }
+    val dfs = inputs map {df => processDf(df, config)}
+    dfs reduce {(d1, d2) => MergeUtils.concat2(d1, d2)}
   }
 
   private def processDf(input: DataFrame, config: CopyConfig): DataFrame = {
@@ -32,11 +30,11 @@ private[spark] object CopyUtils {
     val filtered = (colsToSelect, colsToDrop) match {
       case (None, None) => input
       case _ =>
-        val (colsToSelectOrDrop, isSelectMode) = getColsToSelectOrDrop(input.columns.toList, colsToSelect, colsToDrop)
-        if (isSelectMode) {
-          selectCols(input, colsToSelectOrDrop)
+        val (colsToSelectOrDrop, selectMode) = getColsToSelectOrDrop(input.columns.toList, colsToSelect, colsToDrop)
+        if (selectMode) {
+          input.select(colsToSelectOrDrop map col: _*)
         } else {
-          dropCols(input, colsToSelectOrDrop)
+          input.drop(colsToSelectOrDrop: _*)
         }
     }
 
@@ -72,32 +70,6 @@ private[spark] object CopyUtils {
       (colsInDf.diff(dropped), false)
     }
 
-  }
-
-  private def selectCols(input: DataFrame, colsToSelect: Seq[String]): DataFrame = {
-    val colSet = colsToSelect.toSet
-    val fieldIdxPairs = input.schema.zipWithIndex filter { t => colSet.contains(t._1.name) }
-    val outputSchema = StructType(fieldIdxPairs map { t => t._1 })
-    val selectedIdx: Seq[Int] = fieldIdxPairs map { t => t._2 }
-    input.map(row => {
-      val seq2: ArrayBuffer[Any] = ArrayBuffer()
-      for (index <- selectedIdx) {
-        seq2 += row.get(index)
-      }
-      Row.fromSeq(seq2)
-    })(RowEncoder(outputSchema))
-  }
-
-
-  private def dropCols(input: DataFrame, colsToDrop: Seq[String]): DataFrame = {
-    val colSet = colsToDrop.toSet
-    val remainFields = input.schema.filter(f => !colSet.contains(f.name))
-    val outputSchema = StructType(remainFields)
-    val dropIdx: Set[Int] = input.columns.zipWithIndex.filter(t => colSet.contains(t._1)).map(t => t._2).toSet
-    input.map(row => {
-      val vals = row.toSeq.zipWithIndex.filter(t => !dropIdx.contains(t._2)).map(t => t._1)
-      Row.fromSeq(vals)
-    })(RowEncoder(outputSchema))
   }
 
 }

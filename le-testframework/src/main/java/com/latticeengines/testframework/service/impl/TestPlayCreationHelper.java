@@ -69,6 +69,7 @@ import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
@@ -378,6 +379,9 @@ public class TestPlayCreationHelper {
             config = new LinkedInChannelConfig();
             ((LinkedInChannelConfig) config).setAudienceType(testPlayChannelConfig.getAudienceType());
             break;
+        case GoogleAds:
+            config = new GoogleChannelConfig();
+            break;
         default:
             config = new SalesforceChannelConfig();
             break;
@@ -492,6 +496,9 @@ public class TestPlayCreationHelper {
             break;
         case LinkedIn:
             channel.setChannelConfig(new LinkedInChannelConfig());
+            break;
+        case GoogleAds:
+            channel.setChannelConfig(new GoogleChannelConfig());
             break;
         default:
             channel.setChannelConfig(new SalesforceChannelConfig());
