@@ -12,9 +12,9 @@ public class StringTemplates {
 
     public static final String ACTIVITY_METRICS_GROUP_SUBCATEGORY = "${PathPatternId.PathPatternName}";
 
-    public static final String ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME = "Visit ${" + ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN + "} ${SourceMedium.SourceMedium?contains('__others__')?then('by all other sources', 'from ${SourceMedium.SourceMedium}')}";
+    public static final String ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME = "Visit ${" + ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN + "} ${SourceMediumId.SourceMedium?contains('__others__')?then('by all other sources', 'from ${SourceMediumId.SourceMedium}')}";
 
-    public static final String ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION = "Number of visits ${SourceMedium.SourceMedium?contains('__others__')?then('by all other sources', 'from ${SourceMedium.SourceMedium}')} to the url pattern ${PathPatternId.PathPatternName} ${" + ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN + "}";
+    public static final String ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION = "Number of visits ${SourceMediumId.SourceMedium?contains('__others__')?then('by all other sources', 'from ${SourceMediumId.SourceMedium}')} to the url pattern ${PathPatternId.PathPatternName} ${" + ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN + "}";
 
     public static final String ACTIVITY_METRICS_GROUP_ATTRNAME = "am_${GroupId}__${RollupDimIds?join(\"_\")}__${" + ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN + "}";
 }
