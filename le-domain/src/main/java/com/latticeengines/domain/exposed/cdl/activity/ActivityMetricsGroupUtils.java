@@ -90,6 +90,7 @@ public class ActivityMetricsGroupUtils {
         switch (op) {
             case "w":
                 descTemplate = SINGLE_VAL_TIME_RANGE_DESC;
+                break;
             case "b":
                 descTemplate = DOUBLE_VAL_TIME_RANGE_DESC;
                 break;
