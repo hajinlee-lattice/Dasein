@@ -54,19 +54,24 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             bumpEntityMatchStagingVersion();
             String convertBatchStoreTableName = getConvertBatchStoreTableName();
             if (CollectionUtils.isNotEmpty(inputTableNames)) {
-                steps.add(mergeInputs(getConsolidateDataTxmfrConfig(), null, ETLEngineLoad.LIGHT, null, -1));
+                TransformationStepConfig mergeImport = mergeInputs(getConsolidateDataTxmfrConfig(), null,
+                        ETLEngineLoad.LIGHT, null, -1);
+                steps.add(mergeImport);
                 if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
-                    steps.add(matchTransaction(steps.size() - 1, null, null));
+                    TransformationStepConfig matchImport = matchTransaction(steps.size() - 1, null, null);
+                    steps.add(matchImport);
                 }
             }
             if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
-                // when there is no batch store, steps.size() - 1 will be -1
-                steps.add(mergeInputs(getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
-                        convertBatchStoreTableName, steps.size() - 1));
+                // when there is no input table, steps.size() - 1 will be -1
+                TransformationStepConfig mergeImportAndBatchStore = mergeInputs(getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
+                        convertBatchStoreTableName, steps.size() - 1);
+                steps.add(mergeImportAndBatchStore);
             }
-            TransformationStepConfig match = matchTransaction(steps.size() - 1, matchTargetTablePrefix,
+            TransformationStepConfig matchImportAndBatchStore = matchTransaction(steps.size() - 1,
+                    matchTargetTablePrefix,
                     convertBatchStoreTableName);
-            steps.add(match);
+            steps.add(matchImportAndBatchStore);
         } else {
             // legacy tenants, just merge imports
             steps.add(mergeInputs(getConsolidateDataTxmfrConfig(), matchTargetTablePrefix, ETLEngineLoad.LIGHT, null,

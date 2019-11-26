@@ -1,11 +1,13 @@
 package com.latticeengines.cdl.workflow.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -239,12 +240,13 @@ public class MigrateImportService
 
     @Override
     public List<String> getAttributes(String customerSpace, Table templateTable, 
-                                      Table masterTable, MigrateImportServiceConfiguration config) {
-        return templateTable.getAttributes().stream()
-                .map(Attribute::getName)
-                .distinct()
-                .filter(attrName -> masterTable.getAttribute(attrName) == null)
-                .collect(Collectors.toList());
+                                      Table masterTable,
+                                      List<String> discardFields, MigrateImportServiceConfiguration config) {
+        List<String> allAttributes = new ArrayList<>(Arrays.asList(templateTable.getAttributeNames()));
+        if (CollectionUtils.isNotEmpty(discardFields)) {
+            allAttributes.removeAll(discardFields);
+        }
+        return allAttributes;
     }
 
     @Override
