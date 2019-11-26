@@ -33,6 +33,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -48,13 +49,16 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
 
     private static final Logger log = LoggerFactory.getLogger(DataCloutEtlAbstractTestNGBase.class);
 
-    protected static final String SUCCESS_FLAG = "/_SUCCESS";
+    protected static final String SUCCESS_FLAG = "/" + HdfsPathBuilder.SUCCESS_FILE;
 
     @Value("${datacloud.test.env}")
     protected String testEnv;
 
     @Value("${datacloud.collection.sqoop.mapper.number:4}")
     private int numMappers;
+
+    @Value("${datacloud.collection.s3bucket}")
+    protected String s3Bucket;
 
     @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
@@ -64,6 +68,9 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
 
     @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Inject
+    private S3Service s3Service;
 
     @Inject
     @Qualifier(value = "propDataCollectionJdbcTemplate")
@@ -187,11 +194,11 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         }
     }
 
-    protected void extractSchema(Source source, String version, String avroDir) throws Exception {
-        extractSchema(source, version, avroDir, null);
+    protected void extractSchemaOnHdfs(Source source, String version, String avroDir) throws Exception {
+        extractSchemaOnHdfs(source, version, avroDir, null);
     }
 
-    protected void extractSchema(Source source, String version, String avroDir, Map<String, String> extraProps)
+    protected void extractSchemaOnHdfs(Source source, String version, String avroDir, Map<String, String> extraProps)
             throws Exception {
         String avscPath;
         if (source instanceof TableSource) {
@@ -249,11 +256,123 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         }
     }
 
+    /**
+     * Upload prepared avro files for a source to hdfs
+     *
+     * @param source:
+     *            source object
+     * @param version:
+     *            version of source which will be set to _CURRENT_VERSION file;
+     *            if need to upload multiple versions by calling this method
+     *            repeatedly, make sure the latest version is uploaded at last
+     * @param fileNames:
+     *            data file names (data files should be put under "sources"
+     *            folder under "test/resources" directory)
+     * @param extractSchema:
+     *            whether to generate avsc schema file from avro files uploaded;
+     *            require all the uploaded files uploaded are in avro format and
+     *            have same schema
+     */
+    protected void uploadSourceToHdfs(Source source, String version, List<String> fileNames, boolean extractSchema) {
+        try {
+            String versionPath = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, versionPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, versionPath);
+            }
+
+            for (String fileName : fileNames) {
+                InputStream fileStream = ClassLoader.getSystemResourceAsStream("sources/" + fileName);
+                String targetPath = versionPath + "/" + fileName;
+                HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
+            }
+
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            String successPath = versionPath + SUCCESS_FLAG;
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+
+            if (extractSchema) {
+                extractSchemaOnHdfs(source, version, versionPath);
+            }
+
+            hdfsSourceEntityMgr.setCurrentVersion(source, version);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Upload prepared avro files for a source to s3
+     *
+     * TODO: To support extracting schema file on s3
+     *
+     * @param source:
+     *            source object
+     * @param version:
+     *            version of source which will be set to _CURRENT_VERSION file;
+     *            if need to upload multiple versions by calling this method
+     *            repeatedly, make sure the latest version is uploaded at last
+     * @param fileNames:
+     *            data file names (data files should be put under "sources"
+     *            folder under "test/resources" directory)
+     */
+    protected void uploadSourceToS3(Source source, String version, List<String> fileNames) {
+        try {
+            String versionPath = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
+            if (s3Service.isNonEmptyDirectory(s3Bucket, versionPath)) {
+                s3Service.cleanupPrefix(s3Bucket, versionPath);
+            }
+
+            for (String fileName : fileNames) {
+                InputStream fileStream = ClassLoader.getSystemResourceAsStream("sources/" + fileName);
+                String objectKey = versionPath + "/" + fileName;
+                s3Service.uploadInputStream(s3Bucket, objectKey, fileStream, true);
+            }
+
+            InputStream successStream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            String successObjectKey = versionPath + SUCCESS_FLAG;
+            s3Service.uploadInputStream(s3Bucket, successObjectKey, successStream, true);
+
+            InputStream currVersionStream = new ByteArrayInputStream(version.getBytes(StandardCharsets.UTF_8));
+            String currVersionObjectKey = hdfsPathBuilder.constructVersionFile(source).toString();
+            s3Service.uploadInputStream(s3Bucket, currVersionObjectKey, currVersionStream, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Prepare clean pod id on hdfs
+     *
+     * @param podId:
+     *            pod id
+     */
     protected void prepareCleanPod(String podId) {
         HdfsPodContext.changeHdfsPodId(podId);
         this.podId = podId;
         try {
             HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Prepare clean pod id on hdfs and s3
+     *
+     * @param s3Bucket:
+     *            s3 bucket
+     * @param podId:
+     *            pod id
+     */
+    protected void prepareCleanPod(String s3Bucket, String podId) {
+        HdfsPodContext.changeHdfsPodId(podId);
+        this.podId = podId;
+        try {
+            String podPath = hdfsPathBuilder.podDir().toString();
+            HdfsUtils.rmdir(yarnConfiguration, podPath);
+            if (s3Service.isNonEmptyDirectory(s3Bucket, podPath)) {
+                s3Service.cleanupPrefix(s3Bucket, podPath);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

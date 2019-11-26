@@ -77,7 +77,7 @@ public class TypeBatchConvertFunction extends BaseOperation implements Function 
                             if (failForCastError) {
                                 throw new RuntimeException(String.format(
                                         "Fail to cast field %s with value %s to Integer",
-                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                                    entry.getKey(), TypeConversionUtil.toString(objVal)), e);
                             }
                         }
                         result.set(loc, intVal);
@@ -91,7 +91,7 @@ public class TypeBatchConvertFunction extends BaseOperation implements Function 
                             if (failForCastError) {
                                 throw new RuntimeException(String.format(
                                         "Fail to cast field %s with value %s to Long",
-                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                                    entry.getKey(), TypeConversionUtil.toString(objVal)), e);
                             }
                         }
                         result.set(loc, longVal);
@@ -105,7 +105,7 @@ public class TypeBatchConvertFunction extends BaseOperation implements Function 
                             if (failForCastError) {
                                 throw new RuntimeException(String.format(
                                         "Fail to cast field %s with value %s to Double",
-                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                                    entry.getKey(), TypeConversionUtil.toString(objVal)), e);
                             }
                         }
                         result.set(loc, doubleVal);
@@ -119,7 +119,7 @@ public class TypeBatchConvertFunction extends BaseOperation implements Function 
                             if (failForCastError) {
                                 throw new RuntimeException(String.format(
                                         "Fail to cast field %s with value %s to Boolean",
-                                        entry.getKey(), TypeConversionUtil.toString(objVal)));
+                                    entry.getKey(), TypeConversionUtil.toString(objVal)), e);
                             }
                         }
                         result.set(loc, booleanVal);

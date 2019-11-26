@@ -23,7 +23,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -90,11 +91,22 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     protected abstract void verifyResultAvroRecords(Iterator<GenericRecord> records);
 
-    @BeforeMethod(groups = { "functional", "deployment", "pipeline1", "pipeline2" })
+    // Override this method if don't want to use target source of last step of
+    // pipeline as pod id
+    protected String getPodId() {
+        return getSource().getSourceName();
+    }
+
+    @BeforeClass(groups = { "functional", "deployment", "pipeline1", "pipeline2" })
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod(source.getSourceName());
+        prepareCleanPod(s3Bucket, getPodId());
         transformationService = getTransformationService();
+    }
+
+    @AfterClass(groups = { "functional", "deployment", "pipeline1", "pipeline2" })
+    public void destroy() {
+        prepareCleanPod(s3Bucket, getPodId());
     }
 
     protected void uploadFileToHdfs(List<String> fileNames) {

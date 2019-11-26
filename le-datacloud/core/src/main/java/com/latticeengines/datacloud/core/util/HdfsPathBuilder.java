@@ -171,8 +171,10 @@ public class HdfsPathBuilder {
         return baseDir.append(WORK_FLOWS).append(flowName);
     }
 
-    @Deprecated
     public Path constructSchemaFile(Source source, String version) {
+        if (!(source instanceof DerivedSource)) {
+            return null;
+        }
         return constructSchemaFile(source.getSourceName(), version);
     }
 

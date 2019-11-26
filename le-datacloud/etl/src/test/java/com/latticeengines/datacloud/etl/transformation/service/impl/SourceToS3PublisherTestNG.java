@@ -142,8 +142,9 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         cleanupProgressTables();
     }
 
+    @Override
     @AfterClass(groups = "pipeline1", enabled = true)
-    private void destroy() {
+    public void destroy() {
         cleanupPods();
         cleanupPurgeStrategy();
     }
@@ -250,7 +251,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
 
     private void createSchema(Source baseSource, String version) {
         try {
-            extractSchema(baseSource, version, hdfsPathBuilder
+            extractSchemaOnHdfs(baseSource, version, hdfsPathBuilder
                     .constructSnapshotDir(baseSource.getSourceName(), version).toString());
         } catch (Exception e) {
             log.error("Fail to extract schema for source {} at version {}", baseSource.getSourceName(),
