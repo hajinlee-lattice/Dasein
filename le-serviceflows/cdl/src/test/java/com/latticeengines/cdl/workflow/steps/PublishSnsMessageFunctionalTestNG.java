@@ -135,7 +135,6 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
     public void testGoogleSnsTopic() {
         PlayLaunchExportPublishToSNSConfiguration publishConfig = new PlayLaunchExportPublishToSNSConfiguration();
         GoogleChannelConfig liConfig = new GoogleChannelConfig();
-        liConfig.setAudienceType(AudienceType.ACCOUNTS);
         PlayLaunchChannel plC = new PlayLaunchChannel();
         plC.setChannelConfig(liConfig);
 
