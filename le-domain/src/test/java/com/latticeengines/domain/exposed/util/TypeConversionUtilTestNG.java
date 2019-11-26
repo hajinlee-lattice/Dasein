@@ -83,6 +83,7 @@ public class TypeConversionUtilTestNG {
                 { true, TypeConvertStrategy.ANY_TO_INT, 1 },
                 { 100L, TypeConvertStrategy.ANY_TO_INT, 100 },
                 { "2", TypeConvertStrategy.ANY_TO_INT, 2 },
+                { "003", TypeConvertStrategy.ANY_TO_INT, 3 },
                 { 6D, TypeConvertStrategy.ANY_TO_INT, 6 },
                 { 3L, TypeConvertStrategy.ANY_TO_INT, 3 } };
     }

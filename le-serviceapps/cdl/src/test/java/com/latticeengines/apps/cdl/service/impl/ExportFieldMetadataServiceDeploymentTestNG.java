@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataService;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -85,9 +87,12 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     private ExportFieldMetadataDefaultsService exportFieldMetadataDefaultsService;
 
     @Inject
+    private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
+
+    @Inject
     private SegmentService segmentService;
 
-    private Set<String> defaultMarketoFields = new HashSet<String>(Arrays.asList(InterfaceName.CompanyName.name(),
+    private Set<String> defaultMarketoFields = new HashSet<>(Arrays.asList(InterfaceName.CompanyName.name(),
             InterfaceName.Email.name(), InterfaceName.PhoneNumber.name()));
 
     private Set<String> defaultS3Fields = new HashSet<>(Collections.singletonList("PLAY_ID"));
@@ -147,6 +152,13 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         if (defaultFacebookExportFields.size() == 0) {
             defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Facebook);
+        }
+
+        defaultFacebookExportFields = exportFieldMetadataDefaultsService
+                .getAllAttributes(CDLExternalSystemName.Outreach);
+
+        if (defaultFacebookExportFields.size() == 0) {
+            defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
         }
 
         assertNotEquals(defaultMarketoExportFields.size(), 0);
@@ -234,6 +246,35 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testLinkedInLaunch")
+    public void testOutreachLaunch() {
+        registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Outreach, "Outreach",
+                InterfaceName.AccountId.name(), InterfaceName.CompanyName.name());
+
+        createPlayLaunchChannel(new OutreachChannelConfig(), lookupIdMap);
+
+        ExportFieldMetadataMapping mapping = new ExportFieldMetadataMapping();
+        mapping.setLookupIdMap(lookupIdMap);
+        mapping.setDestinationField("Contact Name");
+        mapping.setSourceField("ContactName");
+        mapping.setOverwriteValue(false);
+        mapping.setTenant(mainTestTenant);
+
+        exportFieldMetadataMappingEntityMgr.createAll(Collections.singletonList(mapping));
+
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        assertEquals(columnMetadata.size(), 3);
+
+        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+
+        long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
+        assertEquals(nonStandardFields, 0);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testOutreachLaunch")
     public void testFacebookLaunch() {
         registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.Facebook, "Facebook");
 
@@ -316,6 +357,20 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         fieldMapping_3.setOverwriteValue(false);
 
         lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
+        lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
+    }
+
+    private void registerLookupIdMap(CDLExternalSystemType systemType, CDLExternalSystemName systemName, String orgName,
+            String accountId, String prospectOwner) {
+        lookupIdMap = new LookupIdMap();
+        lookupIdMap.setTenant(mainTestTenant);
+        lookupIdMap.setExternalSystemType(systemType);
+        lookupIdMap.setExternalSystemName(systemName);
+        lookupIdMap.setOrgId(orgName + "_" + CURRENT_TIME_MILLIS);
+        lookupIdMap.setOrgName(orgName);
+        lookupIdMap.setAccountId(accountId);
+        lookupIdMap.setProspectOwner(prospectOwner);
+
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
     }
 

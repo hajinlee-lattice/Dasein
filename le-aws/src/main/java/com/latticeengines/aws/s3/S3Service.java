@@ -66,6 +66,8 @@ public interface S3Service {
 
     List<Tag> getObjectTags(String bucket, String key);
 
+    void deleteObjectTags(String bucket, String key);
+
     ObjectMetadata getObjectMetadata(String bucket, String key);
 
     List<String> getFilesForDir(String s3Bucket, String prefix);
