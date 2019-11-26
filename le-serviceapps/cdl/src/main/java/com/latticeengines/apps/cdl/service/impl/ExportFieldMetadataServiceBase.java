@@ -1,7 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,11 +66,10 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
                 .collect(Collectors.toMap(ExportFieldMetadataDefaults::getAttrName, Function.identity()));
     }
 
-    protected List<ColumnMetadata> enrichExportFieldMappings(CDLExternalSystemName systemName,
-            List<String> fieldNames, Map<String, ColumnMetadata> accountAttributesMap,
-            Map<String, ColumnMetadata> contactAttributesMap) {
+    protected List<ColumnMetadata> enrichExportFieldMappings(CDLExternalSystemName systemName, List<String> fieldNames,
+            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
 
-        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<ColumnMetadata>();
+        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMap(systemName);
 
         fieldNames.forEach(fieldName -> {
@@ -102,10 +101,10 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(String customerSpace, CDLExternalSystemName systemName) {
 
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Account));
+                Collections.singletonList(BusinessEntity.Account));
 
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Contact));
+                Collections.singletonList(BusinessEntity.Contact));
 
         return enrichDefaultFieldsMetadata(systemName, accountAttributesMap, contactAttributesMap);
     }
@@ -113,7 +112,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
             Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
 
-        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<ColumnMetadata>();
+        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMap(systemName);
 
         defaultFieldsMetadataMap.values().forEach(defaultField -> {
@@ -140,7 +139,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     protected Flux<ColumnMetadata> getServingMetadata(String customerSpace, List<BusinessEntity> entities) {
         Flux<ColumnMetadata> cms = Flux.empty();
-        if (entities != null && !entities.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(entities)) {
             List<ColumnMetadata> cmList;
             if (entities.contains(BusinessEntity.Contact)) {
                 cmList = servingStoreService.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
