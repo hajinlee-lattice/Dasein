@@ -261,14 +261,9 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       val selectedContactNum = contactTable.join(derivedAccounts, joinKey :: Nil, "inner").count()
       logSpark(f"selectedContactNum=$selectedContactNum%d")
 
-      logSpark("Right after joining, the contactTable is is:")
-      logDataFrame("contact join account", contactTable.join(derivedAccounts, joinKey :: Nil, "inner"),
-        joinKey, Seq(joinKey), limit = 100)
-
-//      val selectedAccountList =  contactTable.join(derivedAccounts, joinKey :: Nil, "inner").select(joinKey).distinct()
-//      val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
-//      val aggregatedContacts = aggregateContacts(selctedContacts, contactCols, joinKey)
-      val aggregatedContacts = aggregateContacts(contactTable, contactCols, joinKey)
+      val selectedAccountList =  contactTable.join(derivedAccounts, joinKey :: Nil, "inner").select(joinKey).distinct()
+      val selctedContacts = contactTable.join(selectedAccountList, joinKey :: Nil, "inner")
+      val aggregatedContacts = aggregateContacts(selctedContacts, contactCols, joinKey)
 
       // join
       val recommendations = derivedAccounts.join(aggregatedContacts, joinKey :: Nil, "left")
