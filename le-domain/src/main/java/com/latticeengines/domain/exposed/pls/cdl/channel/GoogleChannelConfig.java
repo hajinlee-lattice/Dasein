@@ -122,14 +122,14 @@ public class GoogleChannelConfig implements ChannelConfig {
     @Override
     public ChannelConfig copyConfig(ChannelConfig config) {
         GoogleChannelConfig googleChannelConfig = this;
-        GoogleChannelConfig newLinkedInChannelConfig = (GoogleChannelConfig) config;
-        googleChannelConfig.setContactLimit(newLinkedInChannelConfig.getContactLimit());
+        GoogleChannelConfig newGoogleChannelConfig = (GoogleChannelConfig) config;
+        googleChannelConfig.setContactLimit(newGoogleChannelConfig.getContactLimit());
         googleChannelConfig
-                .setSuppressContactsWithoutEmails(newLinkedInChannelConfig.isSuppressContactsWithoutEmails());
-        googleChannelConfig.setAudienceId(newLinkedInChannelConfig.getAudienceId());
-        googleChannelConfig.setAudienceName(newLinkedInChannelConfig.getAudienceName());
-        googleChannelConfig.setFolderName(newLinkedInChannelConfig.getFolderName());
-        googleChannelConfig.setAudienceType(newLinkedInChannelConfig.getAudienceType());
+                .setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
+        googleChannelConfig.setAudienceId(newGoogleChannelConfig.getAudienceId());
+        googleChannelConfig.setAudienceName(newGoogleChannelConfig.getAudienceName());
+        googleChannelConfig.setFolderName(newGoogleChannelConfig.getFolderName());
+        googleChannelConfig.setAudienceType(newGoogleChannelConfig.getAudienceType());
         return this;
     }
 
