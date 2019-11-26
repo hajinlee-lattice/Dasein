@@ -280,5 +280,15 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp,
                 orgId, externalSysType);
     }
-
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunch getLaunchFullyLoaded(String playLaunchId){
+        if(playLaunchId != null) {
+            PlayLaunch launchRetrieved = this.findByLaunchId(playLaunchId);
+            Hibernate.initialize(launchRetrieved.getPlayLaunchChannel());
+            Hibernate.initialize(launchRetrieved.getPlay());
+            return launchRetrieved;
+        }
+        throw new NullPointerException(String.format("Play launch can not be found"));
+    }
 }

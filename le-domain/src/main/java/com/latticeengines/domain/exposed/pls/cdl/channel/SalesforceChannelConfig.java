@@ -54,6 +54,26 @@ public class SalesforceChannelConfig implements ChannelConfig {
     }
 
     @Override
+    public void setAudienceId(String audienceId) {
+
+    }
+
+    @Override
+    public String getAudienceId() {
+        return "";
+    }
+
+    @Override
+    public void setAudienceName(String audienceName) {
+
+    }
+
+    @Override
+    public String getAudienceName() {
+        return "";
+    }
+
+    @Override
     public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
         return false;
     }
