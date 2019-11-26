@@ -54,7 +54,7 @@ public class GoogleChannelConfig implements ChannelConfig {
     }
 
     public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
-        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
+        this.suppressAccountsWithoutContacts = true;
     }
 
     public String getAudienceId() {
@@ -114,8 +114,6 @@ public class GoogleChannelConfig implements ChannelConfig {
         googleChannelConfig.setContactLimit(newGoogleChannelConfig.getContactLimit());
         googleChannelConfig
                 .setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
-        googleChannelConfig
-                .setSuppressAccountsWithoutContacts(newGoogleChannelConfig.isSuppressAccountsWithoutContacts());
         googleChannelConfig.setAudienceId(newGoogleChannelConfig.getAudienceId());
         googleChannelConfig.setAudienceName(newGoogleChannelConfig.getAudienceName());
         googleChannelConfig.setFolderName(newGoogleChannelConfig.getFolderName());
