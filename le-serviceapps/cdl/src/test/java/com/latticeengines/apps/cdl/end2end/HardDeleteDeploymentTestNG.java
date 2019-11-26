@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -104,7 +105,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
             sb.append('\n');
             idSets.add(id);
             numRecordsInCsv++;
-            if (numRecordsInCsv == recordsBeforeDelete.size()/2 || numRecordsInCsv == recordsBeforeDelete.size() - 1) {
+            if (numRecordsInCsv == 10 || numRecordsInCsv == 20) {
 
                 log.info("There are " + numRecordsInCsv + " rows in csv.");
                 String fileName = "account_delete_" + numRecordsInCsv + ".csv";
@@ -121,6 +122,9 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
                         sourceFile.getName(), true);
                 JobStatus status = waitForWorkflowStatus(appId.toString(), false);
                 Assert.assertEquals(JobStatus.COMPLETED, status);
+                if (numRecordsInCsv == 20) {
+                    break;
+                }
                 sb = new StringBuilder();
                 sb.append("id");
                 sb.append(',');
@@ -136,8 +140,8 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         List<Extract> extracts = table.getExtracts();
         Assert.assertNotNull(extracts);
         List<String> paths = new ArrayList<>();
-        for (Extract e : extracts) {
-            paths.add(e.getPath());
+        for (Extract extract : table.getExtracts()) {
+            paths.add(PathUtils.toAvroGlob(extract.getPath()));
         }
         return AvroUtils.getDataFromGlob(yarnConfiguration, paths);
     }
@@ -156,7 +160,6 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         log.info("There are {} rows in avro after delete. table role is {}.", originalNumRecords, tableRoleInCollection);
         for (GenericRecord record : recordsAfterDelete) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            log.info("accountId is {}.", accountId);
             Assert.assertTrue(!idSets.contains(accountId));
         }
     }

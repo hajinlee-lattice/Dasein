@@ -177,6 +177,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setupDataCollectionStatus(evaluationDate);
 
         grapherContext.setEntityMatchEnabled(Boolean.TRUE.equals(configuration.isEntityMatchEnabled()));
+        putObjectInContext(ENTITY_MATCH_ENABLED, Boolean.TRUE.equals(configuration.isEntityMatchEnabled()));
 
         updateDataFeed();
 

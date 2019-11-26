@@ -5,9 +5,11 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOG
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_ENABLED;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DEELETE_ACTIONS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.FULL_REMATCH_PA;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -229,7 +231,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info(String.format("Found %d hard delete actions", hardDeletes.size()));
         }
         hasSoftDelete = CollectionUtils.isNotEmpty(softDeletes);
-        if (hasHardDelete) {
+        if (hasSoftDelete) {
             log.info(String.format("Found %d soft delete actions", softDeletes.size()));
         }
     }
@@ -309,7 +311,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports || hasSoftDelete;
+        return hasImports || hasSoftDelete || checkHasEntityMatchRematch(step);
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -400,6 +402,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("No account batch store.");
         }
         return hasAccounts;
+    }
+
+    protected boolean checkHasEntityMatchRematch(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.getObjectFromContext(FULL_REMATCH_PA, Boolean.class) && step.getObjectFromContext(ENTITY_MATCH_ENABLED, Boolean.class);
     }
 
     /**

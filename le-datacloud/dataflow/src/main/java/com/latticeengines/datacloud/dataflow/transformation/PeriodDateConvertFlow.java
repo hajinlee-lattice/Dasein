@@ -25,7 +25,6 @@ public class PeriodDateConvertFlow extends ConfigurableFlowBase<PeriodDateConver
         PeriodDateConvertorConfig config = getTransformerConfig(parameters);
 
         Node result = addSource(parameters.getBaseTables().get(0));
-
         List<FieldMetadata> fms = new ArrayList<FieldMetadata>();
         fms.add(new FieldMetadata(config.getTrxDateField(), String.class));
         fms.add(new FieldMetadata(config.getTrxDayPeriodField(), Integer.class));
