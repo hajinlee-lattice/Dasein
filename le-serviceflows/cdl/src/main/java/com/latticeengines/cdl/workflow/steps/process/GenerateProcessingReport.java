@@ -123,7 +123,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     private BusinessEntity getOwnerEntity(TableRoleInCollection role) {
         BusinessEntity owner = Arrays.stream(BusinessEntity.values()).filter(entity -> //
-                role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
+        role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
                 .findFirst().orElse(null);
         if (owner == null) {
             switch (role) {
@@ -259,7 +259,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts,
-                                        Map<OrphanRecordsType, Long> orphanCnts) {
+            Map<OrphanRecordsType, Long> orphanCnts) {
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
         detail.setContactCount(currentCnts.get(BusinessEntity.Contact));
