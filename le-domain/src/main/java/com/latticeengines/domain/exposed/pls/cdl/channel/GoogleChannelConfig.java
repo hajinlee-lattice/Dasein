@@ -13,15 +13,16 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 public class GoogleChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.GoogleAds;
+    private static final AudienceType audienceType = AudienceType.CONTACTS;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
 
     @JsonProperty("suppressContactsWithoutEmails")
-    private boolean suppressContactsWithoutEmails = true;
+    private Boolean suppressContactsWithoutEmails = true;
 
-    @JsonProperty("suppressAccountsWithoutNameOrDomain")
-    private boolean suppressAccountsWithoutNameOrDomain = false;
+    @JsonProperty("suppressAccountsWithoutContacts")
+    private Boolean suppressAccountsWithoutContacts = true;
 
     @JsonProperty("audienceId")
     private String audienceId;
@@ -31,9 +32,6 @@ public class GoogleChannelConfig implements ChannelConfig {
 
     @JsonProperty("folderName")
     private String folderName;
-
-    @JsonProperty("audienceType")
-    private AudienceType audienceType;
 
     public Long getContactLimit() {
         return contactLimit;
@@ -51,15 +49,12 @@ public class GoogleChannelConfig implements ChannelConfig {
         this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
-    @JsonProperty("suppressAccountsWithoutContacts")
-    public boolean isSuppressAccountsWithoutContacts() { return audienceType != AudienceType.ACCOUNTS; }
-
-    public boolean isSuppressAccountsWithoutNameOrDomain() {
-        return suppressAccountsWithoutNameOrDomain;
+    public boolean isSuppressAccountsWithoutContacts() {
+        return suppressAccountsWithoutContacts;
     }
 
-    public void setSuppressAccountsWithoutNameOrDomain(boolean suppressAccountsWithoutNameOrDomain) {
-        this.suppressAccountsWithoutNameOrDomain = suppressAccountsWithoutNameOrDomain;
+    public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
+        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
     }
 
     public String getAudienceId() {
@@ -78,13 +73,8 @@ public class GoogleChannelConfig implements ChannelConfig {
         this.audienceName = audienceName;
     }
 
-    @Override
     public AudienceType getAudienceType() {
         return audienceType;
-    }
-
-    public void setAudienceType(AudienceType audienceType) {
-        this.audienceType = audienceType;
     }
 
     public String getFolderName() {
@@ -102,15 +92,13 @@ public class GoogleChannelConfig implements ChannelConfig {
 
     @Override
     public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
-        if (!(channelConfig instanceof GoogleChannelConfig)) {
+        if (!(channelConfig instanceof FacebookChannelConfig)) {
             return false;
         }
         GoogleChannelConfig updatedConfig = (GoogleChannelConfig) channelConfig;
 
-        return (this.audienceType == null ? updatedConfig.audienceType != null //
-                : !this.audienceType.equals(updatedConfig.audienceType)) //
-                || (StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
-                : !this.audienceName.equals(updatedConfig.audienceName));
+        return StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
+                : !this.audienceName.equals(updatedConfig.audienceName);
     }
 
     @Override
@@ -126,10 +114,11 @@ public class GoogleChannelConfig implements ChannelConfig {
         googleChannelConfig.setContactLimit(newGoogleChannelConfig.getContactLimit());
         googleChannelConfig
                 .setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
+        googleChannelConfig
+                .setSuppressAccountsWithoutContacts(newGoogleChannelConfig.isSuppressAccountsWithoutContacts());
         googleChannelConfig.setAudienceId(newGoogleChannelConfig.getAudienceId());
         googleChannelConfig.setAudienceName(newGoogleChannelConfig.getAudienceName());
         googleChannelConfig.setFolderName(newGoogleChannelConfig.getFolderName());
-        googleChannelConfig.setAudienceType(newGoogleChannelConfig.getAudienceType());
         return this;
     }
 
