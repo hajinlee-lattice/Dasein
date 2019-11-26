@@ -10,9 +10,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FacebookChannelConfig implements ChannelConfig {
+public class GoogleChannelConfig implements ChannelConfig {
 
-    private static final CDLExternalSystemName systemName = CDLExternalSystemName.Facebook;
+    private static final CDLExternalSystemName systemName = CDLExternalSystemName.GoogleAds;
     private static final AudienceType audienceType = AudienceType.CONTACTS;
 
     @JsonProperty("contactLimit")
@@ -95,7 +95,7 @@ public class FacebookChannelConfig implements ChannelConfig {
         if (!(channelConfig instanceof FacebookChannelConfig)) {
             return false;
         }
-        FacebookChannelConfig updatedConfig = (FacebookChannelConfig) channelConfig;
+        GoogleChannelConfig updatedConfig = (GoogleChannelConfig) channelConfig;
 
         return StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
                 : !this.audienceName.equals(updatedConfig.audienceName);
@@ -109,14 +109,14 @@ public class FacebookChannelConfig implements ChannelConfig {
 
     @Override
     public ChannelConfig copyConfig(ChannelConfig config) {
-        FacebookChannelConfig facebookChannelConfig = this;
-        FacebookChannelConfig newFacebookChannelConfig = (FacebookChannelConfig) config;
-        facebookChannelConfig.setContactLimit(newFacebookChannelConfig.getContactLimit());
-        facebookChannelConfig
-                .setSuppressContactsWithoutEmails(newFacebookChannelConfig.isSuppressContactsWithoutEmails());
-        facebookChannelConfig.setAudienceId(newFacebookChannelConfig.getAudienceId());
-        facebookChannelConfig.setAudienceName(newFacebookChannelConfig.getAudienceName());
-        facebookChannelConfig.setFolderName(newFacebookChannelConfig.getFolderName());
+        GoogleChannelConfig googleChannelConfig = this;
+        GoogleChannelConfig newGoogleChannelConfig = (GoogleChannelConfig) config;
+        googleChannelConfig.setContactLimit(newGoogleChannelConfig.getContactLimit());
+        googleChannelConfig
+                .setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
+        googleChannelConfig.setAudienceId(newGoogleChannelConfig.getAudienceId());
+        googleChannelConfig.setAudienceName(newGoogleChannelConfig.getAudienceName());
+        googleChannelConfig.setFolderName(newGoogleChannelConfig.getFolderName());
         return this;
     }
 

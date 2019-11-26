@@ -307,6 +307,24 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         assertEquals(columnMetadata.size(), 0);
 
     }
+    @Test(groups = "deployment-app")
+    public void testGoogleLaunch() {
+        registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.GoogleAds, "GoogleAds");
+
+        createPlayLaunchChannel(new LinkedInChannelConfig(), lookupIdMap);
+
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        assertEquals(columnMetadata.size(), 6);
+
+        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+
+        long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
+        assertEquals(nonStandardFields, 0);
+    }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
         String filePath = String.format("service/impl/%s_default_export_fields.json",

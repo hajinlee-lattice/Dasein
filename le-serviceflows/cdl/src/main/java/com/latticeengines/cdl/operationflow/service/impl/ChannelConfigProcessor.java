@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 
 /**
@@ -27,6 +28,11 @@ public class ChannelConfigProcessor {
             updateSnsMessageWithChannelConfig((FacebookChannelConfig) channelConfig, messageBody);
             return;
         }
+        if(channelConfig instanceof GoogleChannelConfig){
+            updateSnsMessageWithChannelConfig((GoogleChannelConfig) channelConfig, messageBody);
+            return;
+        }
+
 
         return;
     }
@@ -40,6 +46,10 @@ public class ChannelConfigProcessor {
             ExternalIntegrationMessageBody messageBody) {
         messageBody.setAudienceType(
                 channelConfig.getAudienceType() != null ? channelConfig.getAudienceType().getType() : null);
+    }
+    private void updateSnsMessageWithChannelConfig(GoogleChannelConfig channelConfig,
+                                                   ExternalIntegrationMessageBody messageBody) {
+        messageBody.setAudienceType(channelConfig.getAudienceType() != null ? channelConfig.getAudienceType().getType() : null);
     }
 
 }

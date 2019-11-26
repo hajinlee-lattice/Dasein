@@ -9,7 +9,7 @@ public enum CDLExternalSystemName {
     Salesforce("Salesforce"), //
     Facebook("Facebook"), //
     LinkedIn("LinkedIn"), //
-    GoogleAds("Google Ads"), //
+    GoogleAds("GoogleAds"), //
     AWS_S3("AWS S3"), //
     Outreach("Outreach"), //
     Others("Others");
