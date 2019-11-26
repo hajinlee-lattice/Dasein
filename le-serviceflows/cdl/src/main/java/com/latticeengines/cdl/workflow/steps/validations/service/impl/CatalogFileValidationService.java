@@ -70,7 +70,9 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                     boolean rowError = false;
                                     String pathStr = getFieldValue(record, pathPattern.name());
                                     if (StringUtils.isNotBlank(pathStr)) {
-                                        // validate url legacy
+                                        // 1. full URLs 2. URLs with parameters 3. relative URLs (ie. /app/solutions)
+                                        // 4. URLs with Wildcards
+                                        // validate url or path, isValid check 1,2,4; isValidPath check 3
                                         if (!urlValidator.isValid(pathStr) && !isValidPath(pathStr)) {
                                             String lineId = getFieldValue(record, InterfaceName.InternalId.name());
                                             rowError = true;
@@ -119,8 +121,9 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         return errorLine;
     }
 
-    // this part was from UrlValidator, check regex, then check if the path can generate URI and count of "//" in
-    // path
+    // this part was referenced from org.apache.commons.validator.routines.UrlValidator#isValidPath, its basic thought:
+    // first check if the regex can parse the input, then try to generate the URI object, then get the normalized path,
+    // finally make sure the generated path not contain double slash
     private boolean isValidPath(String path) {
         if (path == null) {
             return false;
@@ -130,6 +133,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
             try {
                 URI uri = new URI((String)null, (String)null, path, (String)null);
                 String norm = uri.normalize().getPath();
+                // check trying to go via the parent dir or trying to go to the parent dir
                 if (norm.startsWith("/../") || norm.equals("/..")) {
                     return false;
                 }
