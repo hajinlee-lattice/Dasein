@@ -64,7 +64,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
 
         // Field standardization for OrbCompany
         TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = new ArrayList<String>();
+        List<String> baseSources = new ArrayList<>();
         baseSources.add(orbCompanyRaw.getSourceName());
         step1.setBaseSources(baseSources);
         step1.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
@@ -74,7 +74,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
 
         // Data cleanup for OrbCompany
         TransformationStepConfig step2 = new TransformationStepConfig();
-        baseSources = new ArrayList<String>();
+        baseSources = new ArrayList<>();
         baseSources.add("OrbCompanyRawMarked");
         step2.setBaseSources(baseSources);
         step2.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
@@ -84,7 +84,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
 
         // Field standardization for OrbDomain
         TransformationStepConfig step3 = new TransformationStepConfig();
-        baseSources = new ArrayList<String>();
+        baseSources = new ArrayList<>();
         baseSources.add(orbDomainRaw.getSourceName());
         step3.setBaseSources(baseSources);
         step3.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
@@ -94,7 +94,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
 
         // Data cleanup for OrbDomain
         TransformationStepConfig step4 = new TransformationStepConfig();
-        baseSources = new ArrayList<String>();
+        baseSources = new ArrayList<>();
         baseSources.add("OrbDomainRawMarked");
         step4.setBaseSources(baseSources);
         step4.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
@@ -104,7 +104,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
 
         // Generate OrbCacheSeed
         TransformationStepConfig step5 = new TransformationStepConfig();
-        baseSources = new ArrayList<String>();
+        baseSources = new ArrayList<>();
         baseSources.add("OrbCompany");
         baseSources.add("OrbDomain");
         step5.setBaseSources(baseSources);
@@ -115,7 +115,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
 
         // Generate OrbCacheSeedStantard
         TransformationStepConfig step6 = new TransformationStepConfig();
-        baseSources = new ArrayList<String>();
+        baseSources = new ArrayList<>();
         baseSources.add(orbCacheSeed.getSourceName());
         step6.setBaseSources(baseSources);
         step6.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);

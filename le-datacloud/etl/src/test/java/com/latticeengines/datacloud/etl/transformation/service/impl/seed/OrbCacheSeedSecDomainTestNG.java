@@ -1,29 +1,33 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.seed;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ORBSEC_ATTR_PRIDOM;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ORBSEC_ATTR_SECDOM;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.dataflow.transformation.seed.OrbCacheSeedMarkerFlow;
+import com.latticeengines.datacloud.dataflow.transformation.seed.OrbCacheSeedSecDomainFlow;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedSecDomainRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.OrbCacheSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class OrbCacheSeedSecDomainTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(OrbCacheSeedSecDomainTestNG.class);
@@ -51,53 +55,48 @@ public class OrbCacheSeedSecDomainTestNG extends PipelineTransformationTestNGBas
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
-            // -----------
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add("OrbCacheSeed");
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(OrbCacheSeedMarkerFlow.TRANSFORMER);
-            step1.setTargetSource("OrbCacheSeedMarked");
-            step1.setConfiguration(getMarkerConfig());
+        // -----------
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add("OrbCacheSeed");
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(OrbCacheSeedMarkerFlow.TRANSFORMER);
+        step1.setTargetSource("OrbCacheSeedMarked");
+        step1.setConfiguration(getMarkerConfig());
 
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<Integer>();
-            inputSteps.add(0);
-            step2.setInputSteps(inputSteps);
-            step2.setTargetSource("OrbCacheSeedSecondaryDomain");
-            step2.setTransformer("orbCacheSeedSecondaryDomainTransformer");
-            step2.setConfiguration(getAccumulationConfig());
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            steps.add(step2);
-            // -----------
-            configuration.setSteps(steps);
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.add(0);
+        step2.setInputSteps(inputSteps);
+        step2.setTargetSource(source.getSourceName());
+        step2.setTransformer(OrbCacheSeedSecDomainFlow.TRANSFORMER);
+        step2.setConfiguration(getAccumulationConfig());
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
+        steps.add(step2);
+        // -----------
+        configuration.setSteps(steps);
 
-            configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
+        configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
+        return configuration;
     }
 
     private String getAccumulationConfig() {
         OrbCacheSeedSecDomainRebuildConfig conf = new OrbCacheSeedSecDomainRebuildConfig();
         List<String> domainMappingFields = new ArrayList<>();
         domainMappingFields.add(DOMAIN_FIELD_NAME);
-        domainMappingFields.add("PrimaryDomain");
+        domainMappingFields.add(ORBSEC_ATTR_PRIDOM);
         conf.setDomainMappingFields(domainMappingFields);
         conf.setMarkerFieldName(MARKER_FIELD_NAME);
         conf.setSecondaryDomainFieldName(DOMAIN_FIELD_NAME);
-        conf.setRenamedSecondaryDomainFieldName("SecondaryDomain");
+        conf.setRenamedSecondaryDomainFieldName(ORBSEC_ATTR_SECDOM);
         return JsonUtils.serialize(conf);
     }
 
-    private String getMarkerConfig() throws JsonProcessingException {
+    private String getMarkerConfig() {
         OrbCacheSeedMarkerConfig conf = new OrbCacheSeedMarkerConfig();
         conf.setMarkerFieldName(MARKER_FIELD_NAME);
         List<String> fieldsToCheck = new ArrayList<>();
@@ -111,43 +110,23 @@ public class OrbCacheSeedSecDomainTestNG extends PipelineTransformationTestNGBas
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
+        // SecondaryDomain, PrimaryDomain
         Object[][] expectedData = { //
                 { "secondary.com", "a.com" }, //
                 { "mailserver.com", "a.com" }//
         };
+        Map<String, Object[]> expectedMap = Arrays.stream(expectedData)
+                .collect(Collectors.toMap(x -> (String) x[1] + "_" + (String) x[0], x -> x));
 
         while (records.hasNext()) {
             GenericRecord record = records.next();
-
-            boolean foundMatchingRecord = false;
-            for (Object[] data : expectedData) {
-                int idx = 0;
-                boolean hasFieldMismatchInRecord = false;
-                for (Field field : record.getSchema().getFields()) {
-                    Object val = record.get(field.name());
-                    if (val instanceof Utf8) {
-                        val = ((Utf8) val).toString();
-                    }
-                    Object expectedVal = data[idx];
-                    if ((val == null && expectedVal != null) //
-                            || (val != null && !val.equals(expectedVal))) {
-                        hasFieldMismatchInRecord = true;
-                        break;
-
-                    }
-                    idx++;
-
-                }
-
-                if (!hasFieldMismatchInRecord || idx == record.getSchema().getFields().size()) {
-                    foundMatchingRecord = true;
-                    break;
-                }
-            }
-            if (!foundMatchingRecord) {
-                log.info(record.toString());
-            }
-            Assert.assertTrue(foundMatchingRecord);
+            String priDomain = record.get(ORBSEC_ATTR_PRIDOM).toString();
+            String secDomain = record.get(ORBSEC_ATTR_SECDOM).toString();
+            String key = priDomain + "_" + secDomain;
+            Object[] expectedObject = expectedMap.get(key);
+            Assert.assertNotNull(expectedObject);
+            Assert.assertTrue(isObjEquals(record.get(ORBSEC_ATTR_SECDOM), expectedObject[0]));
+            Assert.assertTrue(isObjEquals(record.get(ORBSEC_ATTR_PRIDOM), expectedObject[1]));
             rowNum++;
         }
         Assert.assertEquals(rowNum, 2);
