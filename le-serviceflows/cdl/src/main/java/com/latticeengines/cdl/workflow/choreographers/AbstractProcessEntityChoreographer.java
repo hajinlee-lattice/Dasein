@@ -6,10 +6,10 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLI
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_ENABLED;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.FULL_REMATCH_PA;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DEELETE_ACTIONS;
-import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.FULL_REMATCH_PA;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +54,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private boolean hasSoftDelete = false;
     private boolean hasHardDelete = false;
     float diffRate = 0;
+    long diffCount = 0;
 
     boolean rebuild = false;
     boolean update = false;
@@ -303,7 +304,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             updateCount = updateValueMap.get(mainEntity());
         }
 
-        long diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
+        diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
         if (existingCount != null && existingCount != 0L) {
             diffRate = diffCount * 1.0F / existingCount;
             hasManyUpdate = diffRate >= 0.3;

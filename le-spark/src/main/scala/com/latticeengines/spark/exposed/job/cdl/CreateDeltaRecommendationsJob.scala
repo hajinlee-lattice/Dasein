@@ -239,7 +239,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         finalDfs += recommendationDf
         if (createAddCsvDataFrame) {
             var finalrecommendationDf: DataFrame = null
-            if (addContactTable != null) {
+            if (!addContactTable.rdd.isEmpty) {
                 // replace contacts
                 val aggregatedContacts = aggregateContacts(addContactTable, contactCols, joinKey)
                 finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
@@ -306,7 +306,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       logDataFrame("derivedAccounts", derivedAccounts, joinKey, Seq(joinKey), limit = 100)        
   
       var finalRecommendations: DataFrame = null
-      if (completeContactTable != null) {
+      if (!completeContactTable.rdd.isEmpty) {
           val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, joinKey)
           val recommendations = derivedAccounts.join(aggregatedContacts, joinKey :: Nil, "left")
           val contactCount = recommendations.agg(sum("CONTACT_NUM")).first.get(0)
