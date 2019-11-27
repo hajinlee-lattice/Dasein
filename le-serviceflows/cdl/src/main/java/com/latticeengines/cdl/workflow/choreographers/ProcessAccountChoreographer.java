@@ -142,6 +142,16 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
+    protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
+        boolean shouldUpdate = super.shouldUpdate(step);
+        if (diffCount == 0) {
+            log.info("Diff table is empty, skip update");
+            return false;
+        }
+        return shouldUpdate;
+    }
+
+    @Override
     protected Set<String> getExtraDecisions() {
         TreeSet<String> decisions = new TreeSet<>();
         decisions.add(dataCloudChanged ? "dataCloudChanged=true" : "");
