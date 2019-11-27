@@ -57,6 +57,11 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
     }
 
     @Override
+    protected CustomerSpace parseCustomerSpace(ProcessAccountStepConfiguration stepConfiguration) {
+        return stepConfiguration.getCustomerSpace();
+    }
+
+    @Override
     protected GenerateAccountLookupConfig configureJob(ProcessAccountStepConfiguration stepConfiguration) {
         customerSpace = stepConfiguration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
