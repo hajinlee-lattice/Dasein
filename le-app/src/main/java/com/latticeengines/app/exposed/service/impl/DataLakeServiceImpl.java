@@ -399,16 +399,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         return internalAccountId;
     }
 
-    private String getInternalIdViaAccountLookup(String customerSpace, String lookupIdColumn, String accountId) {
-        String internalAccountId = null;
-        try {
-
-        } catch (Exception e) {
-            log.error("Failed to lookup accountId in account lookup dynamo cache", e);
-        }
-        return internalAccountId;
-    }
-
     private List<String> getInternalAccountsIdViaObjectApi(String customerSpace, List<String> accountIds,
             String lookupIdColumn) {
 
