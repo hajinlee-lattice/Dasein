@@ -28,6 +28,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.CatalogFileValidationConfiguration;
 
 @Component("catalogFileValidationService")
@@ -38,8 +39,8 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
     private static final Pattern PATH_PATTERN = Pattern.compile("^(/[-\\w:@&?=+,.!/~*'%$_;\\(\\)]*)?$");
 
     @Override
-    public long validate(CatalogFileValidationConfiguration catalogFileValidationServiceConfiguration,
-                         List<String> processedRecords, StringBuilder statistics) {
+    public EntityValidationSummary validate(CatalogFileValidationConfiguration catalogFileValidationServiceConfiguration,
+                         List<String> processedRecords) {
         List<String> pathList = catalogFileValidationServiceConfiguration.getPathList();
         // copy error file if file exists
         String errorFile = getPath(pathList.get(0)) + PATH_SEPARATOR + ImportProperty.ERROR_FILE;
@@ -118,7 +119,9 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         if (errorLine != 0L) {
             copyErrorFileBackToHdfs(errorFile);
         }
-        return errorLine;
+        EntityValidationSummary summary = new EntityValidationSummary();
+        summary.setErrorLineNumber(errorLine);
+        return summary;
     }
 
     // this part was referenced from org.apache.commons.validator.routines.UrlValidator#isValidPath, its basic thought:
@@ -137,7 +140,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
             }
 
             int slash2Count = countToken("//", path);
-            return slash2Count <= 0;
+            return slash2Count == 0;
         }
     }
 
