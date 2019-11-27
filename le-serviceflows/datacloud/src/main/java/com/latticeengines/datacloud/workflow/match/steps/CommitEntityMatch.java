@@ -106,6 +106,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
             log.info("Entity {} committed. nSeeds={}, nLookups={}, nlookupNotInStaging={}", entity, stats.getSeedCount(),
                     stats.getLookupCount(), stats.getNotInStagingLookupCount());
             setStats(entity, stats.getSeedCount(), stats.getLookupCount());
+            updateDataCollectionStatusVersion(versionMap);
         } catch(Exception e) {
             if (versionMap != null) {//Increase next version, avoid next PA reuse current next version number.
                 int nextVersion = entityMatchVersionService.bumpNextVersion(EntityMatchEnvironment.SERVING, tenant);
