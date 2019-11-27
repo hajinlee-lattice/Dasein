@@ -65,6 +65,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private S3ImportService s3ImportService;
         private CampaignLaunchTriggerService campaignLaunchTriggerService;
         private DeltaCalculationService deltaCalculationService;
+        
         private String jobArguments;
 
         public Builder() {
