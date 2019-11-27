@@ -14,6 +14,8 @@ public interface ActivityMetricsGroupRepository extends BaseJpaRepository<Activi
 
     ActivityMetricsGroup findByPid(@Param("pid") Long pid);
 
+    ActivityMetricsGroup findByTenantAndGroupId(@Param("tenant") Tenant tenant, @Param("groupId") String groupId);
+
     @Query("SELECT g.groupId FROM ActivityMetricsGroup g WHERE g.groupId LIKE :base AND g.tenant = :tenant ORDER BY g.pid DESC")
     List<String> findGroupIdsByBase(@Param("tenant") Tenant tenant, @Param("base") String base);
 

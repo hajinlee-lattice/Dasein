@@ -73,6 +73,13 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         validateGroupsEqual(group, retrived);
     }
 
+    @Test(groups = "functional", dataProvider = "testGroupsDataProvider", dependsOnMethods = "testCreate")
+    public void testGetByGroupId(ActivityMetricsGroup group, ActivityMetricsGroup expected) {
+        ActivityMetricsGroup retrived = activityMetricsGroupEntityMgr.findByGroupId(group.getGroupId());
+        Assert.assertNotNull(retrived);
+        validateGroupsEqual(group, retrived);
+    }
+
     @Test(groups = "functional", dataProvider = "groupNamesDataProvider", dependsOnMethods = "testCreate")
     public void testGetNextAvailableGroupId(String groupName, String expected) {
         String groupIdBase = ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(groupName);
