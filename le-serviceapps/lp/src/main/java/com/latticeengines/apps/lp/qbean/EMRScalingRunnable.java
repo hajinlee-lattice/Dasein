@@ -81,6 +81,7 @@ public class EMRScalingRunnable implements Runnable {
         // always available free resource, until maxed out: 25% core nodes
         minAvailMemMb = getStaticMemBuffer();
         minAvailVCores = getStaticVCoreBuffer();
+        log.debug("minAvailMemMb=" + minAvailMemMb + " minAvailVCores=" + minAvailVCores);
 
         if (needToScale()) {
             attemptScale();
@@ -273,11 +274,11 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private int getStaticVCoreBuffer() {
-        return (int) Math.round(0.25 * coreVCores * runningCore / taskVCores);
+        return (int) Math.round(0.25 * coreVCores * runningCore);
     }
 
     private long getStaticMemBuffer() {
-        return Math.round(0.25 * coreMb * runningCore / taskMb);
+        return Math.round(0.25 * coreMb * runningCore);
     }
 
     private ScaleCounter getScaleCounter() {
