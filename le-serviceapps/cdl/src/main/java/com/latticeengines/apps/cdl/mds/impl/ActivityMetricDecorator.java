@@ -195,7 +195,7 @@ public class ActivityMetricDecorator implements Decorator {
         }
 
         String subCatTmpl = group.getSubCategoryTmpl();
-        if (StringUtils.isNotBlank(dispNameTmpl)) {
+        if (StringUtils.isNotBlank(subCatTmpl)) {
             try {
                 cm.setSubcategory(TemplateUtils.renderByMap(subCatTmpl, params));
             } catch (Exception e) {
