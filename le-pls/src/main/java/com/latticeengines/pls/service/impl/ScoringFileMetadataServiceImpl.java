@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
+import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -331,7 +332,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         Attribute attribute = new Attribute();
 
         attribute.setName(fieldName == null
-                ? ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(scoringHeaderName) : fieldName);
+                ? ImportWorkflowSpecUtils.convertFieldNameToAvroFriendlyFormat(scoringHeaderName) : fieldName);
         attribute.setPhysicalDataType(FieldType.STRING.toString().toLowerCase());
         attribute.setDisplayName(scoringHeaderName);
         // need to populate possible csv name after renaming initial CSV name.

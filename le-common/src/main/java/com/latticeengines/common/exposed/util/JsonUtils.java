@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -279,5 +282,33 @@ public class JsonUtils {
     public static ObjectNode createObjectNode() {
         ObjectMapper mapper = getObjectMapper();
         return mapper.createObjectNode();
+    }
+
+    // Converts a JSON object stored as a String in a system resource file to a "Plain Old Java Object" of the
+    // provided class.
+    // resourceJsonFileRelativePath should start "com/latticeengines/...".
+    public static <T> T pojoFromJsonResourceFile(String resourceJsonFileRelativePath, Class<T> clazz) throws
+            IOException {
+        T pojo = null;
+        try {
+            InputStream jsonInputStream = ClassLoader.getSystemResourceAsStream(resourceJsonFileRelativePath);
+            if (jsonInputStream == null) {
+                throw new IOException("Failed to convert resource file " + resourceJsonFileRelativePath +
+                        " to InputStream.  Please check path");
+            }
+            pojo = JsonUtils.deserialize(jsonInputStream, clazz);
+            if (pojo == null) {
+                String jsonString = IOUtils.toString(jsonInputStream, Charset.defaultCharset());
+                throw new IOException("POJO was null. Failed to deserialize InputStream containing string: " +
+                        jsonString);
+            }
+        } catch (IOException e1) {
+            throw new IOException("File to POJO conversion failed for resource file " + resourceJsonFileRelativePath,
+                    e1);
+        } catch (IllegalStateException e2) {
+            throw new IOException("File to POJO conversion failed for resource file " + resourceJsonFileRelativePath,
+                    e2);
+        }
+        return pojo;
     }
 }

@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import org.apache.avro.SchemaParseException;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -47,7 +46,6 @@ public class ValidateFileHeaderUtils {
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;
     public static final int MAX_NUM_ROWS = 100;
-    public static final String AVRO_FIELD_NAME_PREFIX = "avro_";
 
     @Inject
     private CommonTenantConfigServiceImpl appTenantConfigService;
@@ -230,19 +228,6 @@ public class ValidateFileHeaderUtils {
             validationResult.setErrorMessage(LedpException.buildMessage(LedpCode.LEDP_18226,
                     new String[]{String.valueOf(limit), String.valueOf(fieldSize)}));
         }
-    }
-
-    public static String convertFieldNameToAvroFriendlyFormat(String fieldName) {
-        int length = fieldName.length();
-        if (length == 0) {
-            throw new SchemaParseException("Empty name");
-        }
-        StringBuilder sb = new StringBuilder();
-        char first = fieldName.charAt(0);
-        if (!(Character.isLetter(first) || first == '_')) {
-            sb.append(AVRO_FIELD_NAME_PREFIX);
-        }
-        return sb.append(fieldName).toString().replaceAll("[^A-Za-z0-9_]", "_");
     }
 
     public static void checkForReservedHeaders(String displayName, Set<String> headerFields,

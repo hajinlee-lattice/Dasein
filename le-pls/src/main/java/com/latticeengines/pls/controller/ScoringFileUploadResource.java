@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -124,7 +125,7 @@ public class ScoringFileUploadResource {
                 for (String header : headers) {
                     Attribute attr = new Attribute();
                     attr.setName(
-                            ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(header));
+                            ImportWorkflowSpecUtils.convertFieldNameToAvroFriendlyFormat(header));
                     attr.setDisplayName(header);
                     attr.setPhysicalDataType(FieldType.STRING.avroTypes()[0]);
                     attr.setNullable(true);
