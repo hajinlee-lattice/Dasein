@@ -88,7 +88,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         Assert.assertEquals(entityMatchVersion.getNextVersion(), entityMatchVersionAfterPA.getCurrentVersion());
         log.info("after PA, entityMatchVersion is {}.", entityMatchVersion);
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
-        verifyServingStoreVersion(activeVersion.complement(), entityMatchVersion.getNextVersion());
+        verifyServingStoreVersion(activeVersion, entityMatchVersion.getNextVersion());
         verifyHardDelete();
     }
 

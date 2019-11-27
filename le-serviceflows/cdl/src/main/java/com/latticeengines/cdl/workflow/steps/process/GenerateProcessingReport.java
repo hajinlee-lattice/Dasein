@@ -28,8 +28,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -270,8 +268,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
         detail.setOrphanContactCount(orphanCnts.get(OrphanRecordsType.CONTACT));
         detail.setUnmatchedAccountCount(orphanCnts.get(OrphanRecordsType.UNMATCHED_ACCOUNT));
-        updateDataCollectionStatusVersion(detail);
-        log.info("update ServingVersion in DataCollectionStatus, the version is {}.", detail.getServingStoreVersion());
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
@@ -484,20 +480,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             actions = Collections.emptyList();
         }
         return actions;
-    }
-
-    private void updateDataCollectionStatusVersion(DataCollectionStatus detail) {
-        if (!Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
-            return;
-        }
-        Map<EntityMatchEnvironment, Integer> versionMap = new HashMap<>();
-        EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
-                EntityMatchVersion.class);
-        versionMap.put(EntityMatchEnvironment.SERVING, entityMatchVersion.getNextVersion());
-        if (versionMap.get(EntityMatchEnvironment.SERVING) == null) {
-            return;
-        }
-        detail.setServingStoreVersion(versionMap.get(EntityMatchEnvironment.SERVING));
     }
 
 }

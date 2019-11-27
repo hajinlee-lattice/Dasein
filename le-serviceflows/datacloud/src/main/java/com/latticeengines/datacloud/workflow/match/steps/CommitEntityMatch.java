@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -105,6 +106,7 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
             log.info("Entity {} committed. nSeeds={}, nLookups={}, nlookupNotInStaging={}", entity, stats.getSeedCount(),
                     stats.getLookupCount(), stats.getNotInStagingLookupCount());
             setStats(entity, stats.getSeedCount(), stats.getLookupCount());
+            updateDataCollectionStatusVersion(versionMap);
         } catch(Exception e) {
             if (versionMap != null) {//Increase next version, avoid next PA reuse current next version number.
                 int nextVersion = entityMatchVersionService.bumpNextVersion(EntityMatchEnvironment.SERVING, tenant);
@@ -185,4 +187,15 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         versionMap.put(EntityMatchEnvironment.SERVING, entityMatchVersion.getNextVersion());
         return versionMap;
     }
+
+    private void updateDataCollectionStatusVersion(Map<EntityMatchEnvironment, Integer> versionMap) {
+        if (versionMap == null || versionMap.get(EntityMatchEnvironment.SERVING) == null) {
+            return;
+        }
+        DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        detail.setServingStoreVersion(versionMap.get(EntityMatchEnvironment.SERVING));
+        log.info("update ServingVersion in DataCollectionStatus, the version is {}.", detail.getServingStoreVersion());
+        putObjectInContext(CDL_COLLECTION_STATUS, detail);
+    }
+
 }
