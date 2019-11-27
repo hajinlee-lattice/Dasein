@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,7 +15,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -49,9 +50,7 @@ public class EntityMatchRematchDeploymentTestNG extends CDLEnd2EndDeploymentTest
         EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace,
                 EntityMatchEnvironment.SERVING, false);
         log.info("entityMatchVersion is {}.", entityMatchVersion);
-        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        request.setFullRematch(true);
-        processAnalyze(request);
+        runTestWithRetry(getCandidateFailingSteps(), true);
         EntityMatchVersion entityMatchVersionAfterPA = matchProxy.getEntityMatchVersion(customerSpace,
                 EntityMatchEnvironment.SERVING, false);
         Assert.assertEquals(entityMatchVersion.getNextVersion(), entityMatchVersionAfterPA.getCurrentVersion());
@@ -62,5 +61,12 @@ public class EntityMatchRematchDeploymentTestNG extends CDLEnd2EndDeploymentTest
         Thread.sleep(2000);
         mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 1, "DefaultSystem_ContactData");
         Thread.sleep(2000);
+    }
+
+    private List<String> getCandidateFailingSteps() {
+        return Arrays.asList(
+                "matchAccount",
+                "mergeAccount", //
+                "mergeContact");
     }
 }

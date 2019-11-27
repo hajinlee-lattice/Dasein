@@ -42,6 +42,13 @@ public class ActivityMetricsGroupEntityMgrImpl extends JpaEntityMgrRepositoryImp
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ActivityMetricsGroup findByGroupId(String groupId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return readerRepository.findByTenantAndGroupId(tenant, groupId);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public String getNextAvailableGroupId(String base) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {

@@ -528,7 +528,11 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected String getConvertBatchStoreTableName() {
-        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
+        Map<String, String> rematchTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
+        if (rematchTables == null) {
+            rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
+        }
+        log.info("rematch_table_name is : {}", JsonUtils.serialize(rematchTables));
         return (rematchTables != null) && rematchTables.get(configuration.getMainEntity().name()) != null ?
                 rematchTables.get(configuration.getMainEntity().name()) : null;
     }
