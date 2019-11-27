@@ -193,7 +193,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
 
         Map<String, RetentionPolicy> policyMap = new HashMap<>();
         policyMap.put(TABLE_NAME, RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
-        metadataProxy.uppdateTableRetentionPolicies(customerSpace1, policyMap);
+        metadataProxy.updateTableRetentionPolicies(customerSpace1, policyMap);
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_3_WEEKS");
     }

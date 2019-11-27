@@ -420,9 +420,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         post("keepTableFor7Days", url, null);
     }
 
-    public void uppdateTableRetentionPolicies(String customerSpace, Map<String, RetentionPolicy> policyMap) {
+    public void updateTableRetentionPolicies(String customerSpace, Map<String, RetentionPolicy> policyMap) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies",
                 customerSpace);
-        post("keepTableFor7Days", url, policyMap);
+        post("updateTableRetentionPolicies", url, policyMap);
     }
 }
