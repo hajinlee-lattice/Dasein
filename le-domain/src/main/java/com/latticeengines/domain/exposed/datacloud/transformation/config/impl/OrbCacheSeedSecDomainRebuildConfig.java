@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class OrbCacheSeedSecondaryDomainAccumulationTransformerConfig extends TransformerConfig {
+public class OrbCacheSeedSecDomainRebuildConfig extends TransformerConfig {
 
     @JsonProperty("MarkerFieldName")
     private String markerFieldName;

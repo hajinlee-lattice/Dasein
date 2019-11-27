@@ -1,39 +1,38 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.OrbCacheSeedMarkerFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.seed.OrbCacheSeedMarkerFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedSecondaryDomainMarkerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.OrbCacheSeedMarkerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.operation.Function;
 
-@Component("orbCacheSeedMarkerTransformerFlow")
-public class OrbCacheSeedSecondaryDomainMarkerFlow
-        extends ConfigurableFlowBase<OrbCacheSeedSecondaryDomainMarkerTransformerConfig> {
+/**
+ * A pipeline step in OrbCacheSeed rebuild pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-OrbCacheSeedCreation
+ */
+@Component(OrbCacheSeedMarkerFlow.DATAFLOW_BEAN)
+public class OrbCacheSeedMarkerFlow extends ConfigurableFlowBase<OrbCacheSeedMarkerConfig> {
 
-    private static final Logger log = LoggerFactory.getLogger(OrbCacheSeedSecondaryDomainMarkerFlow.class);
+    public static final String DATAFLOW_BEAN = "orbCacheSeedMarkerTransformerFlow";
+    public static final String TRANSFORMER = "orbCacheSeedMarkerTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        OrbCacheSeedSecondaryDomainMarkerTransformerConfig config = getTransformerConfig(parameters);
+        OrbCacheSeedMarkerConfig config = getTransformerConfig(parameters);
 
         Node source = addSource(parameters.getBaseTables().get(0));
 
         List<String> fieldNames = source.getFieldNames();
-
-        for (String fieldName : fieldNames) {
-            log.info("Field in input schema " + fieldName);
-        }
 
         List<String> outputFieldNames = new ArrayList<>(fieldNames);
         Function<?> function = new OrbCacheSeedMarkerFunction(config.getMarkerFieldName(), config.getFieldsToCheck());
@@ -50,17 +49,17 @@ public class OrbCacheSeedSecondaryDomainMarkerFlow
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return OrbCacheSeedSecondaryDomainMarkerTransformerConfig.class;
+        return OrbCacheSeedMarkerConfig.class;
     }
 
     @Override
     public String getDataFlowBeanName() {
-        return "orbCacheSeedMarkerTransformerFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "orbCacheSeedMarkerTransformer";
+        return TRANSFORMER;
 
     }
 }

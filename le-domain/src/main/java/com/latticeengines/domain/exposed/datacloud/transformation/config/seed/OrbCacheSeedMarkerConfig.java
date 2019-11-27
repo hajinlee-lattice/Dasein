@@ -1,10 +1,11 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.seed;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
-public class OrbCacheSeedSecondaryDomainMarkerTransformerConfig extends TransformerConfig {
+public class OrbCacheSeedMarkerConfig extends TransformerConfig {
     @JsonProperty("MarkerFieldName")
     private String markerFieldName;
 

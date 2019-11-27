@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.seed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,19 +13,18 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.DnBCleanFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.seed.DnBCleanFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class DnBCleanTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(BomboraSurgeCleanServiceTestNG.class);
+public class DnBCleanTestNG extends PipelineTransformationTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(DnBCleanTestNG.class);
 
-    GeneralSource source = new GeneralSource("DnBCacheSeedClean");
-    GeneralSource baseSource = new GeneralSource("DnBCacheSeed");
+    private GeneralSource source = new GeneralSource("DnBCacheSeedClean");
+    private GeneralSource baseSource = new GeneralSource("DnBCacheSeed");
 
     @Test(groups = "pipeline1")
     public void testTransformation() {
@@ -35,6 +34,11 @@ public class DnBCleanTestNG extends TransformationServiceImplTestNGBase<Pipeline
         finish(progress);
         confirmResultFile(progress);
         cleanupProgressTables();
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
@@ -60,30 +64,6 @@ public class DnBCleanTestNG extends TransformationServiceImplTestNGBase<Pipeline
 
         return configuration;
     }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-
 
     private Object[][] expectedData = new Object[][] {
             { 1, null, null, 1, null, 1, null }, //
@@ -135,7 +115,7 @@ public class DnBCleanTestNG extends TransformationServiceImplTestNGBase<Pipeline
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            Object[] expectedResult = expectedMap.get((Integer) record.get("ID"));
+            Object[] expectedResult = expectedMap.get(record.get("ID"));
             Assert.assertTrue(isObjEquals(record.get("SALES_VOLUME_US_DOLLARS"), expectedResult[1]));
             Assert.assertTrue(isObjEquals(record.get("SALES_VOLUME_RELIABILITY_CODE"), expectedResult[2]));
             Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_TOTAL"), expectedResult[3]));

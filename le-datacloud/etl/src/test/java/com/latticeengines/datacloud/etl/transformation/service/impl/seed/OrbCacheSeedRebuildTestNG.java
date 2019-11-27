@@ -1,9 +1,11 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.seed;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
@@ -11,8 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.seed.OrbCacheSeedRebuildFlow;
@@ -34,6 +34,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
     private static final Logger log = LoggerFactory.getLogger(OrbCacheSeedRebuildTestNG.class);
 
     private GeneralSource source = new GeneralSource("OrbCacheSeedStandard");
+    private GeneralSource orbCacheSeed = new GeneralSource("OrbCacheSeed");
     private GeneralSource orbCompanyRaw = new GeneralSource("OrbCompanyRaw");
     private GeneralSource orbDomainRaw = new GeneralSource("OrbDomainRaw");
 
@@ -44,8 +45,8 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
+        confirmIntermediateSource(orbCacheSeed, null);
         confirmResultFile(progress);
-        confirmIntermediateResultFile();
         cleanupProgressTables();
     }
 
@@ -68,7 +69,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         step1.setBaseSources(baseSources);
         step1.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
         step1.setTargetSource("OrbCompanyRawMarked");
-        String confParamStr1 = getStandardizationTransformerConfigForOrbCompanyMarker();
+        String confParamStr1 = getStdConfigForOrbCompanyMarker();
         step1.setConfiguration(confParamStr1);
 
         // Data cleanup for OrbCompany
@@ -78,7 +79,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         step2.setBaseSources(baseSources);
         step2.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
         step2.setTargetSource("OrbCompany");
-        String confParamStr2 = getStandardizationTransformerConfigForCleanup();
+        String confParamStr2 = getStdConfigForCleanup();
         step2.setConfiguration(confParamStr2);
 
         // Field standardization for OrbDomain
@@ -88,7 +89,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         step3.setBaseSources(baseSources);
         step3.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
         step3.setTargetSource("OrbDomainRawMarked");
-        String confParamStr3 = getStandardizationTransformerConfigForOrbDomain();
+        String confParamStr3 = getStdConfigForOrbDomain();
         step3.setConfiguration(confParamStr3);
 
         // Data cleanup for OrbDomain
@@ -98,7 +99,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         step4.setBaseSources(baseSources);
         step4.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
         step4.setTargetSource("OrbDomain");
-        String confParamStr4 = getStandardizationTransformerConfigForCleanup();
+        String confParamStr4 = getStdConfigForCleanup();
         step4.setConfiguration(confParamStr4);
 
         // Generate OrbCacheSeed
@@ -108,14 +109,14 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         baseSources.add("OrbDomain");
         step5.setBaseSources(baseSources);
         step5.setTransformer(OrbCacheSeedRebuildFlow.TRANSFORMER);
-        step5.setTargetSource("OrbCacheSeed");
+        step5.setTargetSource(orbCacheSeed.getSourceName());
         String confParamStr5 = getOrbCacheSeedRebuildConfig();
         step5.setConfiguration(confParamStr5);
 
         // Generate OrbCacheSeedStantard
         TransformationStepConfig step6 = new TransformationStepConfig();
         baseSources = new ArrayList<String>();
-        baseSources.add("OrbCacheSeed");
+        baseSources.add(orbCacheSeed.getSourceName());
         step6.setBaseSources(baseSources);
         step6.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
         step6.setTargetSource(source.getSourceName());
@@ -123,7 +124,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         step6.setConfiguration(confParamStr6);
 
         // -----------
-        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(step1);
         steps.add(step2);
         steps.add(step3);
@@ -137,16 +138,17 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         return configuration;
     }
 
-    private String getStandardizationTransformerConfigForOrbCompanyMarker() {
+    private String getStdConfigForOrbCompanyMarker() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] domainFields = { "Website" };
         conf.setDomainFields(domainFields);
         String[] convertTypeFields = {"Employee", "LocationEmployee","FacebookLikes", "TwitterFollowers", "TotalAmountRaised", "LastFundingRoundAmount", "SearchRank" };
         conf.setConvertTypeFields(convertTypeFields);
-        TypeConvertStrategy[] convertTypeStrategies = { TypeConvertStrategy.STRING_TO_INT,
-                TypeConvertStrategy.STRING_TO_INT, TypeConvertStrategy.STRING_TO_LONG,
-                TypeConvertStrategy.STRING_TO_LONG, TypeConvertStrategy.STRING_TO_LONG,
-                TypeConvertStrategy.STRING_TO_LONG, TypeConvertStrategy.STRING_TO_LONG };
+        TypeConvertStrategy[] convertTypeStrategies = { //
+                TypeConvertStrategy.STRING_TO_INT, TypeConvertStrategy.STRING_TO_INT, //
+                TypeConvertStrategy.STRING_TO_LONG, TypeConvertStrategy.STRING_TO_LONG, //
+                TypeConvertStrategy.STRING_TO_LONG, TypeConvertStrategy.STRING_TO_LONG, //
+                TypeConvertStrategy.STRING_TO_LONG };
         conf.setConvertTypeStrategies(convertTypeStrategies);
         String[] dedupFields = { "OrbNum" };
         conf.setDedupFields(dedupFields);
@@ -169,15 +171,15 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         conf.setMarkerCheckFields(markerCheckFields);
         String markerField = "IsValid";
         conf.setMarkerField(markerField);
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DEDUP,
-                StandardizationStrategy.DOMAIN, StandardizationStrategy.CONVERT_TYPE,
-                StandardizationStrategy.CONSOLIDATE_RANGE,
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { //
+                StandardizationStrategy.DEDUP, StandardizationStrategy.DOMAIN, //
+                StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.CONSOLIDATE_RANGE, //
                 StandardizationStrategy.CONSOLIDATE_INDUSTRY, StandardizationStrategy.MARKER };
         conf.setSequence(sequence);
         return JsonUtils.serialize(conf);
     }
 
-    private String getStandardizationTransformerConfigForCleanup() {
+    private String getStdConfigForCleanup() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String filterExpression = "IsValid == true";
         conf.setFilterExpression(filterExpression);
@@ -191,7 +193,7 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         return JsonUtils.serialize(conf);
     }
 
-    private String getStandardizationTransformerConfigForOrbDomain() {
+    private String getStdConfigForOrbDomain() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] dedupFields = { "OrbNum", "WebDomain" };
         conf.setDedupFields(dedupFields);
@@ -199,8 +201,9 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         conf.setDomainFields(domainFields);
         String[] convertTypeFields = { "DomainHasEmail", "DomainHasWebsite", "DomainIsEmailHosting" };
         conf.setConvertTypeFields(convertTypeFields);
-        TypeConvertStrategy[] convertTypeStrategies = { TypeConvertStrategy.STRING_TO_BOOLEAN,
-                TypeConvertStrategy.STRING_TO_BOOLEAN, TypeConvertStrategy.STRING_TO_BOOLEAN };
+        TypeConvertStrategy[] convertTypeStrategies = { //
+                TypeConvertStrategy.STRING_TO_BOOLEAN, TypeConvertStrategy.STRING_TO_BOOLEAN,
+                TypeConvertStrategy.STRING_TO_BOOLEAN };
         conf.setConvertTypeStrategies(convertTypeStrategies);
         String markerExpression = "OrbNum != null && WebDomain != null";
         conf.setMarkerExpression(markerExpression);
@@ -208,8 +211,9 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         conf.setMarkerCheckFields(markerCheckFields);
         String markerField = "IsValid";
         conf.setMarkerField(markerField);
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DOMAIN,
-                StandardizationStrategy.DEDUP, StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.MARKER };
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { //
+                StandardizationStrategy.DOMAIN, StandardizationStrategy.DEDUP, //
+                StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.MARKER };
         conf.setSequence(sequence);
         return JsonUtils.serialize(conf);
     }
@@ -250,65 +254,75 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
         conf.setAddFieldValues(addFieldValues);
         StandardizationTransformerConfig.FieldType[] addFieldTypes = { FieldType.STRING };
         conf.setAddFieldTypes(addFieldTypes);
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
-                StandardizationStrategy.RETAIN, StandardizationStrategy.RENAME, StandardizationStrategy.ADD_FIELD };
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { //
+                StandardizationStrategy.FILTER, StandardizationStrategy.RETAIN, //
+                StandardizationStrategy.RENAME, StandardizationStrategy.ADD_FIELD };
         conf.setSequence(sequence);
         return JsonUtils.serialize(conf);
     }
 
+    // Verify target source of final step: OrbCacheSeedStandard
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        log.info("Start to verify records one by one.");
-        Object[][] expectedData = { { "1", "google.com", "Company1", "101-250M", ">10,000", "Media" },
-                { "3", "yahoo.com", "Company3", "null", "201-500", "null" },
-                { "4", "baidu.com", "Company4", "null", "null", "null" } };
+        log.info("Verify target source of final step: " + source.getSourceName());
+        // Schema: ID, Domain, Name, RevenueRange, EmployeeRange,
+        // PrimaryIndustry
+        Object[][] expectedData = { //
+                { "1", "google.com", "Company1", "101-250M", ">10,000", "Media" },
+                { "3", "yahoo.com", "Company3", null, "201-500", null },
+                { "4", "baidu.com", "Company4", null, null, null } };
+        Map<String, Object[]> expectedMap = Arrays.stream(expectedData)
+                .collect(Collectors.toMap(x -> (String) x[0], x -> x));
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            String id = String.valueOf(record.get("ID"));
-            String domain = String.valueOf(record.get("Domain"));
-            String name = String.valueOf(record.get("Name"));
-            String revenueRange = String.valueOf(record.get("RevenueRange"));
-            String employeeRange = String.valueOf(record.get("EmployeeRange"));
-            String primaryIndustry = String.valueOf(record.get("PrimaryIndustry"));
-            boolean flag = false;
-            for (Object[] data : expectedData) {
-                if (id.equals(data[0]) && domain.equals(data[1]) && name.equals(data[2]) && revenueRange.equals(data[3])
-                        && employeeRange.equals(data[4]) && primaryIndustry.equals(data[5])) {
-                    flag = true;
-                    break;
-                }
-            }
-            Assert.assertTrue(flag);
+            String id = record.get("ID").toString();
+            Object[] expectedRecord = expectedMap.get(id);
+            Assert.assertNotNull(expectedRecord);
+            Assert.assertTrue(isObjEquals(record.get("Domain"), expectedRecord[1]));
+            Assert.assertTrue(isObjEquals(record.get("Name"), expectedRecord[2]));
+            Assert.assertTrue(isObjEquals(record.get("RevenueRange"), expectedRecord[3]));
+            Assert.assertTrue(isObjEquals(record.get("EmployeeRange"), expectedRecord[4]));
+            Assert.assertTrue(isObjEquals(record.get("PrimaryIndustry"), expectedRecord[5]));
+//
+//            String id = String.valueOf(record.get("ID"));
+//            String domain = String.valueOf(record.get("Domain"));
+//            String name = String.valueOf(record.get("Name"));
+//            String revenueRange = String.valueOf(record.get("RevenueRange"));
+//            String employeeRange = String.valueOf(record.get("EmployeeRange"));
+//            String primaryIndustry = String.valueOf(record.get("PrimaryIndustry"));
+//            boolean flag = false;
+//            for (Object[] data : expectedData) {
+//                if (id.equals(data[0]) && domain.equals(data[1]) && name.equals(data[2]) && revenueRange.equals(data[3])
+//                        && employeeRange.equals(data[4]) && primaryIndustry.equals(data[5])) {
+//                    flag = true;
+//                    break;
+//                }
+//            }
+//            Assert.assertTrue(flag);
             rowNum++;
         }
         Assert.assertEquals(rowNum, 3);
     }
 
-    void confirmIntermediateResultFile() {
-        String path = hdfsPathBuilder.constructSnapshotDir("OrbCacheSeed", targetVersion).toString();
-        log.info("Checking for result file: " + path);
-        List<String> files;
+    // Verify intermediate source OrbCacheSeed
+    @Override
+    protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
+        log.info(String.format("Start to verify intermediate source %s", source));
         try {
-            files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            verifyOrbCacheSeed(records);
+        } catch (Exception ex) {
+            throw new RuntimeException("Exception in verifyIntermediateResult", ex);
         }
-        Assert.assertTrue(files.size() >= 2);
-        for (String file : files) {
-            if (!file.endsWith(SUCCESS_FLAG)) {
-                Assert.assertTrue(file.endsWith(".avro"));
-                continue;
-            }
-            Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
-        }
-
-        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, path + "/*.avro");
-        verifyIntermediateResultAvroRecords(records);
     }
 
-    protected void verifyIntermediateResultAvroRecords(Iterator<GenericRecord> records) {
+    private void verifyOrbCacheSeed(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
+        // Schema: OrbNum, Name, EntityType, Employee, LocationEmployee,
+        // FacebookLikes, TwitterFollowers, TotalAmountRaised,
+        // LastFundingRoundAmount, SearchRank, ConsolidateEmployeeRange,
+        // ConsolidateRevenueRange, PrimaryIndustry, Domain, PrimaryDomain,
+        // IsSecondaryDomain, DomainHasEmail
         Object[][] expectedData = {
                 { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
                         "101-250M", "Media", "googlecompany3.com", "google.com", true, null },
@@ -322,73 +336,45 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
                         "101-250M", "Media", "googlecompany1.com", "google.com", true, null },
                 { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",
                         "101-250M", "Media", "googledomain2.com", "google.com", true, false },
-                { "2", "Company2", "company", null, null, null, null, null, null, null, "null", "null", "null",
+                { "2", "Company2", "company", null, null, null, null, null, null, null, null, null, null,
                         "google.com", "google.com", false, true },
-                { "2", "Company2", "company", null, null, null, null, null, null, null, "null", "null", "null",
+                { "2", "Company2", "company", null, null, null, null, null, null, null, null, null, null,
                         "googledomain1.com", "google.com", true, false },
-                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", "null", "null",
+                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", null, null,
                         "yahoocompany1.com", "yahoo.com", true, null },
-                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", "null", "null",
+                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", null, null,
                         "yahoocompany2.com", "yahoo.com", true, null },
-                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", "null", "null",
+                { "3", "Company3", "company", 500, 500, 500L, 500L, 500L, 500L, 500L, "201-500", null, null,
                         "yahoo.com", "yahoo.com", false, null },
-                { "4", "Company4", "company", null, null, null, null, null, null, null, "null", "null", "null",
+                { "4", "Company4", "company", null, null, null, null, null, null, null, null, null, null,
                         "baidu.com", "baidu.com", false, null } };
+        // Expected data is unique in OrbNum + Domain
+        Map<String, Object[]> expectedMap = Arrays.stream(expectedData)
+                .collect(Collectors.toMap(x -> (String) x[0] + "_" + (String) x[13], x -> x));
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            String orbNum = String.valueOf(record.get("OrbNum"));
-            String name = String.valueOf(record.get("Name"));
-            String entityType = String.valueOf(record.get("EntityType"));
-            Integer employee = (record.get("Employee") == null) ? null : ((Integer) record.get("Employee"));
-            Integer locationEmployee = (record.get("Employee") == null) ? null
-                    : ((Integer) record.get("LocationEmployee"));
-            Long facebookLikes = (record.get("FacebookLikes") == null) ? null : ((Long) record.get("FacebookLikes"));
-            Long twitterFollowers = (record.get("TwitterFollowers") == null) ? null
-                    : ((Long) record.get("TwitterFollowers"));
-            Long totalAmountRaised = (record.get("TotalAmountRaised") == null) ? null
-                    : ((Long) record.get("TotalAmountRaised"));
-            Long lastFundingRoundAmount = (record.get("LastFundingRoundAmount") == null) ? null
-                    : ((Long) record.get("LastFundingRoundAmount"));
-            Long searchRank = (record.get("SearchRank") == null) ? null : ((Long) record.get("SearchRank"));
-            String consolidateEmployeeRange = String.valueOf(record.get("ConsolidateEmployeeRange"));
-            String consolidateRevenueRange = String.valueOf(record.get("ConsolidateRevenueRange"));
-            String primaryIndustry = String.valueOf(record.get("PrimaryIndustry"));
-            String domain = String.valueOf(record.get("Domain"));
-            String primaryDomain = String.valueOf(record.get("PrimaryDomain"));
-            Boolean isSecondaryDomain = (record.get("IsSecondaryDomain") == null) ? null
-                    : ((Boolean) record.get("IsSecondaryDomain"));
-            Boolean domainHasEmail = (record.get("DomainHasEmail") == null) ? null
-                    : ((Boolean) record.get("DomainHasEmail"));
-            log.info(String
-                    .format("OrbNum = %s, Name = %s, EntityType = %s, Employee = %d, LocationEmployee = %d, FacebookLikes = %d, "
-                            + "TwitterFollowers = %d, TotalAmountRaised = %d, LastFundingRoundAmount = %d, SearchRank = %d, ConsolidateEmployeeRange = %s, "
-                            + "ConsolidateRevenueRange = %s, PrimaryIndustry = %s, Domain = %s, PrimaryDomain = %s, IsSecondaryDomain = %s, DomainHasEmail = %s",
-                    orbNum, name, entityType, employee, locationEmployee, facebookLikes, twitterFollowers,
-                    totalAmountRaised, lastFundingRoundAmount, searchRank, consolidateEmployeeRange,
-                    consolidateRevenueRange, primaryIndustry, domain, primaryDomain,
-                    isSecondaryDomain == null ? null : String.valueOf(domainHasEmail),
-                    domainHasEmail == null ? null : String.valueOf(domainHasEmail)));
-            boolean flag = false;
-            for (Object[] data : expectedData) {
-                if (orbNum.equals(data[0]) && name.equals(data[1]) && entityType.equals(data[2])
-                        && ((employee == null && data[3] == null) || employee.equals(data[3]))
-                        && ((locationEmployee == null && data[4] == null) || locationEmployee.equals(data[4]))
-                        && ((facebookLikes == null && data[5] == null) || facebookLikes.equals(data[5]))
-                        && ((twitterFollowers == null && data[6] == null) || twitterFollowers.equals(data[6]))
-                        && ((totalAmountRaised == null && data[7] == null) || totalAmountRaised.equals(data[7]))
-                        && ((lastFundingRoundAmount == null && data[8] == null)
-                                || lastFundingRoundAmount.equals(data[8]))
-                        && ((searchRank == null && data[9] == null) || searchRank.equals(data[9]))
-                        && consolidateEmployeeRange.equals(data[10])
-                        && consolidateRevenueRange.equals(data[11]) && primaryIndustry.equals(data[12])
-                        && domain.equals(data[13]) && primaryDomain.equals(data[14]) && isSecondaryDomain == data[15]
-                        && domainHasEmail == data[16]) {
-                    flag = true;
-                    break;
-                }
-            }
-            Assert.assertTrue(flag);
+            String key = record.get("OrbNum").toString() + "_" + record.get("Domain").toString();
+            Object[] expectedRecord = expectedMap.get(key);
+            log.info("actual record: {}, expected record: {}", record.toString(), JsonUtils.serialize(expectedRecord));
+            Assert.assertNotNull(expectedRecord);
+            Assert.assertTrue(isObjEquals(record.get("OrbNum"), expectedRecord[0]));
+            Assert.assertTrue(isObjEquals(record.get("Name"), expectedRecord[1]));
+            Assert.assertTrue(isObjEquals(record.get("EntityType"), expectedRecord[2]));
+            Assert.assertTrue(isObjEquals(record.get("Employee"), expectedRecord[3]));
+            Assert.assertTrue(isObjEquals(record.get("LocationEmployee"), expectedRecord[4]));
+            Assert.assertTrue(isObjEquals(record.get("FacebookLikes"), expectedRecord[5]));
+            Assert.assertTrue(isObjEquals(record.get("TwitterFollowers"), expectedRecord[6]));
+            Assert.assertTrue(isObjEquals(record.get("TotalAmountRaised"), expectedRecord[7]));
+            Assert.assertTrue(isObjEquals(record.get("LastFundingRoundAmount"), expectedRecord[8]));
+            Assert.assertTrue(isObjEquals(record.get("SearchRank"), expectedRecord[9]));
+            Assert.assertTrue(isObjEquals(record.get("ConsolidateEmployeeRange"), expectedRecord[10]));
+            Assert.assertTrue(isObjEquals(record.get("ConsolidateRevenueRange"), expectedRecord[11]));
+            Assert.assertTrue(isObjEquals(record.get("PrimaryIndustry"), expectedRecord[12]));
+            Assert.assertTrue(isObjEquals(record.get("Domain"), expectedRecord[13]));
+            Assert.assertTrue(isObjEquals(record.get("PrimaryDomain"), expectedRecord[14]));
+            Assert.assertTrue(isObjEquals(record.get("IsSecondaryDomain"), expectedRecord[15]));
+            Assert.assertTrue(isObjEquals(record.get("DomainHasEmail"), expectedRecord[16]));
             rowNum++;
         }
         Assert.assertEquals(rowNum, 12);
