@@ -256,8 +256,8 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private DimensionMetadata ptnMetadata() {
         DimensionMetadata metadata = new DimensionMetadata();
-        Map<String, Object> content = pathPtnValue(".*dnb\\.com/contents/.*", ALL_CTN_PAGE_PTN_NAME);
-        Map<String, Object> video = pathPtnValue(".*dnb\\.com/contents/videos/.*", VIDEO_CTN_PAGE_PTN_NAME);
+        Map<String, Object> content = pathPtnValue("*dnb.com/contents/*", ALL_CTN_PAGE_PTN_NAME);
+        Map<String, Object> video = pathPtnValue("*dnb.com/contents/videos/*", VIDEO_CTN_PAGE_PTN_NAME);
         metadata.setDimensionValues(Arrays.asList(content, video));
         metadata.setCardinality(2);
         return metadata;
