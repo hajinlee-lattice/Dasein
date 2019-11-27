@@ -54,7 +54,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         setupTemplates();
-        // webVisit_d5c08346-1489-4390-b495-59d043305dde.csv
+        // webVisit_8a6d017b-9d47-45ef-832d-9655751fd6a2.csv
         mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 1,
                 generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
         Thread.sleep(2000);
@@ -86,7 +86,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         processAnalyze(request);
     }
 
-    @Test(groups = "end2end", dependsOnMethods = "test")
+    @Test(groups = "end2end", dependsOnMethods = "test", enabled = false)
     private void testReplace() throws Exception {
         importSmallWebVisitFile();
         createReplaceWebVisitAction();
@@ -106,7 +106,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     private void importSmallWebVisitFile() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        // webVisit_01d55da4-02f9-45b4-9232-09ea59ec2635.csv
+        // webVisit_46d8cd33-f55d-4fcc-8371-261ebe58fcf9.csv
         mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 2,
                 generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
         Thread.sleep(2000);
