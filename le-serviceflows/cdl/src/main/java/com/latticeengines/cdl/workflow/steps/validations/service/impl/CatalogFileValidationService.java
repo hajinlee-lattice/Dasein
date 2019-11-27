@@ -131,12 +131,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
             return false;
         } else {
             try {
-                URI uri = new URI((String)null, (String)null, path, (String)null);
-                String norm = uri.normalize().getPath();
-                // check trying to go via the parent dir or trying to go to the parent dir
-                if (norm.startsWith("/../") || norm.equals("/..")) {
-                    return false;
-                }
+                new URI((String)null, (String)null, path, (String)null);
             } catch (URISyntaxException var4) {
                 return false;
             }
