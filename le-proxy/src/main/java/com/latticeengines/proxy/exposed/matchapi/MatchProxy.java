@@ -13,6 +13,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.InternalAccountIdLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
@@ -21,12 +22,12 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
-import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("matchProxy")
-public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
+public class MatchProxy extends BaseRestApiProxy {
 
     private static final Set<String> MATCHAPI_RETRY_MESSAGES = ImmutableSet.of("Connection reset", "502 Bad Gateway");
 
@@ -35,7 +36,6 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
         this.setRetryMessages(MATCHAPI_RETRY_MESSAGES);
     }
 
-    @Override
     public MatchOutput matchRealTime(MatchInput input) {
         String url = constructUrl("/realtime");
         return postKryo("realtime_match", url, input, MatchOutput.class);
@@ -46,7 +46,6 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
         return postKryo("bulkrealtime_match", url, input, BulkMatchOutput.class);
     }
 
-    @Override
     public MatchCommand matchBulk(MatchInput matchInput, String hdfsPod) {
         String url = constructUrl("/bulk?podid={pod}", hdfsPod);
         return post("bulk_match", url, matchInput, MatchCommand.class);
@@ -57,39 +56,33 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
         return post("bulk_match_conf", url, matchInput, BulkMatchWorkflowConfiguration.class);
     }
 
-    @Override
     public MatchCommand bulkMatchStatus(String rootuid) {
         String url = constructUrl("/bulk/{rootuid}", rootuid);
         // not tracing request that commonly used in polling
         return getNoTracing("bulk_status", url, MatchCommand.class);
     }
 
-    @Override
     public EntityPublishStatistics publishEntity(EntityPublishRequest request) {
         String url = constructUrl("/entity/publish");
         return postKryo("publish_entity", url, request, EntityPublishStatistics.class);
     }
 
-    @Override
     public List<EntityPublishStatistics> publishEntity(List<EntityPublishRequest> requests) {
         String url = constructUrl("/entity/publish/list");
         List<?> list = postKryo("publish_entity_list", url, requests, List.class);
         return JsonUtils.convertList(list, EntityPublishStatistics.class);
     }
 
-    @Override
     public BumpVersionResponse bumpVersion(BumpVersionRequest request) {
         String url = constructUrl("/entity/versions");
         return postKryo("bump_version", url, request, BumpVersionResponse.class);
     }
 
-    @Override
     public BumpVersionResponse bumpNextVersion(BumpVersionRequest request) {
         String url = constructUrl("/entity/versions/next");
         return postKryo("bump_next_version", url, request, BumpVersionResponse.class);
     }
 
-    @Override
     public Map<EntityMatchEnvironment, EntityMatchVersion> getEntityMatchVersions(String customerSpace,
             boolean clearCache) {
         String url = constructUrl("/entity/versions/{customerSpace}?{clearCache}", customerSpace, clearCache);
@@ -97,11 +90,21 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
         return JsonUtils.convertMap(map, EntityMatchEnvironment.class, EntityMatchVersion.class);
     }
 
-    @Override
     public EntityMatchVersion getEntityMatchVersion(@NotNull String customerSpace, @NotNull EntityMatchEnvironment env,
             boolean clearCache) {
         String url = constructUrl("/entity/versions/{customerSpace}/{environment}?{clearCache}", customerSpace,
                 env.name(), clearCache);
         return get("get_entity_match_version", url, EntityMatchVersion.class);
+    }
+
+    public String lookupInternalAccountId(@NotNull String customerSpace, @NotNull String lookupId,
+            @NotNull String lookupIdVal, DataCollection.Version version) {
+        String url = constructUrl("/cdllookup", customerSpace);
+        InternalAccountIdLookupRequest request = new InternalAccountIdLookupRequest();
+        request.setCustomerSpace(customerSpace);
+        request.setLookupId(lookupId);
+        request.setLookupIdVal(lookupIdVal);
+        request.setDataCollectionVersion(version);
+        return post("lookup_internal_account_id", url, request, String.class);
     }
 }

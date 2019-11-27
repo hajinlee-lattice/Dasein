@@ -99,6 +99,7 @@ public enum InterfaceName {
     Longitude, Latitude,
 
     // CDL
+    AtlasLookupKey, //
     VdbAccountId, // account id whose uniqueness is managed by vdb
     LEAccountIDLong, // TODO: to be replaced by VdbAccountId
     VdbContactId, // contact id whose uniqueness is managed by vdb
