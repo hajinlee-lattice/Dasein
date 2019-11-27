@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,17 +6,24 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AddNotNullFieldFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DenseFieldsCountFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceDedupeWithDenseFieldsTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceDedupeWithDenseFieldsTransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("sourceDedupeWithDenseFieldsFlow")
+/**
+ * A pipeline step in LatticeCacheSeed rebuild pipeline
+ */
+@Component(SourceDedupeWithDenseFieldsFlow.DATAFLOW_BEAN)
 public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<SourceDedupeWithDenseFieldsTransformerConfig> {
+
+    public static final String DATAFLOW_BEAN = "sourceDedupeWithDenseFieldsFlow";
+    public static final String TRANSFORMER = "sourceDedupeWithDenseFieldsTransformer";
 
     private static final String DENSE_FIELDS_COUNT = "__DENSE_FIELDS_COUNT__";
     private static final String NEW_DEDUPE_FIELD_PREFIX = "__NEW_DEDUPE_FIELD_PREFIX__";
@@ -66,12 +73,12 @@ public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<Source
 
     @Override
     public String getDataFlowBeanName() {
-        return "sourceDedupeWithDenseFieldsFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "sourceDedupeWithDenseFieldsTransformer";
+        return TRANSFORMER;
 
     }
 }

@@ -2,11 +2,11 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.util.List;
 
-import org.apache.avro.Schema;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.service.CountryCodeService;
@@ -18,7 +18,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowP
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(SourceStandardizationFlow.TRANSFORMER_NAME)
 public class StandardizationTransformer
@@ -26,7 +25,7 @@ public class StandardizationTransformer
 
     private static final Logger log = LoggerFactory.getLogger(StandardizationTransformer.class);
 
-    @Autowired
+    @Inject
     private CountryCodeService countryCodeService;
 
     @Override
@@ -512,14 +511,6 @@ public class StandardizationTransformer
             }
         }
         return true;
-    }
-
-    @Override
-    protected Schema getTargetSchema(Table result, StandardizationFlowParameter parameters,
-            StandardizationTransformerConfig config, List<Schema> baseSchemas) {
-        // respect isSyncSchemaProp for backward compatibility
-        config.setShouldInheritSchemaProp(config.isSyncSchemaProp());
-        return super.getTargetSchema(result, parameters, config, baseSchemas);
     }
 
     @Override

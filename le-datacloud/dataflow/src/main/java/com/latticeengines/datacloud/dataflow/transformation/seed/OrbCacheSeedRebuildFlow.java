@@ -1,22 +1,26 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.OrbCacheSeedRebuildBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedRebuildConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.OrbCacheSeedRebuildConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
-@Component("orbCacheSeedRebuildFlow")
+@Component(OrbCacheSeedRebuildFlow.DATAFLOW_BEAN)
 public class OrbCacheSeedRebuildFlow extends ConfigurableFlowBase<OrbCacheSeedRebuildConfig> {
+
+    public static final String DATAFLOW_BEAN = "orbCacheSeedRebuildFlow";
+    public static final String TRANSFORMER = "orbCacheSeedRebuildTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -86,12 +90,12 @@ public class OrbCacheSeedRebuildFlow extends ConfigurableFlowBase<OrbCacheSeedRe
 
     @Override
     public String getDataFlowBeanName() {
-        return "orbCacheSeedRebuildFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "orbCacheSeedRebuildTransformer";
+        return TRANSFORMER;
     }
 
     @Override
