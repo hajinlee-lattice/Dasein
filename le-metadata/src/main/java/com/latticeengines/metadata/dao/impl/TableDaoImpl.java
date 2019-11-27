@@ -2,13 +2,12 @@ package com.latticeengines.metadata.dao.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
@@ -52,9 +51,9 @@ public class TableDaoImpl extends BaseDaoImpl<Table> implements TableDao {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public List<Table> findByNames(Set<String> names) {
+    public List<Table> findByNames(List<String> names) {
         Session session = getSessionFactory().getCurrentSession();
-        Iterable<List<String>> namesList = Iterables.partition(names, DEFAULT_JDBC_FETCH_SIZE);
+        List<List<String>> namesList = Lists.partition(names, DEFAULT_JDBC_FETCH_SIZE);
         List<Table> result = new ArrayList<>();
         namesList.forEach(
                 namesToQuery -> {

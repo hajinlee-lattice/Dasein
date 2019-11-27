@@ -25,6 +25,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -200,9 +202,10 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         List<Table> tables = tableEntityMgr.findAllWithExpiredRetentionPolicy(0, 10);
         assertTrue(tables.size() > 0);
 
-        Map<String, RetentionPolicy> policyMap = new HashMap<>();
-        policyMap.put(tableName, RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
-        tableEntityMgr.updateTableRetentionPolicies(policyMap);
+        RetentionPolicyUpdateDetail retentionPolicyUpdateDetail = new RetentionPolicyUpdateDetail();
+        retentionPolicyUpdateDetail.setTableNames(Lists.newArrayList(tableName));
+        retentionPolicyUpdateDetail.setRetentionPolicy(RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
+        tableEntityMgr.updateTableRetentionPolicies(retentionPolicyUpdateDetail);
         result = tableEntityMgr.findByName(tableName);
         assertEquals(result.getRetentionPolicy(), "KEEP_3_WEEKS");
     }
@@ -251,3 +254,4 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
 }
+

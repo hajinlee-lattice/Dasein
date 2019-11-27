@@ -9,9 +9,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -23,11 +21,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
@@ -191,9 +191,10 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(updatedTable2.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
 
-        Map<String, RetentionPolicy> policyMap = new HashMap<>();
-        policyMap.put(TABLE_NAME, RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
-        metadataProxy.updateTableRetentionPolicies(customerSpace1, policyMap);
+        RetentionPolicyUpdateDetail retentionPolicyUpdateDetail = new RetentionPolicyUpdateDetail();
+        retentionPolicyUpdateDetail.setTableNames(Lists.newArrayList(TABLE_NAME));
+        retentionPolicyUpdateDetail.setRetentionPolicy(RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
+        metadataProxy.updateTableRetentionPolicies(customerSpace1, retentionPolicyUpdateDetail);
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_3_WEEKS");
     }

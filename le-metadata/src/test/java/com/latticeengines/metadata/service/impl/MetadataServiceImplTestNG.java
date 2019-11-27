@@ -7,10 +7,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -36,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -150,9 +150,10 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         List<Table> tables = mdService.findAllWithExpiredRetentionPolicy(0, 10);
         assertTrue(tables.size() > 0);
 
-        Map<String, RetentionPolicy> policyMap = new HashMap<>();
-        policyMap.put(tableName, RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
-        mdService.updateTableRetentionPolicies(customerSpace, policyMap);
+        RetentionPolicyUpdateDetail retentionPolicyUpdateDetail = new RetentionPolicyUpdateDetail();
+        retentionPolicyUpdateDetail.setTableNames(Lists.newArrayList(tableName));
+        retentionPolicyUpdateDetail.setRetentionPolicy(RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
+        mdService.updateTableRetentionPolicies(customerSpace, retentionPolicyUpdateDetail);
         result = mdService.getTable(customerSpace, tableName);
         assertEquals(result.getRetentionPolicy(), "KEEP_3_WEEKS");
     }

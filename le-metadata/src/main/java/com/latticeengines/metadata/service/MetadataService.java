@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public interface MetadataService {
@@ -58,5 +59,5 @@ public interface MetadataService {
 
     List<Table> findAllWithExpiredRetentionPolicy(int index, int max);
 
-    void updateTableRetentionPolicies(CustomerSpace customerSpace, Map<String, RetentionPolicy> policyMap);
+    void updateTableRetentionPolicies(CustomerSpace customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail);
 }

@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.MetadataService;
 
@@ -198,9 +199,9 @@ public class TableResourceHelper {
         return true;
     }
 
-    public boolean updateTableRetentionPolicies(String customerSpace, Map<String, RetentionPolicy> policyMap) {
+    public boolean updateTableRetentionPolicies(String customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        mdService.updateTableRetentionPolicies(space, policyMap);
+        mdService.updateTableRetentionPolicies(space, retentionPolicyUpdateDetail);
         return true;
     }
 

@@ -3,7 +3,6 @@ package com.latticeengines.metadata.entitymgr.impl;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +42,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -551,11 +551,11 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void updateTableRetentionPolicies(Map<String, RetentionPolicy> policyMap) {
-        List<Table> tables = tableDao.findByNames(policyMap.keySet());
+    public void updateTableRetentionPolicies(RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
+        List<Table> tables = tableDao.findByNames(retentionPolicyUpdateDetail.getTableNames());
         if (CollectionUtils.isNotEmpty(tables)) {
             tables.forEach(table -> {
-                table.setRetentionPolicy(RetentionPolicyUtil.retentionPolicyToStr(policyMap.get(table.getName())));
+                table.setRetentionPolicy(RetentionPolicyUtil.retentionPolicyToStr(retentionPolicyUpdateDetail.getRetentionPolicy()));
             });
             tableDao.update(tables, true);
         }

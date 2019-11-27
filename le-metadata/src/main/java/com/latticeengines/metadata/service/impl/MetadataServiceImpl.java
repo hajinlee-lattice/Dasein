@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -250,8 +251,8 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void updateTableRetentionPolicies(CustomerSpace customerSpace, Map<String, RetentionPolicy> policyMap) {
-        tableEntityMgr.updateTableRetentionPolicies(policyMap);
+    public void updateTableRetentionPolicies(CustomerSpace customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
+        tableEntityMgr.updateTableRetentionPolicies(retentionPolicyUpdateDetail);
     }
 
     @NoCustomSpaceAndType

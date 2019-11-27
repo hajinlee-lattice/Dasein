@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -26,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
@@ -202,7 +202,7 @@ public class TableResource extends BaseRestResource {
     @ResponseBody
     @ApiOperation(value = "batch update table retention policy")
     public Boolean updateTableRetentionPolicies(@PathVariable String customerSpace,
-                                                @RequestBody Map<String, RetentionPolicy> policyMap) {
-        return tableResourceHelper.updateTableRetentionPolicies(customerSpace, policyMap);
+                                                @RequestBody RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
+        return tableResourceHelper.updateTableRetentionPolicies(customerSpace, retentionPolicyUpdateDetail);
     }
 }
