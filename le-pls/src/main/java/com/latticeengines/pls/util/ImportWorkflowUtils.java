@@ -1,6 +1,6 @@
 package com.latticeengines.pls.util;
 
-import static com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils.convertFieldNameToAvroFriendlyFormat;
+import static com.latticeengines.common.exposed.util.AvroUtils.getAvroFriendlyString;
 import static com.latticeengines.pls.metadata.resolution.MetadataResolver.distinguishDateAndTime;
 import static com.latticeengines.pls.metadata.resolution.MetadataResolver.getFundamentalTypeFromFieldType;
 import static com.latticeengines.pls.metadata.resolution.MetadataResolver.getStatisticalTypeFromFieldType;
@@ -339,7 +339,7 @@ public class ImportWorkflowUtils {
                 validateSpecFieldDefinition(section.getKey(), specDefinition);
 
                 // Convert Spec fieldNames to Avro friendly format if necessary.
-                String avroFieldName = convertFieldNameToAvroFriendlyFormat(specDefinition.getFieldName());
+                String avroFieldName = getAvroFriendlyString(specDefinition.getFieldName());
                 if (!avroFieldName.equals(specDefinition.getFieldName())) {
                     log.warn("Found non-Avro compatible Spec fieldName {} in section {}", specDefinition.getFieldName(),
                             section.getKey());
@@ -468,7 +468,7 @@ public class ImportWorkflowUtils {
                 validateSpecFieldDefinition(section.getKey(), specDefinition);
 
                 // Convert Spec fieldNames to Avro friendly format if necessary.
-                String avroFieldName = convertFieldNameToAvroFriendlyFormat(specDefinition.getFieldName());
+                String avroFieldName = getAvroFriendlyString(specDefinition.getFieldName());
                 if (!avroFieldName.equals(specDefinition.getFieldName())) {
                     log.warn("Found non-Avro compatible Spec fieldName {} in section {}", specDefinition.getFieldName(),
                             section.getKey());
@@ -773,7 +773,7 @@ public class ImportWorkflowUtils {
                 validateSpecFieldDefinition(section.getKey(), specDefinition);
 
                 // Convert Spec fieldNames to Avro friendly format if necessary.
-                String avroFieldName = convertFieldNameToAvroFriendlyFormat(specDefinition.getFieldName());
+                String avroFieldName = getAvroFriendlyString(specDefinition.getFieldName());
                 if (!avroFieldName.equals(specDefinition.getFieldName())) {
                     log.warn("Found non-Avro compatible Spec fieldName {} in section {}", specDefinition.getFieldName(),
                             section.getKey());

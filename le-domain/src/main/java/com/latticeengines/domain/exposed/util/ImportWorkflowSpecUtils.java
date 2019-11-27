@@ -1,9 +1,10 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.common.exposed.util.AvroUtils.getAvroFriendlyString;
+
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avro.SchemaParseException;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -97,10 +98,10 @@ public class ImportWorkflowSpecUtils {
         InterfaceName interfaceName = null;
         // A blank field name means that it's a new custom field.  Generate a field name from the column name.
         if (StringUtils.isBlank(definition.getFieldName())) {
-            attrName = convertFieldNameToAvroFriendlyFormat(definition.getColumnName());
+            attrName = getAvroFriendlyString(definition.getColumnName());
             attrName = USER_PREFIX + attrName;
         } else {
-            attrName = convertFieldNameToAvroFriendlyFormat(definition.getFieldName());
+            attrName = getAvroFriendlyString(definition.getFieldName());
             try {
                 interfaceName = InterfaceName.valueOf(definition.getFieldName());
             } catch (IllegalArgumentException e) {
@@ -137,21 +138,6 @@ public class ImportWorkflowSpecUtils {
                 //.failImportValidator()
                 //.defaultValueStr("")
                 .build();
-    }
-
-    // Since it was unclear how to use the original function, this function was copied from:
-    // ledp/le-pls/src/main/java/com/latticeengines/pls/util/ValidateFileHeaderUtils.java
-    public static String convertFieldNameToAvroFriendlyFormat(String fieldName) {
-        int length = fieldName.length();
-        if (length == 0) {
-            throw new SchemaParseException("Empty name");
-        }
-        StringBuilder sb = new StringBuilder();
-        char first = fieldName.charAt(0);
-        if (!(Character.isLetter(first) || first == '_')) {
-            sb.append(AVRO_FIELD_NAME_PREFIX);
-        }
-        return sb.append(fieldName).toString().replaceAll("[^A-Za-z0-9_]", "_");
     }
 
 }
