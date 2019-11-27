@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.util.Collections;
-import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -31,11 +30,6 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
         Assert.assertEquals(generated, expected);
     }
 
-    @Test(groups = "unit", dataProvider = "sourceMediumProvider")
-    public void testSourceMediumDisplayName(String timeRange, Map<String, Object> SourceMedium, String expected) {
-        Assert.assertEquals(ActivityMetricsGroupUtils.generateSourceMediumDisplayName(timeRange, SourceMedium), expected);
-    }
-
     @DataProvider(name = "groupNameProvider")
     public Object[][] groupNameProvider() {
         return new Object[][]{
@@ -62,11 +56,4 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
                 { "b_2_4_w", "between 2 and 4 week" } };
     }
 
-    @DataProvider(name = "sourceMediumProvider")
-    public Object[][] sourceMediumProvider() {
-        return new Object[][]{
-                {"in last 2 week", Collections.singletonMap("SourceMedium", "__others__"), "Visit in last 2 week by all other sources"}, //
-                {"in last 2 week", Collections.singletonMap("SourceMedium", "w.le.c"), "Visit in last 2 week from w.le.c"}
-        };
-    }
 }
