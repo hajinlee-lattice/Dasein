@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIng
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(OrbFileToSourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(HGDataFileToSourceTestNG.class);
 
     private GeneralSource source = new GeneralSource("HGSeedRaw");
 

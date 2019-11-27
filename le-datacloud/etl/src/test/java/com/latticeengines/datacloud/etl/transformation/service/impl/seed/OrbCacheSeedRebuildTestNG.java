@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.seed;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,52 +8,39 @@ import java.util.List;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.OrbCacheSeed;
-import com.latticeengines.datacloud.core.source.impl.OrbCompanyRaw;
-import com.latticeengines.datacloud.core.source.impl.OrbDomainRaw;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.dataflow.transformation.seed.OrbCacheSeedRebuildFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.ConsolidateIndustryStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.FieldType;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.StandardizationStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.OrbCacheSeedRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class OrbCacheSeedRebuildServiceTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(OrbCacheSeedRebuildServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(OrbCacheSeedRebuildTestNG.class);
 
-    @Autowired
-    OrbCacheSeed source;
-
-    @Autowired
-    OrbCompanyRaw baseSourceOrbCompanyRaw;
-
-    @Autowired
-    OrbDomainRaw baseSourceOrbDomainRaw;
-
-    String targetSourceName = "OrbCacheSeedStandard";
-
-    ObjectMapper om = new ObjectMapper();
+    private GeneralSource source = new GeneralSource("OrbCacheSeedStandard");
+    private GeneralSource orbCompanyRaw = new GeneralSource("OrbCompanyRaw");
+    private GeneralSource orbDomainRaw = new GeneralSource("OrbDomainRaw");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
-        uploadBaseSourceFile(baseSourceOrbCompanyRaw, "OrbCompanyRaw", baseSourceVersion);
-        uploadBaseSourceFile(baseSourceOrbDomainRaw, "OrbDomainRaw", baseSourceVersion);
+        uploadBaseSourceFile(orbCompanyRaw, "OrbCompanyRaw", baseSourceVersion);
+        uploadBaseSourceFile(orbDomainRaw, "OrbDomainRaw", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -63,108 +50,94 @@ public class OrbCacheSeedRebuildServiceTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
-            configuration.setName("OrbCacheSeedRebuild");
-            configuration.setVersion(targetVersion);
+        configuration.setName("OrbCacheSeedRebuild");
+        configuration.setVersion(targetVersion);
 
-            // Field standardization for OrbCompany
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add("OrbCompanyRaw");
-            step1.setBaseSources(baseSources);
-            step1.setTransformer("standardizationTransformer");
-            step1.setTargetSource("OrbCompanyRawMarked");
-            String confParamStr1 = getStandardizationTransformerConfigForOrbCompanyMarker();
-            step1.setConfiguration(confParamStr1);
+        // Field standardization for OrbCompany
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<String>();
+        baseSources.add(orbCompanyRaw.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
+        step1.setTargetSource("OrbCompanyRawMarked");
+        String confParamStr1 = getStandardizationTransformerConfigForOrbCompanyMarker();
+        step1.setConfiguration(confParamStr1);
 
-            // Data cleanup for OrbCompany
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            baseSources = new ArrayList<String>();
-            baseSources.add("OrbCompanyRawMarked");
-            step2.setBaseSources(baseSources);
-            step2.setTransformer("standardizationTransformer");
-            step2.setTargetSource("OrbCompany");
-            String confParamStr2 = getStandardizationTransformerConfigForCleanup();
-            step2.setConfiguration(confParamStr2);
+        // Data cleanup for OrbCompany
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        baseSources = new ArrayList<String>();
+        baseSources.add("OrbCompanyRawMarked");
+        step2.setBaseSources(baseSources);
+        step2.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
+        step2.setTargetSource("OrbCompany");
+        String confParamStr2 = getStandardizationTransformerConfigForCleanup();
+        step2.setConfiguration(confParamStr2);
 
-            // Field standardization for OrbDomain
-            TransformationStepConfig step3 = new TransformationStepConfig();
-            baseSources = new ArrayList<String>();
-            baseSources.add("OrbDomainRaw");
-            step3.setBaseSources(baseSources);
-            step3.setTransformer("standardizationTransformer");
-            step3.setTargetSource("OrbDomainRawMarked");
-            String confParamStr3 = getStandardizationTransformerConfigForOrbDomain();
-            step3.setConfiguration(confParamStr3);
+        // Field standardization for OrbDomain
+        TransformationStepConfig step3 = new TransformationStepConfig();
+        baseSources = new ArrayList<String>();
+        baseSources.add(orbDomainRaw.getSourceName());
+        step3.setBaseSources(baseSources);
+        step3.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
+        step3.setTargetSource("OrbDomainRawMarked");
+        String confParamStr3 = getStandardizationTransformerConfigForOrbDomain();
+        step3.setConfiguration(confParamStr3);
 
-            // Data cleanup for OrbDomain
-            TransformationStepConfig step4 = new TransformationStepConfig();
-            baseSources = new ArrayList<String>();
-            baseSources.add("OrbDomainRawMarked");
-            step4.setBaseSources(baseSources);
-            step4.setTransformer("standardizationTransformer");
-            step4.setTargetSource("OrbDomain");
-            String confParamStr4 = getStandardizationTransformerConfigForCleanup();
-            step4.setConfiguration(confParamStr4);
+        // Data cleanup for OrbDomain
+        TransformationStepConfig step4 = new TransformationStepConfig();
+        baseSources = new ArrayList<String>();
+        baseSources.add("OrbDomainRawMarked");
+        step4.setBaseSources(baseSources);
+        step4.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
+        step4.setTargetSource("OrbDomain");
+        String confParamStr4 = getStandardizationTransformerConfigForCleanup();
+        step4.setConfiguration(confParamStr4);
 
-            // Generate OrbCacheSeed
-            TransformationStepConfig step5 = new TransformationStepConfig();
-            baseSources = new ArrayList<String>();
-            baseSources.add("OrbCompany");
-            baseSources.add("OrbDomain");
-            step5.setBaseSources(baseSources);
-            step5.setTransformer("orbCacheSeedRebuildTransformer");
-            step5.setTargetSource("OrbCacheSeed");
-            String confParamStr5 = getOrbCacheSeedRebuildConfig();
-            step5.setConfiguration(confParamStr5);
+        // Generate OrbCacheSeed
+        TransformationStepConfig step5 = new TransformationStepConfig();
+        baseSources = new ArrayList<String>();
+        baseSources.add("OrbCompany");
+        baseSources.add("OrbDomain");
+        step5.setBaseSources(baseSources);
+        step5.setTransformer(OrbCacheSeedRebuildFlow.TRANSFORMER);
+        step5.setTargetSource("OrbCacheSeed");
+        String confParamStr5 = getOrbCacheSeedRebuildConfig();
+        step5.setConfiguration(confParamStr5);
 
-            // Generate OrbCacheSeedStantard
-            TransformationStepConfig step6 = new TransformationStepConfig();
-            baseSources = new ArrayList<String>();
-            baseSources.add("OrbCacheSeed");
-            step6.setBaseSources(baseSources);
-            step6.setTransformer("standardizationTransformer");
-            step6.setTargetSource(targetSourceName);
-            String confParamStr6 = getOrbCacheSeedStandardConfig();
-            step6.setConfiguration(confParamStr6);
+        // Generate OrbCacheSeedStantard
+        TransformationStepConfig step6 = new TransformationStepConfig();
+        baseSources = new ArrayList<String>();
+        baseSources.add("OrbCacheSeed");
+        step6.setBaseSources(baseSources);
+        step6.setTransformer(DataCloudConstants.TRANSFORMER_STANDARDIZATION);
+        step6.setTargetSource(source.getSourceName());
+        String confParamStr6 = getOrbCacheSeedStandardConfig();
+        step6.setConfiguration(confParamStr6);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            steps.add(step2);
-            steps.add(step3);
-            steps.add(step4);
-            steps.add(step5);
-            steps.add(step6);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        steps.add(step1);
+        steps.add(step2);
+        steps.add(step3);
+        steps.add(step4);
+        steps.add(step5);
+        steps.add(step6);
 
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return configuration;
     }
 
-    private String getStandardizationTransformerConfigForOrbCompanyMarker() throws JsonProcessingException {
+    private String getStandardizationTransformerConfigForOrbCompanyMarker() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] domainFields = { "Website" };
         conf.setDomainFields(domainFields);
@@ -201,10 +174,10 @@ public class OrbCacheSeedRebuildServiceTestNG
                 StandardizationStrategy.CONSOLIDATE_RANGE,
                 StandardizationStrategy.CONSOLIDATE_INDUSTRY, StandardizationStrategy.MARKER };
         conf.setSequence(sequence);
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getStandardizationTransformerConfigForCleanup() throws JsonProcessingException {
+    private String getStandardizationTransformerConfigForCleanup() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String filterExpression = "IsValid == true";
         conf.setFilterExpression(filterExpression);
@@ -215,10 +188,10 @@ public class OrbCacheSeedRebuildServiceTestNG
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
                 StandardizationStrategy.DISCARD };
         conf.setSequence(sequence);
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getStandardizationTransformerConfigForOrbDomain() throws JsonProcessingException {
+    private String getStandardizationTransformerConfigForOrbDomain() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] dedupFields = { "OrbNum", "WebDomain" };
         conf.setDedupFields(dedupFields);
@@ -238,10 +211,10 @@ public class OrbCacheSeedRebuildServiceTestNG
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.DOMAIN,
                 StandardizationStrategy.DEDUP, StandardizationStrategy.CONVERT_TYPE, StandardizationStrategy.MARKER };
         conf.setSequence(sequence);
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getOrbCacheSeedRebuildConfig() throws JsonProcessingException {
+    private String getOrbCacheSeedRebuildConfig() {
         OrbCacheSeedRebuildConfig conf = new OrbCacheSeedRebuildConfig();
         conf.setCompanyFileOrbNumField("OrbNum");
         conf.setCompanyFileEntityTypeField("EntityType");
@@ -254,10 +227,10 @@ public class OrbCacheSeedRebuildServiceTestNG
         conf.setOrbCacheSeedPrimaryDomainField("PrimaryDomain");
         conf.setOrbCacheSeedIsSecondaryDomainField("IsSecondaryDomain");
         conf.setOrbCacheSeedDomainHasEmailField("DomainHasEmail");
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getOrbCacheSeedStandardConfig() throws JsonProcessingException {
+    private String getOrbCacheSeedStandardConfig() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String filterExpression = "IsSecondaryDomain == false && (DomainHasEmail == null || DomainHasEmail == false)";
         conf.setFilterExpression(filterExpression);
@@ -280,14 +253,7 @@ public class OrbCacheSeedRebuildServiceTestNG
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
                 StandardizationStrategy.RETAIN, StandardizationStrategy.RENAME, StandardizationStrategy.ADD_FIELD };
         conf.setSequence(sequence);
-        return om.writeValueAsString(conf);
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return JsonUtils.serialize(conf);
     }
 
     @Override
@@ -321,7 +287,7 @@ public class OrbCacheSeedRebuildServiceTestNG
 
     void confirmIntermediateResultFile() {
         String path = hdfsPathBuilder.constructSnapshotDir("OrbCacheSeed", targetVersion).toString();
-        System.out.println("Checking for result file: " + path);
+        log.info("Checking for result file: " + path);
         List<String> files;
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
@@ -337,7 +303,7 @@ public class OrbCacheSeedRebuildServiceTestNG
             Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
         }
 
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, path + "/*.avro");
         verifyIntermediateResultAvroRecords(records);
     }
 

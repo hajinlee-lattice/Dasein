@@ -150,13 +150,6 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("SampleFraction")
     private Float sampleFraction; // for strategy SAMPLE
 
-    // Deprecated. Replaced with {@link
-    // #TransformerConfig.isShouldInheritSchemaProp}
-    @Deprecated
-    @JsonProperty("SyncSchemaProp")
-    private boolean syncSchemaProp; // If true, target schema will retain all
-                                    // the properties from base schema
-
     public String[] getDomainFields() {
         return domainFields;
     }
@@ -493,14 +486,6 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setSampleFraction(Float sampleFraction) {
         this.sampleFraction = sampleFraction;
-    }
-
-    public boolean isSyncSchemaProp() {
-        return syncSchemaProp;
-    }
-
-    public void setSyncSchemaProp(boolean syncSchemaProp) {
-        this.syncSchemaProp = syncSchemaProp;
     }
 
     public enum StandardizationStrategy {

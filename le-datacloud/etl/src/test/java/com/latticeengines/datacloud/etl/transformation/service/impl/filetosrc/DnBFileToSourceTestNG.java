@@ -92,12 +92,6 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
     }
 
     @Override
-    protected String getPathForResult() {
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
-        return hdfsPathBuilder.constructTransformationSourceDir(source, targetVersion).toString();
-    }
-
-    @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         String[] expectedDuns = { "972058411", "972058412", "972058413", "972058414", "972058415",

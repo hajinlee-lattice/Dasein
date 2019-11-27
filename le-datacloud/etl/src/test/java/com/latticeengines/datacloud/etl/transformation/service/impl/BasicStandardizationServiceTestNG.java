@@ -18,14 +18,11 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.SourceStandardizationFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
@@ -33,15 +30,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.St
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.StandardizationStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class BasicStandardizationServiceTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class BasicStandardizationServiceTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(BasicStandardizationServiceTestNG.class);
 
-    GeneralSource source = new GeneralSource("Output");
-    GeneralSource baseSource = new GeneralSource("Input");
-    GeneralSource intermediateSource = new GeneralSource("Intermediate");
-
-    ObjectMapper om = new ObjectMapper();
+    private GeneralSource source = new GeneralSource("Output");
+    private GeneralSource baseSource = new GeneralSource("Input");
+    private GeneralSource intermediateSource = new GeneralSource("Intermediate");
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
@@ -55,45 +49,47 @@ public class BasicStandardizationServiceTestNG
     }
 
     @Override
-    protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("BasicStandardization");
-            configuration.setVersion(targetVersion);
-
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add(baseSource.getSourceName());
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
-            step1.setTargetSource(intermediateSource.getSourceName());
-            String confParamStr1 = getFirstStepConfig();
-            step1.setConfiguration(confParamStr1);
-            
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<>();
-            inputSteps.add(0);
-            step2.setInputSteps(inputSteps);;
-            step2.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
-            step2.setTargetSource(source.getSourceName());
-            String confParamStr2 = getSecondStepConfig();
-            step2.setConfiguration(confParamStr2);
-
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            steps.add(step2);
-
-            // -----------
-            configuration.setSteps(steps);
-
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
-    private String getFirstStepConfig() throws JsonProcessingException {
+    @Override
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("BasicStandardization");
+        configuration.setVersion(targetVersion);
+
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(baseSource.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
+        step1.setTargetSource(intermediateSource.getSourceName());
+        String confParamStr1 = getFirstStepConfig();
+        step1.setConfiguration(confParamStr1);
+
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.add(0);
+        step2.setInputSteps(inputSteps);
+        ;
+        step2.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
+        step2.setTargetSource(source.getSourceName());
+        String confParamStr2 = getSecondStepConfig();
+        step2.setConfiguration(confParamStr2);
+
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
+        steps.add(step2);
+
+        // -----------
+        configuration.setSteps(steps);
+
+        return configuration;
+    }
+
+    private String getFirstStepConfig() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] updateFields = { "CHIEF_EXECUTIVE_OFFICER_NAME" };
         String[] updateExpressions = { "ID == 2 ? \"CEO2Fixed\" : CHIEF_EXECUTIVE_OFFICER_NAME" };
@@ -101,13 +97,13 @@ public class BasicStandardizationServiceTestNG
         conf.setUpdateFields(updateFields);
         conf.setUpdateExpressions(updateExpressions);
         conf.setUpdateInputFields(updateInputFields);
-        conf.setSyncSchemaProp(true);
+        conf.setShouldInheritSchemaProp(true);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.UPDATE };
         conf.setSequence(sequence);
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getSecondStepConfig() throws JsonProcessingException {
+    private String getSecondStepConfig() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] countryFields = { "Country" };
         conf.setCountryFields(countryFields);
@@ -124,33 +120,13 @@ public class BasicStandardizationServiceTestNG
         String[][] copyFields = { { "Name", "CopiedName" } };
         conf.setCopyFields(copyFields);
         conf.setChecksumField("Checksum");
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.COUNTRY,
-                StandardizationStrategy.STATE, StandardizationStrategy.STRING, StandardizationStrategy.DUNS,
-                StandardizationStrategy.ADD_ID, StandardizationStrategy.COPY, StandardizationStrategy.CHECKSUM};
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { //
+                StandardizationStrategy.COUNTRY, StandardizationStrategy.STATE, //
+                StandardizationStrategy.STRING, StandardizationStrategy.DUNS, //
+                StandardizationStrategy.ADD_ID, StandardizationStrategy.COPY, //
+                StandardizationStrategy.CHECKSUM };
         conf.setSequence(sequence);
-        return om.writeValueAsString(conf);
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+        return JsonUtils.serialize(conf);
     }
 
     // ID, Name, Country, State, ZipCode, DUNS, CHIEF_EXECUTIVE_OFFICER_NAME
@@ -206,7 +182,7 @@ public class BasicStandardizationServiceTestNG
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            Object[] expectedResult = expectedMap.get((Integer) record.get("ID"));
+            Object[] expectedResult = expectedMap.get(record.get("ID"));
             Assert.assertTrue(isObjEquals(record.get("Name"), expectedResult[1]));
             Assert.assertTrue(isObjEquals(record.get("Country"), expectedResult[2]));
             Assert.assertTrue(isObjEquals(record.get("State"), expectedResult[3]));
@@ -214,7 +190,7 @@ public class BasicStandardizationServiceTestNG
             Assert.assertTrue(isObjEquals(record.get("DUNS"), expectedResult[5]));
             Assert.assertTrue(isObjEquals(record.get("CopiedName"), expectedResult[6]));
             Assert.assertTrue(isObjEquals(record.get("CHIEF_EXECUTIVE_OFFICER_NAME"), expectedResult[7]));
-            Assert.assertFalse(rowIdSet.contains((Long) record.get("RowId")));
+            Assert.assertFalse(rowIdSet.contains(record.get("RowId")));
             rowIdSet.add((Long) record.get("RowId"));
             Assert.assertFalse(uuidSet.contains(record.get("UUID").toString()));
             uuidSet.add(record.get("UUID").toString());
@@ -227,5 +203,4 @@ public class BasicStandardizationServiceTestNG
         Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(intermediateSource, targetVersion);
         Assert.assertEquals(schema.getProp("PropertyToRetain"), "TestPropertyToRetain");
     }
-
 }

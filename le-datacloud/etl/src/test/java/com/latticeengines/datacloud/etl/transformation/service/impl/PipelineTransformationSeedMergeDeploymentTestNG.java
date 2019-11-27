@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceFieldSelectionTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceSeedFileMergeTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceSeedFileMergeTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class PipelineTransformationSeedMergeDeploymentTestNG extends

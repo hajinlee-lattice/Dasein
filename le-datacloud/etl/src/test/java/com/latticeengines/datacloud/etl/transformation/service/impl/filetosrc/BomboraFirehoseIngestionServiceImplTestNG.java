@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.BomboraFirehose;
@@ -15,14 +15,14 @@ import com.latticeengines.datacloud.etl.transformation.service.impl.BomboraFireh
 import com.latticeengines.datacloud.etl.transformation.service.impl.FirehoseTransformationServiceImplTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraFirehoseConfiguration;
 
-@Component
+@Deprecated
 public class BomboraFirehoseIngestionServiceImplTestNG
         extends FirehoseTransformationServiceImplTestNGBase<BomboraFirehoseConfiguration> {
 
-    @Autowired
+    @Inject
     BomboraFirehoseIngestionService refreshService;
 
-    @Autowired
+    @Inject
     BomboraFirehose source;
 
     @Override

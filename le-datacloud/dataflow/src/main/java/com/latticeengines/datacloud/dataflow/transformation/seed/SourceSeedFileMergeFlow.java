@@ -1,16 +1,23 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceSeedFileMergeTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceSeedFileMergeTransformerConfig;
 
-@Component("sourceSeedFileMergeFlow")
+/**
+ * A pipeline step in LatticeCacheSeed rebuild pipeline
+ */
+@Component(SourceSeedFileMergeFlow.DATAFLOW_BEAN)
 public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFileMergeTransformerConfig> {
+
+    public static final String DATAFLOW_BEAN = "sourceSeedFileMergeFlow";
+    public static final String TRANSFORMER = "sourceSeedFileMergeTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -60,12 +67,12 @@ public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFile
 
     @Override
     public String getDataFlowBeanName() {
-        return "sourceSeedFileMergeFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "sourceSeedFileMergeTransformer";
+        return TRANSFORMER;
 
     }
 }
