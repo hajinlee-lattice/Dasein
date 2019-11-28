@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
@@ -31,11 +32,13 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CommitEntityMatchConfiguration;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 /**
@@ -70,6 +73,9 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
 
     @Value("${cdl.processAnalyze.entity.commit.parallel}")
     private boolean useParallelCommitter;
@@ -194,8 +200,10 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
         }
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setServingStoreVersion(versionMap.get(EntityMatchEnvironment.SERVING));
-        log.info("update ServingVersion in DataCollectionStatus, the version is {}.", detail.getServingStoreVersion());
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
+        log.info("CommitEntityMatch step: dataCollection Status is " + JsonUtils.serialize(detail));
+        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(configuration.getCustomerSpace().toString(), detail, inactive);
     }
 
 }
