@@ -32,7 +32,7 @@ public class MatchContext implements Fact, Dimension {
     private List<InternalOutputRecord> internalResults;
     private boolean seekingIdOnly;
     private boolean cdlLookup;
-    private DynamoDataUnit customAccountDataUnit;
+    private DynamoDataUnit accountLookupDataUnit; // lookupId -> accountId
     private List<DynamoDataUnit> customDataUnits;
     private MatchEngine matchEngine;
 
@@ -148,12 +148,12 @@ public class MatchContext implements Fact, Dimension {
         this.cdlLookup = cdlLookup;
     }
 
-    public DynamoDataUnit getCustomAccountDataUnit() {
-        return customAccountDataUnit;
+    public DynamoDataUnit getAccountLookupDataUnit() {
+        return accountLookupDataUnit;
     }
 
-    public void setCustomAccountDataUnit(DynamoDataUnit customAccountDataUnit) {
-        this.customAccountDataUnit = customAccountDataUnit;
+    public void setAccountLookupDataUnit(DynamoDataUnit accountLookupDataUnit) {
+        this.accountLookupDataUnit = accountLookupDataUnit;
     }
 
     public List<DynamoDataUnit> getCustomDataUnits() {

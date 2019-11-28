@@ -190,17 +190,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 .map(cm -> new Column(cm.getAttrName())) //
                 .collect(Collectors.toList());
         columnSelection.setColumns(columns);
-        context.setCustomAccountDataUnit(parseCustomAccount(input));
-        context.setCustomDataUnits(parseCustomDynamo(input));
+        context.setAccountLookupDataUnit(parseAccountLookupDataUnit(input));
+        context.setCustomDataUnits(parseCustomDynamoDataUnits(input));
         return Pair.of(columnSelection, metadatas);
     }
 
-    DynamoDataUnit parseCustomAccount(MatchInput input) {
-        return cdlColumnSelectionService.parseCustomAccountDynamo(input);
+    DynamoDataUnit parseAccountLookupDataUnit(MatchInput input) {
+        return cdlColumnSelectionService.parseAccountLookupDataUnit(input);
     }
 
-    List<DynamoDataUnit> parseCustomDynamo(MatchInput input) {
-        return cdlColumnSelectionService.parseCustomDynamo(input);
+    List<DynamoDataUnit> parseCustomDynamoDataUnits(MatchInput input) {
+        return cdlColumnSelectionService.parseCustomDynamoDataUnits(input);
     }
 
     public List<ColumnMetadata> parseEntityMetadata(MatchInput input) {

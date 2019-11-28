@@ -32,12 +32,14 @@ import com.latticeengines.datacloud.core.annotation.PodContextAware;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
+import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.InternalAccountIdLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -84,6 +86,9 @@ public class MatchResource {
 
     @Inject
     private DataCloudVersionService datacloudVersionService;
+
+    @Inject
+    private CDLLookupService cdlLookupService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -203,6 +208,18 @@ public class MatchResource {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25008, e, new String[] { rootuid });
         }
+    }
+
+    @PostMapping(value = "/cdllookup")
+    @ResponseBody
+    @ApiOperation(value = "Looking for AccountId using given LookupId")
+    public String lookupInternalAccountId(@RequestBody InternalAccountIdLookupRequest request) {
+        return cdlLookupService.lookupInternalAccountId( //
+                request.getCustomerSpace(), //
+                request.getDataCollectionVersion(), //
+                request.getLookupId(), //
+                request.getLookupIdVal() //
+        );
     }
 
     @PostMapping(value = "/entity/publish")
