@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
-public class SourceDedupeWithDenseFieldsTransformerConfig extends TransformerConfig {
+public class SourceDedupeWithDenseFieldsConfig extends TransformerConfig {
 
     @JsonProperty("DedupeFields")
     private List<String> dedupeFields;

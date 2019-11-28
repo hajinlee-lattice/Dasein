@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
-public class SourceFieldEnrichmentTransformerConfig extends TransformerConfig {
+public class SourceFieldEnrichmentConfig extends TransformerConfig {
 
     @JsonProperty("FromFields")
     private List<String> fromFields;

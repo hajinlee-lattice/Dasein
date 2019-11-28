@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
-public class SourceSeedFileMergeTransformerConfig extends TransformerConfig {
+public class SourceSeedFileMergeConfig extends TransformerConfig {
 
     @JsonProperty("SourceFieldName")
     private String sourceFieldName;

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,26 +8,31 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.FirmoGraphExistingColumnEnrichmentFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.FirmoGraphNewColumnEnrichmentFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.seed.FirmoGraphExistingColumnEnrichmentFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.seed.FirmoGraphNewColumnEnrichmentFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceFirmoGraphEnrichmentTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceFirmoGraphEnrichmentConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
+/**
+ * A pipeline step in LatticeCacheSeed rebuild pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-LatticeCacheSeedCreation
+ */
 @Component(SourceFirmoGraphEnchrimentFlow.DATAFLOW_BEAN)
-public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceFirmoGraphEnrichmentTransformerConfig> {
+public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceFirmoGraphEnrichmentConfig> {
 
     public static final String DATAFLOW_BEAN = "sourceFirmoGraphEnrichmentFlow";
     public static final String TRANSFORMER = "sourceFirmoGraphEnrichmentTransformer";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        SourceFirmoGraphEnrichmentTransformerConfig config = getTransformerConfig(parameters);
+        SourceFirmoGraphEnrichmentConfig config = getTransformerConfig(parameters);
 
         String leftMatchField = config.getLeftMatchField();
         String rightMatchField = config.getRightMatchField();
@@ -117,7 +122,7 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return SourceFirmoGraphEnrichmentTransformerConfig.class;
+        return SourceFirmoGraphEnrichmentConfig.class;
     }
 
     @Override

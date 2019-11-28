@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.seed;
 
 import org.apache.commons.lang3.StringUtils;
 

@@ -8,13 +8,14 @@ import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceSeedFileMergeTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceSeedFileMergeConfig;
 
 /**
  * A pipeline step in LatticeCacheSeed rebuild pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-LatticeCacheSeedCreation
  */
 @Component(SourceSeedFileMergeFlow.DATAFLOW_BEAN)
-public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFileMergeTransformerConfig> {
+public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFileMergeConfig> {
 
     public static final String DATAFLOW_BEAN = "sourceSeedFileMergeFlow";
     public static final String TRANSFORMER = "sourceSeedFileMergeTransformer";
@@ -22,7 +23,7 @@ public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFile
     @Override
     public Node construct(TransformationFlowParameters parameters) {
 
-        SourceSeedFileMergeTransformerConfig config = getTransformerConfig(parameters);
+        SourceSeedFileMergeConfig config = getTransformerConfig(parameters);
         valiateParameters(parameters, config);
 
         Node source = addSource(parameters.getBaseTables().get(0));
@@ -41,7 +42,7 @@ public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFile
         return source;
     }
 
-    private void valiateParameters(TransformationFlowParameters parameters, SourceSeedFileMergeTransformerConfig config) {
+    private void valiateParameters(TransformationFlowParameters parameters, SourceSeedFileMergeConfig config) {
         if (parameters.getBaseTables().size() < 2) {
             throw new RuntimeException("There should be two or more sources!");
         }
@@ -62,7 +63,7 @@ public class SourceSeedFileMergeFlow extends ConfigurableFlowBase<SourceSeedFile
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return SourceSeedFileMergeTransformerConfig.class;
+        return SourceSeedFileMergeConfig.class;
     }
 
     @Override

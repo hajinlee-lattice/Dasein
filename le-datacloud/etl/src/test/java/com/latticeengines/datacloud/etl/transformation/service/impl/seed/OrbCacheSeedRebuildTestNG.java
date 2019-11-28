@@ -284,22 +284,6 @@ public class OrbCacheSeedRebuildTestNG extends PipelineTransformationTestNGBase 
             Assert.assertTrue(isObjEquals(record.get("RevenueRange"), expectedRecord[3]));
             Assert.assertTrue(isObjEquals(record.get("EmployeeRange"), expectedRecord[4]));
             Assert.assertTrue(isObjEquals(record.get("PrimaryIndustry"), expectedRecord[5]));
-//
-//            String id = String.valueOf(record.get("ID"));
-//            String domain = String.valueOf(record.get("Domain"));
-//            String name = String.valueOf(record.get("Name"));
-//            String revenueRange = String.valueOf(record.get("RevenueRange"));
-//            String employeeRange = String.valueOf(record.get("EmployeeRange"));
-//            String primaryIndustry = String.valueOf(record.get("PrimaryIndustry"));
-//            boolean flag = false;
-//            for (Object[] data : expectedData) {
-//                if (id.equals(data[0]) && domain.equals(data[1]) && name.equals(data[2]) && revenueRange.equals(data[3])
-//                        && employeeRange.equals(data[4]) && primaryIndustry.equals(data[5])) {
-//                    flag = true;
-//                    break;
-//                }
-//            }
-//            Assert.assertTrue(flag);
             rowNum++;
         }
         Assert.assertEquals(rowNum, 3);
