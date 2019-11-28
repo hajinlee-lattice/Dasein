@@ -12,4 +12,6 @@ public interface PublishedTalkingPointEntityMgr extends BaseEntityMgrRepository<
     List<PublishedTalkingPoint> findAllByPlayName(String playName);
 
     List<TalkingPointDTO> findAllByTenantPid(Long tenantPid);
+
+    List<String> findPlaysUsingGivenAttributes(List<String> attributes);
 }

@@ -7,4 +7,6 @@ import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
 
 public interface PublishedTalkingPointDao extends BaseDao<PublishedTalkingPoint> {
     List<PublishedTalkingPoint> findAllByPlayName(String playName);
+
+    List<String> findPlaysUsingGivenAttributes(List<String> attributes);
 }
