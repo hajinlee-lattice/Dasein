@@ -40,7 +40,7 @@ public class CDLDependenciesResource {
     @ResponseBody
     @ApiOperation(value = "Get impacted segments")
     public List<MetadataSegment> getDependingSegments(@PathVariable String customerSpace,
-                                                      @RequestBody List<String> attributes) {
+            @RequestBody List<String> attributes) {
         return segmentService.findDependingSegments(attributes);
     }
 
@@ -48,7 +48,7 @@ public class CDLDependenciesResource {
     @ResponseBody
     @ApiOperation(value = "Get impacted rating engines")
     public List<RatingEngine> getDependingRatingEngines(@PathVariable String customerSpace,
-                                                        @RequestBody List<String> attributes) {
+            @RequestBody List<String> attributes) {
         return ratingEngineService.getDependingRatingEngines(attributes);
     }
 
@@ -56,15 +56,15 @@ public class CDLDependenciesResource {
     @ResponseBody
     @ApiOperation(value = "Get impacted rating models")
     public List<RatingModel> getDependingRatingModels(@PathVariable String customerSpace,
-                                                      @RequestBody List<String> attributes) {
+            @RequestBody List<String> attributes) {
         return ratingEngineService.getDependingRatingModels(attributes);
     }
 
     @RequestMapping(value = "/plays", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get impacted plays")
-    public List<Play> getDependingPlays(@PathVariable String customerSpace,
-                                        @RequestBody List<String> attributes) {
-        return playService.findDependingPalys(attributes);
+    @ApiOperation(value = "Find Plays using the given attributes")
+    public List<Play> findDependantPlays(@PathVariable String customerSpace, @RequestBody List<String> attributes) {
+        return playService.findDependantPlays(attributes);
     }
+
 }

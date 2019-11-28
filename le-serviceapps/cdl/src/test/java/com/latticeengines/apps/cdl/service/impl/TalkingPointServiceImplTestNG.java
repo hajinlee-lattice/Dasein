@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -65,7 +66,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         tp.setPlayName(testPlay.getName());
         tp.setOffset(1);
         tp.setTitle("Test TP Title");
-        tp.setContent("PLS Deployment Test Talking Point no 1");
+        tp.setContent("PLS Deployment Test Talking Point no 1 {!Account.Website}");
         tps.add(tp);
 
         tps = talkingPointService.createOrUpdate(tps);
@@ -88,7 +89,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         tp2.setPlayName(testPlay.getName());
         tp2.setOffset(2);
         tp2.setTitle("Test TP2 Title");
-        tp2.setContent("PLS Deployment Test Talking Point no 2");
+        tp2.setContent("PLS Deployment Test Talking Point no 2 {!Account.CompanyName}");
         tps.add(tp2);
 
         tps = talkingPointService.createOrUpdate(tps);
@@ -99,6 +100,17 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(tps.get(1).getName());
 
         tp2 = tps.get(1);
+
+        List<Play> plays = playService.findDependantPlays(Arrays.asList("Account.CompanyName", "Account.Website"));
+        Assert.assertEquals(plays.size(), 1);
+        Assert.assertEquals(plays.get(0).getDisplayName(), testPlay.getDisplayName());
+
+        //TODO: Turn On after fixing tenancy part of talkingPointService.findDependantPlayIds
+        // Set<String> playIds = talkingPointService
+        // .findDependantPlayIds(Arrays.asList("Account.CompanyName",
+        // "Account.Website"));
+        // Assert.assertEquals(playIds.size(), 1);
+        // Assert.assertEquals(new ArrayList<>(playIds).get(0), testPlay.getName());
 
         TalkingPointPreview preview = talkingPointService.getPreview(tp.getPlayName());
         Assert.assertNotNull(preview);
@@ -118,6 +130,17 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
+
+        //TODO: Turn On after fixing tenancy part of talkingPointService.findDependantPlayIds
+        // playIds =
+        // talkingPointService.findDependantPlayIds(Arrays.asList("Account.CompanyName",
+        // "Account.Website"));
+        // Assert.assertEquals(playIds.size(), 1);
+        // Assert.assertEquals(new ArrayList<>(playIds).get(0), testPlay.getName());
+
+        plays = playService.findDependantPlays(Arrays.asList("Account.CompanyName", "Account.Website"));
+        Assert.assertEquals(plays.size(), 1);
+        Assert.assertEquals(plays.get(0).getDisplayName(), testPlay.getDisplayName());
 
         tps = talkingPointService.findAllByPlayName(testPlay.getName(), false);
         Assert.assertNotNull(tps);

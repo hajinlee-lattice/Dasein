@@ -69,20 +69,19 @@ public class CDLImpactValidator extends AttrValidator {
                     List<RatingEngine> impactRatingEngines = cdlDependenciesProxy
                             .getDependingRatingEngines(customerSpace, attributes);
                     if (CollectionUtils.isNotEmpty(impactSegments)) {
-                        List<String> names = getImpactSegmentNames(impactSegments);
-                        names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS, name, attrConfig));
+                        impactSegments.forEach(segment -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS,
+                                segment.getDisplayName(), attrConfig));
                     }
                     if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
-                        List<String> names = getImpactRatingEngineNames(impactRatingEngines);
-                        names.forEach(
-                                name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES, name, attrConfig));
+                        impactRatingEngines.forEach(re -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES,
+                                re.getDisplayName(), attrConfig));
                     }
                 }
                 if (isToBeDisabledForTalkingPoint(attrConfig)) {
-                    List<Play> impactPlays = cdlDependenciesProxy.getDependingPlays(customerSpace, attributes);
+                    List<Play> impactPlays = cdlDependenciesProxy.getDependantPlays(customerSpace, attributes);
                     if (CollectionUtils.isNotEmpty(impactPlays)) {
-                        List<String> names = getImpactPlayNames(impactPlays);
-                        names.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS, name, attrConfig));
+                        impactPlays.forEach(play -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS,
+                                play.getDisplayName(), attrConfig));
                     }
                 }
             }

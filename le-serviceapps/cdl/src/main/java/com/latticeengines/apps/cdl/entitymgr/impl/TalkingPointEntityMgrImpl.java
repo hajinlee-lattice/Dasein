@@ -21,9 +21,8 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrIm
 import com.latticeengines.domain.exposed.cdl.TalkingPoint;
 
 @Controller("talkingPointEntityMgr")
-public class TalkingPointEntityMgrImpl
-        extends BaseReadWriteRepoEntityMgrImpl<TalkingPointRepository, TalkingPoint, Long>
-        implements TalkingPointEntityMgr {
+public class TalkingPointEntityMgrImpl extends
+        BaseReadWriteRepoEntityMgrImpl<TalkingPointRepository, TalkingPoint, Long> implements TalkingPointEntityMgr {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(TalkingPointEntityMgrImpl.class);
@@ -68,5 +67,10 @@ public class TalkingPointEntityMgrImpl
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public TalkingPoint findByName(String name) {
         return talkingPointDao.findByField("name", name);
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<String> findPlaysUsingGivenAttributes(List<String> attributes) {
+        return talkingPointDao.findPlaysUsingGivenAttributes(attributes);
     }
 }
