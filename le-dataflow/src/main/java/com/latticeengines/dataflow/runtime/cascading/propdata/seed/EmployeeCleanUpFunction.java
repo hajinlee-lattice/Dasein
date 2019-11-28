@@ -1,8 +1,10 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.seed;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.latticeengines.dataflow.runtime.cascading.propdata.CleanupFunction;
 
 import cascading.operation.Function;
 import cascading.tuple.Fields;

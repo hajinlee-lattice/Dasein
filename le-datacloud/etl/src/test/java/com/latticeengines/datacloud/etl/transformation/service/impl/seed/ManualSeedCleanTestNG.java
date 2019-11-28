@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.seed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,25 +11,22 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.ManualSeedCleanFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.seed.ManualSeedCleanFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ManualSeedCleanTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.StandardizationStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.ManualSeedCleanConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class ManualSeedCleanTestNG extends PipelineTransformationTestNGBase {
 
-    GeneralSource source = new GeneralSource("ManualSeedCleanedData");
-
-    GeneralSource baseSource = new GeneralSource("ManualSeedData");
+    private GeneralSource source = new GeneralSource("ManualSeedCleanedData");
+    private GeneralSource baseSource = new GeneralSource("ManualSeedData");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -42,57 +39,43 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("ManualSeedClean");
-            configuration.setVersion(targetVersion);
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSourceStep1 = new ArrayList<String>();
-            baseSourceStep1.add(baseSource.getSourceName());
-            step1.setBaseSources(baseSourceStep1);
-            step1.setTransformer(ManualSeedCleanFlow.TRANSFORMER_NAME);
-            String confParamStr1 = getManualSeedConfig();
-            step1.setConfiguration(confParamStr1);
-            // -----------
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<Integer>();
-            inputSteps.add(0);
-            step2.setInputSteps(inputSteps);
-            step2.setTransformer("standardizationTransformer");
-            step2.setTargetSource(source.getSourceName());
-            String confParamStr2 = getRangeMappingConfig();
-            step2.setConfiguration(confParamStr2);
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            steps.add(step2);
-            // -----------
-            configuration.setSteps(steps);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("ManualSeedClean");
+        configuration.setVersion(targetVersion);
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSourceStep1 = new ArrayList<>();
+        baseSourceStep1.add(baseSource.getSourceName());
+        step1.setBaseSources(baseSourceStep1);
+        step1.setTransformer(ManualSeedCleanFlow.TRANSFORMER_NAME);
+        String confParamStr1 = getManualSeedConfig();
+        step1.setConfiguration(confParamStr1);
+        // -----------
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.add(0);
+        step2.setInputSteps(inputSteps);
+        step2.setTransformer("standardizationTransformer");
+        step2.setTargetSource(source.getSourceName());
+        String confParamStr2 = getRangeMappingConfig();
+        step2.setConfiguration(confParamStr2);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
+        steps.add(step2);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return configuration;
     }
 
-    private String getManualSeedConfig() throws JsonProcessingException {
-        ManualSeedCleanTransformerConfig conf = new ManualSeedCleanTransformerConfig();
+    private String getManualSeedConfig() {
+        ManualSeedCleanConfig conf = new ManualSeedCleanConfig();
         conf.setSalesVolumeInUSDollars("Manual_SALES_VOLUME_US_DOLLARS");
         conf.setEmployeesTotal("Manual_EMPLOYEES_TOTAL");
         conf.setManSeedDomain("Manual_Domain");
@@ -100,7 +83,7 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
         return JsonUtils.serialize(conf);
     }
 
-    private String getRangeMappingConfig() throws JsonProcessingException {
+    private String getRangeMappingConfig() {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
         String[] addConsolidatedRangeFields = { "Manual_LE_EMPLOYEE_RANGE", "Manual_LE_REVENUE_RANGE" };
         conf.setAddConsolidatedRangeFields(addConsolidatedRangeFields);
@@ -115,13 +98,6 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
                 StandardizationStrategy.CONSOLIDATE_RANGE };
         conf.setSequence(sequence);
         return JsonUtils.serialize(conf);
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     private void prepareManualSeedData() {
