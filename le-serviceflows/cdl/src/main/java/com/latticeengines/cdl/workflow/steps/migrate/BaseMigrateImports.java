@@ -192,7 +192,7 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
         return templateTable.getAttributes().stream()
                 .map(Attribute::getName)
                 .distinct()
-                .filter(attrName -> masterTable.getAttribute(attrName) == null)
+                .filter(attrName -> masterTable.getAttribute(attrName) != null)
                 .collect(Collectors.toList());
     }
 
