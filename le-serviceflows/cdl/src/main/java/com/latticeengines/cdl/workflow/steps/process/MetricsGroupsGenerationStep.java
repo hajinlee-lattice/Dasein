@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -32,6 +34,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -109,11 +112,12 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         Map<String, String> signatureTableNames = new HashMap<>();
         outputMetadata.forEach((groupId, details) -> {
             HdfsDataUnit metricsGroupDU = result.getTargets().get(details.getStartIdx());
-            String name = String.format(METRICS_GROUP_TABLE_FORMAT, groupId);
-            Table metricsGroupTable = toTable(name, metricsGroupDU);
-            metadataProxy.createTable(customerSpace.toString(), name, metricsGroupTable);
-            signatureTableNames.put(groupId, name); // use groupId as signature
-            putStringValueInContext(name, metricsGroupTable.getName());
+            String ctxKey = String.format(METRICS_GROUP_TABLE_FORMAT, groupId);
+            String tableName = TableUtils.getFullTableName(ctxKey, UuidUtils.shortenUuid(UUID.randomUUID()));
+            Table metricsGroupTable = toTable(tableName, metricsGroupDU);
+            metadataProxy.createTable(customerSpace.toString(), tableName, metricsGroupTable);
+            signatureTableNames.put(groupId, tableName); // use groupId as signature
+            putStringValueInContext(ctxKey, metricsGroupTable.getName());
         });
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.MetricsGroup, inactive);
     }

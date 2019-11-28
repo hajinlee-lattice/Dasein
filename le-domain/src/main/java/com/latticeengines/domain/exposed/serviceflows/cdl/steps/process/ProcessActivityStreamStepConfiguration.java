@@ -27,6 +27,12 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
     @JsonProperty("active_raw_stream_tables")
     private Map<String, String> activeRawStreamTables;
 
+    @JsonProperty("replace_mode")
+    private boolean isReplaceMode;
+
+    @JsonProperty("rematch_mode")
+    private boolean isRematchMode;
+
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
 
@@ -79,6 +85,22 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
 
     public void setEntityMatchGAOnly(boolean entityMatchGAOnly) {
         this.entityMatchGAOnly = entityMatchGAOnly;
+    }
+
+    public boolean isReplaceMode() {
+        return isReplaceMode;
+    }
+
+    public void setReplaceMode(boolean replaceMode) {
+        isReplaceMode = replaceMode;
+    }
+
+    public boolean isRematchMode() {
+        return isRematchMode;
+    }
+
+    public void setRematchMode(boolean rematchMode) {
+        isRematchMode = rematchMode;
     }
 
     @Override

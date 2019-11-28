@@ -7,9 +7,11 @@ import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,11 +27,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
@@ -46,6 +50,8 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
     static final String BEAN_NAME = "buildRawActivityStream";
 
     private static final String RAWSTREAM_TABLE_PREFIX_FORMAT = "RawStream_%s";
+    private static final String REMATCH_RAWSTREAM_TABLE_PREFIX_FORMAT = "Re_RawStream_%s";
+    private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
 
     // streamId -> set of column names
     private final Map<String, Set<String>> streamImportColumnNames = new HashMap<>();
@@ -58,6 +64,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
         super.initializeConfiguration();
         paTimestamp = getLongValueFromContext(PA_TIMESTAMP);
         log.info("Timestamp used as current time to build raw stream = {}", paTimestamp);
+        log.info("IsRematch={}, isReplace={}", configuration.isRematchMode(), configuration.isReplaceMode());
         buildStreamImportColumnNames();
         bumpEntityMatchStagingVersion();
     }
@@ -94,21 +101,53 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
                 .filter(Objects::nonNull) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
+        // streams that have batch store and not ignored with replace
+        Set<String> streamsWithActiveTableUsed = new HashSet<>();
+        Map<String, Integer> appendedRawStreamStepIdx = new HashMap<>();
         // add date to import and append to active table
         configuration.getActivityStreamMap().forEach((streamId, stream) -> {
             DataFeedTask.IngestionBehavior behavior = stream.getDataFeedTaskIngestionBehavior();
             Integer matchedStepIdx = matchedImportTableIdx.get(streamId);
             String activeTable = configuration.getActiveRawStreamTables().get(streamId);
-            if (behavior == DataFeedTask.IngestionBehavior.Replace) {
-                // ignore active table in replace
+            // ignore active table in replace mode or stream has replace ingestion behavior
+            if (configuration.isReplaceMode()) {
+                activeTable = null;
+            } else if (behavior == DataFeedTask.IngestionBehavior.Replace) {
                 log.info("Stream {} has ingestion behavior replace, ignore active table {}", streamId, activeTable);
                 activeTable = null;
             } else if (behavior != DataFeedTask.IngestionBehavior.Append) {
                 String msg = String.format("Ingestion behavior %s for stream %s is not supported", behavior, streamId);
                 throw new UnsupportedOperationException(msg);
             }
-            appendRawStream(steps, stream, matchedStepIdx, activeTable);
+            if (activeTable != null) {
+                streamsWithActiveTableUsed.add(streamId);
+            }
+            // append import to batch store
+            appendRawStream(steps, stream, matchedStepIdx, activeTable, RAWSTREAM_TABLE_PREFIX_FORMAT)
+                    .ifPresent(idx -> appendedRawStreamStepIdx.put(streamId, idx));
         });
+
+        if (configuration.isRematchMode()) {
+            log.info("Adding rematch steps, appendedRawStreamIdxMap = {}", appendedRawStreamStepIdx);
+
+            configuration.getActivityStreamMap().forEach((streamId, stream) -> {
+                if (!appendedRawStreamStepIdx.containsKey(streamId)) {
+                    // no import & batch store
+                    return;
+                }
+
+                String activeTable = configuration.getActiveRawStreamTables().get(streamId);
+                int appendedStreamIdx = appendedRawStreamStepIdx.get(streamId);
+                Set<String> importTableColumns = new HashSet<>(
+                        streamImportColumnNames.getOrDefault(streamId, new HashSet<>()));
+                if (streamsWithActiveTableUsed.contains(streamId)) {
+                    importTableColumns.addAll(getTableColumnNames(activeTable));
+                }
+                // match with empty universe and use as import to append
+                addMatchStep(stream, importTableColumns, steps, appendedStreamIdx, true);
+                appendRawStream(steps, stream, steps.size() - 1, null, REMATCH_RAWSTREAM_TABLE_PREFIX_FORMAT);
+            });
+        }
 
         if (CollectionUtils.isEmpty(steps)) {
             log.info("No existing/new activity stream found, skip build raw stream step");
@@ -119,16 +158,16 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
         return request;
     }
 
-    private void appendRawStream(@NotNull List<TransformationStepConfig> steps, @NotNull AtlasStream stream,
-            Integer matchedImportIdx, String activeBatchTable) {
+    private Optional<Integer> appendRawStream(@NotNull List<TransformationStepConfig> steps,
+            @NotNull AtlasStream stream, Integer matchedImportIdx, String activeBatchTable, String prefixFormat) {
         if (matchedImportIdx == null && StringUtils.isBlank(activeBatchTable)) {
             log.info("No import and no active batch store for stream {}. Skip append raw stream step",
                     stream.getStreamId());
-            return;
+            return Optional.empty();
         }
 
         String streamId = stream.getStreamId();
-        String rawStreamTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
+        String rawStreamTablePrefix = String.format(prefixFormat, streamId);
         AppendRawStreamConfig config = new AppendRawStreamConfig();
         config.dateAttr = stream.getDateAttribute();
         config.retentionDays = stream.getRetentionDays();
@@ -139,7 +178,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
         if (matchedImportIdx == null) {
             // no import, must have active table
             config.masterInputIdx = 0;
-            addBaseTables(step, activeBatchTable);
+            addBaseTables(step, ImmutableList.of(RAWSTREAM_PARTITION_KEYS), activeBatchTable);
         } else {
             // has import, no necessarily has active table (first time import or replace
             // mode)
@@ -147,14 +186,19 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
             step.setInputSteps(Collections.singletonList(matchedImportIdx));
             if (activeBatchTable != null) {
                 config.masterInputIdx = 1;
-                addBaseTables(step, activeBatchTable);
+                addBaseTables(step, ImmutableList.of(RAWSTREAM_PARTITION_KEYS), activeBatchTable);
             }
         }
+
+        // configure dest table
         setTargetTable(step, rawStreamTablePrefix);
+        step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
+
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         steps.add(step);
 
         rawStreamTablePrefixes.put(streamId, rawStreamTablePrefix);
+        return Optional.of(steps.size() - 1);
     }
 
     private Integer concatAndMatchStreamImports(@NotNull String streamId, @NotNull List<String> importTables,
@@ -167,24 +211,30 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
 
         // concat import
         steps.add(dedupAndConcatTables(null, false, importTables));
+        addMatchStep(stream, importTableColumns, steps, steps.size() - 1, false);
+        return steps.size() - 1;
+    }
+
+    private void addMatchStep(@NotNull AtlasStream stream, @NotNull Set<String> importTableColumns,
+            @NotNull List<TransformationStepConfig> steps, int matchInputTableIdx, boolean isRematchMode) {
         String matchConfig;
         // match entity TODO maybe support rematch and entity match GA?
         if (stream.getMatchEntities().contains(Contact.name())) {
             // contact match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
                     importTableColumns, getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
-                    null, false);
+                    null, isRematchMode);
         } else if (stream.getMatchEntities().contains(Account.name())) {
             // account match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(),
-                    importTableColumns, getSystemIds(BusinessEntity.Account), null, false);
+                    importTableColumns, getSystemIds(BusinessEntity.Account), null, isRematchMode);
         } else {
-            log.error("Match entities {} in stream {} is not supported", stream.getMatchEntities(), streamId);
+            log.error("Match entities {} in stream {} is not supported", stream.getMatchEntities(),
+                    stream.getStreamId());
             throw new UnsupportedOperationException(
-                    String.format("Match entities in stream %s are not supported", streamId));
+                    String.format("Match entities in stream %s are not supported", stream.getStreamId()));
         }
-        steps.add(match(steps.size() - 1, null, matchConfig));
-        return steps.size() - 1;
+        steps.add(match(matchInputTableIdx, null, matchConfig));
     }
 
     private Map<String, String> buildRawStreamBatchStore() {

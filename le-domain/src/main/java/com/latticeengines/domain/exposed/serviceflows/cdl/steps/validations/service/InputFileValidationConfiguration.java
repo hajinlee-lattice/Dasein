@@ -7,12 +7,16 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.CatalogFileValidationConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ContactFileValidationConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = AccountFileValidationConfiguration.class, name = "AccountFileValidationConfiguration"),
         @JsonSubTypes.Type(value = ContactFileValidationConfiguration.class, name = "ContactFileValidationConfiguration"),
+        @JsonSubTypes.Type(value = ProductFileValidationConfiguration.class, name = "ProductFileValidationConfiguration"),
+        @JsonSubTypes.Type(value = CatalogFileValidationConfiguration.class, name = "CatalogFileValidationConfiguration")
         })
 public class InputFileValidationConfiguration {
     @JsonProperty("entity")

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -27,6 +29,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
@@ -103,11 +106,12 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         metadata.forEach((streamId, details) -> {
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
                 String period = details.getLabels().get(offset);
-                String name = String.format(PERIOD_STORE_TABLE_FORMAT, streamId, period);
-                Table periodStoreTable = dirToTable(name, result.getTargets().get(details.getStartIdx() + offset));
-                metadataProxy.createTable(customerSpace.toString(), name, periodStoreTable);
-                signatureTableNames.put(details.getLabels().get(offset), name); // use period name as signature
-                putStringValueInContext(name, periodStoreTable.getName());
+                String ctxKey = String.format(PERIOD_STORE_TABLE_FORMAT, streamId, period);
+                String tableName = TableUtils.getFullTableName(ctxKey, UuidUtils.shortenUuid(UUID.randomUUID()));
+                Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
+                metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
+                signatureTableNames.put(details.getLabels().get(offset), tableName); // use period name as signature
+                putStringValueInContext(ctxKey, periodStoreTable.getName());
             }
         });
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
