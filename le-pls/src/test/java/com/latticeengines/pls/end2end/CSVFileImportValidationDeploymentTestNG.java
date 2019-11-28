@@ -136,7 +136,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 0L, 2L, 0L);
         verifyReport(webVisitReport, 90L, 90L, 210L);
-        verifyReport(webVisitPathPatternReport, 0L, 0L, 13L);
+        verifyReport(webVisitPathPatternReport, 7L, 7L, 21L);
     }
 
     @Test(groups = "deployment")
