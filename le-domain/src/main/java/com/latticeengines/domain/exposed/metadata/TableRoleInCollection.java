@@ -41,6 +41,7 @@ public enum TableRoleInCollection {
 
     AccountFeatures, //
     AccountExport, //
+    AccountLookup, //
 
     WebVisitProfile, //
     PeriodStores, //
@@ -101,6 +102,7 @@ public enum TableRoleInCollection {
 
         AccountFeatures.primaryKey = ConsolidatedAccount.primaryKey;
         AccountExport.primaryKey = ConsolidatedAccount.primaryKey;
+        AccountLookup.primaryKey = InterfaceName.AtlasLookupKey;
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }
