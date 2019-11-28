@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
@@ -28,4 +29,6 @@ public interface TalkingPointService {
     List<AttributeLookup> getAttributesInTalkingPointOfPlay(String playName);
 
     List<TalkingPointDTO> findAllPublishedByTenant(String customerSpace);
+
+    Set<String> findDependantPlayIds(List<String> attributes);
 }
