@@ -5,10 +5,12 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -74,7 +76,12 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
             }
 
             String avroDir = table.getExtracts().get(0).getPath();
+            if (CollectionUtils.isNotEmpty(tableSource.getPartitionKeys())) {
+                avroDir = PathUtils.toNestedDirGlob(avroDir, tableSource.getPartitionKeys().size());
+            }
             String tableName = table.getName();
+            log.info("Tablename = {}, Extract path = {}, Final match input path = {}, partitionKeys = {}", tableName,
+                    table.getExtracts().get(0).getPath(), avroDir, tableSource.getPartitionKeys());
             CustomerSpace customerSpace = tableSource.getCustomerSpace();
 
             // M29: in PA, the provided table avsc might not be updated.

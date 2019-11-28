@@ -83,7 +83,8 @@ public class BuildCatalog extends BaseMergeImports<BuildCatalogStepConfiguration
                 });
         if (CollectionUtils.isEmpty(steps)) {
             log.info("No import for catalog, copying existing tables in active version");
-            buildCatalogBatchStore();
+            Map<String, String> tableNames = buildCatalogBatchStore();
+            putObjectInContext(CATALOG_TABLE_NAME, tableNames);
             return null;
         }
 

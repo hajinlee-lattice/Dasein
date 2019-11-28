@@ -258,10 +258,12 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
     private DataUnit getSourceDataUnit(Source source, List<String> versions) {
         String sourceName = source.getSourceName();
         Table sourceTable;
+        List<String> partitionKeys = null;
         if (source instanceof TableSource) {
             TableSource tableSource = (TableSource) source;
             sourceTable = metadataProxy.getTable(tableSource.getCustomerSpace().toString(), tableSource.getTable()
                     .getName());
+            partitionKeys = tableSource.getPartitionKeys();
         } else if (versions.size() == 1) {
             sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, versions.get(0));
         } else {
@@ -273,8 +275,13 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             throw new UnsupportedOperationException("Source " + sourceName + " has " + numExtracts //
                     + " extracts. But only single extract tables are supported by Spark now.");
         }
-        log.info("Select source " + sourceName + "@versions " + StringUtils.join(versions, ","));
-        return sourceTable.toHdfsDataUnit(sourceName);
+        log.info("Select source {}@versions {}, partitionKeys are {}", sourceName, StringUtils.join(versions, ","),
+                partitionKeys);
+        if (CollectionUtils.isNotEmpty(partitionKeys)) {
+            return sourceTable.partitionedToHdfsDataUnit(sourceName, partitionKeys);
+        } else {
+            return sourceTable.toHdfsDataUnit(sourceName);
+        }
     }
 
     private List<Schema> getBaseSourceSchemas(TransformStep step) {

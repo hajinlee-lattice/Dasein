@@ -104,8 +104,14 @@ object DimensionValueHelper extends Serializable {
                                getValueFn: AnyRef => String): DataFrame = {
     val ptnAttr = regexCalculator.getPatternAttribute
     // seq of (pattern, valueMap)
+    /*-
+     * NOTE to support wildcard, replace all * with .*
+     *      this will break regex usage with asterisk
+     * NOTE use negative lookbehind to exclude replacing existing .*
+     */
     val metadataWithPtn = dimValues
-      .map(valueMap => (valueMap(ptnAttr).asInstanceOf[String].r.pattern, valueMap))
+      .map(valueMap => (valueMap(ptnAttr).asInstanceOf[String]
+        .replaceAll("(?<!\\.)\\*", ".*").r.pattern, valueMap))
 
     // can match multiple patterns
     df.flatMap(row => {

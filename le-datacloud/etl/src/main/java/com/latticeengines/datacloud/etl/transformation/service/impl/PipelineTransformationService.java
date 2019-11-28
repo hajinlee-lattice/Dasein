@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -303,7 +304,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                             throw new RuntimeException("There is no table named " + baseTable.getTableName()
                                     + " for customer " + baseTable.getCustomerSpace());
                         }
-                        source = new TableSource(table, baseTable.getCustomerSpace());
+                        source = new TableSource(table, baseTable.getCustomerSpace(), baseTable.getPartitionKeys());
                         involvedTableSources.put(sourceName, (TableSource) source);
                     } else if (baseIngestions.containsKey(sourceName)) {
                         SourceIngestion baseIngestion = baseIngestions.get(sourceName);
@@ -365,7 +366,11 @@ public class PipelineTransformationService extends AbstractTransformationService
             String targetName = config.getTargetSource();
             TargetTable targetTable = config.getTargetTable();
             if (targetTable != null) {
-                target = sourceService.createTableSource(targetTable, pipelineVersion);
+                TableSource targetTableSource = sourceService.createTableSource(targetTable, pipelineVersion);
+                if (CollectionUtils.isNotEmpty(config.getTargetPartitionKeys())) {
+                    targetTableSource.setPartitionKeys(config.getTargetPartitionKeys());
+                }
+                target = targetTableSource;
             } else if (targetName == null) {
                 targetName = getTempSourceName(transConf.getName(), pipelineVersion, stepIdx, transConf.getKeepTemp());
                 target = sourceService.createSource(targetName);
