@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -17,6 +18,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -533,11 +535,23 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public List<Play> findDependantPlays(List<String> attributes) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         Set<String> playIds = talkingPointService.findDependantPlayIds(attributes);
+        stopWatch.stop();
+        log.info(String.format("Time to get playIds from talking points: %s ms",
+                stopWatch.getTime(TimeUnit.MILLISECONDS)));
         if (CollectionUtils.isEmpty(playIds)) {
             return new ArrayList<>();
         }
-        return getAllPlays().stream().filter(play -> playIds.contains(play.getName())).collect(Collectors.toList());
+
+        stopWatch.start();
+        List<Play> plays = getAllPlays().stream().filter(play -> playIds.contains(play.getName()))
+                .collect(Collectors.toList());
+        stopWatch.stop();
+        log.info(String.format("Time to get plays from PlayIds: %s ms", stopWatch.getTime(TimeUnit.MILLISECONDS)));
+
+        return plays;
     }
 
     private String sanitize(String attribute) {
