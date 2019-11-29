@@ -106,24 +106,23 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
 
     private String getDeltaTables() {
         return (StringUtils.isNotBlank(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class))
-                ? ("AddedAccounts: " + getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class))
+                ? (" AddedAccounts: " + getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class))
                 : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class))
-                        ? ("AddedCompleteContacts: "
+                        ? (" AddedCompleteContacts: "
                                 + getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class))
                         : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
-                        ? ("AddedAccounts: " + getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
+                        ? (" AddedAccounts: " + getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
                         : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class))
-                        ? ("AddedAccounts: " + getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class))
+                        ? (" AddedAccounts: " + getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class))
                         : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
-                        ? ("AddedAccounts: " + getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
+                        ? (" AddedAccounts: " + getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
                         : "");
     }
 
-    @SuppressWarnings("unchecked")
     private boolean wasDeltaDataFound(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
         Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
         switch (externalSystemName) {
