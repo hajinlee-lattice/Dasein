@@ -183,6 +183,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACTIVITY_STREAMS_SKIP_AGG = "ACTIVITY_STREAMS_SKIP_AGG";
     protected static final String STREAM_DIMENSION_METADATA_MAP = "STREAM_DIMENSION_METADATA_MAP";
     protected static final String METRICS_GROUP_TABLE_FORMAT = "METRICS_GROUP_%s"; // groupId
+    protected static final String MERGED_METRICS_GROUP_TABLE_FORMAT = "MERGED_METRICS_GROUP_%s"; // entity_servingEntity
+    protected static final String ACTIVITY_MERGED_METRICS_SERVING_ENTITIES = "MERGED_METRICS_SERVING_ENTITIES"; // set of merged activity metrics groups' serving entities
     protected static final String SCORE_TRAINING_FILE_INCLUDED_FEATURES = "SCORE_TRAINING_FILE_INCLUDED_FEATURES";
     protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s"; // streamId, period
 

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
@@ -105,5 +106,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata/{signature}",
                 shortenCustomerSpace(customerSpace), signature);
         delete("delete_dimension_metadata_with_signature", url);
+    }
+
+    public ActivityMetricsGroup findGroupByGroupId(@NotNull String customerSpace, @NotNull String groupId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/metricsGroups/groupId/{groupId}",
+                shortenCustomerSpace(customerSpace), groupId);
+        return get("findGroupByGroupId", url, ActivityMetricsGroup.class);
     }
 }

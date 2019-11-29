@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -107,7 +108,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
                 String period = details.getLabels().get(offset);
                 String ctxKey = String.format(PERIOD_STORE_TABLE_FORMAT, streamId, period);
-                String tableName = TableUtils.getFullTableName(ctxKey, UuidUtils.shortenUuid(UUID.randomUUID()));
+                String tableName = TableUtils.getFullTableName(ctxKey, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
                 Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
                 signatureTableNames.put(details.getLabels().get(offset), tableName); // use period name as signature

@@ -23,7 +23,9 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
         @Type(value = BuildCatalogStepConfiguration.class, name = "BuildCatalogStepConfiguration"),
         @Type(value = ProcessActivityStreamStepConfiguration.class, name = "ProcessActivityStreamStepConfiguration"),
         @Type(value = CuratedAccountAttributesStepConfiguration.class, name = "CuratedAccountAttributesStepConfiguration"),
-        @Type(value = ProcessRatingStepConfiguration.class, name = "ProcessRatingStepConfiguration"), })
+        @Type(value = ProcessRatingStepConfiguration.class, name = "ProcessRatingStepConfiguration"),
+        @Type(value = ProfileAccountActivityMetricsStepConfiguration.class, name = "ProfileAccountActivityMetricsStepConfiguration"),
+        @Type(value = ProfileContactActivityMetricsStepConfiguration.class, name = "ProfileContactActivityMetricsStepConfiguration") })
 public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStepConfiguration {
 
     @JsonProperty("rebuild")

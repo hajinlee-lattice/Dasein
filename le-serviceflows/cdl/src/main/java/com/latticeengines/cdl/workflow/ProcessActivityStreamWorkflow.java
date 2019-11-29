@@ -11,8 +11,11 @@ import com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStreamWrapper
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.cdl.workflow.steps.process.AggActivityStreamToDaily;
 import com.latticeengines.cdl.workflow.steps.process.GenerateDimensionMetadata;
+import com.latticeengines.cdl.workflow.steps.process.MergeActivityMetricsToEntityStep;
 import com.latticeengines.cdl.workflow.steps.process.MetricsGroupsGenerationStep;
 import com.latticeengines.cdl.workflow.steps.process.PeriodStoresGenerationStep;
+import com.latticeengines.cdl.workflow.steps.process.ProfileAccountActivityMetricsWrapper;
+import com.latticeengines.cdl.workflow.steps.process.ProfileContactActivityMetricsWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessActivityStreamWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -43,6 +46,15 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     @Inject
     private MetricsGroupsGenerationStep metricsGroupsGenerationStep;
 
+    @Inject
+    private MergeActivityMetricsToEntityStep mergeActivityMetricsToEntityStep;
+
+    @Inject
+    private ProfileAccountActivityMetricsWrapper profileAccountActivityMetricsWrapper;
+
+    @Inject
+    private ProfileContactActivityMetricsWrapper profileContactActivityMetricsWrapper;
+
     @Override
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -52,6 +64,9 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
                 .next(aggActivityStreamToDaily) //
                 .next(periodStoresGenerationStep) //
                 .next(metricsGroupsGenerationStep) //
+                .next(mergeActivityMetricsToEntityStep) //
+                .next(profileAccountActivityMetricsWrapper) //
+                .next(profileContactActivityMetricsWrapper) //
                 .build();
     }
 }

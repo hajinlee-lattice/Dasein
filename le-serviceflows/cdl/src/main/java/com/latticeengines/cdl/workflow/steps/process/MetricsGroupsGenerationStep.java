@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -113,7 +114,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         outputMetadata.forEach((groupId, details) -> {
             HdfsDataUnit metricsGroupDU = result.getTargets().get(details.getStartIdx());
             String ctxKey = String.format(METRICS_GROUP_TABLE_FORMAT, groupId);
-            String tableName = TableUtils.getFullTableName(ctxKey, UuidUtils.shortenUuid(UUID.randomUUID()));
+            String tableName = TableUtils.getFullTableName(ctxKey, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
             Table metricsGroupTable = toTable(tableName, metricsGroupDU);
             metadataProxy.createTable(customerSpace.toString(), tableName, metricsGroupTable);
             signatureTableNames.put(groupId, tableName); // use groupId as signature
