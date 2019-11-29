@@ -114,7 +114,28 @@ public enum TableRoleInCollection {
         return primaryKey;
     }
 
+    public void setPrimaryKey(InterfaceName primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    public ImmutableList<InterfaceName> getForeignKeys() {
+        return foreignKeys;
+    }
+
+    public void setForeignKeys(ImmutableList<InterfaceName> foreignKeys) {
+        this.foreignKeys = foreignKeys;
+    }
+
     public List<String> getForeignKeysAsStringList() {
         return foreignKeys.stream().map(InterfaceName::name).collect(Collectors.toList());
+    }
+
+    public static TableRoleInCollection getByName(String role) {
+        for (TableRoleInCollection roleInCollection : values()) {
+            if (roleInCollection.name().equalsIgnoreCase(role)) {
+                return roleInCollection;
+            }
+        }
+        throw new IllegalArgumentException(String.format("There is no entity name %s in TableRoleInCollection", role));
     }
 }

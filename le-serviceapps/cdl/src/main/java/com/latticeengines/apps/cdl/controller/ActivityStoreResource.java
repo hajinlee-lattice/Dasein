@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.ActivityStoreService;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
@@ -129,6 +130,15 @@ public class ActivityStoreResource {
             @PathVariable(value = "streamName") String streamName, //
             @RequestParam(value = "signature", required = false) String signature) {
         return activityStoreService.getDimensionMetadataInStream(customerSpace, streamName, signature);
+    }
+
+    @GetMapping("/metricsGroups/groupId/{groupId}")
+    @ResponseBody
+    @ApiOperation("Retrieve metricsGroup by tenant and groupId")
+    public ActivityMetricsGroup findGroupByGroupId(
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @PathVariable(value = "groupId") String groupId) {
+        return activityStoreService.findGroupByGroupId(customerSpace, groupId);
     }
 
     @DeleteMapping("/dimensionMetadata/{signature}")
