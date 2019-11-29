@@ -17,7 +17,7 @@ class MultiCopyJob extends AbstractSparkJob[MultiCopyConfig] {
     val inputs: List[DataFrame] = lattice.input
     val copyConfigs: Seq[CopyConfig] = lattice.config.getCopyConfigs.asScala
     lattice.output = copyConfigs.map(copyConfig => {
-      CopyUtils.copy(copyConfig, inputs)
+      CopyUtils.copy(spark, copyConfig, inputs)
     }).toList
   }
 
