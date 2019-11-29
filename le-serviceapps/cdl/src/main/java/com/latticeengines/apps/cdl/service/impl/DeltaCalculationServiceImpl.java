@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
@@ -40,8 +41,8 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
     @Value("common.internal.app.url")
     private String internalAppUrl;
 
-    private final String campaignDeltaCalculationUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-delta-calculation";
-    private final String campaignLaunchUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/launch?is-auto-launch=true&state=Queued";
+    private final String campaignDeltaCalculationUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-delta-calculation?launchId=";
+    private final String campaignLaunchUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/launch?is-auto-launch=true&state=";
     private final String setChannelScheduleUrlPrefix = "/customerspaces/{customerSpace}/plays//{playName}/channels/{channelId}/next-scheduled-date";
 
     public DeltaCalculationServiceImpl() {
@@ -57,10 +58,8 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
 
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.getAllValidScheduledChannels();
 
-        List<PlayLaunchChannel> deltaLaunchChannels = channels.stream()
-                .filter(c -> c.getLaunchType() == LaunchType.DELTA)
-                .filter(c -> batonService.isEnabled(CustomerSpace.parse(c.getTenant().getId()),
-                        LatticeFeatureFlag.ENABLE_DELTA_CALCULATION))
+        List<PlayLaunchChannel> deltaEnabledTenantChannels = channels.stream().filter(c -> batonService
+                .isEnabled(CustomerSpace.parse(c.getTenant().getId()), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION))
                 .collect(Collectors.toList());
 
         long inValidDeltaLaunchChannels = channels.stream().filter(c -> c.getLaunchType() == LaunchType.DELTA)
@@ -73,16 +72,21 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
                     + " these channels will be skipped");
         }
 
-        List<PlayLaunchChannel> fullLaunchChannels = channels.stream().filter(c -> c.getLaunchType() == LaunchType.FULL)
+        List<PlayLaunchChannel> deltaDisabledTenantChannels = channels.stream()
+                .filter(c -> c.getLaunchType() == LaunchType.FULL)
+                .filter(c -> !batonService.isEnabled(CustomerSpace.parse(c.getTenant().getId()),
+                        LatticeFeatureFlag.ENABLE_DELTA_CALCULATION))
                 .collect(Collectors.toList());
 
-        log.info(String.format("Found %d channels scheduled for launch, Full Launches: %d, Delta Launches: %d",
-                channels.size(), fullLaunchChannels.size(), deltaLaunchChannels.size()));
+        log.info(String.format(
+                "Found %d channels scheduled for launch, Full Launches in Delta Disabled Tenants: %d, Delta Launches in Delta Disabled Tenants: %d,Launches is Delta Enabled tenants: %d",
+                channels.size(), deltaDisabledTenantChannels.size(), inValidDeltaLaunchChannels,
+                deltaEnabledTenantChannels.size()));
 
-        long successfullyQueuedForDelta = deltaLaunchChannels.stream().map(this::queueNewDeltaCalculationJob)
+        long successfullyQueuedForDelta = deltaEnabledTenantChannels.stream().map(this::queueNewDeltaCalculationJob)
                 .filter(x -> x).count();
 
-        long successfullyQueuedForFull = fullLaunchChannels.stream().map(this::queueNewFullCampaignLaunch)
+        long successfullyQueuedForFull = deltaDisabledTenantChannels.stream().map(this::queueNewFullCampaignLaunch)
                 .filter(x -> x).count();
 
         log.info(String.format(
@@ -95,12 +99,20 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
 
     private boolean queueNewDeltaCalculationJob(PlayLaunchChannel channel) {
         try {
-            String url = constructUrl(campaignDeltaCalculationUrlPrefix,
+            Play play = channel.getPlay();
+            String url = constructUrl(campaignLaunchUrlPrefix + LaunchState.UnLaunched.name(),
+                    CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), play.getName(), channel.getId());
+
+            PlayLaunch launch = post("Creating Unlaunched Campaign Launch", url, null, PlayLaunch.class);
+            log.info("Created Unlaunched Campaign Launch for campaignId " + play.getName() + ", Channel ID: "
+                    + channel.getId() + " Launch Id: " + launch.getLaunchId());
+
+            url = constructUrl(campaignDeltaCalculationUrlPrefix + launch.getLaunchId(),
                     CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
                     channel.getId());
             Long workflowPid = post("Kicking off delta calculation", url, null, Long.class);
             log.info("Queued a delta calculation job for campaignId " + channel.getPlay().getName() + ", Channel ID: "
-                    + channel.getId() + "  WorkflowPid: " + workflowPid);
+                    + channel.getId() + " Launch Id: " + launch.getLaunchId() + "  WorkflowPid: " + workflowPid);
             return true;
         } catch (Exception e) {
             log.error("Failed to Kick off delta calculation for channel: " + channel.getId() + " \n", e);
@@ -111,7 +123,7 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
     private boolean queueNewFullCampaignLaunch(PlayLaunchChannel channel) {
         try {
             Play play = channel.getPlay();
-            String url = constructUrl(campaignLaunchUrlPrefix,
+            String url = constructUrl(campaignLaunchUrlPrefix + LaunchState.Queued.name(),
                     CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), play.getName(), channel.getId());
 
             PlayLaunch launch = post("Kicking off Campaign Launch", url, null, PlayLaunch.class);
