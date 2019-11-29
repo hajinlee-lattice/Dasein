@@ -359,6 +359,14 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     println(accountColsRecNotIncludedStd)
     println(accountColsRecNotIncludedNonStd)
     println(contactCols)
+    
+    if (accountColsRecIncluded.isEmpty //
+        && accountColsRecNotIncludedStd.isEmpty //
+        && accountColsRecNotIncludedNonStd.isEmpty //
+        && contactCols.isEmpty) {
+      logSpark("Four categories are all empty.")
+      return finalRecommendations
+    }
 
     // 1. combine Recommendation-contained columns (including Contacts column if required)
     // with Recommendation-not-contained standard columns
@@ -421,6 +429,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       userConfiguredDataFrame = userConfiguredDataFrame.drop(RecommendationColumnName.CONTACTS.name)
     }
 
+    logSpark("----- BEGIN SCRIPT OUTPUT -----")
+	  userConfiguredDataFrame.printSchema
+	  logSpark("----- END SCRIPT OUTPUT -----")
     userConfiguredDataFrame
   }
 

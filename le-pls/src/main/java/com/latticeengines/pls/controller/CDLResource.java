@@ -374,7 +374,7 @@ public class CDLResource {
     public List<S3ImportSystem> getS3ImportSystemList(
             @RequestParam(value = "Account", required = false, defaultValue = "false") Boolean filterByAccountSystemId,
             @RequestParam(value = "Contact", required = false, defaultValue = "false") Boolean filterByContactSystemId,
-            @RequestBody S3ImportTemplateDisplay templateDisplay) {
+            @RequestBody(required = false) S3ImportTemplateDisplay templateDisplay) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
