@@ -545,6 +545,7 @@ public class PlayServiceImpl implements PlayService {
             return new ArrayList<>();
         }
 
+        stopWatch.reset();
         stopWatch.start();
         List<Play> plays = getAllPlays().stream().filter(play -> playIds.contains(play.getName()))
                 .collect(Collectors.toList());
