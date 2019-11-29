@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -123,7 +124,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         outputMetadata.forEach((mergedTableLabel, details) -> {
             HdfsDataUnit mergedDU = result.getTargets().get(details.getStartIdx());
             String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, mergedTableLabel); // entity_servingEntity (Account_WebVisit)
-            String tableName = TableUtils.getFullTableName(tableCtxName, UuidUtils.shortenUuid(UUID.randomUUID()));
+            String tableName = TableUtils.getFullTableName(tableCtxName, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
             Table mergedTable = toTable(tableName, mergedDU);
             metadataProxy.createTable(customerSpace.toString(), tableName, mergedTable);
             TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
