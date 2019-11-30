@@ -54,6 +54,10 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     private BusinessEntity entity = BusinessEntity.Contact;
     private ValidateFieldDefinitionsRequest validateRequest = new ValidateFieldDefinitionsRequest();
     private String fileName;
+    private static String otherSystemName = "Test_OtherSystem";
+    private static String defaultSystemName = "DefaultSystem";
+    private static String systemType = "Test";
+    private static String systemObject = "Contacts";
 
 
     @Inject
@@ -69,22 +73,20 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
-
         //cdlService.createS3ImportSystem(mainTestTenant.getName(), "Default", S3ImportSystem.SystemType.Other, false);
         // Set up the import system used in this test.  This involves setting up the Account system ID as if the
         // Accounts template was already set up.  This is needed for Match to Accounts - ID to work in the Contacts
         // template set up which is tested here.
-        S3ImportSystem importSystem = cdlService.getS3ImportSystem(mainTestTenant.getName(), "DefaultSystem");
+        S3ImportSystem importSystem = cdlService.getS3ImportSystem(mainTestTenant.getName(), defaultSystemName);
         importSystem.setAccountSystemId(importSystem.generateAccountSystemId());
         cdlService.updateS3ImportSystem(mainTestTenant.getName(), importSystem);
 
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity.name()), entity.name(), csvFileName,
                 ClassLoader.getSystemResourceAsStream(localPath + csvFileName));
-
         fileName = sourceFile.getName();
         FetchFieldDefinitionsResponse  fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName);
+                defaultSystemName, systemType, systemObject, fileName);
         setValidateRequestFromFetchResponse(fetchResponse);
     }
 
@@ -168,7 +170,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         Assert.assertNotNull(nameDefinition);
         nameDefinition.setRequired(Boolean.FALSE);
         ValidateFieldDefinitionsResponse validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
 
         Assert.assertNotNull(validateResponse);
         Assert.assertEquals(validateResponse.getValidationResult(),
@@ -183,7 +185,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         fieldDefinitionMap.put(FieldDefinitionSectionName.Contact_Fields.getName(),
                 new ArrayList<>(fieldNameToContactFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         Assert.assertEquals(validateResponse.getValidationResult(),
                 ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
@@ -197,7 +199,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         Assert.assertNotNull(lastNameDefinition);
         lastNameDefinition.setFieldName(InterfaceName.LastName.name());
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         Assert.assertEquals(validateResponse.getValidationResult(),
                 ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
@@ -209,7 +211,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         lastNameInContactField.setColumnName(null);
         lastNameInContactField.setInCurrentImport(false);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Contact_Fields.getName(),
                 InterfaceName.LastName.name(), FieldValidationMessage.MessageLevel.WARNING, "Column name Last Name " +
                         "matched Lattice Field LastName, but they are not mapped to each other");
@@ -217,7 +219,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         // case 5: set fieldName LastName to empty
         lastNameInContactField.setFieldName(null);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Contact_Fields.getName(), null,
                 FieldValidationMessage.MessageLevel.ERROR, "FieldName shouldn't be empty in Contact Fields.");
@@ -228,7 +230,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         Assert.assertEquals(emailDefinition.getFieldType(), UserDefinedType.TEXT);
         emailDefinition.setFieldType(UserDefinedType.INTEGER);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.Email.name(),
                 FieldValidationMessage.MessageLevel.ERROR, "the current template has fieldType INTEGER while the Spec" +
@@ -248,7 +250,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         // change field type from auto-detected number to text
         earningDefinition.setFieldType(UserDefinedType.TEXT);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Text", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Custom_Fields.getName(), "Earnings",
                 FieldValidationMessage.MessageLevel.WARNING,
@@ -260,7 +262,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         // change type for id to integer
         idDefinition.setFieldType(UserDefinedType.NUMBER);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Text", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Unique_ID.getName(), "CustomerContactId",
                 FieldValidationMessage.MessageLevel.ERROR, "Field mapped to Contact Id in section Unique ID has type " +
@@ -272,7 +274,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         Assert.assertNotNull(createdDateDefinition);
         createdDateDefinition.setDateFormat(null);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Text", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
                 FieldValidationMessage.MessageLevel.ERROR,
@@ -281,7 +283,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         // case 11: Date format selected by user can't parse > 10% of column data.
         createdDateDefinition.setDateFormat("MM-DD-YYYY");
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Text", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
                 FieldValidationMessage.MessageLevel.WARNING,
@@ -300,13 +302,13 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
         log.info("Committing fieldDefinitionsRecord:\n" + JsonUtils.pprint(currentFieldDefinitionRecord));
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, false,
+                defaultSystemName, systemType, systemObject, fileName, false,
                 currentFieldDefinitionRecord);
         FetchFieldDefinitionsResponse  fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName);
+                defaultSystemName, systemType, systemObject, fileName);
         setValidateRequestFromFetchResponse(fetchResponse);
         Assert.assertNotNull(commitRecord);
-
+        log.info("Committing validate request:\n" + JsonUtils.pprint(validateRequest));
 
         //the second round test after the fetch api
         currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
@@ -329,7 +331,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         // change field type of Country from text to number
         countryDefinition.setFieldType(UserDefinedType.NUMBER);
         ValidateFieldDefinitionsResponse validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts",
+                defaultSystemName, systemType, systemObject,
                 fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Custom_Fields.getName(), "Country", FieldValidationMessage.MessageLevel.WARNING,
@@ -348,7 +350,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         Assert.assertNotNull(createdDateDefinition);
         createdDateDefinition.setTimeZone(TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
                 FieldValidationMessage.MessageLevel.WARNING,
@@ -358,7 +360,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         // date format for existing template is MM-DD-YYYY set in above method
         createdDateDefinition.setDateFormat("MM.DD.YYYY");
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
                 FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM.DD.YYYY which is not " +
@@ -369,7 +371,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         fieldDefinitionMap.put(FieldDefinitionSectionName.Analysis_Fields.getName(),
                 new ArrayList<>(fieldNameToAnalysisFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
                 FieldValidationMessage.MessageLevel.ERROR, "Field name CreatedDate in spec not in current template.");
@@ -380,7 +382,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         fieldDefinitionMap.put(FieldDefinitionSectionName.Custom_Fields.getName(),
                 new ArrayList<>(customNameToCustomFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse, FieldDefinitionSectionName.Custom_Fields.getName(),
                 "Country", FieldValidationMessage.MessageLevel.ERROR,
                 "Existing field user_Country mapped to column Country cannot be removed.");
@@ -391,7 +393,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         fieldDefinitionMap.put(FieldDefinitionSectionName.Analysis_Fields.getName(),
                 new ArrayList<>(fieldNameToAnalysisFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), countryDefinition.getFieldName(),
                 FieldValidationMessage.MessageLevel.ERROR, "field name user_Country of Analysis Fields in template " +
@@ -406,7 +408,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         fieldDefinitionMap.put(FieldDefinitionSectionName.Analysis_Fields.getName(),
                 new ArrayList<>(fieldNameToAnalysisFieldDefinition.values()));
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
-                "DefaultSystem", "Test", "Contacts", fileName, validateRequest);
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), fakedFieldName,
                 FieldValidationMessage.MessageLevel.ERROR,
@@ -414,6 +416,48 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
 
     }
 
+    @Test(groups = "deployment", dependsOnMethods = "testFieldDefinitionValidate_withExistingTemplate")
+    public void testFieldDefinitionValidate__WithOtherTemplate() throws Exception {
+        // create another system and corresponding data feed task with same entity
+        cdlService.createS3ImportSystem(mainTestTenant.getName(), otherSystemName, S3ImportSystem.SystemType.Other,
+                false);
+        S3ImportSystem otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getName(), otherSystemName);
+        otherSystem.setAccountSystemId(otherSystem.generateAccountSystemId());
+        cdlService.updateS3ImportSystem(mainTestTenant.getName(), otherSystem);
+        SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(entity.name()), entity.name(), csvFileName,
+                ClassLoader.getSystemResourceAsStream(localPath + csvFileName));
+        FetchFieldDefinitionsResponse fetchResponse = modelingFileMetadataService.fetchFieldDefinitions(
+                otherSystemName, systemType, systemObject, sourceFile.getName());
+
+        modelingFileMetadataService.commitFieldDefinitions(otherSystemName, systemType, systemObject,
+                sourceFile.getName(), false, fetchResponse.getCurrentFieldDefinitionsRecord());
+
+        // validate type after having other template data in request
+        fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions(
+                defaultSystemName, systemType, systemObject, fileName);
+        setValidateRequestFromFetchResponse(fetchResponse);
+
+        FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
+        Map<String, List<FieldDefinition>> fieldDefinitionMap =
+                currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
+        Map<String, FieldDefinition> customNameToCustomFieldDefinition =
+                fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(),
+                        new ArrayList<>()).stream().collect(
+                        Collectors.toMap(FieldDefinition::getColumnName, field -> field));
+
+        FieldDefinition countryDefinition = customNameToCustomFieldDefinition.get("Country");
+        Assert.assertNotNull(countryDefinition);
+        // change field type of Country from text to number
+        countryDefinition.setFieldType(UserDefinedType.NUMBER);
+        ValidateFieldDefinitionsResponse validateResponse =
+                modelingFileMetadataService.validateFieldDefinitions(defaultSystemName, systemType, systemObject,
+                fileName, validateRequest);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Custom_Fields.getName(), "Country", FieldValidationMessage.MessageLevel.ERROR,
+                "Field Type NUMBER is not consistent with field type TEXT in batch store or other template for user_Country.");
+
+    }
 
 
     @Test(groups = "deployment")

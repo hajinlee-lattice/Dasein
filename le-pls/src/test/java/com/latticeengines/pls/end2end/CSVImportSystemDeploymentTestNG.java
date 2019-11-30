@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
 
@@ -367,6 +368,22 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 S3ImportSystem.SystemType.Other, false);
         allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
         return allSystems;
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testImportSystem")
+    public void  testGetDataFeedTask() {
+        List<DataFeedTask> accountTasks =
+                dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, BusinessEntity.Account.name());
+        Assert.assertNotNull(accountTasks);
+        Assert.assertEquals(accountTasks.size(), 3);
+        String defaultFeedType = getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_ACCOUNT);
+        // get data feed tasks excluding case souce is File and default feed type
+        accountTasks =
+                dataFeedProxy.getDataFeedTaskWithSameEntityExcludeOne(customerSpace, BusinessEntity.Account.name(),
+                        SOURCE, defaultFeedType);
+        Assert.assertNotNull(accountTasks);
+        Assert.assertEquals(accountTasks.size(), 2);
+
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testImportSystem")

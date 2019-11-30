@@ -9,7 +9,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -32,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -135,6 +138,14 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         datafeed.setActiveExecutionId(execution.getPid());
         datafeed.setStatus(DataFeed.Status.ProcessAnalyzing);
         datafeedEntityMgr.update(datafeed);
+        List<DataFeedTask> tasks =
+                datafeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(BusinessEntity.Account.name(), dataFeed, "SFDC",
+                "VisiDB");
+        Assert.assertTrue(CollectionUtils.isEmpty(tasks));
+        tasks = datafeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(BusinessEntity.Account.name(), dataFeed
+                , "", "VisiDB");
+        Assert.assertNotNull(tasks);
+        Assert.assertEquals(tasks.size(), 1);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")

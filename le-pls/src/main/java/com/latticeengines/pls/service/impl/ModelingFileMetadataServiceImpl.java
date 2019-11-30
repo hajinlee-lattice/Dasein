@@ -1189,7 +1189,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // 4e. Fetch all other DataFeedTask templates for Other Systems that are the same System Object and extract
         // the fieldTypes used for each field.
-        // TODO(jwinter): Add Other System processing.
+        // Add Other System processing.
+        List<DataFeedTask> tasks =
+                dataFeedProxy.getDataFeedTaskWithSameEntityExcludeOne(customerSpace.toString(),
+                entityType.getEntity().name(), source, feedType);
+        if (CollectionUtils.isNotEmpty(tasks)) {
+            fetchFieldDefinitionsResponse.setOtherTemplateDataMap(ImportWorkflowUtils.generateOtherTemplateDataMap(tasks));
+        }
 
         // 4f. Get the Metadata Attribute data from the Batch Store and get the fieldTypes set there.
         // TODO(jwinter):  Implement Batch Store extractions.

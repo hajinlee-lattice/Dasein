@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -240,6 +241,35 @@ public class ImportWorkflowUtils {
             map.put(definition.getColumnName(), definition);
         }
         return map;
+    }
+
+    public static Map<String, OtherTemplateData> generateOtherTemplateDataMap(List<DataFeedTask> tasks) {
+        Map<String, OtherTemplateData> templateDataMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(tasks)) {
+            return templateDataMap;
+        }
+        List<Table> tables =
+                tasks.stream().filter(task -> task.getImportTemplate() != null).map(DataFeedTask::getImportTemplate).collect(Collectors.toList());
+        for (Table table : tables) {
+            String templateName = table.getName();
+            for (Attribute attr : table.getAttributes()) {
+                String attrName = attr.getName();
+                templateDataMap.putIfAbsent(attrName, new OtherTemplateData());
+                OtherTemplateData templateData = templateDataMap.get(attrName);
+                if (StringUtils.isBlank(templateData.getFieldName())) {
+                    templateData.setFieldName(attrName);
+                }
+                if (CollectionUtils.isEmpty(templateData.getExistingTemplateNames())) {
+                    templateData.setExistingTemplateNames(new ArrayList<>());
+                }
+                templateData.getExistingTemplateNames().add(templateName);
+                if (templateData.getFieldType() == null) {
+                    templateData.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attr.getPhysicalDataType()));
+                }
+            }
+        }
+
+        return templateDataMap;
     }
 
     private static FieldDefinition getFieldDefinitionFromAttribute(Attribute attribute) {

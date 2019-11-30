@@ -122,6 +122,17 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
+    public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String customerSpace, String entity,
+                                                                      String source, String feedType) {
+        DataFeed datafeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (datafeed == null) {
+            return null;
+        }
+        return dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(entity, datafeed,
+                source, feedType);
+    }
+
+    @Override
     public List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds) {
         if (CollectionUtils.isEmpty(uniqueIds)) {
             return null;

@@ -24,6 +24,9 @@ public interface DataFeedTaskService {
 
     List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity);
 
+    List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String customerSpace, String entity,
+                                                               String source, String feedType);
+
     List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds);
 
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
