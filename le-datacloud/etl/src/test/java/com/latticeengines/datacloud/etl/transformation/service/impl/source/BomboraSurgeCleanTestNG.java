@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.source;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,29 +14,22 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.BomboraSurgeCleanFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.source.BomboraSurgeCleanFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 
-public class BomboraSurgeCleanServiceTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(BomboraSurgeCleanServiceTestNG.class);
+public class BomboraSurgeCleanTestNG extends PipelineTransformationTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(BomboraSurgeCleanTestNG.class);
 
-    GeneralSource source = new GeneralSource("BomboraSurge");
-    GeneralSource bomboraSurgeRaw = new GeneralSource("BomboraSurgeRaw");
-
-    String targetSourceName = "BomboraSurge";
-
-    ObjectMapper om = new ObjectMapper();
+    private GeneralSource source = new GeneralSource("BomboraSurge");
+    private GeneralSource bomboraSurgeRaw = new GeneralSource("BomboraSurgeRaw");
 
     @Test(groups = "functional")
     public void testTransformation() {
@@ -49,42 +42,43 @@ public class BomboraSurgeCleanServiceTestNG
     }
 
     @Override
-    protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("BomboraSurge");
-            configuration.setVersion(targetVersion);
-
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add(bomboraSurgeRaw.getSourceName());
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(BomboraSurgeCleanFlow.TRANSFORMER_NAME);
-            step1.setTargetSource(targetSourceName);
-            String confParamStr1 = getTransformerConfig();
-            step1.setConfiguration(confParamStr1);
-
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-
-            // -----------
-            configuration.setSteps(steps);
-
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
-    private String getTransformerConfig() throws JsonProcessingException {
+    @Override
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("BomboraSurge");
+        configuration.setVersion(targetVersion);
+
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(bomboraSurgeRaw.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(BomboraSurgeCleanFlow.TRANSFORMER_NAME);
+        step1.setTargetSource(source.getSourceName());
+        String confParamStr1 = getTransformerConfig();
+        step1.setConfiguration(confParamStr1);
+
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        steps.add(step1);
+
+        // -----------
+        configuration.setSteps(steps);
+
+        return configuration;
+    }
+
+    private String getTransformerConfig() {
         BomboraSurgeConfig config = new BomboraSurgeConfig();
         config.setMetroAreaField("MetroArea");
         config.setDomainOriginField("DomainOrigin");
         config.setCountryField("Country");
         config.setStateField("State");
         config.setCityField("City");
-        return om.writeValueAsString(config);
+        return JsonUtils.serialize(config);
     }
 
     private Object[][] data = new Object[][] { //
@@ -123,40 +117,18 @@ public class BomboraSurgeCleanServiceTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
-    }
-
-    @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         Map<Integer, List<NameLocation>> loc = new HashMap<>();
         for (Object[] data : expectedData) {
             if (!loc.containsKey(data[0])) {
-                loc.put((Integer) data[0], new ArrayList<NameLocation>());
+                loc.put((Integer) data[0], new ArrayList<>());
             }
             NameLocation nl = new NameLocation();
             nl.setName((String) data[1]);
             nl.setCity((String) data[2]);
             nl.setState((String) data[3]);
             nl.setCountry((String) data[4]);
-            loc.get((Integer) data[0]).add(nl);
+            loc.get(data[0]).add(nl);
         }
         log.info("Start to verify records one by one.");
         int rowNum = 0;

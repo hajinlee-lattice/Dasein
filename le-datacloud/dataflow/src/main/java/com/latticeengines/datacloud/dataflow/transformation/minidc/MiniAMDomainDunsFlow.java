@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.minidc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,18 +8,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MiniAMDomainDunsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.minidc.MiniAMDomainDunsConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("miniAMDomainDunsFlow")
+/**
+ * A pipeline step of mini DataCloud creation pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-MiniAMDomainDunsCreation
+ */
+@Component(MiniAMDomainDunsFlow.DATAFLOW_BEAN)
 public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(MiniAMDomainDunsFlow.class);
+
+    public static final String DATAFLOW_BEAN = "miniAMDomainDunsFlow";
+    public static final String TRANSFORMER = "miniAMDomainDunsTransformer";
 
     private static final String DNB_GU_VALUE = "GuDnbValue";
     private static final String DNB_DU_VALUE = "DuDnbValue";
@@ -126,7 +134,7 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
          * Joining the DU and GU nodes DunsValue with Dnb Seed to get the
          * respective DUNS under DU and GU
          */
-        List<Node> dunsFromGuDu = new ArrayList<Node>();
+        List<Node> dunsFromGuDu = new ArrayList<>();
         // DUNS from GuNode
         Node guDuns = storeDnbGu.join(DNB_GU_VALUE, dnbSeedDataSet, config.getDnbInputDataSetGU(), JoinType.INNER) //
                 .retain(config.getDnbInputDataSetDuns()) //
@@ -155,7 +163,7 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
         miniDomainDunsList = miniDomainDunsList.groupByAndLimit(new FieldList(miniTargetTableAttr), 1);
 
         // Adding domains by matching with DUNS
-        List<Node> storeDomainValues = new ArrayList<Node>();
+        List<Node> storeDomainValues = new ArrayList<>();
         for (Node seedDataSet : storeList) {
             Node domainsMatchedByDuns = miniDomainDunsList
                     .join(config.getOutputDataSetValue(), seedDataSet, seedsDuns.get(seedDataSet.getPipeName()), JoinType.INNER) //
@@ -190,12 +198,12 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
 
     @Override
     public String getDataFlowBeanName() {
-        return "miniAMDomainDunsFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "miniAMDomainDunsTransformer";
+        return TRANSFORMER;
     }
 
     @Override

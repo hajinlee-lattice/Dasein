@@ -1,28 +1,36 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.minidc;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MiniAMSeedSampleSetConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.minidc.MiniAMSeedSampleSetConfig;
 
-@Component("miniAmSeedSampleSetFlow")
+/**
+ * A pipeline step of mini DataCloud creation pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-SeedSampling
+ */
+@Component(MiniAMSeedSampleSetFlow.DATAFLOW_BEAN)
 public class MiniAMSeedSampleSetFlow extends ConfigurableFlowBase<MiniAMSeedSampleSetConfig> {
+
+    public static final String DATAFLOW_BEAN = "miniAmSeedSampleSetFlow";
+    public static final String TRANSFORMER = "miniAMSampledSetTransformer";
 
     private static final String DOMAIN_TYPE = "Domain";
     private static final String DUNS_TYPE = "Duns";
 
     @Override
     public String getDataFlowBeanName() {
-        return "miniAmSeedSampleSetFlow";
+        return DATAFLOW_BEAN;
     }
 
     @Override
     public String getTransformerName() {
-        return "miniAMSampledSetTransformer";
+        return TRANSFORMER;
     }
 
     @Override

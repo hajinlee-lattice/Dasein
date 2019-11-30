@@ -1,8 +1,9 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.minidc;
 
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
 
 public class MiniAMDomainDunsConfig extends TransformerConfig {

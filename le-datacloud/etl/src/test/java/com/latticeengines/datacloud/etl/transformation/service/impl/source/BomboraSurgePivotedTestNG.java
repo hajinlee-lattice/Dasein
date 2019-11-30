@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.source;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,44 +8,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.BomboraSurgePivotedFlow;
+import com.latticeengines.datacloud.dataflow.transformation.source.BomboraSurgePivotedFlow;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook.DecodeStrategy;
 
-public class BomboraSurgePivotedServiceImplTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(BomboraSurgePivotedServiceImplTestNG.class);
+public class BomboraSurgePivotedTestNG extends PipelineTransformationTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(BomboraSurgePivotedTestNG.class);
 
-    GeneralSource source = new GeneralSource("BomboraSurgePivoted");
-    GeneralSource bomboraSurge = new GeneralSource("BomboraSurge");
+    private GeneralSource source = new GeneralSource("BomboraSurgePivoted");
+    private GeneralSource bomboraSurge = new GeneralSource("BomboraSurge");
 
-    String targetSourceName = "BomboraSurgePivoted";
+    private ObjectMapper om = new ObjectMapper();
 
-    ObjectMapper om = new ObjectMapper();
-
-    @Autowired
+    @Inject
     private SourceColumnEntityMgr sourceColumnEntityMgr;
 
     private String[] topics = { "2-in-1 PCs", "3D Printing", "401k" };
@@ -70,6 +67,11 @@ public class BomboraSurgePivotedServiceImplTestNG
         finish(progress);
         confirmResultFile(progress);
         cleanupProgressTables();
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     private void prepareEnDecodeHelper() {
@@ -110,38 +112,34 @@ public class BomboraSurgePivotedServiceImplTestNG
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("BomboraSurgePivoted");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("BomboraSurgePivoted");
+        configuration.setVersion(targetVersion);
 
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add(bomboraSurge.getSourceName());
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(BomboraSurgePivotedFlow.TRANSFORMER_NAME);
-            step1.setTargetSource(targetSourceName);
-            String confParamStr1 = getTransformerConfig();
-            step1.setConfiguration(confParamStr1);
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(bomboraSurge.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(BomboraSurgePivotedFlow.TRANSFORMER_NAME);
+        step1.setTargetSource(source.getSourceName());
+        String confParamStr1 = getTransformerConfig();
+        step1.setConfiguration(confParamStr1);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
 
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return configuration;
     }
 
-    private String getTransformerConfig() throws JsonProcessingException {
+    private String getTransformerConfig() {
         BomboraSurgeConfig config = new BomboraSurgeConfig();
         config.setBucketCodeField("BucketCode");
         config.setCompoScoreField("CompositeScore");
-        return om.writeValueAsString(config);
+        return JsonUtils.serialize(config);
     }
 
     private Object[][] data = new Object[][] { //
@@ -160,28 +158,6 @@ public class BomboraSurgePivotedServiceImplTestNG
         columns.add(Pair.of("CompositeScore", Integer.class));
         columns.add(Pair.of("BucketCode", String.class));
         uploadBaseSourceData(bomboraSurge.getSourceName(), baseSourceVersion, columns, data);
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     private Object[][] expected = { //
@@ -256,7 +232,7 @@ public class BomboraSurgePivotedServiceImplTestNG
     }
 
     private void prepareBitCodeBook() {
-        List<SourceColumn> srcCols = sourceColumnEntityMgr.getSourceColumns(targetSourceName);
+        List<SourceColumn> srcCols = sourceColumnEntityMgr.getSourceColumns(source.getSourceName());
         Map<String, Integer> bitsPosMap = srcCols.stream()
                 .filter(srcCol -> SourceColumn.Calculation.BIT_ENCODE.equals(srcCol.getCalculation()))
                 .collect(Collectors.toMap(srcCol -> srcCol.getColumnName(),

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.source;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,11 +7,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -19,20 +20,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.BitCodecUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.HGDataTechIndicatorsFlow;
+import com.latticeengines.datacloud.dataflow.transformation.source.HGDataTechIndicatorsFlow;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TechIndicatorsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.TechIndicatorsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
-public class HGDataTechIndicatorsTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class HGDataTechIndicatorsTestNG extends PipelineTransformationTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(HGDataTechIndicatorsTestNG.class);
 
@@ -60,11 +59,11 @@ public class HGDataTechIndicatorsTestNG
 
     private final ObjectMapper om = new ObjectMapper();
 
-    GeneralSource source = new GeneralSource("HGDataTechIndicators");
-    GeneralSource hgClean = new GeneralSource("HGDataClean");
-    GeneralSource hgTechInd = new GeneralSource("HGDataTechIndicators");
+    private GeneralSource source = new GeneralSource("HGDataTechIndicators");
+    private GeneralSource hgClean = new GeneralSource("HGDataClean");
+    private GeneralSource hgTechInd = new GeneralSource("HGDataTechIndicators");
 
-    @Autowired
+    @Inject
     private SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Test(groups = "functional")
@@ -80,25 +79,8 @@ public class HGDataTechIndicatorsTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
@@ -109,7 +91,7 @@ public class HGDataTechIndicatorsTestNG
             configuration.setVersion(targetVersion);
 
             TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
+            List<String> baseSources = new ArrayList<>();
             baseSources.add(hgClean.getSourceName());
             baseSources.add(hgTechInd.getSourceName());
             step1.setBaseSources(baseSources);

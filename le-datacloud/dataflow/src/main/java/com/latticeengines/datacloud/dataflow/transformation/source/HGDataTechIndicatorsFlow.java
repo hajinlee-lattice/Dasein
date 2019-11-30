@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,20 +6,24 @@ import java.util.stream.Collectors;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.datacloud.dataflow.utils.BitEncodeUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.EncodedBitOperationFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.source.EncodedBitOperationFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TechIndicatorsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.TechIndicatorsConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
+/**
+ * A pipeline step of HGDataTechIndicator pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-HGDataTechIndicatorsCreation
+ */
 @Component(HGDataTechIndicatorsFlow.DATAFLOW_BEAN_NAME)
-public class HGDataTechIndicatorsFlow
- extends ConfigurableFlowBase<TechIndicatorsConfig> {
+public class HGDataTechIndicatorsFlow extends ConfigurableFlowBase<TechIndicatorsConfig> {
 
     public static final String DATAFLOW_BEAN_NAME = "hgDataTechIndicatorsFlow";
     public static final String TRANSFORMER_NAME = "hgDataTechIndicatorsTransformer";

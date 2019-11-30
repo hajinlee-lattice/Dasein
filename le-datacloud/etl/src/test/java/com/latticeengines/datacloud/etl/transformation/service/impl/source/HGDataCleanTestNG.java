@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.source;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -16,22 +16,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.HGDataCleanFlow;
+import com.latticeengines.datacloud.dataflow.transformation.source.HGDataCleanFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.HGDataCleanConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.HGDataCleanConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
 
     private static final Logger log = LoggerFactory.getLogger(HGDataCleanTestNG.class);
 
-    GeneralSource baseSource = new GeneralSource("HGSeedRaw");
-
-    ObjectMapper om = new ObjectMapper();
+    private GeneralSource baseSource = new GeneralSource("HGSeedRaw");
 
     @Test(groups = "pipeline2")
     public void testTransformation() {
@@ -49,41 +47,31 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
     }
 
     @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(getTargetSourceName(), targetVersion).toString();
-    }
-
-    @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("HGDataClean");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("HGDataClean");
+        configuration.setVersion(targetVersion);
 
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add(baseSource.getSourceName());
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(HGDataCleanFlow.TRANSFORMER_NAME);
-            step1.setTargetSource(getTargetSourceName());
-            String confParamStr1 = getHGDataCleanConfig();
-            // step1.setConfiguration(setDataFlowEngine(confParamStr1, "TEZ"));
-            step1.setConfiguration(confParamStr1);
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(baseSource.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(HGDataCleanFlow.TRANSFORMER_NAME);
+        step1.setTargetSource(getTargetSourceName());
+        String confParamStr1 = getHGDataCleanConfig();
+        step1.setConfiguration(confParamStr1);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<>();
-            steps.add(step1);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
 
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return configuration;
     }
 
-    private String getHGDataCleanConfig() throws JsonProcessingException {
+    private String getHGDataCleanConfig() {
         HGDataCleanConfig config = new HGDataCleanConfig();
         config.setDomainField("URL");
         config.setDateLastVerifiedField("DateLastVerified");
@@ -94,7 +82,7 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
         config.setCategoryParentField("CategoryParent");
         config.setCategoryParent2Field("CategoryParent2");
         config.setIntensityField("Intensity");
-        return om.writeValueAsString(config);
+        return JsonUtils.serialize(config);
     }
 
     private void prepareHGSeedRaw() {

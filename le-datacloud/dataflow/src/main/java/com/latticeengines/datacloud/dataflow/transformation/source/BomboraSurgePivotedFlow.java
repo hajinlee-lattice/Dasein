@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.util.List;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.Range;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.datacloud.dataflow.utils.BitEncodeUtils;
 import com.latticeengines.datacloud.dataflow.utils.FileParser;
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -13,10 +14,15 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BomboraSurgeIntentFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
+/**
+ * A pipeline step of BomboraSurge pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-BomboraSurgeCreation
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-BomboraSurgePivotedCreation
+ */
 @Component(BomboraSurgePivotedFlow.DATAFLOW_BEAN_NAME)
 public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeConfig> {
 
@@ -38,8 +44,6 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
         config = getTransformerConfig(parameters);
         Map<Range<Integer>, String> intentMap = FileParser.parseBomboraIntent();
         Node bomboraSurge = addSource(parameters.getBaseTables().get(0));
-        //bomboraSurge = bomboraSurge.groupByAndLimit(new FieldList(groupByFields), 1);
-        //bomboraSurge = bomboraSurge.checkpoint();
         bomboraSurge = addIntent(bomboraSurge, intentMap);
 
         List<SourceColumn> sourceColumns = parameters.getColumns();

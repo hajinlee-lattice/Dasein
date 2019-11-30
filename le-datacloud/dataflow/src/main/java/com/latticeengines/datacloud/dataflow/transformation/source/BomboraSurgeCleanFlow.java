@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,18 +6,24 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.datacloud.dataflow.utils.FileParser;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.BomboraSurgeParseLocFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.source.BomboraSurgeParseLocFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.BomboraSurgeConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
+/**
+ * A pipeline step of BomboraSurge pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-BomboraSurgeCreation
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-BomboraSurgePivotedCreation
+ */
 @Component(BomboraSurgeCleanFlow.DATAFLOW_BEAN_NAME)
 public class BomboraSurgeCleanFlow extends ConfigurableFlowBase<BomboraSurgeConfig> {
 

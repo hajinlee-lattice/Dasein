@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.minidc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,30 +16,25 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.minidc.MiniAMDomainDunsFlow;
+import com.latticeengines.datacloud.dataflow.transformation.minidc.MiniAMDomainDunsInitFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MiniAMDomainDunsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MiniAMDomainDunsInitConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.minidc.MiniAMDomainDunsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.minidc.MiniAMDomainDunsInitConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.IterativeStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
-public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class MiniAMDomainDunsTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(MiniAMDomainDunsTestNG.class);
 
-    GeneralSource source = new GeneralSource("MiniAMDomainDuns");
-
-    GeneralSource baseSource = new GeneralSource("GoldenDataSet");
-    GeneralSource baseSourceAccountMasterSeed = new GeneralSource("AccountMasterSeed");
-    GeneralSource baseSourceDnbSeed = new GeneralSource("DnbSeed");
-
-    String targetSourceName = "MiniAMDomainDuns";
-
-    ObjectMapper om = new ObjectMapper();
+    private GeneralSource source = new GeneralSource("MiniAMDomainDuns");
+    private GeneralSource baseSource = new GeneralSource("GoldenDataSet");
+    private GeneralSource baseSourceAMS = new GeneralSource("AccountMasterSeed");
+    private GeneralSource baseSourceDnBSeed = new GeneralSource("DnbSeed");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -54,70 +49,49 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
     }
 
     @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
+    }
+
+    @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("MiniAMDomainDuns");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("MiniAMDomainDuns");
+        configuration.setVersion(targetVersion);
 
-            // Initialize Golden Data Set
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSourcesStep1 = new ArrayList<String>();
-            baseSourcesStep1.add(baseSource.getSourceName());
-            step1.setBaseSources(baseSourcesStep1);
-            step1.setTargetVersion("2017-01-01_21-50-34_UTC");
-            step1.setTargetSource(targetSourceName);
-            step1.setTransformer("miniDnbAMDomainDunsTransformer");
-            String confParamStr1 = getMiniAMDomainDunsInitConfig();
-            step1.setConfiguration(confParamStr1);
+        // Initialize Golden Data Set
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSourcesStep1 = new ArrayList<>();
+        baseSourcesStep1.add(baseSource.getSourceName());
+        step1.setBaseSources(baseSourcesStep1);
+        step1.setTargetVersion("2017-01-01_21-50-34_UTC");
+        step1.setTargetSource(source.getSourceName());
+        step1.setTransformer(MiniAMDomainDunsInitFlow.TRANSFORMER);
+        String confParamStr1 = getMiniAMDomainDunsInitConfig();
+        step1.setConfiguration(confParamStr1);
 
-            // Initialize DnbSeed Data Set and AMSeed Data Set
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<String> baseSourcesStep2 = new ArrayList<String>();
-            step2.setStepType(TransformationStepConfig.ITERATIVE);
-            step2.setTargetSource(targetSourceName);
-            step2.setTransformer("miniAMDomainDunsTransformer");
-            String confParamStr2 = getMiniDnbAMDomainDunsConfig();
-            step2.setConfiguration(confParamStr2);
-            baseSourcesStep2.add(targetSourceName);
-            baseSourcesStep2.add(baseSourceDnbSeed.getSourceName());
-            baseSourcesStep2.add(baseSourceAccountMasterSeed.getSourceName());
-            step2.setBaseSources(baseSourcesStep2);
+        // Initialize DnbSeed Data Set and AMSeed Data Set
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        List<String> baseSourcesStep2 = new ArrayList<>();
+        step2.setStepType(TransformationStepConfig.ITERATIVE);
+        step2.setTargetSource(source.getSourceName());
+        step2.setTransformer(MiniAMDomainDunsFlow.TRANSFORMER);
+        String confParamStr2 = getMiniDnbAMDomainDunsConfig();
+        step2.setConfiguration(confParamStr2);
+        baseSourcesStep2.add(source.getSourceName());
+        baseSourcesStep2.add(baseSourceDnBSeed.getSourceName());
+        baseSourcesStep2.add(baseSourceAMS.getSourceName());
+        step2.setBaseSources(baseSourcesStep2);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            steps.add(step2);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
+        steps.add(step2);
 
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return configuration;
     }
 
     @Override
@@ -185,7 +159,7 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
                 { "citrix.com", null, "345678912", null }
         };
 
-        uploadBaseSourceData(baseSourceDnbSeed.getSourceName(), baseSourceVersion, columns, data);
+        uploadBaseSourceData(baseSourceDnBSeed.getSourceName(), baseSourceVersion, columns, data);
     }
 
     private void prepareAMDataSetSeed() {
@@ -196,38 +170,38 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
                 { "intel.com", "333333333" }, { "netapp.com", "888888888" }, { "paypal.com", "145789000" },
                 { "adobe.com", "909090909" }, { null, "191090190" }, { null, "799090909" },
                 { "infotech.com", "901234561" }, { "kaggle.com", null }, { "snapchat.com", "121459889" } };
-        uploadBaseSourceData(baseSourceAccountMasterSeed.getSourceName(), baseSourceVersion, columns, data);
+        uploadBaseSourceData(baseSourceAMS.getSourceName(), baseSourceVersion, columns, data);
     }
 
-    private String getMiniAMDomainDunsInitConfig() throws JsonProcessingException {
+    private String getMiniAMDomainDunsInitConfig() {
         MiniAMDomainDunsInitConfig conf = new MiniAMDomainDunsInitConfig();
         // For storing DOMAINS of all golden data sets
         Map<String, String> goldenDomain = new HashMap<String, String>();
-        goldenDomain.put("GoldenDataSet", "Domain");
+        goldenDomain.put(baseSource.getSourceName(), "Domain");
         // For storing DUNS of all golden data sets
         Map<String, String> goldenDuns = new HashMap<String, String>();
-        goldenDuns.put("GoldenDataSet", "DUNS");
+        goldenDuns.put(baseSource.getSourceName(), "DUNS");
         conf.setGoldenInputDataSetDomain(goldenDomain);
         conf.setGoldenInputDataSetDuns(goldenDuns);
         conf.setOutputDataSetType("Type");
         conf.setOutputDataSetValue("Value");
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getMiniDnbAMDomainDunsConfig() throws JsonProcessingException {
+    private String getMiniDnbAMDomainDunsConfig() {
         MiniAMDomainDunsConfig conf = new MiniAMDomainDunsConfig();
         IterativeStepConfig.ConvergeOnCount iterateStrategy = new IterativeStepConfig.ConvergeOnCount();
-        iterateStrategy.setIteratingSource(targetSourceName);
+        iterateStrategy.setIteratingSource(source.getSourceName());
         iterateStrategy.setCountDiff(0);
         conf.setIterateStrategy(iterateStrategy);
         // For storing DOMAINS of all seeds as {seed, domain_name}
-        Map<String, String> domain = new HashMap<String, String>();
-        domain.put("DnbSeed", "Domain");
-        domain.put("AccountMasterSeed", "DOMAIN");
+        Map<String, String> domain = new HashMap<>();
+        domain.put(baseSourceDnBSeed.getSourceName(), "Domain");
+        domain.put(baseSourceAMS.getSourceName(), "DOMAIN");
         // For storing DUNS of all seeds as {seed, duns_name}
-        Map<String, String> duns = new HashMap<String, String>();
-        duns.put("DnbSeed", "DUNS");
-        duns.put("AccountMasterSeed", "Duns");
+        Map<String, String> duns = new HashMap<>();
+        duns.put(baseSourceDnBSeed.getSourceName(), "DUNS");
+        duns.put(baseSourceAMS.getSourceName(), "Duns");
         conf.setDnbInputDataSetDomain("Domain");
         conf.setDnbInputDataSetDuns("DUNS");
         conf.setDnbInputDataSetGU("GU");
@@ -238,7 +212,6 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
         conf.setMiniInputDataSetValue("Value");
         conf.setOutputDataSetType("Type");
         conf.setOutputDataSetValue("Value");
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
-
 }

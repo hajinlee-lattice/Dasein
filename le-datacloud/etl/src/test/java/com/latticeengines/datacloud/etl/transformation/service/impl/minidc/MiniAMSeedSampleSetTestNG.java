@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.minidc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,27 +14,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.minidc.MiniAMSeedSampleSetFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MiniAMSeedSampleSetConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.minidc.MiniAMSeedSampleSetConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class MiniAMSeedSampleSetTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class MiniAMSeedSampleSetTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(MiniAMSeedSampleSetTestNG.class);
-    GeneralSource source = new GeneralSource("MiniAMSeedSampleSet");
-
-    GeneralSource baseSource = new GeneralSource("MiniAMDataSet");
-    GeneralSource baseSourceDataSeed = new GeneralSource("SeedDataSet");
-
-    String targetSourceName = source.getSourceName();
-
-    ObjectMapper om = new ObjectMapper();
+    private GeneralSource source = new GeneralSource("MiniAMSeedSampleSet");
+    private GeneralSource baseSource = new GeneralSource("MiniAMDataSet");
+    private GeneralSource baseSourceDataSeed = new GeneralSource("SeedDataSet");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -48,56 +41,30 @@ public class MiniAMSeedSampleSetTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
-    }
-
-    @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("MiniAMSampleSet");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("MiniAMSampleSet");
+        configuration.setVersion(targetVersion);
 
-            // Initialize Sampled Data Set
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSourcesStep1 = new ArrayList<String>();
-            baseSourcesStep1.add(baseSource.getSourceName());
-            baseSourcesStep1.add(baseSourceDataSeed.getSourceName());
-            step1.setBaseSources(baseSourcesStep1);
-            step1.setTransformer("miniAMSampledSetTransformer");
-            String confParamStr1 = getMiniAMSampledSetConfig();
-            step1.setConfiguration(confParamStr1);
-            step1.setTargetSource(targetSourceName);
+        // Initialize Sampled Data Set
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSourcesStep1 = new ArrayList<>();
+        baseSourcesStep1.add(baseSource.getSourceName());
+        baseSourcesStep1.add(baseSourceDataSeed.getSourceName());
+        step1.setBaseSources(baseSourcesStep1);
+        step1.setTransformer(MiniAMSeedSampleSetFlow.TRANSFORMER);
+        String confParamStr1 = getMiniAMSampledSetConfig();
+        step1.setConfiguration(confParamStr1);
+        step1.setTargetSource(source.getSourceName());
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
 
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return configuration;
     }
 
     @Override
@@ -157,17 +124,22 @@ public class MiniAMSeedSampleSetTestNG
         uploadBaseSourceData(baseSourceDataSeed.getSourceName(), baseSourceVersion, columns, data);
     }
 
-    private String getMiniAMSampledSetConfig() throws JsonProcessingException {
+    private String getMiniAMSampledSetConfig() {
         MiniAMSeedSampleSetConfig conf = new MiniAMSeedSampleSetConfig();
         conf.setMiniDataSetType("Type");
         conf.setMiniDataSetValue("Value");
         conf.setSampledSetDomain("Domain");
         conf.setSampledSetDuns("Duns");
-        List<String> columnList = new ArrayList<String>();
+        List<String> columnList = new ArrayList<>();
         columnList.add(conf.getSampledSetDomain());
         columnList.add(conf.getSampledSetDuns());
         conf.setKeyIdentifier(columnList);
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
 }
