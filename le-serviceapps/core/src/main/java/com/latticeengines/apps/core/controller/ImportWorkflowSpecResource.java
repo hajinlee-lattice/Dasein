@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.controller;
 
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -74,4 +75,24 @@ public class ImportWorkflowSpecResource {
         }
         return table;
     }
+
+    @GetMapping(value = "/list")
+    @ResponseBody
+    @ApiOperation("get workflow spec with same object excluding one type")
+    public List<ImportWorkflowSpec> getImportWorkflowSpecWithSameObjectExcludeType(
+            @PathVariable String customerSpace, //
+            @RequestParam(value = "systemType", required = true) String systemType, //
+            @RequestParam(value = "systemObject", required = true) String systemObject) {
+        List<ImportWorkflowSpec> specs;
+        try {
+            specs = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(systemType, systemObject);
+        } catch (Exception e) {
+            log.error(String.format(
+                    "ImportWorkflowSpecService failed to return Spec for system type %s and system object %s.\n" +
+                            "Error was: %s", systemType, systemObject, e.toString()));
+            return null;
+        }
+        return specs;
+    }
+
 }

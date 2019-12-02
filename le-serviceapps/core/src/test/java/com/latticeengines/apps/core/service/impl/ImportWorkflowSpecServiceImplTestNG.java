@@ -1,7 +1,6 @@
 package com.latticeengines.apps.core.service.impl;
 
 import java.io.IOException;
-
 import java.util.List;
 
 import org.slf4j.Logger;

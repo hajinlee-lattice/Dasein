@@ -14,12 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-<<<<<<< c27fdfecad2f412f28705af5033e10bfcd6cc105:le-serviceapps/core/src/main/java/com/latticeengines/apps/core/service/impl/ImportWorkflowSpecServiceImpl.java
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
-||||||| merged common ancestors
-=======
 import com.latticeengines.aws.s3.S3KeyFilter;
->>>>>>> DP-11158 Validate Import Workflow Specs:le-pls/src/main/java/com/latticeengines/pls/service/impl/ImportWorkflowSpecServiceImpl.java
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -88,7 +84,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     public List<ImportWorkflowSpec> loadSpecWithSameObjectExcludeTypeFromS3(String systemType, String systemObject) throws Exception {
         String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
         String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
-        String s3Path = s3Dir;
+        String s3Path = s3Folder;
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
 
         // Read in S3 file as InputStream.

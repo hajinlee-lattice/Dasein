@@ -1464,9 +1464,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     public List<String> validateIndividualSpec(String systemType, String systemObject,
                                                      InputStream specInputStream) throws Exception {
 
-        ImportWorkflowSpec existingSpec = importWorkflowSpecService.loadSpecFromS3(systemType, systemObject);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+
+        ImportWorkflowSpec existingSpec = importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(),
+                systemType,
+                systemObject);
         List<ImportWorkflowSpec> specList =
-                importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(systemType, systemObject);
+                importWorkflowSpecProxy.getSpecWithSameObjectExcludeTypeFromS3(customerSpace.toString(), systemType,
+                        systemObject);
         Map<String, Map<String, FieldDefinition>> specWithSameObjectMap = new HashMap<>();
         specList.forEach(spec ->
             specWithSameObjectMap.put(spec.getSystemType(),
