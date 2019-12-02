@@ -13,11 +13,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -42,6 +45,8 @@ import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public abstract class BaseExportData<T extends ExportStepConfiguration> extends BaseWorkflowStep<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseExportData.class);
 
     private static final String MAPPED_FIELD_PREFIX = "user_";
     private static final String DATE_FORMAT = "M/d/yyyy";
@@ -173,46 +178,48 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
             boolean hasHeader = false;
             for (File file : files) {
                 log.info("Merging file " + file.getName());
-                CSVReader csvReader = new CSVReader(new FileReader(file));
-                List<String[]> records = csvReader.readAll();
-                log.info(String.format("There are 1 header row, %d data row(s) in file %s.", records.size() - 1,
-                        file.getName()));
-                String[] header = records.get(0);
-                boolean needRemapFieldNames = (file.getName().toLowerCase().contains("orphan")
-                        || file.getName().toLowerCase().contains("unmatched"))
-                        && MapUtils.isNotEmpty(importedAttributes);
-                if (needRemapFieldNames) {
-                    log.info("Remap field names.");
-                    Map<String, Integer> headerPosMap = buildPositionMap(Arrays.asList(header));
-                    log.info("Header positionMap=" + JsonUtils.serialize(headerPosMap));
-                    List<String> displayNames = importedAttributes.entrySet().stream()
-                            .map(entry -> normalizeFieldName(entry.getValue().getDisplayName()))
-                            .collect(Collectors.toList());
-                    log.info("DisplayName positionMap=" + JsonUtils.serialize(displayNames));
-                    Map<String, Integer> displayNamePosMap = buildPositionMap(displayNames);
-                    String[] displayNamesAsArr = toOrderedArray(displayNamePosMap);
+                try (CSVReader csvReader = new CSVReader(new FileReader(file))) {
+                    AtomicInteger counter = new AtomicInteger();
+                    String[] headers = csvReader.readNext();
+                    boolean needRemapFieldNames = (file.getName().toLowerCase().contains("orphan")
+                            || file.getName().toLowerCase().contains("unmatched"))
+                            && MapUtils.isNotEmpty(importedAttributes);
+
+                    Map<String, Integer> headerPosMap = null;
+                    String[] displayNamesAsArr = null;
+                    Map<String, Integer> displayNamePosMap = null;
+                    if (needRemapFieldNames) {
+                        log.info("Remap field names.");
+                        headerPosMap = buildPositionMap(Arrays.asList(headers));
+                        log.info("Header positionMap=" + JsonUtils.serialize(headerPosMap));
+                        List<String> displayNames = importedAttributes.values().stream()
+                                .map(attribute -> normalizeFieldName(attribute.getDisplayName()))
+                                .collect(Collectors.toList());
+                        log.info("DisplayName positionMap=" + JsonUtils.serialize(displayNames));
+                        displayNamePosMap = buildPositionMap(displayNames);
+                        displayNamesAsArr = toOrderedArray(displayNamePosMap);
+                    } else {
+                        log.info("Use field names as-is.");
+                    }
                     if (!hasHeader) {
-                        writer.writeNext(displayNamesAsArr);
+                        writer.writeNext(headers);
                         hasHeader = true;
                     }
-                    if (records.size() > 1) {
-                        records.subList(1, records.size()).forEach(record -> {
+                    String[] record = csvReader.readNext();
+                    while (record != null) {
+                        counter.incrementAndGet();
+                        if (needRemapFieldNames) {
                             String[] newRecord = generateNewRecord(record, displayNamesAsArr.length, headerPosMap,
                                     displayNamePosMap, importedAttributes);
                             writer.writeNext(newRecord);
-                        });
+                        } else {
+                            writer.writeNext(record);
+                        }
+                        record = csvReader.readNext();
                     }
-                } else {
-                    log.info("Use field names as-is.");
-                    if (!hasHeader) {
-                        writer.writeNext(header);
-                        hasHeader = true;
-                    }
-                    if (records.size() > 1) {
-                        writer.writeAll(records.subList(1, records.size()));
-                    }
+                    log.info(String.format("There are 1 header row, %d data row(s) in file %s.", counter.get(),
+                            file.getName()));
                 }
-                csvReader.close();
             }
             log.info("Finished for loops.");
             writer.flush();
