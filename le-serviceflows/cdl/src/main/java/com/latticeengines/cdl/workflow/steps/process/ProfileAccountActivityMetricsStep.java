@@ -17,7 +17,7 @@ public class ProfileAccountActivityMetricsStep extends ProfileActivityMetricsSte
     static final String BEAN_NAME = "profileAccountActivityMetricsStep";
 
     @Override
-    protected BusinessEntity getEntity() {
+    protected BusinessEntity getEntityLevel() {
         return BusinessEntity.Account;
     }
 

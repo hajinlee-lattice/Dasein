@@ -1,22 +1,19 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
-import com.google.common.collect.ImmutableList;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileStepBase;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
@@ -30,8 +27,12 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
     private Map<String, String> profiledTableNames = new HashMap<>();
     private List<String> statsTableNamePrefixes = new ArrayList<>();
 
+    protected abstract BusinessEntity getEntityLevel(); // Account/Contact. For constructing ActivityMetrics table name only
+
     @Override
-    protected abstract BusinessEntity getEntity();
+    protected BusinessEntity getEntity() { // serving entity. need to be configured before use
+        return null;
+    } // serving multiple entities
 
     protected abstract String getRequestName();
 
@@ -65,21 +66,21 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         int bucketStep = 1;
         List<TransformationStepConfig> steps = new ArrayList<>();
         for (String servingEntity : servingEntities) {
-            String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, String.format("%s_%s", getEntity().name(), servingEntity));
+            String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, String.format("%s_%s", getEntityLevel().name(), servingEntity));
             String tableName = getStringValueFromContext(tableCtxName);
             if (StringUtils.isBlank(tableName)) {
-                log.info("No need to profile {} for {}", servingEntity, getEntity());
+                log.info("No need to profile {} for {}", servingEntity, getEntityLevel());
                 continue;
             }
             profiledTableNames.put(servingEntity, tableName);
             steps.add(profile(tableName));
             steps.add(bucket(profileStep, tableName, getBucketTablePrefix(servingEntity)));
-            steps.add(calcStats(profileStep, bucketStep, getStatsTablePrefix(servingEntity), null)); // TODO - add stats table name to a list
+            steps.add(calcStats(profileStep, bucketStep, getStatsTablePrefix(servingEntity), null));
             statsTableNamePrefixes.add(getStatsTablePrefix(servingEntity));
             profileStep += 3;
             bucketStep += 3;
         }
-        log.info("{} activity metrics need to be profiled for {}: {}", profiledTableNames.size(), getEntity(), profiledTableNames);
+        log.info("{} activity metrics need to be profiled for {}: {}", profiledTableNames.size(), getEntityLevel(), profiledTableNames);
 
         if (CollectionUtils.isEmpty(steps)) {
             return null;
@@ -94,42 +95,24 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
 
     @Override
     protected void onPostTransformationCompleted() {
-        log.info("postprocessing pipeline version: {}", getStringValueFromContext(TRANSFORM_PIPELINE_VERSION));
         for (Map.Entry<String, String> entry : profiledTableNames.entrySet()) {
-            String servingEntity = entry.getKey();
+            BusinessEntity servingEntity = BusinessEntity.getByName(entry.getKey());
+            TableRoleInCollection servingStore = servingEntity.getServingStore();
             String tableName = entry.getValue();
-            // TODO - enrich table attrs
-            TableRoleInCollection role = TableRoleInCollection.getByName(servingEntity);
-            role.setPrimaryKey(getEntityIdCol(getEntity()));
-            role.setForeignKeys(getForeignKeys(getEntity()));
-            exportTableRoleToRedshift(tableName, TableRoleInCollection.getByName(servingEntity));
-            exportToDynamo(tableName, getEntityIdCol(getEntity()).name(), null);
+            exportTableRoleToRedshift(tableName, servingStore);
+            exportToDynamo(tableName, servingStore.getPrimaryKey().name(), null);
+            String statsTableName = constructStatsTableName(getStatsTablePrefix(servingEntity.name()));
+            log.info("Adding stats table to context: {}", statsTableName);
+            updateEntityValueMapInContext(servingEntity, STATS_TABLE_NAMES, statsTableName, String.class);
         }
-        log.info("adding stats table with pipeline version: {}", getStringValueFromContext(TRANSFORM_PIPELINE_VERSION));
-        statsTableNamePrefixes.forEach(prefix -> updateEntityValueMapInContext(STATS_TABLE_NAMES, constructStatsTableName(prefix), String.class));
-    }
-
-    private ImmutableList<InterfaceName> getForeignKeys(BusinessEntity entity) {
-        InterfaceName fk = getEntityIdCol(entity);
-        return ImmutableList.copyOf(Collections.singletonList(fk));
-    }
-
-    private InterfaceName getEntityIdCol(BusinessEntity entity) {
-        switch (entity) {
-            case Account:
-                return InterfaceName.AccountId;
-            case Contact:
-                return InterfaceName.ContactId;
-            default:
-                throw new IllegalArgumentException(String.format("Not supported entity %s", entity));
-        }
+        // TODO - enrich table attrs
     }
 
     private String getStatsTablePrefix(String servingEntity) {
-        return String.format("%s%s%s", getEntity(), servingEntity, "Stats");
+        return String.format("%s%s%s", getEntityLevel(), servingEntity, "Stats");
     }
 
     private String getBucketTablePrefix(String servingEntity) {
-        return String.format("%s%s%s", getEntity(), servingEntity, "Buckets");
+        return String.format("%s%s%s", getEntityLevel(), servingEntity, "Buckets");
     }
 }

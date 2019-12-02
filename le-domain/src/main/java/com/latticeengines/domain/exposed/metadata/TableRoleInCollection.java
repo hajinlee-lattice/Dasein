@@ -105,6 +105,8 @@ public enum TableRoleInCollection {
         AccountLookup.primaryKey = InterfaceName.AtlasLookupKey;
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
+
+        WebVisitProfile.primaryKey = InterfaceName.AccountId;
     }
 
     private InterfaceName primaryKey;
@@ -120,10 +122,6 @@ public enum TableRoleInCollection {
 
     public ImmutableList<InterfaceName> getForeignKeys() {
         return foreignKeys;
-    }
-
-    public void setForeignKeys(ImmutableList<InterfaceName> foreignKeys) {
-        this.foreignKeys = foreignKeys;
     }
 
     public List<String> getForeignKeysAsStringList() {
