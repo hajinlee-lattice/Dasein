@@ -81,11 +81,11 @@ import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
-import com.latticeengines.pls.service.ImportWorkflowSpecService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.EntityMatchGAConverterUtils;
@@ -95,6 +95,7 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -130,7 +131,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private CommonTenantConfigServiceImpl appTenantConfigService;
 
     @Autowired
-    private ImportWorkflowSpecService importWorkflowSpecService;
+    private ImportWorkflowSpecProxy importWorkflowSpecProxy;
 
     @Autowired
     private CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -1133,8 +1134,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
 
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n   feedType: %s\n   source: %s\n" +
-                        "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(), feedType,
-                source, sourceFile.getName(), customerSpace.toString()));
+                        "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
+                feedType, source, sourceFile.getName(), customerSpace.toString()));
 
         // 3. Get flags relevant to import workflow.
         // TODO(jwinter): Figure out how to incorporate all the system flags for entity match.
@@ -1158,7 +1159,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // 4b. Retrieve Spec for given systemType and systemObject.
         fetchFieldDefinitionsResponse.setImportWorkflowSpec(
-                importWorkflowSpecService.loadSpecFromS3(systemType, systemObject));
+                importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(), systemType, systemObject));
 
         // 4c. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
         // exists.
@@ -1186,8 +1187,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // TODO(jwinter):  Implement Batch Store extractions.
 
         // 5. Generate the initial FieldMappingsRecord based on the Spec, existing table, input file, and batch store.
-
-        //ImportWorkflowUtils.createFieldDefinitionsRecordFromSpecAndTable(importWorkflowSpec, existingTable, resolver);
         ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
 
         log.info("JAW ------ END Real Fetch Field Definition -----");
@@ -1272,7 +1271,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
         // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
         String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
-        Table newTable = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(newTableName, commitRequest, false);
+        Table newTable = ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(newTableName, false, commitRequest);
         // TODO(jwinter): Figure out how to properly set the Table display name.
         printTableAttributes("New Table", newTable);
 

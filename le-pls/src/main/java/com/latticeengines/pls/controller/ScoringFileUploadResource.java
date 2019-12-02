@@ -123,8 +123,7 @@ public class ScoringFileUploadResource {
                 table.setDisplayName(sourceFile.getDisplayName());
                 for (String header : headers) {
                     Attribute attr = new Attribute();
-                    attr.setName(
-                            ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(header));
+                    attr.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(header));
                     attr.setDisplayName(header);
                     attr.setPhysicalDataType(FieldType.STRING.avroTypes()[0]);
                     attr.setNullable(true);

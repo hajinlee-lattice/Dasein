@@ -1,5 +1,7 @@
 package com.latticeengines.pls.metadata.resolution;
 
+import static com.latticeengines.common.exposed.util.AvroUtils.getAvroFriendlyString;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
@@ -191,8 +193,7 @@ public class MetadataResolver {
                         hasExternalId = true;
                     }
 
-                    String attrName =
-                            ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField());
+                    String attrName = getAvroFriendlyString(fieldMapping.getMappedField());
                     String externalAttrName;
                     if (currentAttrs.contains(attrName)) {
                         Attribute attribute = getAttributeFromFieldName(fieldMapping);
@@ -538,15 +539,13 @@ public class MetadataResolver {
             fieldType = fieldMapping.getFieldType().getAvroType().toString().toLowerCase();
         }
         if (cdlResolve) {
-            String attrName =
-                    ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField());
+            String attrName = getAvroFriendlyString(fieldMapping.getMappedField());
             if (!fieldMapping.isMappedToLatticeField() && !attrName.startsWith(USER_PREFIX)) {
                 attrName = USER_PREFIX + attrName;
             }
             attribute.setName(attrName);
         } else {
-            attribute
-                    .setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getUserField()));
+            attribute.setName(getAvroFriendlyString(fieldMapping.getUserField()));
         }
         attribute.setPhysicalDataType(fieldType);
         attribute.setDisplayName(fieldMapping.getUserField());
