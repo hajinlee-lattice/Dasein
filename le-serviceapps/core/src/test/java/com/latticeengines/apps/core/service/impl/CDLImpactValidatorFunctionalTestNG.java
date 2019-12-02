@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -16,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -42,28 +44,25 @@ public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTes
         CDLDependenciesProxy cdlDependenciesProxy = Mockito.mock(CDLDependenciesProxy.class);
         Play play = new Play();
         play.setName("play1");
-        List<Play> playList = Arrays.asList(play);
-        when(cdlDependenciesProxy.getDependingPlays(anyString(), anyList())).thenReturn(playList);
+        List<Play> playList = Collections.singletonList(play);
+        when(cdlDependenciesProxy.getDependantPlays(anyString(), anyList())).thenReturn(playList);
         MetadataSegment seg = new MetadataSegment();
-        List<MetadataSegment> segList = Arrays.asList(seg);
+        List<MetadataSegment> segList = Collections.singletonList(seg);
         when(cdlDependenciesProxy.getDependingSegments(anyString(), anyList())).thenReturn(segList);
         ReflectionTestUtils.setField(cdlImpactValidator, "cdlDependenciesProxy", cdlDependenciesProxy);
         AttrConfig lDCNonPremium = AttrConfigTestUtils.getLDCNonPremiumAttr(Category.INTENT, true);
         lDCNonPremium.getStrongTypedProperty(ColumnSelection.Predefined.TalkingPoint.name(), Boolean.class).setCustomValue(false);
-        cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCNonPremium),
+        cdlImpactValidator.validate(new ArrayList<>(), Collections.singletonList(lDCNonPremium),
                 new AttrValidation());
 
         Assert.assertNotNull(lDCNonPremium.getImpactWarnings());
-        Assert.assertEquals(
-                lDCNonPremium.getImpactWarnings().getWarnings().containsKey(ImpactWarnings.Type.IMPACTED_PLAYS), true);
+        Assert.assertTrue(lDCNonPremium.getImpactWarnings().getWarnings().containsKey(ImpactWarnings.Type.IMPACTED_PLAYS));
 
         AttrConfig lDCPremium = AttrConfigTestUtils.getLDCPremiumAttr(Category.INTENT, true);
         lDCNonPremium.getStrongTypedProperty(ColumnSelection.Predefined.Segment.name(), Boolean.class).setCustomValue(false);
-        cdlImpactValidator.validate(new ArrayList<>(), Arrays.asList(lDCPremium), new AttrValidation());
+        cdlImpactValidator.validate(new ArrayList<>(), Collections.singletonList(lDCPremium), new AttrValidation());
 
         Assert.assertNotNull(lDCPremium.getImpactWarnings());
-        Assert.assertEquals(
-                lDCPremium.getImpactWarnings().getWarnings().containsKey(ImpactWarnings.Type.IMPACTED_SEGMENTS),
-                true);
+        Assert.assertTrue(lDCPremium.getImpactWarnings().getWarnings().containsKey(ImpactWarnings.Type.IMPACTED_SEGMENTS));
     }
 }
