@@ -71,6 +71,30 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
     }
 
+    // End-to-end test for Activity Store with Import Workflow 2.0.
+    @Test(groups = "end2end")
+    private void test2() throws Exception {
+        resumeCheckpoint(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT);
+
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
+        setupTemplates2();
+        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 1,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
+        Thread.sleep(2000);
+        // webVisitPathPtn.csv
+        mockCSVImport(BusinessEntity.Catalog, ADVANCED_MATCH_SUFFIX, 2,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisitPathPattern));
+        Thread.sleep(2000);
+        // webVisitSrcMedium.csv
+        mockCSVImport(BusinessEntity.Catalog, ADVANCED_MATCH_SUFFIX, 3,
+                generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisitSourceMedium));
+        Thread.sleep(2000);
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
+
+        // run PA with fake current time
+        processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
+    }
+
     @Test(groups = "end2end", dependsOnMethods = "test", enabled = false)
     private void testRematch() throws Exception {
         importSmallWebVisitFile();
@@ -125,4 +149,19 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         sm.setEntityType(EntityType.WebVisitSourceMedium);
         cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(sm));
     }
+
+    private void setupTemplates2() {
+        // setup webvisit template one by one for now, batch setup sometimes having
+        // problem
+        SimpleTemplateMetadata webVisit = new SimpleTemplateMetadata();
+        webVisit.setEntityType(EntityType.WebVisit);
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(webVisit));
+        SimpleTemplateMetadata ptn = new SimpleTemplateMetadata();
+        ptn.setEntityType(EntityType.WebVisitPathPattern);
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(ptn));
+        SimpleTemplateMetadata sm = new SimpleTemplateMetadata();
+        sm.setEntityType(EntityType.WebVisitSourceMedium);
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(sm));
+    }
+
 }
