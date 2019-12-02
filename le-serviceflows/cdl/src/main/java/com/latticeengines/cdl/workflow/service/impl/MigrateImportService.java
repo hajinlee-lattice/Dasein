@@ -244,8 +244,23 @@ public class MigrateImportService
         return templateTable.getAttributes().stream()
                 .map(Attribute::getName)
                 .distinct()
-                .filter(attrName -> masterTable.getAttribute(attrName) != null)
+                .filter(attrName -> masterTable.getAttribute(attrName) != null || forceRetain(config, attrName))
                 .collect(Collectors.toList());
+    }
+
+    // We already have checks that template before migration won't have these columns;
+    // So this force retain fields are all from template updates not original template.
+    private boolean forceRetain(MigrateImportServiceConfiguration config, String attrName) {
+        switch (config.getEntity()) {
+            case Account:
+                return InterfaceName.CustomerAccountId.name().equals(attrName);
+            case Contact:
+            case Transaction:
+                return InterfaceName.CustomerAccountId.name().equals(attrName)
+                        || InterfaceName.CustomerContactId.name().equals(attrName);
+            default:
+                return false;
+        }
     }
 
     @Override

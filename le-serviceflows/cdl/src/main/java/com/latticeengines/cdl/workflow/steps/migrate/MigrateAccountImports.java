@@ -52,6 +52,11 @@ public class MigrateAccountImports extends BaseMigrateImports<MigrateAccountImpo
     }
 
     @Override
+    protected boolean forceRetain(String attrName) {
+        return InterfaceName.CustomerAccountId.name().equals(attrName);
+    }
+
+    @Override
     protected String getTaskId() {
         if (importMigrateTracking == null) {
             importMigrateTracking = migrateTrackingProxy.getMigrateTracking(customerSpace.toString(),

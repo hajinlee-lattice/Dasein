@@ -468,8 +468,15 @@ public class CDLResource {
         try {
             DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
             boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
-            Table standardTable = SchemaRepository.instance().getSchema(
-                    BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+            EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
+            Table standardTable;
+            if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
+                standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
+                        entityType, enableEntityMatch);
+            } else {
+                standardTable = SchemaRepository.instance().getSchema(
+                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
+            }
             String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
             DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
             String dateString = dateFormat.format(new Date());
