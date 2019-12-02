@@ -79,6 +79,8 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
 
     protected abstract Map<String, String> getDuplicateMap();
 
+    protected abstract boolean forceRetain(String attrName);
+
     protected abstract String getTaskId();
 
     protected abstract void updateMigrateTracking(Long migratedCounts, List<String> dataTables);
@@ -192,7 +194,7 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
         return templateTable.getAttributes().stream()
                 .map(Attribute::getName)
                 .distinct()
-                .filter(attrName -> masterTable.getAttribute(attrName) != null)
+                .filter(attrName -> masterTable.getAttribute(attrName) != null || forceRetain(attrName))
                 .collect(Collectors.toList());
     }
 
