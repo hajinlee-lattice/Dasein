@@ -18,10 +18,10 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowSpecServiceImplTestNG.class);
 
     private static String testSpecFileName =
-            "com/latticeengines/pls/service/impl/importworkflowspecservice/specfunctest-contacts-spec.json";
+            "com/latticeengines/apps/core/service/impl/importworkflowspecservice/specfunctest-contacts-spec.json";
 
     private static String expectedTableFileName =
-            "com/latticeengines/pls/service/impl/importworkflowspecservice/expected-spec-table.json";
+            "com/latticeengines/apps/core/service/impl/importworkflowspecservice/expected-spec-table.json";
 
 
     @Autowired
