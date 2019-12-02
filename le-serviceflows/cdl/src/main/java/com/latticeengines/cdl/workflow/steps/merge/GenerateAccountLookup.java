@@ -43,7 +43,8 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
     private DataCollection.Version active;
     private DataCollection.Version inactive;
 
-    private String batchStoreName;
+    private String activeBatchStoreName;
+    private String inactiveBatchStoreName;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -67,6 +68,7 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         if (hasNewBatchStore() || missingLookupTable()) {
+            String batchStoreName = hasNewBatchStore() ? inactiveBatchStoreName : activeBatchStoreName;
             Table batchStoreSummary = metadataProxy.getTableSummary(customerSpace.toString(), batchStoreName);
             GenerateAccountLookupConfig config = new GenerateAccountLookupConfig();
             config.setInput(Collections.singletonList(batchStoreSummary.toHdfsDataUnit("Account")));
@@ -94,15 +96,23 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
     }
 
     private boolean missingLookupTable() {
+        if (StringUtils.isBlank(activeBatchStoreName)) {
+            TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
+            activeBatchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
+        }
         String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), TABLE_ROLE, active);
-        return StringUtils.isBlank(activeTableName);
+        return StringUtils.isBlank(activeTableName) && StringUtils.isNotBlank(activeBatchStoreName);
     }
 
     private boolean hasNewBatchStore() {
         TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
-        String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
-        batchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
-        return StringUtils.isNotBlank(batchStoreName) && !batchStoreName.equals(activeTableName);
+        if (StringUtils.isBlank(activeBatchStoreName)) {
+            activeBatchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, active);
+        }
+        if (StringUtils.isBlank(inactiveBatchStoreName)) {
+            inactiveBatchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        }
+        return StringUtils.isNotBlank(inactiveBatchStoreName) && !inactiveBatchStoreName.equals(activeBatchStoreName);
     }
 
     private void exportToDynamo(String tableName) {
