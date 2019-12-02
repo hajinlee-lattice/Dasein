@@ -1,14 +1,11 @@
 package com.latticeengines.pls.util;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -32,8 +29,10 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionSectionName
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 
 
 public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
@@ -41,6 +40,9 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private ImportWorkflowSpecProxy importWorkflowSpecProxy;
 
     String csvHdfsPath = "/tmp/test_import_workflow";
 
@@ -58,14 +60,13 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, csvHdfsPath);
     }
 
-
     @Test(groups = "functional")
     public void testCreateFieldDefinitionsRecordFromSpecAndTable_noExistingTemplate() throws IOException {
         // Load CSV containing imported Contact data for this test from resource file into HDFS.
         MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
 
         // Generate Spec Java class from resource file.
-        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+        ImportWorkflowSpec importWorkflowSpec = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
 
@@ -75,7 +76,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         log.info("Actual (no existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
 
-        FieldDefinitionsRecord expectedRecord = pojoFromJsonResourceFile(
+        FieldDefinitionsRecord expectedRecord = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/test-record-no-existing-template.json",
                 FieldDefinitionsRecord.class);
 
@@ -95,14 +96,14 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         MetadataResolver resolver = new MetadataResolver(csvHdfsPath, yarnConfiguration, null);
 
         // Generate Spec Java class from resource file.
-        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+        ImportWorkflowSpec importWorkflowSpec = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
 
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
 
         // Generate Table containing existing template from resource file.
-        Table existingTemplateTable = pojoFromJsonResourceFile(
+        Table existingTemplateTable = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/test-existing-contact-template.json", Table.class);
 
         log.error("Existing Table is:\n" + JsonUtils.pprint(existingTemplateTable));
@@ -113,7 +114,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         log.info("Actual (existing template) fieldDefinitionsRecord is:\n" + JsonUtils.pprint(actualRecord));
 
-        FieldDefinitionsRecord expectedRecord = pojoFromJsonResourceFile(
+        FieldDefinitionsRecord expectedRecord = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/test-record-existing-template.json",
                 FieldDefinitionsRecord.class);
 
@@ -134,7 +135,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
                 new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "ImportFuncTest", "Contacts"));
 
         // Generate Spec Java class from resource file.
-        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+        ImportWorkflowSpec importWorkflowSpec = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
@@ -149,7 +150,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         log.info("Actual (no existing template) fetchFieldDefinitionsResponse is:\n" + JsonUtils.pprint(actualResponse));
 
-        FetchFieldDefinitionsResponse expectedResponse = pojoFromJsonResourceFile(
+        FetchFieldDefinitionsResponse expectedResponse = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/test-response-no-existing-template.json",
                 FetchFieldDefinitionsResponse.class);
 
@@ -171,14 +172,14 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
                 new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "ImportFuncTest", "Contacts"));
 
         // Generate Spec Java class from resource file.
-        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+        ImportWorkflowSpec importWorkflowSpec = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
         actualResponse.setImportWorkflowSpec(importWorkflowSpec);
 
         // Generate Table containing existing template from resource file.
-        Table existingTemplateTable = pojoFromJsonResourceFile(
+        Table existingTemplateTable = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/test-existing-contact-template.json", Table.class);
         log.error("Existing Table is:\n" + JsonUtils.pprint(existingTemplateTable));
         actualResponse.setExistingFieldDefinitionsMap(
@@ -193,7 +194,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
 
         log.info("Actual (existing template) fetchFieldDefinitionsResponse is:\n" + JsonUtils.pprint(actualResponse));
 
-        FetchFieldDefinitionsResponse expectedResponse = pojoFromJsonResourceFile(
+        FetchFieldDefinitionsResponse expectedResponse = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/test-response-existing-template.json",
                 FetchFieldDefinitionsResponse.class);
 
@@ -211,7 +212,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
     public void testGenerateValidation() throws IOException {
 
         // Generate Spec Java class from resource file.
-        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+        ImportWorkflowSpec importWorkflowSpec = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/importfunctest-contacts-spec.json",
                 ImportWorkflowSpec.class);
         log.error("Import Workflow Spec is:\n" + JsonUtils.pprint(importWorkflowSpec));
@@ -266,7 +267,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
                 new FieldDefinitionsRecord("ImportWorkflowUtilsTest", "ImportFuncTest", "Contacts"));
 
         // Generate Spec Java class from resource file
-        ImportWorkflowSpec importWorkflowSpec = pojoFromJsonResourceFile(
+        ImportWorkflowSpec importWorkflowSpec = JsonUtils.pojoFromJsonResourceFile(
                 "com/latticeengines/pls/util/importfunctest-contacts-spec.json", ImportWorkflowSpec.class);
 
         actualResponse.setImportWorkflowSpec(importWorkflowSpec);
@@ -290,7 +291,7 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
         FieldDefinition earningsDefinition = customNameToFieldDefinition.get("Earnings");
         Assert.assertNotNull(earningsDefinition);
         earningsDefinition.setIgnored(Boolean.TRUE);
-        Table result = ImportWorkflowUtils.getTableFromFieldDefinitionsRecord(null, currentRecord, false);
+        Table result = ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(null, false, currentRecord);
 
         List<Attribute> attrs = result.getAttributes();
         Attribute earningsAttr =
@@ -317,33 +318,4 @@ public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
             Assert.assertNotNull(validation);
         }
     }
-
-    // resourceJsonFileRelativePath should start "com/latticeengines/...".
-    public static <T> T pojoFromJsonResourceFile(String resourceJsonFileRelativePath, Class<T> clazz) throws
-            IOException {
-        T pojo = null;
-        try {
-            InputStream jsonInputStream = ClassLoader.getSystemResourceAsStream(resourceJsonFileRelativePath);
-            if (jsonInputStream == null) {
-                throw new IOException("Failed to convert resource file " + resourceJsonFileRelativePath +
-                        " to InputStream.  Please check path");
-            }
-            pojo = JsonUtils.deserialize(jsonInputStream, clazz);
-            if (pojo == null) {
-                String jsonString = IOUtils.toString(jsonInputStream, Charset.defaultCharset());
-                throw new IOException("POJO was null. Failed to deserialize InputStream containing string: " +
-                        jsonString);
-            }
-        } catch (IOException e1) {
-            log.error("File to POJO conversion failed for resource file " + resourceJsonFileRelativePath +
-                    " with error: ", e1);
-            throw e1;
-        } catch (IllegalStateException e2) {
-            log.error("File to POJO conversion failed for resource file " + resourceJsonFileRelativePath +
-                    " with error: ", e2);
-            throw e2;
-        }
-        return pojo;
-    }
-
 }
