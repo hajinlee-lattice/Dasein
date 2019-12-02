@@ -17,7 +17,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
