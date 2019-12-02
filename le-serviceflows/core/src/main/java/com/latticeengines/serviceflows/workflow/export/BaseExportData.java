@@ -185,37 +185,40 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
                             || file.getName().toLowerCase().contains("unmatched"))
                             && MapUtils.isNotEmpty(importedAttributes);
 
-                    Map<String, Integer> headerPosMap = null;
-                    String[] displayNamesAsArr = null;
-                    Map<String, Integer> displayNamePosMap = null;
                     if (needRemapFieldNames) {
                         log.info("Remap field names.");
-                        headerPosMap = buildPositionMap(Arrays.asList(headers));
+                        Map<String, Integer> headerPosMap = buildPositionMap(Arrays.asList(headers));
                         log.info("Header positionMap=" + JsonUtils.serialize(headerPosMap));
                         List<String> displayNames = importedAttributes.values().stream()
                                 .map(attribute -> normalizeFieldName(attribute.getDisplayName()))
                                 .collect(Collectors.toList());
                         log.info("DisplayName positionMap=" + JsonUtils.serialize(displayNames));
-                        displayNamePosMap = buildPositionMap(displayNames);
-                        displayNamesAsArr = toOrderedArray(displayNamePosMap);
-                    } else {
-                        log.info("Use field names as-is.");
-                    }
-                    if (!hasHeader) {
-                        writer.writeNext(headers);
-                        hasHeader = true;
-                    }
-                    String[] record = csvReader.readNext();
-                    while (record != null) {
-                        counter.incrementAndGet();
-                        if (needRemapFieldNames) {
+                        Map<String, Integer> displayNamePosMap = buildPositionMap(displayNames);
+                        String[] displayNamesAsArr = toOrderedArray(displayNamePosMap);
+                        if (!hasHeader) {
+                            writer.writeNext(displayNamesAsArr);
+                            hasHeader = true;
+                        }
+                        String[] record = csvReader.readNext();
+                        while (record != null) {
+                            counter.incrementAndGet();
                             String[] newRecord = generateNewRecord(record, displayNamesAsArr.length, headerPosMap,
                                     displayNamePosMap, importedAttributes);
                             writer.writeNext(newRecord);
-                        } else {
-                            writer.writeNext(record);
+                            record = csvReader.readNext();
                         }
-                        record = csvReader.readNext();
+                    } else {
+                        log.info("Use field names as-is.");
+                        if (!hasHeader) {
+                            writer.writeNext(headers);
+                            hasHeader = true;
+                        }
+                        String[] record = csvReader.readNext();
+                        while (record != null) {
+                            counter.incrementAndGet();
+                            writer.writeNext(record);
+                            record = csvReader.readNext();
+                        }
                     }
                     log.info(String.format("There are 1 header row, %d data row(s) in file %s.", counter.get(),
                             file.getName()));
