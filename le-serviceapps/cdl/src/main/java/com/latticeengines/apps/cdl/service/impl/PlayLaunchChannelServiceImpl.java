@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
@@ -28,6 +29,9 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
+import com.latticeengines.domain.exposed.cdl.EventDetail;
+import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -39,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
@@ -78,6 +83,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
     @Value("${cdl.play.service.default.types.user}")
     private String serviceUser;
@@ -187,7 +195,18 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     public List<PlayLaunchChannel> getPlayLaunchChannels(String playName, Boolean includeUnlaunchedChannels) {
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.findByPlayName(playName);
         for (PlayLaunchChannel playLaunchChannel : channels) {
-            playLaunchChannel.setLastLaunch(playLaunchService.findLatestByChannel(playLaunchChannel.getPid()));
+            PlayLaunch playLaunch = playLaunchService.findLatestByChannel(playLaunchChannel.getPid());
+            playLaunchChannel.setLastLaunch(playLaunch);
+            if(playLaunch != null && playLaunch.getLaunchId() != null) {
+                DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessageByLaunchId(playLaunch.getLaunchId());
+                if (audienceState != null && audienceState.getEventDetail() != null) {
+                    EventDetail details = audienceState.getEventDetail();
+                    if (details instanceof ProgressEventDetail) {
+                        playLaunch.setAudienceState(((ProgressEventDetail) details).getStatus());
+                        playLaunch.setMatchedRate(((ProgressEventDetail) details).getMatchRate());
+                    }
+                }
+            }
         }
         if (includeUnlaunchedChannels) {
             addUnlaunchedChannels(channels);
@@ -268,6 +287,25 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     @Override
     public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel) {
         return queueNewLaunchForChannel(play, playLaunchChannel, null, null, null, null, null, false);
+    }
+
+    @Override
+    public PlayLaunchChannel updateAudience(String audienceId, String audienceName, String playLaunchId){
+        PlayLaunch playLaunchRetrieved = playLaunchEntityMgr.getLaunchFullyLoaded(playLaunchId);
+        if(playLaunchRetrieved != null) {
+            PlayLaunchChannel playLaunchChannel = playLaunchRetrieved.getPlayLaunchChannel();
+            Play play = playLaunchRetrieved.getPlay();
+            if (playLaunchChannel != null && play != null) {
+                ChannelConfig channlConfigUpdated = playLaunchChannel.getChannelConfig();
+                channlConfigUpdated.setAudienceName(audienceName);
+                channlConfigUpdated.setAudienceId(audienceId);
+                playLaunchChannel.setChannelConfig(channlConfigUpdated);
+                playLaunchChannel = update(play.getName(), playLaunchChannel);
+                return playLaunchChannel;
+            }
+            throw new LedpException(LedpCode.LEDP_18237, new String[] { playLaunchId, (play == null ? "true" : "false"), (playLaunchChannel == null ? "true" : "false") });
+        }
+        throw new LedpException(LedpCode.LEDP_18238, new String[] { audienceName, audienceId });
     }
 
     private void runValidations(String customerSpace, Play play, PlayLaunchChannel playLaunchChannel) {

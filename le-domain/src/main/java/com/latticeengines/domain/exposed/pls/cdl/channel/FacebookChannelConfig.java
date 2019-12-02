@@ -54,7 +54,7 @@ public class FacebookChannelConfig implements ChannelConfig {
     }
 
     public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
-        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
+        this.suppressAccountsWithoutContacts = true;
     }
 
     public String getAudienceId() {
@@ -114,8 +114,6 @@ public class FacebookChannelConfig implements ChannelConfig {
         facebookChannelConfig.setContactLimit(newFacebookChannelConfig.getContactLimit());
         facebookChannelConfig
                 .setSuppressContactsWithoutEmails(newFacebookChannelConfig.isSuppressContactsWithoutEmails());
-        facebookChannelConfig
-                .setSuppressAccountsWithoutContacts(newFacebookChannelConfig.isSuppressAccountsWithoutContacts());
         facebookChannelConfig.setAudienceId(newFacebookChannelConfig.getAudienceId());
         facebookChannelConfig.setAudienceName(newFacebookChannelConfig.getAudienceName());
         facebookChannelConfig.setFolderName(newFacebookChannelConfig.getFolderName());

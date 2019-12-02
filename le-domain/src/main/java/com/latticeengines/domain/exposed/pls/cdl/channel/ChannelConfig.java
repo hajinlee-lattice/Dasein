@@ -19,7 +19,8 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
         @Type(value = S3ChannelConfig.class, name = "aws_s3"), //
         @Type(value = LinkedInChannelConfig.class, name = "linkedin"), //
         @Type(value = FacebookChannelConfig.class, name = "facebook"), //
-        @Type(value = OutreachChannelConfig.class, name = "outreach") //
+        @Type(value = OutreachChannelConfig.class, name = "outreach"), //
+        @Type(value = GoogleChannelConfig.class, name = "google") //
 })
 public interface ChannelConfig {
 
@@ -28,6 +29,14 @@ public interface ChannelConfig {
     CDLExternalSystemName getSystemName();
 
     AudienceType getAudienceType();
+
+    String getAudienceId();
+
+    void setAudienceId(String audienceId);
+
+    String getAudienceName();
+
+    void setAudienceName(String audienceName);
 
     boolean shouldResetDeltaCalculations(ChannelConfig channelConfig);
 

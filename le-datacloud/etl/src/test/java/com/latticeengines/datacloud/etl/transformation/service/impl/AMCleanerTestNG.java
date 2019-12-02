@@ -94,7 +94,7 @@ public class AMCleanerTestNG extends PipelineTransformationTestNGBase {
         schema.add(Pair.of("ExtraColumn", String.class)); // not present in source attribute, should be dropped
         uploadBaseSourceData(baseSourceAccMaster1.getSourceName(), baseSourceVersion, schema, amData);
         try {
-            extractSchema(baseSourceAccMaster1, baseSourceVersion,
+            extractSchemaOnHdfs(baseSourceAccMaster1, baseSourceVersion,
                     hdfsPathBuilder.constructSnapshotDir(baseSourceAccMaster1.getSourceName(), baseSourceVersion)
                             .toString(),
                     ImmutableMap.of(MapAttributeTransformer.DATA_CLOUD_VERSION, DATA_CLOUD_VERSION));

@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.util.Collections;
-import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -25,15 +24,10 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
         Assert.assertEquals(generated, expected);
     }
 
-    @Test(groups = "unit", dataProvider = "timeFilterDescriptionProvider")
-    public void testTimeFilterToDescription(String timeFilter, String tmpl, String expected) {
-        String generated = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeFilter, tmpl);
+    @Test(groups = "unit", dataProvider = "timeRangeDescriptionProvider")
+    public void testTimeFilterToDescription(String timeRange, String expected) {
+        String generated = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
         Assert.assertEquals(generated, expected);
-    }
-
-    @Test(groups = "unit", dataProvider = "sourceMediumProvider")
-    public void testSourceMediumDisplayName(String timeRange, Map<String, Object> SourceMedium, String expected) {
-        Assert.assertEquals(ActivityMetricsGroupUtils.generateSourceMediumDisplayName(timeRange, SourceMedium), expected);
     }
 
     @DataProvider(name = "groupNameProvider")
@@ -55,18 +49,11 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
                         Collections.singletonList(10)), "w_10_w" } };
     }
 
-    @DataProvider(name = "timeFilterDescriptionProvider")
+    @DataProvider(name = "timeRangeDescriptionProvider")
     public Object[][] timeFilterDescriptionProvider() {
         return new Object[][] {
-                { "w_2_w", "${operator} ${params?join(\"_\")} ${period}", "in last 2 week" },
-                { "b_2_4_w", "${operator} ${params?join(\" and \")} ${period}", "between 2 and 4 week" } };
+                { "w_2_w", "in last 2 week" },
+                { "b_2_4_w", "between 2 and 4 week" } };
     }
 
-    @DataProvider(name = "sourceMediumProvider")
-    public Object[][] sourceMediumProvider() {
-        return new Object[][]{
-                {"in last 2 week", Collections.singletonMap("SourceMedium", "__others__"), "Visit in last 2 week by all other sources"}, //
-                {"in last 2 week", Collections.singletonMap("SourceMedium", "w.le.c"), "Visit in last 2 week from w.le.c"}
-        };
-    }
 }

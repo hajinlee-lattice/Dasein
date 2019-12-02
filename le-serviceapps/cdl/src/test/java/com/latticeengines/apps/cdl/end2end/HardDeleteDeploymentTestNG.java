@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -42,6 +43,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(HardDeleteDeploymentTestNG.class);
+
+    private final String DeleteJoinId = "AccountId";
 
     @Inject
     private ActionProxy actionProxy;
@@ -81,6 +84,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         EntityMatchVersion entityMatchVersionAfterPA = matchProxy.getEntityMatchVersion(customerSpace,
                 EntityMatchEnvironment.SERVING, false);
         Assert.assertEquals(entityMatchVersion.getNextVersion(), entityMatchVersionAfterPA.getCurrentVersion());
+        log.info("after PA, entityMatchVersion is {}.", entityMatchVersion);
         verifyHardDelete();
     }
 
@@ -92,7 +96,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         int numRecordsInCsv = 0;
         String fieldName = table.getAttribute(InterfaceName.AccountId.name()).getName();
         StringBuilder sb = new StringBuilder();
-        sb.append("id");
+        sb.append(DeleteJoinId);
         sb.append(',');
         sb.append("index");
         sb.append('\n');
@@ -104,7 +108,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
             sb.append('\n');
             idSets.add(id);
             numRecordsInCsv++;
-            if (numRecordsInCsv == recordsBeforeDelete.size()/2 || numRecordsInCsv == recordsBeforeDelete.size() - 1) {
+            if (numRecordsInCsv == 10 || numRecordsInCsv == 20) {
 
                 log.info("There are " + numRecordsInCsv + " rows in csv.");
                 String fileName = "account_delete_" + numRecordsInCsv + ".csv";
@@ -121,8 +125,11 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
                         sourceFile.getName(), true);
                 JobStatus status = waitForWorkflowStatus(appId.toString(), false);
                 Assert.assertEquals(JobStatus.COMPLETED, status);
+                if (numRecordsInCsv == 20) {
+                    break;
+                }
                 sb = new StringBuilder();
-                sb.append("id");
+                sb.append(DeleteJoinId);
                 sb.append(',');
                 sb.append("index");
                 sb.append('\n');
@@ -136,8 +143,8 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         List<Extract> extracts = table.getExtracts();
         Assert.assertNotNull(extracts);
         List<String> paths = new ArrayList<>();
-        for (Extract e : extracts) {
-            paths.add(e.getPath());
+        for (Extract extract : table.getExtracts()) {
+            paths.add(PathUtils.toAvroGlob(extract.getPath()));
         }
         return AvroUtils.getDataFromGlob(yarnConfiguration, paths);
     }
@@ -156,7 +163,6 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         log.info("There are {} rows in avro after delete. table role is {}.", originalNumRecords, tableRoleInCollection);
         for (GenericRecord record : recordsAfterDelete) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            log.info("accountId is {}.", accountId);
             Assert.assertTrue(!idSets.contains(accountId));
         }
     }

@@ -30,6 +30,9 @@ public class ProgressEventDetail extends EventDetail {
     @JsonProperty("matched_count")
     private Long matchedCount;
 
+    @JsonProperty("matched_rate")
+    private Long matchRate;
+
     @JsonProperty("total_records_submitted")
     private Long totalRecordsSubmitted;
 
@@ -111,6 +114,14 @@ public class ProgressEventDetail extends EventDetail {
 
     public void setMatchedCount(Long matchedCount) {
         this.matchedCount = matchedCount;
+    }
+
+    public void setMatchRate(Long matchRate) {
+        this.matchRate = matchRate;
+    }
+
+    public Long getMatchRate() {
+        return matchRate;
     }
 
     public Long getTotalRecordsSubmitted() {

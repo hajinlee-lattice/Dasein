@@ -26,10 +26,17 @@ public class EntityAssociationRequest {
     // NOTE Calling EntityLookupEntryConverter.fromMatchKeyTuple on any tuple should get a list of ONE lookup entry
     private final List<Pair<MatchKeyTuple, String>> lookupResults;
     private final Map<String, String> extraAttributes;
+    private final List<Integer> dummyLookupResultIndices; // idx of artificially created lookup results
 
     public EntityAssociationRequest(
             @NotNull Tenant tenant, @NotNull String entity, Integer servingVersion, String preferredEntityId,
             @NotNull List<Pair<MatchKeyTuple, String>> lookupResults, Map<String, String> extraAttributes) {
+        this(tenant, entity, servingVersion, preferredEntityId, lookupResults, extraAttributes, null);
+    }
+
+    public EntityAssociationRequest(@NotNull Tenant tenant, @NotNull String entity, Integer servingVersion,
+            String preferredEntityId, @NotNull List<Pair<MatchKeyTuple, String>> lookupResults,
+            Map<String, String> extraAttributes, List<Integer> dummyLookupResultIndices) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(lookupResults);
@@ -39,6 +46,8 @@ public class EntityAssociationRequest {
         this.preferredEntityId = preferredEntityId;
         this.lookupResults = lookupResults;
         this.extraAttributes = extraAttributes == null ? Collections.emptyMap() : extraAttributes;
+        this.dummyLookupResultIndices = dummyLookupResultIndices == null ? Collections.emptyList()
+                : dummyLookupResultIndices;
     }
 
     public Tenant getTenant() {
@@ -63,5 +72,9 @@ public class EntityAssociationRequest {
 
     public Map<String, String> getExtraAttributes() {
         return extraAttributes;
+    }
+
+    public List<Integer> getDummyLookupResultIndices() {
+        return dummyLookupResultIndices;
     }
 }

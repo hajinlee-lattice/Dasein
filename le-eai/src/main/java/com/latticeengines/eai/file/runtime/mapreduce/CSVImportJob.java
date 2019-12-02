@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -88,7 +89,7 @@ public class CSVImportJob extends MRJobCustomizationBase {
 
             String opts = config.get(MRJobConfig.MAP_JAVA_OPTS, "");
             config.set(MRJobConfig.MAP_JAVA_OPTS, opts + " -Dlog4j.configurationFile=log4j2-yarn.xml" //
-                    + " -DLOG4J_LE_LEVEL=INFO");
+                    + " -DLOG4J_LE_LEVEL=INFO " + CipherUtils.getSecretPropertyStr());
             // config.set(MRJobConfig.MAP_JAVA_OPTS,
             // "-Xdebug -Xnoagent -Djava.compiler=NONE
             // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");

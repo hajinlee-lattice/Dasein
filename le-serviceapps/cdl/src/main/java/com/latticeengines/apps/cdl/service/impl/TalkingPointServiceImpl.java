@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,8 +237,18 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                 }
             }
         }
-
         return new ArrayList<>(attributes);
+    }
+
+    @Override
+    public Set<String> findDependantPlayIds(List<String> attributes) {
+        if (CollectionUtils.isEmpty(attributes)) {
+            return new HashSet<>();
+        }
+        List<String> playNames = talkingPointEntityMgr.findPlaysUsingGivenAttributes(attributes);
+        List<String> publishedPlayNames = publishedTalkingPointEntityMgr.findPlaysUsingGivenAttributes(attributes);
+        playNames.addAll(publishedPlayNames);
+        return new HashSet<>(playNames);
     }
 
     private Set<AttributeLookup> findAttributeLookups(String content) {

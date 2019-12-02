@@ -165,7 +165,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testisAvroFriendlyFieldName() {
+    public void testIsAvroFriendlyFieldName() {
         String malformedName = "2name?*wer23";
         assertFalse(AvroUtils.isAvroFriendlyFieldName(malformedName));
         String correctformedName = "avro_2name_23";

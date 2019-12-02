@@ -11,6 +11,8 @@ public interface ActivityMetricsGroupEntityMgr extends BaseEntityMgrRepository<A
 
     ActivityMetricsGroup findByPid(Long pid);
 
+    ActivityMetricsGroup findByGroupId(String groupId);
+
     List<ActivityMetricsGroup> findByTenant(Tenant tenant);
 
     List<ActivityMetricsGroup> findByStream(AtlasStream stream);

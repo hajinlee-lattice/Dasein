@@ -322,7 +322,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
         uploadBaseSourceData(account.getSourceName(), baseSourceVersion, schema, accountData);
         try {
-            extractSchema(account, baseSourceVersion,
+            extractSchemaOnHdfs(account, baseSourceVersion,
                     hdfsPathBuilder.constructSnapshotDir(account.getSourceName(), baseSourceVersion).toString());
         } catch (Exception e) {
             log.error(String.format("Fail to extract schema for source %s at version %s", account.getSourceName(),
@@ -335,7 +335,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         uploadBaseSourceData(accountNoSegment.getSourceName(), baseSourceVersion, schemaNoSegment,
                 accountDataNoSegment);
         try {
-            extractSchema(accountNoSegment, baseSourceVersion, hdfsPathBuilder
+            extractSchemaOnHdfs(accountNoSegment, baseSourceVersion, hdfsPathBuilder
                     .constructSnapshotDir(accountNoSegment.getSourceName(), baseSourceVersion).toString());
         } catch (Exception e) {
             log.error(String.format("Fail to extract schema for source %s at version %s",
@@ -359,7 +359,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
         uploadBaseSourceData(product.getSourceName(), baseSourceVersion, schema, productData);
         try {
-            extractSchema(product, baseSourceVersion,
+            extractSchemaOnHdfs(product, baseSourceVersion,
                     hdfsPathBuilder.constructSnapshotDir(product.getSourceName(), baseSourceVersion).toString());
         } catch (Exception e) {
             log.error(String.format("Fail to extract schema for source %s at version %s", product.getSourceName(),
@@ -611,7 +611,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
         uploadBaseSourceData(weekTable.getSourceName(), baseSourceVersion, schema, weekData);
         try {
-            extractSchema(weekTable, baseSourceVersion,
+            extractSchemaOnHdfs(weekTable, baseSourceVersion,
                     hdfsPathBuilder.constructSnapshotDir(weekTable.getSourceName(), baseSourceVersion).toString());
         } catch (Exception e) {
             log.error(String.format("Fail to extract schema for source %s at version %s", weekTable.getSourceName(),

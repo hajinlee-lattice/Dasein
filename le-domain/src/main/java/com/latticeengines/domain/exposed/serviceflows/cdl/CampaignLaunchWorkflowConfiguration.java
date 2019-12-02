@@ -63,15 +63,10 @@ public class CampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder exportPublishPlayLaunch(PlayLaunch playLaunch, boolean canBeLaunchedToExternal) {
-
             exportFileGeneratorConf.setPlayName(playLaunch.getPlay().getName());
             exportFileGeneratorConf.setPlayLaunchId(playLaunch.getLaunchId());
             exportFilesToS3Conf.setPlayLaunchId(playLaunch.getLaunchId());
-
-            if (!canBeLaunchedToExternal) {
-                exportPublishToSNSConf.setSkipStep(true);
-                return this;
-            }
+            exportPublishToSNSConf.setSkipStep(!canBeLaunchedToExternal);
             return this;
         }
 

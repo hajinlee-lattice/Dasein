@@ -40,4 +40,6 @@ public interface PlayLaunchService {
 
     Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp,
             String orgId, String externalSysType);
+
+    PlayLaunch updateAudience(String audienceId, String audienceName, String playLaunchId);
 }

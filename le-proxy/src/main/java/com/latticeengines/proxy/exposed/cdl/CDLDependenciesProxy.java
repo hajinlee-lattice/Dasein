@@ -49,4 +49,11 @@ public class CDLDependenciesProxy extends MicroserviceRestApiProxy implements Pr
         return JsonUtils.convertList(rawSegments, Play.class);
     }
 
+    public List<Play> getDependantPlays(String customerSpace, List<String> attributes) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dependencies/plays",
+                shortenCustomerSpace(customerSpace));
+        List<?> rawSegments = post("Get dependant play display names", url, attributes, List.class);
+        return JsonUtils.convertList(rawSegments, Play.class);
+    }
+
 }

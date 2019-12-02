@@ -2,6 +2,9 @@ package com.latticeengines.common.exposed.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+
 public class PathUtils {
 
     public static String stripoutProtocol(String hdfsPath) {
@@ -19,6 +22,23 @@ public class PathUtils {
             }
         }
         return dirPath;
+    }
+
+    /*-
+     * Produce glob pattern with specified number of layer of child directories
+     */
+    public static String toNestedDirGlob(@NotNull String path, int numNestedDirs) {
+        Preconditions.checkNotNull(path);
+        // remove file extension
+        path = toParquetOrAvroDir(path);
+        StringBuilder sb = new StringBuilder(path);
+        for (int i = 0; i < numNestedDirs; i++) {
+            if (sb.charAt(sb.length() - 1) != '/') {
+                sb.append('/');
+            }
+            sb.append("*");
+        }
+        return StringUtils.removeEnd(sb.toString(), "/");
     }
 
     public static String toAvroGlob(String path) {

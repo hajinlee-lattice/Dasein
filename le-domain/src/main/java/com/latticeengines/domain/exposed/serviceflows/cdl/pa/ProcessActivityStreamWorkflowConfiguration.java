@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProfileAccountActivityMetricsStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProfileContactActivityMetricsStepConfiguration;
 
 public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -17,11 +19,15 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
         private ProcessActivityStreamWorkflowConfiguration configuration = new ProcessActivityStreamWorkflowConfiguration();
         private ProcessActivityStreamStepConfiguration processStepConfiguration = new ProcessActivityStreamStepConfiguration();
         private ActivityStreamSparkStepConfiguration activityStreamSparkConfiguration = new ActivityStreamSparkStepConfiguration();
+        private ProfileAccountActivityMetricsStepConfiguration profileAccountActivityMetricsStepConfiguration = new ProfileAccountActivityMetricsStepConfiguration();
+        private ProfileContactActivityMetricsStepConfiguration profileContactActivityMetricsStepConfiguration = new ProfileContactActivityMetricsStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             processStepConfiguration.setCustomerSpace(customerSpace);
             activityStreamSparkConfiguration.setCustomer(customerSpace.toString());
+            profileAccountActivityMetricsStepConfiguration.setCustomerSpace(customerSpace);
+            profileContactActivityMetricsStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -29,6 +35,8 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             activityStreamSparkConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            profileAccountActivityMetricsStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            profileContactActivityMetricsStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -37,6 +45,8 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             activityStreamSparkConfiguration.setSkipStep(!entityMatchEnabled);
             processStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             activityStreamSparkConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            profileAccountActivityMetricsStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
+            profileContactActivityMetricsStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;
         }
 
@@ -68,11 +78,23 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder setReplaceMode(boolean isReplaceMode) {
+            processStepConfiguration.setReplaceMode(isReplaceMode);
+            return this;
+        }
+
+        public Builder setRematchMode(boolean isRematchMode) {
+            processStepConfiguration.setRematchMode(isRematchMode);
+            return this;
+        }
+
         public ProcessActivityStreamWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processActivityStreamWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(processStepConfiguration);
             configuration.add(activityStreamSparkConfiguration);
+            configuration.add(profileAccountActivityMetricsStepConfiguration);
+            configuration.add(profileContactActivityMetricsStepConfiguration);
             return configuration;
         }
     }

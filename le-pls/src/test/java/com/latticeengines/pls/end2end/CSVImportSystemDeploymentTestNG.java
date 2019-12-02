@@ -3,6 +3,7 @@ package com.latticeengines.pls.end2end;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -30,7 +32,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
 
 /*
- * dpltc deploy -a pls,admin,cdl,lp,metadata
+ * dpltc deploy -a pls,admin,cdl,lp,metadata,workflowapi,matchapi
  */
 public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
@@ -56,11 +58,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertTrue(defaultSystem.isPrimarySystem());
         Assert.assertNull(defaultSystem.getAccountSystemId());
         // create 2 new systems
-        cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_SalesforceSystem",
-                S3ImportSystem.SystemType.Other, false);
-        cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_OtherSystem",
-                S3ImportSystem.SystemType.Other, false);
-        allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
+        allSystems = createImportSystem();
         Assert.assertEquals(allSystems.size(), 3);
         String sfSystemName = null, otherSystemName = null;
         for (S3ImportSystem system : allSystems) {
@@ -70,15 +68,255 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 otherSystemName = system.getName();
             }
         }
-        Assert.assertFalse(StringUtils.isEmpty(sfSystemName));
-        Assert.assertFalse(StringUtils.isEmpty(otherSystemName));
-
-        S3ImportSystem sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
-        S3ImportSystem otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
-        Assert.assertNotNull(sfSystem);
-        Assert.assertNotNull(otherSystem);
+        verifyImportSystem(sfSystemName, otherSystemName);
 
         // create template
+        String defaultFeedType = createDefaultAccountTemplateAndVerify();
+
+        // salesforce system with match account it to default system.
+        String sfDFId = createSFAccountTemplateAndVerify(sfSystemName);
+
+        // other system with match account it to itself.
+        String otherDFId = createOtherSystemAccountAndVerify(otherSystemName);
+
+        allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
+        defaultSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), DEFAULT_SYSTEM);
+        S3ImportSystem sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
+        S3ImportSystem otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
+        verifySystemAfterCreateAccountTemplate(allSystems, defaultSystem, sfSystem, otherSystem, sfDFId, otherDFId);
+
+        // test with contact
+        String sfContactDFId = createSFContactTemplateAndVerify(sfSystemName);
+
+        String otherContactDFId = createOtherContactTemplateAndVerify(sfSystemName, otherSystemName);
+
+        sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
+        otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
+
+        verifySystemAfterCreateContactTemplate(sfSystem, otherSystem, sfContactDFId, otherContactDFId);
+
+        // check upload file again and can get system name this time
+        verifyEditTemplate(otherSystemName, sfSystem);
+
+        // exception when double primary system.
+        SourceFile defaultAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(defaultAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, defaultFeedType);
+
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMapToLatticeId(true);
+                fieldMapping.setMappedToLatticeSystem(false);
+            }
+        }
+
+        Assert.expectThrows(LedpException.class,
+                () -> modelingFileMetadataService.resolveMetadata(defaultAccountFile.getName(),
+                        fieldMappingDocument, ENTITY_ACCOUNT, SOURCE, defaultFeedType));
+
+    }
+
+    private void verifyEditTemplate(String otherSystemName, S3ImportSystem sfSystem) {
+        String otherContactDFId;
+        SourceFile otherContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+        String otherContactFeedType = getFeedTypeByEntity(otherSystemName, ENTITY_CONTACT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(otherContactFile.getName(), ENTITY_CONTACT, SOURCE, otherContactFeedType);
+        Map<String, FieldMapping> fieldMappingMapFromReImport =
+                fieldMappingDocument.getFieldMappings().stream()
+                        .filter(fieldMapping -> StringUtils.isNotEmpty(fieldMapping.getMappedField()))
+                        .collect(Collectors.toMap(FieldMapping::getMappedField, fieldMapping -> fieldMapping));
+        Assert.assertTrue(fieldMappingMapFromReImport.containsKey(sfSystem.getAccountSystemId()));
+        Assert.assertTrue(fieldMappingMapFromReImport.containsKey(sfSystem.getContactSystemId()));
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getAccountSystemId()).getSystemName(),
+                sfSystem.getName());
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getContactSystemId()).getSystemName(),
+                sfSystem.getName());
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getAccountSystemId()).getIdType(),
+                FieldMapping.IdType.Account);
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getContactSystemId()).getIdType(),
+                FieldMapping.IdType.Contact);
+
+        modelingFileMetadataService.resolveMetadata(otherContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                otherContactFeedType);
+        otherContactFile = sourceFileService.findByName(otherContactFile.getName());
+        otherContactDFId = cdlService.createS3Template(customerSpace, otherContactFile.getName(),
+                SOURCE, ENTITY_CONTACT, otherContactFeedType, null, ENTITY_CONTACT + "Data");
+        Assert.assertNotNull(otherContactFile);
+        Assert.assertNotNull(otherContactDFId);
+    }
+
+    private void verifySystemAfterCreateContactTemplate(S3ImportSystem sfSystem, S3ImportSystem otherSystem, String sfContactDFId, String otherContactDFId) {
+        Assert.assertNotNull(sfSystem.getContactSystemId());
+        Table sfSystemContactTable =
+                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), sfContactDFId).getImportTemplate();
+        Attribute sfSystemContactIdAttr = sfSystemContactTable.getAttribute(sfSystem.getContactSystemId());
+        Assert.assertNotNull(sfSystemContactIdAttr);
+        Assert.assertEquals(sfSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
+
+        Assert.assertNull(otherSystem.getContactSystemId());
+
+        Table otherSystemContactTable =
+                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), otherContactDFId).getImportTemplate();
+        Attribute otherSystemContactIdAttr = otherSystemContactTable.getAttribute(sfSystem.getContactSystemId());
+        Assert.assertNotNull(otherSystemContactIdAttr);
+        Assert.assertEquals(otherSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
+
+        Attribute otherSystemAccountIdAttr = otherSystemContactTable.getAttribute(sfSystem.getAccountSystemId());
+        Assert.assertNotNull(otherSystemAccountIdAttr);
+        Assert.assertEquals(otherSystemAccountIdAttr.getDisplayName(), "Account_ID");
+
+        Attribute otherSystemCustomerAccountIdAttr =
+                otherSystemContactTable.getAttribute(InterfaceName.CustomerAccountId);
+        Assert.assertNotNull(otherSystemCustomerAccountIdAttr);
+        Assert.assertEquals(otherSystemCustomerAccountIdAttr.getDisplayName(), "Account_ID");
+    }
+
+    private String createOtherContactTemplateAndVerify(String sfSystemName, String otherSystemName) {
+        SourceFile otherContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+        String otherContactFeedType = getFeedTypeByEntity(otherSystemName, ENTITY_CONTACT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(otherContactFile.getName(), ENTITY_CONTACT, SOURCE, otherContactFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
+                fieldMapping.setSystemName(sfSystemName);
+                fieldMapping.setIdType(FieldMapping.IdType.Contact);
+            }
+            if (fieldMapping.getUserField().equals("Account_ID")) {
+                fieldMapping.setSystemName(sfSystemName);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(otherContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                otherContactFeedType);
+        otherContactFile = sourceFileService.findByName(otherContactFile.getName());
+
+        String otherContactDFId = cdlService.createS3Template(customerSpace, otherContactFile.getName(),
+                SOURCE, ENTITY_CONTACT, otherContactFeedType, null, ENTITY_CONTACT + "Data");
+        Assert.assertNotNull(otherContactFile);
+        Assert.assertNotNull(otherContactDFId);
+        return otherContactDFId;
+    }
+
+    private String createSFContactTemplateAndVerify(String sfSystemName) {
+        SourceFile sfContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+        String sfContactFeedType = getFeedTypeByEntity(sfSystemName, ENTITY_CONTACT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sfContactFile.getName(), ENTITY_CONTACT, SOURCE, sfContactFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                fieldMapping.setMapToLatticeId(true);
+                fieldMapping.setMappedToLatticeField(true);
+            }
+            if (fieldMapping.getUserField().equals("Account_ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMappedToLatticeField(true);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(sfContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                sfContactFeedType);
+        sfContactFile = sourceFileService.findByName(sfContactFile.getName());
+
+        String sfContactDFId = cdlService.createS3Template(customerSpace, sfContactFile.getName(),
+                SOURCE, ENTITY_CONTACT, sfContactFeedType, null, ENTITY_CONTACT + "Data");
+        Assert.assertNotNull(sfContactFile);
+        Assert.assertNotNull(sfContactDFId);
+        return sfContactDFId;
+    }
+
+    private void verifySystemAfterCreateAccountTemplate(List<S3ImportSystem> allSystems, S3ImportSystem defaultSystem,
+                                                        S3ImportSystem sfSystem, S3ImportSystem otherSystem, String sfDFId, String otherDFId) {
+        Table sfAccountTable = dataFeedProxy.getDataFeedTask(customerSpace, sfDFId).getImportTemplate();
+        Attribute customerAccountId = sfAccountTable.getAttribute(InterfaceName.CustomerAccountId);
+        Attribute sfSystemIdAttr = sfAccountTable.getAttribute(sfSystem.getAccountSystemId());
+        Table otherSystemAccountTable =
+                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), otherDFId).getImportTemplate();
+        Attribute otherSystemAccountAttr = otherSystemAccountTable.getAttribute(otherSystem.getAccountSystemId());
+
+        Assert.assertEquals(allSystems.size(), 3);
+        Assert.assertFalse(defaultSystem.isPrimarySystem());
+        Assert.assertTrue(sfSystem.isPrimarySystem());
+        Assert.assertNotNull(sfSystem.getAccountSystemId());
+        Assert.assertTrue(sfSystem.isMapToLatticeAccount());
+        Assert.assertNotNull(sfAccountTable);
+        Assert.assertNotNull(sfAccountTable.getAttribute(defaultSystem.getAccountSystemId()));
+        Assert.assertNotNull(customerAccountId);
+        Assert.assertEquals(customerAccountId.getDisplayName(), "ID");
+        Assert.assertNotNull(sfSystemIdAttr);
+        Assert.assertEquals(sfSystemIdAttr.getDisplayName(), "ID");
+        Assert.assertNotNull(otherSystem.getAccountSystemId());
+        Assert.assertNotNull(otherSystemAccountAttr);
+        Assert.assertEquals(otherSystemAccountAttr.getDisplayName(), "CrmAccount_External_ID");
+    }
+
+    private String createOtherSystemAccountAndVerify(String otherSystemName) {
+        SourceFile otherAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+        String otherFeedType = getFeedTypeByEntity(otherSystemName, ENTITY_ACCOUNT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(otherAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, otherFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(otherAccountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
+                otherFeedType);
+        otherAccountFile = sourceFileService.findByName(otherAccountFile.getName());
+
+        String otherDFId = cdlService.createS3Template(customerSpace, otherAccountFile.getName(),
+                SOURCE, ENTITY_ACCOUNT, otherFeedType, null, ENTITY_ACCOUNT + "Data");
+        Assert.assertNotNull(otherAccountFile);
+        Assert.assertNotNull(otherDFId);
+        return otherDFId;
+    }
+
+    private String createSFAccountTemplateAndVerify(String sfSystemName) {
+        SourceFile sfAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+        String sfFeedType = getFeedTypeByEntity(sfSystemName, ENTITY_ACCOUNT);
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sfAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, sfFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+            if (fieldMapping.getUserField().equals("ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMapToLatticeId(true);
+            }
+            //remove id field.
+            if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
+                fieldMapping.setMappedField(null);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(sfAccountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
+                sfFeedType);
+        sfAccountFile = sourceFileService.findByName(sfAccountFile.getName());
+
+        String sfDFId = cdlService.createS3Template(customerSpace, sfAccountFile.getName(),
+                SOURCE, ENTITY_ACCOUNT, sfFeedType, null, ENTITY_ACCOUNT + "Data");
+        Assert.assertNotNull(sfAccountFile);
+        Assert.assertNotNull(sfDFId);
+        return sfDFId;
+    }
+
+    private String createDefaultAccountTemplateAndVerify() {
+        S3ImportSystem defaultSystem;
         SourceFile defaultAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
@@ -108,183 +346,27 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Table defaultAccountTable = dataFeedProxy.getDataFeedTask(customerSpace, defaultDFId).getImportTemplate();
         Assert.assertNotNull(defaultAccountTable);
         Assert.assertNull(defaultAccountTable.getAttribute(InterfaceName.CustomerAccountId));
+        return defaultFeedType;
+    }
 
-        // salesforce system with match account it to default system.
-        SourceFile sfAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
-        String sfFeedType = getFeedTypeByEntity(sfSystemName, ENTITY_ACCOUNT);
-        fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(sfAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, sfFeedType);
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
-                fieldMapping.setSystemName(DEFAULT_SYSTEM);
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-            }
-            if (fieldMapping.getUserField().equals("ID")) {
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-                fieldMapping.setMapToLatticeId(true);
-            }
-            //remove id field.
-            if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
-                fieldMapping.setMappedField(null);
-            }
-        }
-        modelingFileMetadataService.resolveMetadata(sfAccountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
-                sfFeedType);
-        sfAccountFile = sourceFileService.findByName(sfAccountFile.getName());
+    private void verifyImportSystem(String sfSystemName, String otherSystemName) {
+        Assert.assertFalse(StringUtils.isEmpty(sfSystemName));
+        Assert.assertFalse(StringUtils.isEmpty(otherSystemName));
 
-        String sfDFId = cdlService.createS3Template(customerSpace, sfAccountFile.getName(),
-                SOURCE, ENTITY_ACCOUNT, sfFeedType, null, ENTITY_ACCOUNT + "Data");
-        Assert.assertNotNull(sfAccountFile);
-        Assert.assertNotNull(sfDFId);
+        S3ImportSystem sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
+        S3ImportSystem otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
+        Assert.assertNotNull(sfSystem);
+        Assert.assertNotNull(otherSystem);
+    }
 
-        // other system with match account it to itself.
-        SourceFile otherAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
-        String otherFeedType = getFeedTypeByEntity(otherSystemName, ENTITY_ACCOUNT);
-        fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(otherAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, otherFeedType);
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-            }
-        }
-        modelingFileMetadataService.resolveMetadata(otherAccountFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
-                otherFeedType);
-        otherAccountFile = sourceFileService.findByName(otherAccountFile.getName());
-
-        String otherDFId = cdlService.createS3Template(customerSpace, otherAccountFile.getName(),
-                SOURCE, ENTITY_ACCOUNT, otherFeedType, null, ENTITY_ACCOUNT + "Data");
-        Assert.assertNotNull(otherAccountFile);
-        Assert.assertNotNull(otherDFId);
-
+    private List<S3ImportSystem> createImportSystem() {
+        List<S3ImportSystem> allSystems;
+        cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_SalesforceSystem",
+                S3ImportSystem.SystemType.Other, false);
+        cdlService.createS3ImportSystem(mainTestTenant.getId(), "Test_OtherSystem",
+                S3ImportSystem.SystemType.Other, false);
         allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
-        Assert.assertEquals(allSystems.size(), 3);
-        defaultSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), DEFAULT_SYSTEM);
-        Assert.assertFalse(defaultSystem.isPrimarySystem());
-        sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
-        Assert.assertTrue(sfSystem.isPrimarySystem());
-        Assert.assertNotNull(sfSystem.getAccountSystemId());
-        Assert.assertTrue(sfSystem.isMapToLatticeAccount());
-        Table sfAccountTable = dataFeedProxy.getDataFeedTask(customerSpace, sfDFId).getImportTemplate();
-        Assert.assertNotNull(sfAccountTable);
-        Assert.assertNotNull(sfAccountTable.getAttribute(defaultSystem.getAccountSystemId()));
-        Attribute customerAccountId = sfAccountTable.getAttribute(InterfaceName.CustomerAccountId);
-        Assert.assertNotNull(customerAccountId);
-        Assert.assertEquals(customerAccountId.getDisplayName(), "ID");
-        Attribute sfSystemIdAttr = sfAccountTable.getAttribute(sfSystem.getAccountSystemId());
-        Assert.assertNotNull(sfSystemIdAttr);
-        Assert.assertEquals(sfSystemIdAttr.getDisplayName(), "ID");
-        otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
-        Assert.assertNotNull(otherSystem.getAccountSystemId());
-        Table otherSystemAccountTable =
-                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), otherDFId).getImportTemplate();
-        Attribute otherSystemAccountAttr = otherSystemAccountTable.getAttribute(otherSystem.getAccountSystemId());
-        Assert.assertNotNull(otherSystemAccountAttr);
-        Assert.assertEquals(otherSystemAccountAttr.getDisplayName(), "CrmAccount_External_ID");
-
-        // test with contact
-        SourceFile sfContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
-        String sfContactFeedType = getFeedTypeByEntity(sfSystemName, ENTITY_CONTACT);
-        fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(sfContactFile.getName(), ENTITY_CONTACT, SOURCE, sfContactFeedType);
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
-                fieldMapping.setIdType(FieldMapping.IdType.Contact);
-                fieldMapping.setMapToLatticeId(true);
-                fieldMapping.setMappedToLatticeField(true);
-            }
-            if (fieldMapping.getUserField().equals("Account_ID")) {
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-                fieldMapping.setMappedToLatticeField(true);
-            }
-        }
-        modelingFileMetadataService.resolveMetadata(sfContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
-                sfContactFeedType);
-        sfContactFile = sourceFileService.findByName(sfContactFile.getName());
-
-        String sfContactDFId = cdlService.createS3Template(customerSpace, sfContactFile.getName(),
-                SOURCE, ENTITY_CONTACT, sfContactFeedType, null, ENTITY_CONTACT + "Data");
-        Assert.assertNotNull(sfContactFile);
-        Assert.assertNotNull(sfContactDFId);
-
-
-        SourceFile otherContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
-        String otherContactFeedType = getFeedTypeByEntity(otherSystemName, ENTITY_CONTACT);
-        fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(otherContactFile.getName(), ENTITY_CONTACT, SOURCE, otherContactFeedType);
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
-                fieldMapping.setSystemName(sfSystemName);
-                fieldMapping.setIdType(FieldMapping.IdType.Contact);
-            }
-            if (fieldMapping.getUserField().equals("Account_ID")) {
-                fieldMapping.setSystemName(sfSystemName);
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-            }
-        }
-        modelingFileMetadataService.resolveMetadata(otherContactFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
-                otherContactFeedType);
-        otherContactFile = sourceFileService.findByName(otherContactFile.getName());
-
-        String otherContactDFId = cdlService.createS3Template(customerSpace, otherContactFile.getName(),
-                SOURCE, ENTITY_CONTACT, otherContactFeedType, null, ENTITY_CONTACT + "Data");
-        Assert.assertNotNull(otherContactFile);
-        Assert.assertNotNull(otherContactDFId);
-
-        sfSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), sfSystemName);
-        Assert.assertNotNull(sfSystem.getContactSystemId());
-        Table sfSystemContactTable =
-                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), sfContactDFId).getImportTemplate();
-        Attribute sfSystemContactIdAttr = sfSystemContactTable.getAttribute(sfSystem.getContactSystemId());
-        Assert.assertNotNull(sfSystemContactIdAttr);
-        Assert.assertEquals(sfSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
-        otherSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), otherSystemName);
-        Assert.assertNull(otherSystem.getContactSystemId());
-
-        Table otherSystemContactTable =
-                dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), otherContactDFId).getImportTemplate();
-        Attribute otherSystemContactIdAttr = otherSystemContactTable.getAttribute(sfSystem.getContactSystemId());
-        Assert.assertNotNull(otherSystemContactIdAttr);
-        Assert.assertEquals(otherSystemContactIdAttr.getDisplayName(), "S_Contact_For_PlatformTest");
-
-        Attribute otherSystemAccountIdAttr = otherSystemContactTable.getAttribute(sfSystem.getAccountSystemId());
-        Assert.assertNotNull(otherSystemAccountIdAttr);
-        Assert.assertEquals(otherSystemAccountIdAttr.getDisplayName(), "Account_ID");
-
-        Attribute otherSystemCustomerAccountIdAttr =
-                otherSystemContactTable.getAttribute(InterfaceName.CustomerAccountId);
-        Assert.assertNotNull(otherSystemCustomerAccountIdAttr);
-        Assert.assertEquals(otherSystemCustomerAccountIdAttr.getDisplayName(), "Account_ID");
-
-        // exception when double primary system.
-        defaultAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
-                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
-
-        fieldMappingDocument = modelingFileMetadataService
-                .getFieldMappingDocumentBestEffort(defaultAccountFile.getName(), ENTITY_ACCOUNT, SOURCE, defaultFeedType);
-
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getUserField().equals("CrmAccount_External_ID")) {
-//                fieldMapping.setSystemName(DEFAULT_SYSTEM);
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-                fieldMapping.setMapToLatticeId(true);
-            }
-        }
-
-        SourceFile finalDefaultAccountFile = defaultAccountFile;
-        FieldMappingDocument finalFieldMappingDocument = fieldMappingDocument;
-        Assert.expectThrows(LedpException.class,
-                () -> modelingFileMetadataService.resolveMetadata(finalDefaultAccountFile.getName(),
-                        finalFieldMappingDocument, ENTITY_ACCOUNT, SOURCE, defaultFeedType));
-
+        return allSystems;
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testImportSystem")
@@ -398,5 +480,53 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertNotNull(sfLeadTable.getAttribute(sfSystem.getSecondaryContactId(EntityType.Leads)));
         Assert.assertNotNull(sfLeadTable.getAttribute(sfSystem.getContactSystemId()));
 
+        // test edit template with Lead
+        fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sfContactFile.getName(), ENTITY_CONTACT, SOURCE, sfLeadFeedType);
+        Map<String, FieldMapping> fieldMappingMapFromReImport =
+                fieldMappingDocument.getFieldMappings().stream()
+                        .filter(fieldMapping -> StringUtils.isNotEmpty(fieldMapping.getMappedField()))
+                        .collect(Collectors.toMap(FieldMapping::getMappedField, fieldMapping -> fieldMapping));
+        Assert.assertTrue(fieldMappingMapFromReImport.containsKey(sfSystem.getSecondaryContactId(EntityType.Leads)));
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getSecondaryContactId(EntityType.Leads)).getSystemName(),
+                sfSystem.getName());
+        Assert.assertEquals(fieldMappingMapFromReImport.get(sfSystem.getSecondaryContactId(EntityType.Leads)).getIdType(),
+                FieldMapping.IdType.Lead);
+
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "testMultipleSubType")
+    public void testGetSystemList() {
+        // Right now there should be 4 systems: DefaultSystem, Test_SalesforceSystem, Test_OtherSystem, Test_SalesforceSystemLead
+        // Three of them have Account System Id : DefaultSystem, Test_SalesforceSystem, Test_OtherSystem
+        // Two of them have Contact System Id : Test_SalesforceSystem, Test_SalesforceSystemLead
+        // One of them has Leads System Id(secondary Id) : Test_SalesforceSystemLead
+        List<S3ImportTemplateDisplay> templateList = cdlService.getS3ImportTemplate(mainTestTenant.getId(), "", null);
+        S3ImportTemplateDisplay otherSystemAccount =
+                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
+                        "Test_OtherSystem_AccountData")).findFirst().get();
+        Assert.assertNotNull(otherSystemAccount);
+        List<S3ImportSystem> filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                true, false, otherSystemAccount);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 2);
+
+        S3ImportTemplateDisplay sfSystemContact =
+                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
+                        "Test_SalesforceSystemLead_ContactData")).findFirst().get();
+        filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                false, true, sfSystemContact);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 1);
+
+        filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                true, false, sfSystemContact);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 3);
+
+        S3ImportTemplateDisplay sfSystemLead =
+                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
+                        "Test_SalesforceSystemLead_LeadsData")).findFirst().get();
+        filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
+                false, true, sfSystemLead);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 2);
+    }
+
 }

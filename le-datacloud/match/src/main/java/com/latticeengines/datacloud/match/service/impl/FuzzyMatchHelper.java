@@ -137,8 +137,9 @@ public class FuzzyMatchHelper implements DbHelper {
             String lookupIdValue = record.getLookupIdValue();
             if (StringUtils.isNotBlank(lookupIdValue)) {
                 List<DynamoDataUnit> dynamoDataUnits = context.getCustomDataUnits();
-                Map<String, Object> customAccount = cdlLookupService.lookup(dynamoDataUnits, lookupIdKey,
-                        lookupIdValue);
+                DynamoDataUnit lookupDataUnit = context.getAccountLookupDataUnit();
+                Map<String, Object> customAccount = cdlLookupService.lookup(lookupDataUnit, dynamoDataUnits,
+                        lookupIdKey, lookupIdValue);
                 if (MapUtils.isNotEmpty(customAccount)) {
                     record.setMatched(true);
                     if (InterfaceName.AccountId.name().equals(record.getLookupIdKey())) {

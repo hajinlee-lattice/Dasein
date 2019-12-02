@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.dao.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -30,6 +31,20 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
                 getEntityClass().getSimpleName());
         Query<PublishedTalkingPoint> query = session.createQuery(queryStr);
         query.setParameter("playName", playName);
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<String> findPlaysUsingGivenAttributes(List<String> attributes) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("select distinct tp.playName from %s tp where ( ",
+                getEntityClass().getSimpleName())
+                + attributes.stream().map(attr -> "content like '%{!" + attr + "}%'")
+                        .collect(Collectors.joining(" or "))
+                + ")";
+
+        Query<String> query = session.createQuery(queryStr);
         return query.list();
     }
 }

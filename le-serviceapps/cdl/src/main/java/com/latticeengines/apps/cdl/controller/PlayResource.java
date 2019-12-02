@@ -36,7 +36,6 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -229,10 +228,21 @@ public class PlayResource {
         }
         playLaunchChannel = playLaunchChannelService.create(playName, playLaunchChannel);
         if (launchNow) {
-            PlayLaunch launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
-                    playLaunchChannel);
-            log.info(String.format("Queued new launch for play:%s and channel: %s : %s", playName,
-                    playLaunchChannel.getId(), launch.getLaunchId()));
+            PlayLaunch launch;
+            if (batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                    LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
+                launch = playLaunchChannelService.createNewLaunchForChannelByState(playLaunchChannel.getPlay(),
+                        playLaunchChannel, LaunchState.UnLaunched, false);
+                Long workflowId = schedule(customerSpace, playName, playLaunchChannel.getId(), launch.getLaunchId());
+                log.info(String.format(
+                        "Scheduled Delta Calculation workflow for Play: %s, Channel: %s and Launch: %s with WorkflowPID: %s",
+                        playName, playLaunchChannel.getId(), launch.getLaunchId(), workflowId.toString()));
+            } else {
+                launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
+                        playLaunchChannel);
+            }
+            log.info(String.format("Queued new launch for play:%s and channel: %s : %s", playName, playLaunchChannel,
+                    launch.getLaunchId()));
         }
         return playLaunchChannel;
     }
@@ -258,14 +268,8 @@ public class PlayResource {
         playLaunchChannel = playLaunchChannelService.update(playName, playLaunchChannel);
         if (launchNow) {
             PlayLaunch launch;
-            if (playLaunchChannel.getLaunchType() != null && playLaunchChannel.getLaunchType() == LaunchType.DELTA
-                    && batonService.isEnabled(CustomerSpace.parse(customerSpace),
-                            LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
-                if (!playLaunchChannel.getIsAlwaysOn()) {
-                    throw new LedpException(LedpCode.LEDP_32000,
-                            new String[] { "Cannot keep one time launches in sync" });
-                }
-
+            if (batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                    LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
                 launch = playLaunchChannelService.createNewLaunchForChannelByState(playLaunchChannel.getPlay(),
                         playLaunchChannel, LaunchState.UnLaunched, false);
                 Long workflowId = schedule(customerSpace, playName, channelId, launch.getLaunchId());
@@ -321,6 +325,11 @@ public class PlayResource {
         channel.setPlay(play);
         channel.setTenant(MultiTenantContext.getTenant());
         channel.setTenantId(MultiTenantContext.getTenant().getPid());
+
+        if (state == LaunchState.UnLaunched) {
+            return playLaunchChannelService.createNewLaunchForChannelByState(play, channel, state, isAutoLaunch);
+        }
+
         return playLaunchChannelService.queueNewLaunchForChannel(play, channel, addAccountsTable, completeContactsTable,
                 removeAccountsTable, addContactsTable, removeContactsTable, isAutoLaunch);
     }

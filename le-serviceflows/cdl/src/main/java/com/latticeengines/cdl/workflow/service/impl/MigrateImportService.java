@@ -239,11 +239,12 @@ public class MigrateImportService
 
     @Override
     public List<String> getAttributes(String customerSpace, Table templateTable, 
-                                      Table masterTable, MigrateImportServiceConfiguration config) {
+                                      Table masterTable,
+                                      List<String> discardFields, MigrateImportServiceConfiguration config) {
         return templateTable.getAttributes().stream()
                 .map(Attribute::getName)
                 .distinct()
-                .filter(attrName -> masterTable.getAttribute(attrName) == null)
+                .filter(attrName -> masterTable.getAttribute(attrName) != null)
                 .collect(Collectors.toList());
     }
 

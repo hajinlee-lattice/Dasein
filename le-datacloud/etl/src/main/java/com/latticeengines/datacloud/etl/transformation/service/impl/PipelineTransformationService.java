@@ -5,6 +5,7 @@ import static com.latticeengines.datacloud.etl.transformation.transformer.Iterat
 import static com.latticeengines.datacloud.etl.transformation.transformer.IterativeStep.MAX_ITERATION;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -15,22 +16,28 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.DataCloudNotificationService;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
+import com.latticeengines.datacloud.etl.service.SourceHdfsS3TransferService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -92,6 +99,15 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     @Inject
     private DataCloudVersionService datacloudVersionService;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Inject
+    private SourceHdfsS3TransferService sourceHdfsS3TransferService;
+
+    @Value("${datacloud.collection.s3bucket}")
+    private String s3Bucket;
 
     private final String PIPELINE = DataCloudConstants.PIPELINE_TEMPSRC_PREFIX;
     private final String VERSION = "_version_";
@@ -288,7 +304,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                             throw new RuntimeException("There is no table named " + baseTable.getTableName()
                                     + " for customer " + baseTable.getCustomerSpace());
                         }
-                        source = new TableSource(table, baseTable.getCustomerSpace());
+                        source = new TableSource(table, baseTable.getCustomerSpace(), baseTable.getPartitionKeys());
                         involvedTableSources.put(sourceName, (TableSource) source);
                     } else if (baseIngestions.containsKey(sourceName)) {
                         SourceIngestion baseIngestion = baseIngestions.get(sourceName);
@@ -321,10 +337,19 @@ public class PipelineTransformationService extends AbstractTransformationService
                     if (inputBaseVersions == null) {
                         sourceVersion = sourceVersions.get(source);
                         if (sourceVersion == null) {
-                            sourceVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+                            try {
+                                sourceVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+                            } catch (Exception e) {
+                                log.info("Cannot find current version for " + getSourceNameForLogging(source)
+                                        + " on HDFS");
+                                sourceVersion = null;
+                            }
                         }
                     } else {
                         sourceVersion = inputBaseVersions.get(i);
+                    }
+                    if (transConf.isAMJob()) {
+                        sourceVersion = copyMissingBaseSourceFromS3(source, sourceVersion);
                     }
                     sourceVersions.put(source, sourceVersion);
                     baseVersions.add(sourceVersion);
@@ -341,7 +366,11 @@ public class PipelineTransformationService extends AbstractTransformationService
             String targetName = config.getTargetSource();
             TargetTable targetTable = config.getTargetTable();
             if (targetTable != null) {
-                target = sourceService.createTableSource(targetTable, pipelineVersion);
+                TableSource targetTableSource = sourceService.createTableSource(targetTable, pipelineVersion);
+                if (CollectionUtils.isNotEmpty(config.getTargetPartitionKeys())) {
+                    targetTableSource.setPartitionKeys(config.getTargetPartitionKeys());
+                }
+                target = targetTableSource;
             } else if (targetName == null) {
                 targetName = getTempSourceName(transConf.getName(), pipelineVersion, stepIdx, transConf.getKeepTemp());
                 target = sourceService.createSource(targetName);
@@ -859,5 +888,38 @@ public class PipelineTransformationService extends AbstractTransformationService
         } else {
             return workflowDir;
         }
+    }
+
+    private String copyMissingBaseSourceFromS3(Source source, String version) {
+        if (StringUtils.isNotBlank(version) && hdfsSourceEntityMgr.checkSourceExist(source, version)) {
+            return version;
+        }
+        if (StringUtils.isBlank(version)) {
+            log.info(getSourceNameForLogging(source)
+                    + " doesn't exist on HDFS. Attempt to find its current version on S3");
+            String versionFilePath = hdfsPathBuilder.constructVersionFile(source).toString();
+            try {
+                version = IOUtils.toString(s3Service.readObjectAsStream(s3Bucket, versionFilePath),
+                        Charset.defaultCharset());
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "Fail to find current version of " + getSourceNameForLogging(source) + " on S3", e);
+            }
+            if (StringUtils.isBlank(version)) {
+                throw new RuntimeException(
+                        "Fail to find current version of " + getSourceNameForLogging(source) + " on S3");
+            }
+        }
+        log.info(String.format("%s @%s doesn't exist on HDFS. Copying it from S3", getSourceNameForLogging(source),
+                version));
+        sourceHdfsS3TransferService.transfer(false, source, version, null, false, false);
+        return version;
+    }
+
+    private String getSourceNameForLogging(Source source) {
+        String sourceType = source instanceof IngestionSource ? IngestionSource.class.getSimpleName()
+                : (source instanceof TableSource ? TableSource.class.getSimpleName()
+                        : GeneralSource.class.getSimpleName());
+        return sourceType + " " + source.getSourceName();
     }
 }

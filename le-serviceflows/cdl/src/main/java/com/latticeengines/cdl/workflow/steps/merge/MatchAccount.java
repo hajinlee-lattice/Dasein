@@ -50,31 +50,33 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
 
     List<TransformationStepConfig> steps = new ArrayList<>();
-        int mergeStep = 0;
-        TransformationStepConfig merge;
         String convertBatchStoreTableName = getConvertBatchStoreTableName();
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
             Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
-            if (CollectionUtils.isEmpty(inputTableNames) && StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(), convertBatchStoreTableName, -1);
-            } else {
-                merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(), null, -1);
-                // if we have convertBatchStore, we should merge and match new import first
-                // then merge and match the Table which combined convertBatchStoreTable with the match result of new import
-                if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-                    TransformationStepConfig match = matchAccount(mergeStep++, null, null);
-                    steps.add(merge);
-                    steps.add(match);
-                    merge = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
-                            convertBatchStoreTableName, mergeStep++);
+
+            if (CollectionUtils.isNotEmpty(inputTableNames)) {
+                TransformationStepConfig mergeImports = concatImports(null, preProcessFlds.getLeft(),
+                        preProcessFlds.getRight(), null, -1);
+                steps.add(mergeImports);
+                if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+                    TransformationStepConfig matchImport =  matchAccount(steps.size() - 1, null, null);
+                    steps.add(matchImport);
                 }
             }
+            if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+                TransformationStepConfig mergeBatchStoreAndImport = concatImports(null, preProcessFlds.getLeft(),
+                        preProcessFlds.getRight(),
+                        convertBatchStoreTableName, steps.size() - 1);
+                steps.add(mergeBatchStoreAndImport);
+            }
         } else {
-            merge = dedupAndConcatImports(InterfaceName.AccountId.name());
+            TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
+            steps.add(merge);
         }
-        TransformationStepConfig match = matchAccount(mergeStep, matchTargetTablePrefix, convertBatchStoreTableName);
-        steps.add(merge);
+        TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
+                convertBatchStoreTableName);
+
         steps.add(match);
         log.info("steps are {}.", steps);
         request.setSteps(steps);

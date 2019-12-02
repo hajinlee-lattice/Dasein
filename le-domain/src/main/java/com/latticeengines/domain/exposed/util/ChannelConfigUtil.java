@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 
 public class ChannelConfigUtil {
@@ -17,7 +18,6 @@ public class ChannelConfigUtil {
             ChannelConfig channelConfig) {
         switch (destinationSystemName) {
         case Marketo:
-        case GoogleAds:
         case Outreach:
             return true;
         case LinkedIn:
@@ -34,6 +34,13 @@ public class ChannelConfigUtil {
             }
             FacebookChannelConfig facebookConfig = (FacebookChannelConfig) channelConfig;
             return facebookConfig.getAudienceType() == AudienceType.CONTACTS;
+        case GoogleAds:
+            if(channelConfig == null){
+                log.info("Channel config object is null. Returning false by default");
+                return false;
+            }
+            GoogleChannelConfig googleConfig = (GoogleChannelConfig) channelConfig;
+            return googleConfig.getAudienceType() == AudienceType.CONTACTS;
         default:
             return false;
         }
@@ -53,6 +60,9 @@ public class ChannelConfigUtil {
         case Facebook:
             FacebookChannelConfig fbConfig = (FacebookChannelConfig) channelConfig;
             return fbConfig.getAudienceType() == AudienceType.ACCOUNTS;
+        case GoogleAds:
+            GoogleChannelConfig googleConfig = (GoogleChannelConfig) channelConfig;
+            return googleConfig.getAudienceType() == AudienceType.ACCOUNTS;
         default:
             return false;
         }

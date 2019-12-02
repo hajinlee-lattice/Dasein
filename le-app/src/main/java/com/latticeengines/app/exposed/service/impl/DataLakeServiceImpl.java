@@ -39,6 +39,8 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
@@ -64,6 +66,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -129,6 +132,10 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private LocalCacheManager<String, Map<String, StatsCube>> statsCubesCache;
     private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
+    private LoadingCache<String, Boolean> hasAccountLookupCache = Caffeine.newBuilder() //
+            .maximumSize(1000) //
+            .expireAfterWrite(30, TimeUnit.SECONDS) //
+            .build(this::hasAccountLookupCache);
     private ExecutorService workers = null;
 
     @Inject
@@ -218,43 +225,55 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
 
-        String internalAccountId = getInternalIdViaAccountCache(customerSpace, lookupIdColumn, accountId);
-
-        if (StringUtils.isBlank(internalAccountId)) {
-            List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
-                    Collections.singletonList(accountId), lookupIdColumn);
-            internalAccountId = CollectionUtils.isNotEmpty(internalAccountIds) ? internalAccountIds.get(0) : null;
-        }
+        // if has the AccountLookup table, which is the latest implementation,
+        // can skip both special cache and redshift,
+        // go straight to match api
         DataPage dataPage;
+        String internalAccountId;
+        if (Boolean.TRUE.equals(hasAccountLookupCache.get(customerSpace))) {
+            internalAccountId = matchProxy.lookupInternalAccountId(customerSpace, lookupIdColumn, accountId, null);
+        } else {
+            log.warn("Tenant " + customerSpace + " does not have AccountLookup table.");
+
+            internalAccountId = getInternalIdViaAccountCache(customerSpace, lookupIdColumn, accountId);
+
+            if (StringUtils.isBlank(internalAccountId)) {
+                List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
+                        Collections.singletonList(accountId), lookupIdColumn);
+                internalAccountId = CollectionUtils.isNotEmpty(internalAccountIds) ? internalAccountIds.get(0) : null;
+            }
+        }
 
         if (StringUtils.isNotBlank(internalAccountId)) {
             dataPage = getAccountByIdViaMatchApi(customerSpace, Collections.singletonList(internalAccountId),
                     predefined);
 
-            if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
-                // if we didn't get any data from matchapi then it may be
-                // because data is not published to dynamoDB for this tenant. So
-                // for fallback mechanism we'll use original logic to get data
-                // from redshift
+//TODO: attempt to remove the redshift fall back in M34
 
-                log.info("Falling back to old logic for extracting account data from Redshift for AccountId: "
-                        + internalAccountId + " of Tenant: " + customerSpace);
-
-                List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
-                        .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
-                try {
-                    FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, true,
-                            batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
-                    dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
-                } catch (Exception ex) {
-                    log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
-                    FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, false,
-                            batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
-                    dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
-                }
-            }
+//            if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
+//                // if we didn't get any data from matchapi then it may be
+//                // because data is not published to dynamoDB for this tenant. So
+//                // for fallback mechanism we'll use original logic to get data
+//                // from redshift
+//
+//                log.info("Falling back to old logic for extracting account data from Redshift for AccountId: "
+//                        + internalAccountId + " of Tenant: " + customerSpace);
+//
+//                List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
+//                        .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+//                try {
+//                    FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
+//                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, true,
+//                            batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
+//                    dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
+//                } catch (Exception ex) {
+//                    log.info("Ignoring error due to missing lookup id column. Trying without lookup id this time.", ex);
+//                    FrontEndQuery query = AccountExtensionUtil.constructFrontEndQuery(customerSpace,
+//                            Collections.singletonList(accountId), lookupIdColumn, attributes, null, false,
+//                            batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
+//                    dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
+//                }
+//            }
 
             if (dataPage != null && dataPage.getData() != null && dataPage.getData().size() == 1) {
                 if (!dataPage.getData().get(0).containsKey(InterfaceName.AccountId.name())) {
@@ -662,6 +681,12 @@ public class DataLakeServiceImpl implements DataLakeService {
     @VisibleForTesting
     void setAccountLookupCacheTable(String testTable) {
         this.dynamoAccountLookupCacheTableName = testTable;
+    }
+
+    private boolean hasAccountLookupCache(String customerSpace) {
+        DynamoDataUnit dynamoDataUnit = //
+                dataCollectionProxy.getAccountLookupDynamoDataUnit(customerSpace, null);
+        return dynamoDataUnit != null;
     }
 
     private ExecutorService getWorkers() {

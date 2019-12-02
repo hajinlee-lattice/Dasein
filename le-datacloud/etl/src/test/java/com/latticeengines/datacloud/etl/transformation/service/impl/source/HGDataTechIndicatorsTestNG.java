@@ -66,7 +66,7 @@ public class HGDataTechIndicatorsTestNG extends PipelineTransformationTestNGBase
     @Inject
     private SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         readBitPositions();
         prepareHGClean();

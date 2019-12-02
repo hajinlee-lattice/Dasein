@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.merge.GenerateAccountLookup;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
@@ -23,6 +24,9 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
     private MergeAccountWrapper mergeAccountWrapper;
 
     @Inject
+    private GenerateAccountLookup generateAccountLookup;
+
+    @Inject
     private UpdateAccountWorkflow updateAccountWorkflow;
 
     @Inject
@@ -35,6 +39,7 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
     public Workflow defineWorkflow(ProcessAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(mergeAccountWrapper) //
+                .next(generateAccountLookup) //
                 .next(updateAccountWorkflow) //
                 .next(rebuildAccountWorkflow) //
                 .next(resetAccount) //

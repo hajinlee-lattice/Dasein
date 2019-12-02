@@ -11,7 +11,6 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
-import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
@@ -21,6 +20,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 
 @Component
@@ -87,11 +87,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
             playLaunch.setAudienceSize(eventDetail.getAudienceSize());
             playLaunch.setMatchedCount(eventDetail.getMatchedCount());
-            //Update audience state if it exists
-            DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessageByLaunchId(playLaunch.getLaunchId());
-            if(audienceState != null && audienceState.getEventDetail() != null && audienceState.getEventDetail().getType().equals(eventDetail.getType())){
-                playLaunch.setAudienceState(eventDetail.getStatus());
-            }
 
             playLaunchService.update(playLaunch);
         }
@@ -103,7 +98,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             AudienceType audienceType) {
         switch (systemName) {
         case Marketo:
-        case GoogleAds:
         case Outreach:
             return audienceType == AudienceType.CONTACTS;
         case LinkedIn:
@@ -112,6 +106,9 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         case Facebook:
             FacebookChannelConfig fbConfig = (FacebookChannelConfig) channelConfig;
             return fbConfig.getAudienceType() == audienceType;
+        case GoogleAds:
+            GoogleChannelConfig googleConfig = (GoogleChannelConfig) channelConfig;
+            return googleConfig.getAudienceType() == audienceType;
         default:
             return null;
         }

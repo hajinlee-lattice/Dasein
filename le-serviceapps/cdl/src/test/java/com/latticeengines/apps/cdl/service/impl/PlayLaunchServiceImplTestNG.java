@@ -19,11 +19,13 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.DataIntegrationStatusMonitoringService;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
@@ -38,6 +40,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -50,6 +53,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -65,6 +69,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
     private PlayLaunchChannelService playLaunchChannelService;
+
+    @Autowired
+    private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Inject
     private PlayService playService;
@@ -83,12 +90,23 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private Play play;
 
+
+
+    private PlayLaunchChannel plChannel1;
+
     private PlayLaunch playLaunch1;
     private PlayLaunch playLaunch2;
+
+    private LookupIdMap lookupIdMapMarketo;
+    private PlayLaunchChannel playLaunchChannelMarketo;
 
     String org1 = "org1_" + CURRENT_TIME_MILLIS;
     String org2 = "org2_" + CURRENT_TIME_MILLIS;
 
+    private String orgIdMarketo = "org1" + CURRENT_TIME_MILLIS;
+    private String orgNameMarketo = "marketo_org";
+
+    private String CRON_EXPRESSION = "0 0 12 ? * WED *";
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
     private String PLAY_TARGET_SEGMENT_NAME = "Play Target Segment - 2";
@@ -129,7 +147,6 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
         assertPlayTargetSegment(play);
-
         bucketsToLaunch1 = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
         playLaunch1 = new PlayLaunch();
@@ -291,6 +308,36 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunchMap.put(playLaunch2.getId(), playLaunch2);
 
         Thread.sleep(2000);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
+    public void testUpdateAudience() throws InterruptedException {
+        lookupIdMapMarketo = createLookIdMap(orgIdMarketo, orgNameMarketo, CDLExternalSystemType.MAP, CDLExternalSystemName.Marketo);
+        playLaunchChannelMarketo = createPlayLaunchChannel(play, lookupIdMapMarketo);
+        playLaunchChannelMarketo.setIsAlwaysOn(false);
+        playLaunchChannelMarketo.setChannelConfig(new MarketoChannelConfig());
+        playLaunchChannelMarketo = playLaunchChannelService.create(play.getName(), playLaunchChannelMarketo);
+        PlayLaunch playLaunch1 = new PlayLaunch();
+        playLaunch1.setLaunchId(NamingUtils.randomSuffix("pl", 16));
+        playLaunch1.setTenant(mainTestTenant);
+        playLaunch1.setLaunchState(LaunchState.Launching);
+        playLaunch1.setPlay(play);
+        playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
+        playLaunch1.setDestinationAccountId("SFDC_ACC1");
+        playLaunch1.setDestinationOrgId(org1);
+        playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch1.setCreatedBy(CREATED_BY);
+        playLaunch1.setUpdatedBy(CREATED_BY);
+        playLaunch1.setChannelConfig(new MarketoChannelConfig());
+        playLaunch1.setPlayLaunchChannel(playLaunchChannelMarketo);
+        playLaunchService.create(playLaunch1);
+        playLaunchService.updateAudience("1", "test_audience", playLaunch1.getLaunchId());
+
+        Thread.sleep(2000);
+        PlayLaunchChannel plChannel = playLaunchChannelService.findById(playLaunchChannelMarketo.getId());
+
+        String audienceId = plChannel.getChannelConfig().getAudienceId();
+        Assert.assertEquals(audienceId, "1");
     }
 
     private void assertBucketsToLaunch(PlayLaunch launch, Set<RatingBucketName> expectedBucketsToLaunch) {
@@ -457,6 +504,30 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         }
         retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId());
         Assert.assertNull(retreivedPlayLaunch);
+    }
+
+
+    private PlayLaunchChannel createPlayLaunchChannel(Play play, LookupIdMap lookupIdMap) {
+        PlayLaunchChannel playLaunchChannel = new PlayLaunchChannel();
+        playLaunchChannel.setTenant(mainTestTenant);
+        playLaunchChannel.setPlay(play);
+        playLaunchChannel.setLookupIdMap(lookupIdMap);
+        playLaunchChannel.setCreatedBy(CREATED_BY);
+        playLaunchChannel.setUpdatedBy(CREATED_BY);
+        playLaunchChannel.setLaunchType(LaunchType.FULL);
+        playLaunchChannel.setId(NamingUtils.randomSuffix("pl", 16));
+        playLaunchChannel.setCronScheduleExpression(CRON_EXPRESSION);
+        return playLaunchChannel;
+    }
+
+    private LookupIdMap createLookIdMap(String orgId, String orgName, CDLExternalSystemType type, CDLExternalSystemName name){
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setExternalSystemType(type);
+        lookupIdMap.setExternalSystemName(name);
+        lookupIdMap.setOrgId(orgId);
+        lookupIdMap.setOrgName(orgName);
+        lookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
+        return  lookupIdMap;
     }
 
     private void checkCountForDashboard(Long playId, List<LaunchState> goodStates, List<LaunchState> badStates,

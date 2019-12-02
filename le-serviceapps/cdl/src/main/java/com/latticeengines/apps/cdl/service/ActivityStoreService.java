@@ -5,6 +5,7 @@ import java.util.Map;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
@@ -106,4 +107,16 @@ public interface ActivityStoreService {
      *         {@code null}
      */
     Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace, String signature);
+
+    /**
+     * Retrieve a ActivityMetricsGroup
+     *
+     * @param customerSpace
+     *          target tenant
+     * @param groupId
+     *          groupId, which is unique within tenant
+     * @return
+     *          ActivityMetricsGroup
+     */
+    ActivityMetricsGroup findGroupByGroupId(String customerSpace, String groupId);
 }

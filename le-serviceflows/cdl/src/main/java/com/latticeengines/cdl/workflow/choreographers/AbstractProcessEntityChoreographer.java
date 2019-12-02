@@ -5,6 +5,8 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOG
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_ENABLED;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.FULL_REMATCH_PA;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.PROCESS_ANALYTICS_DECISIONS_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.SOFT_DEELETE_ACTIONS;
@@ -52,10 +54,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private boolean hasSoftDelete = false;
     private boolean hasHardDelete = false;
     float diffRate = 0;
+    long diffCount = 0;
 
     boolean rebuild = false;
     boolean update = false;
     boolean reset = false;
+    boolean replace = false;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -77,7 +81,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             reset = shouldReset(step);
             rebuild = shouldRebuild(step);
             update = shouldUpdate(step);
-            log.info("reset=" + reset + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
+            log.info("reset=" + reset + ", replace=" + replace + ", rebuild=" + rebuild + ", update=" + update + ", entity=" + mainEntity());
             saveDecisions(step);
             if (reset && (rebuild || update)) {
                 throw new IllegalStateException("When reset, neither rebuild nor update can be true.");
@@ -124,6 +128,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         TreeSet<String> decisions = new TreeSet<>();
         decisions.add(reset ? "reset=true" : (update ? "update=true" : "rebuild=true"));
         decisions.add(enforceRebuild ? "enforceRebuild=true" : "");
+        decisions.add(replace ? "replace=true" : "");
         decisions.add(hasSchemaChange ? "hasSchemaChange=true" : "");
         decisions.add(hasImports ? "hasImports=true" : "");
         decisions.add(hasSoftDelete ? "hasSoftDelete=true" : "");
@@ -188,6 +193,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         checkActiveServingStore(step);
         checkHasBatchStore(step);
         checkRebuildDueToActions(step);
+        checkHasReplace(step);
     }
 
     void checkRebuildDueToActions(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -226,7 +232,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info(String.format("Found %d hard delete actions", hardDeletes.size()));
         }
         hasSoftDelete = CollectionUtils.isNotEmpty(softDeletes);
-        if (hasHardDelete) {
+        if (hasSoftDelete) {
             log.info(String.format("Found %d soft delete actions", softDeletes.size()));
         }
     }
@@ -272,6 +278,12 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
+    private void checkHasReplace(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (step.getConfiguration() instanceof BaseProcessEntityStepConfiguration) {
+            replace = ((BaseProcessEntityStepConfiguration)step.getConfiguration()).getNeedReplace();
+        }
+    }
+
     void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         Long existingCount = null;
         Long updateCount = null;
@@ -292,7 +304,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             updateCount = updateValueMap.get(mainEntity());
         }
 
-        long diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
+        diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
         if (existingCount != null && existingCount != 0L) {
             diffRate = diffCount * 1.0F / existingCount;
             hasManyUpdate = diffRate >= 0.3;
@@ -300,7 +312,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports || hasSoftDelete;
+        return hasImports || hasSoftDelete || checkHasEntityMatchRematch(step);
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -315,6 +327,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping rebuild.");
             return false;
+        }
+        if (replace) {
+            log.info("Has replace action in " + mainEntity() + ", going to rebuild");
+            return true;
         }
         if (enforceRebuild) {
             log.info("Enforced to rebuild " + mainEntity());
@@ -338,6 +354,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected boolean shouldUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping update.");
+            return false;
+        }
+        if (replace) {
+            log.info("Going to replace  " + mainEntity() + ", skipping update.");
             return false;
         }
         if (!rebuild && hasImports) {
@@ -383,6 +403,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("No account batch store.");
         }
         return hasAccounts;
+    }
+
+    protected boolean checkHasEntityMatchRematch(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.getObjectFromContext(FULL_REMATCH_PA, Boolean.class) && step.getObjectFromContext(ENTITY_MATCH_ENABLED, Boolean.class);
     }
 
     /**

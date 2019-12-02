@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -15,6 +16,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.IngestionNames;
+import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
@@ -35,12 +37,24 @@ public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
-        uploadBaseSourceFile(baseSource, "Lattice_Engines_2017-02-14.zip", baseSourceVersion);
+        uploadSourceToS3(baseSource, baseSourceVersion, Arrays.asList("Lattice_Engines_2017-02-14.zip"));
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
         confirmResultFile(progress);
         cleanupProgressTables();
+    }
+
+    @Override
+    protected String getPodId() {
+        // Due to s3 bucket is shared, use different pod id to avoid conflicts
+        // if multiple clients run this test around same time
+        return HGDataFileToSourceTestNG.class.getSimpleName() + UUID.randomUUID().toString();
+    }
+
+    @Override
+    protected Source getSource() {
+        return source;
     }
 
     @Override
@@ -54,12 +68,14 @@ public class HGDataFileToSourceTestNG extends PipelineTransformationTestNGBase {
 
         configuration.setName("HGDataFileToSource");
         configuration.setVersion(targetVersion);
+        configuration.setAMJob(true);
 
         // -----------
         TransformationStepConfig step1 = new TransformationStepConfig();
         step1.setBaseSources(Arrays.asList(baseSource.getSourceName()));
         step1.setBaseIngestions(Collections.singletonMap(baseSource.getSourceName(),
                 new SourceIngestion(baseSource.getIngestionName())));
+        step1.setBaseVersions(Arrays.asList(baseSourceVersion));
         step1.setTransformer(IngestedFileToSourceTransformer.TRANSFORMER_NAME);
         step1.setTargetSource(source.getSourceName());
         String confParamStr1 = getIngestedFileToSourceTransformerConfig();

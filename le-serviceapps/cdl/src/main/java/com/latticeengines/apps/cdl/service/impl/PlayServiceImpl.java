@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -17,6 +18,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -107,7 +109,8 @@ public class PlayServiceImpl implements PlayService {
         log.info(String.format("%s play %sfor tenant %s", //
                 play.getName() == null ? "Creating" : "Updating", //
                 play.getName() == null //
-                        ? "" : String.format("with name: %s, ", play.getName()),
+                        ? ""
+                        : String.format("with name: %s, ", play.getName()),
                 tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         MultiTenantContext.setTenant(tenant);
@@ -180,10 +183,9 @@ public class PlayServiceImpl implements PlayService {
 
                 Map<String, Long> counts = play.getRatingEngine().getCountsAsMap();
                 if (counts != null) {
-                    play.getRatingEngine()
-                            .setBucketMetadata(counts.keySet().stream() //
-                                    .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
-                                    .collect(Collectors.toList()));
+                    play.getRatingEngine().setBucketMetadata(counts.keySet().stream() //
+                            .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
+                            .collect(Collectors.toList()));
                 }
             } else {
                 String reId = play.getRatingEngine().getId();
@@ -247,11 +249,10 @@ public class PlayServiceImpl implements PlayService {
                                 ratingEngines.forEach(r -> {
                                     Map<String, Long> counts = r.getCountsAsMap();
                                     if (counts != null) {
-                                        r.setBucketMetadata(
-                                                counts.keySet().stream() //
-                                                        .map(c -> new BucketMetadata(BucketName.fromValue(c),
-                                                                counts.get(c).intValue()))
-                                                        .collect(Collectors.toList()));
+                                        r.setBucketMetadata(counts.keySet().stream() //
+                                                .map(c -> new BucketMetadata(BucketName.fromValue(c),
+                                                        counts.get(c).intValue()))
+                                                .collect(Collectors.toList()));
                                     }
                                 });
                             });
@@ -283,8 +284,7 @@ public class PlayServiceImpl implements PlayService {
             }
         }
 
-        final List<Play> innerPlays = new ArrayList<>();
-        innerPlays.addAll(plays);
+        final List<Play> innerPlays = new ArrayList<>(plays);
 
         Date lastRefreshedDate = findLastRefreshedDate();
         // to make loading of play list efficient and faster we need to run full
@@ -492,7 +492,6 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private Date findLastRefreshedDate() {
-        Tenant tenant = MultiTenantContext.getTenant();
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(MultiTenantContext.getCustomerSpace().toString());
         return dataFeed.getLastPublished();
     }
@@ -532,6 +531,28 @@ public class PlayServiceImpl implements PlayService {
         }
 
         return new ArrayList<>(dependingPlays);
+    }
+
+    @Override
+    public List<Play> findDependantPlays(List<String> attributes) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        Set<String> playIds = talkingPointService.findDependantPlayIds(attributes);
+        stopWatch.stop();
+        log.info(String.format("Time to get playIds from talking points: %s ms",
+                stopWatch.getTime(TimeUnit.MILLISECONDS)));
+        if (CollectionUtils.isEmpty(playIds)) {
+            return new ArrayList<>();
+        }
+
+        stopWatch.reset();
+        stopWatch.start();
+        List<Play> plays = getAllPlays().stream().filter(play -> playIds.contains(play.getName()))
+                .collect(Collectors.toList());
+        stopWatch.stop();
+        log.info(String.format("Time to get plays from PlayIds: %s ms", stopWatch.getTime(TimeUnit.MILLISECONDS)));
+
+        return plays;
     }
 
     private String sanitize(String attribute) {

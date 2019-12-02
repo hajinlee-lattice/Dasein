@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,12 +35,13 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
         log.info("Calling MarketoExportFieldMetadataService");
 
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Account));
+                Collections.singletonList(BusinessEntity.Account));
 
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Contact));
+                Collections.singletonList(BusinessEntity.Contact));
 
-        List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(), channel.getLookupIdMap().getTenant().getPid());
+        List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
+                channel.getLookupIdMap().getTenant().getPid());
 
         List<ColumnMetadata> exportColumnMetadataList;
 
@@ -48,8 +49,8 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Marketo, mappedFieldNames,
                     accountAttributesMap, contactAttributesMap);
         } else {
-            exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo,
-                    accountAttributesMap, contactAttributesMap);
+            exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo, accountAttributesMap,
+                    contactAttributesMap);
         }
 
         return exportColumnMetadataList;

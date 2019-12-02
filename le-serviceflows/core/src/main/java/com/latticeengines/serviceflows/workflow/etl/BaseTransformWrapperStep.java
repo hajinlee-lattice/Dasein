@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -178,6 +180,16 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     }
 
     protected void addBaseTables(TransformationStepConfig step, String... sourceTableNames) {
+        addBaseTables(step, null, sourceTableNames);
+    }
+
+    protected void addBaseTables(TransformationStepConfig step, List<List<String>> partitionKeys,
+            String... sourceTableNames) {
+        if (partitionKeys != null) {
+            Preconditions.checkArgument(partitionKeys.size() == sourceTableNames.length,
+                    String.format("Partition key list size %d should be the same as source table name list size %d",
+                            partitionKeys.size(), ArrayUtils.getLength(sourceTableNames)));
+        }
         if (customerSpace == null) {
             throw new IllegalArgumentException("Have not set customerSpace.");
         }
@@ -189,8 +201,12 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         if (MapUtils.isEmpty(baseTables)) {
             baseTables = new HashMap<>();
         }
-        for (String sourceTableName: sourceTableNames) {
+        for (int i = 0; i < sourceTableNames.length; i++) {
+            String sourceTableName = sourceTableNames[i];
             SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+            if (partitionKeys != null) {
+                sourceTable.setPartitionKeys(partitionKeys.get(i));
+            }
             baseSources.add(sourceTableName);
             baseTables.put(sourceTableName, sourceTable);
         }

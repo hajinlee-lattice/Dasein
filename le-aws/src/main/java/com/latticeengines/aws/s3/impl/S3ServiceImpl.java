@@ -42,6 +42,7 @@ import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.CopyPartRequest;
 import com.amazonaws.services.s3.model.CopyPartResult;
+import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.GetObjectTaggingResult;
@@ -489,6 +490,12 @@ public class S3ServiceImpl implements S3Service {
         GetObjectTaggingRequest getTaggingRequest = new GetObjectTaggingRequest(bucket, key);
         GetObjectTaggingResult getTagsResult = s3Client.getObjectTagging(getTaggingRequest);
         return getTagsResult.getTagSet();
+    }
+
+    @Override
+    public void deleteObjectTags(String bucket, String key) {
+        DeleteObjectTaggingRequest deleteTaggingRequest = new DeleteObjectTaggingRequest(bucket, key);
+        s3Client.deleteObjectTagging(deleteTaggingRequest);
     }
 
     @Override
