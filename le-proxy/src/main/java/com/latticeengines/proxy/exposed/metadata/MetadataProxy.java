@@ -252,7 +252,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     }
 
     public String getAvroDir(String customerSpace, String tableName) {
-        Table table = getTable(customerSpace, tableName);
+        Table table = getTableSummary(customerSpace, tableName);
         if (table == null) {
             throw new IllegalArgumentException("Cannot find table named " + tableName);
         }
