@@ -356,14 +356,25 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                             simpleTemplateMetadata.getIgnoredStandardAttributes().contains(attribute.getName()));
         }
         if (CollectionUtils.isNotEmpty(simpleTemplateMetadata.getStandardAttributes())) {
-            Map<String, String> nameMapping = simpleTemplateMetadata.getStandardAttributes()
-                    .stream()
-                    .filter(simpleTemplateAttribute -> StringUtils.isNotBlank(simpleTemplateAttribute.getName()))
-                    .collect(Collectors.toMap(SimpleTemplateMetadata.SimpleTemplateAttribute::getName,
-                            SimpleTemplateMetadata.SimpleTemplateAttribute::getDisplayName));
+            Map<String, SimpleTemplateMetadata.SimpleTemplateAttribute> nameMapping =
+                    simpleTemplateMetadata.getStandardAttributes().stream()
+                            .filter(simpleTemplateAttribute -> StringUtils.isNotBlank(simpleTemplateAttribute.getName()))
+                            .collect(Collectors.toMap(SimpleTemplateMetadata.SimpleTemplateAttribute::getName,
+                                    simpleTemplateAttribute -> simpleTemplateAttribute));
             standardTable.getAttributes().forEach(attribute -> {
                 if (nameMapping.containsKey(attribute.getName())) {
-                    attribute.setDisplayName(nameMapping.get(attribute.getName()));
+                    attribute.setDisplayName(nameMapping.get(attribute.getName()).getDisplayName());
+                    if (LogicalDataType.Date.equals(attribute.getLogicalDataType())) {
+                        if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getDateFormat())) {
+                            attribute.setDateFormatString(nameMapping.get(attribute.getName()).getDateFormat());
+                        }
+                        if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getTimeFormat())) {
+                            attribute.setTimeFormatString(nameMapping.get(attribute.getName()).getTimeFormat());
+                        }
+                        if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getTimezone())) {
+                            attribute.setTimezone(nameMapping.get(attribute.getName()).getTimezone());
+                        }
+                    }
                 }
             });
         }
@@ -391,6 +402,15 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             attribute.setFundamentalType(fundamentalType);
             if (FundamentalType.DATE.equals(fundamentalType)) {
                 attribute.setLogicalDataType(LogicalDataType.Date);
+                if (StringUtils.isNotEmpty(simpleTemplateAttr.getDateFormat())) {
+                    attribute.setDateFormatString(simpleTemplateAttr.getDateFormat());
+                }
+                if (StringUtils.isNotEmpty(simpleTemplateAttr.getTimeFormat())) {
+                    attribute.setTimeFormatString(simpleTemplateAttr.getTimeFormat());
+                }
+                if (StringUtils.isNotEmpty(simpleTemplateAttr.getTimezone())) {
+                    attribute.setTimezone(simpleTemplateAttr.getTimezone());
+                }
             }
             attribute.setTags(ModelingMetadata.INTERNAL_TAG);
             attribute.setApprovedUsageFromEnumList(getApprovedUsage(simpleTemplateAttr.getApprovedUsages()));
