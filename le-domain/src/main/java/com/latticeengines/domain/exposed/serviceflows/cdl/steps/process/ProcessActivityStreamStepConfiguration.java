@@ -29,7 +29,6 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
 
     private boolean isReplaceMode;
 
-    @JsonProperty("rematch_mode")
     private boolean isRematchMode;
 
     @JsonProperty("entity_match_enabled")
@@ -96,10 +95,12 @@ public class ProcessActivityStreamStepConfiguration extends BaseProcessEntitySte
         isReplaceMode = replaceMode;
     }
 
+    @JsonProperty("rematch_mode")
     public boolean isRematchMode() {
         return isRematchMode;
     }
 
+    @JsonProperty("rematch_mode")
     public void setRematchMode(boolean rematchMode) {
         isRematchMode = rematchMode;
     }
