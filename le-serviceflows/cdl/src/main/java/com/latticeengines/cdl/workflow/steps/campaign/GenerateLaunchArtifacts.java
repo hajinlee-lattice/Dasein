@@ -277,7 +277,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         if (CollectionUtils.isNotEmpty(fieldMappingMetadata)) {
             List<ColumnMetadata> unExportableFields = fieldMappingMetadata.stream()
                     .filter(cm -> !BusinessEntity.EXPORT_ACCOUNT_ENTITIES.contains(cm.getEntity())
-                            && cm.getEntity() == BusinessEntity.Contact)
+                            && cm.getEntity() != BusinessEntity.Contact)
                     .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(unExportableFields)) {
                 log.warn("Unexportable columns found in columns received from FieldMetadata Service, "
