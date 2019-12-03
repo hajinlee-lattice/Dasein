@@ -16,6 +16,10 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
+/**
+ * A pipeline step in OrbCacheSeed rebuild pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-OrbCacheSeedCreation
+ */
 @Component(OrbCacheSeedRebuildFlow.DATAFLOW_BEAN)
 public class OrbCacheSeedRebuildFlow extends ConfigurableFlowBase<OrbCacheSeedRebuildConfig> {
 

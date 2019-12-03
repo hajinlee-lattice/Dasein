@@ -20,9 +20,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.SourceFirmoGraphEnchrimentFlow;
 import com.latticeengines.datacloud.dataflow.transformation.seed.SourceDedupeWithDenseFieldsFlow;
 import com.latticeengines.datacloud.dataflow.transformation.seed.SourceFieldEnchrimentFlow;
+import com.latticeengines.datacloud.dataflow.transformation.seed.SourceFirmoGraphEnchrimentFlow;
 import com.latticeengines.datacloud.dataflow.transformation.seed.SourceSeedFileMergeFlow;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -32,9 +32,9 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SourceFirmoGraphEnrichmentTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceFieldEnrichmentTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceSeedFileMergeTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceFieldEnrichmentConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceFirmoGraphEnrichmentConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceSeedFileMergeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -154,7 +154,7 @@ public class LatticeCacheSeedRebuildDeploymentTestNG extends PipelineTransformat
     }
 
     private String getSeedFileMergeConfig() {
-        SourceSeedFileMergeTransformerConfig config = new SourceSeedFileMergeTransformerConfig();
+        SourceSeedFileMergeConfig config = new SourceSeedFileMergeConfig();
         config.setSourceFieldName("__Source__");
         config.setSourcePriorityFieldName("__Source_Priority__");
         config.setSourceFieldValues(Arrays.asList("RTS", "Orb"));
@@ -163,7 +163,7 @@ public class LatticeCacheSeedRebuildDeploymentTestNG extends PipelineTransformat
     }
 
     private String getFirmoGraphEnrichmentConfig() {
-        SourceFirmoGraphEnrichmentTransformerConfig config = new SourceFirmoGraphEnrichmentTransformerConfig();
+        SourceFirmoGraphEnrichmentConfig config = new SourceFirmoGraphEnrichmentConfig();
         config.setLeftMatchField("DUNS");
         config.setRightMatchField("DUNS_NUMBER");
         config.setEnrichingFields(Arrays.asList("BUSINESS_NAME", "STREET_ADDRESS", "CITY_NAME", "STATE_PROVINCE_NAME",
@@ -177,7 +177,7 @@ public class LatticeCacheSeedRebuildDeploymentTestNG extends PipelineTransformat
     }
 
     private String getFieldsEnrichmentConfig() {
-        SourceFieldEnrichmentTransformerConfig config = new SourceFieldEnrichmentTransformerConfig();
+        SourceFieldEnrichmentConfig config = new SourceFieldEnrichmentConfig();
         config.setFromFields(Arrays.asList("__Matched_DUNS__", "__Matched_City__"));
         config.setToFields(Arrays.asList("DUNS", "City"));
         return JsonUtils.serialize(config);
