@@ -14,8 +14,10 @@
                 ],
                 "required": false,
                 "logicalDataType": "Id",
-                "fundamentalType": "ALPHA",
-                "approvedUsage": [ "None" ]
+                "fundamentalType": "alpha",
+                "approvedUsage": [
+                    "None"
+                ]
             }
         ],
         "Match IDs": []

@@ -13,9 +13,9 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
-                "fundamentalType": "ALPHA"
+                "fundamentalType": "alpha"
             },
             {
                 "fieldName": "PathPattern",
@@ -27,9 +27,9 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
-                "fundamentalType": "ALPHA"
+                "fundamentalType": "alpha"
             }
         ],
         "Custom Fields": []
