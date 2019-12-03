@@ -24,9 +24,9 @@ import com.latticeengines.datacloud.dataflow.transformation.seed.OrbCacheSeedMar
 import com.latticeengines.datacloud.dataflow.transformation.seed.OrbCacheSeedSecDomainFlow;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedSecDomainRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.OrbCacheSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.OrbCacheSeedSecDomainRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class OrbCacheSeedSecDomainTestNG extends PipelineTransformationTestNGBase {

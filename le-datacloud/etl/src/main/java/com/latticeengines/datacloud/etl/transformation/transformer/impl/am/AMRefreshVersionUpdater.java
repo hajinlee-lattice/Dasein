@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.am;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_AM_REFRESH_VER_UPDATER;
 
@@ -14,6 +14,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 

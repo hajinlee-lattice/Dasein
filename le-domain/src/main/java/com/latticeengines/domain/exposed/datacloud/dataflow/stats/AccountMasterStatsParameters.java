@@ -1,9 +1,10 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow;
+package com.latticeengines.domain.exposed.datacloud.dataflow.stats;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;

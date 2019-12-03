@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.stats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.avro.Schema;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+
+import com.latticeengines.datacloud.dataflow.transformation.TransformationFlowBase;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -24,7 +26,7 @@ public abstract class AMStatsFlowBase
 
     protected static final String MIN_MAX_JOIN_FIELD = "_JoinFieldMinMax_";
 
-    @Autowired
+    @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
 
     @Override

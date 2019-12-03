@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.cdl.CalculateFittedExpectedRevenueFunction;
+import com.latticeengines.dataflow.runtime.cascading.atlas.CalculateFittedExpectedRevenueFunction;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
 import com.latticeengines.scoring.dataflow.CalculateExpectedRevenuePercentile.ParsedContext;

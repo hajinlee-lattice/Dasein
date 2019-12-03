@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.datacloud.dataflow.utils.FlowUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
@@ -30,8 +31,8 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyIm
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.PivotConfig;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 

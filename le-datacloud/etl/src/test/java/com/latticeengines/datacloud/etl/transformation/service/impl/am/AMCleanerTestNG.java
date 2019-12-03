@@ -31,12 +31,12 @@ import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.AMCleaner;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.MapAttributeTransformer;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.am.AMCleaner;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.am.MapAttributeTransformer;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMCleanerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.AMCleanerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 

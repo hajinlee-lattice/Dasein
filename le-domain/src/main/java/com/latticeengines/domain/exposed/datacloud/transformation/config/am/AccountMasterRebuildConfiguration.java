@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.am;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.InputSourceConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 
 public class AccountMasterRebuildConfiguration extends BasicTransformationConfiguration
         implements TransformationConfiguration {

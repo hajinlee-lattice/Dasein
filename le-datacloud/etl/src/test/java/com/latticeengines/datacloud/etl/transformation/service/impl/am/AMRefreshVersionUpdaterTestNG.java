@@ -1,36 +1,35 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.am;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.AMRefreshVersionUpdater;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.am.AMRefreshVersionUpdater;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class AMRefreshVersionUpdaterTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class AMRefreshVersionUpdaterTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AMRefreshVersionUpdaterTestNG.class);
     private Long refreshVerValBefore;
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
-    GeneralSource source = new GeneralSource("LDCDEV_AMRefreshVersionUpdater");
-    GeneralSource baseSource = new GeneralSource("AMRefreshVersionUpdater");
+    private GeneralSource source = new GeneralSource("LDCDEV_AMRefreshVersionUpdater");
+    private GeneralSource baseSource = new GeneralSource("AMRefreshVersionUpdater");
     private int iteration = 0;
 
     @Test(groups = "functional", enabled = true)
@@ -72,49 +71,22 @@ public class AMRefreshVersionUpdaterTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder
-                .constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("WeeklyRefreshVersionUpdate");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("WeeklyRefreshVersionUpdate");
+        configuration.setVersion(targetVersion);
 
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSourcesStep1 = new ArrayList<String>();
-            baseSourcesStep1.add(baseSource.getSourceName());
-            step1.setBaseSources(baseSourcesStep1);
-            step1.setTransformer(AMRefreshVersionUpdater.TRANSFORMER_NAME);
-            step1.setTargetSource(source.getSourceName());
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSourcesStep1 = new ArrayList<>();
+        baseSourcesStep1.add(baseSource.getSourceName());
+        step1.setBaseSources(baseSourcesStep1);
+        step1.setTransformer(AMRefreshVersionUpdater.TRANSFORMER_NAME);
+        step1.setTargetSource(source.getSourceName());
 
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
-            configuration.setSteps(steps);
-            return configuration;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
+        configuration.setSteps(steps);
+        return configuration;
     }
 
     @Override
@@ -151,5 +123,10 @@ public class AMRefreshVersionUpdaterTestNG
             rowCount++;
         }
         Assert.assertEquals(rowCount, 1);
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 }

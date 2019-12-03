@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddCompositeColumnFuction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddPeriodColumnFunction;
+import com.latticeengines.dataflow.runtime.cascading.atlas.ConsolidateAddCompositeColumnFuction;
+import com.latticeengines.dataflow.runtime.cascading.atlas.ConsolidateAddPeriodColumnFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodConvertorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodConvertorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;

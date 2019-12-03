@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.atlas;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +15,11 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.RequestContext;
-import com.latticeengines.datacloud.dataflow.transformation.ConsolidateReportFlow;
+import com.latticeengines.datacloud.dataflow.transformation.atlas.ConsolidateReportFlow;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateReportParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateReportConfig;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateReportParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateReportConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;

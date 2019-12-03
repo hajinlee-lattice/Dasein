@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.source;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -14,10 +14,11 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.dataflow.transformation.MostRecentFlow;
-import com.latticeengines.domain.exposed.datacloud.dataflow.MostRecentParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MostRecentConfig;
+import com.latticeengines.datacloud.dataflow.transformation.source.MostRecentFlow;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.domain.exposed.datacloud.dataflow.source.MostRecentParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.MostRecentConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @Component(MostRecentFlow.TRANSFORMER_NAME)

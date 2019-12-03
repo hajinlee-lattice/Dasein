@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ActivityMetricsNullImputeFunc;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ActivityMetricsPivotAgg;
+import com.latticeengines.dataflow.runtime.cascading.atlas.ActivityMetricsNullImputeFunc;
+import com.latticeengines.dataflow.runtime.cascading.atlas.ActivityMetricsPivotAgg;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ActivityMetricsPivotConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ActivityMetricsPivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;

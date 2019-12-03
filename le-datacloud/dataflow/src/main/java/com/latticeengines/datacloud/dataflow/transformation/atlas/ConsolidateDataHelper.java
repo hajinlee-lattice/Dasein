@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,15 +1,16 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.seed;
 
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.RowsInRTSInOrbInAMConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.RowsInRTSInOrbInAMConfig;
 
 @Component(RowsInRTSInOrbInAMFlow.DATAFLOW_BEAN_NAME)
 public class RowsInRTSInOrbInAMFlow extends ConfigurableFlowBase<RowsInRTSInOrbInAMConfig> {

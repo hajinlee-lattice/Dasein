@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.EntityMatchImportMigrateConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.EntityMatchImportMigrateConfig;
 
 public class EntityMatchImportMigrateFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 

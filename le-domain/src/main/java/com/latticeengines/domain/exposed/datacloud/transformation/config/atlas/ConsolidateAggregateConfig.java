@@ -1,8 +1,9 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.atlas;
 
 import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 public class ConsolidateAggregateConfig extends TransformerConfig {
 

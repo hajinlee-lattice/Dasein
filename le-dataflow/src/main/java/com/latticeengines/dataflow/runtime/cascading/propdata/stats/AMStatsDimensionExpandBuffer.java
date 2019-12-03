@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.stats;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionUtil.ExpandedTuple;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDimensionUtil.ExpandedTuple;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 
 import cascading.flow.FlowProcess;

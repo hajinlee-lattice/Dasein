@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.cdl;
+package com.latticeengines.dataflow.runtime.cascading.atlas;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 
@@ -7,6 +7,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("serial")
 public class NumberOfContactsAggregator extends BaseAggregator<NumberOfContactsAggregator.Context>
         implements Aggregator<NumberOfContactsAggregator.Context> {
 

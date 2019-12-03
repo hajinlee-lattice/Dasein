@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.stats;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,21 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterReport;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -33,13 +35,13 @@ public abstract class AbstractStatsDataflowTransformer
         extends AbstractDataflowTransformer<AccountMasterStatisticsConfig, AccountMasterStatsParameters> {
     private static final Logger log = LoggerFactory.getLogger(AbstractStatsDataflowTransformer.class);
 
-    @Autowired
+    @Inject
     protected DimensionAttributeProxy dimensionAttributeProxy;
 
-    @Autowired
+    @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
 
-    @Autowired
+    @Inject
     protected AccountMasterReport accountMasterReport;
 
     @Override
@@ -68,7 +70,6 @@ public abstract class AbstractStatsDataflowTransformer
 
         for (CategoricalDimension dimension : allDimensions) {
             finalDimensionColumns.add(dimension.getDimension());
-            System.out.println(this.getClass());
             if (dimensions.contains(dimension.getDimension())) {
                 requiredDimensions.put(dimension.getDimension(), dimension);
                 List<CategoricalAttribute> dimensionAttrDetails = //

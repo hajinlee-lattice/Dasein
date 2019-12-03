@@ -12,8 +12,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
 
 public class ConsolidateCollectionSemRushFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ConsolidateCollectionSemRushFlowTestNG.class);

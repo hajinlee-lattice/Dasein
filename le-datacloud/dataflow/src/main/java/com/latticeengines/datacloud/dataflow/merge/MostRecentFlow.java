@@ -8,7 +8,7 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.OldDataCleanupFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.source.MostRecentDataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("mostRecentFlow")

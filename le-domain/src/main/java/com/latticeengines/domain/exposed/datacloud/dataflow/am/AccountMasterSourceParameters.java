@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow;
+package com.latticeengines.domain.exposed.datacloud.dataflow.am;
 
 import java.util.ArrayList;
 import java.util.HashSet;

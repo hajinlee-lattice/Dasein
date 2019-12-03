@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.stats;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionUtil.ExpandedTuple;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDimensionUtil.ExpandedTuple;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.Dimensions;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.MultiListCrossProductUtil;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;

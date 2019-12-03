@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow;
+package com.latticeengines.domain.exposed.datacloud.dataflow.source;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.dunsredirect;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectBookConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.dunsredirect.DunsRedirectBookConfig;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.datacloud.dataflow.transformation.TransformationFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.BomboraDomainFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.BomboraDomainParameters;
+import com.latticeengines.dataflow.runtime.cascading.propdata.source.BomboraDomainFunction;
+import com.latticeengines.domain.exposed.datacloud.dataflow.source.BomboraDomainParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;

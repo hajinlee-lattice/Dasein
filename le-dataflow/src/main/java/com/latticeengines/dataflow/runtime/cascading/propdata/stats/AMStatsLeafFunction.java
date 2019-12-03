@@ -1,11 +1,11 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.stats;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 

@@ -1,7 +1,9 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.stats;
 
 import java.util.List;
 import java.util.Map;
+
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 public class AccountMasterStatisticsConfig extends TransformerConfig {
     private Map<String, String> attributeCategoryMap;

@@ -1,6 +1,7 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.seed;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 public class ManualSeedEnrichDunsConfig extends TransformerConfig {
 

@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.source;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

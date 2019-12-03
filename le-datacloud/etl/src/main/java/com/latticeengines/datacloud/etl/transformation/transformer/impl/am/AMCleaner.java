@@ -1,23 +1,25 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.am;
 
-import static com.latticeengines.datacloud.etl.transformation.transformer.impl.AMCleaner.TRANSFORMER_NAME;
+import static com.latticeengines.datacloud.etl.transformation.transformer.impl.am.AMCleaner.TRANSFORMER_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CLEANER;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.am.AMCleanerParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.am.AMCleanerParameters.CleanOpt;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMCleanerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.AMCleanerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(TRANSFORMER_NAME)
@@ -29,10 +31,10 @@ public class AMCleaner extends AbstractDataflowTransformer<AMCleanerConfig, AMCl
     public static final String ACCOUNT_MASTER = "AccountMaster";
     public static final String CLEAN = "CLEAN";
 
-    @Autowired
+    @Inject
     private SourceAttributeEntityMgr srcAttrEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
 
     @Override

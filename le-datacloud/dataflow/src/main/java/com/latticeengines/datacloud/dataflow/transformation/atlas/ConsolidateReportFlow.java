@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,9 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.TransformationFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateReportParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateReportParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;

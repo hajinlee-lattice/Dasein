@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,13 +6,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.TransformationFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.propdata.BomboraWeeklyAggBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.source.BomboraWeeklyAggBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;

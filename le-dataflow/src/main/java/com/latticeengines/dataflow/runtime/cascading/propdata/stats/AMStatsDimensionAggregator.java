@@ -1,7 +1,7 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.stats;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionUtil.ExpandedTuple;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDimensionUtil.ExpandedTuple;
 
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;

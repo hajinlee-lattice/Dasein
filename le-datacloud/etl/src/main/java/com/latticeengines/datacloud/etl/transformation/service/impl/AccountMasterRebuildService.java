@@ -19,7 +19,7 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformationSer
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccountMasterRebuildConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.am.AccountMasterRebuildConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 

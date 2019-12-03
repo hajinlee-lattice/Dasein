@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.atlas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class ConsolidateDataTransformerConfig extends TransformerConfig {

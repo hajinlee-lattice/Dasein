@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.stats;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,48 +15,36 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AMStatsUtils;
-import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.AccountMaster;
-import com.latticeengines.datacloud.core.source.impl.PipelineSource;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class AMStatsDeploymentTestNG extends PipelineTransformationTestNGBase {
     private static final String DATA_CLOUD_VERSION = "2.0.2";
 
     private static final Logger log = LoggerFactory.getLogger(AMStatsDeploymentTestNG.class);
 
-    @Autowired
-    PipelineSource source;
-
-    @Autowired
-    AccountMaster baseSource;
-
-    String targetSourceName = "AccountMasterStats";
-    String targetVersion = "2017-01-30_19-12-43_UTC";
-
-    String statsJsonFileName = "AccountMasterStatsCube_Test.json";
-
-    ObjectMapper OM = new ObjectMapper();
+    private GeneralSource source = new GeneralSource("AccountMasterStats");
+    private GeneralSource baseSource = new GeneralSource("AccountMaster");
+    private String statsJsonFileName = "AccountMasterStatsCube_Test.json";
 
     @Test(groups = "deployment", enabled = true)
     public void testTransformation() {
-        uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + targetSourceName,
+        uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + source.getSourceName(),
                 "2017-01-30_19-12-43_UTC");
 
         TransformationProgress progress = createNewProgress();
@@ -64,22 +52,6 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
         finish(progress);
         confirmResultFile(progress);
         cleanupProgressTables();
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).toString();
     }
 
     @Override
@@ -217,7 +189,7 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
         List<Integer> inputSteps7 = new ArrayList<Integer>();
         inputSteps7.add(6);
         step7.setInputSteps(inputSteps7);
-        step7.setTargetSource(targetSourceName);
+        step7.setTargetSource(source.getSourceName());
         step7.setTransformer("amStatsReportTransformer");
 
         AccountMasterStatisticsConfig confParam7 = getAccountMasterStatsParameters();
@@ -275,14 +247,6 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
         param.setNumericalBucketsRequired(true);
 
         return param;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
     }
 
     @Override
@@ -885,5 +849,10 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
                 { 15L, 374L, 1057L, 1069L, 1080L, 1081L, 1L, "618@1|616@1|619@1|622@1|614@1|621@1|623@", null, null,
                         null, 25L, DATA_CLOUD_VERSION } };
         return expectedData;
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 }

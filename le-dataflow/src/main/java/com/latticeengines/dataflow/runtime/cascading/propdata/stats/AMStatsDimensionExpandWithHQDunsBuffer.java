@@ -1,10 +1,10 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.stats;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionUtil.ExpandedTuple;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDimensionUtil.ExpandedTuple;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

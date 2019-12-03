@@ -1,15 +1,16 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.am;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -17,6 +18,7 @@ import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.am.MapAttributeFlow;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.am.MapAttributeConfig;
@@ -33,7 +35,7 @@ public class MapAttributeTransformer
     public static final String ACCOUNT_MASTER = "AccountMaster";
     public static final String MINI_PREFIX = "MINI_";
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
 
     @Override

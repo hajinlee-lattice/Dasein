@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.ams;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,19 +13,18 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedDedup;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.AMSeedDedupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class AMSeedDedupTestNG extends PipelineTransformationTestNGBase {
 
-    GeneralSource baseSource1 = new GeneralSource("AccountMasterSeed");
-    GeneralSource source = new GeneralSource("amSeedDeduped");
+    private GeneralSource baseSource = new GeneralSource("AccountMasterSeed");
+    private GeneralSource source = new GeneralSource("amSeedDeduped");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -63,22 +62,7 @@ public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<Pipel
                 // dedup case
                 { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services" },
                 { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services" } };
-        uploadBaseSourceData(baseSource1.getSourceName(), baseSourceVersion, schema, data);
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+        uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, schema, data);
     }
 
     @Override
@@ -89,15 +73,15 @@ public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<Pipel
             configuration.setVersion(targetVersion);
 
             TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSourceStep = new ArrayList<String>();
-            baseSourceStep.add(baseSource1.getSourceName());
+            List<String> baseSourceStep = new ArrayList<>();
+            baseSourceStep.add(baseSource.getSourceName());
             step1.setBaseSources(baseSourceStep);
             step1.setTransformer(AMSeedDedup.TRANSFORMER_NAME);
             String confParamStr1 = getAmSeedDedupConfig();
             step1.setConfiguration(confParamStr1);
             step1.setTargetSource(source.getSourceName());
 
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(step1);
             configuration.setSteps(steps);
             return configuration;
@@ -112,13 +96,6 @@ public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<Pipel
         conf.setIsDomainOnlyCleanup(true);
         conf.setIsDedup(true);
         return JsonUtils.serialize(conf);
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     Object[][] expectedDataValues = new Object[][] { //
@@ -158,6 +135,11 @@ public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<Pipel
             rowCount++;
         }
         Assert.assertEquals(rowCount, 7);
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_TRANSACTION_AGGREGATOR;
 
@@ -9,14 +9,15 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.atlas.TransactionAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.FillDefaultFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.TransactionAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransactionAggregateConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;

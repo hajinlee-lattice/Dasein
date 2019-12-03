@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.cdl;
+package com.latticeengines.dataflow.runtime.cascading.atlas;
 
 import org.apache.commons.lang3.StringUtils;
 

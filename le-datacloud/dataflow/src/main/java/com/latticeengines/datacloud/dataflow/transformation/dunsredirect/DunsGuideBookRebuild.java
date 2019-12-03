@@ -9,12 +9,12 @@ import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.DunsGuideBookAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.dunsredirect.DunsGuideBookAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBookConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectBookConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.dunsredirect.DunsRedirectBookConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 

@@ -22,8 +22,8 @@ import com.latticeengines.datacloud.dataflow.transformation.am.MapAttributeFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.am.DeriveAttributeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.am.MapAttributeConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DeriveAttributeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 

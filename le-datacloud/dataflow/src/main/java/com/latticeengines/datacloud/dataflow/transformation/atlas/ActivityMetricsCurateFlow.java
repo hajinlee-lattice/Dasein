@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,14 +19,14 @@ import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ActivityMetricsNullImputeFunc;
-import com.latticeengines.dataflow.runtime.cascading.propdata.MetricsShareOfWalletFunc;
-import com.latticeengines.dataflow.runtime.cascading.propdata.StandardActivityMetricsAgg;
+import com.latticeengines.dataflow.runtime.cascading.atlas.ActivityMetricsNullImputeFunc;
+import com.latticeengines.dataflow.runtime.cascading.atlas.MetricsShareOfWalletFunc;
+import com.latticeengines.dataflow.runtime.cascading.atlas.StandardActivityMetricsAgg;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ActivityMetricsCuratorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ActivityMetricsCuratorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;

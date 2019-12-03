@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.seed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,25 +15,23 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.ManualSeedEnrichDunsFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.seed.ManualSeedEnrichDunsFlow;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ManualSeedEnrichDunsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.ManualSeedEnrichDunsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class ManualSeedDunsEnrichTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class ManualSeedDunsEnrichTestNG extends PipelineTransformationTestNGBase {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ManualSeedDunsEnrichTestNG.class);
 
-    GeneralSource source = new GeneralSource("ManualSeedEnrichedDuns");
+    private GeneralSource source = new GeneralSource("ManualSeedEnrichedDuns");
 
-    GeneralSource baseSource1 = new GeneralSource("ManualSeedData");
-    GeneralSource baseSource2 = new GeneralSource("ManualSeedWithoutZip");
-    GeneralSource baseSource3 = new GeneralSource("ManualSeedWithoutZipAndCity");
+    private GeneralSource baseSource1 = new GeneralSource("ManualSeedData");
+    private GeneralSource baseSource2 = new GeneralSource("ManualSeedWithoutZip");
+    private GeneralSource baseSource3 = new GeneralSource("ManualSeedWithoutZipAndCity");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -46,20 +44,11 @@ public class ManualSeedDunsEnrichTestNG
         confirmResultFile(progress);
         cleanupProgressTables();
     }
+    
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
@@ -71,7 +60,7 @@ public class ManualSeedDunsEnrichTestNG
 
             // Initialize manualSeed Data Set
             TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSourceStep1 = new ArrayList<String>();
+            List<String> baseSourceStep1 = new ArrayList<>();
             baseSourceStep1.add(baseSource1.getSourceName());
             baseSourceStep1.add(baseSource2.getSourceName());
             baseSourceStep1.add(baseSource3.getSourceName());
@@ -82,7 +71,7 @@ public class ManualSeedDunsEnrichTestNG
             step1.setConfiguration(confParamStr);
 
             // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(step1);
 
             // -----------
@@ -139,13 +128,6 @@ public class ManualSeedDunsEnrichTestNG
         conf.setManSeedDuns("MAN_DUNS");
         conf.setManSeedId("MAN_Id");
         return JsonUtils.serialize(conf);
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     private Object[][] expectedDataValues = {

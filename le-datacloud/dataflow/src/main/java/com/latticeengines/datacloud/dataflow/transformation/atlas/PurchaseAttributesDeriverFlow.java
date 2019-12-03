@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,13 +7,14 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AttrHasPurchasedFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AttrMarginFunction;
+import com.latticeengines.dataflow.runtime.cascading.atlas.AttrHasPurchasedFunction;
+import com.latticeengines.dataflow.runtime.cascading.atlas.AttrMarginFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PurchaseAttributesDeriverConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PurchaseAttributesDeriverConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;

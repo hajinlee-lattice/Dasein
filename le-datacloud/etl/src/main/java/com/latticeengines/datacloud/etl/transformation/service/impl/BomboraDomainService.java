@@ -14,7 +14,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.BomboraDomain;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.domain.exposed.datacloud.dataflow.BomboraDomainParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.source.BomboraDomainParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;

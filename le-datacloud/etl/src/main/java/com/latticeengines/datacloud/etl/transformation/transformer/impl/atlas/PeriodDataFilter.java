@@ -1,6 +1,6 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.atlas;
 
-import static com.latticeengines.datacloud.etl.transformation.transformer.impl.PeriodDataFilter.TRANSFORMER_NAME;
+import static com.latticeengines.datacloud.etl.transformation.transformer.impl.atlas.PeriodDataFilter.TRANSFORMER_NAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PERIOD_DATA_FILTER;
 
 import java.util.List;
@@ -15,8 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataFilterConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodDataFilterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 

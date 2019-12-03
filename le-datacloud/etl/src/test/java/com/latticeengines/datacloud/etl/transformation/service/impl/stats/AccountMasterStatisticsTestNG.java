@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.stats;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.HQ_DUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
 
 import java.util.Arrays;
 import java.util.Collections;

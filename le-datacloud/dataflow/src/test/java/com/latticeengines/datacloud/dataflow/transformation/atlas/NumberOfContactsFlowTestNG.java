@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.NumberOfContactsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class NumberOfContactsFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {

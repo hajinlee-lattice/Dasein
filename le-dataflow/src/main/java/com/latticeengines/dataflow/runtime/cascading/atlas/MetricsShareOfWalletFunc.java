@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.atlas;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

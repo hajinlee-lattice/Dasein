@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.atlas;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 

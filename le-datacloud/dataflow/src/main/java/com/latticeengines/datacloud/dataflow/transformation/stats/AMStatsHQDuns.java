@@ -1,14 +1,14 @@
 package com.latticeengines.datacloud.dataflow.transformation.stats;
 
 import static com.latticeengines.datacloud.dataflow.transformation.stats.AMStatsHQDuns.BEAN_NAME;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DDUNS;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DOMAIN;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DUNS;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.GDUNS;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.STATUS_CODE;
-import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.SUBSIDIARY_INDICATOR;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.DDUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.DOMAIN;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.DUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.GDUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.HQ_DUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.STATUS_CODE;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters.SUBSIDIARY_INDICATOR;
 
 import org.springframework.stereotype.Component;
 

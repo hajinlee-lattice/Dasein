@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.cdl;
+package com.latticeengines.dataflow.runtime.cascading.atlas;
 
 import com.latticeengines.domain.exposed.cdl.scoring.RawScoreToPercentileMapper;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;

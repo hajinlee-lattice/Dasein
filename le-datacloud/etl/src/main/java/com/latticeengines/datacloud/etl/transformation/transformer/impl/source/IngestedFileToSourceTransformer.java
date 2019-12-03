@@ -1,11 +1,12 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.source;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
@@ -13,10 +14,11 @@ import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.service.impl.IngestedFileToSourceDataFlowService;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
-import com.latticeengines.domain.exposed.datacloud.dataflow.IngestedFileToSourceParameters;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.domain.exposed.datacloud.dataflow.source.IngestedFileToSourceParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.IngestedFileToSourceTransformerConfig;
 
 @Component(IngestedFileToSourceTransformer.TRANSFORMER_NAME)
 public class IngestedFileToSourceTransformer
@@ -26,7 +28,7 @@ public class IngestedFileToSourceTransformer
 
     public static final String TRANSFORMER_NAME = "ingestedFileToSourceTransformer";
 
-    @Autowired
+    @Inject
     private IngestedFileToSourceDataFlowService dataFlowService;
 
     @Override

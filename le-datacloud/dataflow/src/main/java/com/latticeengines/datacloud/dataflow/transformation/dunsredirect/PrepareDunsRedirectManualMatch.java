@@ -16,11 +16,11 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.AddFieldFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AddKeyPartitionStrategy;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ManualSeedKeyPartitionRowFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.dunsredirect.ManualSeedKeyPartitionRowFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectBookConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PrepareDunsRedirectManualMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.dunsredirect.DunsRedirectBookConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.dunsredirect.PrepareDunsRedirectManualMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 

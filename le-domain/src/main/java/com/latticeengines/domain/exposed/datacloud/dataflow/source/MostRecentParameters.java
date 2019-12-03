@@ -1,8 +1,9 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow;
+package com.latticeengines.domain.exposed.datacloud.dataflow.source;
 
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class MostRecentParameters extends TransformationFlowParameters {
     @JsonProperty("EarliestToArchive")

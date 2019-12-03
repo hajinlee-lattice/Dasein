@@ -1,8 +1,9 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow;
+package com.latticeengines.domain.exposed.datacloud.dataflow.atlas;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 
 public class ConsolidateCollectionParameters extends TransformationFlowParameters {
 

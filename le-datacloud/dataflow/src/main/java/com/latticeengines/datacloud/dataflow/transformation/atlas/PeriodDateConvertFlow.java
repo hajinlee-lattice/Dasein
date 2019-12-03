@@ -1,16 +1,17 @@
-package com.latticeengines.datacloud.dataflow.transformation;
+package com.latticeengines.datacloud.dataflow.transformation.atlas;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddDateColumnFuction;
+import com.latticeengines.dataflow.runtime.cascading.atlas.ConsolidateAddDateColumnFuction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDateConvertorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodDateConvertorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
@@ -25,7 +26,7 @@ public class PeriodDateConvertFlow extends ConfigurableFlowBase<PeriodDateConver
         PeriodDateConvertorConfig config = getTransformerConfig(parameters);
 
         Node result = addSource(parameters.getBaseTables().get(0));
-        List<FieldMetadata> fms = new ArrayList<FieldMetadata>();
+        List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(config.getTrxDateField(), String.class));
         fms.add(new FieldMetadata(config.getTrxDayPeriodField(), Integer.class));
 

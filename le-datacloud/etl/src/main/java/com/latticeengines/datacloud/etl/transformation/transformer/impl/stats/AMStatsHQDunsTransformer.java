@@ -1,10 +1,11 @@
-package com.latticeengines.datacloud.etl.transformation.transformer.impl;
+package com.latticeengines.datacloud.etl.transformation.transformer.impl.stats;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccountMasterStatisticsConfig;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.AccountMasterStatisticsConfig;
 
 @Component("amStatsHQDunsTransformer")
 public class AMStatsHQDunsTransformer

@@ -1,6 +1,8 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.atlas;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 // Description: Configuration file for NumberOfContactsFlow transformation.
 public class NumberOfContactsConfig extends TransformerConfig {

@@ -1,10 +1,10 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.propdata.dunsredirect;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseFunction;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DunsRedirectBookConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.dunsredirect.DunsRedirectBookConfig;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.FunctionCall;

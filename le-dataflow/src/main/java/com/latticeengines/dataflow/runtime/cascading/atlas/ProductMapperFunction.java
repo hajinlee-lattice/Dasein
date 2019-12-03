@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.runtime.cascading.propdata;
+package com.latticeengines.dataflow.runtime.cascading.atlas;
 
 import java.util.Arrays;
 import java.util.HashMap;

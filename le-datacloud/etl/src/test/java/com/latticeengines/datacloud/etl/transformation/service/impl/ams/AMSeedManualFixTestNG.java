@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.etl.transformation.service.impl;
+package com.latticeengines.datacloud.etl.transformation.service.impl.ams;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,22 +13,20 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedManualFixFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.ManualSeedTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class AMSeedManualFixTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class AMSeedManualFixTestNG extends PipelineTransformationTestNGBase {
 
-    GeneralSource source = new GeneralSource("ManualSeedMergedData");
+    private GeneralSource source = new GeneralSource("ManualSeedMergedData");
 
-    GeneralSource baseSource1 = new GeneralSource("ManualSeed");
-    GeneralSource baseSource2 = new GeneralSource("AmSeed");
+    private GeneralSource baseSource1 = new GeneralSource("ManualSeed");
+    private GeneralSource baseSource2 = new GeneralSource("AmSeed");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -39,21 +37,6 @@ public class AMSeedManualFixTestNG
         finish(progress);
         confirmResultFile(progress);
         cleanupProgressTables();
-    }
-
-    @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
@@ -194,13 +177,6 @@ public class AMSeedManualFixTestNG
         uploadBaseSourceData(baseSource2.getSourceName(), baseSourceVersion, columns, data);
     }
 
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
     private Object[][] expectedDataValues = {
             // Id, EmployeeTotal, Domain, DUNS, salesVolume, LE_IS_PRIMARY_DOMAIN, LE_PRIMARY_DUNS, City, IsPrimaryAccount,
             // LE_EMPLOYEE_RANGE, LE_REVENUE_RANGE, DomainSource
@@ -280,5 +256,10 @@ public class AMSeedManualFixTestNG
             rowCount++;
         }
         Assert.assertEquals(rowCount, 25);
+    }
+
+    @Override
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 }

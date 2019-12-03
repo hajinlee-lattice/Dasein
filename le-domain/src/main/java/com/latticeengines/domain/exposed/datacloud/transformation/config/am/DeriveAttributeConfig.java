@@ -1,10 +1,12 @@
-package com.latticeengines.domain.exposed.datacloud.transformation.config.impl;
+package com.latticeengines.domain.exposed.datacloud.transformation.config.am;
 
 import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TblDrivenFuncConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TblDrivenTransformerConfig;
 
 public class DeriveAttributeConfig extends TblDrivenTransformerConfig {
 
