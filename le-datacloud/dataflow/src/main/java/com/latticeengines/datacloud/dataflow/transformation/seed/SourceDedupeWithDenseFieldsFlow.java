@@ -10,17 +10,18 @@ import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AddNotNullFieldFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.DenseFieldsCountFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.seed.DenseFieldsCountFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceDedupeWithDenseFieldsTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceDedupeWithDenseFieldsConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 /**
  * A pipeline step in LatticeCacheSeed rebuild pipeline
+ * https://confluence.lattice-engines.com/display/ENG/AccountMaster+Rebuild+Pipelines#AccountMasterRebuildPipelines-LatticeCacheSeedCreation
  */
 @Component(SourceDedupeWithDenseFieldsFlow.DATAFLOW_BEAN)
-public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<SourceDedupeWithDenseFieldsTransformerConfig> {
+public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<SourceDedupeWithDenseFieldsConfig> {
 
     public static final String DATAFLOW_BEAN = "sourceDedupeWithDenseFieldsFlow";
     public static final String TRANSFORMER = "sourceDedupeWithDenseFieldsTransformer";
@@ -31,7 +32,7 @@ public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<Source
     @Override
     public Node construct(TransformationFlowParameters parameters) {
 
-        SourceDedupeWithDenseFieldsTransformerConfig config = getTransformerConfig(parameters);
+        SourceDedupeWithDenseFieldsConfig config = getTransformerConfig(parameters);
 
         Node source = addSource(parameters.getBaseTables().get(0));
         List<String> origFieldNames = source.getFieldNames();
@@ -68,7 +69,7 @@ public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<Source
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return SourceDedupeWithDenseFieldsTransformerConfig.class;
+        return SourceDedupeWithDenseFieldsConfig.class;
     }
 
     @Override

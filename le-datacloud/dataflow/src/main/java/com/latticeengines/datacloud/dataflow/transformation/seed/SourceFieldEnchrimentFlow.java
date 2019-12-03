@@ -12,7 +12,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.FieldEnrichmentFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceFieldEnrichmentTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SourceFieldEnrichmentConfig;
 
 import cascading.tuple.Fields;
 
@@ -21,7 +21,7 @@ import cascading.tuple.Fields;
  * RTSCacheSeed, etc
  */
 @Component(SourceFieldEnchrimentFlow.DATAFLOW_BEAN)
-public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldEnrichmentTransformerConfig> {
+public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldEnrichmentConfig> {
 
     public static final String DATAFLOW_BEAN = "sourceFieldEnrichmentFlow";
     public static final String TRANSFORMER = "sourceFieldEnrichmentTransformer";
@@ -29,7 +29,7 @@ public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldE
     @Override
     public Node construct(TransformationFlowParameters parameters) {
 
-        SourceFieldEnrichmentTransformerConfig config = getTransformerConfig(parameters);
+        SourceFieldEnrichmentConfig config = getTransformerConfig(parameters);
         List<String> fromFields = config.getFromFields();
         List<String> toFields = config.getToFields();
         if (CollectionUtils.isEmpty(fromFields) || CollectionUtils.isEmpty(toFields)
@@ -50,7 +50,7 @@ public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldE
 
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
-        return SourceFieldEnrichmentTransformerConfig.class;
+        return SourceFieldEnrichmentConfig.class;
     }
 
     @Override

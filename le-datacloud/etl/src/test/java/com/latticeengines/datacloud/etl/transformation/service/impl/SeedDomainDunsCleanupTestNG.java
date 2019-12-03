@@ -1,41 +1,35 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.SeedDomainDunsCleanup;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.dataflow.transformation.seed.SeedDomainDunsCleanup;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.SeedDomainDunsCleanupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.SeedDomainDunsCleanupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 
-public class SeedDomainDunsCleanupTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class SeedDomainDunsCleanupTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(SeedDomainDunsCleanupTestNG.class);
 
-    GeneralSource source = new GeneralSource("SeedCleaned");
-    GeneralSource seed = new GeneralSource("Seed");
-    GeneralSource goldenDom = new GeneralSource("GoldenDom");
-    GeneralSource goldenDuns = new GeneralSource("GoldenDuns");
-
-    ObjectMapper om = new ObjectMapper();
+    private GeneralSource source = new GeneralSource("SeedCleaned");
+    private GeneralSource seed = new GeneralSource("Seed");
+    private GeneralSource goldenDom = new GeneralSource("GoldenDom");
+    private GeneralSource goldenDuns = new GeneralSource("GoldenDuns");
 
     @Test(groups = "pipeline1")
     public void testTransformation() {
@@ -50,64 +44,43 @@ public class SeedDomainDunsCleanupTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
-    }
-
-    @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("SeedDomainDunsCleanup");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("SeedDomainDunsCleanup");
+        configuration.setVersion(targetVersion);
 
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add(seed.getSourceName());
-            baseSources.add(goldenDom.getSourceName());
-            baseSources.add(goldenDuns.getSourceName());
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(SeedDomainDunsCleanup.TRANSFORMER_NAME);
-            step1.setTargetSource(source.getSourceName());
-            String confParamStr1 = getTransformerConfig();
-            step1.setConfiguration(confParamStr1);
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(seed.getSourceName());
+        baseSources.add(goldenDom.getSourceName());
+        baseSources.add(goldenDuns.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(SeedDomainDunsCleanup.TRANSFORMER_NAME);
+        step1.setTargetSource(source.getSourceName());
+        String confParamStr1 = getTransformerConfig();
+        step1.setConfiguration(confParamStr1);
 
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
 
-            // -----------
-            configuration.setSteps(steps);
+        // -----------
+        configuration.setSteps(steps);
 
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return configuration;
     }
 
-    private String getTransformerConfig() throws JsonProcessingException {
+    private String getTransformerConfig() {
         SeedDomainDunsCleanupConfig config = new SeedDomainDunsCleanupConfig();
         config.setGoldenDomainField("Domain");
         config.setGoldenDunsField("DUNS");
         config.setSeedDomainField("Domain");
         config.setSeedDunsField("DUNS");
-        return om.writeValueAsString(config);
+        return JsonUtils.serialize(config);
     }
 
     private void prepareGoldenDom() {
@@ -169,6 +142,7 @@ public class SeedDomainDunsCleanupTestNG
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
+        // Schema ID, Domain, DUNS
         Object[][] expectedData = { //
                 { "2", "e.com", "1" }, //
                 { "7", "f.com", "1" }, //
@@ -177,31 +151,17 @@ public class SeedDomainDunsCleanupTestNG
                 { "10", "g.com", null }, //
         };
 
-        Map<Object, Object[]> map = new HashMap<>();
-        for (Object[] data : expectedData) {
-            map.put(data[0], data);
-        }
+        Map<Object, Object[]> map = Arrays.stream(expectedData).collect(Collectors.toMap(x -> (String) x[0], x -> x));
 
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            Object id = record.get("ID");
-            if (id instanceof Utf8) {
-                id = id.toString();
-            }
-            Object[] data = map.get(id);
-            Assert.assertNotNull(data);
-            Object domain = record.get("Domain");
-            if (domain instanceof Utf8) {
-                domain = domain.toString();
-            }
-            Assert.assertEquals(domain, data[1]);
-            Object duns = record.get("DUNS");
-            if (duns instanceof Utf8) {
-                duns = duns.toString();
-            }
-            Assert.assertEquals(duns, data[2]);
+            String id = record.get("ID").toString();
+            Object[] expectedRecord = map.get(id);
+            Assert.assertNotNull(expectedRecord);
+            Assert.assertTrue(isObjEquals(record.get("Domain"), expectedRecord[1]));
+            Assert.assertTrue(isObjEquals(record.get("DUNS"), expectedRecord[2]));
             rowNum++;
         }
         Assert.assertEquals(rowNum, expectedData.length);
