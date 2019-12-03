@@ -32,6 +32,7 @@ import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -56,6 +57,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -109,6 +111,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     @Inject
     private ActivityMetricsGroupService activityMetricsGroupService;
 
+    @Inject
+    private ImportWorkflowSpecService importWorkflowSpecService;
+
     @Value("${aws.customer.s3.bucket}")
     private String customerBucket;
 
@@ -119,6 +124,41 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     public boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         EntityType entityType = simpleTemplateMetadata.getEntityType();
+        S3ImportSystem websiteSystem = setupWebVisitSystems(customerSpace, entityType);
+
+        Table standardTable = SchemaRepository.instance().getSchema(websiteSystem.getSystemType(), entityType,
+                batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace()));
+
+        DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, websiteSystem,
+                standardTable);
+        setupWebVisitCatalogs(customerSpace, entityType, websiteSystem, dataFeedTask);
+        return true;
+    }
+
+    public boolean setupWebVisitProfile2(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata) {
+        Preconditions.checkNotNull(simpleTemplateMetadata);
+        EntityType entityType = simpleTemplateMetadata.getEntityType();
+        S3ImportSystem websiteSystem = setupWebVisitSystems(customerSpace, entityType);
+
+        ImportWorkflowSpec spec;
+        try {
+            spec = importWorkflowSpecService.loadSpecFromS3(websiteSystem.getSystemType().name(),
+                    entityType.getDisplayName());
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Could not create template for tenant %s, system type %s, and system object %s " +
+                            "because the Spec failed to load", customerSpace, websiteSystem.getSystemType().name(),
+                            entityType.getDisplayName()), e);
+        }
+        Table standardTable = importWorkflowSpecService.tableFromRecord(null, true, spec);
+
+        DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, websiteSystem,
+                standardTable);
+        setupWebVisitCatalogs(customerSpace, entityType, websiteSystem, dataFeedTask);
+        return true;
+    }
+
+    private S3ImportSystem setupWebVisitSystems(String customerSpace, EntityType entityType) {
         if (!EntityType.WebVisit.equals(entityType)
                 && !EntityType.WebVisitPathPattern.equals(entityType)
                 && !EntityType.WebVisitSourceMedium.equals(entityType)) {
@@ -142,9 +182,15 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             s3ImportSystemService.createS3ImportSystem(customerSpace, s3ImportSystem);
             dropBoxService.createFolder(customerSpace, systemName, null, null);
             websiteSystem = s3ImportSystemService.getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
+
+            log.debug("Successfully created S3ImportSystem for entity type {}:\n{}", entityType,
+                    JsonUtils.pprint(websiteSystem));
         }
-        Table standardTable = SchemaRepository.instance().getSchema(websiteSystem.getSystemType(), entityType,
-                batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace()));
+        return websiteSystem;
+    }
+
+    private DataFeedTask setupDataFeedTask(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
+                                           EntityType entityType, S3ImportSystem websiteSystem, Table standardTable) {
         Table templateTable = generateTemplate(standardTable, simpleTemplateMetadata);
         templateTable.setName(templateTable.getName() + System.currentTimeMillis());
         metadataProxy.createImportTable(customerSpace, templateTable.getName(), templateTable);
@@ -168,6 +214,14 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             dataFeedService.updateDataFeed(customerSpace, "", DataFeed.Status.Initialized.getName());
         }
 
+        log.debug("Successfully created DataFeedTask with FeedType {} for entity type {}",
+                dataFeedTask.getFeedType(), entityType);
+
+        return dataFeedTask;
+    }
+
+    private void setupWebVisitCatalogs(String customerSpace, EntityType entityType, S3ImportSystem websiteSystem,
+                                       DataFeedTask dataFeedTask) {
         Tenant tenant = websiteSystem.getTenant();
         Catalog pathPtnCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitPathPattern.name(), tenant);
         Catalog srcMediumCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitSourceMedium.name(), tenant);
@@ -183,9 +237,11 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             dimensions.forEach(dimensionEntityMgr::create);
             log.info("Create WebVisit stream dimensions for tenant {}. PathPatternCatalog = {}",
                     webVisitStream.getTenant().getId(), pathPtnCatalog);
-            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(tenant.getId(), webVisitStream.getName());
+            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(
+                    tenant.getId(), webVisitStream.getName());
             if (defaultGroups == null || defaultGroups.stream().anyMatch(Objects::isNull)) {
-                throw new IllegalStateException(String.format("Failed to setup default web visit metric groups for tenant %s", customerSpace));
+                throw new IllegalStateException(String.format(
+                        "Failed to setup default web visit metric groups for tenant %s", customerSpace));
             }
         } else {
             // create src medium catalog
@@ -207,7 +263,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             attachDimensionCatalog(tenant, InterfaceName.SourceMediumId.name(), srcMediumCatalog);
         }
 
-        return true;
+        log.debug("Successfully set up Catalog for entity type {}", entityType);
     }
 
     @Override
@@ -358,6 +414,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             try {
                 type = FundamentalType.fromName(fundamentalType);
             } catch (IllegalArgumentException ignored) {
+                // Ignore
             }
         }
         if (type == null) {
