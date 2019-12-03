@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -32,7 +33,7 @@ public interface SegmentService {
 
     Map<BusinessEntity, Long> updateSegmentCounts(String segmentName);
 
-    Map<String, Map<BusinessEntity, Long>> updateSegmentsCounts();
+    UpdateSegmentCountResponse updateSegmentsCounts();
 
     List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments);
 
