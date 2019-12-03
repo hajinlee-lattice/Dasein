@@ -25,7 +25,6 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
     private static final Logger log = LoggerFactory.getLogger(ProfileActivityMetricsStepBase.class);
 
     private Map<String, String> profiledTableNames = new HashMap<>();
-    private List<String> statsTableNamePrefixes = new ArrayList<>();
 
     protected abstract BusinessEntity getEntityLevel(); // Account/Contact. For constructing ActivityMetrics table name only
 
@@ -76,7 +75,6 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
             steps.add(profile(tableName));
             steps.add(bucket(profileStep, tableName, getBucketTablePrefix(servingEntity)));
             steps.add(calcStats(profileStep, bucketStep, getStatsTablePrefix(servingEntity), null));
-            statsTableNamePrefixes.add(getStatsTablePrefix(servingEntity));
             profileStep += 3;
             bucketStep += 3;
         }
@@ -98,21 +96,23 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         for (Map.Entry<String, String> entry : profiledTableNames.entrySet()) {
             BusinessEntity servingEntity = BusinessEntity.getByName(entry.getKey());
             TableRoleInCollection servingStore = servingEntity.getServingStore();
-            String tableName = entry.getValue();
-            exportTableRoleToRedshift(tableName, servingStore);
-            exportToDynamo(tableName, servingStore.getPrimaryKey().name(), null);
-            String statsTableName = constructStatsTableName(getStatsTablePrefix(servingEntity.name()));
-            log.info("Adding stats table to context: {}", statsTableName);
-            updateEntityValueMapInContext(servingEntity, STATS_TABLE_NAMES, statsTableName, String.class);
+            if (servingStore != null) {
+                String tableName = entry.getValue();
+                exportTableRoleToRedshift(tableName, servingStore);
+                exportToDynamo(tableName, servingStore.getPrimaryKey().name(), null);
+                String statsTableName = constructStatsTableName(getStatsTablePrefix(servingEntity.name()));
+                log.info("Adding stats table to context: {}", statsTableName);
+                updateEntityValueMapInContext(servingEntity, STATS_TABLE_NAMES, statsTableName, String.class);
+            }
         }
         // TODO - enrich table attrs
     }
 
     private String getStatsTablePrefix(String servingEntity) {
-        return String.format("%s%s%s", getEntityLevel(), servingEntity, "Stats");
+        return String.format("%s%s", servingEntity, "Stats");
     }
 
     private String getBucketTablePrefix(String servingEntity) {
-        return String.format("%s%s%s", getEntityLevel(), servingEntity, "Buckets");
+        return String.format("%s%s", servingEntity, "Buckets");
     }
 }
