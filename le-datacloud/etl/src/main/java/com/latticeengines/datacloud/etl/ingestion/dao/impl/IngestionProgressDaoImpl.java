@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.etl.ingestion.dao.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.CronUtils;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.dao.IngestionProgressDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -85,25 +82,6 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
             }
         }
         query.executeUpdate();
-    }
-
-    @Override
-    public boolean isIngestionTriggered(Ingestion ingestion) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<IngestionProgress> entityClz = getEntityClass();
-        String queryStr = String
-                .format("select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND StartTime >= :latestScheduledTime",
-                        entityClz.getSimpleName());
-        Query<?> query = session.createQuery(queryStr);
-        query.setParameter("ingestionId", ingestion.getPid());
-        query.setParameter("triggeredBy", PropDataConstants.SCAN_SUBMITTER);
-        Date latestScheduledTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression()).toDate();
-        query.setParameter("latestScheduledTime", latestScheduledTime);
-        if (CollectionUtils.isEmpty(query.list())) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     @SuppressWarnings("unchecked")

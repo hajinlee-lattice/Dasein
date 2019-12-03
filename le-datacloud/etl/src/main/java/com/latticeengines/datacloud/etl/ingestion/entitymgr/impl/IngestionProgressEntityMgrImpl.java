@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.dao.IngestionProgressDao;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
-import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 @Component("ingestionProgressEntityMgr")
@@ -55,12 +54,6 @@ public class IngestionProgressEntityMgrImpl implements IngestionProgressEntityMg
     @Transactional(value = "propDataManage")
     public void deleteProgressByField(Map<String, Object> fields) {
         ingestionProgressDao.deleteProgressByField(fields);
-    }
-
-    @Override
-    @Transactional(value = "propDataManage", readOnly = true)
-    public boolean isIngestionTriggered(Ingestion ingestion) {
-        return ingestionProgressDao.isIngestionTriggered(ingestion);
     }
 
     @Override
