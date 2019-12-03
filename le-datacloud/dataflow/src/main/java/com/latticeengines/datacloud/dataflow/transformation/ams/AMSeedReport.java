@@ -6,7 +6,7 @@ import com.latticeengines.datacloud.dataflow.transformation.am.AccountMasterBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.AMSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 
 @Component(AMSeedReport.DATAFLOW_BEAN_NAME)

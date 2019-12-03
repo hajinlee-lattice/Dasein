@@ -21,7 +21,7 @@ import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMLookupKeyFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.am.AMLookupKeyFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;

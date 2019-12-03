@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.dataflow.transformation.MapAttributeFlow;
+import com.latticeengines.datacloud.dataflow.transformation.am.MapAttributeFlow;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MapAttributeConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.am.MapAttributeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 

@@ -15,23 +15,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedMerged;
-import com.latticeengines.datacloud.core.source.impl.AlexaMostRecent;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.dataflow.transformation.AMSeedJunkyard;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedCleanup;
+import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedJunkyard;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedMarker;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedReport;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.AMSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
@@ -39,12 +36,8 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
     private static final Logger log = LoggerFactory.getLogger(AMSeedCleanPipelineTestNG.class);
 
     private GeneralSource source = new GeneralSource("AccountMasterSeed");
-
-    @Autowired
-    private AccountMasterSeedMerged amsMerged;
-
-    @Autowired
-    private AlexaMostRecent alexa;
+    private GeneralSource amsMerged = new GeneralSource("AccountMasterSeedMerged");
+    private GeneralSource alexa = new GeneralSource("AlexaMostRecent");
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -70,46 +63,36 @@ public class AMSeedCleanPipelineTestNG extends PipelineTransformationTestNGBase 
 
         // -----------
         TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = new ArrayList<String>();
+        List<String> baseSources = new ArrayList<>();
         baseSources.add(amsMerged.getSourceName());
         baseSources.add(alexa.getSourceName());
         step1.setBaseSources(baseSources);
         step1.setTransformer(AMSeedMarker.TRANSFORMER_NAME);
         step1.setTargetSource("AccountMasterSeedMarked");
-        String confParamStr1 = getMarkerConfig(true);
-        step1.setConfiguration(confParamStr1);
+        step1.setConfiguration(getMarkerConfig(true));
         // -----------
         TransformationStepConfig step2 = new TransformationStepConfig();
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(0);
         step2.setInputSteps(inputSteps);
         step2.setTargetSource(source.getSourceName());
         step2.setTransformer(AMSeedCleanup.TRANSFORMER_NAME);
-
-        String confParamStr2 = getCleanupConfig();
-
-        step2.setConfiguration(confParamStr2);
+        step2.setConfiguration(getCleanupConfig());
         // -----------
         TransformationStepConfig step3 = new TransformationStepConfig();
         step3.setInputSteps(inputSteps);
         step3.setTargetSource("AccountMasterSeedReport");
         step3.setTransformer(AMSeedReport.TRANSFORMER_NAME);
-
-        String confParamStr3 = getReportConfig();
-
-        step3.setConfiguration(confParamStr3);
+        step3.setConfiguration(getReportConfig());
 
         // -----------
         TransformationStepConfig step4 = new TransformationStepConfig();
         step4.setInputSteps(inputSteps);
         step4.setTargetSource("AccountMasterSeedJunkyard");
         step4.setTransformer(AMSeedJunkyard.TRANSFORMER_NAME);
-
-        String confParamStr5 = getJunkyardConfig();
-
-        step4.setConfiguration(confParamStr5);
+        step4.setConfiguration(getJunkyardConfig());
         // -----------
-        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(step1);
         steps.add(step2);
         steps.add(step3);

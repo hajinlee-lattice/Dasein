@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
-import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.DCEncodedAttr;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
-import com.latticeengines.datacloud.dataflow.transformation.AMStatsHQDuns;
+import com.latticeengines.datacloud.dataflow.transformation.stats.AMStatsHQDuns;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 

@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.ams.DomainOwnershipRebuild;
@@ -45,32 +44,28 @@ public class DomainOwnershipRebuildTestNG extends PipelineTransformationTestNGBa
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("DomainOwnershipRebuild");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("DomainOwnershipRebuild");
+        configuration.setVersion(targetVersion);
 
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<String> baseSources = new ArrayList<String>();
-            baseSources.add(ams.getSourceName());
-            step1.setBaseSources(baseSources);
-            step1.setTransformer(DomainOwnershipRebuild.TRANSFORMER_NAME);
-            String confParamStr1 = getDomOwnershipTableConfig();
-            step1.setConfiguration(confParamStr1);
-            step1.setTargetSource(source.getSourceName());
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(ams.getSourceName());
+        step1.setBaseSources(baseSources);
+        step1.setTransformer(DomainOwnershipRebuild.TRANSFORMER_NAME);
+        String confParamStr1 = getDomOwnershipTableConfig();
+        step1.setConfiguration(confParamStr1);
+        step1.setTargetSource(source.getSourceName());
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step1);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step1);
 
-            configuration.setSteps(steps);
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        configuration.setSteps(steps);
+        return configuration;
     }
 
-    private String getDomOwnershipTableConfig() throws JsonProcessingException {
+    private String getDomOwnershipTableConfig() {
         DomainOwnershipConfig conf = new DomainOwnershipConfig();
         conf.setFranchiseThreshold(3);
         conf.setMultLargeCompThreshold(500000000L);

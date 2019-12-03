@@ -15,8 +15,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
+import com.latticeengines.datacloud.dataflow.transformation.atlas.Sort;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
-import com.latticeengines.domain.exposed.datacloud.dataflow.SorterParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.SorterParameters;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 public class SortTestNG extends DataCloudDataFlowFunctionalTestNGBase {
