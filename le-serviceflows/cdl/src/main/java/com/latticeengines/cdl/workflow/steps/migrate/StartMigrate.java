@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -130,6 +131,7 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
                 putStringValueInContext(PRIMARY_IMPORT_SYSTEM, DEFAULT_SYSTEM);
             }
         }
+        saveOutputValue(WorkflowContextConstants.Outputs.IMPORT_MIGRATE_TRACKING_ID, String.valueOf(migrateTrackingPid));
         migrateTrackingProxy.updateReport(customerSpace.toString(), migrateTrackingPid, report);
     }
 
