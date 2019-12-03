@@ -35,12 +35,14 @@ import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
@@ -406,24 +408,29 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public void updateImportDataTablePolicy(String customerSpace, String tableName, RetentionPolicy retentionPolicy) {
         String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}/policy",
                 customerSpace, tableName);
-        post("updateImportDataTablePolicy", url, retentionPolicy);
+        put("updateImportDataTablePolicy", url, retentionPolicy);
     }
 
-    public void keepTableForever(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/policy/keepforever",
-                customerSpace, tableName);
-        post("keepTableForever", url, null);
+    public void keepTableForever(String customerSpace, List<String> tableNames) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies", customerSpace);
+        put("updateTableRetentionPolicies", url, getRetentionPolicyUpdateDetail(tableNames, RetentionPolicyUtil.noExpireRetentionPolicy));
     }
 
-    public void keepTableFor7Days(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/policy/keep7days",
-                customerSpace, tableName);
-        post("keepTableFor7Days", url, null);
+    private RetentionPolicyUpdateDetail getRetentionPolicyUpdateDetail(List<String> tableNames, RetentionPolicy retentionPolicy) {
+        RetentionPolicyUpdateDetail retentionPolicyUpdateDetail = new RetentionPolicyUpdateDetail();
+        retentionPolicyUpdateDetail.setRetentionPolicy(retentionPolicy);
+        retentionPolicyUpdateDetail.setTableNames(tableNames);
+        return retentionPolicyUpdateDetail;
+    }
+
+    public void keepTableFor7Days(String customerSpace, List<String> tableNames) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies", customerSpace);
+        put("updateTableRetentionPolicies", url,
+                getRetentionPolicyUpdateDetail(tableNames, RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY)));
     }
 
     public void updateTableRetentionPolicies(String customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies",
-                customerSpace);
-        post("updateTableRetentionPolicies", url, retentionPolicyUpdateDetail);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies", customerSpace);
+        put("updateTableRetentionPolicies", url, retentionPolicyUpdateDetail);
     }
 }

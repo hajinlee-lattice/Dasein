@@ -14,7 +14,6 @@ public class RetentionPolicyUpdateDetail {
     @JsonProperty("RetentionPolicy")
     private RetentionPolicy retentionPolicy;
 
-
     public RetentionPolicy getRetentionPolicy() {
         return retentionPolicy;
     }

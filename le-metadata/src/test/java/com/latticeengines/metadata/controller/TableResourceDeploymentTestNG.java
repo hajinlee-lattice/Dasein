@@ -183,11 +183,11 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_2_MONTHS");
 
-        metadataProxy.keepTableFor7Days(customerSpace1, srcTable.getName());
+        metadataProxy.keepTableFor7Days(customerSpace1, Lists.newArrayList(srcTable.getName()));
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_7_DAYS");
 
-        metadataProxy.keepTableForever(customerSpace1, srcTable.getName());
+        metadataProxy.keepTableForever(customerSpace1, Lists.newArrayList(srcTable.getName()));
         updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
         assertEquals(updatedTable2.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
 
