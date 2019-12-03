@@ -59,6 +59,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends CDLDep
         lookupIdsMap.setOrgId("Org_" + System.currentTimeMillis());
         lookupIdsMap.setOrgName(CDLExternalSystemName.Marketo + "_" + lookupIdsMap.getOrgId());
         lookupIdsMap.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdsMap.setExternalSystemName(CDLExternalSystemName.Marketo);
         LookupIdMap resultLookupIdMap = lookupIdMappingProxy.registerExternalSystem(mainCustomerSpace, lookupIdsMap);
         assertNotNull(resultLookupIdMap);
         assertNotNull(resultLookupIdMap.getId());

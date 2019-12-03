@@ -70,6 +70,9 @@ public enum LaunchState {
         case READY:
         case PENDING:
         case RUNNING:
+        case ENQUEUED:
+        case PENDING_RETRY:
+        case RETRIED:
             return Launching;
         case SKIPPED:
         case CANCELLED:
