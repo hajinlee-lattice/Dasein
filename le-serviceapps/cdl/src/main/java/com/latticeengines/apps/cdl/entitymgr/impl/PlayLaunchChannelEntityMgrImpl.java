@@ -247,10 +247,9 @@ public class PlayLaunchChannelEntityMgrImpl
             }
             verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, updatedChannel);
 
-            existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
-                    .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
-
             if (existingPlayLaunchChannel.getChannelConfig() != null) {
+                existingPlayLaunchChannel.setResetDeltaCalculationData(existingPlayLaunchChannel.getChannelConfig()
+                        .shouldResetDeltaCalculations(updatedChannel.getChannelConfig()));
                 existingPlayLaunchChannel.setChannelConfig(
                         existingPlayLaunchChannel.getChannelConfig().copyConfig(updatedChannel.getChannelConfig()));
             } else {

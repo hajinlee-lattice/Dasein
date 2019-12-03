@@ -118,7 +118,8 @@ public enum LedpCode {
     LEDP_17014("Import table metadata error! {0}"), //
     LEDP_17015("Import table data error! {0}"), //
     LEDP_17016("Failed to get data from DL!"), //
-    LEDP_17017("The id {0} is duplicated."), LEDP_17018("Entity {0} cannot apply merge rule {1}!"),
+    LEDP_17017("The id {0} is duplicated."), //
+    LEDP_17018("Entity {0} cannot apply merge rule {1}!"),
 
     // le-pls 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
@@ -163,7 +164,7 @@ public enum LedpCode {
     LEDP_18039("Salesforce URL with name {0} not found."), //
     LEDP_18040("The URL field is empty of Salesforce URL with name {0}."), //
     LEDP_18041("Failed to extract information from modelSummary file."), //
-    LEDP_18042("Failed to extract information from data-diagnostics file."), //40
+    LEDP_18042("Failed to extract information from data-diagnostics file."), // 40
     LEDP_18043("Failed to extract information from rfModel file."), //
     LEDP_18044("Failed to extract information from top predictor file."), //
     LEDP_18045("Failed to extract information from metadata-diagnostics file."), //
@@ -274,8 +275,8 @@ public enum LedpCode {
     LEDP_18150("Cannot get tenant configuration."), //
     LEDP_18151("Play not found for {0}."), //
     LEDP_18152("Failed to submit a customer report on matching issue."), //
-    LEDP_18153("Segment not defined for Rating Engine {0}."), //
-    LEDP_18154("Type not defined for Rating Engine {0}."), //
+    LEDP_18153("Segment not defined for Model {0}."), //
+    LEDP_18154("Type not defined for Model {0}."), //
     LEDP_18155("Play {0} cannot be launched since corresponding ratings engine is not active."), //
     LEDP_18156("PlayLaunch for Play {0} cannot be started since it does not have buckets specified."), //
     LEDP_18157("PlayLaunch workflow failed."), //
@@ -297,24 +298,23 @@ public enum LedpCode {
     LEDP_18171("Could not create valid session for External User {0}."), //
     LEDP_18172("Action Ids for job {0} is empty."), //
     LEDP_18173("SchemaInterpretation {0} not supported for cleanup file template!"), //
-    LEDP_18174("Cannot transition Rating Engine: {0} from {1} to {2}"), //
-    LEDP_18175("There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
+    LEDP_18174("Cannot transition Model: {0} from {1} to {2}"), //
+    LEDP_18175("There are Plays associated with the current Model {0} and thus it cannot be deleted."), //
     LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchable accounts."), //
     LEDP_18177("Websocket session {0} has NOT associated with any authentication token yet."), //
     LEDP_18178("Websocket session {0} has associated with tenant {1} and cannot associate with tenant {2}."), //
     LEDP_18179("Error finding the AI Model for {0}."), //
-    LEDP_18180(
-            "There is no active Rating Model associated with the current Rating Engine {0} and thus it cannot be activated."), //
-    LEDP_18181("The current Rating Engine {0} is not inactive thus it cannot be deleted."), //
+    LEDP_18180("There is no active Iteration associated with the current Model {0} and thus it cannot be activated."), //
+    LEDP_18181("Cannot delete the current Model {0} since it is active"), //
     LEDP_18182("Submit {0} job failed: {1}"), //
     LEDP_18183("Column name {0} has potential conflict with system defined name"), //
     LEDP_18184("Job cannot be null or incomplete"), //
     LEDP_18185("User {0} does not have the right to deactivate attribute"), //
-    LEDP_18186("No scoring iteration set for Rating Engine: {0}"), //
-    LEDP_18187("Cannot populate full play information since No Rating Engine associated with the Play: {0}"), //
+    LEDP_18186("No scoring iteration set for Model: {0}"), //
+    LEDP_18187("Cannot populate full play information since No Model associated with the Play: {0}"), //
     LEDP_18188(
             "The following field name length exceeded the limit of {0} characters. Shorten the field name to upload the file: {1}"), //
-    LEDP_18189("There are Rating Models associated with the current segment {0} and thus it cannot be deleted."), //
+    LEDP_18189("There are models associated with the current segment {0} and thus it cannot be deleted."), //
     LEDP_18190("Update Usage Attribute Config failed due to dependency check failure"), //
     LEDP_18191("Marketo Scoring setup is missing required {0}"), //
     LEDP_18192("This Model is already configured for the given Marketo Profile {0}. Please refresh the page."), //
@@ -331,35 +331,37 @@ public enum LedpCode {
     LEDP_18203("Validation fails and there are errors."), //
     LEDP_18204("User {0} does not have the right to update name/description of attribute"), //
     LEDP_18205("Unable to update PlayLaunch due to {0}"), //
-    LEDP_18206("Play validation failure: Segment is empty"), LEDP_18207(
-            "Play validation failure: Segment Name is empty"), LEDP_18208(
-                    "CSV file name validations failed: CSV injection in the file name or headers"), //
-    LEDP_18210("You do not have admin rights to setup automation on this tenant. Contact your Admin and setup your file transfers. For more information, visit <a href=\"http://help.lattice-engines.com/\">help.lattice-engines.com</a>"),
-    LEDP_18211("Unable to cancel this action: {0}"),//
-    LEDP_18212("No buckets nor launch unscored is set for play {0}, Nothing to Launch."),
-    LEDP_18213("Failed while generating playlaunch export file: {0}."),
-    LEDP_18214("Bulk scoring request exceeds the maximum number of rows on runtime, please try later."),
-    LEDP_18215("System is under maintenance, cannot submit processAnalyze job."),
-    LEDP_18216("Failed to create S3ImportSystem {0}"),
-    LEDP_18217("Current CustomerSpace is NULL!"),
-    LEDP_18218("Failed to get template preview {0}"),
-    LEDP_18219("Unable to update PlayLaunchChannel due to {0}"),
-    LEDP_18220("Play launch channel already exists for respective play {0} and system org {1}"),
-    LEDP_18221("User not found"),
-    LEDP_18222("Channel configuration destination given {0} doesn't match lookup id map destination {1}"),
-    LEDP_18223("Cannot update System Priority: {0}"),
-    LEDP_18224("AWS credentials have not been generated yet. Please ask your administrator to generate one first."),
-    LEDP_18225("Play launch channel given belongs to play: {0} and does not belong play: {1}."),
-    LEDP_18226("The input contains more than {0} fields. Please reduce the no. of {1} fields and try again"),
-    LEDP_18227("Can't get entity data from cache when cache is in build."),
-    LEDP_18228("Play Launch Channel {0} not found."),
-    LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"),
-    LEDP_18230("{0} Field Definition Request has invalid body: {1}"),
-    LEDP_18231("No attributes can be exported for export type: {0}."),
-    LEDP_18232("Expiration Date {0} for PlayLaunchChannel is greater than allowed time of {1} months."),
+    LEDP_18206("Play validation failure: Segment is empty"), //
+    LEDP_18207("Play validation failure: Segment Name is empty"), //
+    LEDP_18208("CSV file name validations failed: CSV injection in the file name or headers"), //
+    LEDP_18210(
+            "You do not have admin rights to setup automation on this tenant. Contact your Admin and setup your file transfers. For more information, visit <a href=\"http://help.lattice-engines.com/\">help.lattice-engines.com</a>"), //
+    LEDP_18211("Unable to cancel this action: {0}"), //
+    LEDP_18212("No buckets nor launch unscored is set for play {0}, Nothing to Launch."), //
+    LEDP_18213("Failed while generating playlaunch export file: {0}."), //
+    LEDP_18214("Bulk scoring request exceeds the maximum number of rows on runtime, please try later."), //
+    LEDP_18215("System is under maintenance, cannot submit processAnalyze job."), //
+    LEDP_18216("Failed to create S3ImportSystem {0}"), //
+    LEDP_18217("Current CustomerSpace is NULL!"), //
+    LEDP_18218("Failed to get template preview {0}"), //
+    LEDP_18219("Unable to update PlayLaunchChannel due to {0}"), //
+    LEDP_18220("Play launch channel already exists for respective play {0} and system org {1}"), //
+    LEDP_18221("User not found"), //
+    LEDP_18222("Channel configuration destination given {0} doesn't match lookup id map destination {1}"), //
+    LEDP_18223("Cannot update System Priority: {0}"), //
+    LEDP_18224("AWS credentials have not been generated yet. Please ask your administrator to generate one first."), //
+    LEDP_18225("Play launch channel given belongs to play: {0} and does not belong play: {1}."), //
+    LEDP_18226("The input contains more than {0} fields. Please reduce the no. of {1} fields and try again"), //
+    LEDP_18227("Can't get entity data from cache when cache is in build."), //
+    LEDP_18228("Play Launch Channel {0} not found."), //
+    LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"), //
+    LEDP_18230("{0} Field Definition Request has invalid body: {1}"), //
+    LEDP_18231("No attributes can be exported for export type: {0}."), //
+    LEDP_18232("Expiration Date {0} for PlayLaunchChannel is greater than allowed time of {1} months."), //
     LEDP_18233("Outreach connection requires {0} to be mapped"), //
-    LEDP_18234("Failed to update import system: {0}"),
-    LEDP_18235("RegisterDeleteDataTemplate is the only supported schema for delete operation with entity match tenant!"),
+    LEDP_18234("Failed to update import system: {0}"), //
+    LEDP_18235(
+            "RegisterDeleteDataTemplate is the only supported schema for delete operation with entity match tenant!"), //
     LEDP_18236("PlayLaunch id is null"), //
     LEDP_18237("Audience name {0} with Audience Id {1} can not be set in a null PlayLaunchChannel"), //
     LEDP_18238("PlayLaunch id {0} has Play null {1} and PlayLaunchChannel null {2}"), //
@@ -371,13 +373,13 @@ public enum LedpCode {
     LEDP_19003("Resource not found."), //
     LEDP_19004("External User is not allowed with Lattice Email ID."), //
     LEDP_19005("Could not validate current user as the required information is missing from Identity Provider."), //
-    LEDP_19006("Sign jwt token fail."),
-    LEDP_19007("No such jwt handler {0}."),
-    LEDP_19008("URL encode fail."),
-    LEDP_19009("No User Name key/value"),
-    LEDP_19010("No User Email key/value"),
-    LEDP_19011("No return_to key/value"),
-    LEDP_19012("No source_ref key/value "),
+    LEDP_19006("Sign jwt token fail."), //
+    LEDP_19007("No such jwt handler {0}."), //
+    LEDP_19008("URL encode fail."), //
+    LEDP_19009("No User Name key/value"), //
+    LEDP_19010("No User Email key/value"), //
+    LEDP_19011("No return_to key/value"), //
+    LEDP_19012("No source_ref key/value "), //
     LEDP_19013("Service not found."), //
     LEDP_19014("Unsupport error."), //
     LEDP_19015("Your account has been locked, please reset password."), //
@@ -675,12 +677,11 @@ public enum LedpCode {
     LEDP_31113("missing_domain", "Either email or website is required"), //
     LEDP_31114("inactive_model", "The model {0} is not active for Real time scoring"), //
     LEDP_31115("check_system_error", "Error while check system status. Cause: {0}"), //
-    LEDP_31199("missing_domain",
-            "Required field(s) are missing: {0}. In case of lead type model, " //
-                    + "make sure to specify 'Email' field and for non-lead type model " //
-                    + "specify either 'Website' or 'Domain' fields. If these fields " //
-                    + "are not specified then specify either 'CompanyName' " //
-                    + "or 'DUNS' field."), //
+    LEDP_31199("missing_domain", "Required field(s) are missing: {0}. In case of lead type model, " //
+            + "make sure to specify 'Email' field and for non-lead type model " //
+            + "specify either 'Website' or 'Domain' fields. If these fields " //
+            + "are not specified then specify either 'CompanyName' " //
+            + "or 'DUNS' field."), //
     LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     // Generic Errors
@@ -785,27 +786,27 @@ public enum LedpCode {
     LEDP_40007("Cleanup operation {0} should have attribute {1} in template!"), //
     LEDP_40008("Invoke time should between 0 and 23."), //
     LEDP_40009(
-            "RatingEngine {0} or RatingModel {1} type unsupported for modeling query generation. Customer Space {2}"), //
+            "Transaction based queries not supported for Model {0} or Iteration {1}  of type {2}. Customer Space {3}"), //
     LEDP_40010("Invalid ModelingQueryType {0}."), //
     LEDP_40011("Cross sell Repeat Purchase model {0} is missing PURCHASED_BEFORE_PERIOD configuration."), //
     LEDP_40012("Cannot model Cross-Sell AI Model {0} since no target products were defined. Customer Space {1}"), //
-    LEDP_40013("No Rating Engine provided. Customer Space {0}"), //
-    LEDP_40014("RatingModel for the Rating Engine {0} cannot be null. Customer Space {1}"), //
+    LEDP_40013("No Model provided. Customer Space {0}"), //
+    LEDP_40014("Iteration for the Model {0} cannot be null. Customer Space {1}"), //
     LEDP_40015("Cannot parse {0} to a valid starting date"), //
-    LEDP_40016("No Rating Engine with ID {0} found for Customer Space {1}"), //
+    LEDP_40016("No Model with ID {0} found for Customer Space {1}"), //
     LEDP_40017("Unsupported Modeling strategy"), //
-    LEDP_40018("Unable to submit modeling job for RatingEngine {0}, No target segment set"), //
+    LEDP_40018("Unable to submit modeling job for Model {0}, No target segment set"), //
     LEDP_40019("Unsupported Custom Event Modeling Type {0}"), //
-    LEDP_40020("Unable to find a Model Summary for the AIModel {0} of the RatingEngine {1}, Customer Space {2}"), //
+    LEDP_40020("Unable to find a Model Summary for the AI Iteration {0} of the Model {1}, Customer Space {2}"), //
     LEDP_40021("Unable to set the default model name correctly, setting it to {0}"), //
     LEDP_40022("Serving store is empty or wrong customer config leads to empty store"), //
     LEDP_40023("Wrong customer config, system can't render these attributes {0} "), //
-    LEDP_40024("Dependency detection among rating engine. {0}"), //
+    LEDP_40024("Dependency detection among model. {0}"), //
     LEDP_40025("Dependency detection among segment. {0}"), //
     LEDP_40026("invalid attribute config {0} after render"), //
     LEDP_40027("invalid attribute config {0} in DB"), //
     LEDP_40028("Cannot change job Status for ai model {0} since the current status is already terminal"), //
-    LEDP_40029("RatingModel {0} not associated with Rating Engine {1}"), //
+    LEDP_40029("Iteration {0} is not associated with Model {1}"), //
     LEDP_40030("BucketMetadata not provided for Iteration {0} while setting ScoringIteration for Model {1}"), //
     LEDP_40031("No ModelSummary for Iteration {0}, cannot set it as the ScoringIteration for Model {1}"), //
     LEDP_40032("Curated attribute validation failed due to: {0}"), //
@@ -822,47 +823,48 @@ public enum LedpCode {
     LEDP_40042("Cannot perform deletion as there are direct dependencies: {0}"), //
     LEDP_40043("S3 File missing the following required fields: {0}"), //
     LEDP_40044("Please add Attributes to your model. You can also change usage settings in Attribute Management"), //
-    LEDP_40045("Cannot count rating models coverage for segment {0}, as it doesn't exists"),
+    LEDP_40045("Cannot count rating models coverage for segment {0}, as it doesn't exists"), //
     LEDP_40046("Too few events to learn from - the model needs at least {0} successes. Try modeling on "
-            + "more products or adding more accounts to your Segment. You can also use My Data to learn more about your selling history."),
+            + "more products or adding more accounts to your Segment. You can also use My Data to learn more about your selling history."), //
     LEDP_40047("Invalid state transition from {0} to {1}"), //
-    LEDP_40048("Workflow status handler does not exist for event type {0}"),
-    LEDP_40049("Cannot create External System Authentication as LookupMap is empty"),
-    LEDP_40050("Cannot create External System Authentication as LookupMap with Id {0} doesnot exists"),
-    LEDP_40051("Cannot retrieve External System Authentication as AuthID is empty"),
-    LEDP_40052("Could not find External System Authentication ID: {0}"),
-    LEDP_40053("Unable to parse ModelSummary payload for Iteration {0} of Model {1}"),
-    LEDP_40054("We are currently experiencing heavy data loads. Please try again later."),
-    LEDP_40055("CSV file has duplicate headers! (case insensitive)"),
-    LEDP_40056("Failed to submit S3 import job, error: {0}"),
-    LEDP_40057("Detected invalid buckets: {0}"),
-    LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"),
-    LEDP_40059("{0} error when validating with input file, please reference {1} for details."),
-    LEDP_40060("Invalid business calendar"),
-    LEDP_40061("{0} is setup as your primary system and has the highest priority and cannot be modified."),
-    LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."),
-    LEDP_40063("Cannot update All System Priority, missing system: {0}."),
-    LEDP_40064("Cannot update All System Priority: {0}"),
-    LEDP_40065("Cannot create a new Campaign without a Display Name"),
-    LEDP_40066("Cannot create Import System: {0}"),
-    LEDP_40067("Cannot update Export Field Metadata Mapping as LookupMap is empty"),
-    LEDP_40068("Cannot find Export Field Metadata Service for CDL External System Name {0}."),
-    LEDP_40069("Cannot find attribute name {0} in Export Field Metadata Defaults for {1} or in serving store."),
-    LEDP_40070("Cannot restrict by account ID if no account ID is selected for this Connection"),
-    LEDP_40071("Cannot create External System Authentication, because connection with the same orgId and system type already exists"),
-    LEDP_40072("Cannot get template for task {0}, backup file {1}"),
-    LEDP_40073("Register delete data operation should have attribute {1} in template!"),
-    LEDP_40074("You can only activate {0} models at a time."),
-    LEDP_40075("{0} is setup as your primary. This cannot be changed. Don't assign the unique ID of this system to Account ID and try again."),
+    LEDP_40048("Workflow status handler does not exist for event type {0}"), //
+    LEDP_40049("Cannot create External System Authentication as LookupMap is empty"), //
+    LEDP_40050("Cannot create External System Authentication as LookupMap with Id {0} doesnot exists"), //
+    LEDP_40051("Cannot retrieve External System Authentication as AuthID is empty"), //
+    LEDP_40052("Could not find External System Authentication ID: {0}"), //
+    LEDP_40053("Unable to parse ModelSummary payload for Iteration {0} of Model {1}"), //
+    LEDP_40054("We are currently experiencing heavy data loads. Please try again later."), //
+    LEDP_40055("CSV file has duplicate headers! (case insensitive)"), //
+    LEDP_40056("Failed to submit S3 import job, error: {0}"), //
+    LEDP_40057("Detected invalid buckets: {0}"), //
+    LEDP_40058("Cannot create an iteration derived from an incomplete model. Customer Space: {0}"), //
+    LEDP_40059("{0} error when validating with input file, please reference {1} for details."), //
+    LEDP_40060("Invalid business calendar"), //
+    LEDP_40061("{0} is setup as your primary system and has the highest priority and cannot be modified."), //
+    LEDP_40062("Cannot update All System Priority cause there's {0} systems and {1} systems in update request."), //
+    LEDP_40063("Cannot update All System Priority, missing system: {0}."), //
+    LEDP_40064("Cannot update All System Priority: {0}"), //
+    LEDP_40065("Cannot create a new Campaign without a Display Name"), //
+    LEDP_40066("Cannot create Import System: {0}"), //
+    LEDP_40067("Cannot update Export Field Metadata Mapping as LookupMap is empty"), //
+    LEDP_40068("Cannot find Export Field Metadata Service for CDL External System Name {0}."), //
+    LEDP_40069("Cannot find attribute name {0} in Export Field Metadata Defaults for {1} or in serving store."), //
+    LEDP_40070("Cannot restrict by account ID if no account ID is selected for this Connection"), //
+    LEDP_40071(
+            "Cannot create External System Authentication, because connection with the same orgId and system type already exists"), //
+    LEDP_40072("Cannot get template for task {0}, backup file {1}"), //
+    LEDP_40073("Register delete data operation should have attribute {1} in template!"), //
+    LEDP_40074("You can only activate {0} models at a time."), //
+    LEDP_40075(
+            "{0} is setup as your primary. This cannot be changed. Don't assign the unique ID of this system to Account ID and try again."),
 
     // le-domain
-    LEDP_41001("PeriodName field {0} is null for record {1}."),
-    LEDP_41002("PeriodId field {0} is null for record {1}."),
+    LEDP_41001("PeriodName field {0} is null for record {1}."), //
+    LEDP_41002("PeriodId field {0} is null for record {1}."), //
     LEDP_41003("Fail to shutdown batch write executor properly"),
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
-
 
     private String message;
 
