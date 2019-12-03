@@ -651,17 +651,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
-        String systemName = EntityTypeUtils.getSystemName(feedType);
-        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
-        if (StringUtils.isNotEmpty(systemName) && entityType != null) {
-            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-            schemaTable = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType,
-                    batonService.isEntityMatchEnabled(customerSpace));
-
-        } else {
-            schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
-                    batonService.isEntityMatchEnabled(customerSpace));
-        }
+        BusinessEntity businessEntity = BusinessEntity.getByName(entity);
+        schemaTable = getSchemaTable(customerSpace, businessEntity, feedType, withoutId);
         if (dataFeedTask == null) {
             table = TableUtils.clone(schemaTable, schemaTable.getName());
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
@@ -706,6 +697,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         });
         return merged;
+    }
+
+    private Table getSchemaTable(CustomerSpace customerSpace, BusinessEntity entity, String feedType, boolean withoutId) {
+        String systemName = EntityTypeUtils.getSystemName(feedType);
+        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
+        Table schemaTable;
+        boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
+        if (StringUtils.isNotEmpty(systemName) && entityType != null) {
+            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+            schemaTable = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType, enableEntityMatch);
+        } else {
+            schemaTable = SchemaRepository.instance().getSchema(entity, true, withoutId, enableEntityMatch);
+        }
+        return schemaTable;
     }
 
     private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity, String feedType,
@@ -763,17 +768,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        String systemName = EntityTypeUtils.getSystemName(feedType);
-        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
-        Table schemaTable;
-        if (StringUtils.isNotEmpty(systemName) && entityType != null) {
-            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-            schemaTable = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType,
-                    enableEntityMatch);
-        } else {
-            schemaTable = SchemaRepository.instance().getSchema(entity, true, withoutId, enableEntityMatch);
-        }
+        Table schemaTable = getSchemaTable(customerSpace, entity, feedType, withoutId);
         Table standardTable = templateTable == null ? schemaTable : templateTable;
         Set<String> reservedName = standardTable.getAttributes().stream().map(Attribute::getName)
                 .collect(Collectors.toSet());
