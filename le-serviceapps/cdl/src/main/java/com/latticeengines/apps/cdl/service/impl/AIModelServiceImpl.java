@@ -248,8 +248,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     ratingEngine, aiModel, modelingQueryType, strategy.getName(), maxPeriod, attributeMetadata);
             return ratingQueryBuilder.build();
         } else {
-            throw new LedpException(LedpCode.LEDP_40009,
-                    new String[] { ratingEngine.getId(), aiModel.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40009, new String[] { ratingEngine.getId(), aiModel.getId(),
+                    ratingEngine.getType().name(), customerSpace });
         }
     }
 

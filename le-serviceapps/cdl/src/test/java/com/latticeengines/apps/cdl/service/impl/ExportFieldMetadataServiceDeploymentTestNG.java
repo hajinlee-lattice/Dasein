@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
@@ -101,10 +101,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     private List<ExportFieldMetadataDefaults> defaultS3ExportFields;
     private List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
     private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
-
-    private Map<CDLExternalSystemName, List<ExportFieldMetadataDefaults>> defaultExportFieldsMap;
-    private List<CDLExternalSystemName> EXTERNAL_SYSTEM_NAMES = Arrays.asList(CDLExternalSystemName.Marketo,
-            CDLExternalSystemName.AWS_S3, CDLExternalSystemName.LinkedIn, CDLExternalSystemName.Facebook);
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -307,11 +303,12 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         assertEquals(columnMetadata.size(), 0);
 
     }
-    @Test(groups = "deployment-app")
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testFacebookLaunch")
     public void testGoogleLaunch() {
         registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.GoogleAds, "GoogleAds");
 
-        createPlayLaunchChannel(new LinkedInChannelConfig(), lookupIdMap);
+        createPlayLaunchChannel(new GoogleChannelConfig(), lookupIdMap);
 
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
@@ -319,8 +316,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         log.info(JsonUtils.serialize(columnMetadata));
 
         assertEquals(columnMetadata.size(), 6);
-
-        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
