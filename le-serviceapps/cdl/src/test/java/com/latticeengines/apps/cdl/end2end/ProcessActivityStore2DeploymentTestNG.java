@@ -27,7 +27,10 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
-public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
+// TODO(jwinter): If we are going to keep both ProcessActivityStore2DeploymentTestNG and
+//     ProcessActivityStoreDeploymentTestNG, the common code should be consolidated into
+//     ProcessActivityStoreDeploymentTestNGBase.
+public class ProcessActivityStore2DeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
@@ -48,12 +51,13 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
+    // End-to-end test for Activity Store with Import Workflow 2.0.
     @Test(groups = "end2end")
-    private void test() throws Exception {
+    private void test2() throws Exception {
         resumeCheckpoint(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT);
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        setupTemplates();
+        setupTemplates2();
         mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 1,
                 generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
         Thread.sleep(2000);
@@ -72,7 +76,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     }
 
     @Test(groups = "end2end", dependsOnMethods = "test", enabled = false)
-    private void testRematch() throws Exception {
+    private void test2Rematch() throws Exception {
         importSmallWebVisitFile();
 
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
@@ -86,7 +90,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     }
 
     @Test(groups = "end2end", dependsOnMethods = "test", enabled = false)
-    private void testReplace() throws Exception {
+    private void test2Replace() throws Exception {
         importSmallWebVisitFile();
         createReplaceWebVisitAction();
         processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
@@ -112,18 +116,18 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
-    private void setupTemplates() {
+    private void setupTemplates2() {
         // setup webvisit template one by one for now, batch setup sometimes having
         // problem
         SimpleTemplateMetadata webVisit = new SimpleTemplateMetadata();
         webVisit.setEntityType(EntityType.WebVisit);
-        cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(webVisit));
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(webVisit));
         SimpleTemplateMetadata ptn = new SimpleTemplateMetadata();
         ptn.setEntityType(EntityType.WebVisitPathPattern);
-        cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(ptn));
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(ptn));
         SimpleTemplateMetadata sm = new SimpleTemplateMetadata();
         sm.setEntityType(EntityType.WebVisitSourceMedium);
-        cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(sm));
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(sm));
     }
 
 }
