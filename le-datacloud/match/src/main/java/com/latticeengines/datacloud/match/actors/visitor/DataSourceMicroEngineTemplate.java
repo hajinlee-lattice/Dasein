@@ -1,11 +1,12 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
-import java.util.Collections;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
@@ -14,10 +15,9 @@ import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.template.ProxyMicroEngineTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
-import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import akka.actor.ActorRef;
 
@@ -57,6 +57,10 @@ public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperA
     @Autowired
     @Qualifier("matchGuideBook")
     protected MatchGuideBook guideBook;
+
+    @Inject
+    @Lazy
+    private MatchMetricService metricService;
 
     @Override
     public GuideBook getGuideBook() {
@@ -104,10 +108,7 @@ public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperA
     protected void writeVisitingHistory(VisitingHistory history) {
         try {
             history.setActorSystemMode(matchActorSystem.isBatchMode() ? "Batch" : "Realtime");
-            MeasurementMessage<VisitingHistory> message = new MeasurementMessage<>();
-            message.setMeasurements(Collections.singletonList(history));
-            message.setMetricDB(MetricDB.LDC_Match);
-            matchActorSystem.getMetricActor().tell(message, null);
+            metricService.recordActorVisit(history);
         } catch (Exception e) {
             log.warn("Failed to extract output metric.");
         }
