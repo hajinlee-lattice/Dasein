@@ -402,7 +402,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public void updateDataTablePolicy(String customerSpace, String tableName, RetentionPolicy retentionPolicy) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/policy",
                 customerSpace, tableName);
-        post("updateDataTablePolicy", url, retentionPolicy);
+        put("updateDataTablePolicy", url, retentionPolicy);
     }
 
     public void updateImportDataTablePolicy(String customerSpace, String tableName, RetentionPolicy retentionPolicy) {

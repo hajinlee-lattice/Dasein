@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -87,7 +88,7 @@ public class ImportTableResource {
         return tableResourceHelper.deleteImportTableAndCleanup(customerSpace, tableName);
     }
 
-    @PostMapping(value = "/importtables/{tableName}/policy")
+    @PutMapping(value = "/importtables/{tableName}/policy")
     @ResponseBody
     @ApiOperation(value = "Update import table retention policy")
     public Boolean updateTableRetentionPolicy(@PathVariable String customerSpace, @PathVariable(value = "tableName") String tableName,
