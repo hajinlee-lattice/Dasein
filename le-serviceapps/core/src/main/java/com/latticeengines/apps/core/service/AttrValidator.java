@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.ImpactWarnings;
@@ -48,7 +49,7 @@ public abstract class AttrValidator {
         ImpactWarnings warning = attrConfig.getImpactWarnings();
         if (warning == null) {
             warning = new ImpactWarnings();
-            warning.getWarnings().put(warningType, new ArrayList<>());
+            warning.getWarnings().put(warningType, new CopyOnWriteArrayList<>());
             warning.getWarnings().get(warningType).add(message);
             attrConfig.setImpactWarnings(warning);
         } else {
@@ -57,7 +58,7 @@ public abstract class AttrValidator {
                     warning.getWarnings().get(warningType).add(message);
                 }
             } else {
-                warning.getWarnings().put(warningType, new ArrayList<>());
+                warning.getWarnings().put(warningType, new CopyOnWriteArrayList<>());
                 warning.getWarnings().get(warningType).add(message);
             }
         }
