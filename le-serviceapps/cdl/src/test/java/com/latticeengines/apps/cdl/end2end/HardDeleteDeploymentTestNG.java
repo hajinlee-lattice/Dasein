@@ -28,6 +28,8 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -85,6 +87,8 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
                 EntityMatchEnvironment.SERVING, false);
         Assert.assertEquals(entityMatchVersion.getNextVersion(), entityMatchVersionAfterPA.getCurrentVersion());
         log.info("after PA, entityMatchVersion is {}.", entityMatchVersion);
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
+        verifyServingStoreVersion(activeVersion, entityMatchVersion.getNextVersion());
         verifyHardDelete();
     }
 
@@ -170,6 +174,12 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     protected void importData() throws Exception {
         mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 1, "DefaultSystem_ContactData");
         Thread.sleep(2000);
+    }
+
+    private void verifyServingStoreVersion(DataCollection.Version version, int currentVersion) {
+        DataCollectionStatus dataCollectionStatus = dataCollectionProxy
+                .getOrCreateDataCollectionStatus(mainTestTenant.getId(), version);
+        Assert.assertEquals(dataCollectionStatus.getServingStoreVersion(), currentVersion);
     }
 
 }
