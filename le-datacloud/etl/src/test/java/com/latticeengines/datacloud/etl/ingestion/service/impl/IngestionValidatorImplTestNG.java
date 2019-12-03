@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -14,15 +15,11 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CronUtils;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
-import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionValidator;
 import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
-import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
-import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
@@ -35,9 +32,6 @@ public class IngestionValidatorImplTestNG extends DataCloudEtlFunctionalTestNGBa
 
     @Inject
     private IngestionEntityMgr ingestionEntityMgr;
-
-    @Inject
-    private IngestionProgressEntityMgr ingestionProgressEntityMgr;
 
     private Ingestion ingestion;
 
@@ -75,7 +69,7 @@ public class IngestionValidatorImplTestNG extends DataCloudEtlFunctionalTestNGBa
         Date currentTime = new Date();
         log.info("Generated cron expression: {}; Current time: {}, Latest scheduled time: {}",
                 ingestion.getCronExpression(), currentTime, latestScheduledTime);
-        // No any triggered progress, ingestion should be triggered
+        // No logged trigger time, ingestion should be triggered
         Assert.assertEquals(true, ingestionValidator.isIngestionTriggered(ingestion));
 
         // Insert a progress to DB with start time equal to latestScheduledTime,
@@ -84,17 +78,9 @@ public class IngestionValidatorImplTestNG extends DataCloudEtlFunctionalTestNGBa
         // called again, CronUtils.getPreviousFireTime returns next scheduled
         // time. Add retry for this test to minimize the chance to hit the
         // corner case.
-        IngestionProgress progress = new IngestionProgress();
-        progress.setIngestion(ingestion);
-        progress.setSource("");
-        progress.setDestination("");
-        progress.setHdfsPod("");
-        progress.setStatus(ProgressStatus.NEW);
-        progress.setStartTime(latestScheduledTime);
-        progress.setLatestStatusUpdate(latestScheduledTime);
-        progress.setTriggeredBy(PropDataConstants.SCAN_SUBMITTER);
-        progress.setRetries(0);
-        ingestionProgressEntityMgr.saveProgress(progress);
+        ingestionEntityMgr.logTriggerTime(Arrays.asList(ingestion), latestScheduledTime);
+        Assert.assertEquals(false, ingestionValidator.isIngestionTriggered(ingestion));
+        ingestionEntityMgr.logTriggerTime(Arrays.asList(ingestion), new Date());
         Assert.assertEquals(false, ingestionValidator.isIngestionTriggered(ingestion));
 
         // Wait for (intervalInSec + 1) seconds, CronUtils.getPreviousFireTime

@@ -2,9 +2,11 @@ package com.latticeengines.datacloudapi.engine.ingestion.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -168,14 +170,16 @@ public class IngestionServiceImpl implements IngestionService {
     private void ingestAll() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
         List<IngestionProgress> progresses = new ArrayList<>();
-        List<String> triggeredIngestions = new ArrayList<>();
+        List<Ingestion> triggeredIngestions = new ArrayList<>();
         for (Ingestion ingestion : ingestions) {
             if (ingestionValidator.isIngestionTriggered(ingestion)) {
-                triggeredIngestions.add(ingestion.getIngestionName());
+                triggeredIngestions.add(ingestion);
                 progresses.addAll(createDraftProgresses(ingestion));
             }
         }
-        log.info("Triggered ingestions: " + String.join(",", triggeredIngestions));
+        ingestionEntityMgr.logTriggerTime(triggeredIngestions, new Date());
+        log.info("Triggered ingestions: "
+                + triggeredIngestions.stream().map(Ingestion::getIngestionName).collect(Collectors.joining(",")));
         progresses = ingestionValidator.cleanupDuplicateProgresses(progresses);
         ingestionProgressService.saveProgresses(progresses);
     }

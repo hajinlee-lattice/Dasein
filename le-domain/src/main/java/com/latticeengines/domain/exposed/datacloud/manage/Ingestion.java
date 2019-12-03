@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.manage;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Access;
@@ -87,6 +88,10 @@ public class Ingestion implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "IngestionType", nullable = false, length = 100)
     private IngestionType ingestionType;
+
+    // Latest trigger time of the ingestion
+    @Column(name = "LatestTriggerTime")
+    private Date latestTriggerTime;
 
     @Transient
     private ProviderConfiguration providerConfiguration;
@@ -176,6 +181,16 @@ public class Ingestion implements HasPid, Serializable {
     @JsonProperty("IngestionType")
     public void setIngestionType(IngestionType ingestionType) {
         this.ingestionType = ingestionType;
+    }
+
+    @JsonProperty("LatestTriggerTime")
+    public Date getLatestTriggerTime() {
+        return latestTriggerTime;
+    }
+
+    @JsonProperty("LatestTriggerTime")
+    public void setLatestTriggerTime(Date latestTriggerTime) {
+        this.latestTriggerTime = latestTriggerTime;
     }
 
     @JsonIgnore

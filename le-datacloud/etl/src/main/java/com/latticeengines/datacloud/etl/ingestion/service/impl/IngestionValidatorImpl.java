@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
@@ -63,10 +64,15 @@ public class IngestionValidatorImpl implements IngestionValidator {
         if (ingestion.getIngestionType() == Ingestion.IngestionType.PATCH_BOOK) {
             return false;
         }
-        if (StringUtils.isNotBlank(ingestion.getCronExpression())) {
-            return ingestionProgressEntityMgr.isIngestionTriggered(ingestion);
+        if (StringUtils.isBlank(ingestion.getCronExpression()) || ingestion.getLatestTriggerTime() == null) {
+            return true;
         }
-        return true;
+        Date previousFireTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression()).toDate();
+        if (ingestion.getLatestTriggerTime().compareTo(previousFireTime) >= 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override

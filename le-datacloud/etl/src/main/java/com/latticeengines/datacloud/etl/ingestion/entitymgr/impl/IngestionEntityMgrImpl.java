@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.etl.ingestion.entitymgr.impl;
 
+import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 @Component("ingestionEntityMgr")
 public class IngestionEntityMgrImpl implements IngestionEntityMgr {
 
-    @Autowired
+    @Inject
     private IngestionDao ingestionDao;
 
     @Override
@@ -38,5 +40,14 @@ public class IngestionEntityMgrImpl implements IngestionEntityMgr {
     @Transactional(value = "propDataManage")
     public void delete(Ingestion ingestion) {
         ingestionDao.delete(ingestion);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public void logTriggerTime(List<Ingestion> ingestions, Date triggerTime) {
+        ingestions.forEach(ingestion -> {
+            ingestion.setLatestTriggerTime(triggerTime);
+            ingestionDao.update(ingestion);
+        });
     }
 }
