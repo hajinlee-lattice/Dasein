@@ -7,7 +7,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -25,9 +24,6 @@ import com.latticeengines.workflow.listener.LEJobListener;
 public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(DeltaCampaignLaunchWorkflowListener.class);
-
-    @Inject
-    private Configuration yarnConfiguration;
 
     @Inject
     private PlayProxy playProxy;

@@ -48,10 +48,6 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     private static final String CSV = "csv";
 
-    private static final String ADD = "add";
-
-    private static final String DEL = "del";
-
     @Value("${cdl.atlas.export.dropfolder.tag}")
     private String expire30dTag;
 
@@ -87,11 +83,11 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         }
 
         if (createAddCsvDataFrame) {
-            exportFiles.put(ADD, getListObjectFromContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES,
-                    String.class));
+            exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.ADD, getListObjectFromContext(
+                    DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, String.class));
         }
         if (createDeleteCsvDataFrame) {
-            exportFiles.put(DEL, getListObjectFromContext(
+            exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.DEL, getListObjectFromContext(
                     DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, String.class));
         }
         log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
@@ -130,6 +126,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
             });
         }
         log.info("After processing, Uploading all HDFS files to S3. {}", exportFiles);
+        putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_AND_DELETE_S3_EXPORT_FILES, exportFiles);
         log.info("Uploaded S3 Files. {}", s3ExportFilePaths);
 
     }
@@ -150,12 +147,12 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         message.setEntityName(PlayLaunch.class.getSimpleName());
         message.setExternalSystemId(lookupIdMap.getOrgId());
         if (createAddCsvDataFrame) {
-            String sourceFile = exportFiles.get(ADD).stream()
+            String sourceFile = exportFiles.get(DeltaCampaignLaunchWorkflowConfiguration.ADD).stream()
                     .filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst().get();
             message.setSourceFile(sourceFile.substring(sourceFile.indexOf("dropfolder")));
         }
         if (createDeleteCsvDataFrame) {
-            String deleteFile = exportFiles.get(DEL).stream()
+            String deleteFile = exportFiles.get(DeltaCampaignLaunchWorkflowConfiguration.DEL).stream()
                     .filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst().get();
             message.setDeleteFile(deleteFile.substring(deleteFile.indexOf("dropfolder")));
         }
