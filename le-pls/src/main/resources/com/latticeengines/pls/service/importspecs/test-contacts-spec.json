@@ -18,7 +18,7 @@
                     "None"
                 ],
                 "logicalDataType": "Id",
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null
             }
@@ -38,7 +38,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null,
                 "subcategory": "Account Information"
@@ -55,7 +55,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null,
                 "subcategory": "Account Information"
@@ -72,7 +72,7 @@
                     "Model"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null,
                 "subcategory": "Account Information"
@@ -90,7 +90,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "email",
+                "fundamentalType": "EMAIL",
                 "statisticalType": "nominal",
                 "category": null
             }
@@ -108,7 +108,7 @@
                     "ModelAndAllInsights"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": "nominal",
                 "subcategory": "Account Information"
             },
@@ -124,7 +124,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null
             },
@@ -140,7 +140,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "boolean",
+                "fundamentalType": "BOOLEAN",
                 "statisticalType": null,
                 "category": null
             },
@@ -156,7 +156,7 @@
                     "None"
                 ],
                 "logicalDataType": "Date",
-                "fundamentalType": "date",
+                "fundamentalType": "DATE",
                 "statisticalType": null,
                 "category": null
             },
@@ -173,7 +173,7 @@
                     "None"
                 ],
                 "logicalDataType": "Date",
-                "fundamentalType": "date",
+                "fundamentalType": "DATE",
                 "statisticalType": null,
                 "category": null
             }
@@ -193,7 +193,7 @@
                     "None"
                 ],
                 "logicalDataType": "Id",
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null
             }
@@ -212,7 +212,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": "nominal",
                 "category": null
             },
@@ -230,7 +230,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null
             },
@@ -247,7 +247,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null
             },
@@ -264,7 +264,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null
             },
@@ -285,7 +285,7 @@
                     "None"
                 ],
                 "logicalDataType": null,
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": null,
                 "category": null
             }
