@@ -97,7 +97,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         if (belongsToUpdate(seq)) {
-            update = shouldUpdate(step);
             if (!update) {
                 log.info(msg + ", because not in update mode.");
                 return true;
@@ -105,7 +104,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         if (belongsToRebuild(seq)) {
-            rebuild = shouldRebuild(step);
             if (!rebuild) {
                 log.info(msg + ", because not in rebuild mode.");
                 return true;
@@ -113,7 +111,6 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
 
         if (isResetStep(step)) {
-            reset = shouldReset(step);
             if (!reset) {
                 log.info(msg + ", because not in reset mode.");
                 return true;
