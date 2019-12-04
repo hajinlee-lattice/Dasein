@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.serv
 public class CatalogFileValidationService extends InputFileValidationService<CatalogFileValidationConfiguration>{
     private static Logger log = LoggerFactory.getLogger(CatalogFileValidationService.class);
 
-    private static final Pattern PATH_PATTERN = Pattern.compile("^(/[-\\w:@&?=+,.!/~*'%$_;\\(\\)]*)?$");
+    private static final Pattern PATH_PATTERN = Pattern.compile("^([-\\w:@&?=+,.!/~*'%$_;\\(\\)]*)?$");
 
     @Override
     public EntityValidationSummary validate(CatalogFileValidationConfiguration catalogFileValidationServiceConfiguration,
