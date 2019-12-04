@@ -13,8 +13,12 @@ public interface CollectionRequestRepository extends BaseJpaRepository<Collectio
 
     List<CollectionRequest> findByVendorAndDomainIn(String vendor, Collection<String> domains);
 
-    List<CollectionRequest> findByVendorAndPickupWorkerInAndStatusNotIn(String vendor,
-            Collection<String> pickupWorkers, Collection<String> statuses);
+    List<CollectionRequest> findByVendorAndStatusIn(String vendor,
+                                                    Collection<String> statuses);
+
+    List<CollectionRequest> findByVendorAndStatusInAndPickupWorkerNotIn(String vendor,
+                                                                        Collection<String> statuses,
+                                                                        Collection<String> pickupWorkers);
 
     List<CollectionRequest> findByPickupWorker(String pickupWorker);
 
