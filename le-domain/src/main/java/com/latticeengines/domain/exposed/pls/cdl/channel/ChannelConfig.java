@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
         @Type(value = LinkedInChannelConfig.class, name = "linkedin"), //
         @Type(value = FacebookChannelConfig.class, name = "facebook"), //
         @Type(value = OutreachChannelConfig.class, name = "outreach"), //
-        @Type(value = GoogleChannelConfig.class, name = "google") //
+        @Type(value = GoogleChannelConfig.class, name = "googleads") //
 })
 public interface ChannelConfig {
 
