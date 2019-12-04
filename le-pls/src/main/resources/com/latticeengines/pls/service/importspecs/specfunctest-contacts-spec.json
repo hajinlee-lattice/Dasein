@@ -14,7 +14,7 @@
                 ],
                 "required": false,
                 "logicalDataType": "Id",
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "approvedUsage": [
                     "None"
                 ]

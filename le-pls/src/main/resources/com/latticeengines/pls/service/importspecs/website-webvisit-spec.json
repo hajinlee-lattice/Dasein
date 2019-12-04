@@ -15,7 +15,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "WebVisitDate",
@@ -30,7 +30,7 @@
                     "None"
                 ],
                 "logicalDataType": "Date",
-                "fundamentalType": "year"
+                "fundamentalType": "YEAR"
             },
             {
                 "fieldName": "UserId",
@@ -44,7 +44,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "SourceMedium",
@@ -57,7 +57,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "CompanyName",
@@ -71,7 +71,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "Website",
@@ -85,7 +85,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha",
+                "fundamentalType": "ALPHA",
                 "statisticalType": "nominal"
             },
             {
@@ -100,7 +100,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "State",
@@ -118,7 +118,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "Country",
@@ -132,7 +132,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "PostalCode",
@@ -150,7 +150,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
 
             },
             {
@@ -165,7 +165,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             }
         ],
         "Custom Fields": []

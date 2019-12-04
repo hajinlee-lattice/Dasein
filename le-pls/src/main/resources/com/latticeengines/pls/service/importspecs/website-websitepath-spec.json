@@ -15,7 +15,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             },
             {
                 "fieldName": "PathPattern",
@@ -29,7 +29,7 @@
                 "approvedUsage": [
                     "None"
                 ],
-                "fundamentalType": "alpha"
+                "fundamentalType": "ALPHA"
             }
         ],
         "Custom Fields": []
