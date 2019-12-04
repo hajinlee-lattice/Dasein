@@ -1636,7 +1636,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.WebVisitDate) //
                 .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_YEAR) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .build();
     }
 
