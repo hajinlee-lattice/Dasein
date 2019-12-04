@@ -223,7 +223,7 @@ public class BuildRawActivityStream extends BaseMergeImports<ProcessActivityStre
             // contact match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
                     importTableColumns, getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
-                    null, isRematchMode);
+                    null, isRematchMode, false);
         } else if (stream.getMatchEntities().contains(Account.name())) {
             // account match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(),
