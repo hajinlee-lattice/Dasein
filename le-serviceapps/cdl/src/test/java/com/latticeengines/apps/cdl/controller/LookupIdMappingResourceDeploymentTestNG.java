@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
@@ -24,6 +25,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     private String orgId = "Org_" + System.currentTimeMillis();
     private String orgName = "Dummy name";
     private CDLExternalSystemType externalSystemType = CDLExternalSystemType.CRM;
+    private CDLExternalSystemName externalSystemName = CDLExternalSystemName.Salesforce;
     private String configId = null;
 
     @BeforeClass(groups = "deployment-app")
@@ -46,6 +48,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
         lookupIdsMap.setOrgId(orgId);
         lookupIdsMap.setOrgName(orgName);
         lookupIdsMap.setExternalSystemType(externalSystemType);
+        lookupIdsMap.setExternalSystemName(externalSystemName);
 
         LookupIdMap resultLookupIdMap = lookupIdMappingProxy.registerExternalSystem(mainCustomerSpace, lookupIdsMap);
         Assert.assertNotNull(resultLookupIdMap);
@@ -114,6 +117,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
         lookupIdsMap.setOrgId(orgId);
         lookupIdsMap.setOrgName(orgName);
         lookupIdsMap.setExternalSystemType(externalSystemType);
+        lookupIdsMap.setExternalSystemName(externalSystemName);
 
         lookupIdMappingProxy.deregisterExternalSystem(mainCustomerSpace, lookupIdsMap);
 
