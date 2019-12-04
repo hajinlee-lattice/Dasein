@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.pls.{DeltaCampaignLaunchSparkContext, R
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
-import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_date, from_unixtime}
+import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_timestamp, from_unixtime}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.asc
@@ -341,8 +341,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
   }
   
   private def transformFromTimestampToDate(orderedRec: DataFrame): DataFrame = {
-    return orderedRec.withColumn("LAUNCH_DATE_DATE",  to_date(from_unixtime(col("LAUNCH_DATE")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
-                     .withColumn("LAST_UPDATED_TIMESTAMP_DATE", to_date(from_unixtime(col("LAST_UPDATED_TIMESTAMP")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
+    return orderedRec.withColumn("LAUNCH_DATE_DATE",  to_timestamp(from_unixtime(col("LAUNCH_DATE")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
+                     .withColumn("LAST_UPDATED_TIMESTAMP_DATE", to_timestamp(from_unixtime(col("LAST_UPDATED_TIMESTAMP")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
                      .drop("LAUNCH_DATE") //
                      .drop("LAST_UPDATED_TIMESTAMP") //
                      .withColumnRenamed("LAUNCH_DATE_DATE", "LAUNCH_DATE") //
