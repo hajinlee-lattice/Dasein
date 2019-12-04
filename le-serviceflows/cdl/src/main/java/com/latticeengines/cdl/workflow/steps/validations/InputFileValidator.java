@@ -59,6 +59,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         }
         List<String> pathList = eaiImportJobDetail.getPathDetail();
         List<String> processedRecords = eaiImportJobDetail.getPRDetail();
+        long totalRows = eaiImportJobDetail.getTotalRows();
         pathList = pathList == null ? null : pathList.stream().filter(StringUtils::isNotBlank).map(path -> {
             int index = path.indexOf("/Pods/");
             path = index > 0 ? path.substring(index) : path;
@@ -78,7 +79,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         EntityValidationSummary entityValidationSummary = null;
         long errorLineInValidationStep;
         InputFileValidationConfiguration fileConfiguration = generateConfiguration(entity, pathList,
-                enableEntityMatch, enableEntityMatchGA);
+                enableEntityMatch, enableEntityMatchGA, totalRows);
         if (fileConfiguration == null) {
             log.info(String.format(
                     "skip validation as file configuration is null, the validation for this file with %s waiting to be implemented.",
@@ -103,26 +104,32 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         if (errorLineInValidationStep != 0 && BusinessEntity.Product.equals(entity)) {
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
             totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
-            getJson().put(entity.toString(), eaiImportJobDetail.getTotalRows())
-                            .put("total_rows", eaiImportJobDetail.getTotalRows())
+            getJson().put(entity.toString(), totalRows)
+                            .put("total_rows", totalRows)
                             .put("ignored_rows", 0L)
                             .put("imported_rows", 0L)
                             .put("deduped_rows", 0L)
                             .putPOJO("product_summary", entityValidationSummary).put("total_failed_rows",
                     totalFailed);
+        } else if (BusinessEntity.Catalog.equals(entity) && eaiImportJobDetail.getTotalRows() > 10L) {
+            getJson().put(entity.toString(), totalRows)
+                    .put("total_rows", totalRows)
+                    .put("ignored_rows", 0L)
+                    .put("imported_rows", 0L)
+                    .put("deduped_rows", 0L)
+                    .put("total_failed_rows", totalRows);
         } else {
             totalFailed += eaiImportJobDetail.getIgnoredRows() == null ? 0L : eaiImportJobDetail.getIgnoredRows();
             totalFailed += eaiImportJobDetail.getDedupedRows() == null ? 0L : eaiImportJobDetail.getDedupedRows();
             getJson().put(entity.toString(), eaiImportJobDetail.getProcessedRecords())
-                    .put("total_rows", eaiImportJobDetail.getTotalRows())
+                    .put("total_rows", totalRows)
                     .put("ignored_rows", eaiImportJobDetail.getIgnoredRows())
                     .put("imported_rows", eaiImportJobDetail.getProcessedRecords())
                     .put("deduped_rows", eaiImportJobDetail.getDedupedRows()).put("total_failed_rows", totalFailed);
         }
         super.execute();
         // make sure report first, then fail work flow if necessary
-        failWorkflowIfNeeded(entity, errorLineInValidationStep, totalFailed, eaiImportJobDetail.getProcessedRecords()
-                , entityValidationSummary);
+        failWorkflowIfNeeded(entity, errorLineInValidationStep, totalFailed, totalRows, entityValidationSummary);
     }
 
     private void failWorkflowIfNeeded(BusinessEntity entity, long errorLineInValidationStep, long totalFailed,
@@ -135,7 +142,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
-        if (totalRows > 10 && BusinessEntity.Catalog.equals(entity)) {
+        if (totalRows > 10L && BusinessEntity.Catalog.equals(entity)) {
             String errorMessage = String.format("%s exceeds platform Limit - Please retry with no more than 10 path " +
                     "patterns", String.valueOf(totalRows));
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
@@ -144,13 +151,13 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
     }
 
     private String generateStatisticsForProduct(ProductValidationSummary summary) {
-        Integer missingBundleInUse = summary.getMissingBundleInUse(), bundleWithDiffSku = summary.getDifferentSKU();
+        int missingBundleInUse = summary.getMissingBundleInUse(), bundleWithDiffSku = summary.getDifferentSKU();
         StringBuilder statistics = new StringBuilder();
-        if (missingBundleInUse != null) {
+        if (missingBundleInUse != 0) {
             statistics.append(String.format("%s missing product bundles in use (this import will " +
                     "completely replace the previous one), ", String.valueOf(missingBundleInUse)));
         }
-        if (bundleWithDiffSku != null) {
+        if (bundleWithDiffSku != 0) {
             statistics.append(String.format("%s product bundle has different product SKUs. Dependant models will " +
                     "need to be remodelled to get accurate scores.", String.valueOf(bundleWithDiffSku)));
         }
@@ -158,7 +165,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
     }
 
     private InputFileValidationConfiguration generateConfiguration(BusinessEntity entity, List<String> pathList,
-            boolean enableEntityMatch, boolean enableEntityMatchGA) {
+            boolean enableEntityMatch, boolean enableEntityMatchGA, long totalRows) {
         switch (entity) {
         case Account:
             AccountFileValidationConfiguration accountConfig = new AccountFileValidationConfiguration();
@@ -184,9 +191,11 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             return productConfig;
         case Catalog:
             CatalogFileValidationConfiguration catalogConfig = new CatalogFileValidationConfiguration();
+            catalogConfig.setCustomerSpace(configuration.getCustomerSpace());
             catalogConfig.setEnableEntityMatchGA(enableEntityMatchGA);
             catalogConfig.setEntity(entity);
             catalogConfig.setPathList(pathList);
+            catalogConfig.setTotalRows(totalRows);
             return catalogConfig;
         default:
             return null;

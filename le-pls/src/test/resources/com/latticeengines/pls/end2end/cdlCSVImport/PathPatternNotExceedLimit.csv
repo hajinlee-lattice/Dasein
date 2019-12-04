@@ -1,0 +1,12 @@
+Name,Pattern
+All Products3,/amazon//*
+All Products11,https://www.tencent.com//lattice
+All Products13,https://www.tencent.com/../lattice
+All Products14,https://www.tencent.com/..
+All Products15,https://www.tencent.com/music/..
+All Products16,https://www.tencent.com/music/../
+All Products17,file://ftp.lattice.com/pub/files/foobar.txt
+All Products18,http://localhost:8080
+All Products19,ftp://www.lattice.com/beijing
+All Products20,*/products-and-industries/
+

@@ -45,6 +45,11 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         // copy error file if file exists
         String errorFile = getPath(pathList.get(0)) + PATH_SEPARATOR + ImportProperty.ERROR_FILE;
         CSVFormat format = copyErrorFileToLocalIfExist(errorFile);
+        long totalRows = catalogFileValidationServiceConfiguration.getTotalRows();
+        boolean skipCheck = false;
+        if (totalRows > 10L) {
+            skipCheck = true;
+        }
         UrlValidator urlValidator = new UrlValidator();
         InterfaceName pathPattern = InterfaceName.PathPattern;
         long errorLine = 0L;
@@ -69,19 +74,25 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                 // iterate through all records in avro files
                                 for (GenericRecord record : fileReader) {
                                     boolean rowError = false;
-                                    String pathStr = getFieldValue(record, pathPattern.name());
-                                    if (StringUtils.isNotBlank(pathStr)) {
-                                        // 1. full URLs 2. URLs with parameters 3. relative URLs (ie. /app/solutions)
-                                        // 4. URLs with Wildcards
-                                        // validate url or path, isValid check 1,2,4; isValidPath check 3
-                                        if (!urlValidator.isValid(pathStr) && !isValidPath(pathStr)) {
-                                            String lineId = getFieldValue(record, InterfaceName.InternalId.name());
-                                            rowError = true;
-                                            fileError = true;
-                                            errorInPath++;
-                                            errorLine++;
-                                            csvFilePrinter.printRecord(lineId, "", "invalidate path found in this row");
+                                    String lineId = getFieldValue(record, InterfaceName.InternalId.name());
+                                    if (!skipCheck) {
+                                        String pathStr = getFieldValue(record, pathPattern.name());
+                                        if (StringUtils.isNotBlank(pathStr)) {
+                                            // 1. full URLs 2. URLs with parameters 3. relative URLs (ie. /app/solutions)
+                                            // 4. URLs with Wildcards
+                                            // validate url or path, isValid check 1,2,4; isValidPath check 3
+                                            if (!urlValidator.isValid(pathStr) && !isValidPath(pathStr)) {
+                                                rowError = true;
+                                                fileError = true;
+                                                errorInPath++;
+                                                errorLine++;
+                                                csvFilePrinter.printRecord(lineId, "", String.format("invalid path " +
+                                                        "\"%s\"found in this row", pathStr));
+                                            }
                                         }
+                                    } else {
+                                        csvFilePrinter.printRecord(lineId, "", "invalid row as its file size exceeds " +
+                                                "max limit");
                                     }
                                     // if row is not error, write avro row to local file
                                     if (!rowError) {
@@ -116,8 +127,9 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         }
 
         // copy error file back to hdfs if needed, remove temporary error.csv generated in local
-        if (errorLine != 0L) {
-            copyErrorFileBackToHdfs(errorFile);
+        if (errorLine != 0L || skipCheck) {
+            String tenantId = catalogFileValidationServiceConfiguration.getCustomerSpace().getTenantId();
+            copyErrorFileBackToHdfs(errorFile, tenantId, pathList.get(0));
         }
         EntityValidationSummary summary = new EntityValidationSummary();
         summary.setErrorLineNumber(errorLine);
