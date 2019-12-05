@@ -3,6 +3,7 @@ package com.latticeengines.apps.core.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.AttrValidator;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -34,6 +36,8 @@ public class CDLImpactValidator extends AttrValidator {
 
     @Inject
     private CDLDependenciesProxy cdlDependenciesProxy;
+
+    private static ExecutorService workers;
 
     public static final String VALIDATOR_NAME = "CDL_IMPACT_VALIDATOR";
 
@@ -60,34 +64,51 @@ public class CDLImpactValidator extends AttrValidator {
             }
             String customerSpace = MultiTenantContext.getCustomerSpace().toString();
             AttrState attrState = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
-            if (!AttrState.Inactive.equals(attrState)) { // skip impact checking
-                                                         // for inactive
-                                                         // attributes
-                if (isToBeDisabledForSegment(attrConfig)) {
-                    List<MetadataSegment> impactSegments = cdlDependenciesProxy.getDependingSegments(customerSpace,
-                            attributes);
-                    List<RatingEngine> impactRatingEngines = cdlDependenciesProxy
-                            .getDependingRatingEngines(customerSpace, attributes);
-                    if (CollectionUtils.isNotEmpty(impactSegments)) {
-                        impactSegments.forEach(segment -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS,
-                                segment.getDisplayName(), attrConfig));
-                    }
-                    if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
-                        impactRatingEngines.forEach(re -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES,
-                                re.getDisplayName(), attrConfig));
-                    }
-                }
-                if (isToBeDisabledForTalkingPoint(attrConfig)) {
-                    List<Play> impactPlays = cdlDependenciesProxy.getDependantPlays(customerSpace, attributes);
-                    if (CollectionUtils.isNotEmpty(impactPlays)) {
-                        impactPlays.forEach(play -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS,
-                                play.getDisplayName(), attrConfig));
-                    }
-                }
+            // skip impact checking for inactive attributes
+            if (!AttrState.Inactive.equals(attrState)) {
+                List<Runnable> runnables = generateParallelJob(attrConfig, customerSpace, attributes);
+                // fork join execution
+                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
             }
         }
     }
 
+    private List<Runnable> generateParallelJob(AttrConfig attrConfig, String customerSpace, List<String> attributes) {
+        List<Runnable> threads = new ArrayList<>();
+        if (isToBeDisabledForSegment(attrConfig)) {
+            Runnable segmentRunnable = () -> {
+                List<MetadataSegment> impactSegments = cdlDependenciesProxy.getDependingSegments(customerSpace,
+                        attributes);
+                if (CollectionUtils.isNotEmpty(impactSegments)) {
+                    impactSegments.forEach(segment -> addWarningMsg(ImpactWarnings.Type.IMPACTED_SEGMENTS,
+                            segment.getDisplayName(), attrConfig));
+                }
+            };
+            Runnable ratingEngineRunnable = () -> {
+                List<RatingEngine> impactRatingEngines = cdlDependenciesProxy
+                        .getDependingRatingEngines(customerSpace, attributes);
+
+                if (CollectionUtils.isNotEmpty(impactRatingEngines)) {
+                    impactRatingEngines.forEach(re -> addWarningMsg(ImpactWarnings.Type.IMPACTED_RATING_ENGINES,
+                            re.getDisplayName(), attrConfig));
+                }
+            };
+            threads.add(segmentRunnable);
+            threads.add(ratingEngineRunnable);
+
+        }
+        if (isToBeDisabledForTalkingPoint(attrConfig)) {
+            Runnable playRunnable = () -> {
+                List<Play> impactPlays = cdlDependenciesProxy.getDependantPlays(customerSpace, attributes);
+                if (CollectionUtils.isNotEmpty(impactPlays)) {
+                    impactPlays.forEach(play -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS,
+                            play.getDisplayName(), attrConfig));
+                }
+            };
+            threads.add(playRunnable);
+        }
+        return threads;
+    }
     private boolean isToBeDisabledForSegment(AttrConfig attrConfig) {
         return !Boolean.TRUE
                 .equals(attrConfig.getPropertyFinalValue(ColumnSelection.Predefined.Segment.name(), Boolean.class));
@@ -131,5 +152,16 @@ public class CDLImpactValidator extends AttrValidator {
                 .filter(attrConfigProp -> attrConfigProp.getCustomValue() != null).collect(Collectors.toList());
         res = CollectionUtils.isNotEmpty(customProps);
         return res;
+    }
+
+    private static ExecutorService getWorkers() {
+        if (workers == null) {
+            synchronized (AbstractAttrConfigService.class) {
+                if (workers == null) {
+                    workers = ThreadPoolUtils.getCachedThreadPool("attr-validator-svc");
+                }
+            }
+        }
+        return workers;
     }
 }
