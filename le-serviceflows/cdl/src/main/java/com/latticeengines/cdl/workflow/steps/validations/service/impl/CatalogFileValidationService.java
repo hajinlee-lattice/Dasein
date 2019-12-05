@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.CatalogFileValidationConfiguration;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("catalogFileValidationService")
 @Lazy(value = false)
@@ -47,7 +48,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         CSVFormat format = copyErrorFileToLocalIfExist(errorFile);
         long totalRows = catalogFileValidationServiceConfiguration.getTotalRows();
         boolean skipCheck = false;
-        if (totalRows > 10L) {
+        if (totalRows > BaseWorkflowStep.CATALOG_RECORDS_LIMIT) {
             skipCheck = true;
         }
         UrlValidator urlValidator = new UrlValidator();
@@ -78,7 +79,9 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                     if (!skipCheck) {
                                         String pathStr = getFieldValue(record, pathPattern.name());
                                         if (StringUtils.isNotBlank(pathStr)) {
-                                            // 1. full URLs 2. URLs with parameters 3. relative URLs (ie. /app/solutions)
+                                            // 1. full URLs
+                                            // 2. URLs with parameters
+                                            // 3. relative URLs (ie. /app/solutions)
                                             // 4. URLs with Wildcards
                                             // validate url or path, isValid check 1,2,4; isValidPath check 3
                                             if (!urlValidator.isValid(pathStr) && !isValidPath(pathStr)) {
@@ -87,7 +90,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                                 errorInPath++;
                                                 errorLine++;
                                                 csvFilePrinter.printRecord(lineId, "", String.format("invalid path " +
-                                                        "\"%s\"found in this row", pathStr));
+                                                        "\"%s\" found in this row", pathStr));
                                             }
                                         }
                                     } else {

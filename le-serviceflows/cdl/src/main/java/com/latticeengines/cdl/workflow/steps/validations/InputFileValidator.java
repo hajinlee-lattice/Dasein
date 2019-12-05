@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("inputFileValidator")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -111,7 +112,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
                             .put("deduped_rows", 0L)
                             .putPOJO("product_summary", entityValidationSummary).put("total_failed_rows",
                     totalFailed);
-        } else if (BusinessEntity.Catalog.equals(entity) && eaiImportJobDetail.getTotalRows() > 10L) {
+        } else if (BusinessEntity.Catalog.equals(entity) && eaiImportJobDetail.getTotalRows() > BaseWorkflowStep.CATALOG_RECORDS_LIMIT) {
             getJson().put(entity.toString(), totalRows)
                     .put("total_rows", totalRows)
                     .put("ignored_rows", 0L)
@@ -142,7 +143,7 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
-        if (totalRows > 10L && BusinessEntity.Catalog.equals(entity)) {
+        if (totalRows > BaseWorkflowStep.CATALOG_RECORDS_LIMIT && BusinessEntity.Catalog.equals(entity)) {
             String errorMessage = String.format("%s exceeds platform Limit - Please retry with no more than 10 path " +
                     "patterns", String.valueOf(totalRows));
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,

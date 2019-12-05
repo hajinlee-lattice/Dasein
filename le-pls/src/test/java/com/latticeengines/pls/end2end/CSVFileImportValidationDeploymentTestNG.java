@@ -53,8 +53,6 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
     private static final String WEB_VISIT_WITH_INVALID_URL = "WebVisitWithInvalidURL.csv";
 
-    private static final String PATH_PATTERN_NOT_EXCEED_LIMIT = "PathPatternNotExceedLimit.csv";
-
     private static final String PATH_PATTERN_EXCEED_LIMIT = "PathPatternExceedLimit.csv";
 
     private static final String S3_ATLAS_DATA_TABLE_DIR = "/%s/atlas/Data/Tables";
@@ -131,20 +129,11 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
         // call separate api to create web visit path pattern template
         File pathPatternTemplateFile =
-                new File(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + PATH_PATTERN_NOT_EXCEED_LIMIT).getPath());
+                new File(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + PATH_PATTERN_EXCEED_LIMIT).getPath());
         cdlService.createWebVisitProfile(customerSpace, EntityType.WebVisitPathPattern,
                 new FileInputStream(pathPatternTemplateFile));
         getDataFeedTask(ENTITY_CATALOG);
-        startCDLImportWithTemplateData(webVisitPathPatternDataFeedTask, JobStatus.COMPLETED);
-
-        // call separate api to create web visit path pattern template
-        File pathPatternTemplateFile2 =
-                new File(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + PATH_PATTERN_EXCEED_LIMIT).getPath());
-        cdlService.createWebVisitProfile(customerSpace, EntityType.WebVisitPathPattern,
-                new FileInputStream(pathPatternTemplateFile2));
-        getDataFeedTask(ENTITY_CATALOG);
         startCDLImportWithTemplateData(webVisitPathPatternDataFeedTask, JobStatus.FAILED);
-
 
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
@@ -156,13 +145,11 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         Report productReport = reports.get(2);
         Report webVisitReport = reports.get(3);
         Report pathPatternReport = reports.get(4);
-        Report pathPatternReport2 = reports.get(4);
         verifyReport(accountReport, 3L, 3L, 47L);
         verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 0L, 2L, 0L);
         verifyReport(webVisitReport, 90L, 90L, 210L);
-        verifyReport(pathPatternReport, 6L,6L, 4L);
-        verifyReport(pathPatternReport2, 0L,29L, 0L);
+        verifyReport(pathPatternReport, 0L,29L, 0L);
     }
 
     @Test(groups = "deployment")
