@@ -132,11 +132,6 @@ public class TestDunsGuideBookUtils {
 
                 /* ManualMatch redirect book */
                 { //
-                        newTuple("Lane Gin", null, null, null), //
-                        "602759081", "859029956", //
-                        "ManualMatch" //
-                }, //
-                { //
                         newTuple("Body Central", "USA", null, null), //
                         "052267488", "151962479", //
                         "ManualMatch" //
