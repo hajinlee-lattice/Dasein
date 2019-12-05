@@ -66,12 +66,12 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
             Pair.of("Tag1", "Value1"), Pair.of("Tag2", "Value2"));
 
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "pipeline1")
     public void setup() throws Exception {
         prepareCleanPod(s3Bucket, POD);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "pipeline1")
     public void destroy() {
         prepareCleanPod(s3Bucket, POD);
     }
@@ -85,7 +85,7 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
      * 5. Copy from s3 back to hdfs -- verify success (existed files on hdfs should be deleted)
      * 6. Copy from s3 back to hdfs again with failIfExisted = true -- verify fail
      */
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testIngestionSource() {
         uploadSourceToHdfs(INGESTION_SOURCE, CURR_VER, INGESTION_SOURCE_FILES, false);
 
