@@ -84,7 +84,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             for (S3ImportSystem system : currentSystems) {
                 if (system.getPriority() == 1) {
                     if (system.isMapToLatticeAccount()) {
-                        throw new LedpException(LedpCode.LEDP_40075, new String[] {system.getDisplayName()});
+                        throw new LedpException(LedpCode.LEDP_40075, new String[] {system.getDisplayName(), "Account ID"});
                     }
                 }
             }
@@ -93,7 +93,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
         if (importSystem.isMapToLatticeContact()) {
             for (S3ImportSystem system : currentSystems) {
                 if (!system.getName().equals(importSystem.getName()) && Boolean.TRUE.equals(system.isMapToLatticeContact())) {
-                    throw new LedpException(LedpCode.LEDP_40076, new String[] {system.getDisplayName()});
+                    throw new LedpException(LedpCode.LEDP_40075, new String[] {system.getDisplayName(), "Contact ID"});
                 }
             }
         }
