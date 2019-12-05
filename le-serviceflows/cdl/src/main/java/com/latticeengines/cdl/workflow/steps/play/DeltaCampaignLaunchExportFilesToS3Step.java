@@ -87,7 +87,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                     DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES, String.class));
         }
         if (createDeleteCsvDataFrame) {
-            exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.DEL, getListObjectFromContext(
+            exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.DELETE, getListObjectFromContext(
                     DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, String.class));
         }
         log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
@@ -152,7 +152,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
             message.setSourceFile(sourceFile.substring(sourceFile.indexOf("dropfolder")));
         }
         if (createDeleteCsvDataFrame) {
-            String deleteFile = exportFiles.get(DeltaCampaignLaunchWorkflowConfiguration.DEL).stream()
+            String deleteFile = exportFiles.get(DeltaCampaignLaunchWorkflowConfiguration.DELETE).stream()
                     .filter(path -> FilenameUtils.getExtension(path).equals(CSV)).findFirst().get();
             message.setDeleteFile(deleteFile.substring(deleteFile.indexOf("dropfolder")));
         }

@@ -22,7 +22,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
 
     public static final String ADD = "add";
-    public static final String DEL = "del";
+    public static final String DELETE = "delete";
 
     // avro file path in hdfs
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";

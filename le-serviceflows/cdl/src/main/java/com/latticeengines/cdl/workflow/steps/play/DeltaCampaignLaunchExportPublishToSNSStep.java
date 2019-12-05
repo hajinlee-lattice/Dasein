@@ -87,7 +87,7 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
             messageBody.setSourceFiles(sourceFiles);
         }
         if (createDeleteCsvDataFrame) {
-            Map<String, List<ExportFileConfig>> deleteFiles = getFiles(DeltaCampaignLaunchWorkflowConfiguration.DEL);
+            Map<String, List<ExportFileConfig>> deleteFiles = getFiles(DeltaCampaignLaunchWorkflowConfiguration.DELETE);
             messageBody.setDeleteFiles(deleteFiles);
         }
 
