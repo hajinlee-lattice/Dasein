@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +48,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
+import com.latticeengines.domain.exposed.util.TypeConversionUtil;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.ProcessDimensionJob;
@@ -65,9 +66,6 @@ public class GenerateDimensionMetadata
 
     @Inject
     private ActivityStoreProxy activityStoreProxy;
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     // [streamId, dimName] <-> UUID
     private BiMap<Pair<String, String>, String> dimIdMap = HashBiMap.create();
@@ -111,11 +109,14 @@ public class GenerateDimensionMetadata
                     .collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(exceedCardDimensions)) {
                 log.warn("Dimensions {} in stream {} exceeds cardinality limit", exceedCardDimensions, streamId);
-                List<String> dims = exceedCardDimensions.stream().map(Pair::getKey).collect(Collectors.toList());
+                Set<String> dims = exceedCardDimensions.stream().map(Pair::getKey).collect(Collectors.toSet());
                 streamErrorMsgs.put(streamId,
-                        String.format("Dimension %s in stream has too many distinct values", String.join(",", dims)));
+                        String.format("Dimension %s in stream has too many distinct values, skip processing",
+                                String.join(",", dims)));
             }
         });
+
+        allocateDimensionIdsAndOverrideMap(dimensionMetadataMap);
 
         log.info("Final dimension metadata map = {}", JsonUtils.serialize(dimensionMetadataMap));
         putObjectInContext(STREAM_DIMENSION_METADATA_MAP, dimensionMetadataMap);
@@ -123,6 +124,48 @@ public class GenerateDimensionMetadata
         // publish metadata for serving in app
         String signature = activityStoreProxy.saveDimensionMetadata(configuration.getCustomer(), dimensionMetadataMap);
         saveDimensionMetadataSignature(signature);
+    }
+
+    // generate short ID for each unique dimension value and update corresponding
+    // map
+    private void allocateDimensionIdsAndOverrideMap(Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+
+        Set<String> values = dimensionMetadataMap //
+                .values() //
+                .stream() //
+                .flatMap(dims -> dims.entrySet().stream().flatMap(dimMetadata -> {
+                    String dimName = dimMetadata.getKey();
+                    return dimMetadata.getValue().getDimensionValues().stream().map(attrs -> attrs.get(dimName))
+                            .map(TypeConversionUtil::toString);
+                })) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(values)) {
+            return;
+        }
+
+        // allocate short ID
+        Map<String, String> valueIdMap = activityStoreProxy.allocateDimensionIds(customerSpace.toString(), values);
+        putObjectInContext(STREAM_DIMENSION_VALUE_ID_MAP, valueIdMap);
+
+        log.info("DimensionValueIdMap = {}", valueIdMap);
+
+        // update metadata
+        dimensionMetadataMap.forEach((streamId, dims) -> {
+            dims.forEach((dimName, metadata) -> {
+                if (CollectionUtils.isEmpty(metadata.getDimensionValues())) {
+                    return;
+                }
+
+                metadata.getDimensionValues().forEach(attrs -> {
+                    String value = TypeConversionUtil.toString(attrs.get(dimName));
+                    if (valueIdMap.containsKey(value)) {
+                        // override with short ID
+                        attrs.put(dimName, valueIdMap.get(value));
+                    }
+                });
+            });
+        });
     }
 
     private void saveDimensionMetadataSignature(@NotNull String signature) {
@@ -289,19 +332,6 @@ public class GenerateDimensionMetadata
                 .map(StreamDimension::getCatalog) //
                 .map(Catalog::getCatalogId) //
                 .anyMatch(id -> !catalogTables.containsKey(id));
-    }
-
-    private Map<String, Table> getActivityStoreTables(@NotNull String ctxKey) {
-        if (!hasKeyInContext(ctxKey)) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> tableNames = getMapObjectFromContext(ctxKey, String.class, String.class);
-        return tableNames.entrySet() //
-                .stream() //
-                .map(entry -> Pair.of(entry.getKey(),
-                        metadataProxy.getTable(customerSpace.toString(), entry.getValue())))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     @Override
