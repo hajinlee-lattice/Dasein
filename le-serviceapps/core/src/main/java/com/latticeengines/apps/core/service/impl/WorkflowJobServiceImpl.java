@@ -71,4 +71,5 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Job job = workflowProxy.getWorkflowJobFromApplicationId(appId);
         return job.getJobStatus();
     }
+
 }
