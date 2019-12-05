@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -60,6 +61,13 @@ public class PlayUtils {
                 && StringUtils.isBlank(playLaunch.getDestinationAccountId())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
                     "Cannot restrict accounts with null Ids if account id has not been set up for selected destination" });
+        }
+
+        if (playLaunch.getLaunchState() != LaunchState.Queued
+                && playLaunch.getLaunchState() != LaunchState.UnLaunched) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { String.format("Launch %s is in a State %s and hence cannot be kicked off",
+                            playLaunch.getLaunchId(), playLaunch.getLaunchState().name()) });
         }
     }
 
