@@ -40,15 +40,20 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
 
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
+        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
+        customerSpace = job.getTenant().getId();
+        String playName = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_NAME);
+        String playLaunchId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID);
         try {
             if (jobExecution.getStatus().isUnsuccessful()) {
-                WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-                customerSpace = job.getTenant().getId();
-                String playName = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_NAME);
-                String playLaunchId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID);
-                log.warn(String.format("CampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
+                log.warn(String.format("DeltaCampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
                 playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+            } else {
+                log.info(String.format(
+                        "DeltaCampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
+                        playLaunchId, playName, customerSpace));
+                playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
             }
         } finally {
             cleanupIntermediateFiles(jobExecution);
