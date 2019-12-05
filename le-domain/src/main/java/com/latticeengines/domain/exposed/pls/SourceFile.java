@@ -124,6 +124,10 @@ public class SourceFile
     @Column(name = "S3_BUCKET")
     private String s3Bucket;
 
+    @JsonProperty("workflow_pid")
+    @Column(name = "WORKFLOW_PID", nullable = true)
+    private Long workflowPid;
+
     @Override
     public String getName() {
         return name;
@@ -283,5 +287,13 @@ public class SourceFile
 
     public void setS3Bucket(String s3Bucket) {
         this.s3Bucket = s3Bucket;
+    }
+
+    public Long getWorkflowPid() {
+        return workflowPid;
+    }
+
+    public void setWorkflowPid(Long workflowPid) {
+        this.workflowPid = workflowPid;
     }
 }

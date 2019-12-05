@@ -17,6 +17,8 @@ public interface SourceFileProxy {
 
     SourceFile findByApplicationId(String customerSpace, String applicationId);
 
+    SourceFile findByWorkflowPid(String customerSpace, String workflowPid);
+
     void copySourceFile(String customerSpace, String originalSourceFileName, String targetTableName, String targetTenant);
 
     SourceFile findByTableNameCrossTenant(String tableName);

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.WorkflowJobService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -72,4 +73,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return job.getJobStatus();
     }
 
+    @Override
+    public Job findByApplicationId(String applicationId) {
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId,
+                MultiTenantContext.getCustomerSpace().toString());
+        return job;
+    }
 }

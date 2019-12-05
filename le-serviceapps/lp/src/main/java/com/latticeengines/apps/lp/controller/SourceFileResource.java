@@ -54,6 +54,13 @@ public class SourceFileResource {
         return sourceFileService.findByApplicationId(applicationId);
     }
 
+    @GetMapping(value = "/workflowpid/{workflowPid}")
+    @ResponseBody
+    @ApiOperation(value = "Find source file by workflow Pid")
+    public SourceFile findByWorkflowPid(@PathVariable String customerSpace, @PathVariable String workflowPid) {
+        return sourceFileService.findByWorkflowPid(Long.parseLong(workflowPid));
+    }
+
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Create source file")

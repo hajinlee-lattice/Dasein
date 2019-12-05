@@ -48,6 +48,13 @@ public class SourceFileProxyImpl extends MicroserviceRestApiProxy implements Sou
     }
 
     @Override
+    public SourceFile findByWorkflowPid(String customerSpace, String workflowPid) {
+        String url = URL_PRERIX + "/workflowpid/{workflowpid}";
+        url = constructUrl(url, shortenCustomerSpace(customerSpace), workflowPid);
+        return get("get SourceFile by workflowPid", url, SourceFile.class);
+    }
+
+    @Override
     public void create(String customerSpace, SourceFile sourceFile) {
         String url = constructUrl(URL_PRERIX, shortenCustomerSpace(customerSpace));
         post("create SourceFile", url, sourceFile, Object.class);
