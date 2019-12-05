@@ -49,4 +49,17 @@ public class TemplateUtilsUnitTestNG {
         Assert.assertEquals(rendered, "1, 2");
     }
 
+    @Test(groups = "unit")
+    public void testIfThen() {
+        Map<String, Object> params=  new HashMap<>();
+        params.put("val", "val 1");
+        String template = "Value is <#if val == '__others__'>others<#else>${val}</#if>";
+        String rendered = TemplateUtils.renderByMap(template, params);
+        Assert.assertEquals(rendered, "Value is val 1");
+
+        params.put("val", "__others__");
+        rendered = TemplateUtils.renderByMap(template, params);
+        Assert.assertEquals(rendered, "Value is others");
+    }
+
 }
