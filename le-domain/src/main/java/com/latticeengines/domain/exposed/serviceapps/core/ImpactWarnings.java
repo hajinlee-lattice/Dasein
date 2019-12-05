@@ -1,15 +1,15 @@
 package com.latticeengines.domain.exposed.serviceapps.core;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ImpactWarnings {
 
     @JsonProperty("warnings")
-    private Map<Type, List<String>> warnings = new HashMap<>();
+    private Map<Type, List<String>> warnings = new ConcurrentHashMap<>();
 
     public Map<Type, List<String>> getWarnings() {
         return warnings;
