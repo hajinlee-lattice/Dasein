@@ -411,7 +411,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         put("updateImportDataTablePolicy", url, retentionPolicy);
     }
 
-    public void keepTableForever(String customerSpace, List<String> tableNames) {
+    public void keepTablesForever(String customerSpace, List<String> tableNames) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies", customerSpace);
         put("updateTableRetentionPolicies", url, getRetentionPolicyUpdateDetail(tableNames, RetentionPolicyUtil.noExpireRetentionPolicy));
     }
@@ -423,7 +423,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         return retentionPolicyUpdateDetail;
     }
 
-    public void keepTableFor7Days(String customerSpace, List<String> tableNames) {
+    public void keepTablesFor7Days(String customerSpace, List<String> tableNames) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies", customerSpace);
         put("updateTableRetentionPolicies", url,
                 getRetentionPolicyUpdateDetail(tableNames, RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY)));
