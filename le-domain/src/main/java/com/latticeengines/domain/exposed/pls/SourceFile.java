@@ -125,7 +125,7 @@ public class SourceFile
     private String s3Bucket;
 
     @JsonProperty("workflow_pid")
-    @Column(name = "WORKFLOW_PID", nullable = true)
+    @Column(name = "WORKFLOW_PID")
     private Long workflowPid;
 
     @Override

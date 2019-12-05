@@ -209,7 +209,6 @@ public class SourceFileServiceImpl implements SourceFileService {
         if(sourceFile == null){
             log.info("Find sourcefile by workflowPid failed for {}, try to find by FakeApplicationId", workflowPid);
             FakeApplicationId appId = new FakeApplicationId(workflowPid);
-            log.info("FakeApplicationId is {}", appId.toString());
             sourceFile = sourceFileEntityMgr.findByApplicationId(appId.toString());
             if(sourceFile == null){
                 log.info("Find sourcefile by FakeApplicationId failed for {}", appId.toString());

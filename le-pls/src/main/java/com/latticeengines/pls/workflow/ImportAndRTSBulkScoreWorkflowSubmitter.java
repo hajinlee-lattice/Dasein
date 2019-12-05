@@ -105,8 +105,6 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
                 sourceFile.getDisplayName()));
         ApplicationId applicationId = workflowJobService.submit(configuration);
-        Job job = workflowJobService.findByApplicationId(applicationId.toString());
-        sourceFile.setWorkflowPid(job.getPid());
         sourceFile.setApplicationId(applicationId.toString());
         sourceFileService.update(sourceFile);
         return applicationId;

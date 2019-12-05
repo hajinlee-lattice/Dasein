@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
@@ -87,8 +86,6 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
                 sourceFile.getDisplayName()));
         ApplicationId applicationId = workflowJobService.submit(configuration);
-        Job job = workflowJobService.findByApplicationId(applicationId.toString());
-        sourceFile.setWorkflowPid(job.getPid());
         sourceFile.setApplicationId(applicationId.toString());
         sourceFileService.update(sourceFile);
         return applicationId;

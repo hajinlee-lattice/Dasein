@@ -33,6 +33,11 @@ public class SourceFileEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
+        tenant1 = new Tenant();
+        tenant1.setId("TENANT1");
+        tenant1.setName("TENANT1");
+        tenantEntityMgr.create(tenant1);
+        MultiTenantContext.setTenant(tenant1);
     }
 
     @AfterClass(groups = "functional")
@@ -45,13 +50,7 @@ public class SourceFileEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testGetApplicationId() {
-        Tenant tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
-        tenantEntityMgr.create(tenant1);
-        MultiTenantContext.setTenant(tenant1);
-
-        String name = "SomeFile";
+        String name = "SomeFileForApplicationId";
         String applicationId = "applicationId_00010";
         String path = "path";
         SourceFile sourceFile = new SourceFile();
@@ -67,6 +66,30 @@ public class SourceFileEntityMgrImplTestNG extends LPFunctionalTestNGBase {
         sourceFileEntityMgr.create(sourceFile2);
 
         SourceFile sourceFile3 = sourceFileEntityMgr.findByApplicationId(applicationId);
+        assertEquals(sourceFile.getName(), sourceFile3.getName());
+        assertEquals(sourceFile.getPath(), sourceFile3.getPath());
+        assertEquals(sourceFile.getPid(), sourceFile3.getPid());
+    }
+
+    @Test(groups = "functional")
+    public void testGetWorkflowPid() {
+        String name = "SomeFileForWorkflowPid";
+        Long workflowPid1 = Long.valueOf(111);
+        Long workflowPid2 = Long.valueOf(222);
+        String path = "path";
+        SourceFile sourceFile = new SourceFile();
+        sourceFile.setName(name);
+        sourceFile.setPath(path);
+        sourceFile.setWorkflowPid(workflowPid1);
+        sourceFileEntityMgr.create(sourceFile);
+
+        SourceFile sourceFile2 = new SourceFile();
+        sourceFile2.setName(name + "2");
+        sourceFile2.setPath(path + "2");
+        sourceFile.setWorkflowPid(workflowPid2);
+        sourceFileEntityMgr.create(sourceFile2);
+
+        SourceFile sourceFile3 = sourceFileEntityMgr.findByWorkflowPid(workflowPid1);
         assertEquals(sourceFile.getName(), sourceFile3.getName());
         assertEquals(sourceFile.getPath(), sourceFile3.getPath());
         assertEquals(sourceFile.getPid(), sourceFile3.getPid());
