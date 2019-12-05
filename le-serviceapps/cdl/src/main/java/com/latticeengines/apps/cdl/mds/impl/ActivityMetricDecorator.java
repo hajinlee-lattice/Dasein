@@ -105,7 +105,6 @@ public class ActivityMetricDecorator implements Decorator {
 
     private void enrichColumnMetadata(ColumnMetadata cm) {
         if (!Boolean.TRUE.equals(setTenantCtx.get())) {
-            log.info("Set multi-tenant -context to " + tenant.getId());
             MultiTenantContext.setTenant(tenant);
             setTenantCtx.set(Boolean.TRUE);
         }
