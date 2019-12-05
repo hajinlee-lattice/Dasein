@@ -74,6 +74,21 @@
                 "fundamentalType": "ALPHA"
             },
             {
+                "fieldName": "Website",
+                "fieldType": "TEXT",
+                "screenName": "Website",
+                "matchingColumnNames": [
+                    "WEBSITE",
+                    "DOMAIN"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA",
+                "statisticalType": "nominal"
+            },
+            {
                 "fieldName": "City",
                 "fieldType": "TEXT",
                 "screenName": "City",
@@ -112,6 +127,24 @@
                 "matchingColumnNames": [
                     "COUNTRY",
                     "BILLING COUNTRY"
+                ],
+                "required": false,
+                "approvedUsage": [
+                    "None"
+                ],
+                "fundamentalType": "ALPHA"
+            },
+            {
+                "fieldName": "PostalCode",
+                "fieldType": "TEXT",
+                "screenName": "Postal Code",
+                "matchingColumnNames": [
+                    "ZIP",
+                    "ZIP CODE",
+                    "POSTAL CODE",
+                    "BILLING ZIP",
+                    "BILLING ZIP CODE",
+                    "BILLING POSTAL CODE"
                 ],
                 "required": false,
                 "approvedUsage": [
