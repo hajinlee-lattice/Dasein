@@ -1,5 +1,27 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ACTOR_VISIT;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DISTRIBUTION_RETRY;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_ERROR_DIST;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_RETRY_DIST;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_THROTTLE_DIST;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_THROTTLE;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_HAVE_RETRY_NUM_TRIES;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_HISTORY;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_LOOKUP_CACHE;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_NUM_TRIES;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_SEED_CACHE;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_TRAVEL_ERROR;
+import static com.latticeengines.common.exposed.metric.MetricTags.TAG_DYNAMO_TABLE;
+import static com.latticeengines.common.exposed.metric.MetricTags.TAG_TENANT;
+import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_ALLOCATE_ID_MODE;
+import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_ENTITY;
+import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_MATCH_ENV;
+import static com.latticeengines.common.exposed.metric.MetricTags.Match.TAG_ACTOR;
+import static com.latticeengines.common.exposed.metric.MetricTags.Match.TAG_HAS_ERROR;
+import static com.latticeengines.common.exposed.metric.MetricTags.Match.TAG_MATCHED;
+import static com.latticeengines.common.exposed.metric.MetricTags.Match.TAG_MATCH_MODE;
+
 import java.time.Duration;
 
 import javax.inject.Inject;
@@ -38,35 +60,6 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
     private static final String BATCH_MATCH_MODE = MatchActorSystem.BATCH_MODE;
 
-    /*
-     * metric names
-     */
-    private static final String METRIC_ACTOR_VISIT = "match.entity.actor.microengine";
-    private static final String METRIC_HISTORY = "match.entity.history";
-    private static final String METRIC_TRAVEL_ERROR = "match.entity.travel.error";
-    private static final String METRIC_NUM_TRIES = "match.entity.num.tries";
-    private static final String METRIC_DISTRIBUTION_RETRY = "match.entity.num.tries.dist.retry";
-    private static final String METRIC_HAVE_RETRY_NUM_TRIES = "match.entity.num.tries.count.retry";
-    private static final String METRIC_DYNAMO_THROTTLE = "match.entity.dynamo.throttling.count";
-    private static final String METRIC_DYNAMO_CALL_ERROR_DIST = "match.entity.dynamo.call.error.dist";
-    private static final String METRIC_DYNAMO_CALL_THROTTLE_DIST = "match.entity.dynamo.call.throttling.dist";
-    private static final String METRIC_DYNAMO_CALL_RETRY_DIST = "match.entity.dynamo.call.retry.dist";
-    private static final String METRIC_LOOKUP_CACHE = "match.entity.cache.lookup";
-    private static final String METRIC_SEED_CACHE = "match.entity.cache.seed";
-
-    /*
-     * tag names (TODO probably move to a unified constant class)
-     */
-    private static final String TAG_ACTOR = "Actor";
-    private static final String TAG_ENTITY = "Entity";
-    private static final String TAG_TENANT = "Tenant";
-    private static final String TAG_MATCH_MODE = "MatchMode";
-    private static final String TAG_MATCHED = "Matched";
-    private static final String TAG_ALLOCATE_ID_MODE = "AllocateId";
-    private static final String TAG_ENV = "Environment";
-    private static final String TAG_DYNAMO_TABLE = "Table";
-    private static final String TAG_HAS_ERROR = "HasError";
-
     @Lazy
     @Inject
     private MeterRegistryFactoryService registryFactory;
@@ -80,7 +73,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
             return;
         }
         Counter.builder(METRIC_DYNAMO_THROTTLE) //
-                .tag(TAG_ENV, env.name()) //
+                .tag(TAG_MATCH_ENV, env.name()) //
                 .tag(TAG_DYNAMO_TABLE, tableName) //
                 .register(registryFactory.getServiceLevelRegistry()) //
                 .increment();
@@ -96,7 +89,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
         recordDynamoDistri(METRIC_DYNAMO_CALL_ERROR_DIST, env, tableName, context.isExhaustedOnly());
         recordDynamoDistri(METRIC_DYNAMO_CALL_THROTTLE_DIST, env, tableName, isThrottled);
         DistributionSummary.builder(METRIC_DYNAMO_CALL_RETRY_DIST) //
-                .tag(TAG_ENV, env.name()) //
+                .tag(TAG_MATCH_ENV, env.name()) //
                 .tag(TAG_DYNAMO_TABLE, tableName) //
                 .register(registryFactory.getServiceLevelRegistry()) //
                 .record(context.getRetryCount());
@@ -214,7 +207,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     private void recordDynamoDistri(@NotNull String metricName, @NotNull EntityMatchEnvironment env,
             @NotNull String tableName, boolean hasEvent) {
         DistributionSummary.builder(metricName) //
-                .tag(TAG_ENV, env.name()) //
+                .tag(TAG_MATCH_ENV, env.name()) //
                 .tag(TAG_DYNAMO_TABLE, tableName) //
                 .register(registryFactory.getServiceLevelRegistry()) //
                 .record(hasEvent ? 1.0 : 0.0);
