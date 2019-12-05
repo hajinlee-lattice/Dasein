@@ -21,6 +21,9 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
 
+    public static final String ADD = "add";
+    public static final String DELETE = "delete";
+
     // avro file path in hdfs
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
     public static final String ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH = "ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH";
@@ -28,6 +31,8 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     // csv/json file path in hdfs after file generation
     public static final String ADD_CSV_EXPORT_FILES = "ADD_CSV_EXPORT_FILES";
     public static final String DELETE_CSV_EXPORT_FILES = "DELETE_CSV_EXPORT_FILES";
+    // add and delete csv/json file paths in S3 in the format of map
+    public static final String ADD_AND_DELETE_S3_EXPORT_FILES = "ADD_AND_DELETE_S3_EXPORT_FILES";
 
     public static final String DATA_FRAME_NUM = "DATA_FRAME_NUM";
     public static final String CREATE_RECOMMENDATION_DATA_FRAME = "CREATE_RECOMMENDATION_DATA_FRAME";

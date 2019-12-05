@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
-import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -248,11 +247,10 @@ public class DeltaCampaignLaunchInitStep
         // %d", suppressedAccounts));
         // log.info(String.format("Total suppressed contact count for launch:
         // %d", suppressedContacts));
-        successUpdates(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
+        publishTalkingPoints(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
     }
 
-    private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
-        playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Launched);
+    private void publishTalkingPoints(CustomerSpace customerSpace, String playName, String playLaunchId) {
         if (createRecommendationDataFrame) {
             playProxy.publishTalkingPoints(customerSpace.toString(), playName);
         }
