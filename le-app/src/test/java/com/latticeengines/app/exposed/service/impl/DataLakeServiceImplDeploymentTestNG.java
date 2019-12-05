@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -84,6 +85,7 @@ public class DataLakeServiceImplDeploymentTestNG extends DataLakeServiceImplDepl
 
         LookupIdMap lookupIdMap = new LookupIdMap();
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         lookupIdMap.setOrgId(orgId);
         lookupIdMap.setOrgName(orgName);
 
