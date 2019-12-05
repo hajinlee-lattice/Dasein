@@ -342,7 +342,7 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId) {
         PlayLaunch playLaunch = createLaunchByPlayChannelAndState(customerSpace, playName, channelId,
-                LaunchState.Queued, null, null, null, null, null, false);
+                LaunchState.UnLaunched, null, null, null, null, null, false);
         return kickOffLaunch(customerSpace, playName, playLaunch.getId());
     }
 
@@ -481,10 +481,6 @@ public class PlayResource {
         PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
         if (play.getRatingEngine() != null) {
             validateNonEmptyTargetsForLaunch(customerSpace, play, playLaunch);
-        }
-        if (playLaunch.getLaunchState() != LaunchState.Queued) {
-            throw new LedpException(LedpCode.LEDP_32000, new String[] { String
-                    .format("Launch %s is not in Queued state and hence launch cannot be kicked off", launchId) });
         }
 
         if (batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)
