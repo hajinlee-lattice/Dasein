@@ -88,7 +88,7 @@ public class ActivityMetricDecorator implements Decorator {
         try {
             enrichColumnMetadata(cm);
         } catch (Exception e) {
-            log.warn("Error while rendering the column " + cm.getAttrName());
+            log.warn("Error while rendering the column " + cm.getAttrName(), e);
         }
 
         cm.enableGroup(Segment);
