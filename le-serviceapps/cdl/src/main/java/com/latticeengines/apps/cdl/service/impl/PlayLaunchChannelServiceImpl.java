@@ -137,6 +137,12 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Channel found with id: " + channelId });
         }
         channel.setPlay(play);
+
+        if (channel.getIsAlwaysOn() && StringUtils.isBlank(channel.getCronScheduleExpression())) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Cannot schedule next launch for channel : " + channelId + " since always on is turned off" });
+        }
+
         Date nextLaunchDate = PlayLaunchChannel.getNextDateFromCronExpression(channel);
         if (channel.getExpirationDate() == null)
             log.warn(String.format("Expiration Date Null for Channel: %s", channel.getId()));
@@ -197,8 +203,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         for (PlayLaunchChannel playLaunchChannel : channels) {
             PlayLaunch playLaunch = playLaunchService.findLatestByChannel(playLaunchChannel.getPid());
             playLaunchChannel.setLastLaunch(playLaunch);
-            if(playLaunch != null && playLaunch.getLaunchId() != null) {
-                DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr.getLatestMessageByLaunchId(playLaunch.getLaunchId());
+            if (playLaunch != null && playLaunch.getLaunchId() != null) {
+                DataIntegrationStatusMessage audienceState = dataIntegrationStatusMonitoringEntityMgr
+                        .getLatestMessageByLaunchId(playLaunch.getLaunchId());
                 if (audienceState != null && audienceState.getEventDetail() != null) {
                     EventDetail details = audienceState.getEventDetail();
                     if (details instanceof ProgressEventDetail) {
@@ -290,9 +297,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public PlayLaunchChannel updateAudience(String audienceId, String audienceName, String playLaunchId){
+    public PlayLaunchChannel updateAudience(String audienceId, String audienceName, String playLaunchId) {
         PlayLaunch playLaunchRetrieved = playLaunchEntityMgr.getLaunchFullyLoaded(playLaunchId);
-        if(playLaunchRetrieved != null) {
+        if (playLaunchRetrieved != null) {
             PlayLaunchChannel playLaunchChannel = playLaunchRetrieved.getPlayLaunchChannel();
             Play play = playLaunchRetrieved.getPlay();
             if (playLaunchChannel != null && play != null) {
@@ -303,7 +310,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                 playLaunchChannel = update(play.getName(), playLaunchChannel);
                 return playLaunchChannel;
             }
-            throw new LedpException(LedpCode.LEDP_18237, new String[] { playLaunchId, (play == null ? "true" : "false"), (playLaunchChannel == null ? "true" : "false") });
+            throw new LedpException(LedpCode.LEDP_18237, new String[] { playLaunchId, (play == null ? "true" : "false"),
+                    (playLaunchChannel == null ? "true" : "false") });
         }
         throw new LedpException(LedpCode.LEDP_18238, new String[] { audienceName, audienceId });
     }
