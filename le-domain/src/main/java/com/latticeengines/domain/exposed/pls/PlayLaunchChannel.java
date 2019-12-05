@@ -318,7 +318,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
             return new TreeSet<>(JsonUtils.convertList(attrListIntermediate, RatingBucketName.class));
         }
 
-        return new TreeSet<>();
+        return null;
     }
 
     public void setBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {

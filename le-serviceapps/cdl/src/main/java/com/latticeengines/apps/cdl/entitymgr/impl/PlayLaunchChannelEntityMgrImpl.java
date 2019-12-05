@@ -163,7 +163,7 @@ public class PlayLaunchChannelEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRED)
     public PlayLaunchChannel updatePlayLaunchChannel(PlayLaunchChannel existingPlayLaunchChannel,
             PlayLaunchChannel updatedChannel) {
-        if (updatedChannel.getBucketsToLaunch() != null) {
+        if (!updatedChannel.getBucketsToLaunch().isEmpty()) {
             existingPlayLaunchChannel.setBucketsToLaunch(updatedChannel.getBucketsToLaunch());
         }
         if (updatedChannel.isLaunchUnscored()) {
