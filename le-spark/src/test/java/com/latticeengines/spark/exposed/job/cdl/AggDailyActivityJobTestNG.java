@@ -58,15 +58,31 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final Integer DAY_PERIOD_1 = DateTimeUtils.dateToDayPeriod(DAY_1);
     private static final Integer DAY_PERIOD_2 = DateTimeUtils.dateToDayPeriod(DAY_2);
     private static final String ALL_CTN_PAGE_PTN_NAME = "all content pages";
-    private static final String ALL_CTN_PAGE_PTN_ID = DimensionGenerator.hashDimensionValue(ALL_CTN_PAGE_PTN_NAME);
+    private static final String ALL_CTN_PAGE_PTN_HASH = DimensionGenerator.hashDimensionValue(ALL_CTN_PAGE_PTN_NAME);
+    private static final String ALL_CTN_PAGE_PTN_ID = "1";
     private static final String VIDEO_CTN_PAGE_PTN_NAME = "all video content pages";
-    private static final String VIDEO_CTN_PAGE_PTN_ID = DimensionGenerator.hashDimensionValue(VIDEO_CTN_PAGE_PTN_NAME);
+    private static final String VIDEO_CTN_PAGE_PTN_HASH = DimensionGenerator
+            .hashDimensionValue(VIDEO_CTN_PAGE_PTN_NAME);
+    private static final String VIDEO_CTN_PAGE_PTN_ID = "2";
     private static final String GOOGLE_PAID_SRC = "Google/Paid";
     private static final String GOOGLE_PAID_SRC_HASH = DimensionGenerator.hashDimensionValue(GOOGLE_PAID_SRC);
+    private static final String GOOGLE_PAID_SRC_ID = "3";
     private static final String GOOGLE_ORGANIC_SRC = "Google/Organic";
     private static final String GOOGLE_ORGANIC_SRC_HASH = DimensionGenerator.hashDimensionValue(GOOGLE_ORGANIC_SRC);
+    private static final String GOOGLE_ORGANIC_SRC_ID = "4";
     private static final String FACEBOOK_PAID_SRC = "Facebook/Paid";
     private static final String FACEBOOK_PAID_SRC_HASH = DimensionGenerator.hashDimensionValue(FACEBOOK_PAID_SRC);
+    private static final String FACEBOOK_PAID_SRC_ID = "5";
+
+    private static final Map<String, String> DIMENSION_HASH_ID_MAP = new HashMap<>();
+
+    static {
+        DIMENSION_HASH_ID_MAP.put(ALL_CTN_PAGE_PTN_HASH, ALL_CTN_PAGE_PTN_ID);
+        DIMENSION_HASH_ID_MAP.put(VIDEO_CTN_PAGE_PTN_HASH, VIDEO_CTN_PAGE_PTN_ID);
+        DIMENSION_HASH_ID_MAP.put(GOOGLE_PAID_SRC_HASH, GOOGLE_PAID_SRC_ID);
+        DIMENSION_HASH_ID_MAP.put(GOOGLE_ORGANIC_SRC_HASH, GOOGLE_ORGANIC_SRC_ID);
+        DIMENSION_HASH_ID_MAP.put(FACEBOOK_PAID_SRC_HASH, FACEBOOK_PAID_SRC_ID);
+    }
 
     @Test(groups = "functional")
     private void test() {
@@ -98,15 +114,15 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Map<String, Long> getExpectedRowCounts() {
         Object[][] expectedResults = new Object[][] { //
-                { "a1", "u1", GOOGLE_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L }, //
-                { "a1", "u1", GOOGLE_PAID_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_ORGANIC_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_PAID_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_ORGANIC_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC_HASH, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", GOOGLE_PAID_SRC_HASH, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_ORGANIC_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u2", GOOGLE_ORGANIC_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u1", FACEBOOK_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u1", FACEBOOK_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L }, //
                 /*-
                  * source null
                  */
@@ -118,8 +134,8 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 /*-
                  * url null
                  */
-                { "a1", "u1", GOOGLE_PAID_SRC_HASH, null, DAY_2, 2L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC_HASH, null, DAY_2, 1L }, //
+                { "a1", "u1", GOOGLE_PAID_SRC_ID, null, DAY_2, 2L }, //
+                { "a1", "u1", FACEBOOK_PAID_SRC_ID, null, DAY_2, 1L }, //
                 /*-
                  * both null
                  */
@@ -229,6 +245,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         config.dimensionCalculatorMap.put(STREAM_ID, webVisitDimensionCalculators());
         config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(SourceMediumId.name(), PathPatternId.name()));
         config.additionalDimAttrMap.put(STREAM_ID, Arrays.asList(AccountId.name(), UserId.name()));
+        config.dimensionValueIdMap.putAll(DIMENSION_HASH_ID_MAP);
         return config;
     }
 
@@ -250,7 +267,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private Map<String, Object> smValue(String srcMedium) {
         Map<String, Object> values = new HashMap<>();
         values.put(SourceMedium.name(), srcMedium);
-        values.put(SourceMediumId.name(), DimensionGenerator.hashDimensionValue(srcMedium));
+        values.put(SourceMediumId.name(), DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(srcMedium)));
         return values;
     }
 
@@ -265,7 +282,8 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Map<String, Object> pathPtnValue(String pathPattern, String pathPatternName) {
         Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put(PathPatternId.name(), DimensionGenerator.hashDimensionValue(pathPatternName));
+        valueMap.put(PathPatternId.name(),
+                DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(pathPatternName)));
         valueMap.put(PathPatternName.name(), pathPatternName);
         valueMap.put(PathPattern.name(), pathPattern);
         return valueMap;

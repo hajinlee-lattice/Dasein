@@ -69,6 +69,8 @@ public class AggActivityStreamToDaily
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
+    // TODO handle skipped stream (ACTIVITY_STREAMS_SKIP_AGG ctx)
+
     @Override
     protected AggDailyActivityConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         if (MapUtils.isEmpty(stepConfiguration.getActivityStreamMap())) {
@@ -82,6 +84,8 @@ public class AggActivityStreamToDaily
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         // set dimensions
         config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
+        // dimension value -> short ID
+        config.dimensionValueIdMap = getMapObjectFromContext(STREAM_DIMENSION_VALUE_ID_MAP, String.class, String.class);
         streams.values().forEach(stream -> {
             String streamId = stream.getStreamId();
             Map<String, DimensionCalculator> calculatorMap = new HashMap<>();

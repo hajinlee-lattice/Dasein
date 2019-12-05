@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -221,6 +222,22 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @WithCustomerSpace
     public ActivityMetricsGroup findGroupByGroupId(String customerSpace, String groupId) {
         return activityMetricsGroupEntityMgr.findByGroupId(groupId);
+    }
+
+    @Override
+    public Map<String, String> allocateDimensionId(@NotNull String customerSpace,
+            @NotNull Set<String> dimensionValues) {
+        return dimensionMetadataService.allocateDimensionId(MultiTenantContext.getShortTenantId(), dimensionValues);
+    }
+
+    @Override
+    public Map<String, String> getDimensionValues(@NotNull String customerSpace, @NotNull Set<String> dimensionIds) {
+        return dimensionMetadataService.getDimensionValues(MultiTenantContext.getShortTenantId(), dimensionIds);
+    }
+
+    @Override
+    public Map<String, String> getDimensionIds(String tenantId, Set<String> dimensionValues) {
+        return dimensionMetadataService.getDimensionIds(MultiTenantContext.getShortTenantId(), dimensionValues);
     }
 
     // streamId -> streamName
