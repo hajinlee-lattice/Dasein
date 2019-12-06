@@ -129,7 +129,7 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         List<?> expectedRaw = JsonUtils.deserialize(expected, List.class);
         List<FieldMapping> expectedMappings = JsonUtils.convertList(expectedRaw, FieldMapping.class);
         Assert.assertEquals(fieldMappingDocument.getFieldMappings().size(), expectedMappings.size());
-        Collections.sort(expectedMappings, Comparator.comparing(FieldMapping::getUserField, 
+        Collections.sort(expectedMappings, Comparator.comparing(FieldMapping::getUserField,
                 Comparator.nullsFirst(Comparator.naturalOrder())));
         Collections.sort(fieldMappingDocument.getFieldMappings(),
                 Comparator.comparing(FieldMapping::getUserField, Comparator.nullsFirst(Comparator.naturalOrder())));
@@ -177,15 +177,14 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
         tenant.setPid(1L);
         tenant.setId("2");
         MultiTenantContext.setTenant(tenant);
-        Table t = scoringFileMetadataService.saveFieldMappingDocument(sourceFile.getName(), summary.getId(),
+        Table actualTable = scoringFileMetadataService.saveFieldMappingDocument(sourceFile.getName(), summary.getId(),
                 fieldMappingDocument);
-        System.out.print(t);
-        expected = FileUtils.getContentsAsString(new File(ClassLoader
-                .getSystemResource(
-                        "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedsavedtablePLS_7102.json")
-                .getPath()));
-        Assert.assertEquals(t.toString().trim(), expected.trim());
-
+        log.info("Actual Result:\n" + JsonUtils.pprint(actualTable));
+        Table expectedTable = JsonUtils.pojoFromJsonResourceFile(
+                "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedsavedtablePLS_7102.json",
+                Table.class);
+        log.info("Expected Result:\n" + JsonUtils.pprint(expectedTable));
+        Assert.assertEquals(JsonUtils.serialize(actualTable), JsonUtils.serialize(expectedTable));
     }
 
     @Test(groups = "unit")
