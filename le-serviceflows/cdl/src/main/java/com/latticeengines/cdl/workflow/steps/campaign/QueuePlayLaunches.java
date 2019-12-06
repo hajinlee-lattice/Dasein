@@ -89,8 +89,10 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
             }
         }
 
-        playProxy.setNextScheduledTimeForChannel(configuration.getCustomerSpace().toString(), configuration.getPlayId(),
-                configuration.getChannelId());
+        if (channel.getIsAlwaysOn()) {
+            playProxy.setNextScheduledTimeForChannel(configuration.getCustomerSpace().toString(),
+                    configuration.getPlayId(), configuration.getChannelId());
+        }
     }
 
     private void queueNewLaunch() {

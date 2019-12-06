@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.controller;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -20,10 +21,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
@@ -107,7 +113,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         assertNotNull(srcTable);
 
         // Update the table by adding 1 attribute
-        log.info("Updating {} for {}", TABLE_NAME,  customerSpace1);
+        log.info("Updating {} for {}", TABLE_NAME, customerSpace1);
         Attribute attribute = new Attribute();
         attribute.setName("Name1");
         attribute.setDisplayName("DisplayName1");
@@ -119,6 +125,8 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         metadataProxy.updateTable(customerSpace1, TABLE_NAME, srcTable);
 
         final Table updatedTable = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(srcTable.getRetentionPolicy(), updatedTable.getRetentionPolicy());
+        assertNotEquals(srcTable.getUpdated(), updatedTable.getUpdated());
         assertNotNull(updatedTable);
         assertEquals(updatedTable.getDisplayName(), tableDisplayName);
         logTableSummary("Updated Table from DB", updatedTable);
@@ -131,7 +139,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
 
         // Update the table by deleting 5 attributes
         List<String> deletedAttributes = new ArrayList<>();
-        IntStream.range(0 , 5).forEach(ctr -> {
+        IntStream.range(0, 5).forEach(ctr -> {
             Attribute delAttr = updatedTable.getAttributes().get(new Random().nextInt(updatedTable.getAttributes().size()));
             updatedTable.removeAttribute(delAttr.getName());
             deletedAttributes.add(delAttr.getName());
@@ -169,6 +177,26 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         updatedTable2.getAttributes().forEach(attr -> {
             assertTrue(attr.getDisplayName().endsWith(updateSuffix));
         });
+
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(2, RetentionPolicyTimeUnit.MONTH);
+        metadataProxy.updateDataTablePolicy(customerSpace1, srcTable.getName(), retentionPolicy);
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_2_MONTHS");
+
+        metadataProxy.keepTablesFor7Days(customerSpace1, Lists.newArrayList(srcTable.getName()));
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_7_DAYS");
+
+        metadataProxy.keepTablesForever(customerSpace1, Lists.newArrayList(srcTable.getName()));
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+
+        RetentionPolicyUpdateDetail retentionPolicyUpdateDetail = new RetentionPolicyUpdateDetail();
+        retentionPolicyUpdateDetail.setTableNames(Lists.newArrayList(TABLE_NAME));
+        retentionPolicyUpdateDetail.setRetentionPolicy(RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
+        metadataProxy.updateTableRetentionPolicies(customerSpace1, retentionPolicyUpdateDetail);
+        updatedTable2 = metadataProxy.getTable(customerSpace1, TABLE_NAME);
+        assertEquals(updatedTable2.getRetentionPolicy(), "KEEP_3_WEEKS");
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testUpdateTable")

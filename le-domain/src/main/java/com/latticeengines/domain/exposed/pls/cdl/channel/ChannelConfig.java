@@ -44,5 +44,7 @@ public interface ChannelConfig {
 
     boolean isSuppressContactsWithoutEmails();
 
+    boolean isSuppressAccountsWithoutLookupId();
+
     void populateLaunchFromChannelConfig(PlayLaunch playLaunch);
 }

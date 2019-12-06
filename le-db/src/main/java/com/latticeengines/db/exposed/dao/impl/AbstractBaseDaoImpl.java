@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.SoftDeletable;
 public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
     protected static final int DEFAULT_JDBC_BATCH_SIZE = 50;
+    protected static final int DEFAULT_JDBC_FETCH_SIZE = 200;
     private static final Logger log = LoggerFactory.getLogger(AbstractBaseDaoImpl.class);
 
     protected abstract SessionFactory getSessionFactory();
@@ -40,7 +41,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     protected Session getCurrentSession() {
         return getSessionFactory().getCurrentSession();
     }
-    
+
     @Deprecated
     // This is a temporary workaround to get the entity class from outside
     // When we migrate to pure JPA, we will delete this method
@@ -65,23 +66,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @Override
     public void create(Collection<T> entities, boolean setAuditFields) {
-        Session session = getCurrentSession();
-        int batchSize = getBatchSize();
-
-        Iterator<T> iterator = entities.iterator();
-        for (int i = 0; iterator.hasNext(); i++) {
-            if (i > 0 && i % batchSize == 0) {
-                //flush a batch of inserts and release memory
-                session.flush();
-                session.clear();
-            }
-
-            T entity = iterator.next();
-            if (setAuditFields) {
-                setAuditingFields(entity);
-            }
-            session.persist(entity);
-        }
+        batchSaveOrUpdate(entities, setAuditFields, true);
     }
 
     @Override
@@ -193,7 +178,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @SuppressWarnings("unchecked")
     public final List<T> findByFieldsWithPagination(long minPid, long maxPid, String primIdField,
-            Object... fieldsAndValues) {
+                                                    Object... fieldsAndValues) {
         Session session = getCurrentSession();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fieldsAndValues.length / 2; i++) {
@@ -214,7 +199,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @SuppressWarnings("unchecked")
     public final List<T> findAllSortedByFieldWithPagination(int offset, int limit,
-            String sortByField, Object... fieldsAndValues) {
+                                                            String sortByField, Object... fieldsAndValues) {
         // verify offset and limit
         if (offset < 0 || limit < 0) {
             throw new IllegalArgumentException("Value of Offset and limit should be >= 0");
@@ -287,6 +272,33 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         setAuditingFields(entity);
         Session currSession = getCurrentSession();
         currSession.update(entity);
+    }
+
+    private void batchSaveOrUpdate(Collection<T> entities, boolean setAuditFields, boolean save) {
+        Session session = getCurrentSession();
+        int batchSize = getBatchSize();
+        Iterator<T> iterator = entities.iterator();
+        for (int i = 0; iterator.hasNext(); i++) {
+            if (i > 0 && i % batchSize == 0) {
+                //flush a batch of inserts and release memory
+                session.flush();
+                session.clear();
+            }
+            T entity = iterator.next();
+            if (setAuditFields) {
+                setAuditingFields(entity);
+            }
+            if (save) {
+                session.persist(entity);
+            } else {
+                session.update(entity);
+            }
+        }
+    }
+
+    @Override
+    public void update(Collection<T> entities, boolean setAuditFields) {
+        batchSaveOrUpdate(entities, setAuditFields, false);
     }
 
     @SuppressWarnings("unchecked")
@@ -411,7 +423,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public void clearSession() {
         getCurrentSession().clear();
     }
-    
+
     @Override
     public int getBatchSize() {
         Object batch_size = getSessionFactory().getProperties().get(Environment.STATEMENT_BATCH_SIZE);

@@ -17,7 +17,7 @@ public class SalesforceChannelConfig implements ChannelConfig {
     private Long accountLimit;
 
     @JsonProperty("suppressAccountsWithoutLookupId")
-    private Boolean suppressAccountsWithoutLookupId = false;
+    private boolean suppressAccountsWithoutLookupId = false;
 
     @Override
     @JsonProperty("suppressContactsWithoutEmails")
@@ -35,7 +35,8 @@ public class SalesforceChannelConfig implements ChannelConfig {
         this.accountLimit = accountLimit;
     }
 
-    public Boolean isSuppressAccountsWithoutLookupId() {
+    @Override
+    public boolean isSuppressAccountsWithoutLookupId() {
         return suppressAccountsWithoutLookupId;
     }
 

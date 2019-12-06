@@ -103,8 +103,18 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             Set<String> internalNames = SchemaRepository.getSystemAttributes(configuration.getMainEntity(),
                     entityMatch).stream().map(InterfaceName::name).collect(Collectors.toSet());
             log.info(String.format("internal attributes %s.", internalNames));
-            Set<String> namesExcludeInternal =
-                    names.stream().filter(name -> !internalNames.contains(name)).collect(Collectors.toSet());
+            Set<String> namesExcludeInternal = names.stream().filter(name -> {
+                if (internalNames.contains(name)) {
+                    return false;
+                }
+                if (configuration.isEntityMatchEnabled()) {
+                    if (InterfaceName.AccountId.name().equals(name) || InterfaceName.ContactId.name().equals(name)) {
+                        return false;
+                    }
+                    return true;
+                }
+                return true;
+            }).collect(Collectors.toSet());
             AttrConfigRequest configRequest = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace.toString(),
                     configuration.getMainEntity(), true);
             Set<String> nameExcludeInternalAndInactive = namesExcludeInternal;
@@ -116,8 +126,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 nameExcludeInternalAndInactive =
                         namesExcludeInternal.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
             }
-
-
             int attrCount = nameExcludeInternalAndInactive.size();
             log.info(String.format( "the size of remaining attributes is %s.", attrCount));
             switch(configuration.getMainEntity()) {

@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.validations.service.impl;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,20 +18,16 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HashUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -57,7 +52,6 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingCo
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.ProductFileValidationConfiguration;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -73,7 +67,6 @@ public class ProductFileValidationService
     private static Logger log = LoggerFactory.getLogger(ProductFileValidationService.class);
 
     private static final String S3_ATLAS_DATA_TABLE_DIR = "/%s/atlas/Data/Tables";
-    private static final String PATH_SEPARATOR = "/";
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -86,15 +79,6 @@ public class ProductFileValidationService
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-
-    @Inject
-    private S3Service s3Service;
-
-    @Value("${aws.customer.s3.bucket}")
-    private String bucket;
-
-    @Value("${camille.zk.pod.id}")
-    protected String podId;
 
     @Override
     public EntityValidationSummary validate(ProductFileValidationConfiguration productFileValidationServiceConfiguration,
@@ -123,26 +107,8 @@ public class ProductFileValidationService
 
         // copy error file back to hdfs, remove local error.csv
         if (errorLine != 0L) {
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
-                    HdfsUtils.rmdir(yarnConfiguration, errorFile);
-                }
-                HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, errorFile);
-                // copy error file to s3;
-                StringBuilder sb = new StringBuilder();
-                String tenantId = productFileValidationServiceConfiguration.getCustomerSpace().getTenantId();
-                HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
-                String hdfsTablesDir = pathBuilder.getHdfsAtlasTablesDir(podId, tenantId);
-                String key = sb.append(String.format(S3_ATLAS_DATA_TABLE_DIR, tenantId))
-                        .append(getPath(pathList.get(0)).substring(hdfsTablesDir.length()))
-                        .append(PATH_SEPARATOR)
-                        .append(ImportProperty.ERROR_FILE)
-                        .toString();
-                s3Service.uploadLocalFile(bucket, key, new File(ImportProperty.ERROR_FILE), true);
-                FileUtils.forceDelete(new File(ImportProperty.ERROR_FILE));
-            } catch (IOException e) {
-                log.info("Error when copying file to hdfs");
-            }
+            copyErrorFileBackToHdfs(errorFile, productFileValidationServiceConfiguration.getCustomerSpace().getTenantId(),
+                    pathList.get(0));
         }
         return productValidationSummary;
     }

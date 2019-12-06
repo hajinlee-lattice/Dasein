@@ -2,6 +2,8 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -23,6 +25,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -30,7 +33,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
 
@@ -79,10 +86,18 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional", dataProvider = "tableProvider")
     public void findByName(String customerSpace, String tableName) {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
-
         Table table = tableEntityMgr.findByName(tableName);
+        assertNull(table.getRetentionPolicy());
+        Date updateTime = table.getUpdated();
+        assertNotNull(updateTime);
         addDataRules(table);
-        metadataService.updateTable(CustomerSpace.parse(customerSpace1), table);
+        try {
+            // sleep 1s let the update time different
+            Thread.sleep(1000l);
+        } catch (InterruptedException e) {
+
+        }
+        metadataService.updateTable(CustomerSpace.parse(customerSpace), table);
         validateTable(table);
 
         Table retrievedTable = tableEntityMgr.findByName(table.getName());
@@ -92,6 +107,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
         Table deserializedTable = JsonUtils.deserialize(serializedStr, Table.class);
         validateTable(deserializedTable);
+        assertNotEquals(updateTime, retrievedTable.getUpdated());
     }
 
     @Test(groups = "functional")
@@ -165,10 +181,38 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrs.get(3).getDataSource().get(0), "DerivedColumns");
     }
 
-    @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = { "findAll", "findByName" })
+    private Table updateTableRetentionPolicy(Table table, int count, RetentionPolicyTimeUnit retentionPolicyTimeUnit) {
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(count, retentionPolicyTimeUnit);
+        tableEntityMgr.updateTableRetentionPolicy(table.getName(), retentionPolicy);
+        return tableEntityMgr.findByName(table.getName());
+    }
+
+    @Test(groups = "functional", dataProvider = "tableProvider")
+    public void testTableRetentionPolicy(String customerSpace, String tableName) {
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
+        Table table = tableEntityMgr.findByName(tableName);
+        assertNull(table.getRetentionPolicy());
+        Table result = updateTableRetentionPolicy(table, 2, RetentionPolicyTimeUnit.DAY);
+        assertEquals(result.getRetentionPolicy(), "KEEP_2_DAYS");
+        result = updateTableRetentionPolicy(table, -1, RetentionPolicyTimeUnit.WEEK);
+        assertEquals(result.getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+        result = updateTableRetentionPolicy(table, 1, RetentionPolicyTimeUnit.YEAR);
+        assertEquals(result.getRetentionPolicy(), "KEEP_1_YEAR");
+
+        List<Table> tables = tableEntityMgr.findAllWithExpiredRetentionPolicy(0, 10);
+        assertTrue(tables.size() > 0);
+
+        RetentionPolicyUpdateDetail retentionPolicyUpdateDetail = new RetentionPolicyUpdateDetail();
+        retentionPolicyUpdateDetail.setTableNames(Lists.newArrayList(tableName));
+        retentionPolicyUpdateDetail.setRetentionPolicy(RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.WEEK));
+        tableEntityMgr.updateTableRetentionPolicies(retentionPolicyUpdateDetail);
+        result = tableEntityMgr.findByName(tableName);
+        assertEquals(result.getRetentionPolicy(), "KEEP_3_WEEKS");
+    }
+
+    @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = {"findAll", "findByName", "testTableRetentionPolicy"})
     public void testClone(String customerSpace, String tableName) throws IOException {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
-
         Table table = tableEntityMgr.findByName(tableName);
         String extractPath = "/tmp/data.txt";
         HdfsUtils.writeToFile(yarnConfiguration, extractPath, "test data\ntest data");
@@ -191,7 +235,6 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = "testClone")
     public void deleteTableAndCleanup(String customerSpace, String tableName) throws IOException {
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
-
         Table table = tableEntityMgr.findByName(tableName);
         String extractPath = "/tmp/data.txt";
         HdfsUtils.writeToFile(yarnConfiguration, extractPath, "test data\ntest data");
@@ -211,3 +254,4 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
 }
+
