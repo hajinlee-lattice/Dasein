@@ -47,6 +47,12 @@ public class EloquaChannelConfig implements ChannelConfig {
     }
 
     @Override
+    @JsonProperty("suppressContactsWithoutEmails")
+    public boolean isSuppressAccountsWithoutLookupId() {
+        return false;
+    }
+
+    @Override
     public AudienceType getAudienceType() {
         return audienceType;
     }

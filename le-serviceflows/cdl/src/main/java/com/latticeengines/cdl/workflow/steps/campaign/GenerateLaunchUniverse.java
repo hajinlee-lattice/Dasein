@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -100,9 +99,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 .customerSpace(customerSpace) //
                 .baseAccountRestriction(play.getTargetSegment().getAccountRestriction()) //
                 .baseContactRestriction(play.getTargetSegment().getContactRestriction())
-                .isSuppressAccountsWithoutLookupId(
-                        channelConfig instanceof SalesforceChannelConfig && ((SalesforceChannelConfig) channelConfig)
-                                .isSuppressAccountsWithoutLookupId() == Boolean.TRUE) //
+                .isSuppressAccountsWithoutLookupId(channelConfig.isSuppressAccountsWithoutLookupId()) //
                 .isSuppressAccountsWithoutContacts(channelConfig.isSuppressAccountsWithoutContacts())
                 .isSuppressContactsWithoutEmails(channelConfig.isSuppressContactsWithoutEmails())
                 .bucketsToLaunch(launchBuckets) //

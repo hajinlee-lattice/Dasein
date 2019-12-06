@@ -57,6 +57,12 @@ public class FacebookChannelConfig implements ChannelConfig {
         this.suppressAccountsWithoutContacts = true;
     }
 
+    @Override
+    @JsonProperty("suppressContactsWithoutEmails")
+    public boolean isSuppressAccountsWithoutLookupId() {
+        return false;
+    }
+
     public String getAudienceId() {
         return audienceId;
     }

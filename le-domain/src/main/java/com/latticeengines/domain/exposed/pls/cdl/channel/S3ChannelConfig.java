@@ -76,6 +76,12 @@ public class S3ChannelConfig implements ChannelConfig {
     public boolean isSuppressContactsWithoutEmails() { return false; }
 
     @Override
+    @JsonProperty("suppressContactsWithoutEmails")
+    public boolean isSuppressAccountsWithoutLookupId() {
+        return false;
+    }
+
+    @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
     }

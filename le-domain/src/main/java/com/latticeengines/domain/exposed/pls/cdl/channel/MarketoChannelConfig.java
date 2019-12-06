@@ -57,6 +57,12 @@ public class MarketoChannelConfig implements ChannelConfig {
         this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
     }
 
+    @Override
+    @JsonProperty("suppressContactsWithoutEmails")
+    public boolean isSuppressAccountsWithoutLookupId() {
+        return false;
+    }
+
     public String getAudienceId() {
         return audienceId;
     }
