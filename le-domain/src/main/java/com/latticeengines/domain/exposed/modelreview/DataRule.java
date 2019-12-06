@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Entity
 @javax.persistence.Table(name = "MODELREVIEW_DATARULE")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DataRule implements HasName, HasPid, Serializable, GraphNode {
 
     private static final long serialVersionUID = 4426148663250916349L;
