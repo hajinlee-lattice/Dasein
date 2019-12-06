@@ -185,11 +185,17 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             workflowJobs = workflowJobs.stream().filter(job -> {
                 String appId = job.getApplicationId();
                 if (StringUtils.isNotEmpty(appId)) {
-                    boolean isActuallyRunning = !NOT_RUNNING_STATES.contains(jobService.getJobStatus(appId).getState());
-                    if (!isActuallyRunning) {
-                        log.warn("Workflow {} is not running but labeled running.", job.getPid());
+                    try {
+                        if (NOT_RUNNING_STATES.contains(jobService.getJobStatus(appId).getState())) {
+                            log.warn("Workflow {} is not running but labeled running.", job.getPid());
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        // unable to retrieve report from cluster. consider not running
+                        log.warn("Workflow {} labeled running, but unable to retrieve state from YARN. COnsider not running.", job.getPid());
+                        log.error("{}", e.toString());
+                        return false;
                     }
-                    return isActuallyRunning;
                 }
                 return true;
             }).collect(Collectors.toList());
