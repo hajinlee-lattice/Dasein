@@ -76,7 +76,7 @@ public class S3ChannelConfig implements ChannelConfig {
     public boolean isSuppressContactsWithoutEmails() { return false; }
 
     @Override
-    @JsonProperty("suppressContactsWithoutEmails")
+    @JsonProperty("suppressAccountsWithoutLookupId")
     public boolean isSuppressAccountsWithoutLookupId() {
         return false;
     }

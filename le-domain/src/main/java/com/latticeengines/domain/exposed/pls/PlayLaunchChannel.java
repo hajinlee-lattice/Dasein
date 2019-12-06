@@ -412,16 +412,10 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     public static Date getNextDateFromCronExpression(PlayLaunchChannel channel) {
         try {
             CronExpression cronExp = new CronExpression(channel.getCronScheduleExpression());
-            Date toReturn = cronExp.getNextValidTimeAfter(
-                    channel.getNextScheduledLaunch() == null ? new Date() : channel.getNextScheduledLaunch());
-
-            if (toReturn.before(new Date())) {
-                toReturn = cronExp.getNextValidTimeAfter(new Date());
-            }
-            return toReturn;
+            return cronExp.getNextValidTimeAfter(new Date());
         } catch (ParseException e) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { String.format("Invalid Cron Schedule %s in Channel for channel id: %s",
+                    new String[] { String.format("Invalid Cron Schedule %s set for channel id: %s",
                             channel.getCronScheduleExpression(), channel.getId()) });
         }
     }

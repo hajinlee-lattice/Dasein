@@ -27,8 +27,6 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
 import com.latticeengines.domain.exposed.cdl.EventDetail;
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
@@ -44,7 +42,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
@@ -147,7 +144,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         if (channel.getExpirationDate() == null)
             log.warn(String.format("Expiration Date Null for Channel: %s", channel.getId()));
         if (channel.getExpirationDate() != null && nextLaunchDate.after(channel.getExpirationDate())) {
-
             log.info(String.format(
                     "Channel: %s has expired turning auto launches off (Expiration Date: %s, Next Scheduled Launch Date: %s)",
                     channel.getId(), channel.getExpirationDate().toString(), nextLaunchDate.toString()));
@@ -376,8 +372,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                     new String[] { "No destination system selected for the channel for play: " + play.getName() });
         }
 
-        if (channel.getLookupIdMap().getExternalSystemName() == CDLExternalSystemName.Salesforce
-                && ((SalesforceChannelConfig) channel.getChannelConfig()).isSuppressAccountsWithoutLookupId()
+        if (channel.getChannelConfig().isSuppressAccountsWithoutLookupId()
                 && StringUtils.isBlank(channel.getLookupIdMap().getAccountId())) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
                     "Cannot restrict accounts with null Ids if account id has not been set up for selected Connection" });
@@ -385,9 +380,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
         RatingEnginesCoverageRequest coverageRequest = new RatingEnginesCoverageRequest();
         coverageRequest.setRatingEngineIds(Collections.singletonList(play.getRatingEngine().getId()));
-        if (channel.getLookupIdMap().getExternalSystemType() == CDLExternalSystemType.CRM)
-            coverageRequest.setRestrictNullLookupId(
-                    ((SalesforceChannelConfig) channel.getChannelConfig()).isSuppressAccountsWithoutLookupId());
+        coverageRequest.setRestrictNullLookupId(channel.getChannelConfig().isSuppressAccountsWithoutLookupId());
         coverageRequest.setLookupId(channel.getLookupIdMap().getAccountId());
         RatingEnginesCoverageResponse coverageResponse = ratingCoverageService.getRatingCoveragesForSegment(
                 CustomerSpace.parse(tenantId).toString(), play.getTargetSegment().getName(), coverageRequest);
