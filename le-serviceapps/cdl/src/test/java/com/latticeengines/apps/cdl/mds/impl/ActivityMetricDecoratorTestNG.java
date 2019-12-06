@@ -116,14 +116,14 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
 
         ColumnMetadata cm1 = rendered.get(0);
         Assert.assertEquals(cm1.getCategory(), Category.WEB_VISIT_PROFILE);
-        Assert.assertEquals(cm1.getDisplayName(), "Visits in last 2 week");
-        Assert.assertEquals(cm1.getDescription(), "Number of visits to the url pattern Page 123 in last 2 week");
+        Assert.assertEquals(cm1.getDisplayName(), "Visited in last 2 week");
+        Assert.assertEquals(cm1.getDescription(), "Accounts visited Page 123 in last 2 week");
         Assert.assertEquals(cm1.getSubcategory(), "Page 123");
 
         ColumnMetadata cm2 = rendered.get(1);
         Assert.assertEquals(cm2.getCategory(), Category.WEB_VISIT_PROFILE);
-        Assert.assertEquals(cm2.getDisplayName(), "Visits between 2 and 4 week");
-        Assert.assertEquals(cm2.getDescription(), "Number of visits to the url pattern Page 123 between 2 and 4 week");
+        Assert.assertEquals(cm2.getDisplayName(), "Visited between 2 and 4 week");
+        Assert.assertEquals(cm2.getDescription(), "Accounts visited Page 123 between 2 and 4 week");
         Assert.assertEquals(cm2.getSubcategory(), "Page 123");
     }
 
