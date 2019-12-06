@@ -1501,6 +1501,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             Map<String, List<FieldDefinition>> inputFieldDefinitionMap = importSpec.getFieldDefinitionsRecordsMap();
             Preconditions.checkNotNull(inputFieldDefinitionMap);
             Set<String> fieldNameSet = new HashSet<>();
+            Set<String> columnNamesSet = new HashSet<>();
             for (Map.Entry<String, List<FieldDefinition>> entry : inputFieldDefinitionMap.entrySet()) {
                 List<FieldDefinition> definitions = entry.getValue();
                 for (FieldDefinition definition : definitions) {
@@ -1517,7 +1518,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     if (CollectionUtils.isEmpty(matchingColumnNames)) {
                         errors.add(String.format("empty matching columns for field %s", fieldName));
                     } else {
-                        Set<String> columnNamesSet = new HashSet<>();
                         for (String name : matchingColumnNames) {
                             if (!columnNamesSet.add(name)) {
                                 // duplicate
@@ -1534,6 +1534,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         errors.add(String.format("field type is empty for field %s", fieldName));
                     }
                     FieldDefinition existingDefinition = fieldNameToDefinition.get(fieldName);
+                    //TODO(penglong) to handle checking if there is existing tenant data before disallowing changes to
+                    // the existing definition's fieldTypes
                     if (existingDefinition != null && definition.getFieldType() != existingDefinition.getFieldType()) {
                         // error out
                         errors.add(String.format("Physical type %s of the FieldDefinition with " +
@@ -1549,12 +1551,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         FieldDefinition specDefinition = specMap.get(fieldName);
                         if (specDefinition != null && definition.getFieldType() != specDefinition.getFieldType()) {
                             // error out
-                            errors.add(String.format("Physical type %s of the FieldDefinition with " +
-                                            "same field name %s cannot be changed to %s for system type %s and " +
-                                            "system object %s",
-                                    specDefinition.getFieldType(),
-                                    fieldName, definition.getFieldType(),
-                                    specEntry.getKey().toLowerCase(), systemObject));
+                            errors.add(String.format("Physical type %s of the field name %s in the current " +
+                                            "systemType %s and systemObject %s cannot be different than the Physical " +
+                                            "type %s in other template with system type %s and system object %s",
+                                    definition.getFieldType(),
+                                    fieldName, systemType.toLowerCase(), systemObject.toLowerCase(), specDefinition.getFieldType(),
+                                    specEntry.getKey().toLowerCase(), systemObject.toLowerCase()));
                         }
                     }
                 }

@@ -55,9 +55,9 @@ public class ImportWorkflowSpecProxy extends MicroserviceRestApiProxy  {
     public List<ImportWorkflowSpec> getSpecWithSameObjectExcludeTypeFromS3(String customerSpace, String systemType,
                                                                            String systemObject) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/importworkflowspec/list" +
-                        "?systemType={systemType}&systemObject={systemObject}",
-                shortenCustomerSpace(customerSpace), systemType, systemObject);
+                "/customerspaces/{customerSpace}/importworkflowspec/list/{systemObject}" +
+                        "?excludeSystemType={systemType}",
+                shortenCustomerSpace(customerSpace), systemObject, systemType);
         return getList("get import workflow spec with same object exclude one type", url, ImportWorkflowSpec.class);
     }
 }

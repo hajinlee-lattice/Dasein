@@ -76,20 +76,20 @@ public class ImportWorkflowSpecResource {
         return table;
     }
 
-    @GetMapping(value = "/list")
+    @GetMapping(value = "/list/{systemObject}")
     @ResponseBody
     @ApiOperation("get workflow spec with same object excluding one type")
     public List<ImportWorkflowSpec> getImportWorkflowSpecWithSameObjectExcludeType(
             @PathVariable String customerSpace, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject) {
+            @PathVariable String systemObject, //
+            @RequestParam(value = "excludeSystemType", required = false) String excludeSystemType) {
         List<ImportWorkflowSpec> specs;
         try {
-            specs = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(systemType, systemObject);
+            specs = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(excludeSystemType, systemObject);
         } catch (Exception e) {
             log.error(String.format(
-                    "ImportWorkflowSpecService failed to return Spec for system type %s and system object %s.\n" +
-                            "Error was: %s", systemType, systemObject, e.toString()));
+                    "ImportWorkflowSpecService failed to return Spec for non-system Type %s and system object %s.\n" +
+                            "Error was: %s", excludeSystemType, systemObject, e.toString()));
             return null;
         }
         return specs;

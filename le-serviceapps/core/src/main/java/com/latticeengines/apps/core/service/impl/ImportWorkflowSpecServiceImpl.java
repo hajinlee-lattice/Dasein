@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,8 +82,9 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     }
 
     @Override
-    public List<ImportWorkflowSpec> loadSpecWithSameObjectExcludeTypeFromS3(String systemType, String systemObject) throws Exception {
-        String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
+    public List<ImportWorkflowSpec> loadSpecWithSameObjectExcludeTypeFromS3(String excludeSystemType,
+                                                                            String systemObject) throws Exception {
+        String fileSystemType = excludeSystemType.replaceAll("\\s", "").toLowerCase();
         String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
         String s3Path = s3Folder;
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
@@ -92,7 +94,17 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                 new S3KeyFilter(){
             @Override
             public boolean accept(String key) {
-                return key.contains(fileSystemObject) && !key.startsWith(fileSystemType) && key.endsWith(".json");
+                int index  = key.indexOf('-');
+                String type = key.substring(0, index);
+                String remainingPart = key.substring(index + 1);
+                boolean result = true;
+                if (StringUtils.isNotBlank(fileSystemType)) {
+                    result &= !type.equals(fileSystemType);
+                }
+                if (StringUtils.isNotBlank(fileSystemObject)) {
+                    result &= remainingPart.startsWith(fileSystemObject);
+                }
+                return result;
             }});
         List<ImportWorkflowSpec> specList = new ArrayList<>();
         while (specStreamIterator.hasNext()) {
