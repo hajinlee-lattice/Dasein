@@ -17,7 +17,8 @@ public class SetTenantAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.metadata.service.impl.MetadataServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.metadata.service.impl.MetadataServiceImpl.*(..)) && " +
+            "!@annotation(com.latticeengines.metadata.annotation.NoCustomSpaceAndType)")
     public void allMethodsMetadataService(JoinPoint joinPoint) {
         CustomerSpace customerSpace = (CustomerSpace) joinPoint.getArgs()[0];
         setSecurityContext(customerSpace.toString());
