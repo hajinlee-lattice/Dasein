@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.validations.InputFileValidator;
 import com.latticeengines.cdl.workflow.steps.validations.service.InputFileValidationService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -30,7 +31,6 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.CatalogFileValidationConfiguration;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("catalogFileValidationService")
 @Lazy(value = false)
@@ -48,7 +48,7 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         CSVFormat format = copyErrorFileToLocalIfExist(errorFile);
         long totalRows = catalogFileValidationServiceConfiguration.getTotalRows();
         boolean skipCheck = false;
-        if (totalRows > BaseWorkflowStep.CATALOG_RECORDS_LIMIT) {
+        if (totalRows > InputFileValidator.CATALOG_RECORDS_LIMIT) {
             skipCheck = true;
         }
         UrlValidator urlValidator = new UrlValidator();
