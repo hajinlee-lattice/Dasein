@@ -70,7 +70,6 @@ public class ImportTableResourceDeploymentTestNG extends MetadataDeploymentTestN
         Table srcTable = table;
         table = metadataProxy.getImportTable(customerSpace1, TABLE2);
         assertEquals(srcTable.getRetentionPolicy(), table.getRetentionPolicy());
-        assertEquals(srcTable.getCreated(), table.getCreated());
         assertNotNull(table);
         assertEquals(table.getDisplayName(), TABLE2 + "test");
 
