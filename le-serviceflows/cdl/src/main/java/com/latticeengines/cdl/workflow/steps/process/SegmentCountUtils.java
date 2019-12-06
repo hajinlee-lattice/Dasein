@@ -6,8 +6,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -27,10 +25,8 @@ final class SegmentCountUtils {
         }
     }
 
-    static List<String> updateEntityCounts(final SegmentProxy segmentProxy, final String customerSpace) {
-        UpdateSegmentCountResponse response = segmentProxy.updateSegmentsCounts(customerSpace);
-        log.info("Updated segment counts: " + JsonUtils.serialize(response.getUpdatedCounts()));
-        return response.getFailedSegments();
+    static void updateEntityCounts(final SegmentProxy segmentProxy, final String customerSpace) {
+        segmentProxy.updateSegmentsCounts(customerSpace);
     }
 
 }

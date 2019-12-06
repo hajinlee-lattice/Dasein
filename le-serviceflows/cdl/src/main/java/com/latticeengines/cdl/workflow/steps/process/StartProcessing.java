@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,8 +139,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         String tenantName = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         log.info("tenantName is :" + tenantName);
         if (tenantName.equalsIgnoreCase("QA_Atlas_Auto_Refresh_2")) {
-            String msg = "this warning message from tenant QA_Atlas_Auto_Refresh_2, just for testing.";
-            addToListInContext(PROCESS_ANALYTICS_WARNING_KEY, msg, String.class);
+            List<String> warningMessages = getListObjectFromContext(PROCESS_ANALYTICS_WARNING_KEY, String.class);
+            if (CollectionUtils.isEmpty(warningMessages)) {
+                warningMessages = new LinkedList<>();
+            }
+            warningMessages.add("this warning message from tenant QA_Atlas_Auto_Refresh_2, just for testing.");
+            putObjectInContext(PROCESS_ANALYTICS_WARNING_KEY, warningMessages);
         }
 
         if (!hasKeyInContext(FULL_REMATCH_PA)) {

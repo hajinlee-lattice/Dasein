@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
@@ -85,9 +84,9 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertMap(map, BusinessEntity.class, Long.class);
     }
 
-    public UpdateSegmentCountResponse updateSegmentsCounts(String customerSpace) {
+    public void updateSegmentsCounts(String customerSpace) {
         String url = constructUrl("/{customerSpace}/segments/counts", shortenCustomerSpace(customerSpace));
-        return put("updateAllCounts", url, null, UpdateSegmentCountResponse.class);
+        put("updateAllCounts", url, null, Map.class);
     }
 
     public StatisticsContainer getSegmentStats(String customerSpace, String segmentName,

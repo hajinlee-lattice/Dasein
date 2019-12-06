@@ -29,7 +29,6 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
-import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -158,8 +157,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public UpdateSegmentCountResponse updateSegmentsCounts() {
-        List<String> failedSegments = new ArrayList<>();
+    public Map<String, Map<BusinessEntity, Long>> updateSegmentsCounts() {
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<MetadataSegment> segments = getSegments();
             log.info("Updating counts for " + CollectionUtils.size(segments) + " segments.");
@@ -174,15 +172,11 @@ public class SegmentServiceImpl implements SegmentService {
                     } catch (Exception e) {
                         log.warn("Failed to update counts for segment " + name + //
                         " in tenant " + MultiTenantContext.getShortTenantId());
-                        failedSegments.add(name);
                     }
                 });
             }
             timer.setTimerMessage("Finished updating counts for " + CollectionUtils.size(segments) + " segments.");
-            UpdateSegmentCountResponse response = new UpdateSegmentCountResponse();
-            response.setUpdatedCounts(review);
-            response.setFailedSegments(failedSegments);
-            return response;
+            return review;
         }
     }
 
