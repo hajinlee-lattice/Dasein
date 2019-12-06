@@ -41,7 +41,7 @@ public class CreateCdlEventTableFilterFlow extends TypesafeDataFlowBuilder<Creat
             result = result.apply(revenueColumn + " == null ? new Double(0) : " + revenueColumn,
                     new FieldList(revenueColumn), new FieldMetadata(revenueColumn, Double.class));
         result = result.retain(new FieldList(retainFields));
-        log.info("Cdl event table filter's columns=", retainFields);
+        log.info("Cdl event table filter's columns={}", retainFields);
         return result;
     }
 
