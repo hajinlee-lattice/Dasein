@@ -62,4 +62,18 @@ public class SourceFileDaoImpl extends BaseDaoImpl<SourceFile> implements Source
         }
         return results.get(0);
     }
+
+    @Override
+    public SourceFile findByWorkflowPid(Long workflowPid) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("from %s where %s = :value",
+                getEntityClass().getSimpleName(), "workflowPid");
+        Query<SourceFile> query = session.createQuery(queryStr);
+        query.setParameter("value", workflowPid);
+        List<SourceFile> results = query.list();
+        if (results.size() == 0) {
+            return null;
+        }
+        return results.get(0);
+    }
 }
