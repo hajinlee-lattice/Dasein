@@ -10,12 +10,14 @@ import com.latticeengines.apps.cdl.mds.ActivityMetricDecoratorFac;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DummyDecorator;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("activityMetricDecorator")
 public class ActivityMetricDecoratorFacImpl implements ActivityMetricDecoratorFac {
@@ -32,6 +34,9 @@ public class ActivityMetricDecoratorFacImpl implements ActivityMetricDecoratorFa
     @Inject
     private DataCollectionService dataCollectionService;
 
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
     @Override
     public Decorator getDecorator(Namespace1<String> namespace) {
         String tenantId = namespace.getCoord1();
@@ -44,7 +49,9 @@ public class ActivityMetricDecoratorFacImpl implements ActivityMetricDecoratorFa
                 DataCollectionStatus status = //
                         dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, version);
                 String signature = status.getDimensionMetadataSignature();
-                return new ActivityMetricDecorator(signature, dimensionMetadataService, activityMetricsGroupEntityMgr);
+                Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(tenantId).toString());
+                return new ActivityMetricDecorator(signature, tenant, dimensionMetadataService,
+                        activityMetricsGroupEntityMgr);
             }
         }
         return new DummyDecorator();

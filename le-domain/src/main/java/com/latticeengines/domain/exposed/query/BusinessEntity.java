@@ -131,6 +131,8 @@ public enum BusinessEntity implements GraphNode {
         Account.addRelationship(DepivotedPurchaseHistory, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(CuratedAccount, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
+        Account.addRelationship(WebVisitProfile, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
+
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
 
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);

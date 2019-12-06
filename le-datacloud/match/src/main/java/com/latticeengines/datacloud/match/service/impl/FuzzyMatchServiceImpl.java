@@ -32,8 +32,8 @@ import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
+import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.datacloud.match.util.MatchHistoryUtils;
-import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import akka.util.Timeout;
@@ -75,6 +74,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Lazy
     @Inject
     private EntityMatchMetricService entityMatchMetricService;
+
+    @Lazy
+    @Inject
+    private MatchMetricService matchMetricService;
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
@@ -320,10 +323,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @MatchStep
     private void writeFuzzyMatchHistory(List<FuzzyMatchHistory> metrics) {
         try {
-            MeasurementMessage<FuzzyMatchHistory> message = new MeasurementMessage<>();
-            message.setMeasurements(metrics);
-            message.setMetricDB(MetricDB.LDC_Match);
-            actorSystem.getMetricActor().tell(message, null);
+            if (CollectionUtils.isNotEmpty(metrics)) {
+                metrics.forEach(matchMetricService::recordFuzzyMatchRecord);
+            }
         } catch (Exception e) {
             log.warn("Failed to extract output metric.");
         }

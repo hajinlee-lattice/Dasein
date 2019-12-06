@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.KeysWrapper;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 
 import io.swagger.annotations.Api;
@@ -130,6 +131,37 @@ public class ActivityStoreResource {
             @PathVariable(value = "streamName") String streamName, //
             @RequestParam(value = "signature", required = false) String signature) {
         return activityStoreService.getDimensionMetadataInStream(customerSpace, streamName, signature);
+    }
+
+    @PostMapping("/dimensionIds")
+    @ResponseBody
+    @ApiOperation("Allocate dimension IDs for given dimension values")
+    public Map<String, String> allocateDimensionIds( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @RequestBody KeysWrapper dimensionValues) {
+        return activityStoreService.allocateDimensionId(customerSpace, dimensionValues.getKeys());
+    }
+
+    /*-
+     * use POST for id to value & value to id lookup to prevent url from being too long
+     */
+
+    @PostMapping("/dimensionIdsByValues")
+    @ResponseBody
+    @ApiOperation("Lookup allocated dimension IDs by given dimension values")
+    public Map<String, String> getDimensionIds( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @RequestBody KeysWrapper dimensionValues) {
+        return activityStoreService.getDimensionIds(customerSpace, dimensionValues.getKeys());
+    }
+
+    @PostMapping("/dimensionValuesByIds")
+    @ResponseBody
+    @ApiOperation("Use allocated dimension IDs to lookup dimension values")
+    public Map<String, String> getDimensionValues( //
+            @PathVariable(value = "customerSpace") String customerSpace, //
+            @RequestBody KeysWrapper dimensionIds) {
+        return activityStoreService.getDimensionValues(customerSpace, dimensionIds.getKeys());
     }
 
     @GetMapping("/metricsGroups/groupId/{groupId}")

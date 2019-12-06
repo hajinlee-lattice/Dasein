@@ -48,14 +48,12 @@ public class InfluxRegistryConfig {
     @Value("${monitor.metrics.micrometer.influxdb.num.threads:2}")
     private int numThreads;
 
-    @Value("${monitor.metrics.micrometer.influxdb.autocreatedb:false}")
+    @Value("${monitor.metrics.micrometer.influxdb.autocreatedb:true}")
     private boolean autoCreateDb;
 
-    @Value("${monitor.influxdb.environment:Local}")
-    private String environment;
+    private String stack = MonitoringUtils.getStack();
 
-    @Value("${monitor.influxdb.stack:unknown}")
-    private String stack;
+    private String environment = MonitoringUtils.getEnvironment();
 
     private String hostname = MonitoringUtils.getHostName();
 

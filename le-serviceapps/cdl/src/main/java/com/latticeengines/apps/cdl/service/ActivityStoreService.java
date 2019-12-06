@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StreamDimensionEntityMgr;
@@ -119,4 +120,25 @@ public interface ActivityStoreService {
      *          ActivityMetricsGroup
      */
     ActivityMetricsGroup findGroupByGroupId(String customerSpace, String groupId);
+
+    /**
+     * Wrapper for {@link DimensionMetadataService#allocateDimensionId(String, Set)}
+     *
+     * @return map of dimension value -> allocated ID
+     */
+    Map<String, String> allocateDimensionId(@NotNull String customerSpace, @NotNull Set<String> dimensionValues);
+
+    /**
+     * Wrapper for {@link DimensionMetadataService#getDimensionValues(String, Set)}
+     *
+     * @return map of allocated ID -> dimension value
+     */
+    Map<String, String> getDimensionValues(@NotNull String customerSpace, @NotNull Set<String> dimensionIds);
+
+    /**
+     * Wrapper for {@link DimensionMetadataService#getDimensionIds(String, Set)}
+     *
+     * @return map of dimension value -> allocated ID
+     */
+    Map<String, String> getDimensionIds(@NotNull String tenantId, @NotNull Set<String> dimensionValues);
 }

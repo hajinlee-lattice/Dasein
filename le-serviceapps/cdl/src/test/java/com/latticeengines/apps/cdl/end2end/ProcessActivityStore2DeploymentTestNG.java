@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -18,6 +19,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -121,6 +123,8 @@ public class ProcessActivityStore2DeploymentTestNG extends CDLEnd2EndDeploymentT
         // problem
         SimpleTemplateMetadata webVisit = new SimpleTemplateMetadata();
         webVisit.setEntityType(EntityType.WebVisit);
+        Set<String> ignoredAttrSet = Sets.newHashSet(InterfaceName.Website.name(), InterfaceName.PostalCode.name());
+        webVisit.setIgnoredStandardAttributes(ignoredAttrSet);
         cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(webVisit));
         SimpleTemplateMetadata ptn = new SimpleTemplateMetadata();
         ptn.setEntityType(EntityType.WebVisitPathPattern);
