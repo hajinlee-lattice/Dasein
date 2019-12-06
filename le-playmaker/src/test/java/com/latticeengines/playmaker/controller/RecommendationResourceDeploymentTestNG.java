@@ -1,6 +1,7 @@
 package com.latticeengines.playmaker.controller;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,18 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         testGetRecommendations(restTemplate);
     }
 
+    @Test(groups = "deployment")
+    public void getEmptyRecommendations() {
+
+        long start = new Date().getTime();
+        String url = apiHostPort + "/playmaker/recommendations?start=" + start
+                + "&offset=1&maximum=100&destination=SFDC";
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.get(PlaymakerRecommendationEntityMgr.START_KEY), start);
+        Assert.assertNotNull(result.get(PlaymakerRecommendationEntityMgr.RECORDS_KEY));
+    }
 
     private void testGetRecommendations(OAuth2RestTemplate authRestTemplate) {
         String url = apiHostPort + "/playmaker/recommendations?start=1&offset=1&maximum=100&destination=SFDC";
@@ -151,7 +164,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
             Assert.assertTrue(rec.containsKey("SfdcContactID"));
 
             if (expectColumnsSizeEqualTo6) {
-                Assert.assertTrue(rec.size() == 6,
+                Assert.assertEquals(rec.size(), 6,
                         String.format("rec.size() = %d, expected to be = %d", rec.size(), 6));
             } else {
                 Assert.assertTrue(rec.size() > 6, String.format("rec.size() = %d, expected to be > %d", rec.size(), 6));
@@ -174,7 +187,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
-        Assert.assertTrue(result.size() == 0);
+        Assert.assertEquals(result.size(), 0);
     }
 
     @Test(groups = "deployment")
