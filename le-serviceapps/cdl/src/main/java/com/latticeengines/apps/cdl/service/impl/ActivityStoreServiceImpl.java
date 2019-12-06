@@ -146,7 +146,11 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         Preconditions.checkArgument(StringUtils.isNotBlank(streamName),
                 String.format("StreamName %s should not be blank", streamName));
         Tenant tenant = MultiTenantContext.getTenant();
-        AtlasStream stream = streamEntityMgr.findByNameAndTenant(streamName, tenant, inflateDimensions);
+        AtomicReference<AtlasStream> atmStream = new AtomicReference<>();
+        DatabaseUtils.retry("findStreamByTenantAndName", MAX_FIND_RETRY, EntityNotFoundException.class,
+                "EntityNotFoundException detected", null,
+                input -> atmStream.set(streamEntityMgr.findByNameAndTenant(streamName, tenant, inflateDimensions)));
+        AtlasStream stream = atmStream.get();
         if (!inflateDimensions && stream != null) {
             // set empty list to prevent lazy loading uninitialized proxy
             stream.setDimensions(Collections.emptyList());
