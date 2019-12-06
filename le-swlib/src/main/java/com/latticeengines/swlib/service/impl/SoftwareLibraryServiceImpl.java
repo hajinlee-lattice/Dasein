@@ -124,7 +124,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
                 }
             }
         } catch (FileNotFoundException e) {
-            log.warn(e.getMessage());
+            log.warn(e.getMessage(), e);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -147,6 +147,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         return loadSoftwarePackages(module, Arrays.asList(SoftwareLibrary.values()), context);
     }
 
+    @Override
     public ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context) {
         return loadSoftwarePackages(module, names.stream().map(SoftwareLibrary::fromName).collect(Collectors.toList()),
                 context);
