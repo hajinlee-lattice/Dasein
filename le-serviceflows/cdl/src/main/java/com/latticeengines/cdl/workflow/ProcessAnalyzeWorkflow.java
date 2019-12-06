@@ -14,6 +14,7 @@ import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
+import com.latticeengines.cdl.workflow.steps.process.GeneratePreScoringReport;
 import com.latticeengines.cdl.workflow.steps.process.GenerateProcessingReport;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -41,6 +42,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
 
     @Inject
     private GenerateProcessingReport generateProcessingReport;
+
+    @Inject
+    private GeneratePreScoringReport generatePreScoringReport;
 
     @Inject
     private ProcessAnalyzeListener processAnalyzeListener;
@@ -124,6 +128,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(combineStatistics) //
                 .next(exportToRedshift) //
                 .next(exportToDynamo) //
+                .next(generatePreScoringReport) //
                 .next(processRatingWorkflow) //
                 .next(generateProcessingReport) //
                 .next(exportProcessAnalyzeToS3) //
