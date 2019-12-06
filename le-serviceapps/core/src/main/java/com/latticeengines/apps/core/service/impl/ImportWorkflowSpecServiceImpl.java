@@ -86,25 +86,30 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                                                                             String systemObject) throws Exception {
         String fileSystemType = excludeSystemType.replaceAll("\\s", "").toLowerCase();
         String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
-        String s3Path = s3Folder;
-        log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
+        log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Folder);
 
         // Read in S3 file as InputStream.
-        Iterator<InputStream> specStreamIterator = s3Service.getObjectStreamIterator(s3Bucket, s3Path,
+        Iterator<InputStream> specStreamIterator = s3Service.getObjectStreamIterator(s3Bucket, s3Folder,
                 new S3KeyFilter(){
             @Override
             public boolean accept(String key) {
-                int index  = key.indexOf('-');
-                String type = key.substring(0, index);
-                String remainingPart = key.substring(index + 1);
-                boolean result = true;
-                if (StringUtils.isNotBlank(fileSystemType)) {
-                    result &= !type.equals(fileSystemType);
+                // key example: /import-sepcs/other-contacts-spec.json
+                if (key.endsWith("/")) {
+                    return false;
+                } else {
+                    String name = key.substring(key.lastIndexOf("/") + 1);
+                    int index = name.indexOf('-');
+                    String type = name.substring(0, index);
+                    String remainingPart = name.substring(index + 1);
+                    boolean result = true;
+                    if (StringUtils.isNotBlank(fileSystemType)) {
+                        result &= !type.equals(fileSystemType);
+                    }
+                    if (StringUtils.isNotBlank(fileSystemObject)) {
+                        result &= remainingPart.startsWith(fileSystemObject);
+                    }
+                    return result;
                 }
-                if (StringUtils.isNotBlank(fileSystemObject)) {
-                    result &= remainingPart.startsWith(fileSystemObject);
-                }
-                return result;
             }});
         List<ImportWorkflowSpec> specList = new ArrayList<>();
         while (specStreamIterator.hasNext()) {
@@ -112,7 +117,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                 ImportWorkflowSpec workflowSpec = JsonUtils.deserialize(specStreamIterator.next(), ImportWorkflowSpec.class);
                 specList.add(workflowSpec);
             } catch (Exception e) {
-                log.error("JSON deserialization of Spec file from S3 bucket " + s3Bucket + " and path " + s3Path +
+                log.error("JSON deserialization of Spec file from S3 bucket " + s3Bucket + " and path " + s3Folder +
                         " failed with error:", e);
                 throw e;
             }

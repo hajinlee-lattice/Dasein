@@ -450,6 +450,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         // case 2.b duplicate column name across the field definition
         FieldDefinition lastNameDefinition = fieldNameToDefinition.get("LastName");
         lastNameDefinition.setMatchingColumnNames(Arrays.asList("First Name", "LAST NAME"));
+        specInputStream = new ByteArrayInputStream(JsonUtils.serialize(testSpec).getBytes());
         errors  = modelingFileMetadataService.validateIndividualSpec("other", "contacts",
                 specInputStream);
         Assert.assertNotNull(errors);

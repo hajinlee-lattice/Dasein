@@ -79,7 +79,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
         String systemType = "specfunctest", systemObject = "contacts";
         List<ImportWorkflowSpec> specList = null;
         try {
-            specList = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3("specfunctest", "contacts");
+            specList = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(systemType, systemObject);
 
         } catch (Exception e) {
             log.error("Loading Spec from S3 failed with error:", e);
@@ -94,7 +94,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
         }
         ImportWorkflowSpec spec =
                 specList.stream().filter(workflowSpec -> systemType.equals(workflowSpec.getSystemType().toLowerCase())).findFirst().orElse(null);
-        Assert.assertNotNull(spec);
+        Assert.assertNull(spec);
     }
 
 }
