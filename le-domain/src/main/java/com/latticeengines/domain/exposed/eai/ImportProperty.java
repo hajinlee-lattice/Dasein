@@ -33,6 +33,7 @@ public class ImportProperty extends BaseProperty {
     public static final String USE_S3_INPUT = "useS3Input";
     public static final String S3_BUCKET = "s3Bucket";
     public static final String S3_OBJECT_KEY = "s3ObjectKey";
+    public static final String S3_FILE_SIZE = "s3FileSize";
     public static final String ERROR_FILE = "error.csv";
     public static final String[] ERROR_HEADER = new String[] { "LineNumber", "Id", "ErrorMessage" };
 }
