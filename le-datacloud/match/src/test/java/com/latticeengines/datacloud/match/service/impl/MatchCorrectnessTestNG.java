@@ -2,14 +2,16 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputService;
@@ -76,8 +78,8 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
             { null, "Microsoft Corporation", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { null, "Microsoft Corp.", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
-            { null, "Google Inc.", null, null, null, null, null, "abc.xyz", "ALPHABET INC.",
-                    "California", "USA", ">10,000", ">10B" },
+            { null, "Google Inc.", null, null, null, null, null, "abc.xyz||google.com",
+                    "ALPHABET INC.||Google LLC", "California", "USA", ">10,000", ">10B" },
             // { null, "Apple Inc", null, null, null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
             // { null, "Apple", null, "CA", null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
     };
@@ -110,10 +112,10 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final int EXPECTED_EMP_IDX = 11;
     private static final int EXPECTED_REV_IDX = 12;
 
-    @Autowired
+    @Inject
     private RealTimeMatchService realTimeMatchService;
 
-    @Autowired
+    @Inject
     private TestMatchInputService testMatchInputService;
 
     @Test(groups = "functional", dataProvider = "TestData")
@@ -138,8 +140,16 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
         Assert.assertTrue(record.isMatched(), "This row is not matched: " + StringUtils.join(row, ","));
         List<Object> matchedRow = record.getOutput();
         for (int j = 0; j < idxMap.length; j++) {
-            Assert.assertEquals(String.valueOf(matchedRow.get(j)).toUpperCase(),
-                    String.valueOf(row[idxMap[j]]).toUpperCase(), "Testing Data: " + StringUtils.join(row, ","));
+            String[] expectedCandidates = String.valueOf(row[idxMap[j]]).toUpperCase().split("\\|\\|");
+            boolean matched = false;
+            for (String expectedCandidate : expectedCandidates) {
+                matched = String.valueOf(matchedRow.get(j)).toUpperCase().equals(expectedCandidate);
+                if (matched) {
+                    break;
+                }
+            }
+            Assert.assertTrue(matched, String.format("Actual data: %s, Expected data: %s",
+                    JsonUtils.serialize(matchedRow), StringUtils.join(row, ",")));
         }
     }
 
