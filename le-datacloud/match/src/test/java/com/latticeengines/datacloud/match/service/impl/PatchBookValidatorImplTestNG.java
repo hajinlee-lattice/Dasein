@@ -137,7 +137,7 @@ public class PatchBookValidatorImplTestNG extends DataCloudMatchFunctionalTestNG
         map2.put(MatchKeyUtils.AM_FIELD_MAP.get(MatchKey.DUNS), "123456778  "); // excludedPatchItem
         map2.put("City", "  Mountain View  "); // column not present in AccountMasterColumn
         Map<String, Object> map4 = new HashMap<>();
-        map4.put("BmbrSurge_2in1PCs_BuckScore", "test_value");
+        map4.put("BmbrSurge_2in1PCs_CompScore", "test_value");
         Map<String, Object> map5 = new HashMap<>();
         map5.put("Bmbr30_Enterprise_TotalPctCh", "test.com");
         return new Object[][] {
@@ -193,7 +193,7 @@ public class PatchBookValidatorImplTestNG extends DataCloudMatchFunctionalTestNG
                                     2L),
                     // Encoded Attributes not allowed to patch
                             newError(PatchBookValidator.ENCODED_ATTRS_NOT_SUPPORTED
-                            + "[BmbrSurge_2in1PCs_BuckScore]", 7L),
+                                        + "[BmbrSurge_2in1PCs_CompScore]", 7L),
                     // Type = Attribute and isCleanup = true
                             newError(PatchBookValidator.ERR_ATTRI_CLEANUP, 9L, 10L)}
                 }
