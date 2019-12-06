@@ -97,7 +97,7 @@ public class QueryEvaluatorService {
     }
 
     public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query, String sqlUser, //
-                                                 Map<String, Map<Long, String>> decodeMapping) {
+            Map<String, Map<Long, String>> decodeMapping) {
         SQLQuery<?> sqlQuery = constructSqlQuery(attrRepo, query, sqlUser);
         AtomicLong startTime = new AtomicLong();
         AtomicLong counter = new AtomicLong(0);
@@ -106,9 +106,11 @@ public class QueryEvaluatorService {
                 .doOnNext(m -> counter.getAndIncrement()) //
                 .doOnComplete(() -> {
                     String msg = String.format(
-                            "[Metric] Finished fetching %d records. tenantId=%s SQLQuery=%s ElapsedTime=%d ms",
+                            "[Metric] Finished fetching %d records. tenantId=%s SQLQuery=%s Bindings=%s ElapsedTime=%d ms",
                             counter.get(), attrRepo.getCustomerSpace().getTenantId(),
                             sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "),
+                            sqlQuery.getSQL().getNullFriendlyBindings().toString().trim() //
+                                    .replaceAll(System.lineSeparator(), " "),
                             System.currentTimeMillis() - startTime.get());
                     log.info(msg);
                 });
