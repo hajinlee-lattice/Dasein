@@ -174,6 +174,10 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         log.info(String.format("Download file with applicationId=%s", applicationId));
         SourceFile sourceFile = sourceFileProxy.findByApplicationId(MultiTenantContext.getShortTenantId(),
                 applicationId);
+        if(sourceFile == null) {
+            Job workflowJob = workflowProxy.getWorkflowJobFromApplicationId(applicationId, MultiTenantContext.getShortTenantId());
+            sourceFile = sourceFileProxy.findByWorkflowPid(MultiTenantContext.getShortTenantId(), String.valueOf(workflowJob.getPid()));
+        }
         validateSourceFile(sourceFile);
         downloadSourceFileCsv(request, response, mimeType, fileDisplayName, sourceFile);
     }

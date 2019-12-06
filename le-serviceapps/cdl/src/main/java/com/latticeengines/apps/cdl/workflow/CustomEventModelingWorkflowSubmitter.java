@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -103,6 +104,8 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
         }
         CustomEventModelingWorkflowConfiguration configuration = generateConfiguration(parameters, sourceFile);
         ApplicationId applicationId = workflowJobService.submit(configuration);
+        Job job = workflowJobService.findByApplicationId(applicationId.toString());
+        sourceFile.setWorkflowPid(job.getPid());
         sourceFile.setApplicationId(applicationId.toString());
         plsInternalProxy.updateSourceFile(sourceFile, customerSpace);
         return applicationId;

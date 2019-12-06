@@ -21,4 +21,6 @@ public interface SourceFileEntityMgr extends BaseEntityMgrRepository<SourceFile,
     SourceFile getByTableName(String tableName);
 
     void create(SourceFile sourceFile, Tenant tenant);
+
+    SourceFile findByWorkflowPid(Long workflowPid);
 }

@@ -17,4 +17,5 @@ public interface SourceFileDao extends BaseDao<SourceFile> {
 
     SourceFile getByTableName(String tableName);
 
+    SourceFile findByWorkflowPid(Long workflowPid);
 }

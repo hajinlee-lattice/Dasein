@@ -233,6 +233,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     }
     
     var finalDfs = new ListBuffer[DataFrame]()
+    var contactNums = new Array[Long](2)
     if (createRecommendationDataFrame) {
         val recommendationDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable, completeContactTable).checkpoint(eager = true)
         exportToRecommendationTable(deltaCampaignLaunchSparkContext, recommendationDf)
@@ -243,6 +244,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
                 // replace contacts
                 val aggregatedContacts = aggregateContacts(addContactTable, contactCols, joinKey)
                 finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
+                val contactCount = finalrecommendationDf.agg(sum("CONTACT_NUM")).first.get(0)
+                contactNums(0) = if (contactCount != null) contactCount.toString.toLong else 0L
             } else {
                 finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumn("CONTACTS", lit(""))
             }
@@ -257,6 +260,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         finalDfs += deleteCsvDataFrame
     }
     lattice.output = finalDfs.toList
+    lattice.outputStr = contactNums.mkString("[", ",", "]")
   }
   
   

@@ -21,6 +21,7 @@ import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.Proces
 import com.latticeengines.cdl.workflow.steps.play.FrontEndQueryCreator;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -202,6 +203,14 @@ public class DeltaCampaignLaunchInitStep
 
         int resultDataFrameNum = result.getTargets().size();
         log.info("resultDataFrameNum=" + resultDataFrameNum);
+        log.info(result.getOutput());
+        long totalAccountsAvailableForLaunch = playLaunchContext.getPlayLaunch().getAccountsSelected();
+        long totalContactsAvailableForLaunch = playLaunchContext.getPlayLaunch().getContactsSelected();
+        log.info(String.format("Total available accounts available for Launch: %d, contacts: %d",
+                totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch));
+        long launchedAccountNum = 0L;
+        long launchedContactNum = 0L;
+
         if (createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             String recommendationTargetPath = result.getTargets().get(0).getPath();
             log.info("recommendationTargetPath: " + recommendationTargetPath);
@@ -211,6 +220,12 @@ public class DeltaCampaignLaunchInitStep
             log.info("addCsvTargetPath: " + addCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(addCsvTargetPath));
+
+            launchedAccountNum = result.getTargets().get(1).getCount();
+            // return a string of array.
+            // the first element is the contact num for add csv
+            launchedContactNum = JsonUtils
+                    .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
         } else if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
             String recommendationTargetPath = result.getTargets().get(0).getPath();
             log.info("recommendationTargetPath: " + recommendationTargetPath);
@@ -224,29 +239,31 @@ public class DeltaCampaignLaunchInitStep
             log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(deleteCsvTargetPath));
+
+            launchedAccountNum = result.getTargets().get(1).getCount();
+            // return a string of array.
+            // the first element is the contact num for add csv
+            launchedContactNum = JsonUtils
+                    .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
         } else if (!createAddCsvDataFrame && createDeleteCsvDataFrame) {
             String deleteCsvTargetPath = result.getTargets().get(0).getPath();
             log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(deleteCsvTargetPath));
         } else {
-            throw new RuntimeException("Illegial situation.");
+            throw new RuntimeException("Illegal situation.");
         }
 
-        // PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-        // playLaunch.setAccountsLaunched(launchedAccountNum);
-        // playLaunch.setContactsLaunched(launchedContactNum);
-        // long suppressedAccounts = (totalAccountsAvailableForLaunch -
-        // launchedAccountNum);
-        // playLaunch.setAccountsSuppressed(suppressedAccounts);
-        // long suppressedContacts = (totalContactsAvailableForLaunch -
-        // launchedContactNum);
-        // playLaunch.setContactsSuppressed(suppressedContacts);
-        // campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
-        // log.info(String.format("Total suppressed account count for launch:
-        // %d", suppressedAccounts));
-        // log.info(String.format("Total suppressed contact count for launch:
-        // %d", suppressedContacts));
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        playLaunch.setAccountsLaunched(launchedAccountNum);
+        playLaunch.setContactsLaunched(launchedContactNum);
+        long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
+        playLaunch.setAccountsSuppressed(suppressedAccounts);
+        long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
+        playLaunch.setContactsSuppressed(suppressedContacts);
+        campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
+        log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
+        log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
         publishTalkingPoints(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
     }
 
