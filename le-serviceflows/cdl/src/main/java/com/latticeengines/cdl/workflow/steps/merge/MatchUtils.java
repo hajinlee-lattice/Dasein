@@ -68,7 +68,7 @@ public final class MatchUtils {
 
     static String getAllocateIdMatchConfigForContact(String customer, MatchInput baseMatchInput,
             Set<String> columnNames, List<String> accountSystemIds, List<String> contactSystemIds,
-            String newAccountTableName, boolean hasConvertBatchStore) {
+            String newAccountTableName, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
         baseMatchInput.setTargetEntity(Contact.name());
@@ -82,7 +82,8 @@ public final class MatchUtils {
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
-                .fromKeyMap(getAccountMatchKeysForContact(columnNames, accountSystemIds, hasConvertBatchStore));
+                .fromKeyMap(getAccountMatchKeysForContact(columnNames, accountSystemIds, hasConvertBatchStore,
+                        ignoreDomainMatchKey));
         MatchInput.EntityKeyMap contactKeyMap = MatchInput.EntityKeyMap
                 .fromKeyMap(getContactMatchKeys(columnNames, contactSystemIds, hasConvertBatchStore));
         baseMatchInput.setEntityKeyMaps(new HashMap<>(ImmutableMap.of( //
@@ -98,17 +99,27 @@ public final class MatchUtils {
     }
 
     private static Map<MatchKey, List<String>> getAccountMatchKeysForContact(Set<String> columnNames,
-            List<String> systemIds, boolean hasConvertBatchStore) {
-        return getAccountMatchKeys(columnNames, systemIds, true, hasConvertBatchStore);
+            List<String> systemIds, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey) {
+        return getAccountMatchKeys(columnNames, systemIds, true, hasConvertBatchStore, ignoreDomainMatchKey);
     }
 
     private static Map<MatchKey, List<String>> getAccountMatchKeys(Set<String> columnNames, List<String> systemIds,
             boolean considerEmail, boolean hasConvertBatchStore) {
+        return getAccountMatchKeys(columnNames, systemIds, considerEmail, hasConvertBatchStore, false);
+    }
+
+    /*-
+     * ignoreDomainMatchKey is added to determine whether domain lookup is causing hot partition
+     */
+    private static Map<MatchKey, List<String>> getAccountMatchKeys(Set<String> columnNames, List<String> systemIds,
+            boolean considerEmail, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey) {
         Map<MatchKey, List<String>> matchKeys = new HashMap<>();
-        if (considerEmail) {
+        if (considerEmail && !ignoreDomainMatchKey) {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Domain, InterfaceName.Email.name());
         }
-        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Domain, InterfaceName.Website.name());
+        if (!ignoreDomainMatchKey) {
+            addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Domain, InterfaceName.Website.name());
+        }
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.DUNS, InterfaceName.DUNS.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Name, InterfaceName.CompanyName.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.City, InterfaceName.City.name());

@@ -1437,15 +1437,7 @@ public class SchemaRepository {
     }
 
     public List<Attribute> getMatchingAttributes(SchemaInterpretation schema) {
-        Attribute website = attr("Website") //
-                .allowedDisplayNames(Sets.newHashSet("WEBSITE")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Website) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .build();
-
+        Attribute website = attrWebsite();
         Attribute email = attr("Email") //
                 .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL_ADDRESS")) //
                 .physicalDataType(Schema.Type.STRING) //
@@ -1454,37 +1446,10 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_EMAIL) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .build();
-        Attribute city = attr("City") //
-                .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING_CITY")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.City) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
-        Attribute state = attr("State") //
-                .allowedDisplayNames(Sets.newHashSet("STATE", "STATE PROVINCE", "STATE_PROVINCE", "BILLING_STATE",
-                        "BILLING_PROVINCE")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.State) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
-        Attribute country = attr("Country") //
-                .allowedDisplayNames(Sets.newHashSet("COUNTRY", "BILLING_COUNTRY")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Country) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
-        Attribute postalCode = attr("PostalCode") //
-                .allowedDisplayNames(Sets.newHashSet("ZIP", "POSTALCODE", "BILLING_ZIP", "POSTAL CODE", "POSTAL_CODE"
-                        , "BILLINGPOSTALCODE", "BILLING_POSTAL_CODE", "BILLING_POSTALCODE", "BILLING_ZIP_CODE",
-                        "ZIPCODE","ZIP_CODE", "BILLING_ZIPCODE", "BILLINGZIPCODE")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.PostalCode) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
+        Attribute city = attrCity();
+        Attribute state = attrState();
+        Attribute country = attrCountry();
+        Attribute postalCode = attrPostalCode();
 
         Attribute contactCompanyName = attr(InterfaceName.CompanyName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COMPANY_NAME", "ACCOUNT_NAME", "COMPANY")) //
@@ -1510,13 +1475,7 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();
 
-        Attribute duns = attr("DUNS") //
-                .allowedDisplayNames(Sets.newHashSet("DUNS", "DUNS_NUMBER")) //
-                .physicalDataType(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.DUNS) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
+        Attribute duns = attrDUNS();
 
         Attribute address1 = attr(InterfaceName.Address_Street_1.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ADDRESS1", "ADDRESS_STREET_1", "ADDRESS_1")) //
@@ -1610,7 +1569,8 @@ public class SchemaRepository {
                 break;
             case WebVisit:
                 attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrWebVisitDate(), attrUserId(), //
-                        attrSourceMedium(), attrCompanyName(), attrCity(), attrState(), attrCountry(), attrDUNS()));
+                        attrSourceMedium(), attrCompanyName(), attrWebsite(), attrCity(), attrState(), attrCountry(), //
+                        attrPostalCode(), attrDUNS()));
                 schemaTable = createTable(SchemaInterpretation.WebVisit);
                 schemaTable.addAttributes(attrs);
                 break;
@@ -1636,7 +1596,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.WebVisitDate) //
                 .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_YEAR) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
                 .build();
     }
 
@@ -1683,6 +1643,17 @@ public class SchemaRepository {
                 .build();
     }
 
+    private Attribute attrWebsite() {
+        return attr(InterfaceName.Website.name()) //
+                .allowedDisplayNames(Arrays.asList("WEBSITE", "DOMAIN")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Website) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .build();
+    }
+
     private Attribute attrCity() {
         return attr(InterfaceName.City.name()) //
                 .allowedDisplayNames(Arrays.asList("CITY", "BILLING_CITY")) //
@@ -1709,6 +1680,17 @@ public class SchemaRepository {
                 .allowedDisplayNames(Arrays.asList("COUNTRY", "BILLING_COUNTRY")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrPostalCode() {
+        return attr(InterfaceName.PostalCode.name()) //
+                .allowedDisplayNames(Arrays.asList("ZIP", "ZIP_CODE", "POSTAL_CODE", "BILLING_ZIP",
+                        "BILLING_ZIP_CODE", "BILLING_POSTAL_CODE")) //
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build();

@@ -12,6 +12,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public interface MetadataService {
@@ -31,7 +33,7 @@ public interface MetadataService {
     void renameTable(CustomerSpace customerSpace, String oldName, String newName);
 
     Map<String, Set<AnnotationValidationError>> validateTableMetadata(CustomerSpace customerSpace,
-            ModelingMetadata modelingMetadata);
+                                                                      ModelingMetadata modelingMetadata);
 
     List<Table> getImportTables(CustomerSpace customerSpace);
 
@@ -53,4 +55,9 @@ public interface MetadataService {
 
     Long getTableAttributeCount(CustomerSpace space, String tableName);
 
+    void updateTableRetentionPolicy(CustomerSpace customerSpace, String tableName, RetentionPolicy retentionPolicy);
+
+    List<Table> findAllWithExpiredRetentionPolicy(int index, int max);
+
+    void updateTableRetentionPolicies(CustomerSpace customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail);
 }

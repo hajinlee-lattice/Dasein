@@ -41,7 +41,7 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
     @Value("common.internal.app.url")
     private String internalAppUrl;
 
-    private final String campaignDeltaCalculationUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-delta-calculation?launchId=";
+    private final String campaignDeltaCalculationUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-delta-calculation";
     private final String campaignLaunchUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/launch?is-auto-launch=true&state=";
     private final String setChannelScheduleUrlPrefix = "/customerspaces/{customerSpace}/plays//{playName}/channels/{channelId}/next-scheduled-date";
 
@@ -99,20 +99,12 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
 
     private boolean queueNewDeltaCalculationJob(PlayLaunchChannel channel) {
         try {
-            Play play = channel.getPlay();
-            String url = constructUrl(campaignLaunchUrlPrefix + LaunchState.UnLaunched.name(),
-                    CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), play.getName(), channel.getId());
-
-            PlayLaunch launch = post("Creating Unlaunched Campaign Launch", url, null, PlayLaunch.class);
-            log.info("Created Unlaunched Campaign Launch for campaignId " + play.getName() + ", Channel ID: "
-                    + channel.getId() + " Launch Id: " + launch.getLaunchId());
-
-            url = constructUrl(campaignDeltaCalculationUrlPrefix + launch.getLaunchId(),
+            String url = constructUrl(campaignDeltaCalculationUrlPrefix,
                     CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
                     channel.getId());
             Long workflowPid = post("Kicking off delta calculation", url, null, Long.class);
             log.info("Queued a delta calculation job for campaignId " + channel.getPlay().getName() + ", Channel ID: "
-                    + channel.getId() + " Launch Id: " + launch.getLaunchId() + "  WorkflowPid: " + workflowPid);
+                    + channel.getId() + " WorkflowPid: " + workflowPid);
             return true;
         } catch (Exception e) {
             log.error("Failed to Kick off delta calculation for channel: " + channel.getId() + " \n", e);

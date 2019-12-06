@@ -3,6 +3,7 @@ package com.latticeengines.proxy.exposed.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.KeysWrapper;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -106,6 +108,31 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata/{signature}",
                 shortenCustomerSpace(customerSpace), signature);
         delete("delete_dimension_metadata_with_signature", url);
+    }
+
+    // values -> ids
+    public Map<String, String> allocateDimensionIds(@NotNull String customerSpace,
+            @NotNull Set<String> dimensionValues) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionIds",
+                shortenCustomerSpace(customerSpace));
+        Map<?, ?> rawMap = post("allocate_dimension_ids", url, new KeysWrapper(dimensionValues), Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, String.class);
+    }
+
+    // ids -> values
+    public Map<String, String> getDimensionIds(@NotNull String customerSpace, @NotNull Set<String> dimensionValues) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionIdsByValues",
+                shortenCustomerSpace(customerSpace));
+        Map<?, ?> rawMap = post("get_dimension_ids", url, new KeysWrapper(dimensionValues), Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, String.class);
+    }
+
+    // values -> ids
+    public Map<String, String> getDimensionValues(@NotNull String customerSpace, @NotNull Set<String> dimensionIds) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionValuesByIds",
+                shortenCustomerSpace(customerSpace));
+        Map<?, ?> rawMap = post("get_dimension_values", url, new KeysWrapper(dimensionIds), Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, String.class);
     }
 
     public ActivityMetricsGroup findGroupByGroupId(@NotNull String customerSpace, @NotNull String groupId) {

@@ -18,9 +18,11 @@ import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.monitor.util.MonitoringUtils;
 
 import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import io.micrometer.core.instrument.config.MeterFilter;
+import io.micrometer.core.instrument.config.MeterFilterReply;
 
 /**
  * Root config for micrometer registry
@@ -113,8 +115,32 @@ public class MeterRegistryConfig {
         }
 
         // not recording metrics for tests
-        registry.config().meterFilter(excludeTestTenantFilter());
+        registry.config() //
+                .meterFilter(excludeTestTenantFilter()) //
+                .meterFilter(excludeSystemMetricsFilter());
         return registry;
+    }
+
+    // exclude all metrics by spring actuator for now, enable later if necessary
+    private MeterFilter excludeSystemMetricsFilter() {
+        return new MeterFilter() {
+            @Override
+            public MeterFilterReply accept(Meter.Id id) {
+                if (id.getName().startsWith("tomcat.")) {
+                    return MeterFilterReply.DENY;
+                }
+                if (id.getName().startsWith("jvm.")) {
+                    return MeterFilterReply.DENY;
+                }
+                if (id.getName().startsWith("process.")) {
+                    return MeterFilterReply.DENY;
+                }
+                if (id.getName().startsWith("system.")) {
+                    return MeterFilterReply.DENY;
+                }
+                return MeterFilterReply.NEUTRAL;
+            }
+        };
     }
 
     private MeterFilter excludeTestTenantFilter() {

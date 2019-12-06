@@ -66,12 +66,12 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
             Pair.of("Tag1", "Value1"), Pair.of("Tag2", "Value2"));
 
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "pipeline1")
     public void setup() throws Exception {
         prepareCleanPod(s3Bucket, POD);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "pipeline1")
     public void destroy() {
         prepareCleanPod(s3Bucket, POD);
     }
@@ -85,7 +85,7 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
      * 5. Copy from s3 back to hdfs -- verify success (existed files on hdfs should be deleted)
      * 6. Copy from s3 back to hdfs again with failIfExisted = true -- verify fail
      */
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testIngestionSource() {
         uploadSourceToHdfs(INGESTION_SOURCE, CURR_VER, INGESTION_SOURCE_FILES, false);
 
@@ -111,7 +111,7 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
      * 5. Copy from s3 back to hdfs -- verify success (existed files on hdfs should be deleted)
      * 6. Copy from s3 back to hdfs again with failIfExisted = true -- verify fail
      */
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testGeneralSource() {
         uploadSourceToHdfs(GENERAL_SOURCE, CURR_VER, GENERAL_SOURCE_FILES, true);
 
@@ -138,7 +138,7 @@ public class SourceHdfsS3TransferServiceImplTestNG extends DataCloudEtlFunctiona
      * 5. Copy PREV_VER from s3 back to hdfs -- verify success
      *    (existed files on hdfs should be deleted; _CURRENT_VERSION on hdfs should not be updated)
      */
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testGeneralSource2() {
         uploadSourceToHdfs(GENERAL_SOURCE_2, PREV_VER, GENERAL_SOURCE_FILES, false);
         uploadSourceToHdfs(GENERAL_SOURCE_2, CURR_VER, GENERAL_SOURCE_FILES, false);

@@ -326,7 +326,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         if(nameKeyword == null) {
             Assert.assertNull(output.getResult().get(0).getOutput().get(0));
         } else {
-            Assert.assertTrue(output.getResult().get(0).getOutput().get(0).toString().contains(nameKeyword));
+            Assert.assertTrue(output.getResult().get(0).getOutput().get(0).toString().contains(nameKeyword),
+                    String.format("Matched name %s doesn't contain expected keyword %s:",
+                            output.getResult().get(0).getOutput().get(0).toString(), nameKeyword));
         }
         Assert.assertEquals(output.getResult().get(0).getOutput().get(1).toString(), String.valueOf(isPublicDomain));
     }
@@ -349,7 +351,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 // public domain with Valid Name : will be treated as public
                 // domain when matching and match to google entity(as name
                 // provided)
-                { 4, "facebook.com", "Google", null, true, true, "Alphabet" }, //
+                { 4, "facebook.com", "Google", null, true, true, "Google" }, //
                 // public domain with invalid name : will be treated as public
                 // domain and no match
                 { 5, "facebook.com", "Fake Name", null, true, false, null }, //
@@ -552,7 +554,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         verifyMatchedDuns(output, expectedTargetDuns);
         if (expectedBookSource != null) {
             // should be redirected with the correct keyPartition & bookSource
-            Assert.assertTrue(containsRedirectLog(output, tuple, expectedBookSource));
+            Assert.assertTrue(containsRedirectLog(output, tuple, expectedBookSource),
+                    String.format("Match log doesn't contain expected duns guide book source %s: %s",
+                            expectedBookSource, JsonUtils.serialize(output.getResult().get(0).getMatchLogs())));
         }
     }
 

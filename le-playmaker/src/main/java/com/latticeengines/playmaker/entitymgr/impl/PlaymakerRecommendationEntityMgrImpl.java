@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
         truncateDescriptionLength(recommendations);
 
-        return wrapResult(recommendations);
+        return wrapResult(recommendations, start);
     }
 
     @Override
@@ -127,12 +128,12 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     @Override
     public Map<String, Object> getContacts(String tenantName, String lookupSource, long start, int offset, int maximum,
-            List<String> contactIds, List<String> accountIds, Long recStart, List<String> playIds, Map<String, String> orgInfo,
-            Map<String, String> appId) {
+            List<String> contactIds, List<String> accountIds, Long recStart, List<String> playIds,
+            Map<String, String> orgInfo, Map<String, String> appId) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
-        List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds, accountIds, recStart, playIds,
-                orgInfo, appId);
+        List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds, accountIds, recStart,
+                playIds, orgInfo, appId);
         Map<String, Object> result = wrapResult(contacts);
         log.debug("get contacts: {}", result);
         return result;
@@ -140,8 +141,8 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     @Override
     public Map<String, Object> getContactCount(String tenantName, String lookupSource, long start,
-            List<String> contactIds, List<String> accountIds, Long recStart, List<String> playIds, Map<String, String> orgInfo,
-            Map<String, String> appId) {
+            List<String> contactIds, List<String> accountIds, Long recStart, List<String> playIds,
+            Map<String, String> orgInfo, Map<String, String> appId) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
         Map<String, Object> result = new HashMap<>();
@@ -210,14 +211,25 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
         return dao.getWorkflowTypes();
     }
 
+    private Map<String, Object> wrapResult(List<Map<String, Object>> records, long start) {
+        if (CollectionUtils.isNotEmpty(records)) {
+            return wrapResult(records);
+        } else {
+            Map<String, Object> result = new HashMap<>();
+            result.put(START_KEY, start);
+            result.put(RECORDS_KEY, new ArrayList<>());
+            result.put(END_KEY, null);
+            return result;
+        }
+    }
+
     private Map<String, Object> wrapResult(List<Map<String, Object>> records) {
         Map<String, Object> result = new HashMap<>();
-        if (records != null && records.size() > 0) {
+        if (CollectionUtils.isNotEmpty(records)) {
             if (records.get(0).containsKey(RECOMMENDATION_DATE)) {
                 result.put(START_KEY, records.get(0).get(RECOMMENDATION_DATE));
                 result.put(END_KEY, records.get(records.size() - 1).get(RECOMMENDATION_DATE));
-            }
-            else {
+            } else {
                 result.put(START_KEY, records.get(0).get(LAST_MODIFIATION_DATE_KEY));
                 result.put(END_KEY, records.get(records.size() - 1).get(LAST_MODIFIATION_DATE_KEY));
             }

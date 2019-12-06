@@ -4,6 +4,8 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -21,9 +23,13 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("oauth2RestApiProxy")
 public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interface {
+    private static final Logger log = LoggerFactory.getLogger(Oauth2RestApiProxy.class);
 
     @Value("${common.oauth.url}")
     protected String oauth2AuthHostPort;
+
+    @Value("${common.playmaker.url}")
+    protected String playmakerHostPort;
 
     protected ThreadLocal<OAuth2RestTemplate> oAuth2RestTemplate = new ThreadLocal<>();
 
@@ -65,12 +71,12 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
     }
 
     public String getTenantNameFromOAuthRequest(RequestEntity<String> requestEntity) {
-        String url = constructUrl("/playmaker/tenants/oauthtotenant");
+        String url = playmakerHostPort + "/playmaker/tenants/oauthtotenant";
         return get("GetTenantName", url, requestEntity, String.class);
     }
 
     public Map<String, String> getAppIdFromOAuthRequest(RequestEntity<String> requestEntity) {
-        String url = constructUrl("/playmaker/tenants/oauthtoappid");
+        String url = playmakerHostPort + "/playmaker/tenants/oauthtoappid";
         @SuppressWarnings("rawtypes")
         Map resObj = get("GetAppId", url, requestEntity, Map.class);
         Map<String, String> res = null;
@@ -81,7 +87,7 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
     }
 
     public Map<String, String> getOrgInfoFromOAuthRequest(RequestEntity<String> requestEntity) {
-        String url = constructUrl("/playmaker/tenants/oauthtoorginfo");
+        String url = playmakerHostPort + "/playmaker/tenants/oauthtoorginfo";
         @SuppressWarnings("rawtypes")
         Map resObj = get("GetOrgInfo", url, requestEntity, Map.class);
         Map<String, String> res = null;

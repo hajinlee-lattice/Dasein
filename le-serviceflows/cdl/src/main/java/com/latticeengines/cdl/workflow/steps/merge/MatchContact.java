@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,8 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
     private String matchTargetTablePrefix = null;
     private String newAccountTableName = NamingUtils.timestamp("NewAccountsFromContact");
 
+    @Value("${cdl.pa.contact.match.ignore.domain}")
+    private boolean ignoreDomainMatchKeyInContact;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -151,14 +154,17 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
             setServingVersionForEntityMatchTenant(matchInput);
         }
+        log.info("Ignore domain match keys for account in contact = {}", ignoreDomainMatchKeyInContact);
         if (configuration.isEntityMatchGAOnly()) {
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
                     columnNames, getSystemIds(BusinessEntity.Account),
-                    getSystemIds(BusinessEntity.Contact), null, hasConvertBatchStoreTableName);
+                    getSystemIds(BusinessEntity.Contact), null, hasConvertBatchStoreTableName,
+                    ignoreDomainMatchKeyInContact);
         } else {
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
                     columnNames, getSystemIds(BusinessEntity.Account),
-                    getSystemIds(BusinessEntity.Contact), newAccountTableName, hasConvertBatchStoreTableName);
+                    getSystemIds(BusinessEntity.Contact), newAccountTableName, hasConvertBatchStoreTableName,
+                    ignoreDomainMatchKeyInContact);
         }
         step.setConfiguration(configStr);
         return step;

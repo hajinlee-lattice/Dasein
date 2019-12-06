@@ -64,4 +64,6 @@ public interface BaseDao<T> {
     void clearSession();
     
     int getBatchSize();
+
+    void update(Collection<T> entities, boolean setAuditFields);
 }

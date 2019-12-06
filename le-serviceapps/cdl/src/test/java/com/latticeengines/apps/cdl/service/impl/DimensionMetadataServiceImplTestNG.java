@@ -43,6 +43,11 @@ public class DimensionMetadataServiceImplTestNG extends CDLFunctionalTestNGBase 
     private static final List<String> STREAM_3_DIMS = singletonList("d6");
     private static final String VALUE = RandomStringUtils.randomAlphabetic(100);
 
+    private static final Set<String> DIM_VALUES_1 = Sets.newHashSet("v1", "v2", "v3");
+    private static final Set<String> DIM_VALUES_2 = Sets.newHashSet("v1", "v4");
+
+    private String fakeTenantId;
+
     @Inject
     private DimensionMetadataServiceImpl dimensionMetadataService;
 
@@ -114,6 +119,44 @@ public class DimensionMetadataServiceImplTestNG extends CDLFunctionalTestNGBase 
         verifyStreamDimensions(metadataMap.get(STREAM_ID_1), new HashSet<>(STREAM_1_DIMS));
         verifyStreamDimensions(metadataMap.get(STREAM_ID_2), new HashSet<>(STREAM_2_DIMS));
         verifyStreamDimensions(metadataMap.get(STREAM_ID_3), new HashSet<>(STREAM_3_DIMS));
+    }
+
+    @Test(groups = "functional")
+    private void testAllocateDimensionId() throws Exception {
+        fakeTenantId = getClass().getSimpleName() + "_" + UUID.randomUUID().toString();
+
+        Map<String, String> dimensionIds1 = dimensionMetadataService.allocateDimensionId(fakeTenantId, DIM_VALUES_1);
+        Assert.assertNotNull(dimensionIds1);
+        Assert.assertEquals(dimensionIds1.size(), DIM_VALUES_1.size());
+        dimensionIds1.forEach((val, id) -> Assert.assertNotNull(id,
+                String.format("dimension ID for value %s should not be null", id)));
+
+        Thread.sleep(3000L);
+
+        // allocate again (one already allocated)
+        Map<String, String> dimensionIds2 = dimensionMetadataService.allocateDimensionId(fakeTenantId, DIM_VALUES_2);
+        Assert.assertNotNull(dimensionIds2);
+        Assert.assertEquals(dimensionIds2.size(), DIM_VALUES_2.size());
+        dimensionIds2.forEach((val, id) -> Assert.assertNotNull(id,
+                String.format("dimension ID for value %s should not be null", id)));
+        Assert.assertEquals(dimensionIds1.get("v1"), dimensionIds2.get("v1"),
+                "ID allocated for value v1 should be the same");
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, dependsOnMethods = {
+            "testAllocateDimensionId" })
+    private void testReadAllocatedDimensionIds() {
+        Map<String, String> dimensionIds = dimensionMetadataService.getDimensionIds(fakeTenantId, DIM_VALUES_1);
+        Assert.assertNotNull(dimensionIds);
+        Assert.assertEquals(dimensionIds.size(), DIM_VALUES_1.size());
+        Assert.assertEquals(dimensionIds.keySet(), DIM_VALUES_1);
+
+        Set<String> ids = new HashSet<>(dimensionIds.values());
+        Map<String, String> dimensionValues = dimensionMetadataService.getDimensionValues(fakeTenantId, ids);
+        Assert.assertNotNull(dimensionValues);
+        Assert.assertEquals(dimensionValues.size(), DIM_VALUES_1.size());
+        Assert.assertEquals(new HashSet<>(dimensionValues.values()), DIM_VALUES_1);
+        Assert.assertEquals(dimensionValues.keySet(), ids);
     }
 
     private void verifyStreamDimensions(Map<String, DimensionMetadata> dimensions, Set<String> expectedDimensionNames) {

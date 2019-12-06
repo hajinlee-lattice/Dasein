@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -48,14 +50,13 @@ import com.latticeengines.datacloud.match.service.DnBBulkLookupStatusChecker;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 import com.latticeengines.datacloud.match.service.DnbMatchCommandService;
-import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 @Component("dnbLookupService")
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements DnBLookupService {
@@ -129,6 +130,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     @Autowired
     private DnbMatchCommandService dnbMatchCommandService;
+
+    @Inject
+    @Lazy
+    private MatchMetricService metricService;
 
     private ExecutorService dnbDataSourceServiceExecutor;
     private ExecutorService dnbFetchExecutor;
@@ -645,10 +650,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private void writeDnBMatchHistory(List<DnBMatchHistory> metrics) {
         try {
-            MeasurementMessage<DnBMatchHistory> message = new MeasurementMessage<>();
-            message.setMeasurements(metrics);
-            message.setMetricDB(MetricDB.LDC_Match);
-            getActorSystem().getMetricActor().tell(message, null);
+            if (CollectionUtils.isNotEmpty(metrics)) {
+                metrics.forEach(metricService::recordDnBMatch);
+            }
         } catch (Exception e) {
             log.warn("Failed to extract output metric.");
         }

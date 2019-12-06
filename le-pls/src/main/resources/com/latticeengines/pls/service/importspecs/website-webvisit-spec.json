@@ -30,7 +30,7 @@
                     "None"
                 ],
                 "logicalDataType": "Date",
-                "fundamentalType": "YEAR"
+                "fundamentalType": "DATE"
             },
             {
                 "fieldName": "UserId",
@@ -151,7 +151,6 @@
                     "None"
                 ],
                 "fundamentalType": "ALPHA"
-
             },
             {
                 "fieldName": "DUNS",

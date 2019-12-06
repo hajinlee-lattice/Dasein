@@ -651,17 +651,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
-        String systemName = EntityTypeUtils.getSystemName(feedType);
-        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
-        if (StringUtils.isNotEmpty(systemName) && entityType != null) {
-            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-            schemaTable = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType,
-                    batonService.isEntityMatchEnabled(customerSpace));
-
-        } else {
-            schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
-                    batonService.isEntityMatchEnabled(customerSpace));
-        }
+        BusinessEntity businessEntity = BusinessEntity.getByName(entity);
+        schemaTable = getSchemaTable(customerSpace, businessEntity, feedType, withoutId);
         if (dataFeedTask == null) {
             table = TableUtils.clone(schemaTable, schemaTable.getName());
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
@@ -706,6 +697,20 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         });
         return merged;
+    }
+
+    private Table getSchemaTable(CustomerSpace customerSpace, BusinessEntity entity, String feedType, boolean withoutId) {
+        String systemName = EntityTypeUtils.getSystemName(feedType);
+        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
+        Table schemaTable;
+        boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
+        if (StringUtils.isNotEmpty(systemName) && entityType != null) {
+            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+            schemaTable = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType, enableEntityMatch);
+        } else {
+            schemaTable = SchemaRepository.instance().getSchema(entity, true, withoutId, enableEntityMatch);
+        }
+        return schemaTable;
     }
 
     private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity, String feedType,
@@ -763,17 +768,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
-        String systemName = EntityTypeUtils.getSystemName(feedType);
-        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
-        Table schemaTable;
-        if (StringUtils.isNotEmpty(systemName) && entityType != null) {
-            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
-            schemaTable = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType,
-                    enableEntityMatch);
-        } else {
-            schemaTable = SchemaRepository.instance().getSchema(entity, true, withoutId, enableEntityMatch);
-        }
+        Table schemaTable = getSchemaTable(customerSpace, entity, feedType, withoutId);
         Table standardTable = templateTable == null ? schemaTable : templateTable;
         Set<String> reservedName = standardTable.getAttributes().stream().map(Attribute::getName)
                 .collect(Collectors.toSet());
@@ -898,7 +893,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         switch (fieldMapping.getIdType()) {
             case Account:
                 String accountSystemId = importSystem.getAccountSystemId();
-                importSystem.setMapToLatticeAccount(fieldMapping.isMapToLatticeId());
+                importSystem.setMapToLatticeAccount(importSystem.isMapToLatticeAccount() || fieldMapping.isMapToLatticeId());
                 cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                 importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
                 if (StringUtils.isEmpty(accountSystemId)) {
@@ -906,11 +901,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     importSystem.setAccountSystemId(accountSystemId);
                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                     fieldMapping.setMappedToLatticeField(false);
-                    fieldMapping.setMappedField(accountSystemId);
                 } else {
                     fieldMapping.setMappedToLatticeField(accountSystemId.equals(fieldMapping.getMappedField()));
-                    fieldMapping.setMappedField(accountSystemId);
                 }
+                fieldMapping.setMappedField(accountSystemId);
                 if (importSystem.isMapToLatticeAccount()) {
                     FieldMapping customerLatticeId = new FieldMapping();
                     customerLatticeId.setUserField(fieldMapping.getUserField());
@@ -921,7 +915,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 break;
             case Contact:
                 String contactSystemId = importSystem.getContactSystemId();
-                importSystem.setMapToLatticeContact(fieldMapping.isMapToLatticeId());
+                importSystem.setMapToLatticeContact(importSystem.isMapToLatticeContact() || fieldMapping.isMapToLatticeId());
                 cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                 importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
                 if (StringUtils.isEmpty(contactSystemId)) {
@@ -929,11 +923,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     importSystem.setContactSystemId(contactSystemId);
                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                     fieldMapping.setMappedToLatticeField(false);
-                    fieldMapping.setMappedField(contactSystemId);
                 } else {
                     fieldMapping.setMappedToLatticeField(contactSystemId.equals(fieldMapping.getMappedField()));
-                    fieldMapping.setMappedField(contactSystemId);
                 }
+                fieldMapping.setMappedField(contactSystemId);
                 if (importSystem.isMapToLatticeContact()) {
                     FieldMapping customerLatticeId = new FieldMapping();
                     customerLatticeId.setUserField(fieldMapping.getUserField());
@@ -949,11 +942,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     importSystem.addSecondaryContactId(entityType, leadSystemId);
                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
                     fieldMapping.setMappedToLatticeField(false);
-                    fieldMapping.setMappedField(leadSystemId);
                 } else {
                     fieldMapping.setMappedToLatticeField(leadSystemId.equals(fieldMapping.getMappedField()));
-                    fieldMapping.setMappedField(leadSystemId);
                 }
+                fieldMapping.setMappedField(leadSystemId);
                 break;
         }
     }
