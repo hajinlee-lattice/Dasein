@@ -105,7 +105,12 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         // update segment and rating engine counts
         SegmentCountUtils.invokeMetadataApi(servingStoreProxy, customerSpace.toString());
-        SegmentCountUtils.updateEntityCounts(segmentProxy, customerSpace.toString());
+        List<String> failedSegments = SegmentCountUtils.updateEntityCounts(segmentProxy, customerSpace.toString());
+        if (CollectionUtils.isNotEmpty(failedSegments)) {
+            log.warn("Failed to update counts for segments: " + StringUtils.join(failedSegments, ","));
+            String msg = "Encountered error when updating counts for " + CollectionUtils.size(failedSegments) +" segments";
+            addToListInContext(PROCESS_ANALYTICS_WARNING_KEY, msg, String.class);
+        }
         updateActiveRuleModelCounts();
         setPublishedModels();
     }
