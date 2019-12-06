@@ -138,11 +138,10 @@ public class CampaignFrontEndQueryBuilder {
         if (StringUtils.isNotBlank(ratingId) && CollectionUtils.isNotEmpty(bucketsToLaunch)) {
             addModelRatingBasedRestrictions();
         }
-        addChannelSpecificRestrictions();
         if (isSuppressAccountsWithoutLookupId && StringUtils.isNotBlank(lookupId)) {
             suppressAccountsWithoutLookupId();
         }
-        if (mainEntity == BusinessEntity.Contact && isSuppressContactsWithoutEmails) {
+        if (isSuppressContactsWithoutEmails) {
             filterContactsWithoutEmail();
         }
         addSort();
@@ -160,15 +159,13 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void suppressAccountsWithoutLookupId() {
-        if (mainEntity == BusinessEntity.Account && StringUtils.isNotBlank(lookupId)) {
-            Restriction accountRestriction = campaignFrontEndQuery.getAccountRestriction().getRestriction();
-            Restriction nonNullLookupIdRestriction = Restriction.builder().let(BusinessEntity.Account, lookupId)
-                    .isNotNull().build();
+        Restriction accountRestriction = campaignFrontEndQuery.getAccountRestriction().getRestriction();
+        Restriction nonNullLookupIdRestriction = Restriction.builder().let(BusinessEntity.Account, lookupId).isNotNull()
+                .build();
 
-            Restriction accountRestrictionWithNonNullLookupId = Restriction.builder()
-                    .and(accountRestriction, nonNullLookupIdRestriction).build();
-            campaignFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
-        }
+        Restriction accountRestrictionWithNonNullLookupId = Restriction.builder()
+                .and(accountRestriction, nonNullLookupIdRestriction).build();
+        campaignFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
     }
 
     private void filterAccountsWithoutContacts() {
@@ -185,14 +182,12 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void filterContactsWithoutEmail() {
-        if (mainEntity == BusinessEntity.Contact) {
-            Restriction contactRestriction = campaignFrontEndQuery.getContactRestriction().getRestriction();
-            Restriction nonNullLookupIdRestriction = Restriction.builder()
-                    .let(BusinessEntity.Contact, InterfaceName.Email.name()).isNotNull().build();
-            Restriction contactRestrictionWithNonNullEmail = Restriction.builder()
-                    .and(contactRestriction, nonNullLookupIdRestriction).build();
-            campaignFrontEndQuery.getContactRestriction().setRestriction(contactRestrictionWithNonNullEmail);
-        }
+        Restriction contactRestriction = campaignFrontEndQuery.getContactRestriction().getRestriction();
+        Restriction nonNullEmailRestriction = Restriction.builder()
+                .let(BusinessEntity.Contact, InterfaceName.Email.name()).isNotNull().build();
+        Restriction contactRestrictionWithNonNullEmail = Restriction.builder()
+                .and(contactRestriction, nonNullEmailRestriction).build();
+        campaignFrontEndQuery.getContactRestriction().setRestriction(contactRestrictionWithNonNullEmail);
     }
 
     private void setMainEntity() {
@@ -218,39 +213,22 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void addModelRatingBasedRestrictions() {
-        if (mainEntity == BusinessEntity.Account) {
-            Restriction ratingRestriction;
-            Lookup lhs = new AttributeLookup(BusinessEntity.Rating, ratingId);
-            Collection<Object> allowedRatingsCollection = bucketsToLaunch.stream().map(RatingBucketName::getName)
-                    .collect(Collectors.toList());
-            Lookup rhs = new CollectionLookup(allowedRatingsCollection);
-            ratingRestriction = new ConcreteRestriction(false, lhs, ComparisonType.IN_COLLECTION, rhs);
+        Restriction ratingRestriction;
+        Lookup lhs = new AttributeLookup(BusinessEntity.Rating, ratingId);
+        Collection<Object> allowedRatingsCollection = bucketsToLaunch.stream().map(RatingBucketName::getName)
+                .collect(Collectors.toList());
+        Lookup rhs = new CollectionLookup(allowedRatingsCollection);
+        ratingRestriction = new ConcreteRestriction(false, lhs, ComparisonType.IN_COLLECTION, rhs);
 
-            ratingRestriction = launchUnScored //
-                    ? Restriction.builder()
-                            .or(ratingRestriction, new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
-                            .build()
-                    : ratingRestriction;
+        ratingRestriction = launchUnScored //
+                ? Restriction.builder()
+                        .or(ratingRestriction, new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
+                        .build()
+                : ratingRestriction;
 
-            Restriction finalAccountRestriction = Restriction.builder().and(baseAccountRestriction, ratingRestriction)
-                    .build();
-            campaignFrontEndQuery.setAccountRestriction(new FrontEndRestriction(finalAccountRestriction));
-        }
-    }
-
-    private void addChannelSpecificRestrictions() {
-        if (CDLExternalSystemName.Marketo.equals(destinationSystemName)
-                && campaignFrontEndQuery.getContactRestriction() != null) {
-            Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
-                    campaignFrontEndQuery.getContactRestriction().getRestriction());
-            campaignFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForAccountQuery));
-        }
-    }
-
-    private Restriction applyEmailFilterToContactRestriction(Restriction contactRestriction) {
-        Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
-                .isNotNull().build();
-        return Restriction.builder().and(contactRestriction, emailFilter).build();
+        Restriction finalAccountRestriction = Restriction.builder().and(baseAccountRestriction, ratingRestriction)
+                .build();
+        campaignFrontEndQuery.setAccountRestriction(new FrontEndRestriction(finalAccountRestriction));
     }
 
     private void addSort() {

@@ -2,7 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +84,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
     private String CREATED_BY = "lattice@lattice-engines.com";
-    private String CRON_EXPRESSION = "0 0 12 ? * WED *";
+    private String cron = "0 0 12 ? * WED *";
     private static final long MAX_ACCOUNTS_TO_LAUNCH = 20L;
     private static final long NULL_MAX_ACCOUNTS_TO_LAUNCH = -1L;
 
@@ -160,13 +160,17 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
     public void testNextDateFromCronExpression() {
+        String cronExpression = "0 45 12 ? * WED *";
         PlayLaunchChannel channel = new PlayLaunchChannel();
-        channel.setCronScheduleExpression(CRON_EXPRESSION);
+        channel.setCronScheduleExpression(cronExpression);
         Date d1 = PlayLaunchChannel.getNextDateFromCronExpression(channel);
-        channel.setNextScheduledLaunch(
-                Date.from(LocalDate.of(2019, 6, 14).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        channel.setNextScheduledLaunch(Date.from(LocalDate.of(2019, 6, 14).atStartOfDay(ZoneOffset.UTC).toInstant()));
         Date d2 = PlayLaunchChannel.getNextDateFromCronExpression(channel);
         Assert.assertEquals(d1, d2);
+
+        channel.setNextScheduledLaunch(d2);
+        Date d3 = PlayLaunchChannel.getNextDateFromCronExpression(channel);
+        Assert.assertEquals(d2, d3);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testNextDateFromCronExpression")
@@ -283,7 +287,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertNull(retrieved.getNextScheduledLaunch());
         Assert.assertNull(retrieved.getExpirationDate());
         channel1.setIsAlwaysOn(true);
-        channel1.setCronScheduleExpression(CRON_EXPRESSION);
+        channel1.setCronScheduleExpression(cron);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
         Assert.assertNotNull(retrieved.getCronScheduleExpression());
         Assert.assertNotNull(retrieved.getNextScheduledLaunch());
@@ -335,7 +339,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         retrieved2 = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved2, channel2);
         Assert.assertNotNull(retrieved2);
         Assert.assertEquals(retrieved2.getId(), channel2.getId());
-        Assert.assertEquals(((MarketoChannelConfig) retrieved2.getChannelConfig()).getAudienceName(), "somethingElse");
+        Assert.assertEquals(retrieved2.getChannelConfig().getAudienceName(), "somethingElse");
         Assert.assertTrue(retrieved2.getResetDeltaCalculationData());
     }
 
