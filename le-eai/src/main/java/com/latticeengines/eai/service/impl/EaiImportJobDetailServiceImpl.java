@@ -1,11 +1,14 @@
 package com.latticeengines.eai.service.impl;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.eai.entitymanager.EaiImportJobDetailEntityMgr;
 import com.latticeengines.eai.service.EaiImportJobDetailService;
@@ -13,6 +16,8 @@ import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("eaiImportJobDetailService")
 public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService {
+
+    private static final int MAX_CREATE_RETRY = 5;
 
     @SuppressWarnings("unused")
     @Autowired
@@ -47,7 +52,9 @@ public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService 
 
     @Override
     public void createImportJobDetail(EaiImportJobDetail eaiImportJobDetail) {
-        eaiImportJobDetailEntityMgr.createImportJobDetail(eaiImportJobDetail);
+        DatabaseUtils.retry("createImportJobDetail", MAX_CREATE_RETRY, PersistenceException.class,
+                "PersistenceException detected", null,
+                input -> eaiImportJobDetailEntityMgr.createImportJobDetail(eaiImportJobDetail));
     }
 
     @Override
