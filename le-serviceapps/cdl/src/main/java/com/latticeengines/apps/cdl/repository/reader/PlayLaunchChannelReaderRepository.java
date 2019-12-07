@@ -20,7 +20,7 @@ public interface PlayLaunchChannelReaderRepository extends PlayLaunchChannelRepo
             + "AND c.nextScheduledLaunch BETWEEN :startDate AND :endDate " //
             + "AND p.deleted = false " //
             + "AND (p.ratingEngine is null OR r.status = 'ACTIVE') " //
-            + "AND (c.lastDeltaWorkflowId is null OR (w.status != 'ENQUEUED' AND TIMESTAMPDIFF(HOUR,FROM_UNIXTIME(w.startTimeInMillis/1000), CURRENT_TIMESTAMP())>=6)) " //
+            + "AND (c.lastDeltaWorkflowId is null OR (w.status NOT IN ('ENQUEUED', 'PENDING', 'RUNNING'))) " //
             + "ORDER BY c.nextScheduledLaunch")
     List<PlayLaunchChannel> findAlwaysOnChannelsByNextScheduledTime(@Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
