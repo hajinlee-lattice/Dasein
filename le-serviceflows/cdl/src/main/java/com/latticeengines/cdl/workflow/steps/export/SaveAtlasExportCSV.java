@@ -36,11 +36,10 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -49,7 +48,6 @@ import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
-import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
@@ -213,22 +211,13 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
             List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(entity, Collections.emptyList());
             if (CollectionUtils.isNotEmpty(cms)) {
-                if (BusinessEntity.PurchaseHistory.equals(entity)) {
-                    CustomerSpace customerSpace = parseCustomerSpace(configuration);
-                    DataCollection.Version version = configuration.getDataCollectionVersion();
-                    String tblName = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                            TableRoleInCollection.SortedProduct, version);
-                    if (StringUtils.isBlank(tblName)) {
-                        throw new RuntimeException("Cannot find sorted product table, " + //
-                                "while is exporting purchase history attributes.");
-                    }
+                if (BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
                     for (ColumnMetadata cm : cms) {
-                        String attrName = cm.getAttrName();
-                        String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
-                        String productName = getProductNameFromRedshift(tblName, productId);
-                        String displayName = cm.getDisplayName();
-                        if (!displayName.startsWith(productName)) {
-                            cm.setDisplayName(productName + ": " + displayName);
+                        String dispName = cm.getDisplayName();
+                        String subCategory = cm.getSubcategory();
+                        if (StringUtils.isNotBlank(dispName) && StringUtils.isNotBlank(subCategory)
+                                && !Category.SUB_CAT_OTHER.equalsIgnoreCase(subCategory)) {
+                            cm.setDisplayName(subCategory + ": " + dispName);
                         }
                     }
                 }
