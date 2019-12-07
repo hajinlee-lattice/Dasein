@@ -101,6 +101,8 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     private List<ExportFieldMetadataDefaults> defaultS3ExportFields;
     private List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
     private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
+    private List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
+    private List<ExportFieldMetadataDefaults> defaultGoogleExportFields;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -150,17 +152,26 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
             defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Facebook);
         }
 
-        defaultFacebookExportFields = exportFieldMetadataDefaultsService
+        defaultOutreachExportFields = exportFieldMetadataDefaultsService
                 .getAllAttributes(CDLExternalSystemName.Outreach);
 
-        if (defaultFacebookExportFields.size() == 0) {
-            defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
+        if (defaultOutreachExportFields.size() == 0) {
+            defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
+        }
+
+        defaultGoogleExportFields = exportFieldMetadataDefaultsService
+                .getAllAttributes(CDLExternalSystemName.GoogleAds);
+
+        if (defaultGoogleExportFields.size() == 0) {
+            defaultGoogleExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
         }
 
         assertNotEquals(defaultMarketoExportFields.size(), 0);
         assertNotEquals(defaultS3ExportFields.size(), 0);
         assertNotEquals(defaultLinkedInExportFields.size(), 0);
         assertNotEquals(defaultFacebookExportFields.size(), 0);
+        assertNotEquals(defaultOutreachExportFields.size(), 0);
+        assertNotEquals(defaultGoogleExportFields.size(), 0);
 
     }
 
@@ -215,7 +226,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 79);
+        assertEquals(columnMetadata.size(), 85);
 
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
@@ -304,7 +315,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testFacebookLaunch")
+    @Test(groups = "deployment-app", dependsOnMethods = "testEloquaLaunch")
     public void testGoogleLaunch() {
         registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.GoogleAds, "GoogleAds");
 
@@ -318,7 +329,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         assertEquals(columnMetadata.size(), 6);
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFields, 0);
+        assertEquals(nonStandardFields, 2);
     }
 
     private List<ExportFieldMetadataDefaults> createDefaultExportFields(CDLExternalSystemName systemName) {
