@@ -51,7 +51,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends PlsDep
         List<ExternalSystemAuthentication> extSysAuthLst = JsonUtils.convertList(listObject,
                 ExternalSystemAuthentication.class);
         assertNotNull(extSysAuthLst);
-        assertTrue(extSysAuthLst.size() == 0);
+        assertEquals(extSysAuthLst.size(), 0);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "verifyBaseSetup")
@@ -60,6 +60,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends PlsDep
         lookupIdsMap.setOrgId("Org_" + System.currentTimeMillis());
         lookupIdsMap.setOrgName(CDLExternalSystemName.Marketo + "_" + lookupIdsMap.getOrgId());
         lookupIdsMap.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdsMap.setExternalSystemName(CDLExternalSystemName.Marketo);
         LookupIdMap resultLookupIdMap = lookupIdMappingProxy.registerExternalSystem(TEST_TENANT_ID, lookupIdsMap);
         assertNotNull(resultLookupIdMap);
         assertNotNull(resultLookupIdMap.getId());
@@ -109,7 +110,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends PlsDep
         List<ExternalSystemAuthentication> extSysAuthLst = JsonUtils.convertList(listObject,
                 ExternalSystemAuthentication.class);
         assertNotNull(extSysAuthLst);
-        assertTrue(extSysAuthLst.size() == 1);
+        assertEquals(extSysAuthLst.size(), 1);
         ExternalSystemAuthentication currAuth = extSysAuthLst.get(0);
         verifyCurrentAuthentication(currAuth);
         assertEquals(currAuth.getId(), extSysAuthenticationRef.getId());
@@ -125,7 +126,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends PlsDep
         List<ExternalSystemAuthentication> extSysAuthLst = JsonUtils.convertList(listObject,
                 ExternalSystemAuthentication.class);
         assertNotNull(extSysAuthLst);
-        assertTrue(extSysAuthLst.size() == 1);
+        assertEquals(extSysAuthLst.size(), 1);
         ExternalSystemAuthentication currAuth = extSysAuthLst.get(0);
         verifyCurrentAuthentication(currAuth);
         assertEquals(currAuth.getId(), extSysAuthenticationRef.getId());
