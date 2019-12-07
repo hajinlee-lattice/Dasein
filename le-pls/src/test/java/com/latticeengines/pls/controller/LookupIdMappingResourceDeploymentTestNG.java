@@ -27,6 +27,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
     private String orgId = "Org_" + System.currentTimeMillis();
     private String orgName = "Dummy name";
     private CDLExternalSystemType externalSystemType = CDLExternalSystemType.CRM;
+    private CDLExternalSystemName externalSystemName = CDLExternalSystemName.Salesforce;
     private String configId = null;
     private String configIdWithAuth = null;
 
@@ -55,6 +56,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         lookupIdsMap.setOrgId(orgId);
         lookupIdsMap.setOrgName(orgName);
         lookupIdsMap.setExternalSystemType(externalSystemType);
+        lookupIdsMap.setExternalSystemName(externalSystemName);
 
         LookupIdMap resultLookupIdMap = restTemplate.postForObject(
                 getRestAPIHostPort() + "/pls/lookup-id-mapping/register", lookupIdsMap, LookupIdMap.class);
@@ -114,6 +116,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         lookupIdsMap.setOrgId(orgId);
         lookupIdsMap.setOrgName(orgName);
         lookupIdsMap.setExternalSystemType(externalSystemType);
+        lookupIdsMap.setExternalSystemName(externalSystemName);
 
         restTemplate.put(getRestAPIHostPort() + "/pls/lookup-id-mapping/deregister", lookupIdsMap, LookupIdMap.class);
 
@@ -190,8 +193,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     private void confirmNonEmptyLookupConfigs(Boolean isMarkedRegistered) {
         @SuppressWarnings({ "rawtypes" })
-        Map lookupIdConfigsRaw = (Map) restTemplate.getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping",
-                Map.class);
+        Map lookupIdConfigsRaw = restTemplate.getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping", Map.class);
         Assert.assertNotNull(lookupIdConfigsRaw);
         @SuppressWarnings({ "unchecked" })
         Map<String, List<LookupIdMap>> lookupIdConfigs = JsonUtils.convertMapWithListValue(lookupIdConfigsRaw,
