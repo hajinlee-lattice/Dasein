@@ -161,7 +161,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         defaultGoogleExportFields = exportFieldMetadataDefaultsService
                 .getAllAttributes(CDLExternalSystemName.GoogleAds);
-
         if (defaultGoogleExportFields.size() == 0) {
             defaultGoogleExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
         }
@@ -246,8 +245,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         assertEquals(columnMetadata.size(), 3);
 
-        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
-
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
     }
@@ -255,7 +252,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     @Test(groups = "deployment-app", dependsOnMethods = "testLinkedInLaunch")
     public void testOutreachLaunch() {
         registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Outreach, "Outreach",
-                InterfaceName.AccountId.name(), InterfaceName.CompanyName.name());
+                InterfaceName.AccountId.name(), InterfaceName.AccountId.name());
 
         createPlayLaunchChannel(new OutreachChannelConfig(), lookupIdMap);
 
@@ -274,8 +271,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         log.info(JsonUtils.serialize(columnMetadata));
 
         assertEquals(columnMetadata.size(), 3);
-
-        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
@@ -315,7 +310,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testEloquaLaunch")
+    @Test(groups = "deployment-app", dependsOnMethods = "testEloquaLaunch", enabled = false)
     public void testGoogleLaunch() {
         registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.GoogleAds, "GoogleAds");
 
