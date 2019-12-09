@@ -33,6 +33,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
         echo "You are on Mac"
         APR_VERSION=`brew list apr | head -n 1 | cut -d / -f 6`
         echo "You installed apr ${APR_VERSION}"
+        OPENSSL_PATH=`brew --prefix openssl`
         OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
         echo "You installed openssl ${OPENSSL_VERSION}"
         pushd ${CATALINA_HOME}/bin
@@ -41,7 +42,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
         ./configure \
             --with-java-home=${JAVA_HOME} \
             --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
-            --with-ssl=/usr/local/Cellar/openssl/${OPENSSL_VERSION} \
+            --with-ssl=${OPENSSL_PATH}/ \
             --prefix=${CATALINA_HOME}
         make && make install
         popd
