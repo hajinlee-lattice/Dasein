@@ -356,27 +356,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                             simpleTemplateMetadata.getIgnoredStandardAttributes().contains(attribute.getName()));
         }
         if (CollectionUtils.isNotEmpty(simpleTemplateMetadata.getStandardAttributes())) {
-            Map<String, SimpleTemplateMetadata.SimpleTemplateAttribute> nameMapping =
-                    simpleTemplateMetadata.getStandardAttributes().stream()
-                            .filter(simpleTemplateAttribute -> StringUtils.isNotBlank(simpleTemplateAttribute.getName()))
-                            .collect(Collectors.toMap(SimpleTemplateMetadata.SimpleTemplateAttribute::getName,
-                                    simpleTemplateAttribute -> simpleTemplateAttribute));
-            standardTable.getAttributes().forEach(attribute -> {
-                if (nameMapping.containsKey(attribute.getName())) {
-                    attribute.setDisplayName(nameMapping.get(attribute.getName()).getDisplayName());
-                    if (LogicalDataType.Date.equals(attribute.getLogicalDataType())) {
-                        if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getDateFormat())) {
-                            attribute.setDateFormatString(nameMapping.get(attribute.getName()).getDateFormat());
-                        }
-                        if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getTimeFormat())) {
-                            attribute.setTimeFormatString(nameMapping.get(attribute.getName()).getTimeFormat());
-                        }
-                        if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getTimezone())) {
-                            attribute.setTimezone(nameMapping.get(attribute.getName()).getTimezone());
-                        }
-                    }
-                }
-            });
+            configStandardAttributes(standardTable, simpleTemplateMetadata);
         }
         standardTable.getAttributes().forEach(attribute -> {
             if (StringUtils.isEmpty(attribute.getDisplayName())) {
@@ -387,6 +367,30 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             standardTable.addAttributes(generateCustomerAttributes(simpleTemplateMetadata.getCustomerAttributes()));
         }
         return standardTable;
+    }
+
+    private void configStandardAttributes(Table standardTable, SimpleTemplateMetadata simpleTemplateMetadata) {
+        Map<String, SimpleTemplateMetadata.SimpleTemplateAttribute> nameMapping =
+                simpleTemplateMetadata.getStandardAttributes().stream()
+                        .filter(simpleTemplateAttribute -> StringUtils.isNotBlank(simpleTemplateAttribute.getName()))
+                        .collect(Collectors.toMap(SimpleTemplateMetadata.SimpleTemplateAttribute::getName,
+                                simpleTemplateAttribute -> simpleTemplateAttribute));
+        standardTable.getAttributes().forEach(attribute -> {
+            if (nameMapping.containsKey(attribute.getName())) {
+                attribute.setDisplayName(nameMapping.get(attribute.getName()).getDisplayName());
+                if (LogicalDataType.Date.equals(attribute.getLogicalDataType())) {
+                    if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getDateFormat())) {
+                        attribute.setDateFormatString(nameMapping.get(attribute.getName()).getDateFormat());
+                    }
+                    if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getTimeFormat())) {
+                        attribute.setTimeFormatString(nameMapping.get(attribute.getName()).getTimeFormat());
+                    }
+                    if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getTimezone())) {
+                        attribute.setTimezone(nameMapping.get(attribute.getName()).getTimezone());
+                    }
+                }
+            }
+        });
     }
 
     private List<Attribute> generateCustomerAttributes(List<SimpleTemplateMetadata.SimpleTemplateAttribute> simpleCustomerAttrs) {
