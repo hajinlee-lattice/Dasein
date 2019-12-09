@@ -4,48 +4,21 @@ import static org.testng.Assert.assertEquals;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.lp.entitymgr.SourceFileEntityMgr;
 import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.service.TenantService;
 
 public class SourceFileEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
     @Inject
     private SourceFileEntityMgr sourceFileEntityMgr;
 
-    @Inject
-    private TenantService tenantService;
-
-    @Inject
-    private TenantEntityMgr tenantEntityMgr;
-
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
-        tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
-        tenantEntityMgr.create(tenant1);
-        MultiTenantContext.setTenant(tenant1);
-    }
-
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
+    public void setup() {
+        setupTestEnvironment();
     }
 
     @Test(groups = "functional")
