@@ -161,6 +161,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         defaultGoogleExportFields = exportFieldMetadataDefaultsService
                 .getAllAttributes(CDLExternalSystemName.GoogleAds);
+
         if (defaultGoogleExportFields.size() == 0) {
             defaultGoogleExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
         }
@@ -245,32 +246,26 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         assertEquals(columnMetadata.size(), 3);
 
+        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testLinkedInLaunch")
+    @Test(groups = "deployment-app", dependsOnMethods = "testMarketoLaunch")
     public void testOutreachLaunch() {
-        registerLookupIdMap(CDLExternalSystemType.MAP, CDLExternalSystemName.Outreach, "Outreach",
-                InterfaceName.AccountId.name(), InterfaceName.AccountId.name());
 
-        createPlayLaunchChannel(new OutreachChannelConfig(), lookupIdMap);
-
-        ExportFieldMetadataMapping mapping = new ExportFieldMetadataMapping();
-        mapping.setLookupIdMap(lookupIdMap);
-        mapping.setDestinationField("Contact Name");
-        mapping.setSourceField("ContactName");
-        mapping.setOverwriteValue(false);
-        mapping.setTenant(mainTestTenant);
-
-        exportFieldMetadataMappingEntityMgr.createAll(Collections.singletonList(mapping));
-
+        OutreachChannelConfig outreachChannel = new OutreachChannelConfig();
+        createPlayLaunchChannel(outreachChannel, registerOutreachLookupIdMap());
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 3);
+        //ProspectOwner + AccountID + 3 mapped fields
+        assertEquals(columnMetadata.size(), 5);
+
+        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
@@ -310,7 +305,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testEloquaLaunch", enabled = false)
+    @Test(groups = "deployment-app", dependsOnMethods = "testEloquaLaunch")
     public void testGoogleLaunch() {
         registerLookupIdMap(CDLExternalSystemType.ADS, CDLExternalSystemName.GoogleAds, "GoogleAds");
 
@@ -377,6 +372,37 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
+    }
+
+    private LookupIdMap registerOutreachLookupIdMap(){
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setTenant(mainTestTenant);
+        lookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Outreach);
+        lookupIdMap.setOrgId(org1+"outreach");
+        lookupIdMap.setOrgName("org1nameOutreach");
+
+        ExportFieldMetadataMapping fieldMapping_1 = new ExportFieldMetadataMapping();
+        fieldMapping_1.setSourceField(InterfaceName.CompanyName.name());
+        fieldMapping_1.setDestinationField("company");
+        fieldMapping_1.setOverwriteValue(false);
+
+        ExportFieldMetadataMapping fieldMapping_2 = new ExportFieldMetadataMapping();
+        fieldMapping_2.setSourceField(InterfaceName.Email.name());
+        fieldMapping_2.setDestinationField("email");
+        fieldMapping_2.setOverwriteValue(false);
+
+        ExportFieldMetadataMapping fieldMapping_3 = new ExportFieldMetadataMapping();
+        fieldMapping_3.setSourceField(InterfaceName.PhoneNumber.name());
+        fieldMapping_3.setDestinationField("phone");
+        fieldMapping_3.setOverwriteValue(false);
+
+        lookupIdMap.setProspectOwner(InterfaceName.Website.name());
+        lookupIdMap.setAccountId(InterfaceName.AccountId.name());
+        lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
+        lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
+
+        return lookupIdMap;
     }
 
     private void registerLookupIdMap(CDLExternalSystemType systemType, CDLExternalSystemName systemName, String orgName,
