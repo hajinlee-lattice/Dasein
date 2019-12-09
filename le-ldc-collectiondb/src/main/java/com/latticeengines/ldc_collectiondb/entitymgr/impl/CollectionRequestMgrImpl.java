@@ -65,19 +65,24 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     }
 
     @Override
-    public List<CollectionRequest> getPending(String vendor, List<CollectionWorker> finishedWorkers) {
+    public List<CollectionRequest> getPending(String vendor, List<CollectionWorker> activeWorkers) {
 
-        List<String> finishedWorkerIds = new ArrayList<>(finishedWorkers.size());
-        for (CollectionWorker finishedWorker : finishedWorkers) {
+        List<String> activeWorkerIds = new ArrayList<>(activeWorkers.size());
+        for (CollectionWorker worker : activeWorkers) {
 
-            finishedWorkerIds.add(finishedWorker.getWorkerId());
+            activeWorkerIds.add(worker.getWorkerId());
 
         }
 
-        List<String> excluedStatus = Arrays.asList(
-                CollectionRequest.STATUS_DELIVERED,
-                CollectionRequest.STATUS_FAILED);
-        return readerRepository.findByVendorAndPickupWorkerInAndStatusNotIn(vendor, finishedWorkerIds, excluedStatus);
+        List<String> desiredStatus = Arrays.asList(CollectionRequest.STATUS_COLLECTING);
+        if (activeWorkerIds.size() > 0) {
+
+            return readerRepository.findByVendorAndStatusInAndPickupWorkerNotIn(vendor, desiredStatus, activeWorkerIds);
+
+        } else {
+
+            return readerRepository.findByVendorAndStatusIn(vendor, desiredStatus);
+        }
 
     }
 

@@ -15,13 +15,15 @@ public interface CollectionRequestService {
 
     void beginCollecting(List<CollectionRequest> readyReqs, CollectionWorker worker);
 
-    int handlePending(String vendor, int maxRetries, List<CollectionWorker> finishedWorkers);
+    int handlePending(String vendor, int maxRetries, List<CollectionWorker> activeWorkers);
 
-    int consumeFinished(String workerId, Set<String> domains);
+    int consumeFinished(List<CollectionRequest> processed, Set<String> domains, Set<String> emptyDomains);
 
     Timestamp getEarliestTime(String vendor, String status);
 
     List<CollectionRequest> getReady(String vendor, int upperLimit);
+
+    List<CollectionRequest> getProcessed(String workerId);
 
     void cleanupRequestsBetween(Timestamp start, Timestamp end);
 

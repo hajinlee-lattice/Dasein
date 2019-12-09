@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.service.CollectionWorkerService;
@@ -26,15 +27,15 @@ public class CollectionWorkerServiceImpl implements CollectionWorkerService {
     }
 
     @Override
-    public int getActiveWorkerCount(String vendor) {
+    public List<CollectionWorker> getActiveWorker(String vendor) {
         vendor = vendor.toUpperCase();
         if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
 
-            return -1;
+            return ListUtils.emptyIfNull(null);
 
         }
 
-        return collectionWorkerMgr.getActiveWorkerCount(vendor);
+        return collectionWorkerMgr.getActiveWorker(vendor);
 
     }
 

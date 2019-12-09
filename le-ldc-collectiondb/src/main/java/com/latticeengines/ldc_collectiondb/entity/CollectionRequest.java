@@ -18,6 +18,7 @@ public class CollectionRequest {
     public static final String STATUS_COLLECTING = "COLLECTING";
     public static final String STATUS_DELIVERED = "DELIVERED";
     public static final String STATUS_FAILED = "FAILED";
+    public static final String STATUS_EMPTY_RESULT = "EMPTY_RESULT";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

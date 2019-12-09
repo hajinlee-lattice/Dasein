@@ -155,6 +155,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.ingestion.log.millis.stop}")
     private long ingestionLogMillisStop;
 
+    @Value("${datacloud.collection.checkfield.empty}")
+    private String checkFieldEmptyValue;
+
     private long prevCollectMillis = 0;
     private long prevCleanupMillis = 0;
     private int prevCollectTasks;
@@ -219,7 +222,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    public int spawnCollectionWorker() throws Exception {
+    private int spawnCollectionWorker() throws Exception {
 
         int spawnedTasks = 0;
 
@@ -227,26 +230,19 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         int collectingBatch = vendorConfigService.getDefCollectionBatch();
         for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
 
-            //fixme: is the earliest time of collecting reqs enough? may be ready reqs should also be considered?
-            //get earliest active request time
-            Timestamp earliestReqTime = collectionRequestService.getEarliestTime(vendor, CollectionRequest.STATUS_COLLECTING);
-
-            //get stopped worker since that time
-            List<CollectionWorker> stoppedWorkers = collectionWorkerService.getWorkerStopped(vendor, earliestReqTime);
+            List<CollectionWorker> activeTasks = collectionWorkerService.getActiveWorker(vendor);
 
             //modify req status to READY | FAILED based on retry times
-            int modified = collectionRequestService.handlePending(vendor, maxRetries, stoppedWorkers);
+            int modified = collectionRequestService.handlePending(vendor, maxRetries, activeTasks);
             if (modified > 0) {
 
-                log.info("find " + stoppedWorkers.size() + " " + vendor + " workers recently stopped");
                 log.info(modified + " pending " + vendor + " collection requests reset to ready");
 
             }
 
             //check rate limit
-            int activeTasks = collectionWorkerService.getActiveWorkerCount(vendor);
             int taskLimit = vendorConfigService.getMaxActiveTasks(vendor);
-            if (activeTasks >= taskLimit) {
+            if (activeTasks.size() >= taskLimit) {
 
                 continue;
 
@@ -327,7 +323,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains, Set<String> errDomains) throws Exception {
+    private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains, Set<String> errDomains, Set<String> emptyDomains) throws Exception {
 
         long ret = 0;
         String domainField = vendorConfigService.getDomainField(vendor);
@@ -353,9 +349,18 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                     ++ret;
                     String domain = rec.get(domainIdx);
 
-                    if (!rec.get(domainChkIdx).equals("")) {
+                    String checkFieldVal = rec.get(domainChkIdx);
+                    if (!checkFieldVal.equals("")) {
 
-                        domains.add(domain);
+                        if (checkFieldVal.equals(checkFieldEmptyValue)) {
+
+                            emptyDomains.add(domain);
+
+                        } else {
+
+                            domains.add(domain);
+
+                        }
 
                     } else {
 
@@ -438,11 +443,12 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         //parse csv
         Set<String> domains = new HashSet<>();
         Set<String> errDomains = new HashSet<>();
+        Set<String> emptyDomains = new HashSet<>();
         long recordsCollected = 0;
 
         for (File tmpFile : tmpFiles) {
 
-            recordsCollected += getDomainFromCsvEx(vendor, tmpFile, domains, errDomains);
+            recordsCollected += getDomainFromCsvEx(vendor, tmpFile, domains, errDomains, emptyDomains);
 
         }
 
@@ -450,8 +456,14 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
 
         //consumeFinished reqs
-        int reqRetried = collectionRequestService.consumeFinished(workerId, domains);
-        log.info("END_COLLECTING_REQ=" + vendor + "," + domains.size() + "," + recordsCollected + "," + errDomains.size() + "," + reqRetried );
+        List<CollectionRequest> processedReqs = collectionRequestService.getProcessed(workerId);
+        int reqRetried = collectionRequestService.consumeFinished(processedReqs, domains, emptyDomains);
+        int reqCollected = domains.size() + emptyDomains.size();
+        int reqErrorred = reqCollected + errDomains.size() == processedReqs.size() ? errDomains.size() : processedReqs.size() - reqCollected;
+        log.info("END_COLLECTING_REQ=" + vendor + "," + reqCollected + "," + recordsCollected + "," + reqErrorred +
+                "," + reqRetried );
+        processedReqs.clear();
+
         domains.clear();
 
         //clean tmp files
@@ -892,10 +904,15 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                     //iterate csv, generate avro
                     for (CSVRecord csvRec : parser) {
 
-                        if (domainChkCsvCol != -1 && csvRec.get(domainChkCsvCol).equals("")) {
+                        if (domainChkCsvCol != -1) {
 
                             //bypass dummy line
-                            continue;
+                            String checkFieldVal = csvRec.get(domainChkCsvCol);
+                            if (checkFieldVal.equals("") || checkFieldVal.equals(checkFieldEmptyValue)) {
+
+                                continue;
+
+                            }
 
                         }
 
