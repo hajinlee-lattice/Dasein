@@ -404,8 +404,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             FundamentalType fundamentalType = getFundamentalType(simpleTemplateAttr.getFundamentalType(),
                     simpleTemplateAttr.getPhysicalDataType());
             attribute.setFundamentalType(fundamentalType);
-            if (FundamentalType.DATE.equals(fundamentalType)) {
-                attribute.setLogicalDataType(LogicalDataType.Date);
+            if (LogicalDataType.Date.equals(attribute.getLogicalDataType())) {
                 if (StringUtils.isNotEmpty(simpleTemplateAttr.getDateFormat())) {
                     attribute.setDateFormatString(simpleTemplateAttr.getDateFormat());
                 }
