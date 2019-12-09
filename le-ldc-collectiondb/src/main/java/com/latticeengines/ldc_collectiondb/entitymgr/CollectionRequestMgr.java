@@ -16,7 +16,7 @@ public interface CollectionRequestMgr extends BaseEntityMgrRepository<Collection
 
     List<CollectionRequest> getReady(String vendor, int upperLimit);
 
-    List<CollectionRequest> getPending(String vendor, List<CollectionWorker> finishedWorkers);
+    List<CollectionRequest> getPending(String vendor, List<CollectionWorker> activeWorkers);
 
     Timestamp getEarliestTime(String vendor, String status);
 
