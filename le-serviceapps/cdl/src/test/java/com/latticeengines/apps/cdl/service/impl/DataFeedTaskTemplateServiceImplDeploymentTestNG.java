@@ -254,6 +254,7 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         customerAttr1.setDisplayName("CustomerAttr1");
         customerAttr1.setName("CustomerAttr1");
         customerAttr1.setPhysicalDataType(Schema.Type.LONG);
+        customerAttr1.setLogicalDataType(LogicalDataType.Date);
         customerList.add(customerAttr1);
 
         SimpleTemplateMetadata.SimpleTemplateAttribute customerAttr2 =
@@ -261,6 +262,7 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         customerAttr2.setDisplayName("CustomerAttr2");
         customerAttr2.setName("CustomerAttr2");
         customerAttr2.setPhysicalDataType(Schema.Type.LONG);
+        customerAttr2.setLogicalDataType(LogicalDataType.Date);
         customerAttr2.setDateFormat("MM/DD/YYYY");
         customerAttr2.setTimeZone("UTC");
         customerList.add(customerAttr2);
