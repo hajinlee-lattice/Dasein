@@ -8,6 +8,7 @@ import static com.latticeengines.domain.exposed.cdl.activity.StreamDimension.Usa
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +37,6 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
@@ -73,6 +73,8 @@ public class GenerateDimensionMetadata
     // tableName -> idx in units
     private Map<String, Integer> unitIdxMap = new HashMap<>();
     private Map<String, String> streamErrorMsgs = new HashMap<>();
+    // streamId -> set of dimName that has no data
+    private Map<String, Set<String>> emptyMetadataDimensions = new HashMap<>();
 
     @Override
     protected ProcessDimensionConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
@@ -205,12 +207,6 @@ public class GenerateDimensionMetadata
                 streamErrorMsgs.put(streamId, "No data for this stream");
                 return Stream.empty();
             }
-            if (hasCatalogWithoutData(stream, catalogTables)) {
-                log.info("Stream {} has contains reference to catalog without batch store, skip generating metadata",
-                        streamId);
-                streamErrorMsgs.put(streamId, "Some catalog associated with this stream has no data");
-                return Stream.empty();
-            }
 
             return getDimensionConfigs(streamId, dimensions, catalogTables, rawStreamTables);
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
@@ -238,6 +234,14 @@ public class GenerateDimensionMetadata
                 Preconditions.checkNotNull(dimension.getCatalog(),
                         String.format("Dimension %s in stream %s must have an associated catalog", dimName, streamId));
                 String catalogId = dimension.getCatalog().getCatalogId();
+                if (!catalogTables.containsKey(catalogId)) {
+                    log.info(
+                            "Catalog {} in dimName {} and stream {} does not have any data, generate empty metadata for it",
+                            catalogId, dimName, streamId);
+                    emptyMetadataDimensions.putIfAbsent(streamId, new HashSet<>());
+                    emptyMetadataDimensions.get(streamId).add(dimName);
+                    return null;
+                }
                 dim.inputIdx = addTableAndGetDataUnitIdx(catalogId, catalogTables, "Catalog_");
             } else {
                 dim.inputIdx = addTableAndGetDataUnitIdx(streamId, rawStreamTables, "Stream_");
@@ -281,6 +285,14 @@ public class GenerateDimensionMetadata
             streamDimensionMetadatas.get(streamId).put(dimName, metadata);
         });
 
+        // add empty metadata for dimension without data
+        emptyMetadataDimensions.forEach((streamId, dimNames) -> {
+            DimensionMetadata metadata = new DimensionMetadata();
+            metadata.setDimensionValues(Collections.emptyList());
+            streamDimensionMetadatas.putIfAbsent(streamId, new HashMap<>());
+            dimNames.forEach(dimName -> streamDimensionMetadatas.get(streamId).put(dimName, metadata));
+        });
+
         // add metadata for Usage=Pivot & GeneratorOption=BOOLEAN
         configuration.getActivityStreamMap().values().stream() //
                 .filter(Objects::nonNull) //
@@ -322,16 +334,6 @@ public class GenerateDimensionMetadata
             units.add(tables.get(id).toHdfsDataUnit(unitAliasPrefix + id));
         }
         return unitIdxMap.get(id);
-    }
-
-    // find any catalog without batch store
-    private boolean hasCatalogWithoutData(@NotNull AtlasStream stream, @NotNull Map<String, Table> catalogTables) {
-        return stream.getDimensions() //
-                .stream() //
-                .filter(dimension -> dimension.getCatalog() != null) //
-                .map(StreamDimension::getCatalog) //
-                .map(Catalog::getCatalogId) //
-                .anyMatch(id -> !catalogTables.containsKey(id));
     }
 
     @Override
