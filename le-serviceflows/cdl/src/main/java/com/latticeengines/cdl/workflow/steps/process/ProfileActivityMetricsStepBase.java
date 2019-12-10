@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileStepBase;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
@@ -67,8 +68,8 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         for (String servingEntity : servingEntities) {
             String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, String.format("%s_%s", getEntityLevel().name(), servingEntity));
             String tableName = getStringValueFromContext(tableCtxName);
-            if (StringUtils.isBlank(tableName)) {
-                log.info("No need to profile {} for {}", servingEntity, getEntityLevel());
+            if (noNeedToProfile(tableCtxName, tableName)) {
+                log.info("No need to profile {}", servingEntity);
                 continue;
             }
             profiledTableNames.put(servingEntity, tableName);
@@ -85,6 +86,26 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         }
         request.setSteps(steps);
         return request;
+    }
+
+    private boolean noNeedToProfile(String tableCtxName, String tableName) {
+        if (StringUtils.isNotBlank(tableName)) {
+            Long numRecord = getMergedCount(tableName);
+            if (numRecord <= 0) { // pbc does not support profiling empty tables
+                log.warn("{} rows found in table {}. Skip profiling", numRecord, tableName);
+                return true;
+            } else {
+                log.info("{} rows found in table {}", numRecord, tableName);
+                return false;
+            }
+        }
+        log.warn("No table name found in context {}. Skip profiling", tableCtxName);
+        return true;
+    }
+
+    private Long getMergedCount(String tableName) {
+        Table table = metadataProxy.getTableSummary(customerSpace.toString(), tableName);
+        return table.getExtracts().get(0).getProcessedRecords();
     }
 
     private String constructStatsTableName(String statsNamePrefix) {
