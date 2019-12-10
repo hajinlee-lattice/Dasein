@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
@@ -57,5 +58,8 @@ public interface ModelingFileMetadataService {
                                                               String systemObject, String importFile,
                                                               ValidateFieldDefinitionsRequest validateRequest) throws Exception;
 
-    List<String> validateIndividualSpec(String systemType, String systemObject, InputStream specInputStream) throws Exception;
+    ImportWorkflowSpec validateIndividualSpec(String systemType, String systemObject, InputStream specInputStream,
+                                              List<String> errors) throws Exception;
+
+    String uploadIndividualSpec(String systemType, String systemObject, InputStream specInputStream) throws Exception;
 }

@@ -60,4 +60,20 @@ public class ImportWorkflowSpecProxy extends MicroserviceRestApiProxy  {
                 shortenCustomerSpace(customerSpace), systemObject, systemType);
         return getList("get import workflow spec with same object exclude one type", url, ImportWorkflowSpec.class);
     }
+
+    public void putSpecToS3(String customerSpace, String systemType, String systemObject, ImportWorkflowSpec spec) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/importworkflowspec" +
+                        "?systemType={systemType}&systemObject={systemObject}",
+                shortenCustomerSpace(customerSpace), systemType, systemObject);
+        post("putSpecToS3", url, spec, Void.class);
+    }
+
+    public void deleteSpecFromS3(String customerSpace, String systemType, String systemObject) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/importworkflowspec" +
+                        "?systemType={systemType}&systemObject={systemObject}",
+                shortenCustomerSpace(customerSpace), systemType, systemObject);
+        delete("deleteSpecFromS3", url);
+    }
 }

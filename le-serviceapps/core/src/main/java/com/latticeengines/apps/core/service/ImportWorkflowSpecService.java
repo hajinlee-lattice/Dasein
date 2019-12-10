@@ -14,4 +14,8 @@ public interface ImportWorkflowSpecService {
     Table tableFromRecord(String tableName, boolean writeAllDefinitions, FieldDefinitionsRecord record);
 
     List<ImportWorkflowSpec> loadSpecWithSameObjectExcludeTypeFromS3(String excludeSystemType, String systemObject) throws Exception;
+
+    void putSpecToS3(String systemType, String systemObject, ImportWorkflowSpec importWorkflowSpec) throws Exception;
+
+    void cleanupSpecFromS3(String systemType, String systemObject) throws Exception;
 }

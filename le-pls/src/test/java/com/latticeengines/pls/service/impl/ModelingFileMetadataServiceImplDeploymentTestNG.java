@@ -468,10 +468,9 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
 
         log.error("Expected import workflow spec is:\n" + JsonUtils.pprint(testSpec));
         InputStream specInputStream = new ByteArrayInputStream(JsonUtils.serialize(testSpec).getBytes());
-
+        List<String> errors  = new ArrayList<>();
         // case 1: input the same spec in S3
-        List<String> errors  = modelingFileMetadataService.validateIndividualSpec("other", "contacts",
-                specInputStream);
+        modelingFileMetadataService.validateIndividualSpec("other", "contacts", specInputStream, errors);
         Assert.assertNotNull(errors);
         Assert.assertTrue(errors.contains("input spec matches the existing spec with system type other and " +
                 "system object contacts"));
@@ -486,8 +485,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         FieldDefinition firstNameDefinition = fieldNameToDefinition.get("FirstName");
         firstNameDefinition.setMatchingColumnNames(Arrays.asList("First Name", "First Name"));
         specInputStream = new ByteArrayInputStream(JsonUtils.serialize(testSpec).getBytes());
-        errors  = modelingFileMetadataService.validateIndividualSpec("other", "contacts",
-                specInputStream);
+        modelingFileMetadataService.validateIndividualSpec("other", "contacts", specInputStream, errors);
         Assert.assertNotNull(errors);
         Assert.assertTrue(errors.contains("duplicates found in matching column for field name FirstName"));
 
@@ -495,24 +493,21 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         FieldDefinition lastNameDefinition = fieldNameToDefinition.get("LastName");
         lastNameDefinition.setMatchingColumnNames(Arrays.asList("First Name", "LAST NAME"));
         specInputStream = new ByteArrayInputStream(JsonUtils.serialize(testSpec).getBytes());
-        errors  = modelingFileMetadataService.validateIndividualSpec("other", "contacts",
-                specInputStream);
+        modelingFileMetadataService.validateIndividualSpec("other", "contacts", specInputStream, errors);
         Assert.assertNotNull(errors);
         Assert.assertTrue(errors.contains("duplicates found in matching column for field name LastName"));
 
         // case 3: required flag
         firstNameDefinition.setRequired(null);
         specInputStream = new ByteArrayInputStream(JsonUtils.serialize(testSpec).getBytes());
-        errors  = modelingFileMetadataService.validateIndividualSpec("other", "contacts",
-                specInputStream);
+        modelingFileMetadataService.validateIndividualSpec("other", "contacts", specInputStream, errors);
         Assert.assertNotNull(errors);
         Assert.assertTrue(errors.contains("required flag should be set for FirstName"));
 
         // case 4: field type change
         firstNameDefinition.setFieldType(UserDefinedType.NUMBER);
         specInputStream = new ByteArrayInputStream(JsonUtils.serialize(testSpec).getBytes());
-        errors  = modelingFileMetadataService.validateIndividualSpec("other", "contacts",
-                specInputStream);
+        modelingFileMetadataService.validateIndividualSpec("other", "contacts", specInputStream, errors);
         Assert.assertNotNull(errors);
         Assert.assertTrue(errors.contains("Physical type TEXT of the FieldDefinition with " +
                 "same field name FirstName cannot be changed to NUMBER for system type other and system object " +
@@ -529,11 +524,30 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 "First Name"));
         contactFieldDefinitions.add(firstNameDefinition2);
         specInputStream = new ByteArrayInputStream(JsonUtils.serialize(testSpec).getBytes());
-        errors  = modelingFileMetadataService.validateIndividualSpec("other", "contacts",
-                specInputStream);
+        modelingFileMetadataService.validateIndividualSpec("other", "contacts", specInputStream, errors);
         Assert.assertNotNull(errors);
         Assert.assertTrue(errors.contains("field definitions have same field name FirstName"));
 
+    }
+
+    @Test(groups = "deployment")
+    public void testUploadIndividualSpec() throws Exception {
+        String systemType = "fakeType1";
+        String systemObject = "fakeObject1";
+
+        ImportWorkflowSpec importWorkflowSpec = new ImportWorkflowSpec();
+        importWorkflowSpec.setSystemName(this.getClass().getSimpleName());
+        importWorkflowSpec.setSystemType(systemType);
+        importWorkflowSpec.setSystemObject(systemObject);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        importWorkflowSpecProxy.putSpecToS3(tenantId, systemType, systemObject, importWorkflowSpec);
+        ImportWorkflowSpec importSpec = importWorkflowSpecProxy.getImportWorkflowSpec(tenantId, systemType,
+                systemObject);
+        Assert.assertNotNull(importSpec);
+        importWorkflowSpecProxy.deleteSpecFromS3(tenantId, systemType, systemObject);
+        importSpec = importWorkflowSpecProxy.getImportWorkflowSpec(tenantId, systemType, systemObject);
+
+        Assert.assertNull(importSpec);
     }
 
     private FieldDefinition generateFieldDefinition(String fieldName, UserDefinedType type, List<String> matchingColumns) {

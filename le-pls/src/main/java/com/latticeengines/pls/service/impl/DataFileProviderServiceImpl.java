@@ -109,6 +109,12 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Value("${camille.zk.pod.id}")
     protected String podId;
 
+    @Value("${aws.s3.bucket}")
+    private String s3SpecBucket;
+
+    @Value("${aws.import.specs.s3.folder}")
+    private String s3Folder;
+
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
             String filter, HttpFileDownLoader.DownloadMode mode) {
@@ -391,6 +397,15 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
             // no bundle file
             throw new RuntimeException("No bundle file found.");
         }
+
+    }
+
+    @Override
+    public void downloadSpecFromS3(HttpServletRequest request, HttpServletResponse response, String mimeType,
+                                   String systemType, String systemObject) throws IOException {
+        String specName = systemType.toLowerCase() + "-" + systemObject.toLowerCase() + "-spec.json";
+        String key = s3Folder + "/" + specName;
+        downloadS3File(request, response, mimeType, specName, key, s3SpecBucket);
 
     }
 

@@ -579,6 +579,22 @@ public class ModelingFileUploadResource {
         }
     }
 
+    // API to upload a new Spec
+    @RequestMapping(value = "spec/upload", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "upload a new Spec to S3")
+    public String uploadSpecToS3(
+            @RequestParam(value = "systemType", required = true) String systemType, //
+            @RequestParam(value = "systemObject", required = true) String systemObject, //
+            @RequestParam("file") MultipartFile file) {
+        try {
+            InputStream stream = file.getInputStream();
+            return modelingFileMetadataService.uploadIndividualSpec(systemType, systemObject, stream);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
             SchemaInterpretation schemaInterpretation, String entity, MultipartFile file, boolean checkHeaderFormat, boolean outsizeFlag) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();

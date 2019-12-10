@@ -262,4 +262,19 @@ public class DataFileResource {
             throw e;
         }
     }
+
+    @RequestMapping(value = "/spec/download", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get spec info from s3")
+    public void downloadSpecFromS3(
+            @RequestParam(value = "systemType", required = true) String systemType,
+            @RequestParam(value = "systemObject", required = true) String systemObject,
+            HttpServletRequest request, //
+            HttpServletResponse response) throws IOException {
+        try {
+            dataFileProviderService.downloadSpecFromS3(request, response, "application/csv", systemType, systemObject);
+        } catch(Exception e) {
+            throw e;
+        }
+    }
 }

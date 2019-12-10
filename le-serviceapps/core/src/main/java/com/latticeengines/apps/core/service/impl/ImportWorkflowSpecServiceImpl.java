@@ -1,6 +1,8 @@
 package com.latticeengines.apps.core.service.impl;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -123,5 +125,35 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
             }
         }
         return specList;
+    }
+
+    @Override
+    public void putSpecToS3(String systemType, String systemObject, ImportWorkflowSpec importWorkflowSpec) throws Exception {
+        String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
+        String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
+        String key = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
+        File specFile = null;
+        try {
+            specFile = File.createTempFile(fileSystemType + "-" + fileSystemObject + "-spec", ".json");
+            specFile.deleteOnExit();
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(specFile));
+            writer.write(JsonUtils.pprint(importWorkflowSpec));
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            specFile = null;
+            throw new IOException("Could not create temp file for S3 download of spec with SystemType " + systemType +
+                    " and SystemObject " + systemObject, e);
+        }
+        s3Service.uploadLocalFile(s3Bucket, key, specFile, true);
+    }
+
+    @Override
+    public void cleanupSpecFromS3(String systemType, String systemObject) throws Exception {
+        String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
+        String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
+        String key = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
+        s3Service.cleanupPrefix(s3Bucket, key);
     }
 }

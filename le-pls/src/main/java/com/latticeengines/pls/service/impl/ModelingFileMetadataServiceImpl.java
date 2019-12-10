@@ -1466,8 +1466,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
      * @throws Exception
      */
     @Override
-    public List<String> validateIndividualSpec(String systemType, String systemObject,
-                                                     InputStream specInputStream) throws Exception {
+    public ImportWorkflowSpec validateIndividualSpec(String systemType, String systemObject,
+                                               InputStream specInputStream, List<String> errors) throws Exception {
 
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
 
@@ -1482,7 +1482,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             specWithSameObjectMap.put(spec.getSystemType(),
             spec.getFieldDefinitionsRecordsMap().values().stream().flatMap(List::stream).collect(Collectors.toMap(FieldDefinition::getFieldName, e -> e))));
 
-        List<String> errors = new ArrayList<>();
         Map<String, List<FieldDefinition>> currentFieldDefinitionsMap;
         if (existingSpec == null) {
             currentFieldDefinitionsMap = new HashMap<>();
@@ -1568,7 +1567,19 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
 
-        return errors;
+        return importSpec;
+    }
+
+    @Override
+    public String uploadIndividualSpec(String systemType, String systemObject, InputStream inputStream) throws Exception {
+        List<String> errors = new ArrayList<>();
+        ImportWorkflowSpec importWorkflowSpec = validateIndividualSpec(systemType, systemObject, inputStream, errors);
+        if (CollectionUtils.isEmpty(errors) && importWorkflowSpec != null) {
+            importWorkflowSpecProxy.putSpecToS3(MultiTenantContext.getShortTenantId(), systemType, systemObject, importWorkflowSpec);
+            return "uploaded to S3 successfully.";
+        } else {
+            return String.join("\n", errors);
+        }
     }
 
     private LatticeSchemaField getLatticeFieldFromTableAttribute(Attribute attribute) {

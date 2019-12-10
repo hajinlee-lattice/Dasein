@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -93,6 +94,35 @@ public class ImportWorkflowSpecResource {
             return null;
         }
         return specs;
+    }
+
+    @PostMapping(value = "")
+    @ApiOperation("put the spec to s3")
+    public void putSpecToS3(
+            @PathVariable String customerSpace, //
+            @RequestParam(value = "systemType", required = true) String systemType, //
+            @RequestParam(value = "systemObject", required = true) String systemObject, //
+            @RequestBody ImportWorkflowSpec importWorkflowSpec) {
+        try {
+            importWorkflowSpecService.putSpecToS3(systemType, systemObject, importWorkflowSpec);
+        } catch (Exception e) {
+            log.error(String.format("ImportWorkflowService failed to upload spec for system type %s and system " +
+                    "object %s.\nError was: %s", systemType, systemObject, e.toString()));
+        }
+    }
+
+    @DeleteMapping(value = "")
+    @ApiOperation("delete spec from s3")
+    public void deleteSpecFromS3(
+        @PathVariable String customerSpace, //
+        @RequestParam(value = "systemType", required = true) String systemType, //
+        @RequestParam(value = "systemObject", required = true) String systemObject) {
+        try {
+            importWorkflowSpecService.cleanupSpecFromS3(systemType, systemObject);
+        } catch (Exception e) {
+            log.error(String.format("failed to delete spec with system type %s and system object %s.\n Error was: %s"
+                    , systemType, systemObject, e.toString()));
+        }
     }
 
 }
