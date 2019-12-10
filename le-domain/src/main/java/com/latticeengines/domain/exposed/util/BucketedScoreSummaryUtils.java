@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.util;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
@@ -173,23 +174,7 @@ public class BucketedScoreSummaryUtils {
         if (CollectionUtils.isEmpty(lowerBounds) || lowerBounds.size() + 1 != bucketMetadataList.size()) {
             throw new RuntimeException("Not enough lower bounds");
         }
-        List<BucketedScore> boundaries = new ArrayList<>();
-        boundaries.add(new BucketedScore(0, 0, 0D, //
-                scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted(), isEV ? 0D : null, //
-                isEV ? 0D : null, //
-                isEV ? scoreSummary.getTotalExpectedRevenue() : null));
-        for (BucketedScore bucketedScore : scoreSummary.getBucketedScores()) {
-            if (bucketedScore != null) {
-                if (lowerBounds.contains(bucketedScore.getScore())) {
-                    boundaries.add(bucketedScore);
-                }
-            }
-        }
-        boundaries.add(new BucketedScore(100, 0, 0D, 0, 0D, //
-                isEV ? 0D : null, //
-                isEV ? 0D : null, //
-                isEV ? 0D : null));
-
+        List<BucketedScore> boundaries = buildBoundaries(scoreSummary, isEV, lowerBounds);
         int totalNumLeads = scoreSummary.getTotalNumLeads();
         double overallConversion = scoreSummary.getTotalNumConverted() / totalNumLeads;
         double totalExpectedRevenue = 0;
@@ -231,6 +216,34 @@ public class BucketedScoreSummaryUtils {
         }
 
         return Lists.reverse(bucketMetadataList);
+    }
+
+    private static List<BucketedScore> buildBoundaries(BucketedScoreSummary scoreSummary, boolean isEV,
+            List<Integer> lowerBounds) {
+        List<BucketedScore> boundaries = new ArrayList<>();
+        boundaries.add(new BucketedScore(0, 0, 0D, //
+                scoreSummary.getTotalNumLeads(), scoreSummary.getTotalNumConverted(), isEV ? 0D : null, //
+                isEV ? 0D : null, //
+                isEV ? scoreSummary.getTotalExpectedRevenue() : null));
+        TreeMap<Integer, BucketedScore> scoreBucketMap = new TreeMap<>();
+        for (BucketedScore bucketedScore : scoreSummary.getBucketedScores()) {
+            if (bucketedScore != null && bucketedScore.getScore() != null) {
+                scoreBucketMap.put(bucketedScore.getScore(), bucketedScore);
+            }
+        }
+        for (Integer lowerBound : lowerBounds) {
+            Integer floorKey = scoreBucketMap.floorKey(lowerBound);
+            if (floorKey != null) {
+                boundaries.add(scoreBucketMap.get(floorKey));
+            } else {
+                boundaries.add(boundaries.get(boundaries.size() - 1));
+            }
+        }
+        boundaries.add(new BucketedScore(100, 0, 0D, 0, 0D, //
+                isEV ? 0D : null, //
+                isEV ? 0D : null, //
+                isEV ? 0D : null));
+        return boundaries;
     }
 
     // sort bucket metadata by lower bound score asc
