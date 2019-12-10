@@ -42,14 +42,14 @@ public class RatingQueryTranslator extends QueryTranslator {
     public Query translateRatingQuery(FrontEndQuery frontEndQuery, AttributeRepository attrRepo, boolean isCountQuery, //
             TimeFilterTranslator timeTranslator, String sqlUser) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
-
         if (BusinessEntity.Product.equals(mainEntity)) {
             return translateProductQuery(frontEndQuery, isCountQuery);
         }
-
+        if (BusinessEntity.Transaction.equals(mainEntity)) {
+            return translateTransactionQuery(frontEndQuery, attrRepo, sqlUser);
+        }
         Restriction restriction;
         QueryBuilder queryBuilder = Query.builder();
-
         Map<String, Lookup> ruleBasedModels = ruleBasedModels(mainEntity, attrRepo, frontEndQuery.getRatingModels(), //
                 timeTranslator, sqlUser);
         restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery), //

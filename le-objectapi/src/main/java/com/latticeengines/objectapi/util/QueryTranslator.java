@@ -80,6 +80,9 @@ abstract class QueryTranslator {
         if (BusinessEntity.Product.equals(mainEntity)) {
             return results;
         }
+        if (BusinessEntity.Transaction.equals(mainEntity)) {
+            return results;
+        }
         needPreprocess(frontEndQuery, timeTranslator, results);
         results.forEach((k, v) -> log.info(k + ":" + v));
         return results;
@@ -113,6 +116,21 @@ abstract class QueryTranslator {
             queryBuilder.select(BusinessEntity.Product, InterfaceName.ProductName.name());
         }
 
+        return queryBuilder.build();
+    }
+
+    Query translateTransactionQuery(FrontEndQuery frontEndQuery, AttributeRepository attrRepo, String sqlUser) {
+        QueryBuilder queryBuilder = Query.builder();
+        BusinessEntity mainEntity = BusinessEntity.Transaction;
+        frontEndQuery.setContactRestriction(null);
+        frontEndQuery.setRatingModels(null);
+        Restriction restriction = translateFrontEndRestriction(frontEndQuery.getAccountRestriction(), //
+                attrRepo, null, sqlUser, false);
+        queryBuilder.from(mainEntity).where(restriction) //
+                .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
+                .page(frontEndQuery.getPageFilter()) //
+                .distinct(frontEndQuery.getDistinct());
+        queryBuilder.select(new ValueLookup(1));
         return queryBuilder.build();
     }
 
