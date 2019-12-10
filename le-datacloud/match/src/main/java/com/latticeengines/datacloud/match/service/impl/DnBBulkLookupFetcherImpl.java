@@ -10,10 +10,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
-import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
+import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
@@ -38,7 +39,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
 
     private static final Logger log = LoggerFactory.getLogger(DnBBulkLookupFetcherImpl.class);
 
-    @Autowired
+    @Inject
     private DnBAuthenticationService dnBAuthenticationService;
 
     @Value("${datacloud.dnb.bulk.url}")
@@ -77,8 +78,8 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Value("${datacloud.dnb.bulk.getresult.url.format}")
     private String getResultUrlFormat;
 
-    @Value("${datacloud.dnb.bulk.getstatus.transactioncode.xpath}")
-    private String transactionCodeXPath;
+    @Value("${datacloud.dnb.bulk.fetch.errorcode.xpath}")
+    private String errorCodeXpath;
 
     @Override
     public DnBBatchMatchContext getResult(DnBBatchMatchContext batchContext) {
@@ -103,20 +104,21 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                 }
                 return batchContext;
             }
+            log.info("Attempting to refresh DnB token which was found invalid: " + batchContext.getToken());
             dnBAuthenticationService.requestToken(DnBKeyType.BATCH, batchContext.getToken());
         }
-        log.error("Fail to fetch batch results from dnb because API token expires and fails to refresh");
+        log.error("Fail to fetch batch results from dnb due to invalid token and failed to refresh");
         return batchContext;
     }
 
     @Override
-    protected void parseError(String response, Exception ex, DnBBatchMatchContext batchContext) {
+    protected void parseError(Exception ex, DnBBatchMatchContext batchContext) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
             log.error(String.format("HttpClientErrorException in DnB batch match fetching request: HttpStatus %d %s",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
-            batchContext.setDnbCode(parseDnBHttpError(response, httpEx));
+            batchContext.setDnbCode(parseDnBHttpError(httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
             log.error(String.format("LedpException in DnB batch match fetching request: %s %s",
@@ -186,8 +188,13 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     }
 
     @Override
-    protected String getResultIdPath() {
-        return transactionCodeXPath;
+    protected ResponseType getResponseType() {
+        return ResponseType.XML;
+    }
+
+    @Override
+    protected String getErrorCodePath() {
+        return errorCodeXpath;
     }
 
     @Override

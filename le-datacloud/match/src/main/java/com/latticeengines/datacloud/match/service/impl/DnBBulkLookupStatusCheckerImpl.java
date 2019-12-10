@@ -5,10 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.datacloud.core.service.RateLimitingService;
-import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
+import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupStatusChecker;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
@@ -31,9 +32,6 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
         implements DnBBulkLookupStatusChecker {
 
     private static final Logger log = LoggerFactory.getLogger(DnBBulkLookupStatusCheckerImpl.class);
-
-    @Autowired
-    private DnBAuthenticationService dnBAuthenticationService;
 
     @Value("${datacloud.dnb.bulk.getstatus.url.format}")
     private String urlFormat;
@@ -54,7 +52,10 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     private int checkStatusBatchSize;
 
     @Value("${datacloud.dnb.bulk.getstatus.transactioncode.xpath}")
-    private String transactionCodeXPath;
+    private String transactionCodeXpath;
+
+    @Value("${datacloud.dnb.bulk.getstatus.errorcode.xpath}")
+    private String errorCodeXpath;
 
     @Value("${datacloud.dnb.bulk.getstatus.servicebatchid.xpath}")
     private String serviceBatchIdXpath;
@@ -62,7 +63,10 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     @Value("${datacloud.dnb.bulk.getstatus.status.xpath}")
     private String statusXpath;
 
-    @Autowired
+    @Inject
+    private DnBAuthenticationService dnBAuthenticationService;
+
+    @Inject
     private RateLimitingService rateLimitingService;
 
     @Override
@@ -98,6 +102,8 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
                     log.info("Checked status for batch requests: " + logBuilder.toString());
                     break;
                 }
+                log.info("Attempting to refresh DnB token which was found invalid: "
+                        + batches.entrySet().iterator().next().getValue().getToken());
                 dnBAuthenticationService.requestToken(DnBKeyType.BATCH,
                         batches.entrySet().iterator().next().getValue().getToken());
                 if (i == retries - 1) {
@@ -151,8 +157,13 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     }
 
     @Override
-    protected String getResultIdPath() {
-        return transactionCodeXPath;
+    protected ResponseType getResponseType() {
+        return ResponseType.XML;
+    }
+
+    @Override
+    protected String getErrorCodePath() {
+        return errorCodeXpath;
     }
 
     @Override
@@ -163,7 +174,7 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     }
 
     private DnBReturnCode parseTransactionStatus(String body) {
-        String code = (String) retrieveXmlValueFromResponse(transactionCodeXPath, body);
+        String code = (String) retrieveXmlValueFromResponse(transactionCodeXpath, body);
         switch (code) {
         case "CM000":
             return DnBReturnCode.OK;
@@ -186,14 +197,14 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
     }
 
     @Override
-    protected void parseError(String response, Exception ex, Map<String, DnBBatchMatchContext> batch) {
+    protected void parseError(Exception ex, Map<String, DnBBatchMatchContext> batch) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
             log.error(String.format("HttpClientErrorException in DnB realtime request: HttpStatus %d %s",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
             for (Map.Entry<String, DnBBatchMatchContext> entry : batch.entrySet()) {
-                entry.getValue().setDnbCode(parseDnBHttpError(response, httpEx));
+                entry.getValue().setDnbCode(parseDnBHttpError(httpEx));
             }
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;

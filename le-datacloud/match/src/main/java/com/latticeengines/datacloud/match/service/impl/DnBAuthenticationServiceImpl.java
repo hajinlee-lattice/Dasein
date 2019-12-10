@@ -1,8 +1,13 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.DnBToken;
+
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -22,16 +27,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.jayway.jsonpath.JsonPath;
+import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.camille.exposed.watchers.WatcherCache;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
+import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -69,13 +72,19 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     @Value("${datacloud.dnb.application.id}")
     private String appId;
 
+    // A DnB token expires after 24 hours. We treat it as expired after 20 hours
+    // (with some time buffer) and request a new one from DnB
     @Value("${datacloud.dnb.token.cache.expiration.duration.minute}")
     private int expireTimeInMin;
+
+    // Local cache tries to sync up token from redis every hour
+    @Value("${datacloud.dnb.token.cache.reload.duration.minute}")
+    private int reloadTimeInMin;
 
     @Value("${datacloud.dnb.authentication.token.jsonpath}")
     private String tokenJsonPath;
 
-    private LoadingCache<DnBKeyType, String> tokenCache;
+    private WatcherCache<DnBKeyType, String> tokenCache;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -91,33 +100,25 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     static final String DNB_KEY_PREFIX = "DnBAPIKey_";
     static final String DNB_LOCK_PREFIX = "DnBLockKey_";
 
+    @SuppressWarnings("unchecked")
     @PostConstruct
     public void initialize() throws Exception {
         dnbClient = RestApiClient.newExternalClient(applicationContext);
-        tokenCache = //
-                CacheBuilder.newBuilder()//
-                        .maximumSize(DnBKeyType.values().length)
-                        .refreshAfterWrite(expireTimeInMin, TimeUnit.MINUTES)
-                        .build(new CacheLoader<DnBKeyType, String>() {
-                            @Override
-                            public String load(DnBKeyType type) throws Exception {
-                                return externalRequest(type, null);
-                            }
-
-                            @Override
-                            public ListenableFuture<String> reload(DnBKeyType type, String expiredToken) {
-                                // Eager local cache refresh actually doesn't
-                                // help much, as the token is got from redis
-                                // whose life span is longer than the
-                                // duration of its existing in local cache.
-                                // Mostly rely on the caller to trigger token
-                                // expiration.
-                                log.info(
-                                        "DnB token in local cache {} has existed for more than 23hrs, updating token from redis/dnb.",
-                                        expiredToken);
-                                return Futures.immediateFuture(externalRequest(type, expiredToken));
-                            }
-                        });
+        tokenCache = WatcherCache.builder() //
+                .name("DnBTokenCache") //
+                .watch(DnBToken.name()) //
+                .maximum(DnBKeyType.values().length) //
+                .load(type -> externalRequest((DnBKeyType) type, null)) //
+                // There could be hundreds of yarn containers running at same
+                // time. Add some random waiting time to avoid redis connection
+                // congestion
+                .waitBeforeRefreshInSec(
+                        BeanFactoryEnvironment.Environment.AppMaster.equals(BeanFactoryEnvironment.getEnvironment())
+                                ? new Random().nextInt(15)
+                                : 0)
+                .build();
+        // local cache tries to sync up token from redis periodically
+        tokenCache.setExpire(reloadTimeInMin, TimeUnit.MINUTES);
     }
 
 
@@ -138,6 +139,44 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         return newToken;
     }
 
+    @Override
+    public String refreshToken(@NotNull DnBKeyType type, String newToken) {
+        if (newToken == null) {
+            newToken = dnbRequest(type);
+        }
+        if (newToken == null) {
+            throw new RuntimeException(
+                    "Fail to request a " + type + " token from DnB. Please provide expected token.");
+        }
+
+        // Acquire the lock to refresh token in redis
+        String lockKey = DNB_LOCK_PREFIX + type;
+        String reqId = UUID.randomUUID().toString();
+        boolean acquired = false;
+        int attempt = 0;
+        // Every attempt to fetch lock takes up to 5s. Try for up to 6 times so
+        // that total wait time is 30s.
+        while (attempt < 6) {
+            acquired = redisLock.lock(lockKey, reqId, 60000, true);
+            if (acquired) {
+                break;
+            }
+            attempt++;
+        }
+        if (!acquired) {
+            throw new RuntimeException("Fail to acquire lock in redis to refresh DnB token.");
+        }
+        redisRefresh(type, newToken);
+        redisLock.releaseLock(lockKey, reqId);
+
+        // trigger watcher cache refresh signal so that all the tomcat apps &
+        // yarn containers could reload token from redis to local cache
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        NodeWatcher.updateWatchedData(DnBToken.name(), df.format(new Date()));
+
+        return newToken;
+    }
+
     /**
      * Request DnB token from local cache
      * 
@@ -146,12 +185,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      * @return localCache
      */
     private String localRequest(@NotNull DnBKeyType type) {
-        try {
-            return tokenCache.get(type);
-        } catch (ExecutionException e) {
-            log.error("Fail to get DnB " + type + " token from local cache", e);
-            return null;
-        }
+        return tokenCache.get(type);
     }
 
     /**
@@ -234,7 +268,12 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private String redisRequest(DnBKeyType type, boolean logIfExpire) {
         try {
             DnBTokenCache cache = (DnBTokenCache) redisTemplate.opsForValue().get(DNB_KEY_PREFIX + type);
-            if (cache != null && !isTimestampExpired(cache, logIfExpire)) {
+            if (cache == null) {
+                log.info("There is no DnB token cached in redis, updating token from dnb.");
+                return null;
+            }
+            log.info("Got DnB token from redis: {}", JsonUtils.serialize(cache));
+            if (!isTimestampExpired(cache, logIfExpire)) {
                 return cache.getToken();
             } else {
                 return null;
@@ -268,8 +307,8 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private boolean isTimestampExpired(DnBTokenCache cache, boolean logIfExpire) {
         boolean expired = (System.currentTimeMillis() - cache.getCreatedAt()) > expireTimeInMin * 60_000;
         if (expired && logIfExpire) {
-            log.info("DnB token in redis {} has existed for more than 23hrs, updating token from dnb.",
-                    cache.getToken());
+            log.info("DnB token in redis {} has existed for more than {}hrs, updating token from dnb.",
+                    cache.getToken(), expireTimeInMin / 60);
         }
         return expired;
     }
@@ -342,11 +381,14 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         private String token;
         @JsonProperty("CreatedAt")
         private long createdAt;
+        @JsonProperty("CreatedBy")
+        private String createdBy;
 
         @JsonCreator
         DnBTokenCache(@JsonProperty("Token") String token, @JsonProperty("CreatedAt") long createdAt) {
             this.token = token;
             this.createdAt = createdAt;
+            this.createdBy = BeanFactoryEnvironment.getEnvironment().toString();
         }
 
         String getToken() {
@@ -357,15 +399,4 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             return createdAt;
         }
     }
-    
-    /**
-     * ONLY for testing purpose
-     *
-     * @param type
-     */
-    @VisibleForTesting
-    void refreshLocalCache(DnBKeyType type) {
-        tokenCache.refresh(type);
-    }
-
 }

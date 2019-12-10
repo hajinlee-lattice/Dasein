@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -25,15 +26,22 @@ public class GetDnBResponseErrorHandler implements ResponseErrorHandler {
         return response.getStatusCode() != HttpStatus.OK;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.springframework.web.client.ResponseErrorHandler#handleError(org.
+     * springframework.http.client.ClientHttpResponse)
+     */
     @Override
     public void handleError(ClientHttpResponse response) throws IOException {
-        log.info(String.format("Response body with HTTPStatus %s: %s", response.getStatusCode().name(),
-                IOUtils.toString(response.getBody(), "UTF-8")));
+        String responseBody = IOUtils.toString(response.getBody(), "UTF-8");
+        log.info(String.format("Response body with HTTPStatus %s: %s", response.getStatusCode().name(), responseBody));
         switch (response.getStatusCode()) {
         case UNAUTHORIZED:
         case REQUEST_TIMEOUT:
         case FORBIDDEN:
-            throw new HttpClientErrorException(response.getStatusCode());
+            throw new HttpClientErrorException(response.getStatusCode(), response.getStatusCode().name(),
+                    responseBody.getBytes(), Charset.forName("UTF-8"));
         case BAD_REQUEST:
             throw new LedpException(LedpCode.LEDP_25037);
         case NOT_FOUND:
