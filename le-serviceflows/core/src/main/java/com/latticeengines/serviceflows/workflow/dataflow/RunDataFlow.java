@@ -114,18 +114,24 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
             sourceNames = new HashSet<>(metadataProxy.getTableNames(configuration.getCustomerSpace().toString()));
         }
 
+        // Go through the extra sources and make sure that all are
+        // registered and provided
+        double maxSizeInGb = 0.0;
         for (String name : sourceNames) {
+            double sizeInGb = 0.0;
             if (configuration.getExtraSources().containsKey(name)) {
-                registerTable(name, configuration.getExtraSources().get(name));
+                sizeInGb = registerTable(name, configuration.getExtraSources().get(name));
+            } else {
+                Table table = metadataProxy.getTableSummary(configuration.getCustomerSpace().toString(), name);
+                sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, table);
+                log.info("Found size=" + sizeInGb + " gb for source " + table.getName());
             }
             DataFlowSource source = new DataFlowSource();
             source.setName(name);
             sources.add(source);
+            maxSizeInGb += sizeInGb;
         }
 
-        // Go through the extra sources and make sure that all are
-        // registered and provided
-        double maxSizeInGb = 0.0;
         for (final String extraSourceName : configuration.getExtraSources().keySet()) {
             DataFlowSource extraSource = sources.stream() //
                     .filter(source -> source.getName().equals(extraSourceName)) //
@@ -153,13 +159,11 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
             metadataProxy.createTable(configuration.getCustomerSpace().toString(), table.getName(), table);
         }
         double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, table);
-        if (sizeInGb > 0) {
-            log.info("Found size=" + sizeInGb + " gb for table " + table.getName());
-        }
+        log.info("Found size=" + sizeInGb + " gb for table " + table.getName());
         return sizeInGb;
     }
 
-    protected int getScalingMultiplier(double sizeInGb) {
+    private int getScalingMultiplier(double sizeInGb) {
         int multiplier = ScalingUtils.getMultiplier(sizeInGb);
         if (multiplier > 1) {
             log.info("Set multiplier=" + multiplier + " base on size=" + sizeInGb + " gb.");
