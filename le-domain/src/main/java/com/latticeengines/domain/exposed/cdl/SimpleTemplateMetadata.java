@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.query.EntityType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -75,6 +76,18 @@ public class SimpleTemplateMetadata {
         @JsonProperty("physical_data_type")
         private Schema.Type physicalDataType;
 
+        @JsonProperty("logical_data_type")
+        private LogicalDataType logicalDataType;
+
+        @JsonProperty("date_format")
+        private String dateFormat;
+
+        @JsonProperty("time_format")
+        private String timeFormat;
+
+        @JsonProperty("timezone")
+        private String timezone;
+
         @JsonProperty("approved_usages")
         private List<String> approvedUsages;
 
@@ -103,6 +116,38 @@ public class SimpleTemplateMetadata {
 
         public void setPhysicalDataType(Schema.Type physicalDataType) {
             this.physicalDataType = physicalDataType;
+        }
+
+        public LogicalDataType getLogicalDataType() {
+            return logicalDataType;
+        }
+
+        public void setLogicalDataType(LogicalDataType logicalDataType) {
+            this.logicalDataType = logicalDataType;
+        }
+
+        public String getDateFormat() {
+            return dateFormat;
+        }
+
+        public void setDateFormat(String dateFormat) {
+            this.dateFormat = dateFormat;
+        }
+
+        public String getTimeFormat() {
+            return timeFormat;
+        }
+
+        public void setTimeFormat(String timeFormat) {
+            this.timeFormat = timeFormat;
+        }
+
+        public String getTimezone() {
+            return timezone;
+        }
+
+        public void setTimeZone(String timezone) {
+            this.timezone = timezone;
         }
 
         public List<String> getApprovedUsages() {

@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -85,8 +86,21 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         Assert.assertNotNull(template.getAttribute(InterfaceName.WebVisitPageUrl));
         Assert.assertNull(template.getAttribute(InterfaceName.City));
         Assert.assertNotNull(template.getAttribute("user_CustomerAttr1"));
+        Assert.assertEquals(template.getAttribute("user_CustomerAttr1").getLogicalDataType(), LogicalDataType.Date);
+
+        Assert.assertNotNull(template.getAttribute("user_CustomerAttr2"));
+        Assert.assertEquals(template.getAttribute("user_CustomerAttr2").getLogicalDataType(), LogicalDataType.Date);
+        Assert.assertEquals(template.getAttribute("user_CustomerAttr2").getDateFormatString(), "MM/DD/YYYY");
+        Assert.assertTrue(StringUtils.isEmpty(template.getAttribute("user_CustomerAttr2").getTimeFormatString()));
+        Assert.assertEquals(template.getAttribute("user_CustomerAttr2").getTimezone(), "UTC");
+
         Attribute attribute = template.getAttribute(InterfaceName.CompanyName);
         Assert.assertEquals(attribute.getDisplayName(), "CustomerName");
+
+        Assert.assertNotNull(template.getAttribute(InterfaceName.WebVisitDate));
+        Assert.assertEquals(template.getAttribute(InterfaceName.WebVisitDate).getDateFormatString(), "MM/DD/YYYY");
+        Assert.assertEquals(template.getAttribute(InterfaceName.WebVisitDate).getTimeFormatString(), "00:00:00 12H");
+        Assert.assertEquals(template.getAttribute(InterfaceName.WebVisitDate).getTimezone(), "UTC");
 
         // verify stream is created correctly
         verifyWebVisitStream(webVisitStreamTask, InterfaceName.PathPatternId.name(), false);
@@ -224,13 +238,34 @@ public class DataFeedTaskTemplateServiceImplDeploymentTestNG extends CDLDeployme
         standardAttr.setDisplayName("CustomerName");
         standardAttr.setName(InterfaceName.CompanyName.name());
         standardList.add(standardAttr);
+
+        SimpleTemplateMetadata.SimpleTemplateAttribute standardAttr2 = new SimpleTemplateMetadata.SimpleTemplateAttribute();
+        standardAttr2.setDisplayName("CustomerDate");
+        standardAttr2.setName(InterfaceName.WebVisitDate.name());
+        standardAttr2.setDateFormat("MM/DD/YYYY");
+        standardAttr2.setTimeFormat("00:00:00 12H");
+        standardAttr2.setTimeZone("UTC");
+
+        standardList.add(standardAttr2);
+
         // custom attrs
         List<SimpleTemplateMetadata.SimpleTemplateAttribute> customerList = new ArrayList<>();
         SimpleTemplateMetadata.SimpleTemplateAttribute customerAttr1 = new SimpleTemplateMetadata.SimpleTemplateAttribute();
         customerAttr1.setDisplayName("CustomerAttr1");
         customerAttr1.setName("CustomerAttr1");
-        customerAttr1.setPhysicalDataType(Schema.Type.INT);
+        customerAttr1.setPhysicalDataType(Schema.Type.LONG);
+        customerAttr1.setLogicalDataType(LogicalDataType.Date);
         customerList.add(customerAttr1);
+
+        SimpleTemplateMetadata.SimpleTemplateAttribute customerAttr2 =
+                new SimpleTemplateMetadata.SimpleTemplateAttribute();
+        customerAttr2.setDisplayName("CustomerAttr2");
+        customerAttr2.setName("CustomerAttr2");
+        customerAttr2.setPhysicalDataType(Schema.Type.LONG);
+        customerAttr2.setLogicalDataType(LogicalDataType.Date);
+        customerAttr2.setDateFormat("MM/DD/YYYY");
+        customerAttr2.setTimeZone("UTC");
+        customerList.add(customerAttr2);
 
         metadata.setIgnoredStandardAttributes(new HashSet<>(ignoredStandardAttrs));
         metadata.setCustomerAttributes(customerList);
