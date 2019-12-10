@@ -465,6 +465,8 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         processedReqs.clear();
 
         domains.clear();
+        emptyDomains.clear();
+        errDomains.clear();
 
         //clean tmp files
         for (File tmpFile : tmpFiles) {
@@ -473,7 +475,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         }
 
-        return true;
+        return reqCollected > 0;
 
     }
 
