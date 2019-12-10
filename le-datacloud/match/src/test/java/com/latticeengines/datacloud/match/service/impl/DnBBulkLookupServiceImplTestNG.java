@@ -43,6 +43,12 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Inject
     private DnBAuthenticationService dnbAuthenticationService;
 
+    private static final String INVALID_BATCH_TOKEN = "wExXYdjH60CGv4kfWP3oXxVkIdxUla2LBy4rFzBKHV3Gb5LCqOM8sGxdArHYq"
+            + "GXlgnBOdaUcDLho1qzVAYk4fS/oBYwrmAjEX6W4pV+i2jzd6Pi9VBruiLsAbF9rjvRZ5OxlpPQRcrR7B3Di9kIc5XheB1uax7VeeTv"
+            + "fqWDHl1KHRQ6+KlT9n1oPWrFjj4f7Mre3CndoQU28K/4V8WuqfKwT6tqa7sPQ/Yb4n4aVhd5fsk+LiOYxgUqZQbOvgCbu424m8sTdX"
+            + "Ph3Ehf0p/DnlU/Jb3LjE9HzC3JuUd16fVf6Zdw9Z9NTbgswIb2Y+MV1bqI7Jdj8L0mg9lffON7rAAe4IvZjhzFYWoci6gID4pszAws"
+            + "BcUcHT/aq9LFhU/cexe4EHeYBgj3B6zIvjEMJrg==";
+
     @Test(groups = "dnb", enabled = true, priority = 1, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testDnBBulkLookup() {
         DnBBatchMatchContext batchContext = dnbBulkLookupDispatcher.sendRequest(generateInput());
@@ -103,11 +109,11 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     // Test cases:
     // 1. Records with errors
-    // 2. DnB token cached is invalid -- should refresh token automatically
+    // 2. DnB token cached is expired -- should refresh token automatically
     @Test(groups = "dnb", enabled = true, priority = 2, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testDnBBulkLookupWithErrorRecords() {
         // Set token to be invalid
-        dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, "abc");
+        dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, INVALID_BATCH_TOKEN);
         // Wait for local cache to be refreshed
         try {
             Thread.sleep(5000L);
@@ -120,7 +126,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.SUBMITTED);
 
         // Set token to be invalid
-        dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, "abc");
+        dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, INVALID_BATCH_TOKEN);
         // Wait for local cache to be refreshed
         try {
             Thread.sleep(5000L);
@@ -145,7 +151,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
 
         // Set token to be invalid
-        dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, "abc");
+        dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, INVALID_BATCH_TOKEN);
         // Wait for local cache to be refreshed
         try {
             Thread.sleep(5000L);

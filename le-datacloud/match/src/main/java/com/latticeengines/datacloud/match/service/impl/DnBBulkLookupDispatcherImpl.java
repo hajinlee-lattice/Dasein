@@ -129,7 +129,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
             batchContext.setDnbCode(parseDnBHttpError(httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            log.error(String.format("LedpException in DnB batch match dispatching request: %s %s",
+            log.error(String.format("LedpException in DnB batch dispatching request: %s %s",
                     ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
             switch (ledpEx.getCode()) {
             case LEDP_25027:

@@ -93,6 +93,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         case REQUEST_TIMEOUT:
             return DnBReturnCode.TIMEOUT;
         case UNAUTHORIZED:
+        case FORBIDDEN:
             String errorCode = null;
             switch (getResponseType()) {
             case XML:

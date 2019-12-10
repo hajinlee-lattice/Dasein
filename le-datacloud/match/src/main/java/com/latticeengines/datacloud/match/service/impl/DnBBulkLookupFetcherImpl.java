@@ -115,7 +115,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     protected void parseError(Exception ex, DnBBatchMatchContext batchContext) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            log.error(String.format("HttpClientErrorException in DnB batch match fetching request: HttpStatus %d %s",
+            log.error(String.format("HttpClientErrorException in DnB batch fetching request: HttpStatus %d %s",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
             batchContext.setDnbCode(parseDnBHttpError(httpEx));
