@@ -41,7 +41,6 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -298,11 +297,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         } catch (Exception e) {
             log.warn("Failed to get the number of orphan contacts", e);
         }
-        try {
-            orphanCnts.put(OrphanRecordsType.TRANSACTION, countOrphansInRedshift(OrphanRecordsType.TRANSACTION));
-        } catch (Exception e) {
-            log.warn("Failed to get the number of orphan transactions", e);
-        }
         return orphanCnts;
     }
 
@@ -350,7 +344,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
     private long countOrphansInRedshift(OrphanRecordsType orphanRecordsType) {
         FrontEndQuery frontEndQuery;
-        Table batchStoreTable;
         switch (orphanRecordsType) {
             case UNMATCHED_ACCOUNT:
                 String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
@@ -369,7 +362,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     return 0L;
                 }
             case CONTACT:
-                batchStoreTable = dataCollectionProxy.getTable(customerSpace.toString(), //
+                Table batchStoreTable = dataCollectionProxy.getTable(customerSpace.toString(), //
                         BusinessEntity.Contact.getBatchStore(), inactive);
                 if (batchStoreTable != null) {
                     long allContacts = batchStoreTable.getExtracts().get(0).getProcessedRecords();
@@ -395,30 +388,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     return 0L;
                 }
             case TRANSACTION:
-                batchStoreTable = dataCollectionProxy.getTable(customerSpace.toString(), //
-                        BusinessEntity.Transaction.getBatchStore(), inactive);
-                if (batchStoreTable != null) {
-                    long allTransactions = batchStoreTable.getExtracts().get(0).getProcessedRecords();
-                    log.debug("There are " + allTransactions + " transactions in total.");
-                    String servingStoreTable = dataCollectionProxy.getTableName(customerSpace.toString(), //
-                            BusinessEntity.Transaction.getServingStore(), inactive);
-                    if (StringUtils.isNotBlank(servingStoreTable)) {
-                        frontEndQuery = new FrontEndQuery();
-                        frontEndQuery.setMainEntity(BusinessEntity.Transaction);
-                        frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountAndProductNotNullBucket()));
-                        long nonOrphanTransactions = ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
-                        log.debug("There are " + nonOrphanTransactions + " non-orphan transactions in redshift.");
-                        long orphanTransactions = allTransactions - nonOrphanTransactions;
-                        log.debug("There are " + orphanTransactions + " orphan transactions.");
-                        return orphanTransactions;
-                    } else {
-                        log.info("There is no transaction serving store, all transactions are orphan.");
-                        return allTransactions;
-                    }
-                } else {
-                    log.info("There is no transaction batch store, return 0 as the number of orphan transactions.");
-                    return 0L;
-                }
             default:
                 return 0;
         }
@@ -485,12 +454,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private BucketRestriction accountNotNullBucket() {
         Bucket bkt = Bucket.notNullBkt();
         return new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt);
-    }
-
-    private Restriction accountAndProductNotNullBucket() {
-        Bucket bkt = Bucket.notNullBkt();
-        return LogicalRestriction.builder().and(new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt),
-                new BucketRestriction(BusinessEntity.Product, InterfaceName.ProductId.name(), bkt)).build();
     }
 
     private List<Action> getDeleteActions() {
