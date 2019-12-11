@@ -517,6 +517,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                         actionSet = new HashSet<>();
                     }
                     actionSet.add(action);
+                    legacyDeleteByUploadActions.put(config.getEntity(), actionSet);
                 }
             }
             log.info("legacyDeleteByUploadActions is {}.", JsonUtils.serialize(legacyDeleteByUploadActions));

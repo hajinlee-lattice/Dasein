@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +23,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
-import com.latticeengines.domain.exposed.pls.LegacyDeleteActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -91,36 +87,6 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Override
     public ApplicationId createLegacyDeleteUploadAction(String customerSpace, CleanupOperationConfiguration configuration) {
-        //delete lagacy tenant deleteByUpload Action, do not run workflow, waiting PA to do delete
-        log.info("customerSpace: {}, CleanupOperationConfiguration: {}", customerSpace, configuration);
-        log.info("Registering an operation action for tenant={}", customerSpace);
-        Tenant tenant = tenantService.findByTenantId(customerSpace);
-        if (tenant == null) {
-            throw new NullPointerException(
-                    String.format("Tenant with id=%s cannot be found", customerSpace));
-        }
-        Set<Long> actionPids = new HashSet<>();
-        WorkflowPidWrapper pidWrapper = new WorkflowPidWrapper(-1L);
-        if (configuration instanceof CleanupByUploadConfiguration) {
-            BusinessEntity businessEntity = configuration.getEntity();
-            if (businessEntity == null) {
-                actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Account, pidWrapper.getPid()));
-                actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Contact, pidWrapper.getPid()));
-                actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Product, pidWrapper.getPid()));
-                actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Transaction, pidWrapper.getPid()));
-            } else {
-                actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        businessEntity, pidWrapper.getPid()));
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    String.format("Tenant with id=%s cannot find CleanupByUploadConfiguration when do delete " +
-                            "operation.", customerSpace));
-        }
         String sourceFileName = ((CleanupByUploadConfiguration) configuration).getFileName();
         SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileName);
         if (sourceFile == null) {
@@ -131,8 +97,8 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             log.error("SourceFile: {} does not have a table object!", sourceFileName);
             throw new RuntimeException(String.format("SourceFile: %s does not have a table object!", sourceFileName));
         }
-        return registerDeleteDataWorkflowSubmitter.legacyDeleteSubmit(CustomerSpace.parse(tenant.getId()), sourceFile,
-                configuration.getOperationInitiator(), actionPids, pidWrapper);
+        return registerDeleteDataWorkflowSubmitter.legacyDeleteSubmit(CustomerSpace.parse(customerSpace), sourceFile,
+                configuration.getOperationInitiator(), configuration, new WorkflowPidWrapper(-1L));
     }
 
     @Override
@@ -179,28 +145,4 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         actionService.create(action);
     }
 
-    private Long createLegacyDeleteUploadAction(Tenant tenant,
-                                                CleanupByUploadConfiguration cleanupByUploadConfiguration,
-                                               BusinessEntity businessEntity, Long workflowPid) {
-        Action action = new Action();
-        action.setType(ActionType.LEGACY_DELETE_UPLOAD);
-        action.setActionInitiator(cleanupByUploadConfiguration.getOperationInitiator());
-        LegacyDeleteActionConfiguration legacyDeleteActionConfiguration = new LegacyDeleteActionConfiguration();
-        legacyDeleteActionConfiguration.setEntity(businessEntity);
-        legacyDeleteActionConfiguration.setTableName(cleanupByUploadConfiguration.getTableName());
-        legacyDeleteActionConfiguration.setCleanupOperationType(cleanupByUploadConfiguration.getCleanupOperationType());
-        legacyDeleteActionConfiguration.setFileDisplayName(cleanupByUploadConfiguration.getFileDisplayName());
-        legacyDeleteActionConfiguration.setFileName(cleanupByUploadConfiguration.getFileName());
-        legacyDeleteActionConfiguration.setFilePath(cleanupByUploadConfiguration.getFilePath());
-        action.setActionConfiguration(legacyDeleteActionConfiguration);
-        action.setTrackingPid(workflowPid);
-        action.setTenant(tenant);
-        if (tenant.getPid() != null) {
-            MultiTenantContext.setTenant(tenant);
-        } else {
-            log.warn("The tenant in action does not have a pid:{}. ", tenant);
-        }
-        actionService.create(action);
-        return action.getPid();
-    }
 }
