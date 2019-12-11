@@ -478,6 +478,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
                 ActionType.SOFT_DELETE,
                 ActionType.HARD_DELETE,
+                ActionType.LEGACY_DELETE_UPLOAD,
                 ActionType.CDL_OPERATION_WORKFLOW);
         List<String> importAndDeleteJobPidStrs = actions.stream()
                 .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null
@@ -512,11 +513,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 replaceActions);
         if (CollectionUtils.isNotEmpty(currentDeletedEntityActions)) {
             completedActions.addAll(currentDeletedEntityActions);
-        }
-        List<Action> legacyDeleteByUploadActions =
-                actions.stream().filter(action -> action.getTrackingPid() == null && action.getType() == ActionType.LEGACY_DELETE_UPLOAD).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(legacyDeleteByUploadActions)) {
-            completedActions.addAll(legacyDeleteByUploadActions);
         }
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActions));
 

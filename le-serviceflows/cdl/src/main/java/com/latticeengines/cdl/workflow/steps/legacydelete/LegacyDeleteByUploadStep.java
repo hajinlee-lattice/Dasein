@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.cdl.workflow.steps.maintenance.CleanupByUploadStep;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -70,7 +69,7 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
 
     static final String BEAN_NAME = "legacyDeleteByUploadStep";
 
-    private static Logger log = LoggerFactory.getLogger(CleanupByUploadStep.class);
+    private static Logger log = LoggerFactory.getLogger(LegacyDeleteByUploadStep.class);
 
     private static int prepareStep, cleanupStep, collectMasterStep, cleanupMasterStep, collectStep;
 
@@ -379,6 +378,7 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
     public void execute() {
         Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
                 BusinessEntity.class, Set.class);
+        log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
         if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {
             intializeConfiguration();
             String pipelineVersion = getStringValueFromContext(TRANSFORM_PIPELINE_VERSION);

@@ -100,20 +100,21 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
                     String.format("Tenant with id=%s cannot be found", customerSpace));
         }
         Set<Long> actionPids = new HashSet<>();
+        WorkflowPidWrapper pidWrapper = new WorkflowPidWrapper(-1L);
         if (configuration instanceof CleanupByUploadConfiguration) {
             BusinessEntity businessEntity = configuration.getEntity();
             if (businessEntity == null) {
                 actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Account));
+                        BusinessEntity.Account, pidWrapper.getPid()));
                 actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Contact));
+                        BusinessEntity.Contact, pidWrapper.getPid()));
                 actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Product));
+                        BusinessEntity.Product, pidWrapper.getPid()));
                 actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        BusinessEntity.Transaction));
+                        BusinessEntity.Transaction, pidWrapper.getPid()));
             } else {
                 actionPids.add(createLegacyDeleteUploadAction(tenant, (CleanupByUploadConfiguration) configuration,
-                        businessEntity));
+                        businessEntity, pidWrapper.getPid()));
             }
         } else {
             throw new IllegalArgumentException(
@@ -131,7 +132,7 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             throw new RuntimeException(String.format("SourceFile: %s does not have a table object!", sourceFileName));
         }
         return registerDeleteDataWorkflowSubmitter.legacyDeleteSubmit(CustomerSpace.parse(tenant.getId()), sourceFile,
-                configuration.getOperationInitiator(), actionPids, new WorkflowPidWrapper((-1L)));
+                configuration.getOperationInitiator(), actionPids, pidWrapper);
     }
 
     @Override
@@ -180,7 +181,7 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     private Long createLegacyDeleteUploadAction(Tenant tenant,
                                                 CleanupByUploadConfiguration cleanupByUploadConfiguration,
-                                               BusinessEntity businessEntity) {
+                                               BusinessEntity businessEntity, Long workflowPid) {
         Action action = new Action();
         action.setType(ActionType.LEGACY_DELETE_UPLOAD);
         action.setActionInitiator(cleanupByUploadConfiguration.getOperationInitiator());
@@ -192,6 +193,7 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         legacyDeleteActionConfiguration.setFileName(cleanupByUploadConfiguration.getFileName());
         legacyDeleteActionConfiguration.setFilePath(cleanupByUploadConfiguration.getFilePath());
         action.setActionConfiguration(legacyDeleteActionConfiguration);
+        action.setTrackingPid(workflowPid);
         action.setTenant(tenant);
         if (tenant.getPid() != null) {
             MultiTenantContext.setTenant(tenant);
