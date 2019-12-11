@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,6 +14,7 @@ import org.springframework.util.StringUtils;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -54,6 +57,19 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
         Action action = registerAction(customerSpace, sourceFile.getTableName(), hardDelete, user, pidWrapper.getPid());
         RegisterDeleteDataWorkflowConfiguration configuration = generateConfig(customerSpace,
                 sourceFile.getTableName(), sourceFile.getPath(), user, action.getPid());
+        return workflowJobService.submit(configuration, pidWrapper.getPid());
+    }
+
+    @WithWorkflowJobPid
+    public ApplicationId legacyDeleteSubmit(CustomerSpace customerSpace, SourceFile sourceFile, String user,
+                                            Set<Long> actionPids, WorkflowPidWrapper pidWrapper) {
+        if (!checkSourceFile(customerSpace, sourceFile)) {
+            throw new RuntimeException("Cannot Register delete data due to Source File issue!");
+        }
+        log.info("111");
+        RegisterDeleteDataWorkflowConfiguration configuration = generateConfig(customerSpace,
+                sourceFile.getTableName(), sourceFile.getPath(), user, actionPids);
+        log.info("333");
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
@@ -114,6 +130,22 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
                 .userId(user)
                 .inputProperties(ImmutableMap.<String, String>builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString())
+                        .build())//
+                .build();
+    }
+
+    private RegisterDeleteDataWorkflowConfiguration generateConfig(CustomerSpace customerSpace, String tableName,
+                                                                   String filePath, String user, Set<Long> actionPids) {
+        log.info("222");
+        return new RegisterDeleteDataWorkflowConfiguration.Builder()
+                .customer(customerSpace)
+                .internalResourceHostPort(internalResourceHostPort) //
+                .microServiceHostPort(microserviceHostPort) //
+                .tableName(tableName)
+                .filePath(filePath)
+                .userId(user)
+                .inputProperties(ImmutableMap.<String, String>builder() //
+                        .put(WorkflowContextConstants.Inputs.ACTION_IDS, JsonUtils.serialize(actionPids))
                         .build())//
                 .build();
     }

@@ -13,7 +13,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
         @Type(value = AttrConfigLifeCycleChangeConfiguration.class, name = "attrConfigLifeCycleChangeConfiguration"),
         @Type(value = ImportActionConfiguration.class, name = "importActionConfiguration"),
         @Type(value = DeleteActionConfiguration.class, name = "deleteActionConfiguration"),
-        @Type(value = CleanupActionConfiguration.class, name = "cleanupActionConfiguration") })
+        @Type(value = CleanupActionConfiguration.class, name = "cleanupActionConfiguration"),
+        @Type(value = LegacyDeleteActionConfiguration.class, name = "legacyDeleteActionConfiguration") })
 public abstract class ActionConfiguration {
 
     private Boolean hiddenFromUI = false;

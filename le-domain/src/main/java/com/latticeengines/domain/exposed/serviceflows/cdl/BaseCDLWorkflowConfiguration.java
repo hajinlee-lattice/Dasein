@@ -35,6 +35,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateProductWorkfl
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateTransactionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteAccountWorkFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteContactWorkFlowConfiguratiion;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteTransactionWorkFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertAccountWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertContactWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertTransactionWorkflowConfiguration;
@@ -97,6 +101,11 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = ConvertAccountWorkflowConfiguration.class, name = "ConvertAccountWorkflowConfiguration"),
         @Type(value = ConvertContactWorkflowConfiguration.class, name = "ConvertContactWorkflowConfiguration"),
         @Type(value = ConvertTransactionWorkflowConfiguration.class, name = "ConvertTransactionWorkflowConfiguration"),
+
+        @Type(value = LegacyDeleteWorkFlowConfiguration.class, name = "LegacyDeleteWorkFlowConfiguration"),
+        @Type(value = LegacyDeleteAccountWorkFlowConfiguration.class, name = "LegacyDeleteAccountWorkFlowConfiguration"),
+        @Type(value = LegacyDeleteContactWorkFlowConfiguratiion.class, name = "LegacyDeleteContactWorkFlowConfiguratiion"),
+        @Type(value = LegacyDeleteTransactionWorkFlowConfiguration.class, name = "LegacyDeleteTransactionWorkFlowConfiguration"),
 
         @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration"),
         @Type(value = MigrateDynamoWorkflowConfiguration.class, name = "MigrateDynamoWorkflowConfiguration")})

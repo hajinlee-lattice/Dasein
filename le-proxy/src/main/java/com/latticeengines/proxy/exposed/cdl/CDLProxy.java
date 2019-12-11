@@ -391,7 +391,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         configuration.setCleanupOperationType(operationType);
         configuration.setOperationInitiator(initiator);
 
-        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/legacyDeleteByUploadAction", customerSpace);
 
         ResponseDocument<String> responseDoc = post("cleanup by upload", url, configuration, ResponseDocument.class);
 

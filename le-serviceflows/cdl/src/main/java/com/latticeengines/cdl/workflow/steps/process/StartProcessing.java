@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -290,6 +291,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> hardDeleteActions = getSoftOrHardDeleteActions(false, actions);
         putObjectInContext(SOFT_DEELETE_ACTIONS, softDeleteActions);
         putObjectInContext(HARD_DEELETE_ACTIONS, hardDeleteActions);
+        setLegacyDeleteByUploadActions(actions);
 
         grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
         grapherContext.setHasSoftDelete(CollectionUtils.isNotEmpty(softDeleteActions));
@@ -501,6 +503,24 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             return actions.stream().filter(action -> actionType.equals(action.getType())).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
+        }
+    }
+
+    private void setLegacyDeleteByUploadActions(List<Action> actions) {
+        Map<BusinessEntity, Set<Action>> legacyDeleteByUploadActions = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            for (Action action : actions) {
+                if (ActionType.LEGACY_DELETE_UPLOAD.equals(action.getType())) {
+                    LegacyDeleteActionConfiguration config = (LegacyDeleteActionConfiguration) action.getActionConfiguration();
+                    Set<Action> actionSet = legacyDeleteByUploadActions.get(config.getEntity());
+                    if (actionSet == null) {
+                        actionSet = new HashSet<>();
+                    }
+                    actionSet.add(action);
+                }
+            }
+            log.info("legacyDeleteByUploadActions is {}.", JsonUtils.serialize(legacyDeleteByUploadActions));
+            putObjectInContext(LEGACY_DELTE_BYUOLOAD_ACTIONS, legacyDeleteByUploadActions);
         }
     }
 

@@ -94,4 +94,16 @@ public class CDLDataCleanupResource {
 //        }
     }
 
+    @PostMapping(value = "/legacyDeleteByUploadAction", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "create legacyDelete data action")
+    public ResponseDocument<String> createLegacyDeleteByUploadAction(@PathVariable String customerSpace,
+                                    @RequestBody CleanupOperationConfiguration cleanupOperationConfiguration) {
+        try {
+            return ResponseDocument.successResponse(cdlDataCleanupService.createLegacyDeleteUploadAction(customerSpace, cleanupOperationConfiguration).toString());
+        } catch (Exception e) {
+            log.error("Cannot create cleanup action: {}", e.getMessage());
+            return ResponseDocument.failedResponse(e);
+        }
+    }
 }

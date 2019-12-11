@@ -513,6 +513,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         if (CollectionUtils.isNotEmpty(currentDeletedEntityActions)) {
             completedActions.addAll(currentDeletedEntityActions);
         }
+        List<Action> legacyDeleteByUploadActions =
+                actions.stream().filter(action -> action.getTrackingPid() == null && action.getType() == ActionType.LEGACY_DELETE_UPLOAD).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(legacyDeleteByUploadActions)) {
+            completedActions.addAll(legacyDeleteByUploadActions);
+        }
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActions));
 
         return completedActions;
