@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow.steps.campaign.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -135,7 +134,7 @@ public class CampaignFrontEndQueryBuilder {
         setMainEntity();
         setupLookups();
         setupBaseRestrictions();
-        if (StringUtils.isNotBlank(ratingId) && CollectionUtils.isNotEmpty(bucketsToLaunch)) {
+        if (StringUtils.isNotBlank(ratingId)) {
             addModelRatingBasedRestrictions();
         }
         if (isSuppressAccountsWithoutLookupId && StringUtils.isNotBlank(lookupId)) {
@@ -213,21 +212,21 @@ public class CampaignFrontEndQueryBuilder {
     }
 
     private void addModelRatingBasedRestrictions() {
-        Restriction ratingRestriction;
         Lookup lhs = new AttributeLookup(BusinessEntity.Rating, ratingId);
-        Collection<Object> allowedRatingsCollection = bucketsToLaunch.stream().map(RatingBucketName::getName)
-                .collect(Collectors.toList());
-        Lookup rhs = new CollectionLookup(allowedRatingsCollection);
-        ratingRestriction = new ConcreteRestriction(false, lhs, ComparisonType.IN_COLLECTION, rhs);
 
-        ratingRestriction = launchUnScored //
-                ? Restriction.builder()
-                        .or(ratingRestriction, new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null))
-                        .build()
-                : ratingRestriction;
+        Restriction ratingBucketsRestriction = CollectionUtils.isNotEmpty(bucketsToLaunch)
+                ? new ConcreteRestriction(false, lhs, ComparisonType.IN_COLLECTION,
+                        new CollectionLookup(
+                                bucketsToLaunch.stream().map(RatingBucketName::getName).collect(Collectors.toList())))
+                : null;
+        Restriction unScoredRestriction = launchUnScored
+                ? new ConcreteRestriction(false, lhs, ComparisonType.IS_NULL, null)
+                : null;
 
-        Restriction finalAccountRestriction = Restriction.builder().and(baseAccountRestriction, ratingRestriction)
-                .build();
+        Restriction ratingRestriction = Restriction.builder().or(ratingBucketsRestriction, unScoredRestriction).build();
+
+        Restriction finalAccountRestriction = Restriction.builder()
+                .and(campaignFrontEndQuery.getAccountRestriction().getRestriction(), ratingRestriction).build();
         campaignFrontEndQuery.setAccountRestriction(new FrontEndRestriction(finalAccountRestriction));
     }
 
