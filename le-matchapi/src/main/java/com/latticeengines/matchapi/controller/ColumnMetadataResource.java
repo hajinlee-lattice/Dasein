@@ -3,9 +3,9 @@ package com.latticeengines.matchapi.controller;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,10 +41,10 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/metadata")
 public class ColumnMetadataResource {
 
-    @Autowired
+    @Inject
     private BeanDispatcher beanDispatcher;
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
 
     @Resource(name = "accountMasterColumnMetadataService")

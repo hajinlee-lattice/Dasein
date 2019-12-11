@@ -32,7 +32,7 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Test(groups = "dnb", enabled = true)
+    @Test(groups = "functional", enabled = true)
     public void testAuthentication() {
         // test case 1: local cached token
         String token1 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, null);
@@ -70,11 +70,16 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
         redisTemplate.opsForValue().set(DNB_KEY_PREFIX + DnBKeyType.REALTIME,
                 new DnBAuthenticationServiceImpl.DnBTokenCache(token3, 0));
         // trigger local cache refresh to request new token
-        dnBAuthenticationService.refreshLocalCache(DnBKeyType.REALTIME);
+        dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME, null);
         DnBTokenCache redisCache = (DnBTokenCache) redisTemplate.opsForValue().get(DNB_KEY_PREFIX + DnBKeyType.REALTIME);
         // verify redis cached token is updated
         Assert.assertNotEquals(redisCache.getToken(), token3);
         // verify local cached token is same as redis cached token
+        try {
+            // Wait and make sure local cache has finished reloading
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+        }
         Assert.assertEquals(dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, null), redisCache.getToken());
     }
 }
