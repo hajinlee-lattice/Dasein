@@ -7,7 +7,8 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
 import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver, StreamDimension}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{PeriodId, __StreamDate, __Row_Count__}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{PeriodId, __Row_Count__, __StreamDate}
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DailyStoreToPeriodStoresJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
@@ -27,6 +28,7 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val streams: Seq[AtlasStream] = asScalaIteratorConverter(config.streams.iterator).asScala.toSeq
     val input = lattice.input
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
+    val calendar: BusinessCalendar = config.businessCalendar
 
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]() // streamId -> details
@@ -36,7 +38,7 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     var periodStores: Seq[DataFrame] = Seq()
     streams.foreach((stream: AtlasStream) => {
       val dailyStore: DataFrame = input(inputMetadata.getMetadata.get(stream.getStreamId).getStartIdx)
-      val generated: Seq[DataFrame] = processStream(dailyStore, stream, config.evaluationDate)
+      val generated: Seq[DataFrame] = processStream(dailyStore, stream, config.evaluationDate, calendar)
       val details: Details = new Details()
       details.setStartIdx(index)
       details.setLabels(stream.getPeriods)
@@ -53,13 +55,13 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     lattice.output = periodStores.toList
   }
 
-  private def processStream(dailyStore: DataFrame, stream: AtlasStream, evaluationDate: String): Seq[DataFrame] = {
+  private def processStream(dailyStore: DataFrame, stream: AtlasStream, evaluationDate: String, calendar: BusinessCalendar): Seq[DataFrame] = {
     val periods: Seq[String] = asScalaIteratorConverter(stream.getPeriods.iterator).asScala.toSeq
     val dimensions: Seq[StreamDimension] = asScalaIteratorConverter(stream.getDimensions.iterator).asScala.toSeq
     val aggregators: Seq[StreamAttributeDeriver] =
       if (stream.getAttributeDerivers == null) Seq()
       else asScalaIteratorConverter(stream.getAttributeDerivers.iterator).asScala.toSeq
-    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods), evaluationDate)
+    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods, calendar), evaluationDate)
 
     // 1: for each requested period (week, month, etc.):
     //  a: make a copy of daily store dataframe, add periodId column based on date and period
@@ -92,11 +94,11 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     dailyStore.withColumn(PeriodId.name, getPeriodIdUdf(dailyStore(__StreamDate.name)))
   }
 
-  private def toPeriodStrategy(name: String): PeriodStrategy = {
-    new PeriodStrategy(Template.fromName(name))
+  private def toPeriodStrategy(name: String, calendar: BusinessCalendar): PeriodStrategy = {
+    new PeriodStrategy(calendar, Template.fromName(name))
   }
 
-  private def getPeriodStrategies(periods: Seq[String]): util.List[PeriodStrategy] = {
-    scala.collection.JavaConversions.seqAsJavaList(periods.map(name => toPeriodStrategy(name)))
+  private def getPeriodStrategies(periods: Seq[String], calendar: BusinessCalendar): util.List[PeriodStrategy] = {
+    scala.collection.JavaConversions.seqAsJavaList(periods.map(name => toPeriodStrategy(name, calendar)))
   }
 }

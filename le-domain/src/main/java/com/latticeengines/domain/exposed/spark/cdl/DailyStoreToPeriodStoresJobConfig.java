@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements Serializable {
@@ -21,6 +22,9 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
 
     @JsonProperty("inputMetadata")
     public ActivityStoreSparkIOMetadata inputMetadata; // describes streamId -> dailyStore input index
+
+    @JsonProperty("businessCalendar")
+    public BusinessCalendar businessCalendar;
 
     @Override
     @JsonProperty("Name")
