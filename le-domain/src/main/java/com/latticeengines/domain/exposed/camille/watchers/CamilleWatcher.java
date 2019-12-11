@@ -8,6 +8,10 @@ public enum CamilleWatcher {
     // To trigger refreshing upper-layer cache which is built upon base cache;
     // Change should be triggered after AMReleaseBaseCache and wait for a short
     // silent period after base cache finishes loading
-    AMRelease
+    AMRelease,
+    // To trigger refreshing DnB token in redis by requesting
+    // from DnB, then refreshing token cached locally in tomcat matchapi
+    // services or yarn containers
+    DnBToken
 
 }

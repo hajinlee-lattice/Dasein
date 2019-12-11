@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.service;
+package com.latticeengines.datacloud.match.exposed.service;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -16,4 +16,17 @@ public interface DnBAuthenticationService {
      * @return token
      */
     String requestToken(@NotNull DnBKeyType type, String expiredToken);
+
+    /**
+     * Force to refresh DnB token in redis and local cache of all the envs. Only
+     * for MANUAL OPERATION purpose when any unexpected issue happens
+     *
+     * @param type:
+     *            DnB key type -- realtime/batch
+     * @param newToken:
+     *            If provided, will use this token to overwrite token in redis;
+     *            if not provided, request a new token from DnB
+     * @return: new token
+     */
+    String refreshToken(@NotNull DnBKeyType type, String newToken);
 }
