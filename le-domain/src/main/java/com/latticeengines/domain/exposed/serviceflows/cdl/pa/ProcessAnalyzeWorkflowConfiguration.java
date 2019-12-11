@@ -60,6 +60,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private CuratedAttributesWorkflowConfiguration.Builder curatedAttributesWorkflowBuilder = new CuratedAttributesWorkflowConfiguration.Builder();
         private ProcessRatingWorkflowConfiguration.Builder processRatingWorkflowBuilder = new ProcessRatingWorkflowConfiguration.Builder();
         private CommitEntityMatchWorkflowConfiguration.Builder commitEntityWorkflowBuilder = new CommitEntityMatchWorkflowConfiguration.Builder();
+        private DeleteOperationWorkflowConfiguration.Builder deleteOpWorkflowBuilder = new DeleteOperationWorkflowConfiguration.Builder();
 
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
@@ -79,6 +80,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.setCustomerSpace(customerSpace);
             processStepConfiguration.setCustomerSpace(customerSpace);
             matchEntityWorkflowBuilder.customer(customerSpace);
+            deleteOpWorkflowBuilder.customer(customerSpace);
             processAccountWorkflowBuilder.customer(customerSpace);
             processContactWorkflowBuilder.customer(customerSpace);
             processProductWorkflowBuilder.customer(customerSpace);
@@ -113,6 +115,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             matchEntityWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            deleteOpWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processAccountWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processContactWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processProductWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -344,6 +347,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder replaceEntities(Set<BusinessEntity> entities) {
+            deleteOpWorkflowBuilder.replaceEntities(entities);
             processAccountWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Account));
             processContactWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Contact));
             processProductWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Product));
@@ -368,6 +372,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processStepConfiguration);
             configuration.add(convertBatchStoreToDataTableWorkflowBuilder.build());
             configuration.add(matchEntityWorkflowBuilder.build());
+            configuration.add(deleteOpWorkflowBuilder.build());
             configuration.add(processAccountWorkflowBuilder.build());
             configuration.add(processContactWorkflowBuilder.build());
             configuration.add(processProductWorkflowBuilder.build());

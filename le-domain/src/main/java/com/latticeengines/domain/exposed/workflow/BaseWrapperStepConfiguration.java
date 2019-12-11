@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.BaseSoftDeleteEntityConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.CleanupByUploadWrapperConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
@@ -18,9 +19,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteBy
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({
         @Type(value = BaseProcessEntityStepConfiguration.class, name = "BaseProcessEntityStepConfiguration"),
+        @Type(value = BaseSoftDeleteEntityConfiguration.class, name = "BaseDeleteEntityStepConfiguration"),
         @Type(value = ConvertBatchStoreStepConfiguration.class, name = "ConvertBatchStoreStepConfiguration"),
         @Type(value = CleanupByUploadWrapperConfiguration.class, name = "CleanupByUploadWrapperConfiguration"),
-        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration"),  })
+        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration") })
 public class BaseWrapperStepConfiguration extends BaseStepConfiguration {
 
     @NotNull

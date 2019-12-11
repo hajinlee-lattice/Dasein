@@ -49,6 +49,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private MatchEntityWorkflow matchEntityWorkflow;
 
     @Inject
+    private DeleteOperationWorkflow deleteOperationWorkflow;
+
+    @Inject
     private ProcessAccountWorkflow processAccountWorkflow;
 
     @Inject
@@ -113,6 +116,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(importProcessAnalyzeFromS3) //
                 .next(convertBatchStoreToDataTableWorkflow)
                 .next(matchEntityWorkflow) //
+                .next(deleteOperationWorkflow) //
                 .next(processAccountWorkflow) //
                 .next(processContactWorkflow) //
                 .next(processProductWorkflow) //
