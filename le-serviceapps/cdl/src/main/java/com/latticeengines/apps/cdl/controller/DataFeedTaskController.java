@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -158,8 +159,9 @@ public class DataFeedTaskController {
     @PostMapping(value = "/setup/webvisit")
     @ResponseBody
     @ApiOperation(value = "Create a WebVisit template")
-    public ResponseDocument<Boolean> createWebVisitTemplate(@PathVariable String customerSpace,
-                                                            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+    public ResponseDocument<Boolean> createWebVisitTemplate(
+            @PathVariable String customerSpace,
+            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
         try {
             if (CollectionUtils.isNotEmpty(simpleTemplateMetadataList)) {
                 Boolean result = Boolean.TRUE;
@@ -172,6 +174,32 @@ public class DataFeedTaskController {
             return ResponseDocument.successResponse(Boolean.FALSE);
         } catch (RuntimeException e) {
             log.error("Create WebVisit template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/setup/webvisit2")
+    @ResponseBody
+    @ApiOperation(value = "Create a WebVisit template with IW 2.0")
+    public ResponseDocument<Boolean> createWebVisitTemplate2(
+            @PathVariable String customerSpace,
+            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+        try {
+            if (CollectionUtils.isNotEmpty(simpleTemplateMetadataList)) {
+                Boolean result = Boolean.TRUE;
+                for (SimpleTemplateMetadata simpleTemplateMetadata : simpleTemplateMetadataList) {
+                    result = result && dataFeedTaskTemplateService.setupWebVisitProfile2(customerSpace,
+                            simpleTemplateMetadata);
+                }
+                return ResponseDocument.successResponse(result);
+            }
+            return ResponseDocument.successResponse(Boolean.FALSE);
+        } catch (RuntimeException e) {
+            log.error("Create WebVisit 2.0 template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
             return ResponseDocument.failedResponse(e);
         }
     }

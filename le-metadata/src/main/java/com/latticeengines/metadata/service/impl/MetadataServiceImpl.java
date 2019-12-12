@@ -28,9 +28,12 @@ import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.metadata.annotation.NoCustomSpaceAndType;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
@@ -167,7 +170,11 @@ public class MetadataServiceImpl implements MetadataService {
                             }
                             tableEntityMgr.deleteByName(found.getName());
                         }
-                        tableEntityMgr.create(TableUtils.clone(table, table.getName()));
+                        Table tableToClone = TableUtils.clone(table, table.getName());
+                        if (found != null) {
+                            tableToClone.setRetentionPolicy(found.getRetentionPolicy());
+                        }
+                        tableEntityMgr.create(tableToClone);
                     });
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);
@@ -236,5 +243,21 @@ public class MetadataServiceImpl implements MetadataService {
         }
         tableEntityMgr.fixAttributes(tableName, attributeFixerList);
         return true;
+    }
+
+    @Override
+    public void updateTableRetentionPolicy(CustomerSpace customerSpace, String tableName, RetentionPolicy retentionPolicy) {
+        tableEntityMgr.updateTableRetentionPolicy(tableName, retentionPolicy);
+    }
+
+    @Override
+    public void updateTableRetentionPolicies(CustomerSpace customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
+        tableEntityMgr.updateTableRetentionPolicies(retentionPolicyUpdateDetail);
+    }
+
+    @NoCustomSpaceAndType
+    @Override
+    public List<Table> findAllWithExpiredRetentionPolicy(int index, int max) {
+        return tableEntityMgr.findAllWithExpiredRetentionPolicy(index, max);
     }
 }

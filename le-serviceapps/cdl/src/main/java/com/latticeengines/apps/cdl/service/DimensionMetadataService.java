@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -75,4 +76,39 @@ public interface DimensionMetadataService {
      *            namespace for this metadata, typically contains tenant info
      */
     void delete(@NotNull String signature);
+
+    /**
+     * Allocate a short ID for given dimension values, same value is guaranteed to
+     * map to the same ID across multiple calls
+     *
+     * @param tenantId
+     *            target tenant
+     * @param dimensionValues
+     *            input values
+     * @return map of dimension value -> ID, will not be {@code null} and will be
+     *         the same size as input value set
+     */
+    Map<String, String> allocateDimensionId(@NotNull String tenantId, @NotNull Set<String> dimensionValues);
+
+    /**
+     * Retrieve dimension values from given allocated IDs.
+     *
+     * @param tenantId
+     *            target tenant
+     * @param dimensionIds
+     *            input IDs
+     * @return map of dimension ID -> value, will not be {@code null}
+     */
+    Map<String, String> getDimensionValues(@NotNull String tenantId, @NotNull Set<String> dimensionIds);
+
+    /**
+     * Retrieve already allocated IDs from given dimension values
+     *
+     * @param tenantId
+     *            target tenants
+     * @param dimensionValues
+     *            input values
+     * @return map of dimension value -> ID, will not be {@code null}
+     */
+    Map<String, String> getDimensionIds(@NotNull String tenantId, @NotNull Set<String> dimensionValues);
 }

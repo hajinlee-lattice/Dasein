@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -117,6 +118,9 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     @Override
     public void verifyResult(SparkJobResult result) {
         Assert.assertEquals(result.getTargets().size(), targetNum);
+        List<?> listObject = JsonUtils.deserialize(result.getOutput(), List.class);
+        List<Long> list = JsonUtils.convertList(listObject, Long.class);
+        log.info("list is:" + list);
         if (createRecommendationDataFrame && createAddCsvDataFrame && createDeleteCsvDataFrame) {
             HdfsDataUnit recDf = result.getTargets().get(0);
             HdfsDataUnit addCsvDf = result.getTargets().get(1);

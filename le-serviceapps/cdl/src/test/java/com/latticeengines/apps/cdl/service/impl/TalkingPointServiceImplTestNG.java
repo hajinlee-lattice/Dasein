@@ -105,7 +105,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(plays.size(), 1);
         Assert.assertEquals(plays.get(0).getDisplayName(), testPlay.getDisplayName());
 
-        //TODO: Turn On after fixing tenancy part of talkingPointService.findDependantPlayIds
+        // TODO: Turn On after fixing tenancy part of
+        // talkingPointService.findDependantPlayIds
         // Set<String> playIds = talkingPointService
         // .findDependantPlayIds(Arrays.asList("Account.CompanyName",
         // "Account.Website"));
@@ -131,7 +132,8 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
 
-        //TODO: Turn On after fixing tenancy part of talkingPointService.findDependantPlayIds
+        // TODO: Turn On after fixing tenancy part of
+        // talkingPointService.findDependantPlayIds
         // playIds =
         // talkingPointService.findDependantPlayIds(Arrays.asList("Account.CompanyName",
         // "Account.Website"));

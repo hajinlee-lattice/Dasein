@@ -13,7 +13,7 @@
                 ],
                 "required": true,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -27,10 +27,10 @@
                 ],
                 "required": true,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "logicalDataType": "Date",
-                "fundamentalType": "YEAR"
+                "fundamentalType": "DATE"
             },
             {
                 "fieldName": "UserId",
@@ -42,7 +42,7 @@
                 ],
                 "required": true,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -55,7 +55,7 @@
                 ],
                 "required": true,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -69,7 +69,7 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -83,10 +83,10 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA",
-                "statisticalType": "NOMINAL_STAT_TYPE"
+                "statisticalType": "nominal"
             },
             {
                 "fieldName": "City",
@@ -98,7 +98,7 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -116,7 +116,7 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -130,7 +130,7 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -148,10 +148,9 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
-
             },
             {
                 "fieldName": "DUNS",
@@ -163,7 +162,7 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             }

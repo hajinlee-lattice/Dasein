@@ -38,6 +38,9 @@ public class MigrateContactImports extends BaseMigrateImports<MigrateContactImpo
         if (templateTable.getAttribute(InterfaceName.CustomerContactId) != null) {
             renameMap.put(InterfaceName.ContactId.name(), InterfaceName.CustomerContactId.name());
         }
+        if (templateTable.getAttribute(InterfaceName.CustomerAccountId) != null) {
+            renameMap.put(InterfaceName.AccountId.name(), InterfaceName.CustomerAccountId.name());
+        }
         return renameMap;
     }
 
@@ -48,6 +51,11 @@ public class MigrateContactImports extends BaseMigrateImports<MigrateContactImpo
             dupMap.put(InterfaceName.ContactId.name(), importSystem.getContactSystemId());
         }
         return dupMap;
+    }
+
+    @Override
+    protected boolean forceRetain(String attrName) {
+        return InterfaceName.CustomerContactId.name().equals(attrName) || InterfaceName.CustomerAccountId.name().equals(attrName);
     }
 
     @Override

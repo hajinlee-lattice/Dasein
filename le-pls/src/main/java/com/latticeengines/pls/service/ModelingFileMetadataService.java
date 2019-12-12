@@ -56,4 +56,6 @@ public interface ModelingFileMetadataService {
     ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
                                                               String systemObject, String importFile,
                                                               ValidateFieldDefinitionsRequest validateRequest) throws Exception;
+
+    List<String> validateIndividualSpec(String systemType, String systemObject, InputStream specInputStream) throws Exception;
 }

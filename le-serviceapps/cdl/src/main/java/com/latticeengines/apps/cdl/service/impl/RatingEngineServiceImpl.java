@@ -181,10 +181,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public Long getActiveRatingEngineQuotaLimit(CustomerSpace customerSpace) {
         String componentName = CDLComponent.componentName;
-        Long activeModelDataLimit = zkConfigService.getActiveRatingEngingQuota(customerSpace,
-                componentName);
-        defaultActiveModelQuotaLimit = (activeModelDataLimit != null && activeModelDataLimit > 0)
-                ? activeModelDataLimit : defaultActiveModelQuotaLimit;
+        Long activeModelDataLimit = zkConfigService.getActiveRatingEngingQuota(customerSpace, componentName);
+        defaultActiveModelQuotaLimit = (activeModelDataLimit != null && activeModelDataLimit > 0) ? activeModelDataLimit
+                : defaultActiveModelQuotaLimit;
         return defaultActiveModelQuotaLimit;
     }
 
@@ -613,8 +612,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             return aiModelService.getModelingQuery(customerSpace, ratingEngine, (AIModel) ratingModel,
                     modelingQueryType, version);
         } else {
-            throw new LedpException(LedpCode.LEDP_40009,
-                    new String[] { ratingEngine.getId(), ratingModel.getId(), customerSpace });
+            throw new LedpException(LedpCode.LEDP_40009, new String[] { ratingEngine.getId(), ratingModel.getId(),
+                    ratingEngine.getType().name(), customerSpace });
         }
     }
 

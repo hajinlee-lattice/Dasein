@@ -81,6 +81,12 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrRepositoryImpl<SourceF
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public SourceFile findByWorkflowPid(Long workflowPid) {
+        return dao.findByWorkflowPid(workflowPid);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SourceFile findByTableName(String tableName) {
         return dao.findByTableName(tableName);
     }

@@ -163,70 +163,73 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
             File localOutputCSV = new File(localCsvFilesPath, mergedFileName);
             log.info("Local output CSV=" + localOutputCSV.toString());
 
-            CSVWriter writer = new CSVWriter(new FileWriter(localOutputCSV), CSVWriter.DEFAULT_SEPARATOR,
-                    CSVWriter.DEFAULT_QUOTE_CHARACTER);
+            try(CSVWriter writer = new CSVWriter(new FileWriter(localOutputCSV), CSVWriter.DEFAULT_SEPARATOR,
+                    CSVWriter.DEFAULT_QUOTE_CHARACTER)) {
+                File[] files = localCsvDir
+                        .listFiles(file -> file.getName().matches("\\w+_part-[\\w\\d-]+.csv$|.*-p-\\d+.csv$"));
 
-            File[] files = localCsvDir
-                    .listFiles(file -> file.getName().matches("\\w+_part-[\\w\\d-]+.csv$|.*-p-\\d+.csv$"));
-
-            if (files == null) {
-                throw new RuntimeException("Cannot list files in dir " + localCsvDir);
-            }
-
-            log.info("Local CSV files=" + JsonUtils.serialize(files));
-
-            boolean hasHeader = false;
-            for (File file : files) {
-                log.info("Merging file " + file.getName());
-                try (CSVReader csvReader = new CSVReader(new FileReader(file))) {
-                    AtomicInteger counter = new AtomicInteger();
-                    String[] headers = csvReader.readNext();
-                    boolean needRemapFieldNames = (file.getName().toLowerCase().contains("orphan")
-                            || file.getName().toLowerCase().contains("unmatched"))
-                            && MapUtils.isNotEmpty(importedAttributes);
-
-                    if (needRemapFieldNames) {
-                        log.info("Remap field names.");
-                        Map<String, Integer> headerPosMap = buildPositionMap(Arrays.asList(headers));
-                        log.info("Header positionMap=" + JsonUtils.serialize(headerPosMap));
-                        List<String> displayNames = importedAttributes.values().stream()
-                                .map(attribute -> normalizeFieldName(attribute.getDisplayName()))
-                                .collect(Collectors.toList());
-                        log.info("DisplayName positionMap=" + JsonUtils.serialize(displayNames));
-                        Map<String, Integer> displayNamePosMap = buildPositionMap(displayNames);
-                        String[] displayNamesAsArr = toOrderedArray(displayNamePosMap);
-                        if (!hasHeader) {
-                            writer.writeNext(displayNamesAsArr);
-                            hasHeader = true;
-                        }
-                        String[] record = csvReader.readNext();
-                        while (record != null) {
-                            counter.incrementAndGet();
-                            String[] newRecord = generateNewRecord(record, displayNamesAsArr.length, headerPosMap,
-                                    displayNamePosMap, importedAttributes);
-                            writer.writeNext(newRecord);
-                            record = csvReader.readNext();
-                        }
-                    } else {
-                        log.info("Use field names as-is.");
-                        if (!hasHeader) {
-                            writer.writeNext(headers);
-                            hasHeader = true;
-                        }
-                        String[] record = csvReader.readNext();
-                        while (record != null) {
-                            counter.incrementAndGet();
-                            writer.writeNext(record);
-                            record = csvReader.readNext();
-                        }
-                    }
-                    log.info(String.format("There are 1 header row, %d data row(s) in file %s.", counter.get(),
-                            file.getName()));
+                if (files == null) {
+                    throw new RuntimeException("Cannot list files in dir " + localCsvDir);
                 }
+
+                log.info("Local CSV files=" + JsonUtils.serialize(files));
+
+                boolean hasHeader = false;
+                for (File file : files) {
+                    log.info("Merging file " + file.getName());
+                    try (CSVReader csvReader = new CSVReader(new FileReader(file))) {
+                        AtomicInteger counter = new AtomicInteger();
+                        String[] headers = csvReader.readNext();
+                        boolean needRemapFieldNames = (file.getName().toLowerCase().contains("orphan")
+                                || file.getName().toLowerCase().contains("unmatched"))
+                                && MapUtils.isNotEmpty(importedAttributes);
+
+                        if (needRemapFieldNames) {
+                            log.info("Remap field names.");
+                            Map<String, Integer> headerPosMap = buildPositionMap(Arrays.asList(headers));
+                            log.info("Header positionMap=" + JsonUtils.serialize(headerPosMap));
+                            List<String> displayNames = importedAttributes.values().stream()
+                                    .map(attribute -> normalizeFieldName(attribute.getDisplayName()))
+                                    .collect(Collectors.toList());
+                            log.info("DisplayName positionMap=" + JsonUtils.serialize(displayNames));
+                            Map<String, Integer> displayNamePosMap = buildPositionMap(displayNames);
+                            String[] displayNamesAsArr = toOrderedArray(displayNamePosMap);
+                            if (!hasHeader) {
+                                writer.writeNext(displayNamesAsArr);
+                                hasHeader = true;
+                            }
+                            String[] record = csvReader.readNext();
+                            while (record != null) {
+                                counter.incrementAndGet();
+                                String[] newRecord = generateNewRecord(record, displayNamesAsArr.length, headerPosMap,
+                                        displayNamePosMap, importedAttributes);
+                                writer.writeNext(newRecord);
+                                record = csvReader.readNext();
+                            }
+                        } else {
+                            log.info("Use field names as-is.");
+                            if (!hasHeader) {
+                                writer.writeNext(headers);
+                                hasHeader = true;
+                            }
+                            String[] record = csvReader.readNext();
+                            while (record != null) {
+                                counter.incrementAndGet();
+                                writer.writeNext(record);
+                                // debug log
+                                log.info("Sent " + counter.get() + " lines to writer," //
+                                        + " totalMem=" + Runtime.getRuntime().totalMemory() //
+                                        + " freeMem=" + Runtime.getRuntime().freeMemory());
+                                record = csvReader.readNext();
+                            }
+                        }
+                        log.info(String.format("There are 1 header row, %d data row(s) in file %s.", counter.get(),
+                                file.getName()));
+                    }
+                }
+                log.info("Finished for loops.");
             }
-            log.info("Finished for loops.");
-            writer.flush();
-            writer.close();
+
             log.info("Start copying file from local to hdfs.");
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localOutputCSV.getPath(), dstPath);
             log.info(String.format("Copied merged CSV file from local %s to HDFS %s", localOutputCSV.getPath(),
@@ -311,4 +314,5 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
         Date date = Date.from(Instant.ofEpochMilli(Long.valueOf(timestamp)));
         return formatter.format(date);
     }
+
 }

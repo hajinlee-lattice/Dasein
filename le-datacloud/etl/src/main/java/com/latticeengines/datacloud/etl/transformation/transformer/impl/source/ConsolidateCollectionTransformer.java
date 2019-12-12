@@ -357,6 +357,7 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
             if (runnables.size() >= 64) {
                 ThreadPoolUtils.runRunnablesInParallel(workers, runnables, //
                         (int) TimeUnit.HOURS.toMinutes(1), 10);
+                runnables.clear();
             }
         });
         if (CollectionUtils.isNotEmpty(runnables)) {

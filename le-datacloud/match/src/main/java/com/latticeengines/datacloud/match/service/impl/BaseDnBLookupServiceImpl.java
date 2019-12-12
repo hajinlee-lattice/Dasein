@@ -15,8 +15,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -25,7 +23,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jayway.jsonpath.JsonPath;
-import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
+import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -40,22 +38,22 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
     private RestApiClient dnbClient;
 
-    @Value("${datacloud.dnb.realtime.resultid.jsonpath}")
-    private String resultIdJsonPath;
-
     protected abstract String constructUrl(T context, DnBAPIType apiType);
 
     protected abstract HttpEntity<String> constructEntity(T context, String token);
 
     protected abstract void parseResponse(String response, T context, DnBAPIType apiType);
 
-    protected abstract void parseError(String response, Exception ex, T context);
+    protected abstract void parseError(Exception ex, T context);
 
-    protected abstract String getResultIdPath();
+    protected abstract String getErrorCodePath();
+
+    protected abstract ResponseType getResponseType();
 
     protected abstract void updateTokenInContext(T context, String token);
 
-    @Autowired
+
+    @Inject
     private ApplicationContext applicationContext;
 
     @PostConstruct
@@ -65,7 +63,6 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     }
 
     public void executeLookup(T context, DnBKeyType keyType, DnBAPIType apiType) {
-        String response = null;
         try {
             String token = dnbAuthenticationService.requestToken(keyType, null);
             updateTokenInContext(context, token);
@@ -74,10 +71,10 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             if (keyType == DnBKeyType.BATCH) {
                 log.info("Submitting request {} with token {}", url, token);
             }
-            response = sendRequest(url, entity, apiType);
+            String response = sendRequest(url, entity, apiType);
             parseResponse(response, context, apiType);
         } catch (Exception ex) {
-            parseError(response, ex, context);
+            parseError(ex, context);
         }
     }
 
@@ -90,13 +87,29 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         }
     }
 
-    protected DnBReturnCode parseDnBHttpError(String response, HttpClientErrorException ex) {
+    DnBReturnCode parseDnBHttpError(HttpClientErrorException ex) {
+        String response = ex.getResponseBodyAsString();
         switch (ex.getStatusCode()) {
         case REQUEST_TIMEOUT:
             return DnBReturnCode.TIMEOUT;
         case UNAUTHORIZED:
-            String resultId = (String) retrieveXmlValueFromResponse(getResultIdPath(), response);
-            switch (resultId) {
+        case FORBIDDEN:
+            String errorCode = null;
+            switch (getResponseType()) {
+            case XML:
+                errorCode = (String) retrieveXmlValueFromResponse(getErrorCodePath(), response);
+                break;
+            case JSON:
+                errorCode = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown response type " + getResponseType());
+            }
+            if (errorCode == null) {
+                log.error("Fail to parse DnB error code from response");
+                return DnBReturnCode.UNKNOWN;
+            }
+            switch (errorCode) {
             case "SC001":
             case "SC002":
             case "SC003":
@@ -120,6 +133,8 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             if (raiseException) {
                 throw e;
             } else {
+                log.error(String.format("Fail to extract json property with path %s from response %s", jsonPath, body),
+                        e);
                 return null;
             }
         }
@@ -167,5 +182,9 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         default:
             break;
         }
+    }
+
+    public enum ResponseType {
+        XML, JSON
     }
 }

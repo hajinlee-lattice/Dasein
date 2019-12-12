@@ -1,9 +1,10 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +26,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
         implements DnBRealTimeLookupService {
     private static final Logger log = LoggerFactory.getLogger(DnBRealTimeLookupServiceImpl.class);
 
-    @Autowired
+    @Inject
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
 
     @Value("${datacloud.dnb.realtime.url.prefix}")
@@ -82,8 +83,8 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     @Value("${datacloud.dnb.realtime.operatingstatus.outofbusiness}")
     private String outOfBusinessValue;
 
-    @Value("${datacloud.dnb.bulk.getstatus.transactioncode.xpath}")
-    private String transactionCodeXPath;
+    @Value("${datacloud.dnb.realtime.errorcode.jsonpath}")
+    private String errorCodeXpath;
 
     @Override
     public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
@@ -99,7 +100,11 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                         context.getDnbCode(), context.getDuration()));
                 break;
             }
+            log.info("Attempting to refresh DnB token which was found invalid: " + context.getToken());
             dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, context.getToken());
+            if (i == retries - 1) {
+                log.error("Fail to call dnb realtime email API due to invalid token and failed to refresh");
+            }
         }
         return context;
     }
@@ -118,7 +123,11 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                         context.getDnbCode(), context.getDuration()));
                 break;
             }
+            log.info("Attempting to refresh DnB token which was found invalid: " + context.getToken());
             dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, context.getToken());
+            if (i == retries - 1) {
+                log.error("Fail to call dnb realtime API due to invalid token and failed to refresh");
+            }
         }
         return context;
     }
@@ -172,7 +181,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     }
 
     @Override
-    protected void parseError(String response, Exception ex, DnBMatchContext context) {
+    protected void parseError(Exception ex, DnBMatchContext context) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
             log.error(String.format("HttpClientErrorException in DnB realtime request%s: HttpStatus %d %s",
@@ -180,7 +189,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                             : " (RootOperationID=" + context.getRootOperationUid() + ")",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
-            context.setDnbCode(parseDnBHttpError(response, httpEx));
+            context.setDnbCode(parseDnBHttpError(httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
             // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned. 
@@ -287,12 +296,19 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     }
 
     @Override
-    protected String getResultIdPath() {
-        return transactionCodeXPath;
+    protected ResponseType getResponseType() {
+        return ResponseType.JSON;
+    }
+
+    @Override
+    protected String getErrorCodePath() {
+        return errorCodeXpath;
     }
 
     @Override
     protected void updateTokenInContext(DnBMatchContext context, String token) {
         context.setToken(token);
     }
+
+
 }

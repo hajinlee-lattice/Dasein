@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CopySourceFileRequest;
@@ -140,6 +141,7 @@ public class SourceFileServiceImpl implements SourceFileService {
             throw new LedpException(LedpCode.LEDP_18118, e);
         }
         SourceFile file = new SourceFile();
+        file.setWorkflowPid(originalSourceFile.getWorkflowPid());
         file.setApplicationId(originalSourceFile.getApplicationId());
         file.setDisplayName(originalSourceFile.getDisplayName());
         file.setName(outputFileName);
@@ -199,6 +201,20 @@ public class SourceFileServiceImpl implements SourceFileService {
             log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, outputFileName), e);
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
         }
+    }
+
+    @Override
+    public SourceFile findByWorkflowPid(Long workflowPid) {
+        SourceFile sourceFile = sourceFileEntityMgr.findByWorkflowPid(workflowPid);
+        if(sourceFile == null){
+            log.info("Find sourcefile by workflowPid failed for {}, try to find by FakeApplicationId", workflowPid);
+            FakeApplicationId appId = new FakeApplicationId(workflowPid);
+            sourceFile = sourceFileEntityMgr.findByApplicationId(appId.toString());
+            if(sourceFile == null){
+                log.info("Find sourcefile by FakeApplicationId failed for {}", appId.toString());
+            }
+        }
+        return sourceFile;
     }
 
 }

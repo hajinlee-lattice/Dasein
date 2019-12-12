@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 public interface IngestionProgressDao extends BaseDao<IngestionProgress> {
@@ -14,8 +13,6 @@ public interface IngestionProgressDao extends BaseDao<IngestionProgress> {
     IngestionProgress saveProgress(IngestionProgress progress);
 
     void deleteProgressByField(Map<String, Object> fields);
-
-    boolean isIngestionTriggered(Ingestion ingestion);
 
     List<IngestionProgress> getRetryFailedProgresses();
 

@@ -25,9 +25,6 @@ fi
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv
 
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2017.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2017.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2017.csv
-
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2018.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2018.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2018.csv
 

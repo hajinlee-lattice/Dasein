@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,15 +31,18 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.annotation.PodContextAware;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
+import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.exposed.service.MatchValidationService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.DnBTokenRefreshResponse;
 import com.latticeengines.domain.exposed.datacloud.match.InternalAccountIdLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -59,6 +63,7 @@ import com.latticeengines.matchapi.service.BulkMatchService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "match", description = "REST resource for propdata matches")
 @RestController
@@ -89,6 +94,9 @@ public class MatchResource {
 
     @Inject
     private CDLLookupService cdlLookupService;
+
+    @Inject
+    private DnBAuthenticationService dnbAuthenticationService;
 
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
@@ -325,6 +333,28 @@ public class MatchResource {
         int currentVersion = entityMatchVersionService.getCurrentVersion(environment, tenant);
         int nextVersion = entityMatchVersionService.getNextVersion(environment, tenant);
         return new EntityMatchVersion(currentVersion, nextVersion);
+    }
+
+    /**
+     * Force to refresh DnB token in redis and local cache of all the envs. Only
+     * for MANUAL OPERATION purpose when any unexpected issue happens
+     *
+     * @param keyType:
+     *            DnB key type -- realtime/batch
+     * @param newToken:
+     *            If provided, will use this token to overwrite token in redis;
+     *            if not provided, request a new token from DnB. ONLY use case
+     *            to provide newToken here is: DnB authentication service is
+     *            down and DnB provides us some temporary token to use.
+     * @return
+     */
+    @ApiIgnore
+    @PutMapping(value = "/dnbtoken/{keyType}")
+    @ApiOperation(value = "Force to refresh DnB token. Only for manual operation purpose")
+    public DnBTokenRefreshResponse refreshDnBToken(@PathVariable("keyType") DnBKeyType keyType,
+            @RequestParam(value = "newtoken", required = false) String newToken) {
+        newToken = dnbAuthenticationService.refreshToken(keyType, newToken);
+        return new DnBTokenRefreshResponse(keyType, newToken);
     }
 
     private void validateEntityPublishRequest(EntityPublishRequest request) {

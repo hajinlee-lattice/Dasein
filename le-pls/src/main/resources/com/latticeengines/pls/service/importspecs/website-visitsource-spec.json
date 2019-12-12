@@ -1,6 +1,6 @@
 {
     "systemType": "Website",
-    "systemObject": "Web Visit Source Medium",
+    "systemObject": "Visit Source",
     "fieldDefinitionsRecordsMap": {
         "General": [
             {
@@ -12,7 +12,7 @@
                 ],
                 "required": true,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             }

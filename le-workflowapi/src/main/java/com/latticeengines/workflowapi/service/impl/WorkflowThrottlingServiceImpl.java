@@ -13,13 +13,15 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Sets;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -44,11 +46,14 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("workflowThrottlerService")
 public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowThrottlingServiceImpl.class);
+
+    private static final Set<YarnApplicationState> NOT_RUNNING_STATES = Sets.newHashSet(YarnApplicationState.FAILED, YarnApplicationState.FINISHED, YarnApplicationState.KILLED);
 
     private static final String GLOBAL = WorkflowThrottlingUtils.GLOBAL;
     private static final String DEFAULT = WorkflowThrottlingUtils.DEFAULT;
@@ -66,12 +71,15 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     @Inject
     private EMRCacheService emrCacheService;
 
+    @Inject
+    private JobService jobService;
+
     @Value("${workflowapi.throttling.masterconfig}")
     private String masterConfigStr;
 
     @Override
     public WorkflowThrottlingConfiguration getThrottlingConfig(String podid, String division,
-            Set<String> customerSpaces) {
+                                                               Set<String> customerSpaces) {
         Camille camille = CamilleEnvironment.getCamille();
         WorkflowThrottlingConfiguration config = new WorkflowThrottlingConfiguration();
         try {
@@ -174,6 +182,24 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
             MultiTenantContext.clearTenant();
             List<WorkflowJob> workflowJobs = new ArrayList<>(workflowJobEntityMgr.findByStatusesAndClusterId(
                     emrCacheService.getClusterId(), Arrays.asList(JobStatus.RUNNING.name(), JobStatus.PENDING.name())));
+            workflowJobs = workflowJobs.stream().filter(job -> {
+                String appId = job.getApplicationId();
+                if (StringUtils.isNotEmpty(appId)) {
+                    try {
+                        if (NOT_RUNNING_STATES.contains(jobService.getJobStatus(appId).getState())) {
+                            log.warn("Workflow {} is not running but labeled running.", job.getPid());
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        // unable to retrieve report from cluster. consider not running
+                        log.warn("Workflow {} labeled running, but unable to retrieve state from YARN. COnsider not running.", job.getPid());
+                        log.error("{}", e.toString());
+                        return false;
+                    }
+                }
+                return true;
+            }).collect(Collectors.toList());
+            // filter out killed applications
             workflowJobs
                     .addAll(workflowJobEntityMgr.findByStatuses(Collections.singletonList(JobStatus.ENQUEUED.name()))
                             .stream().filter(o -> division.equals(o.getStack())).collect(Collectors.toList()));
@@ -262,7 +288,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
     }
 
     private void addCurrentSystemState(WorkflowThrottlingSystemStatus status, List<WorkflowJob> workflowJobs,
-            String podid, String division) {
+                                       String podid, String division) {
         Map<String, Integer> runningWorkflowInEnv = new HashMap<String, Integer>() {
             {
                 put(GLOBAL, 0);

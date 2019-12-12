@@ -8,7 +8,7 @@ import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
 
 public interface CollectionWorkerService {
 
-    int getActiveWorkerCount(String vendor);
+    List<CollectionWorker> getActiveWorker(String vendor);
 
     CollectionWorkerMgr getEntityMgr();
 

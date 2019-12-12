@@ -72,14 +72,14 @@ public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<Collecti
 
     }
 
-    public int getActiveWorkerCount(String vendor) {
+    public List<CollectionWorker> getActiveWorker(String vendor) {
 
         List<String> statusList = Arrays.asList(
                 CollectionWorker.STATUS_NEW,
                 CollectionWorker.STATUS_RUNNING);
 
         List<CollectionWorker> resultList = collectionWorkerRepository.findByStatusInAndVendor(statusList, vendor);
-        return resultList.size();
+        return resultList;
     }
 
     @Override

@@ -13,10 +13,12 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -32,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
@@ -50,7 +53,19 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
     private static final String WEB_VISIT_WITH_INVALID_URL = "WebVisitWithInvalidURL.csv";
 
-    private static final String WEB_VISIT_WITH_INVALID_PATH_PATTERN = "WebVisitWithInvalidPathPattern.csv";
+    private static final String PATH_PATTERN_EXCEED_LIMIT = "PathPatternExceedLimit.csv";
+
+    private static final String S3_ATLAS_DATA_TABLE_DIR = "/%s/atlas/Data/Tables";
+    private static final String HDFS_DATA_TABLE_DIR = "/Pods/%s/Contracts/%s/Tenants/%s/Spaces/Production/Data/Tables";
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String bucket;
+
+    @Value("${camille.zk.pod.id}")
+    protected String podId;
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
@@ -114,13 +129,11 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
 
         // call separate api to create web visit path pattern template
         File pathPatternTemplateFile =
-                new File(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + WEB_VISIT_WITH_INVALID_PATH_PATTERN).getPath());
+                new File(ClassLoader.getSystemResource(SOURCE_FILE_LOCAL_PATH + PATH_PATTERN_EXCEED_LIMIT).getPath());
         cdlService.createWebVisitProfile(customerSpace, EntityType.WebVisitPathPattern,
                 new FileInputStream(pathPatternTemplateFile));
         getDataFeedTask(ENTITY_CATALOG);
-        // 13 valid url path pattern, fail the import
         startCDLImportWithTemplateData(webVisitPathPatternDataFeedTask, JobStatus.FAILED);
-
 
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
@@ -131,12 +144,12 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         Report contactReport = reports.get(1);
         Report productReport = reports.get(2);
         Report webVisitReport = reports.get(3);
-        Report webVisitPathPatternReport = reports.get(4);
+        Report pathPatternReport = reports.get(4);
         verifyReport(accountReport, 3L, 3L, 47L);
         verifyReport(contactReport, 3L, 3L, 47L);
         verifyReport(productReport, 0L, 2L, 0L);
         verifyReport(webVisitReport, 90L, 90L, 210L);
-        verifyReport(webVisitPathPatternReport, 7L, 7L, 21L);
+        verifyReport(pathPatternReport, 0L,29L, 0L);
     }
 
     @Test(groups = "deployment")
@@ -175,5 +188,15 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                 dataFeedTask.getUniqueId(), webVisitFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, status);
+        if (JobStatus.FAILED.equals(status)) {
+            String tenantId = MultiTenantContext.getShortTenantId();
+            Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), tenantId);
+            List<?> rawList = JsonUtils.deserialize(job.getOutputs().get("DATAFEEDTASK_IMPORT_ERROR_FILES"), List.class);
+            String errorFilePath = JsonUtils.convertList(rawList, String.class).get(0);
+            Assert.assertNotNull(errorFilePath);
+            String s3File = String.format(S3_ATLAS_DATA_TABLE_DIR, tenantId) +
+                    errorFilePath.substring(String.format(HDFS_DATA_TABLE_DIR, podId, tenantId, tenantId).length());
+            Assert.assertTrue(s3Service.objectExist(bucket, s3File));
+        }
     }
 }

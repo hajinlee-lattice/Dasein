@@ -69,6 +69,8 @@ public class AggActivityStreamToDaily
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
+    // TODO handle skipped stream (ACTIVITY_STREAMS_SKIP_AGG ctx)
+
     @Override
     protected AggDailyActivityConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         if (MapUtils.isEmpty(stepConfiguration.getActivityStreamMap())) {
@@ -78,12 +80,18 @@ public class AggActivityStreamToDaily
         Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
         Map<String, Table> rawStreamTableNames = getTablesFromMapCtxKey(customerSpace.toString(),
                 RAW_ACTIVITY_STREAM_TABLE_NAME);
+        Set<String> skippedStreamIds = getSkippedStreamIds();
 
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         // set dimensions
         config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
-        streams.values().forEach(stream -> {
+        // dimension value -> short ID
+        config.dimensionValueIdMap = getMapObjectFromContext(STREAM_DIMENSION_VALUE_ID_MAP, String.class, String.class);
+        Set<AtlasStream> notSkippedStream = streams.values().stream().filter(stream -> {
             String streamId = stream.getStreamId();
+            if (skippedStreamIds.contains(streamId)) {
+                return false;
+            }
             Map<String, DimensionCalculator> calculatorMap = new HashMap<>();
             Set<String> hashDimensions = new HashSet<>();
             List<String> additionalDimAttrs = new ArrayList<>(getEntityIds(stream));
@@ -101,7 +109,13 @@ public class AggActivityStreamToDaily
             config.dimensionCalculatorMap.put(streamId, calculatorMap);
             config.hashDimensionMap.put(streamId, hashDimensions);
             config.additionalDimAttrMap.put(streamId, additionalDimAttrs);
-        });
+            return true;
+        }).collect(Collectors.toSet());
+        if (notSkippedStream.isEmpty()) {
+            log.info("All streams are skipped for daily aggregation, skipping step entirely");
+            return null;
+        }
+
         // set input
         List<DataUnit> units = new ArrayList<>();
         rawStreamTableNames.forEach((streamId, table) -> {
@@ -173,5 +187,15 @@ public class AggActivityStreamToDaily
     @Override
     protected Class<? extends AbstractSparkJob<AggDailyActivityConfig>> getJobClz() {
         return AggDailyActivityJob.class;
+    }
+
+    private Set<String> getSkippedStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_SKIP_AGG)) {
+            return Collections.emptySet();
+        }
+
+        Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
+        log.info("Stream IDs skipped for daily aggregation = {}", skippedStreamIds);
+        return skippedStreamIds;
     }
 }

@@ -105,7 +105,7 @@ public class SchemaRepositoryUnitTestNG {
             .collect(Collectors.toList());
 
     private static final List<InterfaceName> WEBVISIT_ATTRS = Arrays.asList(WebVisitPageUrl, WebVisitDate, UserId, //
-            SourceMedium, CompanyName, City, State, Country, DUNS);
+            SourceMedium, CompanyName, Website, City, State, Country, PostalCode, DUNS);
 
     private static final List<InterfaceName> WEBVISIT_PATHPATTERN_ATTRS = Arrays.asList(PathPatternName, PathPattern);
 

@@ -13,6 +13,15 @@ public interface DataFeedTaskTemplateService {
     boolean setupWebVisitProfile(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata);
 
     /**
+     * Uses Import Workflow 2.0 to set up the 3 WebVisit import templates from Import Workflow Specs.
+     *
+     * @param customerSpace target tenant
+     * @param simpleTemplateMetadata Template description.
+     * @return true if success.
+     */
+    boolean setupWebVisitProfile2(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata);
+
+    /**
      *
      * @param customerSpace target tenant.
      * @param uniqueTaskId DataFeedTask unique Id to be backup.

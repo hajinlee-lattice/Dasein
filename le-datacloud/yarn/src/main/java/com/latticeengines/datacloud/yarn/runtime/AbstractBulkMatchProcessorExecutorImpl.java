@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
@@ -39,8 +41,8 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
-import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
+import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
@@ -52,7 +54,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
@@ -100,6 +101,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Autowired
     private MatchCommandService matchCommandService;
+
+    @Inject
+    @Lazy
+    private MatchMetricService matchMetricService;
 
     @Value("${datacloud.match.bulk.snappy.compress}")
     private boolean useSnappy;
@@ -465,8 +470,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             context.setInput(input);
             context.setOutput(output);
             context.setMatchEngine(MatchContext.MatchEngine.BULK);
-            MatchResponse response = new MatchResponse(context);
-            metricService.write(MetricDB.LDC_Match, response);
+            matchMetricService.recordMatchFinished(context);
         } catch (Exception e) {
             log.error("Failed to extract output metric.", e);
         }

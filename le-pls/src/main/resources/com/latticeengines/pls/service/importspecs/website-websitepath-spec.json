@@ -1,6 +1,6 @@
 {
     "systemType": "Website",
-    "systemObject": "Web Visit Path Pattern",
+    "systemObject": "Website Path",
     "fieldDefinitionsRecordsMap": {
         "General": [
             {
@@ -13,7 +13,7 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             },
@@ -27,7 +27,7 @@
                 ],
                 "required": false,
                 "approvedUsage": [
-                    "NONE_APPROVED_USAGE"
+                    "None"
                 ],
                 "fundamentalType": "ALPHA"
             }

@@ -8,6 +8,7 @@ import static com.latticeengines.domain.exposed.cdl.activity.StreamDimension.Usa
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +37,6 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
@@ -47,8 +48,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
+import com.latticeengines.domain.exposed.util.TypeConversionUtil;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.ProcessDimensionJob;
@@ -66,15 +67,14 @@ public class GenerateDimensionMetadata
     @Inject
     private ActivityStoreProxy activityStoreProxy;
 
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
-
     // [streamId, dimName] <-> UUID
     private BiMap<Pair<String, String>, String> dimIdMap = HashBiMap.create();
     private List<DataUnit> units = new ArrayList<>();
     // tableName -> idx in units
     private Map<String, Integer> unitIdxMap = new HashMap<>();
     private Map<String, String> streamErrorMsgs = new HashMap<>();
+    // streamId -> set of dimName that has no data
+    private Map<String, Set<String>> emptyMetadataDimensions = new HashMap<>();
 
     @Override
     protected ProcessDimensionConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
@@ -111,11 +111,14 @@ public class GenerateDimensionMetadata
                     .collect(Collectors.toSet());
             if (CollectionUtils.isNotEmpty(exceedCardDimensions)) {
                 log.warn("Dimensions {} in stream {} exceeds cardinality limit", exceedCardDimensions, streamId);
-                List<String> dims = exceedCardDimensions.stream().map(Pair::getKey).collect(Collectors.toList());
+                Set<String> dims = exceedCardDimensions.stream().map(Pair::getKey).collect(Collectors.toSet());
                 streamErrorMsgs.put(streamId,
-                        String.format("Dimension %s in stream has too many distinct values", String.join(",", dims)));
+                        String.format("Dimension %s in stream has too many distinct values, skip processing",
+                                String.join(",", dims)));
             }
         });
+
+        allocateDimensionIdsAndOverrideMap(dimensionMetadataMap);
 
         log.info("Final dimension metadata map = {}", JsonUtils.serialize(dimensionMetadataMap));
         putObjectInContext(STREAM_DIMENSION_METADATA_MAP, dimensionMetadataMap);
@@ -123,6 +126,48 @@ public class GenerateDimensionMetadata
         // publish metadata for serving in app
         String signature = activityStoreProxy.saveDimensionMetadata(configuration.getCustomer(), dimensionMetadataMap);
         saveDimensionMetadataSignature(signature);
+    }
+
+    // generate short ID for each unique dimension value and update corresponding
+    // map
+    private void allocateDimensionIdsAndOverrideMap(Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+
+        Set<String> values = dimensionMetadataMap //
+                .values() //
+                .stream() //
+                .flatMap(dims -> dims.entrySet().stream().flatMap(dimMetadata -> {
+                    String dimName = dimMetadata.getKey();
+                    return dimMetadata.getValue().getDimensionValues().stream().map(attrs -> attrs.get(dimName))
+                            .map(TypeConversionUtil::toString);
+                })) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(values)) {
+            return;
+        }
+
+        // allocate short ID
+        Map<String, String> valueIdMap = activityStoreProxy.allocateDimensionIds(customerSpace.toString(), values);
+        putObjectInContext(STREAM_DIMENSION_VALUE_ID_MAP, valueIdMap);
+
+        log.info("DimensionValueIdMap = {}", valueIdMap);
+
+        // update metadata
+        dimensionMetadataMap.forEach((streamId, dims) -> {
+            dims.forEach((dimName, metadata) -> {
+                if (CollectionUtils.isEmpty(metadata.getDimensionValues())) {
+                    return;
+                }
+
+                metadata.getDimensionValues().forEach(attrs -> {
+                    String value = TypeConversionUtil.toString(attrs.get(dimName));
+                    if (valueIdMap.containsKey(value)) {
+                        // override with short ID
+                        attrs.put(dimName, valueIdMap.get(value));
+                    }
+                });
+            });
+        });
     }
 
     private void saveDimensionMetadataSignature(@NotNull String signature) {
@@ -162,12 +207,6 @@ public class GenerateDimensionMetadata
                 streamErrorMsgs.put(streamId, "No data for this stream");
                 return Stream.empty();
             }
-            if (hasCatalogWithoutData(stream, catalogTables)) {
-                log.info("Stream {} has contains reference to catalog without batch store, skip generating metadata",
-                        streamId);
-                streamErrorMsgs.put(streamId, "Some catalog associated with this stream has no data");
-                return Stream.empty();
-            }
 
             return getDimensionConfigs(streamId, dimensions, catalogTables, rawStreamTables);
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
@@ -195,6 +234,14 @@ public class GenerateDimensionMetadata
                 Preconditions.checkNotNull(dimension.getCatalog(),
                         String.format("Dimension %s in stream %s must have an associated catalog", dimName, streamId));
                 String catalogId = dimension.getCatalog().getCatalogId();
+                if (!catalogTables.containsKey(catalogId)) {
+                    log.info(
+                            "Catalog {} in dimName {} and stream {} does not have any data, generate empty metadata for it",
+                            catalogId, dimName, streamId);
+                    emptyMetadataDimensions.putIfAbsent(streamId, new HashSet<>());
+                    emptyMetadataDimensions.get(streamId).add(dimName);
+                    return null;
+                }
                 dim.inputIdx = addTableAndGetDataUnitIdx(catalogId, catalogTables, "Catalog_");
             } else {
                 dim.inputIdx = addTableAndGetDataUnitIdx(streamId, rawStreamTables, "Stream_");
@@ -238,6 +285,14 @@ public class GenerateDimensionMetadata
             streamDimensionMetadatas.get(streamId).put(dimName, metadata);
         });
 
+        // add empty metadata for dimension without data
+        emptyMetadataDimensions.forEach((streamId, dimNames) -> {
+            DimensionMetadata metadata = new DimensionMetadata();
+            metadata.setDimensionValues(Collections.emptyList());
+            streamDimensionMetadatas.putIfAbsent(streamId, new HashMap<>());
+            dimNames.forEach(dimName -> streamDimensionMetadatas.get(streamId).put(dimName, metadata));
+        });
+
         // add metadata for Usage=Pivot & GeneratorOption=BOOLEAN
         configuration.getActivityStreamMap().values().stream() //
                 .filter(Objects::nonNull) //
@@ -279,29 +334,6 @@ public class GenerateDimensionMetadata
             units.add(tables.get(id).toHdfsDataUnit(unitAliasPrefix + id));
         }
         return unitIdxMap.get(id);
-    }
-
-    // find any catalog without batch store
-    private boolean hasCatalogWithoutData(@NotNull AtlasStream stream, @NotNull Map<String, Table> catalogTables) {
-        return stream.getDimensions() //
-                .stream() //
-                .filter(dimension -> dimension.getCatalog() != null) //
-                .map(StreamDimension::getCatalog) //
-                .map(Catalog::getCatalogId) //
-                .anyMatch(id -> !catalogTables.containsKey(id));
-    }
-
-    private Map<String, Table> getActivityStoreTables(@NotNull String ctxKey) {
-        if (!hasKeyInContext(ctxKey)) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> tableNames = getMapObjectFromContext(ctxKey, String.class, String.class);
-        return tableNames.entrySet() //
-                .stream() //
-                .map(entry -> Pair.of(entry.getKey(),
-                        metadataProxy.getTable(customerSpace.toString(), entry.getValue())))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     @Override

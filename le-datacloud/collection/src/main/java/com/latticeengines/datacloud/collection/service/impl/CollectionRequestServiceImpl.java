@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,8 +244,9 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
                             (curStatus.equals(CollectionRequest.STATUS_COLLECTING) ||
                                     curStatus.equals(CollectionRequest.STATUS_READY) ||
                                     ((curStatus.equals(CollectionRequest.STATUS_DELIVERED) ||
-                                            curStatus.equals(CollectionRequest.STATUS_FAILED)) &&
-                                            curRawReq.getRequestedTime().getTime() - curReq.getRequestedTime().getTime() <
+                                            curStatus.equals(CollectionRequest.STATUS_FAILED) ||
+                                            curStatus.equals(CollectionRequest.STATUS_EMPTY_RESULT)) &&
+                                            curRawReq.getRequestedTime().getTime() - curReq.getDeliveryTime().getTime() <
                                                     1000L * vendorConfigService.getCollectingFreq(curVendor)))) {
 
                         rawReqFilter.set(posBuf[k], true);
@@ -330,12 +330,11 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     }
 
     @Override
-    public int handlePending(String vendor, int maxRetries, List<CollectionWorker> finishedWorkers) {
+    public int handlePending(String vendor, int maxRetries, List<CollectionWorker> activeWorkers) {
 
         //check vendor & list
         vendor = vendor.toUpperCase();
-        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor) ||
-                CollectionUtils.isEmpty(finishedWorkers)) {
+        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
 
             return 0;
 
@@ -348,7 +347,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         }
 
-        List<CollectionRequest> resultList = collectionRequestMgr.getPending(vendor, finishedWorkers);
+        List<CollectionRequest> resultList = collectionRequestMgr.getPending(vendor, activeWorkers);
 
         //processing
         int resetCount = 0, failCount = 0;
@@ -391,9 +390,16 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     }
 
     @Override
-    public int consumeFinished(String workerId, Set<String> domains) {
+    public List<CollectionRequest> getProcessed(String workerId) {
 
-        List<CollectionRequest> reqs = collectionRequestMgr.getDelivered(workerId);
+        return collectionRequestMgr.getDelivered(workerId);
+
+    }
+
+    @Override
+    public int consumeFinished(List<CollectionRequest> processed, Set<String> domains, Set<String> emptyDomains) {
+
+        List<CollectionRequest> reqs = processed;
         List<CollectionRequest> delivered = new ArrayList<>(domains.size());
 
         Timestamp ts = new Timestamp(System.currentTimeMillis());
@@ -403,6 +409,13 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
             if (domains.contains(req.getDomain())) {
 
                 req.setStatus(CollectionRequest.STATUS_DELIVERED);
+                req.setDeliveryTime(ts);
+
+                delivered.add(req);
+
+            } else if (emptyDomains.contains(req.getDomain())) {
+
+                req.setStatus(CollectionRequest.STATUS_EMPTY_RESULT);
                 req.setDeliveryTime(ts);
 
                 delivered.add(req);
@@ -417,7 +430,6 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
 
         collectionRequestMgr.saveRequests(delivered);
 
-        reqs.clear();
         delivered.clear();
 
         return reqRetried;
@@ -440,7 +452,8 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         if (!status.equals(CollectionRequest.STATUS_READY) &&
                 !status.equals(CollectionRequest.STATUS_COLLECTING) &&
                 !status.equals(CollectionRequest.STATUS_DELIVERED) &&
-                !status.equals(CollectionRequest.STATUS_FAILED)) {
+                !status.equals(CollectionRequest.STATUS_FAILED) &&
+                !status.equals(CollectionRequest.STATUS_EMPTY_RESULT)) {
 
             return new Timestamp(System.currentTimeMillis());
 
@@ -479,7 +492,7 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     @Override
     public void cleanupRequestHandled(String vendor, Timestamp before) {
 
-        List<String> statuses = Arrays.asList(CollectionRequest.STATUS_DELIVERED, CollectionRequest.STATUS_FAILED);
+        List<String> statuses = Arrays.asList(CollectionRequest.STATUS_DELIVERED, CollectionRequest.STATUS_FAILED, CollectionRequest.STATUS_EMPTY_RESULT);
 
         collectionRequestMgr.cleanupRequests(statuses, vendor, before, cleanupBatch);
 

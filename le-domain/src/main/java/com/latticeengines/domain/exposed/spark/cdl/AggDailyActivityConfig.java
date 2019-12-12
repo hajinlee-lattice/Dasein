@@ -37,6 +37,10 @@ public class AggDailyActivityConfig extends SparkJobConfig {
     @JsonProperty
     public Map<String, List<StreamAttributeDeriver>> attrDeriverMap = new HashMap<>();
 
+    // dimension value -> short ID
+    @JsonProperty
+    public Map<String, String> dimensionValueIdMap = new HashMap<>();
+
     // streamId -> List[dimension attr col name already generated]
     @JsonProperty
     public Map<String, List<String>> additionalDimAttrMap = new HashMap<>();

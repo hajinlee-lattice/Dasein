@@ -1,6 +1,7 @@
 package com.latticeengines.apps.core.service.impl;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,29 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
         // TODO(jwinter): Figure out the proper way to compare JSON objects for test.
         //ObjectMapper mapper = new ObjectMapper();
         //Assert.assertTrue(mapper.valueToTree(actualTable).equals(mapper.valueToTree(expectedTable)));
+    }
+
+    @Test(groups = "functional")
+    public void loadSpecWithSameObjectExcludeTypeFromS3() throws Exception {
+        String systemType = "specfunctest", systemObject = "contacts";
+        List<ImportWorkflowSpec> specList = null;
+        try {
+            specList = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(systemType, systemObject);
+
+        } catch (Exception e) {
+            log.error("Loading Spec from S3 failed with error:", e);
+            throw e;
+        }
+
+        Assert.assertNotNull(specList);
+        Assert.assertTrue(specList.size() > 0);
+
+        for(ImportWorkflowSpec spec : specList) {
+            Assert.assertEquals(systemObject, spec.getSystemObject().toLowerCase());
+        }
+        ImportWorkflowSpec spec =
+                specList.stream().filter(workflowSpec -> systemType.equals(workflowSpec.getSystemType().toLowerCase())).findFirst().orElse(null);
+        Assert.assertNull(spec);
     }
 
 }

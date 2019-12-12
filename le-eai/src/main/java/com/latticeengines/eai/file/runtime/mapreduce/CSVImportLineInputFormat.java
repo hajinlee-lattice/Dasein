@@ -52,11 +52,19 @@ public class CSVImportLineInputFormat extends FileInputFormat<LongWritable, Text
         if (status.isDirectory()) {
             throw new IOException("Not a file: " + fileName);
         } else {
-            long totalLength = status.getLen();
-            int cores = job.getConfiguration().getInt("mapreduce.map.cpu.vcores", 1);
+            long totalLength;
+            boolean useS3Input = job.getConfiguration().getBoolean("eai.import.use.s3.input", false);
+            if (useS3Input) {
+                totalLength = job.getConfiguration().getLong("eai.import.aws.s3.file.size", 0l);
+            } else {
+                totalLength = status.getLen();
+            }
+            int cores;
             if (totalLength > gigaByte) {
                 cores = job.getConfiguration().getInt(CSVFileImportProperty.CSV_FILE_MAPPER_CORES.name(), 1);
                 job.getConfiguration().setInt("mapreduce.map.cpu.vcores", cores);
+            } else {
+                cores = job.getConfiguration().getInt("mapreduce.map.cpu.vcores", 1);
             }
             logger.info("Total imported file size is {}， set CPU cores to {}", totalLength, cores);
             return getSplits(job, fileName, totalLength);

@@ -62,6 +62,12 @@ public class LinkedInChannelConfig implements ChannelConfig {
         this.suppressAccountsWithoutNameOrDomain = suppressAccountsWithoutNameOrDomain;
     }
 
+    @Override
+    @JsonProperty("suppressAccountsWithoutLookupId")
+    public boolean isSuppressAccountsWithoutLookupId() {
+        return false;
+    }
+
     public String getAudienceId() {
         return audienceId;
     }

@@ -17,7 +17,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-spring-boot-webmvc-parent</artifactId>
-        <version>4.21.0-SNAPSHOT</version>
+        <version>4.22.0-SNAPSHOT</version>
         <relativePath>../le-parent/spring-boot/webmvc</relativePath>
     </parent>
 
@@ -115,7 +115,7 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-quartzclient</artifactId>
             <version>${project.version}</version>

@@ -218,7 +218,10 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     protected void exportTableRoleToRedshift(String tableName, TableRoleInCollection tableRole) {
         String distKey = tableRole.getPrimaryKey().name();
-        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
+        List<String> sortKeys = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(tableRole.getForeignKeys())) {
+            sortKeys.addAll(tableRole.getForeignKeysAsStringList());
+        }
         if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
             sortKeys.add(tableRole.getPrimaryKey().name());
         }

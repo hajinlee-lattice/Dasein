@@ -42,10 +42,9 @@ public class EaiImportJobDetailEntityMgrImpl extends BaseEntityMgrImpl<EaiImport
                 .getCollectionIdentifier());
         if (lastDetail == null) {
             eaiImportJobDetail.setSequenceId(1L);
-            eaiImportJobDetailDao.create(eaiImportJobDetail);
         } else {
             eaiImportJobDetail.setSequenceId(lastDetail.getSequenceId() + 1);
-            eaiImportJobDetailDao.create(eaiImportJobDetail);
         }
+        eaiImportJobDetailDao.create(eaiImportJobDetail);
     }
 }

@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.pls.{DeltaCampaignLaunchSparkContext, R
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
-import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_date, from_unixtime}
+import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_timestamp, from_unixtime}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.asc
@@ -233,33 +233,43 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     }
     
     var finalDfs = new ListBuffer[DataFrame]()
+    var contactNums = new Array[Long](2)
     if (createRecommendationDataFrame) {
-        val recommendationDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable, completeContactTable).checkpoint(eager = true)
+        val recommendationDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable, completeContactTable)
+        val recContactCount = recommendationDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
+        contactNums(0) = if (recContactCount != null) recContactCount.toString.toLong else 0L
+        val recommendationDf = recommendationDfWithContactNum.drop("CONTACT_NUM").checkpoint(eager = true)
+        
         exportToRecommendationTable(deltaCampaignLaunchSparkContext, recommendationDf)
         finalDfs += recommendationDf
         if (createAddCsvDataFrame) {
-            var finalrecommendationDf: DataFrame = null
+            var finalrecommendationDf: DataFrame = recommendationDf
             if (!addContactTable.rdd.isEmpty) {
                 // replace contacts
                 val aggregatedContacts = aggregateContacts(addContactTable, contactCols, joinKey)
                 finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
-            } else {
-                finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumn("CONTACTS", lit(""))
+                val contactCount = finalrecommendationDf.agg(sum("CONTACT_NUM")).first.get(0)
+                contactNums(0) = if (contactCount != null) contactCount.toString.toLong else 0L
             }
+            
             val addCsvDataFrame: DataFrame = generateUserConfiguredDataFrame(finalrecommendationDf, addAccountTable, deltaCampaignLaunchSparkContext, joinKey)
             finalDfs += addCsvDataFrame
         }
     }
     
     if (createDeleteCsvDataFrame) {
-        val deleteRecDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, deleteAccountTable, deleteContactTable)
+        val deleteRecDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, deleteAccountTable, deleteContactTable)
+        val deleteContactCount = deleteRecDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
+        contactNums(1) = if (deleteContactCount != null) deleteContactCount.toString.toLong else 0L
+        val deleteRecDf = deleteRecDfWithContactNum.drop("CONTACT_NUM")
         val deleteCsvDataFrame: DataFrame = generateUserConfiguredDataFrame(deleteRecDf, deleteAccountTable, deltaCampaignLaunchSparkContext, joinKey)
         finalDfs += deleteCsvDataFrame
     }
     lattice.output = finalDfs.toList
+    lattice.outputStr = contactNums.mkString("[", ",", "]")
   }
   
-  
+  // returns recommendation table with one more column "CONTACT_NUM". Need to drop that column before further processing
   private def createRecommendationDf(spark: SparkSession, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, addAccountTable: DataFrame, completeContactTable: DataFrame): DataFrame = {
       val joinKey: String = deltaCampaignLaunchSparkContext.getJoinKey
       val playId: String = deltaCampaignLaunchSparkContext.getPlayName
@@ -309,13 +319,12 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       if (!completeContactTable.rdd.isEmpty) {
           val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, joinKey)
           val recommendations = derivedAccounts.join(aggregatedContacts, joinKey :: Nil, "left")
-          val contactCount = recommendations.agg(sum("CONTACT_NUM")).first.get(0)
 
           logDataFrame("recommendations", recommendations, joinKey, Seq(joinKey, "CONTACT_NUM"), limit = 100)
-          finalRecommendations = recommendations.withColumnRenamed(joinKey,"ACCOUNT_ID").drop("CONTACT_NUM")
+          finalRecommendations = recommendations.withColumnRenamed(joinKey,"ACCOUNT_ID")
       } else {
           // join
-          val recommendations = derivedAccounts.withColumn("CONTACTS", lit(""))
+          val recommendations = derivedAccounts.withColumn("CONTACTS", lit("")).withColumn("CONTACT_NUM", lit(0))
           finalRecommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
       }
       logDataFrame("finalRecommendations", finalRecommendations, "ACCOUNT_ID", Seq("ACCOUNT_ID", "EXTERNAL_ID"), limit = 100)
@@ -341,8 +350,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
   }
   
   private def transformFromTimestampToDate(orderedRec: DataFrame): DataFrame = {
-    return orderedRec.withColumn("LAUNCH_DATE_DATE",  to_date(from_unixtime(col("LAUNCH_DATE")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
-                     .withColumn("LAST_UPDATED_TIMESTAMP_DATE", to_date(from_unixtime(col("LAST_UPDATED_TIMESTAMP")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
+    return orderedRec.withColumn("LAUNCH_DATE_DATE",  to_timestamp(from_unixtime(col("LAUNCH_DATE")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
+                     .withColumn("LAST_UPDATED_TIMESTAMP_DATE", to_timestamp(from_unixtime(col("LAST_UPDATED_TIMESTAMP")/1000, "MM/dd/yyyy HH:mm:ss"), "MM/dd/yyyy HH:mm:ss")) //
                      .drop("LAUNCH_DATE") //
                      .drop("LAST_UPDATED_TIMESTAMP") //
                      .withColumnRenamed("LAUNCH_DATE_DATE", "LAUNCH_DATE") //

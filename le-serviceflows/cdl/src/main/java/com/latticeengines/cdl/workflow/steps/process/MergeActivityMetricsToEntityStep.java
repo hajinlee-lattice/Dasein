@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +16,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,11 +28,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -37,6 +46,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
+import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
@@ -122,10 +132,15 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<TableRoleInCollection, Map<String, String>> signatureTableNames = new HashMap<>();
         outputMetadata.forEach((mergedTableLabel, details) -> {
-            HdfsDataUnit mergedDU = result.getTargets().get(details.getStartIdx());
+            HdfsDataUnit output = result.getTargets().get(details.getStartIdx());
             String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, mergedTableLabel); // entity_servingEntity (Account_WebVisit)
             String tableName = TableUtils.getFullTableName(tableCtxName, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
-            Table mergedTable = toTable(tableName, mergedDU);
+            Table mergedTable = toTable(tableName, output);
+            if (output.getCount() <= 0) {
+                // create dummy record with meaningless accountId, append to mergedDU
+                log.warn("Empty metrics found: {}. Append dummy record.", tableName);
+                appendDummyRecord(mergedTable);
+            }
             metadataProxy.createTable(customerSpace.toString(), tableName, mergedTable);
             TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
             signatureTableNames.putIfAbsent(servingEntity, new HashMap<>());
@@ -135,6 +150,28 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         // signature: entity (Account/Contact)
         // role: WebVisitProfile
         signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
+    }
+
+    private void appendDummyRecord(Table targetTable) {
+        List<GenericRecord> dummyRecords = createDummyRecord();
+        try {
+            String targetPath = ExtractUtils.getSingleExtractPath(yarnConfiguration, targetTable);
+            log.info("Retrieved extract path: {}", targetPath);
+            if (StringUtils.isBlank(targetPath)) {
+                throw new FileNotFoundException("Unable to find the path where extract is located");
+            }
+            AvroUtils.appendToHdfsFile(yarnConfiguration, targetPath, dummyRecords);
+        } catch (IOException e) {
+            log.error("Merged metrics is empty but Failed to create dummy record for profiling", e.fillInStackTrace());
+        }
+    }
+
+    private List<GenericRecord> createDummyRecord() {
+        String dummySchemaStr = "{\"type\":\"record\",\"name\":\"topLevelRecord\",\"fields\":[{\"name\":\"" + InterfaceName.AccountId.name() + "\",\"type\":[\"string\",\"null\"]}]}";
+        Schema.Parser parser = new Schema.Parser();
+        GenericRecord record = new GenericData.Record(parser.parse(dummySchemaStr));
+        record.put(InterfaceName.AccountId.name(), DataCloudConstants.ENTITY_ANONYMOUS_ID);
+        return Collections.singletonList(record);
     }
 
     private TableRoleInCollection getServingEntityInLabel(String mergedTableLabels) {

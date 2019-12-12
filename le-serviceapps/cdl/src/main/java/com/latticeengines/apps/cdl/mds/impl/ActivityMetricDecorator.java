@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.common.exposed.util.TemplateUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplates;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -45,16 +47,20 @@ public class ActivityMetricDecorator implements Decorator {
             .map(InterfaceName::name).collect(Collectors.toSet());
 
     private final String signature;
+    private final Tenant tenant;
     private DimensionMetadataService dimensionMetadataService;
     private ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
+
+    private final ThreadLocal<Boolean> setTenantCtx = new ThreadLocal<>();
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> metadataCache = new ConcurrentHashMap<>();
     private ConcurrentMap<String, ActivityMetricsGroup> groupCache = new ConcurrentHashMap<>();
 
-    ActivityMetricDecorator(String signature, //
+    ActivityMetricDecorator(String signature, Tenant tenant, //
             DimensionMetadataService dimensionMetadataService, //
-            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr) {
+                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr) {
         this.signature = signature;
+        this.tenant = tenant;
         this.dimensionMetadataService = dimensionMetadataService;
         this.activityMetricsGroupEntityMgr = activityMetricsGroupEntityMgr;
     }
@@ -88,7 +94,7 @@ public class ActivityMetricDecorator implements Decorator {
         try {
             enrichColumnMetadata(cm);
         } catch (Exception e) {
-            log.warn("Error while rendering the column " + cm.getAttrName());
+            log.warn("Error while rendering the column " + cm.getAttrName(), e);
         }
 
         cm.enableGroup(Segment);
@@ -98,6 +104,11 @@ public class ActivityMetricDecorator implements Decorator {
     }
 
     private void enrichColumnMetadata(ColumnMetadata cm) {
+        if (!Boolean.TRUE.equals(setTenantCtx.get())) {
+            MultiTenantContext.setTenant(tenant);
+            setTenantCtx.set(Boolean.TRUE);
+        }
+
         String attrName = cm.getAttrName();
         List<String> tokens;
         try {
@@ -153,7 +164,8 @@ public class ActivityMetricDecorator implements Decorator {
             if (allDimMetadata.containsKey(dimName)) {
                 DimensionMetadata dimMetadata = allDimMetadata.get(dimName);
                 dimParams.putAll(dimMetadata.getDimensionValues().stream() //
-                        .filter(row -> dimVal.equals(row.get(dimName))).findFirst().orElse(new HashMap<>()));
+                        .filter(row -> dimVal.equalsIgnoreCase(row.get(dimName).toString())) //
+                        .findFirst().orElse(new HashMap<>()));
             }
             if (MapUtils.isEmpty(dimParams)) {
                 throw new IllegalArgumentException( //

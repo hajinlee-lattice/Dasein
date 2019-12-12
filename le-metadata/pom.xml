@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>4.21.0-SNAPSHOT</version>
+        <version>4.22.0-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 
@@ -157,6 +157,11 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-component</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-quartzclient</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

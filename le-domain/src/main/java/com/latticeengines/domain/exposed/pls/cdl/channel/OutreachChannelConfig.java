@@ -24,6 +24,9 @@ public class OutreachChannelConfig implements ChannelConfig {
     @JsonProperty("suppressAccountsWithoutContacts")
     private boolean suppressAccountsWithoutContacts = true;
 
+    @JsonProperty("suppressAccountsWithoutLookupId")
+    private Boolean suppressAccountsWithoutLookupId = true;
+
     @JsonProperty("audienceId")
     private String audienceId;
 
@@ -55,6 +58,11 @@ public class OutreachChannelConfig implements ChannelConfig {
 
     public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
         this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
+    }
+
+    @Override
+    public boolean isSuppressAccountsWithoutLookupId() {
+        return suppressAccountsWithoutLookupId;
     }
 
     public String getAudienceId() {

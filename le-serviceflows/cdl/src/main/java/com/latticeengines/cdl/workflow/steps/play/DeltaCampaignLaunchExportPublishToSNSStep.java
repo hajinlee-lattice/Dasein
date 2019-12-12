@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,13 +83,11 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace);
         ExternalIntegrationMessageBody messageBody = new ExternalIntegrationMessageBody();
         if (createAddCsvDataFrame) {
-            Map<String, List<ExportFileConfig>> sourceFiles = getFiles(
-                    DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_FILES);
+            Map<String, List<ExportFileConfig>> sourceFiles = getFiles(DeltaCampaignLaunchWorkflowConfiguration.ADD);
             messageBody.setSourceFiles(sourceFiles);
         }
         if (createDeleteCsvDataFrame) {
-            Map<String, List<ExportFileConfig>> deleteFiles = getFiles(
-                    DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES);
+            Map<String, List<ExportFileConfig>> deleteFiles = getFiles(DeltaCampaignLaunchWorkflowConfiguration.DELETE);
             messageBody.setDeleteFiles(deleteFiles);
         }
 
@@ -117,16 +117,22 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private Map<String, List<ExportFileConfig>> getFiles(String key) {
         Map<String, List<ExportFileConfig>> retFiles = new HashMap<>();
-        List<String> s3ExportFilePaths = super.getListObjectFromContext(key, String.class);
-        s3ExportFilePaths.forEach(exportPath -> {
-            List<ExportFileConfig> fileConfigs = retFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
-                    new ArrayList<>());
-            fileConfigs
-                    .add(new ExportFileConfig(exportPath.substring(exportPath.indexOf("dropfolder")), exportS3Bucket));
-            retFiles.put(FilenameUtils.getExtension(exportPath), fileConfigs);
-        });
+        Map<String, List> exportFiles = getMapObjectFromContext(
+                DeltaCampaignLaunchWorkflowConfiguration.ADD_AND_DELETE_S3_EXPORT_FILES, String.class, List.class);
+        log.info("exportFiles=" + exportFiles);
+        if (MapUtils.isNotEmpty(exportFiles) && CollectionUtils.isNotEmpty(exportFiles.get(key))) {
+            List<String> s3ExportFilePaths = JsonUtils.convertList(exportFiles.get(key), String.class);
+            s3ExportFilePaths.forEach(exportPath -> {
+                List<ExportFileConfig> fileConfigs = retFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
+                        new ArrayList<>());
+                fileConfigs.add(
+                        new ExportFileConfig(exportPath.substring(exportPath.indexOf("dropfolder")), exportS3Bucket));
+                retFiles.put(FilenameUtils.getExtension(exportPath), fileConfigs);
+            });
+        }
 
         return retFiles;
     }

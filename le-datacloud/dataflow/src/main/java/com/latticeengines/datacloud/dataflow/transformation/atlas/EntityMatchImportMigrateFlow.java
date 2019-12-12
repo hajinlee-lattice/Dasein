@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.dataflow.transformation.atlas;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
@@ -40,9 +41,11 @@ public class EntityMatchImportMigrateFlow extends ConfigurableFlowBase<EntityMat
         EntityMatchImportMigrateConfig config = getTransformerConfig(parameters);
 
         Node result = addSource(parameters.getBaseTables().get(0));
+        List<String> retainFields = new ArrayList<>(config.getRetainFields());
         if (MapUtils.isNotEmpty(config.getDuplicateMap())) {
             for (Map.Entry<String, String> entry : config.getDuplicateMap().entrySet()) {
                 result = result.addStringColumnFromSource(entry.getValue(), entry.getKey());
+                retainFields.add(entry.getValue());
             }
         }
         if (MapUtils.isNotEmpty(config.getRenameMap())) {
@@ -51,10 +54,12 @@ public class EntityMatchImportMigrateFlow extends ConfigurableFlowBase<EntityMat
             for (Map.Entry<String, String> entry : config.getRenameMap().entrySet()) {
                 previousNames.add(entry.getKey());
                 newNames.add(entry.getValue());
+                retainFields.add(entry.getValue());
             }
             result = result.rename(new FieldList(previousNames), new FieldList(newNames));
         }
-        result = result.retain(new FieldList(config.getRetainFields()));
+        retainFields = retainFields.stream().distinct().collect(Collectors.toList());
+        result = result.retain(new FieldList(retainFields));
         return result;
     }
 }
