@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.dataflow.transformation.TransformationFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMDecodeFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.am.AMDecodeFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.am.AMDecoderParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;

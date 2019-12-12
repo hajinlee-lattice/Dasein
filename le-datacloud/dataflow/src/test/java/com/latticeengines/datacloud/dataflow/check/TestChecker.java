@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.transformation.ConsolidateBaseFlow;
+import com.latticeengines.datacloud.dataflow.transformation.atlas.ConsolidateBaseFlow;
 import com.latticeengines.datacloud.dataflow.utils.CheckUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;

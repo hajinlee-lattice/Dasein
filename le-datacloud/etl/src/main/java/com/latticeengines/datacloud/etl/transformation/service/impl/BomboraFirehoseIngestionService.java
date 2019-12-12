@@ -21,8 +21,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapp
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraFirehoseConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BomboraFirehoseInputSourceConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.BomboraFirehoseConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.BomboraFirehoseInputSourceConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 

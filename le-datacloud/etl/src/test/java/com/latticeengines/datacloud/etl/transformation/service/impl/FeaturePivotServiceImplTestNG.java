@@ -15,11 +15,11 @@ import com.latticeengines.datacloud.core.source.HasSqlPresence;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.FeatureMostRecent;
 import com.latticeengines.datacloud.core.source.impl.FeaturePivoted;
-import com.latticeengines.datacloud.dataflow.transformation.FeaturePivotFlow;
+import com.latticeengines.datacloud.dataflow.transformation.source.FeaturePivotFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.PivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class FeaturePivotServiceImplTestNG

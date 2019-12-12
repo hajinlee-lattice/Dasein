@@ -12,8 +12,8 @@ import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.PivotTransformerConfig;
 
 @Component(PivotTransformer.TRANSFORMER_NAME)
 public class PivotTransformer extends AbstractDataflowTransformer<PivotTransformerConfig, TransformationFlowParameters> {

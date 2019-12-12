@@ -14,8 +14,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterRebuildParameters;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSourceParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.am.AccountMasterRebuildParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.am.AccountMasterSourceParameters;
 
 
 @Component("accountMasterRebuildFlow")

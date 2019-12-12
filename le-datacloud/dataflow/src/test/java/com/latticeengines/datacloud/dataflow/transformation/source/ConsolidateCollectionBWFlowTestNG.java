@@ -10,8 +10,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
 
 public class ConsolidateCollectionBWFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
     private static final String FIELD_DOMAIN = "Domain";

@@ -6,8 +6,8 @@ import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.OrbCacheSeedSecDomainRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.OrbCacheSeedSecDomainRebuildConfig;
 
 /**
  * A pipeline step in OrbCacheSeed rebuild pipeline

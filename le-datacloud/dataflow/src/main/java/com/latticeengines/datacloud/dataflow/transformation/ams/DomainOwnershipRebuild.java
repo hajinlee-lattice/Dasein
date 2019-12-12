@@ -10,8 +10,8 @@ import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.DomOwnerConstructAggregator;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ams.DomOwnerCalRootDunsFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ams.DomOwnerConstructAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.DomainOwnershipConfig;

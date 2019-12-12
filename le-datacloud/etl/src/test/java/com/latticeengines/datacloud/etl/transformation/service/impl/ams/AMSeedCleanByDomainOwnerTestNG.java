@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedCleanByDomainOwner;
@@ -55,36 +54,32 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("AmSeedCleanup");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("AmSeedCleanup");
+        configuration.setVersion(targetVersion);
 
-            // -----------------
-            TransformationStepConfig step0 = new TransformationStepConfig();
-            List<String> cleanupAmSeedSrc = new ArrayList<String>();
-            cleanupAmSeedSrc.add(domOwnTable.getSourceName());
-            cleanupAmSeedSrc.add(ams.getSourceName());
-            cleanupAmSeedSrc.add(orbSecClean.getSourceName());
-            cleanupAmSeedSrc.add(alexa.getSourceName());
-            step0.setBaseSources(cleanupAmSeedSrc);
-            step0.setTransformer(AMSeedCleanByDomainOwner.TRANSFORMER_NAME);
-            String confParamStr1 = getDomOwnershipTableConfig();
-            step0.setConfiguration(confParamStr1);
-            step0.setTargetSource(amsClean.getSourceName());
+        // -----------------
+        TransformationStepConfig step0 = new TransformationStepConfig();
+        List<String> cleanupAmSeedSrc = new ArrayList<>();
+        cleanupAmSeedSrc.add(domOwnTable.getSourceName());
+        cleanupAmSeedSrc.add(ams.getSourceName());
+        cleanupAmSeedSrc.add(orbSecClean.getSourceName());
+        cleanupAmSeedSrc.add(alexa.getSourceName());
+        step0.setBaseSources(cleanupAmSeedSrc);
+        step0.setTransformer(AMSeedCleanByDomainOwner.TRANSFORMER_NAME);
+        String confParamStr1 = getDomOwnershipTableConfig();
+        step0.setConfiguration(confParamStr1);
+        step0.setTargetSource(amsClean.getSourceName());
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step0);
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(step0);
 
-            configuration.setSteps(steps);
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        configuration.setSteps(steps);
+        return configuration;
     }
 
-    private String getDomOwnershipTableConfig() throws JsonProcessingException {
+    private String getDomOwnershipTableConfig() {
         DomainOwnershipConfig conf = new DomainOwnershipConfig();
         return JsonUtils.serialize(conf);
     }

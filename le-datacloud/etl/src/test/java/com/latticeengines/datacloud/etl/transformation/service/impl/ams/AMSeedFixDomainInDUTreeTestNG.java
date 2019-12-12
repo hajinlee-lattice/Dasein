@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -66,7 +65,6 @@ public class AMSeedFixDomainInDUTreeTestNG extends PipelineTransformationTestNGB
         request.setSteps(steps);
         PipelineTransformationConfiguration configuration = pipelineTransformationService
                 .createTransformationConfiguration(request);
-        String configJson =  JsonUtils.serialize(configuration);
         return configuration;
     }
 
@@ -158,7 +156,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends PipelineTransformationTestNGB
         log.info("Total result records " + rowNum);
         Assert.assertEquals(rowNum, 14);
         for (Object[] data : expectedData) {
-            GenericRecord record = recordMap.get((Long) data[0]);
+            GenericRecord record = recordMap.get(data[0]);
             Assert.assertNotNull(record);
             log.info(record.toString());
             Assert.assertTrue(isObjEquals(record.get(DataCloudConstants.AMS_ATTR_DOMAIN), data[1]));

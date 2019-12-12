@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.source.MostRecentDataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 

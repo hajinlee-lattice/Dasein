@@ -19,8 +19,8 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataBothBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataNewTechBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PivotTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.source.PivotTransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.operation.Buffer;

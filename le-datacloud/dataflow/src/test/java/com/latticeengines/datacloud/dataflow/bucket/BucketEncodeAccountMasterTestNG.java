@@ -13,9 +13,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
-import com.latticeengines.datacloud.dataflow.transformation.BucketEncode;
+import com.latticeengines.datacloud.dataflow.transformation.stats.BucketEncode;
 import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
-import com.latticeengines.domain.exposed.datacloud.dataflow.BucketEncodeParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.BucketEncodeParameters;
 
 public class BucketEncodeAccountMasterTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 

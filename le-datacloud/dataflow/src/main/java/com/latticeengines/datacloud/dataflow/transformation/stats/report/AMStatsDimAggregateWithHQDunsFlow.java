@@ -7,16 +7,16 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.transformation.AMStatsFlowBase;
+import com.latticeengines.datacloud.dataflow.transformation.stats.AMStatsFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDedupAggRollupWithHQDuns;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDedupAggRollupWithHQDuns.Params;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDedupAggRollupWithHQDunsMarker;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionAggregator;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionExpandBuffer;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDedupAggRollupWithHQDuns;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDedupAggRollupWithHQDuns.Params;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDedupAggRollupWithHQDunsMarker;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDimensionAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDimensionExpandBuffer;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
@@ -157,7 +157,7 @@ public class AMStatsDimAggregateWithHQDunsFlow extends AMStatsFlowBase {
         List<FieldMetadata> fms = new ArrayList<>();
         fms.addAll(node.getSchema());
 
-        List<String> fields = (List<String>) Arrays.asList(node.getFieldNamesArray());
+        List<String> fields = Arrays.asList(node.getFieldNamesArray());
         List<String> hqFields = getHQDunsFields();
 
         AMStatsDedupAggRollupWithHQDunsMarker.Params params = //

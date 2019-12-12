@@ -6,7 +6,7 @@ import java.util.List;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
 
 public abstract class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<ConsolidateCollectionParameters> {
 

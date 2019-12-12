@@ -2,12 +2,12 @@ package com.latticeengines.datacloud.dataflow.transformation.stats.bucket;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.transformation.AMStatsFlowBase;
+import com.latticeengines.datacloud.dataflow.transformation.stats.AMStatsFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDomainBckFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsHQDunsFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDomainBckFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsHQDunsFunction;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 
 import cascading.tuple.Fields;
 

@@ -16,8 +16,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
 
 
 public class ConsolidateCollectionAlexaFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {

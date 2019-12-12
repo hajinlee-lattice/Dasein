@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component(ConsolidateCollectionSemrushFlow.BEAN_NAME)

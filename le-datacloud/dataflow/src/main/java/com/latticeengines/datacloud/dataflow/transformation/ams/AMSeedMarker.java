@@ -12,13 +12,13 @@ import com.latticeengines.datacloud.dataflow.transformation.am.AccountMasterBase
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordSmallCompaniesBuffer;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedOrphanRecordWithDomainBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ams.AMSeedDuDomAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ams.AMSeedOrphanRecordSmallCompaniesBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ams.AMSeedOrphanRecordWithDomainBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ams.AMSeedPriDomAggregator;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMSeedMarkerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.AMSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.OperationCode;
@@ -205,7 +205,7 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
         notCheckOrphan = notCheckOrphan.retain(LATTICE_ID, FLAG_DROP_ORPHAN_ENTRY);
 
         // apply buffer
-        AccountMasterSeedOrphanRecordWithDomainBuffer buffer = new AccountMasterSeedOrphanRecordWithDomainBuffer(
+        AMSeedOrphanRecordWithDomainBuffer buffer = new AMSeedOrphanRecordWithDomainBuffer(
                 new Fields(checkOrphan.getFieldNamesArray()));
         checkOrphan = checkOrphan.groupByAndBuffer(new FieldList(COUNTRY, DOMAIN), buffer) //
                 .retain(LATTICE_ID, FLAG_DROP_ORPHAN_ENTRY);
@@ -237,7 +237,7 @@ public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
                 .addColumnWithFixedValue(FLAG_DROP_SMALL_BUSINESS, 0, Integer.class);
         // apply buffer to one of them. this buffer needs all the attributes in
         // ams. do not retain fields in the node beforehand
-        AccountMasterSeedOrphanRecordSmallCompaniesBuffer buffer = new AccountMasterSeedOrphanRecordSmallCompaniesBuffer(
+        AMSeedOrphanRecordSmallCompaniesBuffer buffer = new AMSeedOrphanRecordSmallCompaniesBuffer(
                 new Fields(orphanRecordWithDomainNode.getFieldNamesArray()));
         orphanRecordWithDomainNode = orphanRecordWithDomainNode.groupByAndBuffer(new FieldList(DUNS), buffer);
 

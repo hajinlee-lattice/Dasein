@@ -27,7 +27,6 @@ import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.MapAttributeTransformer;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.am.AMDecoderParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;

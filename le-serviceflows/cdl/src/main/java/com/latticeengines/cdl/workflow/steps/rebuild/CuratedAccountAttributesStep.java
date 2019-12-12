@@ -25,9 +25,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CalculateStatsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.NumberOfContactsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ProfileConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
