@@ -128,6 +128,72 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
 
     private String podId = "";
 
+    @Override
+    public void execute() {
+        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
+                BusinessEntity.class, Set.class);
+        log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
+        if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {
+            intializeConfiguration();
+            String pipelineVersion = getStringValueFromContext(TRANSFORM_PIPELINE_VERSION);
+            Table cleanupTable = null;
+            String customerSpace = configuration.getCustomerSpace().toString();
+            String cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, pipelineVersion);
+            Long tableRows = 0L;
+            Set<Action> actionSet = JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class);
+            for (Action action : actionSet) {
+                log.info("action is: {}.", JsonUtils.serialize(action));
+                LegacyDeleteActionConfiguration config = (LegacyDeleteActionConfiguration) action.getActionConfiguration();
+                PipelineTransformationRequest request = generateRequest(config);
+                TransformationProgress progress = transformationProxy.transform(request, podId);
+                log.info("progress: {}", progress);
+                waitForProgressStatus(progress.getRootOperationUID());
+                cleanupTable = metadataProxy.getTable(customerSpace, cleanupTableName);
+                if (cleanupTable == null) {
+                    log.info("cleanupTable is empty.");
+                    break;
+                }
+                log.info("result table Name is " + cleanupTable.getName());
+                tableRows = getTableDataLines(cleanupTable);
+                log.info("tableRows is: {}.", tableRows);
+                if (tableRows <= 0L) {
+                    break;
+                }
+                masterTable = cleanupTable;
+            }
+            if (cleanupTable != null) {
+                if (!batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
+                    if (tableRows > 0) {
+                        DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION,
+                                DataCollection.Version.class);
+                        DynamoDataUnit dataUnit = null;
+                        if (batchStore.equals(BusinessEntity.Account.getBatchStore())) {
+                            // if replaced account batch store, need to link dynamo table
+                            String oldBatchStoreName = dataCollectionProxy.getTableName(customerSpace, batchStore, version);
+                            dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace, oldBatchStoreName, DataUnit.StorageType.Dynamo);
+                            if (dataUnit != null) {
+                                dataUnit.setLinkedTable(StringUtils.isBlank(dataUnit.getLinkedTable()) ? //
+                                        dataUnit.getName() : dataUnit.getLinkedTable());
+                                dataUnit.setName(cleanupTableName);
+                            }
+                        }
+                        dataCollectionProxy.upsertTable(customerSpace, cleanupTableName, batchStore, version);
+                        if (dataUnit != null) {
+                            dataUnitProxy.create(customerSpace, dataUnit);
+                        }
+                    } else {
+                        if (noImport()) {
+                            log.error("cannot clean up all batchStore with no import.");
+                            throw new IllegalStateException("cannot clean up all batchStore with no import, PA failed");
+                        }
+                        log.info("Result table is empty, remove " + batchStore.name() + " from data collection!");
+                        dataCollectionProxy.resetTable(configuration.getCustomerSpace().toString(), batchStore);
+                    }
+                }
+            }
+        }
+    }
+
     private void intializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         batchStore = configuration.getEntity().equals(BusinessEntity.Transaction)
@@ -374,76 +440,6 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
         return lines;
     }
 
-    @Override
-    public void execute() {
-        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
-                BusinessEntity.class, Set.class);
-        log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
-        if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {
-            intializeConfiguration();
-            String pipelineVersion = getStringValueFromContext(TRANSFORM_PIPELINE_VERSION);
-            Table cleanupTable = null;
-            String customerSpace = configuration.getCustomerSpace().toString();
-            String cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, pipelineVersion);
-            Long tableRows = 0L;
-            Set<Action> actionSet = JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class);
-            for (Action action : actionSet) {
-                LegacyDeleteActionConfiguration config = (LegacyDeleteActionConfiguration) action.getActionConfiguration();
-                PipelineTransformationRequest request = generateRequest(config);
-                TransformationWorkflowConfiguration workflowConf =
-                        transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request, podId);
-                String rootId = getRootOperationId(workflowConf);
-                if (StringUtils.isNotBlank(rootId)) {
-                    TransformationProgress progress = transformationProxy.getProgress(rootId);
-                    if (ProgressStatus.FAILED.equals(progress.getStatus())) {
-                        throw new RuntimeException(
-                                "Transformation failed, check log for detail.: " + JsonUtils.serialize(progress));
-                    }
-                }
-                cleanupTable = metadataProxy.getTable(customerSpace, cleanupTableName);
-                if (cleanupTable == null) {
-                    break;
-                }
-                log.info("result table Name is " + cleanupTable.getName());
-                tableRows = getTableDataLines(cleanupTable);
-                if (tableRows <= 0L) {
-                    break;
-                }
-                masterTable = cleanupTable;
-            }
-            if (cleanupTable != null) {
-                if (!batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
-                    if (tableRows > 0) {
-                        DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION,
-                                DataCollection.Version.class);
-                        DynamoDataUnit dataUnit = null;
-                        if (batchStore.equals(BusinessEntity.Account.getBatchStore())) {
-                            // if replaced account batch store, need to link dynamo table
-                            String oldBatchStoreName = dataCollectionProxy.getTableName(customerSpace, batchStore, version);
-                            dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace, oldBatchStoreName, DataUnit.StorageType.Dynamo);
-                            if (dataUnit != null) {
-                                dataUnit.setLinkedTable(StringUtils.isBlank(dataUnit.getLinkedTable()) ? //
-                                        dataUnit.getName() : dataUnit.getLinkedTable());
-                                dataUnit.setName(cleanupTableName);
-                            }
-                        }
-                        dataCollectionProxy.upsertTable(customerSpace, cleanupTableName, batchStore, version);
-                        if (dataUnit != null) {
-                            dataUnitProxy.create(customerSpace, dataUnit);
-                        }
-                    } else {
-                        if (noImport()) {
-                            log.error("cannot clean up all batchStore with no import.");
-                            throw new IllegalStateException("cannot clean up all batchStore with no import, PA failed");
-                        }
-                        log.info("Result table is empty, remove " + batchStore.name() + " from data collection!");
-                        dataCollectionProxy.resetTable(configuration.getCustomerSpace().toString(), batchStore);
-                    }
-                }
-            }
-        }
-    }
-
     protected String appendEngineConf(TransformerConfig conf,
                                       TransformationFlowParameters.EngineConfiguration engineConf) {
         ObjectNode on = OM.valueToTree(conf);
@@ -484,23 +480,26 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
         return MapUtils.isEmpty(entityImportsMap) || !entityImportsMap.containsKey(configuration.getEntity());
     }
 
-    private String getRootOperationId(TransformationWorkflowConfiguration workflowConf) {
-        if (workflowConf != null) {
+    private ProgressStatus waitForProgressStatus(String rootId) {
+        while (true) {
+            TransformationProgress progress = transformationProxy.getProgress(rootId);
+            log.info("progress is {}", JsonUtils.serialize(progress));
+            if (progress == null) {
+                throw new IllegalStateException(String.format("transformationProgress cannot be null, rootId is %s.",
+                        rootId));
+            }
+            if (progress.getStatus().equals(ProgressStatus.FINISHED)) {
+                return progress.getStatus();
+            }
+            if (progress.getStatus().equals(ProgressStatus.FAILED)) {
+                throw new RuntimeException(
+                        "Transformation failed, check log for detail.: " + JsonUtils.serialize(progress));
+            }
             try {
-                String prepareClz = PrepareTransformationStepInputConfiguration.class.getSimpleName();
-                String prepareConfStr = workflowConf.getStepConfigRegistry().getOrDefault(prepareClz, "");
-                if (StringUtils.isNotBlank(prepareConfStr)) {
-                    PrepareTransformationStepInputConfiguration prepareConf = //
-                            JsonUtils.deserialize(prepareConfStr, PrepareTransformationStepInputConfiguration.class);
-                    String transformationConfigurationStr = prepareConf.getTransformationConfiguration();
-                    PipelineTransformationConfiguration transformationConf = JsonUtils
-                            .deserialize(transformationConfigurationStr, PipelineTransformationConfiguration.class);
-                    return transformationConf.getRootOperationId();
-                }
-            } catch (Exception e) {
-                log.warn("Failed to extract root operation id from workflow conf.", e);
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
-        return "";
     }
 }
