@@ -6,11 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -27,6 +28,7 @@ public class PurgeServiceImpl implements PurgeService {
 
     private static Logger log = LoggerFactory.getLogger(PurgeServiceImpl.class);
 
+    // Source list which is never purged
     @SuppressWarnings("serial")
     private Set<String> retainedSources = new HashSet<String>() {
         {
@@ -66,13 +68,13 @@ public class PurgeServiceImpl implements PurgeService {
         }
     };
 
-    @Autowired
+    @Inject
     private List<SourcePurger> sourcePurgers;
 
-    @Autowired
+    @Inject
     private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Override

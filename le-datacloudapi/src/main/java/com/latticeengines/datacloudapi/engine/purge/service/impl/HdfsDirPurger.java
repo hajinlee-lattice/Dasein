@@ -2,7 +2,6 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,14 +13,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
+/**
+ * Targeting source:
+ *
+ * For HDFS path with sub-directories which should be purged by checking
+ * sub-directory's created date is out of date.
+ *
+ * When to purge a sub-directory:
+ *
+ * If a sub-directory's created date is older than
+ * {@link #PurgeStrategy.getHdfsDays}} number of days, purge the sub-directory.
+ * {@link #PurgeStrategy.getHdfsVersions}} is not honored. Root directory is
+ * never purged.
+ */
 @Component("hdfsDirPurger")
 public class HdfsDirPurger extends CollectionPurger {
 
-    public static final String HIVE = "Hive";
     private static final Logger log = LoggerFactory.getLogger(HdfsDirPurger.class);
 
     @Override
@@ -30,13 +40,13 @@ public class HdfsDirPurger extends CollectionPurger {
     }
 
     @Override
-    protected Map<String, String> findSourcePaths(PurgeStrategy strategy, boolean debug) {
+    protected Map<String, List<String>> findSourcePaths(PurgeStrategy strategy, boolean debug) {
         if (StringUtils.isBlank(strategy.getHdfsBasePath())) {
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "HDFS_DIR type must be provided with HdfsBasePath. Please check source " + strategy.getSource());
         }
         if (strategy.getHdfsDays() == null || strategy.getHdfsDays() <= 0) {
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "HDFS versions/days for source " + strategy.getSource() + " must be greater than 0.");
         }
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
@@ -63,35 +73,14 @@ public class HdfsDirPurger extends CollectionPurger {
         } catch (IOException e) {
             throw new RuntimeException("Fail to get sub-items in path " + strategy.getHdfsBasePath(), e);
         }
-        Map<String, String> sourcePaths = new HashMap<>();
+        Map<String, List<String>> sourcePaths = new HashMap<>();
         files.forEach(file -> {
             String fullPath = file.getPath().toString();
-            sourcePaths.put(file.getPath().getName(), fullPath.substring(fullPath.indexOf(strategy.getHdfsBasePath())));
+            sourcePaths.putIfAbsent(strategy.getSource(), new ArrayList<>());
+            sourcePaths.get(strategy.getSource()).add(fullPath.substring(fullPath.indexOf(strategy.getHdfsBasePath())));
         });
 
         return sourcePaths;
-    }
-
-    @Override
-    protected List<PurgeSource> constructPurgeSources(PurgeStrategy strategy, Map<String, String> sourcePaths) {
-        List<PurgeSource> toPurge = new ArrayList<>();
-
-        for (Map.Entry<String, String> srcPath : sourcePaths.entrySet()) {
-            String srcName = srcPath.getKey();
-            String hdfsPath = srcPath.getValue();
-            List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-            List<String> hiveTables = null;
-            if (HIVE.equals(strategy.getSource())) {
-                hiveTables = Collections.singletonList(srcName.toLowerCase());
-            }
-            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, hiveTables, !strategy.isNoBak());
-            if (!strategy.isNoBak()) {
-                purgeSource.setS3Days(strategy.getS3Days());
-                purgeSource.setGlacierDays(strategy.getGlacierDays());
-            }
-            toPurge.add(purgeSource);
-        }
-        return toPurge;
     }
 
     @Override
