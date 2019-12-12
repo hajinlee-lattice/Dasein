@@ -66,6 +66,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.streams = new ArrayList<>(stepConfiguration.getActivityStreamMap().values());
         config.evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+        config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
 
         log.info("Generating period stores. tenant: {}; evaluation date: {}", customerSpace, config.evaluationDate);
 
