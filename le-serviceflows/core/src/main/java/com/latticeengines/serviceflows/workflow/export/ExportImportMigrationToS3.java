@@ -59,8 +59,9 @@ public class ExportImportMigrationToS3 extends BaseImportExportS3<ImportExportS3
                 p = pathBuilder.getFullPath(p);
                 String hdfsPrefix = "/Pods/" + podId;
                 int index = p.indexOf(hdfsPrefix);
-                if (index > 0)
+                if (index > 0) {
                     p = p.substring(index);
+                }
                 String tgtDir = pathBuilder.convertAtlasTableDir(p, podId, tenantId, s3Bucket);
                 requests.add(new ImportExportRequest(p, tgtDir));
             });
