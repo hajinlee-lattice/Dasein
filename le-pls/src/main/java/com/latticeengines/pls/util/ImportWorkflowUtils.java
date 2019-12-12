@@ -1147,8 +1147,8 @@ public class ImportWorkflowUtils {
                     // this is to avoid spacing issue between two if
                     message.append(" ");
                 }
-                message.append(String.format("Timezone set to %s which is not consistent with existing %s.", timezone
-                        , existingTimezone));
+                message.append(String.format("Timezone set to %s which is not consistent with existing %s for column " +
+                                "%s.", timezone, existingTimezone, columnName));
             }
             validations.add(new FieldValidationMessage(fieldName,
                     columnName, message.toString(), FieldValidationMessage.MessageLevel.WARNING));
