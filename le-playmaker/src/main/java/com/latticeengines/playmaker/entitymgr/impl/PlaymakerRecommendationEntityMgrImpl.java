@@ -97,7 +97,7 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
         List<Map<String, Object>> extensions = dao.getAccountExtensions(start, offset, maximum, accountIds, filterBy,
                 recStart, columns, hasSfdcContactId, orgInfo);
-        return wrapResult(extensions);
+        return wrapResult(extensions, start);
     }
 
     @Override
