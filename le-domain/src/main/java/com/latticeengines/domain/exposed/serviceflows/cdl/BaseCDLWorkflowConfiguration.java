@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ConvertBatchSt
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.TransactionImportsMigrateWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ConvertBatchStoreToDataTableWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.pa.DeleteOperationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.MatchEntityWorkflowConfiguration;
@@ -59,7 +58,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = ProcessAccountWorkflowConfiguration.class, name = "ProcessAccountWorkflowConfiguration"),
         @Type(value = UpdateAccountWorkflowConfiguration.class, name = "UpdateAccountWorkflowConfiguration"),
         @Type(value = RebuildAccountWorkflowConfiguration.class, name = "RebuildAccountWorkflowConfiguration"),
-        @Type(value = DeleteOperationWorkflowConfiguration.class, name = "DeleteOperationWorkflowConfiguration"),
 
         @Type(value = CDLEntityMatchMigrationWorkflowConfiguration.class, name = "CDLEntityMatchMigrationWorkflowConfiguration"),
         @Type(value = AccountImportsMigrateWorkflowConfiguration.class, name = "AccountImportsMigrateWorkflowConfiguration"),
