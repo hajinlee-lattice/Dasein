@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Pe
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataCleanerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDateConvertorConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -54,8 +53,6 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.LegacyDeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByUploadStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
@@ -114,15 +111,11 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
     @Value("${pls.cdl.transform.tez.task.mem.gb}")
     private int tezMemGb;
 
-    private Long totalRecords;
-
     private Table masterTable;
 
     private TableRoleInCollection batchStore;
 
     private CustomerSpace customerSpace;
-
-    private CleanupOperationType type;
 
     private int scalingMultiplier = 1;
 
@@ -135,10 +128,9 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
         log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
         if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {
             intializeConfiguration();
-            String pipelineVersion = getStringValueFromContext(TRANSFORM_PIPELINE_VERSION);
             Table cleanupTable = null;
             String customerSpace = configuration.getCustomerSpace().toString();
-            String cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, pipelineVersion);
+            String cleanupTableName = "";
             Long tableRows = 0L;
             Set<Action> actionSet = JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class);
             for (Action action : actionSet) {
@@ -148,6 +140,7 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
                 TransformationProgress progress = transformationProxy.transform(request, podId);
                 log.info("progress: {}", progress);
                 waitForProgressStatus(progress.getRootOperationUID());
+                cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, progress.getVersion());
                 cleanupTable = metadataProxy.getTable(customerSpace, cleanupTableName);
                 if (cleanupTable == null) {
                     log.info("cleanupTable is empty.");
@@ -496,7 +489,7 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
                         "Transformation failed, check log for detail.: " + JsonUtils.serialize(progress));
             }
             try {
-                Thread.sleep(3000);
+                Thread.sleep(120000L);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
