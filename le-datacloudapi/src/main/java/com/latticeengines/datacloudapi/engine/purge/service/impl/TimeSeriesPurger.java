@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
@@ -19,6 +18,18 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
+/**
+ * Targeting source:
+ *
+ * Currently not actively used. Previous use cases were MadisonLogic source
+ * (deprecated), MatchHistory and ScoreHistory (migrated to S3).
+ *
+ * When to purge a version:
+ *
+ * TimeSeries source has version with timestamp format defined in VersionFormat.
+ * Parse the timestamp of a version, if it's older than
+ * {@link #PurgeStrategy.getHdfsDays}} number of days, purge it.
+ */
 @Component("timeSeriesPurger")
 public class TimeSeriesPurger extends VersionedPurger {
 
@@ -32,7 +43,7 @@ public class TimeSeriesPurger extends VersionedPurger {
     @Override
     protected List<String> findAllVersions(PurgeStrategy strategy) {
         if (StringUtils.isBlank(strategy.getHdfsBasePath()) || StringUtils.isBlank(strategy.getVersionFormat())) {
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "TIMESERIES_SOURCE type must be provided with HdfsBasePath and VersionFormat, or change the type to GENERAL_SOURCE. Please check source "
                             + strategy.getSource());
         }
@@ -53,55 +64,34 @@ public class TimeSeriesPurger extends VersionedPurger {
     }
 
     @Override
-    protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> allVersions,
+    protected List<String> findPurgeVersions(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
-        List<String> toDelete = new ArrayList<>();
+        List<String> purgeVersions = new ArrayList<>();
         allVersions.forEach(version -> {
             try {
                 Date date = new SimpleDateFormat(strategy.getVersionFormat()).parse(version);
                 Date now = new Date();
                 int days = (int) ((now.getTime() - date.getTime()) / DAY_IN_MS);
-                if (days > (strategy.getHdfsDays() + strategy.getS3Days() + strategy.getGlacierDays())) {
-                    toDelete.add(version);
+                if (days > strategy.getHdfsDays()) {
+                    purgeVersions.add(version);
                 }
             } catch (ParseException e) {
                 log.error("Fail to parse version " + version + " for source " + strategy.getSource());
             }
         });
-        return toDelete;
+        return purgeVersions;
     }
 
     @Override
-    protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> allVersions,
-            final boolean debug) {
-        List<String> toBak = new ArrayList<>();
-        allVersions.forEach(version -> {
-            try {
-                Date date = new SimpleDateFormat(strategy.getVersionFormat()).parse(version);
-                Date now = new Date();
-                int days = (int) ((now.getTime() - date.getTime()) / DAY_IN_MS);
-                if (days > strategy.getHdfsDays()
-                        && days <= (strategy.getHdfsDays() + strategy.getS3Days() + strategy.getGlacierDays())) {
-                    toBak.add(version);
-                }
-            } catch (ParseException e) {
-                log.error("Fail to parse version " + version + " for source " + strategy.getSource());
-            }
-        });
-        return toBak;
-    }
-
-    @Override
-    protected Pair<List<String>, List<String>> constructHdfsPathsHiveTables(PurgeStrategy strategy,
+    protected List<String> constructHdfsPaths(PurgeStrategy strategy,
             List<String> versions) {
         List<String> hdfsPaths = new ArrayList<>();
-        List<String> hiveTables = new ArrayList<>();
         versions.forEach(version -> {
             String hdfsPath = new Path(strategy.getHdfsBasePath(), version).toString();
             hdfsPaths.add(hdfsPath);
         });
 
-        return Pair.of(hdfsPaths, hiveTables);
+        return hdfsPaths;
     }
 
     private boolean isValidVersion(String version, String versionFormat) {

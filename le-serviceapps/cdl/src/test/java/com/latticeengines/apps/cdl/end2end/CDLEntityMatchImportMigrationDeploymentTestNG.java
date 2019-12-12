@@ -18,12 +18,15 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateReport;
 import com.latticeengines.domain.exposed.cdl.ImportMigrateTracking;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -37,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
@@ -68,13 +72,25 @@ public class CDLEntityMatchImportMigrationDeploymentTestNG extends CDLEnd2EndDep
     @Inject
     private CDLProxy cdlProxy;
 
-    @BeforeClass(groups = { "end2end" })
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${camille.zk.pod.id}")
+    private String podId;
+
+    private HdfsToS3PathBuilder pathBuilder;
+
+    @BeforeClass(groups = { "manual" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        pathBuilder = new HdfsToS3PathBuilder(true);
     }
 
-    @Test(groups = "end2end")
+    @Test(groups = "manual")
     public void runTest() {
         migrateImport();
         verifyMigration();
@@ -143,6 +159,17 @@ public class CDLEntityMatchImportMigrationDeploymentTestNG extends CDLEnd2EndDep
             Assert.assertNull(schema.getField("ContactId"));
             Assert.assertNotNull(schema.getField("CustomerContactId"));
             recordsCountFromAvro += records.size();
+
+            // verify S3 path
+            for (String path : paths) {
+                String tgtDir = pathBuilder.convertAtlasTableDir(path, podId,
+                        CustomerSpace.parse(mainCustomerSpace).getTenantId(), s3Bucket);
+                String exportDir = pathBuilder.stripProtocolAndBucket(tgtDir);
+                if (!exportDir.endsWith("/")) {
+                    exportDir += "/";
+                }
+                Assert.assertTrue(s3Service.isNonEmptyDirectory(s3Bucket, exportDir));
+            }
         }
         Assert.assertEquals(recordsCountFromAction, recordsCountFromAvro);
     }

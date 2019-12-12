@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -40,6 +41,7 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
                 new ContactImportsMigrateWorkflowConfiguration.Builder();
         private TransactionImportsMigrateWorkflowConfiguration.Builder transactionImportMigrateConfigurationBuilder =
                 new TransactionImportsMigrateWorkflowConfiguration.Builder();
+        private ImportExportS3StepConfiguration exportToS3Configuration = new ImportExportS3StepConfiguration();
 
 
         public Builder customer(CustomerSpace customerSpace) {
@@ -49,6 +51,7 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
             accountImportMigrateConfigurationBuilder.customer(customerSpace);
             contactImportMigrateConfigurationBuilder.customer(customerSpace);
             transactionImportMigrateConfigurationBuilder.customer(customerSpace);
+            exportToS3Configuration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -59,6 +62,7 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
             accountImportMigrateConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             contactImportMigrateConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             transactionImportMigrateConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            exportToS3Configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -68,6 +72,7 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
             accountImportMigrateConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             contactImportMigrateConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             transactionImportMigrateConfigurationBuilder.microServiceHostPort(microServiceHostPort);
+            exportToS3Configuration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -125,6 +130,7 @@ public class CDLEntityMatchMigrationWorkflowConfiguration extends BaseCDLWorkflo
             configuration.add(accountImportMigrateConfigurationBuilder.build());
             configuration.add(contactImportMigrateConfigurationBuilder.build());
             configuration.add(transactionImportMigrateConfigurationBuilder.build());
+            configuration.add(exportToS3Configuration);
             configuration.add(finishMigrateConfiguration);
             return configuration;
         }

@@ -3,6 +3,7 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -13,11 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -29,9 +31,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
-import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloudapi.engine.purge.service.PurgeService;
 import com.latticeengines.datacloudapi.engine.testframework.PropDataEngineFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
@@ -42,34 +45,30 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     private static Logger log = LoggerFactory.getLogger(PurgeServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private PurgeService purgeService;
 
-    @Autowired
+    @Inject
     private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
-    @Autowired
-    private HiveTableService hiveTableService;
-
-    @Autowired
+    @Inject
     protected DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
-    private PurgeSource pipelineTempSourceToPurge;
-    private PurgeSource operationalSourceToPurge;
-    private PurgeSource hiveSourceToPurge;
-    private PurgeSource ingestionToPurge;
-    private PurgeSource generalSourceToBak;
-    private PurgeSource generalSourceToDelete;
-    private PurgeSource amToDelete;
-    private PurgeSource amToBak;
-    private PurgeSource amLookupToDelete;
-    private PurgeSource amLookupToBak;
-    private PurgeSource mlDailyToDelete;
-    private PurgeSource mlDailyToBak;
+    private PurgeSource pipelineTempSource;
+    private PurgeSource operationalSource;
+    private PurgeSource ingestionSource;
+    private PurgeSource generalSource;
+    private PurgeSource am;
+    private PurgeSource amLookup;
+    private PurgeSource dunsGuideBook;
+    private PurgeSource mlDaily;
+    private PurgeSource matchResult;
     private String unknownSource = "TestUnknownSource";
 
     private Map<String, PurgeSource> validationMapNonDebugMode;
     private Map<String, PurgeSource> validationMapDebugMode;
+
+    private List<String> hdfsPathsCleanup = new ArrayList<>();
 
     private Date now = new Date();
 
@@ -77,12 +76,14 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     public void setup() throws Exception {
         prepareCleanPod(POD_ID);
         preparePipelineTempSource();
-        prepareOperationalSourceToPurge();
-        prepareHiveSource();
-        prepareIngestionToPurge();
-        prepareGeneralSourceToPurge();
-        prepareAMSourceToPurge();
-        prepareMLSourceToPurge();
+        prepareOperationalSource();
+        prepareIngestion();
+        prepareGeneralSource();
+        prepareAMSource(DataCloudConstants.ACCOUNT_MASTER);
+        prepareAMSource(DataCloudConstants.ACCOUNT_MASTER_LOOKUP);
+        prepareAMSource(DataCloudConstants.DUNS_GUIDE_BOOK);
+        prepareMLSource();
+        prepareMatchResult();
         prepareUnknownSource();
         prepareValidationMap();
     }
@@ -91,15 +92,23 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     public void destroy() {
         purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource("Pipeline_"));
         purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource("LDCDEV_"));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(ingestionToPurge.getSourceName()));
-        purgeStrategyEntityMgr
-                .delete(purgeStrategyEntityMgr.findStrategyBySource(generalSourceToBak.getSourceName()));
-        purgeStrategyEntityMgr
-                .delete(purgeStrategyEntityMgr.findStrategyBySource(generalSourceToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(amToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(amLookupToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(mlDailyToDelete.getSourceName()));
-        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource("Hive"));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(ingestionSource.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(generalSource.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(am.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(amLookup.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(dunsGuideBook.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(mlDaily.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategyBySource(matchResult.getSourceName()));
+
+        for (String hdfsPath : hdfsPathsCleanup) {
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
+                }
+            } catch (IOException e) {
+                log.error("Fail to cleanup " + hdfsPath);
+            }
+        }
     }
 
     /**
@@ -130,244 +139,169 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private void preparePipelineTempSource() throws IOException {
         String srcName = "Pipeline_AccountMasterSeedClean_version_2018-01-10_05-41-36_UTC_step_1";
         String hdfsPath = hdfsPathBuilder.constructSnapshotDir(srcName, "2018-02-25_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        createHdfsPath(hdfsPath);
         List<String> hdfsPaths = Collections.singletonList(hdfsPathBuilder.constructSourceDir(srcName).toString());
-        pipelineTempSourceToPurge = new PurgeSource(srcName, hdfsPaths, null, false);
+        pipelineTempSource = new PurgeSource(srcName, hdfsPaths);
         PurgeStrategy strategy = new PurgeStrategy();
         strategy.setSource("Pipeline_");
         strategy.setSourceType(SourceType.TEMP_SOURCE);
         strategy.setHdfsDays(3);
-        strategy.setNoBak(true);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
-    private void prepareOperationalSourceToPurge() throws IOException {
+    private void prepareOperationalSource() throws IOException {
         String srcName = "LDCDEV_SuspectRecords";
         String hdfsPath = hdfsPathBuilder.constructSnapshotDir(srcName, "2018-02-25_00-00-00_UTC").toString();
 
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        createHdfsPath(hdfsPath);
         List<String> hdfsPaths = Collections.singletonList(hdfsPathBuilder.constructSourceDir(srcName).toString());
-        String hiveTable = hiveTableService.tableName(srcName, "2018-02-25_00-00-00_UTC");
-        List<String> hiveTables = Collections.singletonList(hiveTable);
-        operationalSourceToPurge = new PurgeSource(srcName, hdfsPaths, hiveTables, false);
+        operationalSource = new PurgeSource(srcName, hdfsPaths);
         PurgeStrategy strategy = new PurgeStrategy();
         strategy.setSource("LDCDEV_");
         strategy.setSourceType(SourceType.TEMP_SOURCE);
         strategy.setHdfsDays(14);
-        strategy.setNoBak(true);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
-    private void prepareHiveSource() throws IOException {
-        String srcName = "TestHiveToDelete";
-        String hdfsPath = new Path("/apps/hive/warehouse", srcName).toString();
-        if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath) || HdfsUtils.isDirectory(yarnConfiguration, hdfsPath)) {
-            HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
-        }
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-        List<String> hiveTables = Collections.singletonList(srcName.toLowerCase());
-        hiveSourceToPurge = new PurgeSource(srcName, hdfsPaths, hiveTables, false);
-        PurgeStrategy strategy = new PurgeStrategy();
-        strategy.setSource("Hive");
-        strategy.setSourceType(SourceType.HDFS_DIR);
-        strategy.setHdfsDays(15);
-        strategy.setHdfsBasePath("/apps/hive/warehouse");
-        strategy.setNoBak(true);
-        purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
-    }
-
-    private void prepareIngestionToPurge() throws IOException {
+    private void prepareIngestion() throws IOException {
         String ingestionName = "TestIngestionToPurge";
         String hdfsPath = hdfsPathBuilder.constructIngestionDir(ingestionName, "2018-02-25_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        createHdfsPath(hdfsPath);
         hdfsPath = hdfsPathBuilder.constructIngestionDir(ingestionName, "2018-02-18_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        createHdfsPath(hdfsPath);
         hdfsPath = hdfsPathBuilder.constructIngestionDir(ingestionName, "2018-02-11_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        createHdfsPath(hdfsPath);
         List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-        ingestionToPurge = new PurgeSource(ingestionName, hdfsPaths, null, true);
+        ingestionSource = new PurgeSource(ingestionName, hdfsPaths);
         PurgeStrategy strategy = new PurgeStrategy();
         strategy.setSource(ingestionName);
         strategy.setSourceType(SourceType.INGESTION_SOURCE);
         strategy.setHdfsVersions(2);
-        strategy.setS3Days(100);
-        strategy.setGlacierDays(100);
-        strategy.setNoBak(false);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
-    private void prepareGeneralSourceToPurge() throws IOException {
-        String sourceName = "TestGeneralSourceToBak";
+    private void prepareGeneralSource() throws IOException {
+        String sourceName = "TestGeneralSourceToDelete";
         String hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
         String schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
+        createHdfsPath(hdfsPath);
+        createHdfsPath(schemaPath);
         hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
         schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
+        createHdfsPath(hdfsPath);
+        createHdfsPath(schemaPath);
         hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
         schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
+        createHdfsPath(hdfsPath);
+        createHdfsPath(schemaPath);
         List<String> hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
-        String hiveTable = hiveTableService.tableName(sourceName, "2018-02-11_00-00-00_UTC");
-        List<String> hiveTables = Collections.singletonList(hiveTable);
-        generalSourceToBak = new PurgeSource(sourceName, hdfsPaths, hiveTables, true);
-        PurgeStrategy strategyToBak = new PurgeStrategy();
-        strategyToBak.setSource(sourceName);
-        strategyToBak.setSourceType(SourceType.GENERAL_SOURCE);
-        strategyToBak.setHdfsVersions(2);
-        strategyToBak.setS3Days(100);
-        strategyToBak.setGlacierDays(100);
-        strategyToBak.setNoBak(false);
-
-        sourceName = "TestGeneralSourceToDelete";
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
-        hiveTable = hiveTableService.tableName(sourceName, "2018-02-11_00-00-00_UTC");
-        hiveTables = Collections.singletonList(hiveTable);
-        generalSourceToDelete = new PurgeSource(sourceName, hdfsPaths, hiveTables, false);
+        generalSource = new PurgeSource(sourceName, hdfsPaths);
         PurgeStrategy strategyToDelete = new PurgeStrategy();
         strategyToDelete.setSource(sourceName);
         strategyToDelete.setSourceType(SourceType.GENERAL_SOURCE);
         strategyToDelete.setHdfsDays(90);
-        strategyToDelete.setS3Days(100);
-        strategyToDelete.setGlacierDays(100);
-        strategyToDelete.setNoBak(true);
 
-        purgeStrategyEntityMgr.insertAll(Arrays.asList(strategyToBak, strategyToDelete));
+        purgeStrategyEntityMgr.insertAll(Arrays.asList(strategyToDelete));
     }
 
-    private void prepareAMSourceToPurge() throws IOException {
-        String sourceName = AMSourcePurger.ACCOUNT_MASTER;
-        String versionToRetain1 = dataCloudVersionEntityMgr.currentApprovedVersion().getAccountMasterHdfsVersion();
-        String versionToRetain2 = HdfsPathBuilder.dateFormat.format(new Date());
-        String versionToBak = dataCloudVersionEntityMgr.findVersion("2.0.6")
-                .getAccountMasterHdfsVersion();
-        String versionToDelete = "2000-01-01_00-00-00_UTC";
+    private void prepareAMSource(String sourceName) throws IOException {
+        int retainedHdfsVersion = 2;
+        List<DataCloudVersion> dcVersions = dataCloudVersionEntityMgr.allApprovedVerions();
+        Collections.sort(dcVersions, DataCloudVersion.versionComparator);
+        // Number of approved DataCloud version in LDC_ManageDB.DataCloudVersion
+        // table should be >2
+        String purgeDCVersion = dcVersions.get(0).getVersion();
 
-        String hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToRetain1).toString();
-        String schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToRetain1).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToRetain2).toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToRetain2).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
+        String retainVersion1 = null;
+        String purgeVersion1 = null;
+        switch (sourceName) {
+        case DataCloudConstants.ACCOUNT_MASTER:
+            retainVersion1 = dataCloudVersionEntityMgr.currentApprovedVersion().getAccountMasterHdfsVersion();
+            purgeVersion1 = dataCloudVersionEntityMgr.findVersion(purgeDCVersion).getAccountMasterHdfsVersion();
+            break;
+        case DataCloudConstants.ACCOUNT_MASTER_LOOKUP:
+            retainVersion1 = dataCloudVersionEntityMgr.currentApprovedVersion().getAccountLookupHdfsVersion();
+            purgeVersion1 = dataCloudVersionEntityMgr.findVersion(purgeDCVersion).getAccountLookupHdfsVersion();
+            break;
+        case DataCloudConstants.DUNS_GUIDE_BOOK:
+            retainVersion1 = dataCloudVersionEntityMgr.currentApprovedVersion().getDunsGuideBookHdfsVersion();
+            purgeVersion1 = null;
+            break;
+        default:
+            throw new IllegalArgumentException("Unrecgonized source name for type AM_SOURCE");
+        }
+        String retainVersion2 = HdfsPathBuilder.dateFormat.format(new Date());
+        String purgeVersion2 = "2000-01-01_00-00-00_UTC";
 
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToBak).toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToBak).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        List<String> hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
-        String hiveTable = hiveTableService.tableName(sourceName, versionToBak);
-        List<String> hiveTables = Collections.singletonList(hiveTable);
-        amToBak = new PurgeSource(sourceName, hdfsPaths, hiveTables, true);
+        String hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, retainVersion1).toString();
+        String schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, retainVersion1).toString();
+        createHdfsPath(hdfsPath);
+        createHdfsPath(schemaPath);
 
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToDelete).toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToDelete).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
-        hiveTable = hiveTableService.tableName(sourceName, versionToDelete);
-        hiveTables = Collections.singletonList(hiveTable);
-        amToDelete = new PurgeSource(sourceName, hdfsPaths, hiveTables, false);
+        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, retainVersion2).toString();
+        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, retainVersion2).toString();
+        createHdfsPath(hdfsPath);
+        createHdfsPath(schemaPath);
+
+        List<String> hdfsPaths = new ArrayList<>();
+        if (purgeVersion1 != null) {
+            hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, purgeVersion1).toString();
+            schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, purgeVersion1).toString();
+            createHdfsPath(hdfsPath);
+            createHdfsPath(schemaPath);
+            hdfsPaths.add(hdfsPath);
+            hdfsPaths.add(schemaPath);
+        }
+
+        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, purgeVersion2).toString();
+        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, purgeVersion2).toString();
+        createHdfsPath(hdfsPath);
+        createHdfsPath(schemaPath);
+        hdfsPaths.add(hdfsPath);
+        hdfsPaths.add(schemaPath);
+        switch (sourceName) {
+        case DataCloudConstants.ACCOUNT_MASTER:
+            am = new PurgeSource(sourceName, hdfsPaths);
+            break;
+        case DataCloudConstants.ACCOUNT_MASTER_LOOKUP:
+            amLookup = new PurgeSource(sourceName, hdfsPaths);
+            break;
+        case DataCloudConstants.DUNS_GUIDE_BOOK:
+            dunsGuideBook = new PurgeSource(sourceName, hdfsPaths);
+            break;
+        default:
+            throw new IllegalArgumentException("Unrecgonized source name for type AM_SOURCE");
+        }
 
         PurgeStrategy strategy = new PurgeStrategy();
         strategy.setSource(sourceName);
         strategy.setSourceType(SourceType.AM_SOURCE);
-        strategy.setHdfsVersions(2);
-        strategy.setS3Days(30);
-        strategy.setGlacierDays(1170);
-        strategy.setNoBak(false);
-        purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
-
-        sourceName = AMSourcePurger.ACCOUNT_MASTER_LOOKUP;
-        versionToRetain1 = dataCloudVersionEntityMgr.currentApprovedVersion().getAccountLookupHdfsVersion();
-        versionToRetain2 = HdfsPathBuilder.dateFormat.format(new Date());
-        versionToBak = dataCloudVersionEntityMgr.findVersion("2.0.6").getAccountLookupHdfsVersion();
-        versionToDelete = "2000-01-01_00-00-00_UTC";
-
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToRetain1).toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToRetain1).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToRetain2).toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToRetain2).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToBak).toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToBak).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
-        hiveTable = hiveTableService.tableName(sourceName, versionToBak);
-        hiveTables = Collections.singletonList(hiveTable);
-        amLookupToBak = new PurgeSource(sourceName, hdfsPaths, hiveTables, true);
-
-        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, versionToDelete).toString();
-        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, versionToDelete).toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
-        hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
-        hiveTable = hiveTableService.tableName(sourceName, versionToDelete);
-        hiveTables = Collections.singletonList(hiveTable);
-        amLookupToDelete = new PurgeSource(sourceName, hdfsPaths, hiveTables, false);
-
-        strategy = new PurgeStrategy();
-        strategy.setSource(sourceName);
-        strategy.setSourceType(SourceType.AM_SOURCE);
-        strategy.setHdfsVersions(2);
-        strategy.setS3Days(30);
-        strategy.setGlacierDays(1170);
-        strategy.setNoBak(false);
+        strategy.setHdfsVersions(retainedHdfsVersion);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
-    private void prepareMLSourceToPurge() throws IOException {
+
+    private void prepareMLSource() throws IOException {
         String sourceName = "TestMadisonLogic";
         String versionFormat = "yyyy-MM-dd";
         String hdfsBasePath = "/user/propdata/madison/dataflow/incremental";
+
         DateFormat df = new SimpleDateFormat(versionFormat);
         String versionToRetain = df.format(now);
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -250);
-        String versionToBak = df.format(cal.getTime());
-        cal.add(Calendar.DATE, -250);
-        String versionToDelete = df.format(cal.getTime());
-
         String hdfsPath = new Path(hdfsBasePath, versionToRetain).toString();
         if (!HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
-            HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+            createHdfsPath(hdfsPath);
         }
 
-        hdfsPath = new Path(hdfsBasePath, versionToBak).toString();
-        if (!HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
-            HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        }
-        List<String> hdfsPaths = Arrays.asList(hdfsPath);
-        mlDailyToBak = new PurgeSource(sourceName, hdfsPaths, null, true);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -250);
+        String versionToPurge = df.format(cal.getTime());
 
-        hdfsPath = new Path(hdfsBasePath, versionToDelete).toString();
+        hdfsPath = new Path(hdfsBasePath, versionToPurge).toString();
         if (!HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
-            HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+            createHdfsPath(hdfsPath);
         }
-        hdfsPaths = Arrays.asList(hdfsPath);
-        mlDailyToDelete = new PurgeSource(sourceName, hdfsPaths, null, false);
+        mlDaily = new PurgeSource(sourceName, Arrays.asList(hdfsPath));
 
         PurgeStrategy strategy = new PurgeStrategy();
         strategy.setSource(sourceName);
@@ -375,47 +309,59 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategy.setHdfsBasePath(hdfsBasePath);
         strategy.setVersionFormat(versionFormat);
         strategy.setHdfsDays(200);
-        strategy.setS3Days(30);
-        strategy.setGlacierDays(170);
-        strategy.setNoBak(false);
+        purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
+    }
+
+    private void prepareMatchResult() throws IOException {
+        String srcName = "TestMatchResult";
+        String hdfsBasePath = "/Pods/Production/Services/PropData/Matches";
+        List<String> hdfsPaths = Arrays.asList( //
+                new Path(hdfsBasePath, "1").toString(),
+                new Path(hdfsBasePath, "2").toString());
+
+        createHdfsPath(hdfsBasePath);
+        for (String hdfsPath : hdfsPaths) {
+            createHdfsPath(hdfsPath);
+        }
+        matchResult = new PurgeSource(srcName, hdfsPaths);
+
+        PurgeStrategy strategy = new PurgeStrategy();
+        strategy.setSource(srcName);
+        strategy.setSourceType(SourceType.HDFS_DIR);
+        strategy.setHdfsDays(14);
+        strategy.setHdfsBasePath(hdfsBasePath);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
     private void prepareUnknownSource() throws IOException {
         String hdfsPath = hdfsPathBuilder.constructSnapshotDir(unknownSource, "2018-02-25_00-00-00_UTC").toString();
-        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        createHdfsPath(hdfsPath);
     }
 
     private void prepareValidationMap() {
         validationMapNonDebugMode = new HashMap<>();
-        validationMapNonDebugMode.put(getValidationKey(ingestionToPurge), ingestionToPurge);
-        validationMapNonDebugMode.put(getValidationKey(generalSourceToBak), generalSourceToBak);
-        validationMapNonDebugMode.put(getValidationKey(amToBak), amToBak);
-        validationMapNonDebugMode.put(getValidationKey(amToDelete), amToDelete);
-        validationMapNonDebugMode.put(getValidationKey(amLookupToBak), amLookupToBak);
-        validationMapNonDebugMode.put(getValidationKey(amLookupToDelete), amLookupToDelete);
-        validationMapNonDebugMode.put(getValidationKey(mlDailyToBak), mlDailyToBak);
-        validationMapNonDebugMode.put(getValidationKey(mlDailyToDelete), mlDailyToDelete);
+        validationMapNonDebugMode.put(getValidationKey(ingestionSource), ingestionSource);
+        validationMapNonDebugMode.put(getValidationKey(am), am);
+        validationMapNonDebugMode.put(getValidationKey(amLookup), amLookup);
+        validationMapNonDebugMode.put(getValidationKey(dunsGuideBook), dunsGuideBook);
+        validationMapNonDebugMode.put(getValidationKey(mlDaily), mlDaily);
 
         validationMapDebugMode = new HashMap<>();
-        validationMapDebugMode.put(getValidationKey(pipelineTempSourceToPurge), pipelineTempSourceToPurge);
-        validationMapDebugMode.put(getValidationKey(operationalSourceToPurge), operationalSourceToPurge);
-        validationMapDebugMode.put(getValidationKey(hiveSourceToPurge), hiveSourceToPurge);
-        validationMapDebugMode.put(getValidationKey(ingestionToPurge), ingestionToPurge);
-        validationMapDebugMode.put(getValidationKey(generalSourceToBak), generalSourceToBak);
-        validationMapDebugMode.put(getValidationKey(amToBak), amToBak);
-        validationMapDebugMode.put(getValidationKey(amToDelete), amToDelete);
-        validationMapDebugMode.put(getValidationKey(amLookupToBak), amLookupToBak);
-        validationMapDebugMode.put(getValidationKey(amLookupToDelete), amLookupToDelete);
-        validationMapDebugMode.put(getValidationKey(mlDailyToBak), mlDailyToBak);
-        validationMapDebugMode.put(getValidationKey(mlDailyToDelete), mlDailyToDelete);
+        validationMapDebugMode.put(getValidationKey(pipelineTempSource), pipelineTempSource);
+        validationMapDebugMode.put(getValidationKey(operationalSource), operationalSource);
+        validationMapDebugMode.put(getValidationKey(ingestionSource), ingestionSource);
+        validationMapDebugMode.put(getValidationKey(am), am);
+        validationMapDebugMode.put(getValidationKey(amLookup), amLookup);
+        validationMapDebugMode.put(getValidationKey(dunsGuideBook), dunsGuideBook);
+        validationMapDebugMode.put(getValidationKey(mlDaily), mlDaily);
+        validationMapDebugMode.put(getValidationKey(matchResult), matchResult);
 
-        // generalSourceToDelete should not be any of these map because upload
+        // generalSource should not be any of these map because upload
         // days is not old enough based on HdfsDays
     }
 
     private String getValidationKey(PurgeSource purgeSource) {
-        return purgeSource.getSourceName() + "_ToBak_" + purgeSource.isToBak();
+        return purgeSource.getSourceName();
     }
 
     private void validatePurgeSources(List<PurgeSource> toPurge, Map<String, PurgeSource> validationMap) {
@@ -428,13 +374,14 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
             Assert.assertNotNull(expected);
             log.info("Expecting " + JsonUtils.serialize(expected));
             Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());
-            if (purgeSource.getSourceName().equals(mlDailyToBak.getSourceName())) {
+
+            if (purgeSource.getSourceName().equals(mlDaily.getSourceName())) {
                 validateMLSource(purgeSource);
             } else {
                 Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
-                Assert.assertTrue(
-                        isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
+                Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
             }
+
             if (validationMap.containsKey(key)) {
                 actualKeys.add(key);
             }
@@ -464,16 +411,15 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private void validateMLSource(PurgeSource purgeSource) {
         Assert.assertTrue(CollectionUtils.isNotEmpty(purgeSource.getHdfsPaths()));
         Set<String> hdfsPathSet = new HashSet<>(purgeSource.getHdfsPaths());
-        if (purgeSource.isToBak()) {
-            Assert.assertTrue(hdfsPathSet.contains(mlDailyToBak.getHdfsPaths().get(0)));
-            Assert.assertFalse(hdfsPathSet.contains(mlDailyToDelete.getHdfsPaths().get(0)));
-        } else {
-            Assert.assertTrue(hdfsPathSet.contains(mlDailyToDelete.getHdfsPaths().get(0)));
-            Assert.assertFalse(hdfsPathSet.contains(mlDailyToBak.getHdfsPaths().get(0)));
-        }
+        Assert.assertTrue(hdfsPathSet.contains(mlDaily.getHdfsPaths().get(0)));
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         String versionToRetain = df.format(now);
         String hdfsPathToRetain = new Path("/user/propdata/madison/dataflow/incremental", versionToRetain).toString();
         Assert.assertFalse(hdfsPathSet.contains(hdfsPathToRetain));
+    }
+
+    private void createHdfsPath(String hdfsPath) throws IOException {
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        hdfsPathsCleanup.add(hdfsPath);
     }
 }

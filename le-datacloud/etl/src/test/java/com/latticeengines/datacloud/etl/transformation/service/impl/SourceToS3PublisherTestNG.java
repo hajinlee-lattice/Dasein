@@ -233,7 +233,6 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
         ps1.setSourceType(SourceType.AM_SOURCE);
         ps1.setS3Days(30);
         ps1.setGlacierDays(1170);
-        ps1.setNoBak(false);
 
         PurgeStrategy ps2 = new PurgeStrategy();
         ps2.setSource(baseSrc5.getSourceName());

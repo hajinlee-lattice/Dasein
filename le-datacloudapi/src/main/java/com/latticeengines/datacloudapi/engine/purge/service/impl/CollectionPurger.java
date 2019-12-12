@@ -17,8 +17,11 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
+
 /**
- * Purge sources/directories by checking last modified date
+ * For sources without version, or for source whose version we don't care (When
+ * we purge the source, we always want to purge the entire source). The
+ * retention policy is configured by how long they have existed on HDFS.
  */
 public abstract class CollectionPurger implements SourcePurger {
 
@@ -41,10 +44,8 @@ public abstract class CollectionPurger implements SourcePurger {
 
     protected abstract SourceType getSourceType();
 
-    // SourceName -> HdfsPath
-    protected abstract Map<String, String> findSourcePaths(PurgeStrategy strategy, boolean debug);
-
-    protected abstract List<PurgeSource> constructPurgeSources(PurgeStrategy strategy, Map<String, String> sourcePaths);
+    // SourceName -> HdfsPaths
+    protected abstract Map<String, List<String>> findSourcePaths(PurgeStrategy strategy, boolean debug);
 
     @Override
     public List<PurgeSource> findSourcesToPurge(final boolean debug) {
@@ -55,11 +56,22 @@ public abstract class CollectionPurger implements SourcePurger {
             // check whether source exists or no : if not existing continue to
             // next loop iteration and skip constructPurgeSources
             if (isSourceExisted(strategy)) {
-                Map<String, String> sourcePaths = findSourcePaths(strategy, debug);
+                Map<String, List<String>> sourcePaths = findSourcePaths(strategy, debug);
                 list.addAll(constructPurgeSources(strategy, sourcePaths));
             }
         }
         return list;
+    }
+
+    private List<PurgeSource> constructPurgeSources(PurgeStrategy strategy, Map<String, List<String>> sourcePaths) {
+        List<PurgeSource> toPurge = new ArrayList<>();
+        for (Map.Entry<String, List<String>> srcPath : sourcePaths.entrySet()) {
+            String srcName = srcPath.getKey();
+            List<String> hdfsPaths = srcPath.getValue();
+            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths);
+            toPurge.add(purgeSource);
+        }
+        return toPurge;
     }
 
 }
