@@ -404,17 +404,4 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return model;
     }
 
-    @Test(groups = "functional")
-    public void testTransactionData() {
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setMainEntity(BusinessEntity.Transaction);
-        Bucket bkt = Bucket.notNullBkt();
-        Restriction restriction = LogicalRestriction.builder().and(new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt),
-                new BucketRestriction(BusinessEntity.Product, InterfaceName.ProductId.name(), bkt)).build();
-        frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
-        long count = ratingQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        Assert.assertEquals(count, 499450l);
-    }
-
-
 }
