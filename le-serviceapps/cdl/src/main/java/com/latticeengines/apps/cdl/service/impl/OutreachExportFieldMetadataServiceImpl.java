@@ -33,7 +33,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         super(CDLExternalSystemName.Outreach);
     }
 
-    private static final String TRAY_PROSPECT_OWNER_COLUMN_NAME = "SDR_Email";
+    private static final String TRAY_PROSPECT_OWNER_COLUMN_NAME = "SDR Email";
     private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
 
     @Override
