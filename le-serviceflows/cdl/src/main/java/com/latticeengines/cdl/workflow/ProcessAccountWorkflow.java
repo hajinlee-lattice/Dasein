@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.GenerateAccountLookup;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
@@ -19,6 +20,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkflowConfiguration> {
+
+    @Inject
+    private SoftDeleteAccountWrapper softDeleteAccountWrapper;
 
     @Inject
     private MergeAccountWrapper mergeAccountWrapper;
@@ -38,6 +42,7 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
     @Override
     public Workflow defineWorkflow(ProcessAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(softDeleteAccountWrapper) //
                 .next(mergeAccountWrapper) //
                 .next(generateAccountLookup) //
                 .next(updateAccountWorkflow) //

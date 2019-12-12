@@ -8,12 +8,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteTransactionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 
 public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
         private ProcessTransactionWorkflowConfiguration configuration = new ProcessTransactionWorkflowConfiguration();
+        private SoftDeleteTransactionConfiguration softDeleteTransactionConfiguration = new SoftDeleteTransactionConfiguration();
         private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
         private UpdateTransactionWorkflowConfiguration.Builder updateTransactionWorkflowBuilder = new UpdateTransactionWorkflowConfiguration.Builder();
         private RebuildTransactionWorkflowConfiguration.Builder rebuildTransactionWorkflowBuilder = new RebuildTransactionWorkflowConfiguration.Builder();
@@ -25,6 +27,7 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
+            softDeleteTransactionConfiguration.setCustomerSpace(customerSpace);
             processTransactionStepConfiguration.setCustomerSpace(customerSpace);
             updateTransactionWorkflowBuilder.customer(customerSpace);
             rebuildTransactionWorkflowBuilder.customer(customerSpace);
@@ -33,6 +36,7 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
+            softDeleteTransactionConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processTransactionStepConfiguration
                     .setInternalResourceHostPort(internalResourceHostPort);
             updateTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -58,6 +62,7 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
         }
 
         public Builder setReplace(boolean needReplace) {
+            softDeleteTransactionConfiguration.setNeedReplace(needReplace);
             processTransactionStepConfiguration.setNeedReplace(needReplace);
             updateTransactionWorkflowBuilder.setReplace(needReplace);
             rebuildTransactionWorkflowBuilder.setReplace(needReplace);
@@ -74,6 +79,7 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
         public ProcessTransactionWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processTransactionWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.add(softDeleteTransactionConfiguration);
             configuration.add(processTransactionStepConfiguration);
             configuration.add(updateTransactionWorkflowBuilder.build());
             configuration.add(rebuildTransactionWorkflowBuilder.build());

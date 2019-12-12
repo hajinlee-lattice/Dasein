@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteContactWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.MergeContactWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessContactWorkflowConfiguration;
@@ -18,6 +19,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkflowConfiguration> {
+
+    @Inject
+    private SoftDeleteContactWrapper softDeleteContactWrapper;
 
     @Inject
     private MergeContactWrapper mergeContactWrapper;
@@ -34,6 +38,7 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkf
     @Override
     public Workflow defineWorkflow(ProcessContactWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(softDeleteContactWrapper) //
                 .next(mergeContactWrapper) //
                 .next(updateContactWorkflow) //
                 .next(rebuildContactWorkflow) //

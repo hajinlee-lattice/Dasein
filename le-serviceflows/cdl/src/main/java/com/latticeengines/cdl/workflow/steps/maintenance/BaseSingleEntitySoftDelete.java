@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,9 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
+import com.latticeengines.serviceflows.workflow.util.SparkUtils;
+import com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public abstract class BaseSingleEntitySoftDelete<T extends BaseSoftDeleteEntityConfiguration>
         extends BaseTransformWrapperStep<T> {
@@ -41,6 +45,12 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseSoftDeleteEntityC
 
     @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private LivySessionService sessionService;
+
+    @Inject
+    private SparkJobService sparkJobService;
 
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
@@ -85,6 +95,10 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseSoftDeleteEntityC
     protected void onPostTransformationCompleted() {
         registerBatchStore();
         updateEntityValueMapInContext(PERFORM_SOFT_DELETE, Boolean.TRUE, Boolean.class);
+        long recordsBeforeSoftDelete = countRawEntitiesInHdfs(batchStore, active);
+        long recordsAfterSoftDelete = countRawEntitiesInHdfs(batchStore, inactive);
+        updateEntityValueMapInContext(SOFT_DELETE_RECORD_COUNT, recordsBeforeSoftDelete - recordsAfterSoftDelete,
+                Long.class);
     }
 
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
@@ -149,6 +163,28 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseSoftDeleteEntityC
         return step;
     }
 
-
+    private long countRawEntitiesInHdfs(TableRoleInCollection tableRole, DataCollection.Version version) {
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, version);
+        if (StringUtils.isBlank(tableName)) {
+            return 0L;
+        }
+        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+        if (table == null) {
+            log.error("Cannot find table " + tableName);
+            return 0L;
+        }
+        String hdfsPath = table.getExtracts().get(0).getPath();
+        if (!hdfsPath.endsWith("*.avro")) {
+            if (hdfsPath.endsWith("/")) {
+                hdfsPath += "*.avro";
+            } else {
+                hdfsPath += "/*.avro";
+            }
+        }
+        log.info("Count records in HDFS " + hdfsPath);
+        Long result = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
+        log.info(String.format("Table role %s version %s has %d entities.", tableRole.name(), version.name(), result));
+        return result;
+    }
 
 }
