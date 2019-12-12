@@ -7,14 +7,13 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -26,8 +25,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class SegmentServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(SegmentServiceImplDeploymentTestNG.class);
 
     @Inject
     private CDLTestDataService cdlTestDataService;
@@ -47,7 +44,8 @@ public class SegmentServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment-app")
     public void testUpdateCounts() {
-        Map<String, Map<BusinessEntity, Long>> review = segmentService.updateSegmentsCounts();
+        UpdateSegmentCountResponse response = segmentService.updateSegmentsCounts();
+        Map<String, Map<BusinessEntity, Long>> review = response.getUpdatedCounts();
         Assert.assertEquals(review.size(), 3);
         Assert.assertTrue(review.containsKey(segmentName1));
         Assert.assertTrue(review.containsKey(segmentName2));
