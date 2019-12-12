@@ -143,8 +143,8 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
                     ImportProperty.ERROR_FILE });
         }
         if (totalRows > CATALOG_RECORDS_LIMIT && BusinessEntity.Catalog.equals(entity)) {
-            String errorMessage = String.format("%s exceeds platform Limit - Please retry with no more than 10 path " +
-                    "patterns", String.valueOf(totalRows));
+            String errorMessage = String.format("%s exceeds platform Limit - Please retry with no more than 10 rows.",
+                    String.valueOf(totalRows));
             throw new LedpException(LedpCode.LEDP_40059, new String[] { errorMessage,
                     ImportProperty.ERROR_FILE });
         }
