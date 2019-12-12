@@ -61,9 +61,6 @@ public class PurgeStrategy implements HasPid, Serializable {
     @Column(name = "GlacierDays")
     private Integer glacierDays;
 
-    @Column(name = "NoBak", nullable = false)
-    private boolean noBak;
-
     @Override
     @JsonProperty("PID")
     public Long getPid() {
@@ -154,16 +151,6 @@ public class PurgeStrategy implements HasPid, Serializable {
     @JsonProperty("GlacierDays")
     public void setGlacierDays(Integer glacierDays) {
         this.glacierDays = glacierDays;
-    }
-
-    @JsonProperty("NoBak")
-    public boolean isNoBak() {
-        return noBak;
-    }
-
-    @JsonProperty("NoBak")
-    public void setNoBak(boolean noBak) {
-        this.noBak = noBak;
     }
 
     public enum SourceType {

@@ -1,8 +1,12 @@
 package com.latticeengines.datacloudapi.engine.purge.service.impl;
 
-import java.util.ArrayList;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER_LOOKUP;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.DUNS_GUIDE_BOOK;
+
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -14,20 +18,16 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
 /**
- * Left in HDFS: 
- *      most recent 2 versions (strategy.hdfsVersions) which are approved in DataCloudVersion table
- *    + all the new versions after most recent approved version
- * To back up: 
- *      versions older than most recent 2 which are approved in DataCloudVersion table
- * To delete: 
- *      others
+ * AccountMaster related sources:
+ * AccountMaster, AccountMasterLookup & DunsGuideBook
+ *
+ * Versions expected to be left on HDFS:
+ *      most recent {@link #PurgeStrategy.getHdfsVersions}} versions which are approved in DataCloudVersion table
+ *    + versions with timestamp newer than most recent approved version
  *
  */
 @Component("amSourcePurger")
 public class AMSourcePurger extends VersionedPurger {
-
-    public static final String ACCOUNT_MASTER = "AccountMaster";
-    public static final String ACCOUNT_MASTER_LOOKUP = "AccountMasterLookup";
 
     @Override
     protected SourceType getSourceType() {
@@ -35,50 +35,42 @@ public class AMSourcePurger extends VersionedPurger {
     }
 
     @Override
-    protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> allVersions,
+    protected List<String> findPurgeVersions(PurgeStrategy strategy, List<String> allVersions,
             final boolean debug) {
+        if (strategy.getHdfsVersions() == null) {
+            throw new IllegalArgumentException(
+                    "Must provide HdfsVersions in PurgeStrategy for source in type AM_SOURCE");
+        }
         List<DataCloudVersion> dcVersions = dataCloudVersionEntityMgr.allApprovedVerions();
         if (CollectionUtils.isEmpty(dcVersions)) {
             return null;
         }
-        DataCloudVersion latestApprovedDCVersion = Collections.max(dcVersions, DataCloudVersion.versionComparator);
-        String latestApprovedVersion = getHdfsVersionFromDCVersion(strategy.getSource(), latestApprovedDCVersion);
-        Set<String> approvedVersions = new HashSet<>();
-        dcVersions.forEach(dcv -> {
-            approvedVersions.add(getHdfsVersionFromDCVersion(strategy.getSource(), dcv));
-        });
-
-        List<String> toDelete = new ArrayList<>();
-        for (String version : allVersions) {
-            if (!approvedVersions.contains(version) && version.compareTo(latestApprovedVersion) < 0) {
-                toDelete.add(version);
-            }
-        }
-
-        return toDelete;
-    }
-
-    protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> allVersions,
-            final boolean debug) {
-        List<DataCloudVersion> dcVersions = dataCloudVersionEntityMgr.allApprovedVerions();
         Collections.sort(dcVersions, DataCloudVersion.versionComparator);
-        String versionToCompare = dcVersions.size() >= strategy.getHdfsVersions()
-                ? getHdfsVersionFromDCVersion(strategy.getSource(),
-                        dcVersions.get(dcVersions.size() - strategy.getHdfsVersions()))
-                : getHdfsVersionFromDCVersion(strategy.getSource(), dcVersions.get(0));
-        Set<String> approvedVersions = new HashSet<>();
-        dcVersions.forEach(dcv -> {
-            approvedVersions.add(getHdfsVersionFromDCVersion(strategy.getSource(), dcv));
-        });
+        Set<String> retainedApprovedVersions = new HashSet<>();
+        int nRetainedVersions = Math.min(dcVersions.size(), strategy.getHdfsVersions());
+        for (int i = 0; i < nRetainedVersions; i++) {
+            String hdfsVersion = getHdfsVersionFromDCVersion(strategy.getSource(),
+                    dcVersions.get(dcVersions.size() - 1 - i));
+            // For old DataCloudVersion, it might not have HdfsVersion populated
+            // for DunsGuideBook due to DunsGuideBook was introduced late.
+            if (hdfsVersion != null) {
+                retainedApprovedVersions.add(hdfsVersion);
+            }
+        }
+        // Latest DataCloudVersion should have HdfsVersion populated for all the
+        // sources: AccountMaster, AccountMasterLookup & DunsGuideBook
+        String latestApprovedVersion = getHdfsVersionFromDCVersion(strategy.getSource(),
+                dcVersions.get(dcVersions.size() - 1));
 
-        List<String> toBak = new ArrayList<>();
-        for (String version : allVersions) {
-            if (approvedVersions.contains(version) && version.compareTo(versionToCompare) < 0) {
-                toBak.add(version);
+        Iterator<String> iter = allVersions.iterator();
+        while (iter.hasNext()) {
+            String version = iter.next();
+            if (retainedApprovedVersions.contains(version) || version.compareTo(latestApprovedVersion) >= 0) {
+                iter.remove();
             }
         }
 
-        return toBak;
+        return allVersions;
     }
 
     private String getHdfsVersionFromDCVersion(String srcName, DataCloudVersion dcv) {
@@ -88,7 +80,11 @@ public class AMSourcePurger extends VersionedPurger {
         if (ACCOUNT_MASTER_LOOKUP.equals(srcName)) {
             return dcv.getAccountLookupHdfsVersion();
         }
-        throw new RuntimeException("SourceType AM_SOURCE only support source AccountMaster and AccountMasterLookup");
+        if (DUNS_GUIDE_BOOK.equals(srcName)) {
+            return dcv.getDunsGuideBookHdfsVersion();
+        }
+        throw new RuntimeException(
+                "SourceType AM_SOURCE only support source AccountMaster, AccountMasterLookup & DunsGuideBook");
     }
 
 }

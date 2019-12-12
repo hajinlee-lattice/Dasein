@@ -60,7 +60,6 @@ public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
         ps1.setHdfsVersions(2);
         ps1.setS3Days(200);
         ps1.setGlacierDays(1000);
-        ps1.setNoBak(false);
         list.add(ps1);
         PurgeStrategy ps2 = new PurgeStrategy();
         ps2.setSource(TEST_SRC2);
@@ -68,7 +67,6 @@ public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
         ps2.setHdfsDays(30);
         ps2.setS3Days(200);
         ps2.setGlacierDays(200);
-        ps2.setNoBak(false);
         list.add(ps2);
         purgeStrategyEntityMgr.insertAll(list);
     }

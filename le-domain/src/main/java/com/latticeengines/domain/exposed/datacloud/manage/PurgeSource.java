@@ -14,15 +14,19 @@ public class PurgeSource implements Serializable {
     @JsonProperty("HdfsPaths")
     private List<String> hdfsPaths;
 
+    // Deprecated
     @JsonProperty("HiveTables")
     private List<String> hiveTables;
 
+    // Deprecated
     @JsonProperty("ToBak")
     private boolean toBak;
 
+    // Deprecated
     @JsonProperty("S3Days")
     private Integer s3Days;
 
+    // Deprecated
     @JsonProperty("GlacierDays")
     private Integer glacierDays;
 
@@ -30,12 +34,9 @@ public class PurgeSource implements Serializable {
 
     }
 
-    public PurgeSource(String sourceName, List<String> hdfsPaths, List<String> hiveTables,
-            boolean toBak) {
+    public PurgeSource(String sourceName, List<String> hdfsPaths) {
         this.sourceName = sourceName;
         this.hdfsPaths = hdfsPaths;
-        this.hiveTables = hiveTables;
-        this.toBak = toBak;
     }
 
     public String getSourceName() {

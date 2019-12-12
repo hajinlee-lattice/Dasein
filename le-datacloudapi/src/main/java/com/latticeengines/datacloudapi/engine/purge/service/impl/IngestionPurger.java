@@ -3,7 +3,6 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,6 +12,16 @@ import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
+/**
+ * Targeting source: DataCloud Ingestion
+ *
+ * When to purge a version:
+ *
+ * When a version is older than most recent
+ * {@link #PurgeStrategy.getHdfsVersions}} number of versions (if provided) AND
+ * its created time is older than {@link #PurgeStrategy.getHdfsDays}} number of
+ * days (if provided).
+ */
 @Component("ingestionPurger")
 public class IngestionPurger extends VersionedPurger{
 
@@ -35,16 +44,14 @@ public class IngestionPurger extends VersionedPurger{
     }
 
     @Override
-    protected Pair<List<String>, List<String>> constructHdfsPathsHiveTables(PurgeStrategy strategy,
-            List<String> versions) {
+    protected List<String> constructHdfsPaths(PurgeStrategy strategy, List<String> versions) {
         List<String> hdfsPaths = new ArrayList<>();
-        List<String> hiveTables = new ArrayList<>();
         versions.forEach(version -> {
             String hdfsPath = hdfsPathBuilder.constructIngestionDir(strategy.getSource(), version).toString();
             hdfsPaths.add(hdfsPath);
         });
 
-        return Pair.of(hdfsPaths, hiveTables);
+        return hdfsPaths;
     }
 
     @Override
