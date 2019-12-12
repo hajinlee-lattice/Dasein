@@ -171,7 +171,8 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     public String lookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey,
             String lookupIdValue) {
         DynamoDataUnit lookupDataUnit = //
-                accountLookupCache.get(CustomerSpace.shortenCustomerSpace(customerSpace) + "|" + version.toString());
+                accountLookupCache.get(version == null ? CustomerSpace.shortenCustomerSpace(customerSpace)
+                        : CustomerSpace.shortenCustomerSpace(customerSpace) + "|" + version.toString());
         return lookupInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
     }
 
@@ -182,7 +183,9 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             String tenantId = parseTenantId(lookupDataUnit);
             String tableName = parseTableName(lookupDataUnit);
             List<Pair<String, String>> keyPairs = new ArrayList<>();
-            keyPairs.add(Pair.of(lookupIdKey + "_" + lookupIdValue.toLowerCase(), "0"));
+            if (StringUtils.isNotBlank(lookupIdKey)) {
+                keyPairs.add(Pair.of(lookupIdKey + "_" + lookupIdValue.toLowerCase(), "0"));
+            }
             keyPairs.add(Pair.of(InterfaceName.AccountId.name() + "_" + lookupIdValue.toLowerCase(), "0"));
             List<Map<String, Object>> rows = tableEntityMgr.getByKeyPairs(tenantId, tableName, keyPairs);
             String accountId = "";
