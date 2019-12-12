@@ -20,6 +20,7 @@ public class WorkflowContextConstants {
         public static final String IMPACTED_BUSINESS_ENTITIES = "IMPACTED_BUSINESS_ENTITIES";
         public static final String DATAFEEDTASK_REGISTERED_TABLES = "DATAFEEDTASK_REGISTERED_TABLES";
         public static final String DATAFEEDTASK_IMPORT_ERROR_FILES = "DATAFEEDTASK_IMPORT_ERROR_FILES";
+        public static final String IMPORT_MIGRATE_TRACKING_ID = "IMPORT_MIGRATE_TRACKING_ID";
         public static final String IMPORT_WARNING = "IMPORT_WARNING";
     }
 
