@@ -6,11 +6,11 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.transformation.AMStatsFlowBase;
+import com.latticeengines.datacloud.dataflow.transformation.stats.AMStatsFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsDimensionAggregator;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.AMStatsDimensionAggregator;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;

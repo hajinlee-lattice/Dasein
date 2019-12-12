@@ -6,6 +6,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataflow.runtime.cascading.atlas.RevenueToPercentileMapper;
 import com.latticeengines.domain.exposed.scoringapi.EVScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 

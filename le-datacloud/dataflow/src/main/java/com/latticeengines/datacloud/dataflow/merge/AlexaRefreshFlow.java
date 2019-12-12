@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaIndustryBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DateTimeCleanupFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.MostRecentDataFlowParameters;
+import com.latticeengines.dataflow.runtime.cascading.propdata.source.AlexaFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.source.AlexaIndustryBuffer;
+import com.latticeengines.domain.exposed.datacloud.dataflow.source.MostRecentDataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.operation.Buffer;

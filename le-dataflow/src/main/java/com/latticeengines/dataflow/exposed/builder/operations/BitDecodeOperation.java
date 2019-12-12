@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.latticeengines.dataflow.runtime.cascading.propdata.BitDecodeFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.BitDecodeFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 

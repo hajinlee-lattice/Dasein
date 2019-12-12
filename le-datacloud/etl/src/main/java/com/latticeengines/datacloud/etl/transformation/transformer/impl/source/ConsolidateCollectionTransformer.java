@@ -42,8 +42,8 @@ import com.latticeengines.datacloud.dataflow.transformation.source.ConsolidateCo
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.datacloud.dataflow.ConsolidateCollectionParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.ConsolidateCollectionConfig;
+import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateCollectionConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;

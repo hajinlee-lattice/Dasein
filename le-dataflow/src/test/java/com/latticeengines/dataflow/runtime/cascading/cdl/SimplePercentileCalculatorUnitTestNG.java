@@ -12,6 +12,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataflow.runtime.cascading.atlas.SimplePercentileCalculator;
+
 public class SimplePercentileCalculatorUnitTestNG {
 
     @Test(groups = "unit")

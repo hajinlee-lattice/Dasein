@@ -17,11 +17,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.RowsInRTSInOrbInAMFlow;
+import com.latticeengines.datacloud.dataflow.transformation.seed.RowsInRTSInOrbInAMFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.RowsInRTSInOrbInAMConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.seed.RowsInRTSInOrbInAMConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class CheckRecordsInRTSInOrbInAMTestNG

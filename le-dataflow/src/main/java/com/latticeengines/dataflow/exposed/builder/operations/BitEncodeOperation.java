@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.dataflow.runtime.cascading.propdata.BitEncodeAggregator;
+import com.latticeengines.dataflow.runtime.cascading.propdata.stats.BitEncodeAggregator;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 

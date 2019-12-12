@@ -11,7 +11,7 @@ import com.latticeengines.datacloud.dataflow.utils.BitEncodeUtils;
 import com.latticeengines.datacloud.dataflow.utils.FileParser;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.BomboraSurgeIntentFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.source.BomboraSurgeIntentFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;

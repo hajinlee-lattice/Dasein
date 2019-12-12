@@ -36,20 +36,18 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
 import com.latticeengines.datacloud.dataflow.transformation.SourceStandardizationFlow;
 import com.latticeengines.datacloud.dataflow.transformation.am.AMLookupRebuild;
 import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedPriActFix;
+import com.latticeengines.datacloud.dataflow.transformation.ams.AMSeedSecondDomainCleanup;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AMSeedSecondDomainCleanupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.AMSeedSecondDomainCleanupConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.StandardizationTransformerConfig.StandardizationStrategy;
@@ -61,9 +59,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 public class AMLookupRebuildPipelineTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AMLookupRebuildPipelineTestNG.class);
 
-    @Autowired
-    private AccountMasterLookup source;
-
+    private GeneralSource source = new GeneralSource("AccountMasterLookup");
     private String ams = "AccountMasterSeed";
     private String orbSecDom = "OrbCacheSeedSecondaryDomain";
     private String targetSeedName = "AccountMasterSeedCleaned";
