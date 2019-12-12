@@ -56,7 +56,7 @@ public class ActivityMetricsGroupUtils {
         while (groupId.length() < GROUPID_LOWER_BOUND) {
             groupId.append(FILL_CHAR);
         }
-        return groupId.toString();
+        return groupId.toString().toLowerCase();
     }
 
     // split into groupId, rollupDims, timeRange
