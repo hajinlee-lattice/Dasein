@@ -328,6 +328,10 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             if (StringUtils.isEmpty(tableName)) {
                 tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, inactive);
             }
+            if (StringUtils.isEmpty(tableName)) {
+                valid = false;
+                break;
+            }
             Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
             if (table == null) {
                 log.error("Cannot find table " + tableName);
