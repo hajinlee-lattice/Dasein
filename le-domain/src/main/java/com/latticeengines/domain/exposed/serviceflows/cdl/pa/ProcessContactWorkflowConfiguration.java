@@ -8,7 +8,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteContactConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
 public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -16,14 +15,12 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
     public static class Builder {
 
         private ProcessContactWorkflowConfiguration configuration = new ProcessContactWorkflowConfiguration();
-        private SoftDeleteContactConfiguration softDeleteContactConfiguration = new SoftDeleteContactConfiguration();
         private ProcessContactStepConfiguration processContactStepConfiguration = new ProcessContactStepConfiguration();
         private UpdateContactWorkflowConfiguration.Builder updateContactWorkflowBuilder = new UpdateContactWorkflowConfiguration.Builder();
         private RebuildContactWorkflowConfiguration.Builder rebuildContactWorkflowBuilder = new RebuildContactWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
-            softDeleteContactConfiguration.setCustomerSpace(customerSpace);
             processContactStepConfiguration.setCustomerSpace(customerSpace);
             updateContactWorkflowBuilder.customer(customerSpace);
             rebuildContactWorkflowBuilder.customer(customerSpace);
@@ -31,7 +28,6 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            softDeleteContactConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processContactStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             updateContactWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -72,7 +68,6 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public  Builder setReplace(boolean needReplace) {
-            softDeleteContactConfiguration.setNeedReplace(needReplace);
             processContactStepConfiguration.setNeedReplace(needReplace);
             updateContactWorkflowBuilder.setReplace(needReplace);
             rebuildContactWorkflowBuilder.setReplace(needReplace);
@@ -82,7 +77,6 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public ProcessContactWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
-            configuration.add(softDeleteContactConfiguration);
             configuration.add(processContactStepConfiguration);
             configuration.add(updateContactWorkflowBuilder.build());
             configuration.add(rebuildContactWorkflowBuilder.build());

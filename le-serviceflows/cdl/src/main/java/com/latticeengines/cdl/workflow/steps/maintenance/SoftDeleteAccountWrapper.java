@@ -7,12 +7,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteAccountConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("SoftDeleteAccountWrapper")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SoftDeleteAccountWrapper extends BaseTransformationWrapper<SoftDeleteAccountConfiguration, SoftDeleteAccount> {
+public class SoftDeleteAccountWrapper extends BaseTransformationWrapper<ProcessAccountStepConfiguration, SoftDeleteAccount> {
 
     @Inject
     private SoftDeleteAccount softDeleteAccount;

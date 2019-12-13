@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteContactConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 
 @Component(SoftDeleteContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SoftDeleteContact extends BaseSingleEntitySoftDelete<SoftDeleteContactConfiguration> {
+public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContactStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SoftDeleteContact.class);
 

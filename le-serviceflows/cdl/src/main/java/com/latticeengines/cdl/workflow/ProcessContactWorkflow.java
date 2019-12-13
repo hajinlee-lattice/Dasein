@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteContactWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.MergeContactWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
+import com.latticeengines.cdl.workflow.steps.validations.ValidateContactBatchStore;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessContactWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -27,6 +28,9 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkf
     private MergeContactWrapper mergeContactWrapper;
 
     @Inject
+    private ValidateContactBatchStore validateContactBatchStore;
+
+    @Inject
     private UpdateContactWorkflow updateContactWorkflow;
 
     @Inject
@@ -40,6 +44,7 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkf
         return new WorkflowBuilder(name(), config) //
                 .next(softDeleteContactWrapper) //
                 .next(mergeContactWrapper) //
+                .next(validateContactBatchStore) //
                 .next(updateContactWorkflow) //
                 .next(rebuildContactWorkflow) //
                 .next(resetContact) //

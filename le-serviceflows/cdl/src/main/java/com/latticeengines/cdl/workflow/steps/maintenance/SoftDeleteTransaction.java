@@ -17,22 +17,22 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodCollectorConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataCleanerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PeriodDataDistributorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodCollectorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodDataCleanerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteTransactionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component(SoftDeleteTransaction.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<SoftDeleteTransactionConfiguration> {
+public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTransactionStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SoftDeleteTransaction.class);
 

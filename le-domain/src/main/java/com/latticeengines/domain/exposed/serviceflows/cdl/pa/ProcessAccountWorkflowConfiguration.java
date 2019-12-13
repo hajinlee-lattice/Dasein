@@ -8,21 +8,18 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteAccountConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 
 public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
         private ProcessAccountWorkflowConfiguration configuration = new ProcessAccountWorkflowConfiguration();
-        private SoftDeleteAccountConfiguration softDeleteAccountConfiguration = new SoftDeleteAccountConfiguration();
         private ProcessAccountStepConfiguration processAccountStepConfiguration = new ProcessAccountStepConfiguration();
         private UpdateAccountWorkflowConfiguration.Builder updateAccountWorkflowBuilder = new UpdateAccountWorkflowConfiguration.Builder();
         private RebuildAccountWorkflowConfiguration.Builder rebuildAccountWorkflowBuilder = new RebuildAccountWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
-            softDeleteAccountConfiguration.setCustomerSpace(customerSpace);
             processAccountStepConfiguration.setCustomerSpace(customerSpace);
             updateAccountWorkflowBuilder.customer(customerSpace);
             rebuildAccountWorkflowBuilder.customer(customerSpace);
@@ -31,7 +28,6 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            softDeleteAccountConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             processAccountStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             updateAccountWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             rebuildAccountWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -78,7 +74,6 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder setReplace(boolean needReplace) {
-            softDeleteAccountConfiguration.setNeedReplace(needReplace);
             processAccountStepConfiguration.setNeedReplace(needReplace);
             updateAccountWorkflowBuilder.setReplace(needReplace);
             rebuildAccountWorkflowBuilder.setReplace(needReplace);
@@ -88,7 +83,6 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public ProcessAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
-            configuration.add(softDeleteAccountConfiguration);
             configuration.add(processAccountStepConfiguration);
             configuration.add(updateAccountWorkflowBuilder.build());
             configuration.add(rebuildAccountWorkflowBuilder.build());

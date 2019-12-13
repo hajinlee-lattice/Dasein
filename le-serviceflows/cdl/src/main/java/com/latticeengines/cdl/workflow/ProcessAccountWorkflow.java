@@ -11,6 +11,7 @@ import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteAccountWrappe
 import com.latticeengines.cdl.workflow.steps.merge.GenerateAccountLookup;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
+import com.latticeengines.cdl.workflow.steps.validations.ValidateAccountBatchStore;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -26,6 +27,9 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
 
     @Inject
     private MergeAccountWrapper mergeAccountWrapper;
+
+    @Inject
+    private ValidateAccountBatchStore validateAccountBatchStore;
 
     @Inject
     private GenerateAccountLookup generateAccountLookup;
@@ -44,6 +48,7 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
         return new WorkflowBuilder(name(), config) //
                 .next(softDeleteAccountWrapper) //
                 .next(mergeAccountWrapper) //
+                .next(validateAccountBatchStore) //
                 .next(generateAccountLookup) //
                 .next(updateAccountWorkflow) //
                 .next(rebuildAccountWorkflow) //

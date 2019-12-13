@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.BaseSoftDeleteEntityConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
@@ -35,7 +35,7 @@ import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 
-public abstract class BaseSingleEntitySoftDelete<T extends BaseSoftDeleteEntityConfiguration>
+public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStepConfiguration>
         extends BaseTransformWrapperStep<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseSingleEntitySoftDelete.class);

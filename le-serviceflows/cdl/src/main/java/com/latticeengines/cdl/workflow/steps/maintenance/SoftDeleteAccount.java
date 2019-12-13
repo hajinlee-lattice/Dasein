@@ -11,11 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteAccountConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 
 @Component(SoftDeleteAccount.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<SoftDeleteAccountConfiguration> {
+public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<ProcessAccountStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SoftDeleteAccount.class);
 
@@ -38,5 +39,19 @@ public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<SoftDeleteAcco
         request.setSteps(steps);
 
         return request;
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+        relinkDynamo();
+    }
+
+    private void relinkDynamo() {
+        DynamoExportConfig config = new DynamoExportConfig();
+        config.setTableName(getBatchStoreName());
+        config.setLinkTableName(masterTable.getName());
+        config.setRelink(Boolean.TRUE);
+        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 }

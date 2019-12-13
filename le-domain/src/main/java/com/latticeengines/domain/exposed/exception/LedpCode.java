@@ -365,6 +365,7 @@ public enum LedpCode {
     LEDP_18236("PlayLaunch id is null"), //
     LEDP_18237("Audience name {0} with Audience Id {1} can not be set in a null PlayLaunchChannel"), //
     LEDP_18238("PlayLaunch id {0} has Play null {1} and PlayLaunchChannel null {2}"), //
+    LEDP_18239("All records in {0} batch store has been deleted!"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

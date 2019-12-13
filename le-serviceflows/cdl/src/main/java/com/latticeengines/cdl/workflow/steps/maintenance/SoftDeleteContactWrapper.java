@@ -7,12 +7,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteContactConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("SoftDeleteContactWrapper")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SoftDeleteContactWrapper extends BaseTransformationWrapper<SoftDeleteContactConfiguration, SoftDeleteContact> {
+public class SoftDeleteContactWrapper extends BaseTransformationWrapper<ProcessContactStepConfiguration, SoftDeleteContact> {
 
     @Inject
     private SoftDeleteContact softDeleteContact;

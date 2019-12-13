@@ -78,13 +78,28 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
 
         List<Exporter> exporters = new ArrayList<>();
         configs.forEach(config -> {
-            Exporter exporter = new Exporter(config);
-            exporters.add(exporter);
+            if (!Boolean.TRUE.equals(config.getRelink()) || !relinkDynamo(config)) {
+                Exporter exporter = new Exporter(config);
+                exporters.add(exporter);
+            }
         });
 
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
         ThreadPoolUtils.runRunnablesInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
+    }
+
+    private boolean relinkDynamo(DynamoExportConfig config) {
+        String customerSpace = configuration.getCustomerSpace().toString();
+        DynamoDataUnit dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace, config.getLinkTableName(),
+                DataUnit.StorageType.Dynamo);
+        if (dataUnit == null) {
+            return false;
+        }
+        dataUnit.setLinkedTable(config.getLinkTableName());
+        dataUnit.setName(config.getTableName());
+        dataUnitProxy.create(customerSpace, dataUnit);
+        return true;
     }
 
     private List<DynamoExportConfig> getExportConfigs() {

@@ -7,12 +7,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.SoftDeleteTransactionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("SoftDeleteTransactionWrapper")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SoftDeleteTransactionWrapper extends BaseTransformationWrapper<SoftDeleteTransactionConfiguration, SoftDeleteTransaction> {
+public class SoftDeleteTransactionWrapper extends BaseTransformationWrapper<ProcessTransactionStepConfiguration, SoftDeleteTransaction> {
 
     @Inject
     private SoftDeleteTransaction softDeleteTransaction;
