@@ -19,7 +19,7 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val contactAlias = "contact"
 
     val accountsDf = loadHdfsUnit(spark, config.getAccountsData.asInstanceOf[HdfsDataUnit])
-    val contactsDf = loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit])
+    val contactsDf = if (config.getContactsData != null) loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
     val positiveDeltaDf = if (config.getPositiveDelta != null) loadHdfsUnit(spark, config.getPositiveDelta.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
     val negativeDeltaDf = if (config.getNegativeDelta != null) loadHdfsUnit(spark, config.getNegativeDelta.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
     var distinctPositiveAccountsDf = positiveDeltaDf

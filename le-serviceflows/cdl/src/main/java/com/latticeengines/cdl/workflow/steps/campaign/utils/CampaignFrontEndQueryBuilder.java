@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
@@ -43,6 +44,7 @@ public class CampaignFrontEndQueryBuilder {
     private boolean isSuppressAccountsWithoutLookupId;
     private boolean isSuppressAccountsWithoutContacts;
     private boolean isSuppressContactsWithoutEmails;
+    private boolean isSuppressAccountsWithoutWebsiteOrCompanyName;
 
     private final List<String> accountLookups = Collections.singletonList(InterfaceName.AccountId.name());
 
@@ -113,6 +115,12 @@ public class CampaignFrontEndQueryBuilder {
             return this;
         }
 
+        public Builder isSuppressAccountsWithoutWebsiteOrCompanyName(
+                boolean isSuppressAccountsWithoutWebsiteOrCompanyName) {
+            queryBuilder.isSuppressAccountsWithoutWebsiteOrCompanyName = isSuppressAccountsWithoutWebsiteOrCompanyName;
+            return this;
+        }
+
         public Builder limit(Long limit) {
             if (limit != null) {
                 queryBuilder.limit = limit;
@@ -142,6 +150,9 @@ public class CampaignFrontEndQueryBuilder {
         }
         if (isSuppressContactsWithoutEmails) {
             filterContactsWithoutEmail();
+        }
+        if (isSuppressAccountsWithoutWebsiteOrCompanyName) {
+            filterAccountsWithoutWebsiteOrCompanyName();
         }
         addSort();
         setLimit();
@@ -187,6 +198,16 @@ public class CampaignFrontEndQueryBuilder {
         Restriction contactRestrictionWithNonNullEmail = Restriction.builder()
                 .and(contactRestriction, nonNullEmailRestriction).build();
         campaignFrontEndQuery.getContactRestriction().setRestriction(contactRestrictionWithNonNullEmail);
+    }
+
+    private void filterAccountsWithoutWebsiteOrCompanyName() {
+        RestrictionBuilder websiteFilter = Restriction.builder()
+                .let(BusinessEntity.Account, InterfaceName.Website.name()).isNotNull();
+        RestrictionBuilder companyNameFilter = Restriction.builder()
+                .let(BusinessEntity.Account, InterfaceName.CompanyName.name()).isNotNull();
+        campaignFrontEndQuery.getAccountRestriction().setRestriction(
+                Restriction.builder().and(campaignFrontEndQuery.getAccountRestriction().getRestriction(),
+                        Restriction.builder().or(websiteFilter, companyNameFilter).build()).build());
     }
 
     private void setMainEntity() {
