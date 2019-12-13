@@ -347,7 +347,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         SparkJobResult sparkJobResult = SparkUtils.runJob(customerSpace, yarnConfiguration, sparkJobService,
                 livySessionManager, CountOrphanTransactionsJob.class, countOrphanTransactionsConfig);
         result = Long.parseLong(sparkJobResult.getOutput());
-        log.debug("There are " + result + " orphan transactions.");
+        log.info(String.format("There are %d orphan transactions.", result));
         return result;
     }
 
