@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -82,13 +83,7 @@ public abstract class BaseValidateBatchStore<T extends BaseProcessEntityStepConf
             return 0L;
         }
         String hdfsPath = table.getExtracts().get(0).getPath();
-        if (!hdfsPath.endsWith("*.avro")) {
-            if (hdfsPath.endsWith("/")) {
-                hdfsPath += "*.avro";
-            } else {
-                hdfsPath += "/*.avro";
-            }
-        }
+        hdfsPath = PathUtils.toAvroGlob(hdfsPath);
         log.info("Count records in HDFS " + hdfsPath);
         Long result = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
         log.info(String.format("Table role %s version %s has %d entities.", tableRole.name(), version.name(), result));
