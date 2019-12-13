@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,11 @@ final class SegmentCountUtils {
 
     static List<String> updateEntityCounts(final SegmentProxy segmentProxy, final String customerSpace) {
         UpdateSegmentCountResponse response = segmentProxy.updateSegmentsCounts(customerSpace);
-        log.info("Updated segment counts: " + JsonUtils.serialize(response.getUpdatedCounts()));
+        if (MapUtils.isNotEmpty(response.getUpdatedCounts())) {
+            log.info("Updated segment counts: " + JsonUtils.serialize(response.getUpdatedCounts()));
+        } else {
+            log.info("No updated segment counts.");
+        }
         return response.getFailedSegments();
     }
 
