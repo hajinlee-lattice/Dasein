@@ -190,7 +190,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         Assert.assertEquals(result.getTargets().size(), 3);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 4);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
-        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 5);
+        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 0);
     }
 
     @Test(groups = "functional")
