@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -60,8 +61,11 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
 
     @Override
     protected DeriveActivityMetricGroupJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
-        List<AtlasStream> streams = new ArrayList<>(stepConfiguration.getActivityStreamMap().values());
-        List<ActivityMetricsGroup> groups = new ArrayList<>(stepConfiguration.getActivityMetricsGroupMap().values());
+        Set<String> skippedStreams = getSkippedStreamIds();
+        List<AtlasStream> streams = stepConfiguration.getActivityStreamMap().values().stream()
+                .filter(s -> !skippedStreams.contains(s.getStreamId())).collect(Collectors.toList());
+        List<ActivityMetricsGroup> groups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
+                .filter(g -> !skippedStreams.contains(g.getStream().getStreamId())).collect(Collectors.toList());
         for (ActivityMetricsGroup group : groups) {
             log.info("Retrieved group {}", group.getGroupId());
         }
@@ -88,12 +92,14 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             idx += periods.size();
         }
         inputMetadata.setMetadata(detailsMap);
-
-        List<String> tablenames = periodStoreTableCtxNames.stream().map(this::getStringValueFromContext).collect(Collectors.toList());
-        log.info("Fetching periodStore tables with names {}", tablenames);
-        List<DataUnit> inputs = getTableSummariesFromCtxKeys(customerSpace.toString(), periodStoreTableCtxNames).stream().map(table ->
-                table.partitionedToHdfsDataUnit(table.getName(), Collections.singletonList(InterfaceName.PeriodId.name()))
+        log.info("Fetching periodStore tables with names {}", periodStoreTableCtxNames);
+        List<DataUnit> inputs = getTableSummariesFromCtxKeys(customerSpace.toString(), periodStoreTableCtxNames).stream().filter(Objects::nonNull)
+                .map(table -> table.partitionedToHdfsDataUnit(table.getName(), Collections.singletonList(InterfaceName.PeriodId.name()))
         ).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(inputs)) {
+            log.warn("No period store tables found. Skip metrics generation.");
+            return null;
+        }
         validateInputTableCountMatch(groups, inputs, stepConfiguration);
 
         DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
@@ -133,5 +139,15 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         if (expectedPeriodStoresCount != actualPeriodStoresCount) {
             throw new IllegalStateException(String.format("Actual number of period tables not match. tenant=%s", customerSpace));
         }
+    }
+
+    private Set<String> getSkippedStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_SKIP_AGG)) {
+            return Collections.emptySet();
+        }
+
+        Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
+        log.info("Stream IDs skipped for metrics processing = {}", skippedStreamIds);
+        return skippedStreamIds;
     }
 }
