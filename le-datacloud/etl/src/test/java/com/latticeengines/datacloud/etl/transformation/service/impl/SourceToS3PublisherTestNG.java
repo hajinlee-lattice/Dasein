@@ -49,6 +49,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Pi
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceIngestion;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
+//FIXME: This test, together with HGDataFileToSourceTestNG & SourceToS3PublisherTestNG fail in Mini-Stack
+//due to "Could not find or load main class org.apache.hadoop.mapreduce.v2.app.MRAppMaster"
+//Cannot reproduce on local and production job with this service could work too.
+//The failure should be due to distcp job submitted by test client to EMR cluster cannot properly load MR class
 @Component
 public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase {
 
