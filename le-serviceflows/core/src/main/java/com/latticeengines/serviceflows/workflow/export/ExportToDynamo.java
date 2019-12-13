@@ -94,11 +94,13 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
         DynamoDataUnit dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace, config.getLinkTableName(),
                 DataUnit.StorageType.Dynamo);
         if (dataUnit == null) {
+            log.warn("Cannot find dynamo data unit with name: " + config.getLinkTableName());
             return false;
         }
         dataUnit.setLinkedTable(config.getLinkTableName());
         dataUnit.setName(config.getTableName());
         dataUnitProxy.create(customerSpace, dataUnit);
+        log.info(String.format("Relink dynamo data unit %s to %s", config.getTableName(), config.getLinkTableName()));
         return true;
     }
 

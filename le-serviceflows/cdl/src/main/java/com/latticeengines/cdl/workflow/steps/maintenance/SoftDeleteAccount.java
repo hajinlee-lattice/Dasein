@@ -9,8 +9,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 
@@ -44,14 +46,18 @@ public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<ProcessAccount
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
-        relinkDynamo();
+        String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        relinkDynamo(batchStoreTableName);
     }
 
-    private void relinkDynamo() {
+    private void relinkDynamo(String tableName) {
+        String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
         DynamoExportConfig config = new DynamoExportConfig();
         config.setTableName(getBatchStoreName());
         config.setLinkTableName(masterTable.getName());
         config.setRelink(Boolean.TRUE);
+        config.setPartitionKey(InterfaceName.AccountId.name());
+        config.setInputPath(PathUtils.toAvroGlob(inputPath));
         addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 }
