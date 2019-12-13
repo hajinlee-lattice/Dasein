@@ -25,13 +25,13 @@ import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -148,13 +148,9 @@ public class SegmentResource {
     @PutMapping(value = "/counts")
     @ResponseBody
     @ApiOperation(value = "Update counts for all segment")
-    public void updateAllCounts(@PathVariable String customerSpace) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        new Thread(() -> {
-            MultiTenantContext.setTenant(tenant);
-            log.info("Start updating counts for all segment for " + MultiTenantContext.getShortTenantId());
-            segmentService.updateSegmentsCounts();
-        }).start();
+    public UpdateSegmentCountResponse updateAllCounts(@PathVariable String customerSpace) {
+        log.info("Start updating counts for all segment for " + MultiTenantContext.getShortTenantId());
+        return segmentService.updateSegmentsCounts();
     }
 
     @PostMapping(value = "/attributes")
