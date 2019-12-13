@@ -179,9 +179,9 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         request.setName("MergeTransaction");
         List<TransformationStepConfig> steps;
         if (schemaChanged) {
-            steps = getUpgradeSteps(StringUtils.isBlank(mergedImportTable));
+            steps = getUpgradeSteps();
         } else {
-            steps = getSteps(StringUtils.isBlank(mergedImportTable));
+            steps = getSteps();
         }
         request.setSteps(steps);
         return request;
@@ -234,7 +234,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
 
-    private List<TransformationStepConfig> getUpgradeSteps(boolean noImports) {
+    private List<TransformationStepConfig> getUpgradeSteps() {
         dailyStep = 0;
         mergeRawStep = 1;
         standardizeStep = 2;
@@ -288,76 +288,24 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     }
 
-    private List<TransformationStepConfig> getSteps(boolean noImports) {
-//        if (noImports) {
-//            softDeleteMergeStep = 0;
-//            softDeleteStep = softDeleteMergeStep + 1;
-//            int collectRawStep = softDeleteStep + 1;
-//            int cleanupAgainStep = collectRawStep + 1;
-//            int dayPeriodAgainStep = cleanupAgainStep + 1;
-//            TransformationStepConfig softDeleteMerge = mergeSoftDelete(softDeleteActions);
-//            TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, rawTable);
-//            TransformationStepConfig collectRaw = collectRaw();
-//            TransformationStepConfig cleanupRaw = cleanupRaw(rawTable, collectRawStep);
-//            TransformationStepConfig dayPeriodsAgain = collectDays(softDeleteStep);
-//            TransformationStepConfig dailyPartitionAgain = partitionDaily(dayPeriodAgainStep, softDeleteStep);
-//
-//            List<TransformationStepConfig> steps = new ArrayList<>();
-//            steps.add(softDeleteMerge);
-//            steps.add(softDelete);
-//            steps.add(collectRaw);
-//            steps.add(cleanupRaw);
-//            steps.add(dayPeriodsAgain);
-//            steps.add(dailyPartitionAgain);
-//
-//            return steps;
-//        } else {
-            dailyStep = 0;
-            standardizeStep = 1;
-            dayPeriodStep = 2;
+    private List<TransformationStepConfig> getSteps() {
+        dailyStep = 0;
+        standardizeStep = 1;
+        dayPeriodStep = 2;
 
-//            softDeleteMergeStep = dayPeriodStep + 2;
-//            softDeleteStep = softDeleteMergeStep + 1;
-//            int collectRawStep = softDeleteStep + 1;
-//            int cleanupAgainStep = collectRawStep + 1;
-//            int dayPeriodAgainStep = cleanupAgainStep + 1;
+        TransformationStepConfig daily = addTrxDate();
+        TransformationStepConfig standardize = standardizeTrx(dailyStep);
+        TransformationStepConfig dayPeriods = collectDays(standardizeStep);
+        TransformationStepConfig dailyPartition = partitionDaily(dayPeriodStep, standardizeStep);
+        TransformationStepConfig report = reportDiff(mergedImportTable);
 
-            TransformationStepConfig daily = addTrxDate();
-            TransformationStepConfig standardize = standardizeTrx(dailyStep);
-            TransformationStepConfig dayPeriods = collectDays(standardizeStep);
-            TransformationStepConfig dailyPartition = partitionDaily(dayPeriodStep, standardizeStep);
-//            TransformationStepConfig softDeleteMerge = null;
-//            TransformationStepConfig softDelete = null;
-//            TransformationStepConfig collectRaw = null;
-//            TransformationStepConfig cleanupRawAgain = null;
-//            TransformationStepConfig dayPeriodsAgain = null;
-//            TransformationStepConfig dailyPartitionAgain = null;
-//            if (!skipSoftDelete) {
-//                softDeleteMerge = mergeSoftDelete(softDeleteActions);
-//                softDelete = softDelete(softDeleteMergeStep, rawTable);
-//                collectRaw = collectRaw();
-//                cleanupRawAgain = cleanupRaw(rawTable, collectRawStep);
-//                dayPeriodsAgain = collectDays(softDeleteStep);
-//                dailyPartitionAgain = partitionDaily(dayPeriodAgainStep, softDeleteStep);
-//            }
-            TransformationStepConfig report = reportDiff(mergedImportTable);
-
-            List<TransformationStepConfig> steps = new ArrayList<>();
-            steps.add(daily);
-            steps.add(standardize);
-            steps.add(dayPeriods);
-            steps.add(dailyPartition);
-//            if (!skipSoftDelete) {
-//                steps.add(softDeleteMerge);
-//                steps.add(softDelete);
-//                steps.add(collectRaw);
-//                steps.add(cleanupRawAgain);
-//                steps.add(dayPeriodsAgain);
-//                steps.add(dailyPartitionAgain);
-//            }
-            steps.add(report);
-            return steps;
-//        }
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(daily);
+        steps.add(standardize);
+        steps.add(dayPeriods);
+        steps.add(dailyPartition);
+        steps.add(report);
+        return steps;
     }
 
 
