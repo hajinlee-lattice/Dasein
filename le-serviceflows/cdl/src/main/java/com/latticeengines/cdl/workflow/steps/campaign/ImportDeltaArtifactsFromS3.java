@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -23,6 +25,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaArtifactsFromS3Configuration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -62,6 +66,17 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
         }
 
         AttributeRepository attrRepo = buildAttrRepo(customerSpace);
+
+        if (channel.getChannelConfig().getAudienceType().asBusinessEntity() == BusinessEntity.Contact) {
+            try {
+                AttrRepoUtils.getTablePath(attrRepo, BusinessEntity.Contact);
+            } catch (QueryEvaluationException e) {
+                log.error("Unable to Launch Contact based channel since no contact data exists in attribute Repo");
+                throw new LedpException(LedpCode.LEDP_32000, e,
+                        new String[] { "Failed to find Contact data in Attribute repo" });
+            }
+        }
+
         attrRepo.getTableNames().forEach(tblName -> {
             Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
             if (table == null) {

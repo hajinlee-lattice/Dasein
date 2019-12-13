@@ -30,12 +30,16 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
+import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("generateLaunchUniverse")
@@ -64,7 +68,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         GenerateLaunchUniverseStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
 
-        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(),false, false);
+        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
                 config.getChannelId());
         if (play == null) {
@@ -85,6 +89,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
+        boolean contactsDataExists = doesContactDataExist(attrRepo);
 
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
@@ -98,23 +103,37 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 .mainEntity(channelConfig.getAudienceType().asBusinessEntity()) //
                 .customerSpace(customerSpace) //
                 .baseAccountRestriction(play.getTargetSegment().getAccountRestriction()) //
-                .baseContactRestriction(play.getTargetSegment().getContactRestriction())
+                .baseContactRestriction(contactsDataExists ? play.getTargetSegment().getContactRestriction() : null)
                 .isSuppressAccountsWithoutLookupId(channelConfig.isSuppressAccountsWithoutLookupId()) //
-                .isSuppressAccountsWithoutContacts(channelConfig.isSuppressAccountsWithoutContacts())
-                .isSuppressContactsWithoutEmails(channelConfig.isSuppressContactsWithoutEmails())
+                .isSuppressAccountsWithoutContacts(
+                        contactsDataExists && channelConfig.isSuppressAccountsWithoutContacts())
+                .isSuppressContactsWithoutEmails(contactsDataExists && channelConfig.isSuppressContactsWithoutEmails())
+                .isSuppressAccountsWithoutWebsiteOrCompanyName(ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(
+                        channel.getLookupIdMap().getExternalSystemName(), channelConfig))
                 .bucketsToLaunch(launchBuckets) //
                 .limit(channel.getMaxAccountsToLaunch()) //
                 .lookupId(lookupId) //
                 .launchUnScored(launchUnScored) //
                 .destinationSystemName(externalSystemName) //
                 .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
-                .getCampaignFrontEndQueryBuilder().build();
+                .getCampaignFrontEndQueryBuilder() //
+                .build();
 
         log.info("Full Launch Universe Query: " + frontEndquery.toString());
 
         HdfsDataUnit launchUniverseDataUnit = executeSparkJob(frontEndquery);
         log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
+    }
+
+    private boolean doesContactDataExist(AttributeRepository attrRepo) {
+        try {
+            AttrRepoUtils.getTablePath(attrRepo, BusinessEntity.Contact);
+            return true;
+        } catch (QueryEvaluationException e) {
+            log.info("No Contact data found in the Attribute Repo");
+            return false;
+        }
     }
 
     private HdfsDataUnit executeSparkJob(FrontEndQuery frontEndQuery) {

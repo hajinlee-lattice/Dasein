@@ -59,6 +59,8 @@ import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.spark.exposed.job.cdl.GenerateLaunchArtifactsJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
@@ -127,6 +129,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
+        boolean contactsDataExists = doesContactDataExist(attrRepo);
+
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
 
@@ -156,13 +160,25 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 HdfsDataUnit.class);
 
         SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
-                positiveDeltaDataUnit, negativeDeltaDataUnit, channelConfig.getAudienceType().asBusinessEntity());
+                positiveDeltaDataUnit, negativeDeltaDataUnit,
+                contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
+                contactsDataExists);
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
+    }
+
+    private boolean doesContactDataExist(AttributeRepository attrRepo) {
+        try {
+            AttrRepoUtils.getTablePath(attrRepo, BusinessEntity.Contact);
+            return true;
+        } catch (QueryEvaluationException e) {
+            log.info("No Contact data found in the Attribute Repo");
+            return false;
+        }
     }
 
     private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups,
             Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
-            BusinessEntity mainEntity) {
+            BusinessEntity mainEntity, boolean contactsDataExists) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -175,12 +191,17 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 FrontEndQuery query = FrontEndQuery.fromSegment(targetSegment);
                 query.setLookups(new ArrayList<>(accountLookups));
                 query.setMainEntity(BusinessEntity.Account);
-
                 HdfsDataUnit accountDataUnit = getEntityQueryData(query);
 
-                query.setLookups(new ArrayList<>(contactLookups));
-                query.setMainEntity(BusinessEntity.Contact);
-                HdfsDataUnit contactDataUnit = getEntityQueryData(query);
+                HdfsDataUnit contactDataUnit = null;
+                if (contactsDataExists) {
+                    query.setLookups(new ArrayList<>(contactLookups));
+                    query.setMainEntity(BusinessEntity.Contact);
+                    contactDataUnit = getEntityQueryData(query);
+                } else {
+                    log.info("Ignoring Contact lookups since no contact data found in the Attribute Repo");
+                }
+
                 GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
                         contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity,
                         getRandomWorkspace());

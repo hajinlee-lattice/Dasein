@@ -174,6 +174,26 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     }
 
     @Test(groups = "functional")
+    public void testGenerateLaunchArtifactsForAccountEntityWithoutContacts() {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
+        config.setAccountsData(accountData);
+        config.setContactsData(null);
+        config.setPositiveDelta(positiveAccounts);
+        config.setNegativeDelta(negativeAccounts);
+        config.setMainEntity(BusinessEntity.Account);
+        config.setWorkspace("testGenerateLaunchArtifactsForAccountEntity");
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("Results: " + JsonUtils.serialize(result));
+
+        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 4);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
+        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 0);
+    }
+
+    @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForContactEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
         config.setAccountsData(accountData);
