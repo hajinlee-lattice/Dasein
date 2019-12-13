@@ -68,10 +68,13 @@ public enum TableRoleInCollection {
 
         ConsolidatedCatalog.primaryKey = InterfaceName.InternalId;
         ConsolidatedCatalog.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        ConsolidatedCatalog.hasSignature = true;
         ConsolidatedActivityStream.primaryKey = InterfaceName.InternalId;
         ConsolidatedActivityStream.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        ConsolidatedActivityStream.hasSignature = true;
         AggregatedActivityStream.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedActivityStream.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        AggregatedActivityStream.hasSignature = true;
 
         AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
@@ -107,10 +110,14 @@ public enum TableRoleInCollection {
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
 
         WebVisitProfile.primaryKey = InterfaceName.AccountId;
+        WebVisitProfile.hasSignature = true;
+        PeriodStores.hasSignature = true;
+        MetricsGroup.hasSignature = true;
     }
 
     private InterfaceName primaryKey;
     private ImmutableList<InterfaceName> foreignKeys;
+    private boolean hasSignature; // whether table of this role has signature
 
     public InterfaceName getPrimaryKey() {
         return primaryKey;
@@ -126,6 +133,14 @@ public enum TableRoleInCollection {
 
     public List<String> getForeignKeysAsStringList() {
         return foreignKeys.stream().map(InterfaceName::name).collect(Collectors.toList());
+    }
+
+    public boolean isHasSignature() {
+        return hasSignature;
+    }
+
+    public void setHasSignature(boolean hasSignature) {
+        this.hasSignature = hasSignature;
     }
 
     public static TableRoleInCollection getByName(String role) {

@@ -130,6 +130,16 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Map<String, String> findTableNamesOfRoleWithSignature(String collectionName, TableRoleInCollection tableRole,
+            DataCollection.Version version) {
+        // [ signature, tableName ]
+        List<Tuple> result = dataCollectionTableReaderRepository.findTablesInRoleWithSignature(collectionName,
+                tableRole, version);
+        return parseSignatureTableNames(result);
+    }
+
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public Map<String, String> findTableNamesOfOfRoleAndSignatures(String collectionName,
@@ -140,18 +150,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         // [ signature, tableName ]
         List<Tuple> result = dataCollectionTableReaderRepository.findTablesInRole(collectionName, tableRole, version,
                 new ArrayList<>(signatures));
-        if (CollectionUtils.isEmpty(result)) {
-            return Collections.emptyMap();
-        }
-
-        return result.stream().filter(Objects::nonNull) //
-                .filter(tuple -> tuple.get(0) instanceof String && tuple.get(1) instanceof String) //
-                .map(tuple -> Pair.of((String) tuple.get(0), (String) tuple.get(1))) //
-                .filter(pair -> StringUtils.isNotBlank(pair.getRight())) //
-                /*-
-                 * non-null signature should not have duplicate in role/collection, but just in case
-                 */
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (v1, v2) -> v1));
+        return parseSignatureTableNames(result);
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -302,6 +301,21 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     public DataCollection createDefaultCollection() {
         DataCollection dataCollection = new DataCollection();
         return createDataCollection(dataCollection);
+    }
+
+    // tuple = [ signature, tablename ]
+    private Map<String, String> parseSignatureTableNames(List<Tuple> tuples) {
+        if (CollectionUtils.isEmpty(tuples)) {
+            return Collections.emptyMap();
+        }
+        return tuples.stream().filter(Objects::nonNull) //
+                .filter(tuple -> tuple.get(0) instanceof String && tuple.get(1) instanceof String) //
+                .map(tuple -> Pair.of((String) tuple.get(0), (String) tuple.get(1))) //
+                .filter(pair -> StringUtils.isNotBlank(pair.getRight())) //
+                /*-
+                 * non-null signature should not have duplicate in role/collection, but just in case
+                 */
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (v1, v2) -> v1));
     }
 
     private DataCollection createDataCollection(DataCollection dataCollection) {

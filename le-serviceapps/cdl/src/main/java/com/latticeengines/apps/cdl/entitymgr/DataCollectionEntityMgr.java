@@ -29,6 +29,11 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
 
     List<String> findTableNamesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version);
 
+    // signature -> table name, return all tables with non-blank signatures within
+    // collection/role
+    Map<String, String> findTableNamesOfRoleWithSignature(@NotNull String collectionName,
+            @NotNull TableRoleInCollection tableRole, @NotNull DataCollection.Version version);
+
     /*-
      * Retrieve a map of signature -> table name in target collection
      */
