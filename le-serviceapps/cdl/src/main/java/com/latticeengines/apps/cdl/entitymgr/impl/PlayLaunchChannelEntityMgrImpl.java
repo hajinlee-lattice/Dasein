@@ -9,7 +9,6 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -307,8 +306,8 @@ public class PlayLaunchChannelEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<PlayLaunchChannel> getAllValidScheduledChannels() {
-        List<PlayLaunchChannel> channels = readerRepository.findAlwaysOnChannelsByNextScheduledTime(
-                new Date(Long.MIN_VALUE), DateUtils.addMinutes(new Date(), 15));
+        List<PlayLaunchChannel> channels = readerRepository
+                .findAlwaysOnChannelsByNextScheduledTime(new Date(Long.MIN_VALUE), new Date());
         channels.forEach(c -> {
             Hibernate.initialize(c.getTenant());
             Hibernate.initialize(c.getPlay());
