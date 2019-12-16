@@ -159,7 +159,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     }
 
     private void getAccountExtensionsWithDetailedPaging(boolean shouldSendEmptyColumnMapping, String columns,
-                                                        boolean expectColumnsSizeEqualTo6) {
+            boolean expectColumnsSizeEqualTo6) {
         List<String> someAccountIds = new ArrayList<>();
         Map<String, Object> countResult = playMakerRecommendationEntityMgr
                 .getAccountExtensionCount(tenant.getTenantName(), null, 0L, null, null, 0L, null);
@@ -260,7 +260,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
                 tenant.getTenantName(), null, startTime, (totalAccExtCount.intValue() + 100), max, null, null, 0L,
                 shouldSendEmptyColumnMapping ? "" : columns, false, null);
         Assert.assertNotNull(emptyResultDueToVeryLargeOffset);
-        Assert.assertEquals(emptyResultDueToVeryLargeOffset.size(), 0);
+        Assert.assertEquals(emptyResultDueToVeryLargeOffset.size(), 3);
     }
 
     private Long loopForAccExt(Long totalAccExtCount, Set<Integer> ids, List<Object> idsList,
@@ -331,8 +331,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
                 log.info(String.format(
                         "About to fail as we found repeasing id in set. RECORD[%s, %s] "
                                 + "\nset = %s, \norderedIdsList = %s, \nidsTimestampTupleInOrder = %s",
-                        id, timestamp, ids.toString(), idsList.toString(),
-                        idsTimestampTupleInOrder.stream() //
+                        id, timestamp, ids.toString(), idsList.toString(), idsTimestampTupleInOrder.stream() //
                                 .map(t -> String.format("[%s,%s] ", t.getLeft(), t.getRight())) //
                                 .reduce((t, u) -> t + "," + u).orElse(null)));
             }
@@ -440,7 +439,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     @Test(groups = "functional")
     public void getContacts() {
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContacts(tenant.getTenantName(), null, 1000, 0,
-                100, null, null, null,null, null, eloquaAppId);
+                100, null, null, null, null, null, eloquaAppId);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> contacts = (List<Map<String, Object>>) result
