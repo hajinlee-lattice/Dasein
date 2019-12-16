@@ -165,9 +165,6 @@ public class PlayLaunchChannelEntityMgrImpl
         if (updatedChannel.getBucketsToLaunch() != null) {
             existingPlayLaunchChannel.setBucketsToLaunch(updatedChannel.getBucketsToLaunch());
         }
-        if (updatedChannel.isLaunchUnscored()) {
-            existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
-        }
         if (updatedChannel.getMaxAccountsToLaunch() != null) {
             if (updatedChannel.getMaxAccountsToLaunch() < 0) {
                 existingPlayLaunchChannel.setMaxAccountsToLaunch(null);
