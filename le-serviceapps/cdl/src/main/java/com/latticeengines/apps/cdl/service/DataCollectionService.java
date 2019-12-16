@@ -79,7 +79,8 @@ public interface DataCollectionService {
 
     /*-
      * Retrieve a map of signature -> table name with target signature list,
-     * only link with non-null signature will be included
+     * only link with non-null signature will be included (given null signatures will return all 
+     * tables with non-blank signature)
      */
     Map<String, String> getTableNamesWithSignatures(@NotNull String customerSpace, String collectionName,
             TableRoleInCollection tableRole, DataCollection.Version version, Collection<String> signatures);

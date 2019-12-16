@@ -198,6 +198,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, String.class);
     }
 
+    // null signature list means return all tables with non-blank signature
     public Map<String, String> getTableNamesWithSignatures(String customerSpace, TableRoleInCollection role,
             DataCollection.Version version, List<String> signatures) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames/signatures";

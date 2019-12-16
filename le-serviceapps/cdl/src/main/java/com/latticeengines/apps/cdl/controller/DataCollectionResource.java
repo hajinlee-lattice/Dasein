@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -167,12 +166,12 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get a map of signature to tableName via table role, version and list of signatures")
     public Map<String, String> getTableNames(@PathVariable String customerSpace,
-            @RequestParam(value = "signatures") List<String> signatures,
+            @RequestParam(value = "signatures", required = false) List<String> signatures,
             @RequestParam(value = "role", required = false) TableRoleInCollection role,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getTableNamesWithSignatures(customerSpace, null, role, version,
-                signatures == null ? null : new HashSet<>(signatures));
+                signatures);
     }
 
     @GetMapping(value = "/segments")

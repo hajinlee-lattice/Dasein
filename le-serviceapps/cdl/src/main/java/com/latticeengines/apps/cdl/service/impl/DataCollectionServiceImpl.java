@@ -323,8 +323,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             TableRoleInCollection tableRole, Version version, Collection<String> signatures) {
         collectionName = getOrDefaultCollectionName(customerSpace, collectionName);
         version = getOrDefaultVersion(version);
-        return dataCollectionEntityMgr.findTableNamesOfOfRoleAndSignatures(collectionName, tableRole, version,
-                signatures == null ? null : new HashSet<>(signatures));
+        if (CollectionUtils.isEmpty(signatures)) {
+            return dataCollectionEntityMgr.findTableNamesOfRoleWithSignature(collectionName, tableRole, version);
+        } else {
+            return dataCollectionEntityMgr.findTableNamesOfOfRoleAndSignatures(collectionName, tableRole, version,
+                    new HashSet<>(signatures));
+        }
     }
 
     @Override

@@ -1,16 +1,21 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -64,6 +69,35 @@ public class CloneTableService {
 
     public void cloneToInactiveTable(TableRoleInCollection role) {
         linkOrCloneToInactiveTable(role, true);
+    }
+
+    /*-
+     * link all table with non-blank signature from active version to inactive version
+     * only link signatures that do not already exist in inactive
+     */
+    public void linkToInactiveTableWithSignature(TableRoleInCollection role) {
+        Preconditions.checkArgument(role.isHasSignature(),
+                String.format("Role %s should have signature for its tables", role.name()));
+        Map<String, String> activeTableNames = MapUtils.emptyIfNull(
+                dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), role, active, null));
+        Map<String, String> inactiveTableNames = dataCollectionProxy
+                .getTableNamesWithSignatures(customerSpace.toString(), role, inactive, null);
+        if (MapUtils.isEmpty(activeTableNames)) {
+            log.info("No active tables for role {}, skip cloning", role);
+            return;
+        }
+
+        // add tables from active that does NOT have an active version
+        Map<String, String> union = new HashMap<>(inactiveTableNames);
+        activeTableNames.forEach(union::putIfAbsent);
+        Map<String, String> diff = activeTableNames.entrySet() //
+                .stream() //
+                .filter(entry -> !inactiveTableNames.containsKey(entry.getKey())) //
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        log.info("Cloning active tables {} (diff) to inactive version for role {}. Final tables = {}", diff, role,
+                union);
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), union, role, inactive);
     }
 
     private void linkOrCloneToInactiveTable(TableRoleInCollection role, boolean clone) {
