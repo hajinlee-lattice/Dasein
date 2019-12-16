@@ -187,7 +187,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
-        Assert.assertEquals(result.size(), 0);
+        Assert.assertEquals(result.size(), 3);
     }
 
     @Test(groups = "deployment")
