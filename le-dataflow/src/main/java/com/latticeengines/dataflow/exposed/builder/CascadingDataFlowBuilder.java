@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.comparators.NullComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -1019,6 +1020,18 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 flow0.addListener(dataFlowListener);
                 flow0.addStepListener(dataFlowStepListener);
                 flow0.complete();
+                List<Throwable> stepFailures = dataFlowStepListener.getThrowables();
+                if (CollectionUtils.isNotEmpty(stepFailures)) {
+                    stepFailures.forEach(failure -> {
+                        if (failure != null) {
+                            String stackTrace = ExceptionUtils.getStackTrace(failure);
+                            if (stackTrace.contains("too many fetch failures")) {
+                                log.warn("Too many fetch failures error", failure);
+                                throw new RetryableFlowException(failure);
+                            }
+                        }
+                    });
+                }
                 return flow0;
             } catch (FlowException e) {
                 String stackTrace = ExceptionUtils.getStackTrace(e);
