@@ -24,6 +24,11 @@ public interface DataCollectionTableReaderRepository extends BaseJpaRepository<D
             @Param("signature") String signature);
 
     @Query("select signature, table.name from DataCollectionTable where dataCollection.name = :collectionName "
+            + "and role = :tableRole and version = :version and signature is not null")
+    List<Tuple> findTablesInRoleWithSignature(@Param("collectionName") String collectionName,
+            @Param("tableRole") TableRoleInCollection tableRole, @Param("version") DataCollection.Version version);
+
+    @Query("select signature, table.name from DataCollectionTable where dataCollection.name = :collectionName "
             + "and role = :tableRole and version = :version and signature in :signatures")
     List<Tuple> findTablesInRole(@Param("collectionName") String collectionName,
             @Param("tableRole") TableRoleInCollection tableRole, @Param("version") DataCollection.Version version,

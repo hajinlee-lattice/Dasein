@@ -117,7 +117,13 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                         + ownerEntity + " is being reset.");
                 continue;
             }
-            cloneTableService.linkInactiveTable(role);
+
+            if (role.isHasSignature()) {
+                log.info("Role {} has signature attached to its table, linking with signatures", role);
+                cloneTableService.linkToInactiveTableWithSignature(role);
+            } else {
+                cloneTableService.linkInactiveTable(role);
+            }
         }
     }
 
