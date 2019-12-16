@@ -188,9 +188,10 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             }
             keyPairs.add(Pair.of(InterfaceName.AccountId.name() + "_" + lookupIdValue.toLowerCase(), "0"));
             List<Map<String, Object>> rows = tableEntityMgr.getByKeyPairs(tenantId, tableName, keyPairs);
-            String accountId = "";
+            String accountId = null;
+
             for (Map<String, Object> row : rows) {
-                if (StringUtils.isBlank(accountId)) {
+                if (row != null && StringUtils.isBlank(accountId)) {
                     accountId = row.getOrDefault(InterfaceName.AccountId.name(), "").toString();
                 }
             }
