@@ -182,13 +182,15 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
-            if (ctx.getRetryCount() > 0)
+            if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
-            log.warn("Previous failure:", ctx.getLastThrowable());
+                log.warn("Previous failure:", ctx.getLastThrowable());
+            }
+
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
-                FrontEndQuery query = FrontEndQuery.fromSegment(targetSegment);
+                FrontEndQuery query = new FrontEndQuery();
                 query.setLookups(new ArrayList<>(accountLookups));
                 query.setMainEntity(BusinessEntity.Account);
                 HdfsDataUnit accountDataUnit = getEntityQueryData(query);
