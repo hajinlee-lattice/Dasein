@@ -39,7 +39,7 @@ public class LivySessionManager {
 
     private final AtomicReference<LivySession> livySessionHolder = new AtomicReference<>(null);
 
-    LivySession createLivySession(String jobName, LivyScalingConfig livySessionConfig) {
+    public LivySession createLivySession(String jobName, LivyScalingConfig livySessionConfig) {
         LivySession session = livySessionHolder.get();
         if (session != null) {
             killSession();
@@ -58,7 +58,7 @@ public class LivySessionManager {
         return session;
     }
 
-    void killSession() {
+    public void killSession() {
         LivySession session = livySessionHolder.get();
         if (session != null) {
             livySessionHolder.set(null);

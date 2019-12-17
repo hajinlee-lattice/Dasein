@@ -5,6 +5,9 @@ import java.util.Collections;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -12,24 +15,31 @@ import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.serviceflows.workflow.dataflow.LivySessionManager;
+import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.common.CountAvroGlobs;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public final class SparkUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(SparkUtils.class);
+
     public static Table hdfsUnitToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //
-            Configuration yarnConfiguration, //
-            String podId, CustomerSpace customerSpace) {
+                                        Configuration yarnConfiguration, //
+                                        String podId, CustomerSpace customerSpace) {
         String srcPath = hdfsDataUnit.getPath();
         String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
         try {
@@ -58,8 +68,8 @@ public final class SparkUtils {
      * copy entire directory and preserve directory structure instead of using glob
      */
     public static Table hdfsUnitDirToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //
-            Configuration yarnConfiguration, //
-            String podId, CustomerSpace customerSpace) {
+                                           Configuration yarnConfiguration, //
+                                           String podId, CustomerSpace customerSpace) {
         String srcPath = hdfsDataUnit.getPath();
         String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
         try {
@@ -87,7 +97,7 @@ public final class SparkUtils {
 
     // return copied file count
     private static int copyAvroParquetFiles(@NotNull Configuration yarnConfiguration, @NotNull String srcDir,
-            @NotNull String dstDir) throws IOException {
+                                            @NotNull String dstDir) throws IOException {
         int fileCnt = 0;
         for (String avroParquetPath : AvroParquetUtils.listAvroParquetFiles(yarnConfiguration, srcDir, false)) {
             if (!HdfsUtils.isDirectory(yarnConfiguration, dstDir)) {
@@ -105,7 +115,7 @@ public final class SparkUtils {
     }
 
     public static Long countRecordsInGlobs(LivySessionService sessionService, SparkJobService sparkJobService,
-            Configuration yarnConfig, String... globs) {
+                                           Configuration yarnConfig, String... globs) {
         if (globs[0].endsWith(".parquet")) { // assuming all paths in the array have the same file type
             return ParquetUtils.countParquetFiles(yarnConfig, globs);
         } else {
@@ -124,11 +134,39 @@ public final class SparkUtils {
 
     private static Boolean shouldCountWithAvroUtils(Configuration yarnConfig, String... globs) {
         // if total size of all files less than 1 GB, count with AvroUtils
-        double size = .0;
+        return (getGlobsSize(yarnConfig, globs) < 1.);
+    }
 
+    private static double getGlobsSize(Configuration yarnConfig, String... globs) {
+        double size = .0;
         for (String glob : globs) {
             size += ScalingUtils.getHdfsPathSizeInGb(yarnConfig, glob);
         }
-        return (size < 1.);
+        return size;
+    }
+
+    public static <J extends AbstractSparkJob<C>, C extends SparkJobConfig> SparkJobResult
+    runJob(CustomerSpace customerSpace, Configuration yarnConfiguration, SparkJobService sparkJobService,
+           LivySessionManager livySessionManager, Class<J> jobClz, C jobConfig) {
+        double totalSizeInGb = SparkUtils.getGlobsSize(yarnConfiguration,
+                jobConfig.getInput().stream().map(hdfsDataUnit -> ((HdfsDataUnit) hdfsDataUnit).getPath()).toArray(String[]::new));
+        int scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb);
+        try {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            SparkJobResult sparkJobResult = retry.execute(context -> {
+                if (context.getRetryCount() > 0) {
+                    log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
+                            + jobClz.getSimpleName());
+                    log.warn("Previous failure:", context.getLastThrowable());
+                    livySessionManager.killSession();
+                }
+                String jobName = customerSpace.getTenantId() + "~" + jobClz.getSimpleName();
+                LivySession session = livySessionManager.createLivySession(jobName, new LivyScalingConfig(scalingMultiplier, 1));
+                return sparkJobService.runJob(session, jobClz, jobConfig);
+            });
+            return sparkJobResult;
+        } finally {
+            livySessionManager.killSession();
+        }
     }
 }

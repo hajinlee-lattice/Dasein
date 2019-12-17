@@ -493,8 +493,7 @@ public class PlayResource {
     }
 
     private boolean hasDeltaTables(PlayLaunch playLaunch) {
-        return (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())
-                && StringUtils.isNotBlank(playLaunch.getCompleteContactsTable()))
+        return StringUtils.isNotBlank(playLaunch.getAddAccountsTable())
                 || StringUtils.isNotBlank(playLaunch.getAddContactsTable())
                 || StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())
                 || StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable());
