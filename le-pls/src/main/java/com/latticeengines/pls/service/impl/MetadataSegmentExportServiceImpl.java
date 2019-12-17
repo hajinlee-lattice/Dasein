@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
-import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -37,6 +36,7 @@ import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
+import com.latticeengines.pls.util.ExportUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -188,16 +188,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         }
     }
 
-    private void downloadS3ExportFile(String filePath, String fileName, HttpServletRequest request, HttpServletResponse response) {
-        String fileNameIndownloader = fileName;
-        if (fileNameIndownloader.endsWith(".gz")) {
-            fileNameIndownloader = fileNameIndownloader.substring(0, fileNameIndownloader.length() - 3);
-        }
-        response.setHeader("Content-Encoding", "gzip");
-        CustomerSpaceS3FileDownloader.S3FileDownloadBuilder builder = new CustomerSpaceS3FileDownloader.S3FileDownloadBuilder();
-        builder.setMimeType("application/csv").setFilePath(filePath + fileName).setFileName(fileNameIndownloader).setImportFromS3Service(importFromS3Service).setBatonService(batonService);
-        CustomerSpaceS3FileDownloader customerSpaceS3FileDownloader = new CustomerSpaceS3FileDownloader(builder);
-        customerSpaceS3FileDownloader.downloadFile(request, response);
+    private String getFilePath(String filePath, String fileName){
+        StringBuffer result = new StringBuffer();
+       return result.append(filePath ).append(fileName).toString();
     }
 
     private void downloadAtlasExport(String exportId, HttpServletRequest request, HttpServletResponse response) {
@@ -215,11 +208,13 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderDropFolder())) {
                 filePath = atlasExportProxy.getDropFolderExportPath(customerSpace, atlasExport.getExportType(), atlasExport.getDatePrefix(), false);
                 fileName = atlasExport.getFilesUnderDropFolder().get(0);
-                downloadS3ExportFile(filePath, fileName, request, response);
+                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv", request
+                        , response, importFromS3Service, batonService);
             } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
                 filePath = atlasExportProxy.getSystemExportPath(customerSpace, false);
                 fileName = atlasExport.getFilesUnderSystemPath().get(0);
-                downloadS3ExportFile(filePath, fileName, request, response);
+                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv", request
+                        , response, importFromS3Service, batonService);
             } else {
                 throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
             }

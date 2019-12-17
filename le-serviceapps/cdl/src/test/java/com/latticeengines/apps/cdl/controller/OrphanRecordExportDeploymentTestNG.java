@@ -43,7 +43,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
     private static final String CHECK_POINT = "orphan";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss";
-    private static final String NUM_FILES = "NUM_FILES";
     private static final String NUM_RECORDS = "NUM_RECORDS";
     private static final String MERGED_FILENAME_PREFIX = "MERGED_FILENAME_PREFIX";
     private static final String TARGET_FILE_SUFFIX = "TARGET_FILE_SUFFIX";
@@ -115,7 +114,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         String targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
 
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9308);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -139,7 +137,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         String targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
 
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 3);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.CONTACT.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -163,7 +160,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         String targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
 
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -192,7 +188,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         Job job = workflowProxy.getWorkflowJobFromApplicationId(accountAppId.toString(), customerSpace);
         String targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.UNMATCHED_ACCOUNT.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -203,7 +198,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         job = workflowProxy.getWorkflowJobFromApplicationId(transactionAppId.toString(), customerSpace);
         targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
         expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9308);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -214,7 +208,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         job = workflowProxy.getWorkflowJobFromApplicationId(contactAppId.toString(), customerSpace);
         targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
         expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 3);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.CONTACT.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -242,7 +235,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId1.toString(), customerSpace);
         String targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
         Map<String, Object> expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9308);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -253,7 +245,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         job = workflowProxy.getWorkflowJobFromApplicationId(applicationId2.toString(), customerSpace);
         targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
         expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9308);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -264,7 +255,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
         job = workflowProxy.getWorkflowJobFromApplicationId(applicationId3.toString(), customerSpace);
         targetPathSuffix = job.getInputs().get(ExportProperty.TARGET_FILE_NAME);
         expectedResults = new HashMap<>();
-        expectedResults.put(NUM_FILES, 3);
         expectedResults.put(NUM_RECORDS, 9308);
         expectedResults.put(MERGED_FILENAME_PREFIX, OrphanRecordsType.TRANSACTION.getOrphanType());
         expectedResults.put(TARGET_FILE_SUFFIX, targetPathSuffix);
@@ -280,7 +270,6 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
             List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dir,
                     expectedResults.get(MERGED_FILENAME_PREFIX) + "_.*.csv$");
             Assert.assertNotNull(files);
-            Assert.assertEquals(files.size(), ((Integer) expectedResults.get(NUM_FILES)).intValue());
             int totalRecordNum = 0;
             for (String file : files) {
                 CSVParser parser = new CSVParser(

@@ -8,9 +8,14 @@ import cascading.flow.FlowStepListener;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.DataFlowStepJob;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuppressWarnings("rawtypes")
 public class DataFlowStepListener implements FlowStepListener {
     private static final Logger log = LoggerFactory.getLogger(DataFlowStepListener.class);
+
+    private final List<Throwable> throwables = new ArrayList<>();
 
     @Override
     public void onStepStarting(FlowStep flowStep) {
@@ -40,7 +45,12 @@ public class DataFlowStepListener implements FlowStepListener {
     @Override
     public boolean onStepThrowable(FlowStep flowStep, Throwable throwable) {
         log.warn(String.format("Exception during step %s.", flowStep.getStepDisplayName()), throwable);
+        throwables.add(throwable);
         return false;
+    }
+
+    public List<Throwable> getThrowables() {
+        return throwables;
     }
 
 }

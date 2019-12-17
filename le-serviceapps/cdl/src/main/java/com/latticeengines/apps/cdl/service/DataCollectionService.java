@@ -122,7 +122,7 @@ public interface DataCollectionService {
     DataCollectionArtifact deleteArtifact(String customerSpace, String name, DataCollection.Version version,
                                           boolean deleteLatest);
 
-    byte[] downloadDataCollectionArtifact(String customerSpace, String exportId);
+    String getDataCollectionArtifactPath(String customerSpace, String exportId);
 
     void saveStatusHistory(String customerSpace, DataCollectionStatus status);
 
