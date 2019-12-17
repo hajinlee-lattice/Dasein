@@ -485,11 +485,11 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return post("createDataCollectionArtifact", requestUrl, artifact, DataCollectionArtifact.class);
     }
 
-    public byte[] downloadDataCollectionArtifact(String customerSpace, String exportId) {
+    public String getDataCollectionArtifactPath(String customerSpace, String exportId) {
         String requestUrl = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/artifact/{exportId}/download",
+                "/customerspaces/{customerSpace}/datacollection/artifact/{exportId}/path",
                 shortenCustomerSpace(customerSpace), exportId);
-        return getGenericBinary("downloaDataCollectionArtifact", requestUrl, byte[].class);
+        return getGenericBinary("getDataCollectionArtifactPath", requestUrl, String.class);
     }
 
     public void clearCache(String customerSpace) {

@@ -403,10 +403,10 @@ public class DataCollectionResource {
         return dataCollectionService.deleteArtifact(customerSpace, name, version, deleteLatest);
     }
 
-    @GetMapping(value = "/artifact/{exportId}/download", produces = MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = "Download a data collection artifact")
-    public byte[] downloadArtifact(@PathVariable String customerSpace, @PathVariable String exportId) {
-        return dataCollectionService.downloadDataCollectionArtifact(customerSpace, exportId);
+    @GetMapping(value = "/artifact/{exportId}/path", produces = MediaType.APPLICATION_OCTET_STREAM)
+    @ApiOperation(value = "get data collection artifact path")
+    public String getDataCollectionArtifactPath(@PathVariable String customerSpace, @PathVariable String exportId) {
+        return dataCollectionService.getDataCollectionArtifactPath(customerSpace, exportId);
     }
 
     @PostMapping(value = "/diagnostic/{dataCollectionTablePid}")
