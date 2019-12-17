@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteAccount;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccount;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
@@ -34,6 +35,9 @@ import com.latticeengines.workflow.exposed.build.Choreographer;
 public class ProcessAccountChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAccountChoreographer.class);
+
+    @Inject
+    private SoftDeleteAccount softDeleteAccount;
 
     @Inject
     private MergeAccount mergeAccount;
@@ -62,6 +66,11 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         return isCommonSkip(step, seq);
+    }
+
+    @Override
+    protected AbstractStep<?> softDeleteStep() {
+        return softDeleteAccount;
     }
 
     @Override

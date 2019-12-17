@@ -285,6 +285,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putObjectInContext(HARD_DEELETE_ACTIONS, hardDeleteActions);
 
         grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
+        grapherContext.setHasSoftDelete(CollectionUtils.isNotEmpty(softDeleteActions));
+        grapherContext.setHasAccountBatchStore(hasAccountBatchStore());
+        grapherContext.setHasContactBatchStore(hasContactBatchStore());
+        grapherContext.setHasTransactionRawStore(hasTransactionRawStore());
 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
@@ -386,6 +390,22 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     boolean hasAccountBatchStore() {
         String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
                 TableRoleInCollection.ConsolidatedAccount, activeVersion);
+        boolean hasBatchStore = StringUtils.isNotBlank(accountTableName);
+        log.info("Account batch store exist=" + hasBatchStore);
+        return hasBatchStore;
+    }
+
+    boolean hasContactBatchStore() {
+        String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                TableRoleInCollection.ConsolidatedContact, activeVersion);
+        boolean hasBatchStore = StringUtils.isNotBlank(accountTableName);
+        log.info("Account batch store exist=" + hasBatchStore);
+        return hasBatchStore;
+    }
+
+    boolean hasTransactionRawStore() {
+        String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                TableRoleInCollection.ConsolidatedRawTransaction, activeVersion);
         boolean hasBatchStore = StringUtils.isNotBlank(accountTableName);
         log.info("Account batch store exist=" + hasBatchStore);
         return hasBatchStore;

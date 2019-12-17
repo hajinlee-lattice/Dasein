@@ -93,8 +93,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<Table> inputTables = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
-    boolean skipSoftDelete = true;
-    List<Action> softDeleteActions;
+    Map<BusinessEntity, Boolean> softDeleteEntities;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -112,9 +111,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
-        softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
-        skipSoftDelete = CollectionUtils.isEmpty(softDeleteActions);
-
         entity = configuration.getMainEntity();
         batchStore = entity.getBatchStore();
         if (batchStore != null) {
@@ -125,6 +121,13 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         diffTablePrefix = entity.name() + "_Diff";
         diffReportTablePrefix = entity.name() + "_DiffReport";
+
+        if (hasKeyInContext(PERFORM_SOFT_DELETE)) {
+            softDeleteEntities = getMapObjectFromContext(PERFORM_SOFT_DELETE,
+                    BusinessEntity.class, Boolean.class);
+        } else {
+            softDeleteEntities = Collections.emptyMap();
+        }
 
         @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,

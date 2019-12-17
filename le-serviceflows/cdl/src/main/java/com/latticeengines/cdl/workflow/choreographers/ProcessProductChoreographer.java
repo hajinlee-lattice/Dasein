@@ -80,6 +80,11 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
     }
 
     @Override
+    protected AbstractStep<?> softDeleteStep() {
+        return null;
+    }
+
+    @Override
     protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping rebuild.");

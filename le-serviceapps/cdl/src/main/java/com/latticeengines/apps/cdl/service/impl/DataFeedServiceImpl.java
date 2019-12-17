@@ -538,23 +538,23 @@ public class DataFeedServiceImpl implements DataFeedService {
         DataLimit dataLimit = new DataLimit();
         Long accountDataLimit = zkConfigService.getDataQuotaLimit(customerSpace,
                 componentName, BusinessEntity.Account);
-        defaultAccountQuotaLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
-        dataLimit.setAccountDataQuotaLimit(defaultAccountQuotaLimit);
+        accountDataLimit = accountDataLimit != null ? accountDataLimit : defaultAccountQuotaLimit;
+        dataLimit.setAccountDataQuotaLimit(accountDataLimit);
         Long contactDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName, BusinessEntity.Contact);
-        defaultContactQuotaLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
-        dataLimit.setContactDataQuotaLimit(defaultContactQuotaLimit);
+        contactDataLimit = contactDataLimit != null ? contactDataLimit : defaultContactQuotaLimit;
+        dataLimit.setContactDataQuotaLimit(contactDataLimit);
         Long productBundlesDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 ProductType.Analytic);
-        defaultProductBundlesQuotaLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
-        dataLimit.setProductBundleDataQuotaLimit(defaultProductBundlesQuotaLimit);
+        productBundlesDataLimit = productBundlesDataLimit != null ? productBundlesDataLimit : defaultProductBundlesQuotaLimit;
+        dataLimit.setProductBundleDataQuotaLimit(productBundlesDataLimit);
         Long productSkusDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 ProductType.Spending);
-        defaultProductSkuQuotaLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
-        dataLimit.setProductSkuDataQuotaLimit(defaultProductSkuQuotaLimit);
+        productSkusDataLimit = productSkusDataLimit != null ? productSkusDataLimit : defaultProductSkuQuotaLimit;
+        dataLimit.setProductSkuDataQuotaLimit(productSkusDataLimit);
         Long transactionDataLimit = zkConfigService.getDataQuotaLimit(customerSpace, componentName,
                 BusinessEntity.Transaction);
-        defaultTransactionQuotaLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
-        dataLimit.setTransactionDataQuotaLimit(defaultTransactionQuotaLimit);
+        transactionDataLimit = transactionDataLimit != null ? transactionDataLimit : defaultTransactionQuotaLimit;
+        dataLimit.setTransactionDataQuotaLimit(transactionDataLimit);
         return dataLimit;
     }
 

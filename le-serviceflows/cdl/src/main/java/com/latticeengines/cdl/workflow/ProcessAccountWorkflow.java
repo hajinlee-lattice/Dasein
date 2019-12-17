@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.GenerateAccountLookup;
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
+import com.latticeengines.cdl.workflow.steps.validations.ValidateAccountBatchStore;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -21,7 +23,13 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkflowConfiguration> {
 
     @Inject
+    private SoftDeleteAccountWrapper softDeleteAccountWrapper;
+
+    @Inject
     private MergeAccountWrapper mergeAccountWrapper;
+
+    @Inject
+    private ValidateAccountBatchStore validateAccountBatchStore;
 
     @Inject
     private GenerateAccountLookup generateAccountLookup;
@@ -38,7 +46,9 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
     @Override
     public Workflow defineWorkflow(ProcessAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(softDeleteAccountWrapper) //
                 .next(mergeAccountWrapper) //
+                .next(validateAccountBatchStore) //
                 .next(generateAccountLookup) //
                 .next(updateAccountWorkflow) //
                 .next(rebuildAccountWorkflow) //

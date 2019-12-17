@@ -47,6 +47,18 @@ public class ChoreographerContext {
     @JsonProperty
     private boolean entityMatchEnabled;
 
+    @JsonProperty
+    private boolean hasSoftDelete;
+
+    @JsonProperty
+    private boolean hasAccountBatchStore;
+
+    @JsonProperty
+    private boolean hasContactBatchStore;
+
+    @JsonProperty
+    private boolean hasTransactionRawStore;
+
     public Set<BusinessEntity> getEntitiesRebuildDueToActions() {
         return entitiesRebuildDueToActions;
     }
@@ -133,5 +145,37 @@ public class ChoreographerContext {
 
     public void setEntityMatchEnabled(boolean entityMatchEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
+    }
+
+    public boolean isHasSoftDelete() {
+        return hasSoftDelete;
+    }
+
+    public void setHasSoftDelete(boolean hasSoftDelete) {
+        this.hasSoftDelete = hasSoftDelete;
+    }
+
+    public boolean isHasAccountBatchStore() {
+        return hasAccountBatchStore;
+    }
+
+    public void setHasAccountBatchStore(boolean hasAccountBatchStore) {
+        this.hasAccountBatchStore = hasAccountBatchStore;
+    }
+
+    public boolean isHasContactBatchStore() {
+        return hasContactBatchStore;
+    }
+
+    public void setHasContactBatchStore(boolean hasContactBatchStore) {
+        this.hasContactBatchStore = hasContactBatchStore;
+    }
+
+    public boolean isHasTransactionRawStore() {
+        return hasTransactionRawStore;
+    }
+
+    public void setHasTransactionRawStore(boolean hasTransactionRawStore) {
+        this.hasTransactionRawStore = hasTransactionRawStore;
     }
 }

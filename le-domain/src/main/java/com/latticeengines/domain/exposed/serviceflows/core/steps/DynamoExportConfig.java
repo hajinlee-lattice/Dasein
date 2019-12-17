@@ -20,11 +20,17 @@ public class DynamoExportConfig {
     @JsonProperty("src_table_name")
     private String srcTableName;
 
+    @JsonProperty("link_table_name")
+    private String linkTableName;
+
     @JsonProperty("partition_key")
     private String partitionKey;
 
     @JsonProperty("sort_key")
     private String sortKey;
+
+    @JsonProperty("relink")
+    private Boolean relink;
 
     public String getInputPath() {
         return inputPath;
@@ -50,6 +56,14 @@ public class DynamoExportConfig {
         this.srcTableName = srcTableName;
     }
 
+    public String getLinkTableName() {
+        return linkTableName;
+    }
+
+    public void setLinkTableName(String linkTableName) {
+        this.linkTableName = linkTableName;
+    }
+
     public String getPartitionKey() {
         return partitionKey;
     }
@@ -64,6 +78,14 @@ public class DynamoExportConfig {
 
     public void setSortKey(String sortKey) {
         this.sortKey = sortKey;
+    }
+
+    public Boolean getRelink() {
+        return relink;
+    }
+
+    public void setRelink(Boolean relink) {
+        this.relink = relink;
     }
 
     @Override

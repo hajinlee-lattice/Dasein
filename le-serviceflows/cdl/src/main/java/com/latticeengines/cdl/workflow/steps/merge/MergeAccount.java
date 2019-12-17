@@ -40,8 +40,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private int upsertStep;
     private int diffStep;
-    private int softDeleteStep;
-    private int softDeleteMergeStep;
 
     private String diffTableNameInContext;
     private String batchStoreNameInContext;
@@ -133,53 +131,19 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                     Collections.singletonList(InterfaceName.CustomerAccountId.name()));
             steps.add(merge);
         } else {
-            if (skipSoftDelete) {
-                throw new IllegalArgumentException("No input to be merged, and no soft delete needed!");
-            }
+            throw new IllegalArgumentException("No input to be merged, and no soft delete needed!");
         }
 
-        if (skipSoftDelete) {
-            upsertStep = mergeStep + 1;
-            diffStep = mergeStep + 2;
+        upsertStep = mergeStep + 1;
+        diffStep = mergeStep + 2;
 
-            TransformationStepConfig upsert = upsertMaster(true, mergeStep, true);
-            TransformationStepConfig diff = diff(mergeStep, upsertStep);
-            TransformationStepConfig report = reportDiff(diffStep);
-            steps.add(upsert);
-            steps.add(diff);
-            steps.add(report);
-        } else {
-            if (noImports) {
-                softDeleteMergeStep = 0;
-                softDeleteStep = softDeleteMergeStep + 1;
-                diffStep = softDeleteStep + 1;
-                TransformationStepConfig mergeSoftDelete = mergeSoftDelete(softDeleteActions);
-                TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, inputMasterTableName);
-                TransformationStepConfig diff = diff(inputMasterTableName, softDeleteStep);
-                TransformationStepConfig report = reportDiff(diffStep);
-                steps.add(mergeSoftDelete);
-                steps.add(softDelete);
-                steps.add(diff);
-                steps.add(report);
-            } else {
-                upsertStep = mergeStep + 1;
-                softDeleteMergeStep = upsertStep + 1;
-                softDeleteStep = softDeleteMergeStep + 1;
+        TransformationStepConfig upsert = upsertMaster(true, mergeStep, true);
+        TransformationStepConfig diff = diff(mergeStep, upsertStep);
+        TransformationStepConfig report = reportDiff(diffStep);
+        steps.add(upsert);
+        steps.add(diff);
+        steps.add(report);
 
-                diffStep = softDeleteStep + 1;
-
-                TransformationStepConfig upsert = upsertMaster(true, softDeleteStep, false);
-                TransformationStepConfig mergeSoftDelete = mergeSoftDelete(softDeleteActions);
-                TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, upsertStep);
-                TransformationStepConfig diff = diff(mergeStep, softDeleteStep);
-                TransformationStepConfig report = reportDiff(diffStep);
-                steps.add(mergeSoftDelete);
-                steps.add(softDelete);
-                steps.add(upsert);
-                steps.add(diff);
-                steps.add(report);
-            }
-        }
         return steps;
     }
 

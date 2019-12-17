@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteTransactionWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransactionWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessTransactionWorkflowConfiguration;
@@ -18,6 +19,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessTransactionWorkflow extends AbstractWorkflow<ProcessTransactionWorkflowConfiguration> {
+
+    @Inject
+    private SoftDeleteTransactionWrapper softDeleteTransactionWrapper;
 
     @Inject
     private MergeTransactionWrapper mergeTransactionWrapper;
@@ -34,6 +38,7 @@ public class ProcessTransactionWorkflow extends AbstractWorkflow<ProcessTransact
     @Override
     public Workflow defineWorkflow(ProcessTransactionWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
+                .next(softDeleteTransactionWrapper) //
                 .next(mergeTransactionWrapper) //
                 .next(updateTransactionWorkflow) //
                 .next(rebuildTransactionWorkflow) //

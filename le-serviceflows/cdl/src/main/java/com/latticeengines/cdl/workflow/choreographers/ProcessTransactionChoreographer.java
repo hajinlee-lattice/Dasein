@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteTransaction;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
@@ -46,6 +47,9 @@ import com.latticeengines.workflow.exposed.build.Choreographer;
 public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessTransactionChoreographer.class);
+
+    @Inject
+    private SoftDeleteTransaction softDeleteTransaction;
 
     @Inject
     private MergeTransaction mergeTransaction;
@@ -157,6 +161,11 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
 
         return skip;
+    }
+
+    @Override
+    protected AbstractStep<?> softDeleteStep() {
+        return softDeleteTransaction;
     }
 
     @Override

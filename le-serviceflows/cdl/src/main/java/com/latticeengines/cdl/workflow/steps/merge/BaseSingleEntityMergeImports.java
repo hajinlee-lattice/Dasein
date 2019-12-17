@@ -203,8 +203,12 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         super.initializeConfiguration();
         boolean isEntityMatchRematch =
                 configuration.isEntityMatchEnabled() && Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
-        if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
-            masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
+        if (softDeleteEntities.containsKey(entity) && Boolean.TRUE.equals(softDeleteEntities.get(entity))) {
+            masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, inactive);
+        } else {
+            if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
+                masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
+            }
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
             log.info("There has been no master table for this data collection. Creating a new one. entity is: {}",
