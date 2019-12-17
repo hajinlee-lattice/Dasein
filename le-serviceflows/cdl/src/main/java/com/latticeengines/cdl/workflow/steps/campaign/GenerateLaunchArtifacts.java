@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -159,8 +158,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 getRemoveDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT,
                 HdfsDataUnit.class);
 
-        SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
-                positiveDeltaDataUnit, negativeDeltaDataUnit,
+        SparkJobResult sparkJobResult = executeSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit,
+                negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
                 contactsDataExists);
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
@@ -176,9 +175,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
     }
 
-    private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups,
-            Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
-            BusinessEntity mainEntity, boolean contactsDataExists) {
+    private SparkJobResult executeSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups,
+            HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit, BusinessEntity mainEntity,
+            boolean contactsDataExists) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
