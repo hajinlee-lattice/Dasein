@@ -19,10 +19,14 @@ public class LegacyDeleteTransactionWorkFlow extends AbstractWorkflow<LegacyDele
     @Inject
     private LegacyDeleteByUploadStep legacyDeleteByUploadStep;
 
+    @Inject
+    private LegacyDeleteByDateRangeStep legacyDeleteByDateRangeStep;
+
     @Override
     public Workflow defineWorkflow(LegacyDeleteTransactionWorkFlowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(legacyDeleteByUploadStep)
+                .next(legacyDeleteByDateRangeStep)
                 .build();
     }
 }

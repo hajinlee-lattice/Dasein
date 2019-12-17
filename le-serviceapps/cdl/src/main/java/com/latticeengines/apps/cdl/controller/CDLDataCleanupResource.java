@@ -106,4 +106,18 @@ public class CDLDataCleanupResource {
             return ResponseDocument.failedResponse(e);
         }
     }
+
+    @PostMapping(value = "/legacyDeleteByDateRangeAction", headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "create legacyDelete data action")
+    public void createLegacyDeleteByDateRangeAction(@PathVariable String customerSpace,
+                                                                     @RequestBody CleanupOperationConfiguration cleanupOperationConfiguration) {
+        try {
+            cdlDataCleanupService.createLegacyDeleteDateRangeAction(customerSpace,
+                    cleanupOperationConfiguration);
+        } catch (Exception e) {
+            log.info("can't create legacyDeleteByDateRange Action: {}", e.getMessage());
+            throw e;
+        }
+    }
 }

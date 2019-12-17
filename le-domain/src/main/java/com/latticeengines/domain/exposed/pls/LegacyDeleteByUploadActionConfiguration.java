@@ -5,7 +5,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class LegacyDeleteActionConfiguration extends ActionConfiguration {
+public class LegacyDeleteByUploadActionConfiguration extends ActionConfiguration {
 
     @JsonProperty("entity")
     private BusinessEntity entity;

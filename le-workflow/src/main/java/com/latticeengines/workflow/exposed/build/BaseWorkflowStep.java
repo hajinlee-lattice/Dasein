@@ -281,6 +281,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_REMATCH_SERVING_VERSION = "ENTITY_MATCH_REMATCH_SERVING_VERSION";
 
     public static final String LEGACY_DELTE_BYUOLOAD_ACTIONS = "LEGACY_DELTE_BYUOLOAD_ACTIONS";
+    public static final String LEGACY_DELTE_BYDATERANGE_ACTIONS = "LEGACY_DELTE_BYDATERANGE_ACTIONS";
 
     public static final String TRACING_CONTEXT = "TRACING_CONTEXT";
 

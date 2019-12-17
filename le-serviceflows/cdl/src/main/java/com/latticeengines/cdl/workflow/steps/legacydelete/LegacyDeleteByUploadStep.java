@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.CleanupConfig;
@@ -50,19 +49,18 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.LegacyDeleteActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByUploadStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseMultiTransformationStep;
 
 @Component(LegacyDeleteByUploadStep.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUploadStepConfiguration> {
+public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<LegacyDeleteByUploadStepConfiguration> {
 
     static final String BEAN_NAME = "legacyDeleteByUploadStep";
 
@@ -90,9 +88,6 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
     @Inject
     private DataUnitProxy dataUnitProxy;
 
-    @Inject
-    private TransformationProxy transformationProxy;
-
     @Value("${pls.cdl.transform.default.cascading.engine}")
     private String defaultEngine;
 
@@ -113,91 +108,72 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
 
     private Table masterTable;
 
+    private Table cleanupTable;
+
+    private String cleanupTableName;
+
+    private Long tableRows = 0L;
+
     private TableRoleInCollection batchStore;
 
     private CustomerSpace customerSpace;
 
     private int scalingMultiplier = 1;
 
-    private String podId = "";
+    private List<Action> actionList = null;
 
     @Override
-    public void execute() {
-        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
-                BusinessEntity.class, Set.class);
-        log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
-        if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {
-            intializeConfiguration();
-            Table cleanupTable = null;
-            String customerSpace = configuration.getCustomerSpace().toString();
-            String cleanupTableName = "";
-            Long tableRows = 0L;
-            Set<Action> actionSet = JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class);
-            for (Action action : actionSet) {
-                log.info("action is: {}.", JsonUtils.serialize(action));
-                LegacyDeleteActionConfiguration config = (LegacyDeleteActionConfiguration) action.getActionConfiguration();
-                PipelineTransformationRequest request = generateRequest(config);
-                TransformationProgress progress = transformationProxy.transform(request, podId);
-                log.info("progress: {}", progress);
-                waitForProgressStatus(progress.getRootOperationUID());
-                cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, progress.getVersion());
-                cleanupTable = metadataProxy.getTable(customerSpace, cleanupTableName);
-                if (cleanupTable == null) {
-                    log.info("cleanupTable is empty.");
-                    break;
-                }
-                log.info("result table Name is " + cleanupTable.getName());
-                tableRows = getTableDataLines(cleanupTable);
-                log.info("tableRows is: {}.", tableRows);
-                if (tableRows <= 0L) {
-                    break;
-                }
-                masterTable = cleanupTable;
-            }
-            if (cleanupTable != null) {
-                if (!batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
-                    if (tableRows > 0) {
-                        DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION,
-                                DataCollection.Version.class);
-                        DynamoDataUnit dataUnit = null;
-                        if (batchStore.equals(BusinessEntity.Account.getBatchStore())) {
-                            // if replaced account batch store, need to link dynamo table
-                            String oldBatchStoreName = dataCollectionProxy.getTableName(customerSpace, batchStore, version);
-                            dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace, oldBatchStoreName, DataUnit.StorageType.Dynamo);
-                            if (dataUnit != null) {
-                                dataUnit.setLinkedTable(StringUtils.isBlank(dataUnit.getLinkedTable()) ? //
-                                        dataUnit.getName() : dataUnit.getLinkedTable());
-                                dataUnit.setName(cleanupTableName);
-                            }
-                        }
-                        dataCollectionProxy.upsertTable(customerSpace, cleanupTableName, batchStore, version);
-                        if (dataUnit != null) {
-                            dataUnitProxy.create(customerSpace, dataUnit);
-                        }
-                    } else {
-                        if (noImport()) {
-                            log.error("cannot clean up all batchStore with no import.");
-                            throw new IllegalStateException("cannot clean up all batchStore with no import, PA failed");
-                        }
-                        log.info("Result table is empty, remove " + batchStore.name() + " from data collection!");
-                        dataCollectionProxy.resetTable(configuration.getCustomerSpace().toString(), batchStore);
-                    }
-                }
-            }
-        }
-    }
-
-    private void intializeConfiguration() {
+    protected void intializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         batchStore = configuration.getEntity().equals(BusinessEntity.Transaction)
                 ? ConsolidatedRawTransaction : configuration.getEntity().getBatchStore();
         masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);
+        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
+                BusinessEntity.class, Set.class);
+        log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
+        if (actionMap == null || !actionMap.containsKey(configuration.getEntity())) {
+            return;
+        }
+        actionList = new ArrayList<>(JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class));
     }
 
-    private PipelineTransformationRequest generateRequest(LegacyDeleteActionConfiguration legacyDeleteActionConfiguration) {
+    @Override
+    protected boolean iteratorContinued(TransformationProgress progress, int index) {
+        if (progress == null && index < actionList.size() - 1) {
+            return true;
+        }
+        if (index >= actionList.size() - 1) {
+            return false;
+        }
+        cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, progress.getVersion());
+        cleanupTable = metadataProxy.getTable(customerSpace.toString(), cleanupTableName);
+        if (cleanupTable == null) {
+            log.info("cleanupTable is empty.");
+            return false;
+        }
+        log.info("result table Name is " + cleanupTable.getName());
+        tableRows = getTableDataLines(cleanupTable);
+        log.info("tableRows is: {}.", tableRows);
+        if (tableRows <= 0L) {
+            return false;
+        }
+        masterTable = cleanupTable;
+        return true;
+    }
+
+    @Override
+    protected PipelineTransformationRequest generateRequest(TransformationProgress progress, int index) {
+        Action action = actionList.get(index);
+        if (action == null) {
+            return null;
+        }
+        return generateRequest((LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration());
+    }
+
+    private PipelineTransformationRequest generateRequest(LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration) {
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("CleanupByUploadStep");
+            request.setName("LegacyDeleteByUploadStep");
             request.setSubmitter(customerSpace.getTenantId());
             request.setKeepTemp(false);
             request.setEnableSlack(false);
@@ -211,8 +187,8 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             if (cleanupTrx) {
-                TransformationStepConfig prepare = addTrxDate(legacyDeleteActionConfiguration);
-                TransformationStepConfig cleanup = cleanup(cleanupTrx, legacyDeleteActionConfiguration);
+                TransformationStepConfig prepare = addTrxDate(legacyDeleteByUploadActionConfiguration);
+                TransformationStepConfig cleanup = cleanup(cleanupTrx, legacyDeleteByUploadActionConfiguration);
                 TransformationStepConfig collectMaster = collectMaster();
                 TransformationStepConfig cleanupMaster = cleanupMaster();
                 TransformationStepConfig dayPeriods = collectDays();
@@ -225,7 +201,7 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
                 steps.add(dayPeriods);
                 steps.add(dailyPartition);
             } else {
-                TransformationStepConfig cleanup = cleanup(cleanupTrx, legacyDeleteActionConfiguration);
+                TransformationStepConfig cleanup = cleanup(cleanupTrx, legacyDeleteByUploadActionConfiguration);
                 steps.add(cleanup);
             }
 
@@ -237,11 +213,11 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
         }
     }
 
-    private TransformationStepConfig addTrxDate(LegacyDeleteActionConfiguration legacyDeleteActionConfiguration) {
+    private TransformationStepConfig addTrxDate(LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATE_CONVERTOR);
 
-        String deleteName = legacyDeleteActionConfiguration.getTableName();
+        String deleteName = legacyDeleteByUploadActionConfiguration.getTableName();
         List<String> sourceNames = new ArrayList<>();
         Map<String, SourceTable> baseTables = new HashMap<>();
         SourceTable delete = new SourceTable(deleteName, customerSpace);
@@ -336,7 +312,7 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
         return step;
     }
 
-    private TransformationStepConfig cleanup(boolean cleanupTrx, LegacyDeleteActionConfiguration legacyDeleteActionConfiguration) {
+    private TransformationStepConfig cleanup(boolean cleanupTrx, LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration) {
         TransformationStepConfig step = new TransformationStepConfig();
         BusinessEntity entity = configuration.getEntity();
 
@@ -347,7 +323,7 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
         List<String> sourceNames = new ArrayList<>();
         Map<String, SourceTable> baseTables = new HashMap<>();
         if (!cleanupTrx) {
-            String deleteName = legacyDeleteActionConfiguration.getTableName();
+            String deleteName = legacyDeleteByUploadActionConfiguration.getTableName();
             SourceTable delete = new SourceTable(deleteName, customerSpace);
             sourceNames.add(deleteName);
             baseTables.put(deleteName, delete);
@@ -360,12 +336,12 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
 
         CleanupConfig config = new CleanupConfig();
         config.setBusinessEntity(entity);
-        config.setOperationType(legacyDeleteActionConfiguration.getCleanupOperationType());
+        config.setOperationType(legacyDeleteByUploadActionConfiguration.getCleanupOperationType());
         config.setTransformer(TRANSFORMER);
         config.setBaseJoinedColumns(getJoinedColumns(config.getBusinessEntity(),
-                legacyDeleteActionConfiguration.getCleanupOperationType()));
+                legacyDeleteByUploadActionConfiguration.getCleanupOperationType()));
         config.setDeleteJoinedColumns(getJoinedColumns(config.getBusinessEntity(),
-                legacyDeleteActionConfiguration.getCleanupOperationType()));
+                legacyDeleteByUploadActionConfiguration.getCleanupOperationType()));
 
         String configStr = appendEngineConf(config, lightEngineConfig());
         TargetTable targetTable = new TargetTable();
@@ -473,26 +449,40 @@ public class LegacyDeleteByUploadStep extends BaseWorkflowStep<LegacyDeleteByUpl
         return MapUtils.isEmpty(entityImportsMap) || !entityImportsMap.containsKey(configuration.getEntity());
     }
 
-    private ProgressStatus waitForProgressStatus(String rootId) {
-        while (true) {
-            TransformationProgress progress = transformationProxy.getProgress(rootId);
-            log.info("progress is {}", JsonUtils.serialize(progress));
-            if (progress == null) {
-                throw new IllegalStateException(String.format("transformationProgress cannot be null, rootId is %s.",
-                        rootId));
+    protected void onPostTransformationCompleted() {
+        if (cleanupTable == null) {
+            return;
+        }
+        if (batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
+            return;
+        }
+        if (tableRows <= 0) {
+            if (noImport()) {
+                log.error("cannot clean up all batchStore with no import.");
+                throw new IllegalStateException("cannot clean up all batchStore with no import, PA failed");
             }
-            if (progress.getStatus().equals(ProgressStatus.FINISHED)) {
-                return progress.getStatus();
+            log.info("Result table is empty, remove " + batchStore.name() + " from data collection!");
+            dataCollectionProxy.resetTable(configuration.getCustomerSpace().toString(), batchStore);
+            return;
+        }
+        DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION,
+                DataCollection.Version.class);
+        DynamoDataUnit dataUnit = null;
+        if (batchStore.equals(BusinessEntity.Account.getBatchStore())) {
+            // if replaced account batch store, need to link dynamo table
+            String oldBatchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
+                    version);
+            dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), oldBatchStoreName,
+                    DataUnit.StorageType.Dynamo);
+            if (dataUnit != null) {
+                dataUnit.setLinkedTable(StringUtils.isBlank(dataUnit.getLinkedTable()) ? //
+                        dataUnit.getName() : dataUnit.getLinkedTable());
+                dataUnit.setName(cleanupTableName);
             }
-            if (progress.getStatus().equals(ProgressStatus.FAILED)) {
-                throw new RuntimeException(
-                        "Transformation failed, check log for detail.: " + JsonUtils.serialize(progress));
-            }
-            try {
-                Thread.sleep(120000L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        }
+        dataCollectionProxy.upsertTable(customerSpace.toString(), cleanupTableName, batchStore, version);
+        if (dataUnit != null) {
+            dataUnitProxy.create(customerSpace.toString(), dataUnit);
         }
     }
 }

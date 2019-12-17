@@ -1,10 +1,14 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.LEGACY_DELTE_BYDATERANGE_ACTIONS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.LEGACY_DELTE_BYUOLOAD_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_DYNAMO;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_REDSHIFT;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -20,10 +24,16 @@ import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
 import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
+import com.latticeengines.cdl.workflow.steps.legacydelete.LegacyDeleteByDateRangeStep;
+import com.latticeengines.cdl.workflow.steps.legacydelete.LegacyDeleteByUploadStep;
 import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.rematch.DeleteByUploadStep;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByDateRangeStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByUploadStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
@@ -94,6 +104,12 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private DeleteByUploadStep deleteByUploadStep;
 
     @Inject
+    private LegacyDeleteByUploadStep legacyDeleteByUploadStep;
+
+    @Inject
+    private LegacyDeleteByDateRangeStep legacyDeleteByDateRangeStep;
+
+    @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
     @Inject
@@ -122,6 +138,10 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = ratingChoreographer.skipStep(step, seq);
         } else if (isHardDeleteByUploadStep(step)) {
             skip = skipHardDeleteByUpload(step);
+        } else if (isLegacyDeleteByDateRangeStep(step)) {
+            skip = skipLegacyDeleteByDateRange(step);
+        } else if (isLegacyDeleteByUploadStep(step)) {
+            skip = skipLegacyDeleteByUpload(step);
         }
         return super.skipStep(step, seq) || skip;
     }
@@ -207,9 +227,43 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         return step.name().endsWith(deleteByUploadStep.name());
     }
 
+    private boolean isLegacyDeleteByUploadStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(legacyDeleteByUploadStep.name());
+    }
+
+    private boolean isLegacyDeleteByDateRangeStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(legacyDeleteByDateRangeStep.name());
+    }
+
     private boolean skipHardDeleteByUpload(AbstractStep<? extends BaseStepConfiguration> step) {
         List<Action> actions = step.getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
         return CollectionUtils.isEmpty(actions);
+    }
+
+    private boolean skipLegacyDeleteByUpload(AbstractStep<? extends BaseStepConfiguration> step) {
+        Map<BusinessEntity, Set> actionMap = step.getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
+                BusinessEntity.class, Set.class);
+        if (!(step.getConfiguration() instanceof LegacyDeleteByUploadStepConfiguration)) {
+            return true;
+        }
+        LegacyDeleteByUploadStepConfiguration configuration = (LegacyDeleteByUploadStepConfiguration) step.getConfiguration();
+        if (actionMap == null || !actionMap.containsKey(configuration.getEntity())) {
+            return true;
+        }
+        return CollectionUtils.isEmpty(JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class));
+    }
+
+    private boolean skipLegacyDeleteByDateRange(AbstractStep<? extends BaseStepConfiguration> step) {
+        Map<BusinessEntity, Set> actionMap = step.getMapObjectFromContext(LEGACY_DELTE_BYDATERANGE_ACTIONS,
+                BusinessEntity.class, Set.class);
+        if (!(step.getConfiguration() instanceof LegacyDeleteByDateRangeStepConfiguration)) {
+            return true;
+        }
+        LegacyDeleteByDateRangeStepConfiguration configuration = (LegacyDeleteByDateRangeStepConfiguration) step.getConfiguration();
+        if (actionMap == null || !actionMap.containsKey(configuration.getEntity())) {
+            return true;
+        }
+        return CollectionUtils.isEmpty(JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class));
     }
 
     private boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step) {

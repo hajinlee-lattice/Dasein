@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByDateRangeActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -102,6 +103,37 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     }
 
     @Override
+    public void createLegacyDeleteDateRangeAction(String customerSpace, CleanupOperationConfiguration configuration) {
+        log.info("customerSpace: {}, CleanupOperationConfiguration: {}", customerSpace, configuration);
+        log.info("Registering an operation action for tenant={}", customerSpace);
+        Tenant tenant = tenantService.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new NullPointerException(
+                    String.format("Tenant with id=%s cannot be found", customerSpace));
+        }
+        if (configuration instanceof CleanupByDateRangeConfiguration) {
+            BusinessEntity businessEntity = configuration.getEntity();
+            if (businessEntity == null) {
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Account);
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Contact);
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Product);
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Transaction);
+            } else {
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        businessEntity);
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Tenant with id=%s cannot find CleanupByDataRangeConfiguration when do delete " +
+                            "operation.", customerSpace));
+        }
+    }
+
+    @Override
     public ApplicationId registerDeleteData(String customerSpace, boolean hardDelete, String sourceFileName, String user) {
         SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileName);
         if (sourceFile == null) {
@@ -136,6 +168,27 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         CleanupActionConfiguration cleanupActionConfiguration = new CleanupActionConfiguration();
         cleanupActionConfiguration.addImpactEntity(businessEntity);
         action.setActionConfiguration(cleanupActionConfiguration);
+        action.setTenant(tenant);
+        if (tenant.getPid() != null) {
+            MultiTenantContext.setTenant(tenant);
+        } else {
+            log.warn("The tenant in action does not have a pid:{}. ", tenant);
+        }
+        actionService.create(action);
+    }
+
+    private void createLegacyDeleteByDateRangeAction(Tenant tenant,
+                                                     CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration,
+                                                     BusinessEntity entity) {
+        Action action = new Action();
+        action.setType(ActionType.LEGACY_DELETE_DATERANGE);
+        action.setActionInitiator(cleanupByDateRangeConfiguration.getOperationInitiator());
+        LegacyDeleteByDateRangeActionConfiguration legacyDeleteByDateRangeActionConfiguration =
+                new LegacyDeleteByDateRangeActionConfiguration();
+        legacyDeleteByDateRangeActionConfiguration.setEntity(entity);
+        legacyDeleteByDateRangeActionConfiguration.setStartTime(cleanupByDateRangeConfiguration.getStartTime());
+        legacyDeleteByDateRangeActionConfiguration.setEndTime(cleanupByDateRangeConfiguration.getEndTime());
+        action.setActionConfiguration(legacyDeleteByDateRangeActionConfiguration);
         action.setTenant(tenant);
         if (tenant.getPid() != null) {
             MultiTenantContext.setTenant(tenant);

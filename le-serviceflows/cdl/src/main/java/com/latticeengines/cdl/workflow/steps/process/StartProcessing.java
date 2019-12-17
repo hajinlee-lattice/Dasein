@@ -50,7 +50,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
-import com.latticeengines.domain.exposed.pls.LegacyDeleteActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -292,6 +292,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putObjectInContext(SOFT_DEELETE_ACTIONS, softDeleteActions);
         putObjectInContext(HARD_DEELETE_ACTIONS, hardDeleteActions);
         setLegacyDeleteByUploadActions(actions);
+        setLegacyDeleteByDateRangeActions(actions);
 
         grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
         grapherContext.setHasSoftDelete(CollectionUtils.isNotEmpty(softDeleteActions));
@@ -511,7 +512,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (CollectionUtils.isNotEmpty(actions)) {
             for (Action action : actions) {
                 if (ActionType.LEGACY_DELETE_UPLOAD.equals(action.getType())) {
-                    LegacyDeleteActionConfiguration config = (LegacyDeleteActionConfiguration) action.getActionConfiguration();
+                    LegacyDeleteByUploadActionConfiguration config = (LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration();
                     Set<Action> actionSet = legacyDeleteByUploadActions.get(config.getEntity());
                     if (actionSet == null) {
                         actionSet = new HashSet<>();
@@ -523,6 +524,19 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             log.info("legacyDeleteByUploadActions is {}.", JsonUtils.serialize(legacyDeleteByUploadActions));
             putObjectInContext(LEGACY_DELTE_BYUOLOAD_ACTIONS, legacyDeleteByUploadActions);
         }
+    }
+
+    private void setLegacyDeleteByDateRangeActions(List<Action> actions) {
+        Set<Action> legacyDeleteByDateRangeActions = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            for (Action action : actions) {
+                if (ActionType.LEGACY_DELETE_DATERANGE.equals(action.getType())) {
+                    legacyDeleteByDateRangeActions.add(action);
+                }
+            }
+        }
+        log.info("legacyDeleteByDateRangeActions is {}.", JsonUtils.serialize(legacyDeleteByDateRangeActions));
+        putObjectInContext(LEGACY_DELTE_BYDATERANGE_ACTIONS, legacyDeleteByDateRangeActions);
     }
 
     private List<Action> getDeleteActions() {

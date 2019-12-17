@@ -47,8 +47,8 @@ public class CleanupByUploadDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         cleanupByUpload();
-        processAnalyze();
         verifyCleanup();
+        processAnalyze();
         // verifyProcess();
     }
 
@@ -69,34 +69,26 @@ public class CleanupByUploadDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
             sb.append(numRecordsInCsv);
             sb.append('\n');
             numRecordsInCsv++;
-            if (numRecordsInCsv == 10 || numRecordsInCsv == 20) {
-
-                log.info("There are " + numRecordsInCsv + " rows in csv.");
-                String fileName = "contact_delete_" + numRecordsInCsv + ".csv";
-                Resource source = new ByteArrayResource(sb.toString().getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return fileName;
-                    }
-                };
-                SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.DeleteContactTemplate,
-                        CleanupOperationType.BYUPLOAD_ID,
-                        source);
-                ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, sourceFile,
-                        BusinessEntity.Contact, CleanupOperationType.BYUPLOAD_ID, MultiTenantContext.getEmailAddress());
-                JobStatus status = waitForWorkflowStatus(appId.toString(), false);
-                Assert.assertEquals(JobStatus.COMPLETED, status);
-                if (numRecordsInCsv == 20) {
-                    break;
-                }
-                sb = new StringBuilder();
-                sb.append("id");
-                sb.append(',');
-                sb.append("index");
-                sb.append('\n');
+            if (numRecordsInCsv == 10) {
+                break;
             }
         }
         assert (numRecordsInCsv > 0);
+        log.info("There are " + numRecordsInCsv + " rows in csv.");
+        String fileName = "contact_delete.csv";
+        Resource source = new ByteArrayResource(sb.toString().getBytes()) {
+            @Override
+            public String getFilename() {
+                return fileName;
+            }
+        };
+        SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.DeleteContactTemplate,
+                CleanupOperationType.BYUPLOAD_ID,
+                source);
+        ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, sourceFile,
+                BusinessEntity.Contact, CleanupOperationType.BYUPLOAD_ID, MultiTenantContext.getEmailAddress());
+        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+        Assert.assertEquals(JobStatus.COMPLETED, status);
     }
 
     private void verifyCleanup() {
