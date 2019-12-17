@@ -69,12 +69,13 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         if (hasNewBatchStore() || missingLookupTable()) {
             String batchStoreName = hasNewBatchStore() ? inactiveBatchStoreName : activeBatchStoreName;
+            DataCollection.Version version = batchStoreName.equals(activeBatchStoreName) ? active : inactive;
             Table batchStoreSummary = metadataProxy.getTableSummary(customerSpace.toString(), batchStoreName);
             GenerateAccountLookupConfig config = new GenerateAccountLookupConfig();
             config.setInput(Collections.singletonList(batchStoreSummary.toHdfsDataUnit("Account")));
             List<String> lookupIds = servingStoreProxy
                     .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account,
-                            Collections.singletonList(ColumnSelection.Predefined.LookupId))
+                            Collections.singletonList(ColumnSelection.Predefined.LookupId), version)
                     .map(ColumnMetadata::getAttrName).collectList().block();
             log.info("lookupIds=" + lookupIds);
             config.setLookupIds(lookupIds);
