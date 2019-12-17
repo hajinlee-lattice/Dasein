@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.util.IOUtils;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionArtifactEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
@@ -674,7 +671,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
-    public byte[] downloadDataCollectionArtifact(String customerSpace, String exportId) {
+    public String getDataCollectionArtifactPath(String customerSpace, String exportId) {
         DataCollection.Version activeVersion = getActiveVersion(customerSpace);
         if (activeVersion == null) {
             throw new RuntimeException("Cannot find active version of data collection for tenant " + customerSpace);
@@ -694,19 +691,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         DataCollectionArtifact artifact = artifacts.get(0);
         String artifactKey = getArtifactKey(s3Bucket, artifact.getUrl());
         log.info("S3 artifactKey=" + artifactKey);
-
-        InputStream inputStream = s3Service.readObjectAsStream(s3Bucket, artifactKey);
-        try {
-            if (inputStream != null) {
-                return IOUtils.toByteArray(inputStream);
-            } else {
-                return null;
-            }
-        } catch (IOException exc) {
-            throw new RuntimeException(String.format(
-                    "Failed to get content of data collection artifact. Bucket=%s. Object key=%s.",
-                    s3Bucket, artifactKey), exc);
-        }
+        return artifactKey;
     }
 
     private String getArtifactKey(String s3Bucket, String url) {
