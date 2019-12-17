@@ -1,5 +1,8 @@
 package com.latticeengines.dataflow.service.impl.listener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,9 +10,6 @@ import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.DataFlowStepJob;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("rawtypes")
 public class DataFlowStepListener implements FlowStepListener {
