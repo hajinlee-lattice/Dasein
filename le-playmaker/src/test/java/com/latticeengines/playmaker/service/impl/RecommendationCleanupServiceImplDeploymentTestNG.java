@@ -66,7 +66,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
     private String syncDestination = "SFDC";
     private Map<String, String> orgInfo;
 
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         final TestPlaySetupConfig testPlaySetupConfig = new TestPlaySetupConfig.Builder().build();
         testPlayCreationHelper.setupTenantAndCreatePlay(testPlaySetupConfig);
@@ -85,7 +85,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         createDummyRecommendations(maxUpdateRows * 2, new Date());
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testCleanupRecommendationsWhenNoDeletedPlays() throws Exception {
 
         List<Recommendation> recommendations = recommendationEntityMgr//
@@ -107,7 +107,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         Assert.assertEquals(recommendations.size(), countOfNonDeletedRecommendations);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsWhenNoDeletedPlays" }, enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsWhenNoDeletedPlays" })
     public void testCleanupRecommendationsDueToDeletedPlays() throws Exception {
         List<Recommendation> recommendations = recommendationEntityMgr//
                 .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
@@ -131,7 +131,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsDueToDeletedPlays" }, enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsDueToDeletedPlays" })
     public void testCleanupAfterCleanupRecommendationsDueToDeletedPlays() throws Exception {
         createDummyRecommendations(maxUpdateRows * 2, new Date());
 
@@ -153,8 +153,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         Assert.assertEquals(countOfNonDeletedRecommendations, countOfNonDeletedRecommendations);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testCleanupAfterCleanupRecommendationsDueToDeletedPlays" }, enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = { "testCleanupAfterCleanupRecommendationsDueToDeletedPlays" })
     public void testCleanupRecommendationsWhenNoVeryOldRecommendations() throws Exception {
         List<Recommendation> recommendations = recommendationEntityMgr//
                 .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
@@ -190,8 +189,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {
-            "testCleanupRecommendationsWhenNoVeryOldRecommendations" }, enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsWhenNoVeryOldRecommendations" })
     public void cleanupVeryOldRecommendations() throws Exception {
         createDummyRecommendations(maxOldRecommendations, new Date(System.currentTimeMillis() / 2));
 
@@ -211,7 +209,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "cleanupVeryOldRecommendations" }, enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = { "cleanupVeryOldRecommendations" })
     public void cleanupAfterCleanupVeryOldRecommendations() throws Exception {
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService).cleanupVeryOldRecommendations();
         Assert.assertEquals(count, 0);
