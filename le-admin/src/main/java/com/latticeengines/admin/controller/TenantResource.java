@@ -43,7 +43,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('TENANT_CONSOLE')")
+@PostAuthorize("hasRole('adminconsole')")
 public class TenantResource {
 
     @Inject
@@ -78,8 +78,8 @@ public class TenantResource {
     @ResponseBody
     @ApiOperation(value = "Create a Lattice tenant")
     public boolean createTenantV2(@PathVariable String tenantId, //
-                                @RequestParam(value = "contractId") String contractId, //
-                                @RequestBody TenantRegistration registration, HttpServletRequest request) {
+            @RequestParam(value = "contractId") String contractId, //
+            @RequestBody TenantRegistration registration, HttpServletRequest request) {
         String ticket = request.getHeader(Constants.AUTHORIZATION);
         String userName = "_defaultUser";
         if (!StringUtils.isEmpty(ticket)) {
