@@ -188,6 +188,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACTIVITY_MERGED_METRICS_SERVING_ENTITIES = "MERGED_METRICS_SERVING_ENTITIES"; // set of merged activity metrics groups' serving entities
     protected static final String SCORE_TRAINING_FILE_INCLUDED_FEATURES = "SCORE_TRAINING_FILE_INCLUDED_FEATURES";
     protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s"; // streamId, period
+    protected static final String PERFORM_SOFT_DELETE = "PERFORM_SOFT_DELETE"; //
+    protected static final String SOFT_DELETE_RECORD_COUNT = "SOFT_DELETE_RECORD_COUNT"; //
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";

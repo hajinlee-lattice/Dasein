@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeProductWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetProduct;
+import com.latticeengines.cdl.workflow.steps.validations.ValidateProductBatchStore;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessProductWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -21,6 +22,9 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessProductWorkf
 
     @Inject
     private MergeProductWrapper mergeProductWrapper;
+
+    @Inject
+    private ValidateProductBatchStore validateProductBatchStore;
 
     @Inject
     private UpdateProductWorkflow updateProductWorkflow;

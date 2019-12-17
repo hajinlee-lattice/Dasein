@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteBy
         @Type(value = BaseProcessEntityStepConfiguration.class, name = "BaseProcessEntityStepConfiguration"),
         @Type(value = ConvertBatchStoreStepConfiguration.class, name = "ConvertBatchStoreStepConfiguration"),
         @Type(value = CleanupByUploadWrapperConfiguration.class, name = "CleanupByUploadWrapperConfiguration"),
-        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration"),  })
+        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration") })
 public class BaseWrapperStepConfiguration extends BaseStepConfiguration {
 
     @NotNull

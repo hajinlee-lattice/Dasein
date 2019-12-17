@@ -68,9 +68,9 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public  Builder setReplace(boolean needReplace) {
-                processContactStepConfiguration.setNeedReplace(needReplace);
-                updateContactWorkflowBuilder.setReplace(needReplace);
-                rebuildContactWorkflowBuilder.setReplace(needReplace);
+            processContactStepConfiguration.setNeedReplace(needReplace);
+            updateContactWorkflowBuilder.setReplace(needReplace);
+            rebuildContactWorkflowBuilder.setReplace(needReplace);
             return this;
         }
 

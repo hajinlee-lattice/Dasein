@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.RebuildContactWorkflow;
 import com.latticeengines.cdl.workflow.UpdateContactWorkflow;
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteContact;
 import com.latticeengines.cdl.workflow.steps.merge.MergeContact;
 import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.cdl.workflow.steps.update.CloneContact;
@@ -27,6 +28,9 @@ import com.latticeengines.workflow.exposed.build.Choreographer;
 public class ProcessContactChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessContactChoreographer.class);
+
+    @Inject
+    private SoftDeleteContact softDeleteContact;
 
     @Inject
     private MergeContact mergeContact;
@@ -53,6 +57,11 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         return isCommonSkip(step, seq);
+    }
+
+    @Override
+    protected AbstractStep<?> softDeleteStep() {
+        return softDeleteContact;
     }
 
     @Override

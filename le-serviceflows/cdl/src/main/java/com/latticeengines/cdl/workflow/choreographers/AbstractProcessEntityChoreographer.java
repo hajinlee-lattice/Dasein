@@ -70,8 +70,13 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean isCommonSkip(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         String msg = String.format("Skip step [%d] %s", seq, step.name());
 
+        initialize(step);
+
+        if (isSoftDeleteStep(step)) {
+            return !shouldSoftDelete(step);
+        }
+
         if (isMergeStep(step)) {
-            initialize(step);
             return !shouldMerge(step);
         }
 
@@ -155,6 +160,14 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     protected Set<String> getExtraDecisions() {
         return Collections.emptySet();
+    }
+
+    private boolean isSoftDeleteStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (softDeleteStep() == null) {
+            return false;
+        } else {
+            return step.name().endsWith(softDeleteStep().name());
+        }
     }
 
     private boolean isMergeStep(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -311,8 +324,32 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
+    private boolean shouldSoftDelete(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (!hasSoftDelete || replace) {
+            return false;
+        }
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        boolean hasBatchStore;
+        switch (mainEntity()) {
+            case Account:
+                hasBatchStore = grapherContext.isHasAccountBatchStore();
+                break;
+            case Contact:
+                hasBatchStore = grapherContext.isHasContactBatchStore();
+                break;
+            case Transaction:
+                hasBatchStore = grapherContext.isHasTransactionRawStore();
+                break;
+            default:
+                hasBatchStore = false;
+                break;
+        }
+        return hasBatchStore;
+    }
+
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports || hasSoftDelete || checkHasEntityMatchRematch(step);
+        return hasImports || checkHasEntityMatchRematch(step);
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -371,6 +408,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean hasAnyChange() {
         return rebuild || update;
     }
+
+    protected abstract AbstractStep<?> softDeleteStep();
 
     protected abstract AbstractStep<?> mergeStep();
 
