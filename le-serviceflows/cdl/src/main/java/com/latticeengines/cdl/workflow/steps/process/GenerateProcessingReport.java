@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -34,6 +36,8 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -46,6 +50,8 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.CountOrphanTransactionsConfig;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -54,7 +60,9 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
+import com.latticeengines.serviceflows.workflow.dataflow.LivySessionManager;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
+import com.latticeengines.spark.exposed.job.cdl.CountOrphanTransactionsJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -86,10 +94,14 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     @Inject
     private SparkJobService sparkJobService;
 
+    @Inject
+    private LivySessionManager livySessionManager;
+
     private DataCollection.Version active;
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
     private List<Action> actions;
+    private Map<TableRoleInCollection, String> tableNames = new HashMap<>();
 
     @Override
     public void execute() {
@@ -274,6 +286,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
         detail.setOrphanContactCount(orphanCnts.get(OrphanRecordsType.CONTACT));
         detail.setUnmatchedAccountCount(orphanCnts.get(OrphanRecordsType.UNMATCHED_ACCOUNT));
+        detail.setOrphanTransactionCount(orphanCnts.get(OrphanRecordsType.TRANSACTION));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
         log.info("GenerateProcessingReport step: dataCollection Status is " + JsonUtils.serialize(detail));
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail, inactive);
@@ -286,7 +299,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         currentCnts.put(BusinessEntity.Transaction,
                 countRawEntitiesInHdfs(TableRoleInCollection.ConsolidatedRawTransaction));
         currentCnts.put(BusinessEntity.Product, countRawEntitiesInHdfs(TableRoleInCollection.ConsolidatedProduct));
-
         return currentCnts;
     }
 
@@ -303,49 +315,50 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         } catch (Exception e) {
             log.warn("Failed to get the number of orphan contacts", e);
         }
+        try {
+            orphanCnts.put(OrphanRecordsType.TRANSACTION, countOrphanTransactionsInHdfs());
+        } catch (Exception e) {
+            log.warn("Failed to get the number of orphan transactions", e);
+        }
         return orphanCnts;
     }
 
-    private long countRawEntitiesInHdfs(TableRoleInCollection tableRole) {
-        try {
-            String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, inactive);
-            if (StringUtils.isBlank(tableName)) {
-                log.info(String.format("Cannot find table role %s in version %s", tableRole.name(), inactive));
-                tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, active);
-                if (StringUtils.isBlank(tableName)) {
-                    log.info(String.format("Cannot find table role %s in version %s", tableRole.name(), active));
-                    return 0L;
-                }
+    private long countOrphanTransactionsInHdfs() {
+        long result = 0l;
+        List<TableRoleInCollection> tableRoles = Lists.newArrayList(TableRoleInCollection.ConsolidatedRawTransaction,
+                TableRoleInCollection.ConsolidatedAccount, TableRoleInCollection.ConsolidatedProduct);
+        boolean valid = true;
+        List<DataUnit> hdfsDataUnits = new ArrayList<>();
+        for (TableRoleInCollection tableRole : tableRoles) {
+            String tableName = tableNames.get(tableRole);
+            if (StringUtils.isEmpty(tableName)) {
+                tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, inactive);
+            }
+            if (StringUtils.isEmpty(tableName)) {
+                valid = false;
+                break;
             }
             Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
             if (table == null) {
                 log.error("Cannot find table " + tableName);
-                return 0L;
+                valid = false;
+                break;
             }
-
-            Long result;
-            String hdfsPath = table.getExtracts().get(0).getPath();
-            if (tableRole == TableRoleInCollection.ConsolidatedProduct) {
-                log.info("Count products in HDFS " + hdfsPath);
-                result = ProductUtils.countProducts(yarnConfiguration, hdfsPath,
-                        Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()), ProductStatus.Active.name());
-            } else {
-                if (!hdfsPath.endsWith("*.avro")) {
-                    if (hdfsPath.endsWith("/")) {
-                        hdfsPath += "*.avro";
-                    } else {
-                        hdfsPath += "/*.avro";
-                    }
-                }
-                log.info("Count records in HDFS " + hdfsPath);
-                result = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
-            }
-            log.info(String.format("Table role %s has %d entities.", tableRole.name(), result));
-            return result;
-        } catch (Exception ex) {
-            log.error("Fail to count raw entities in table.", ex);
-            return 0L;
+            HdfsDataUnit hdfsDataUnit = new HdfsDataUnit();
+            hdfsDataUnit.setPath(table.getExtracts().get(0).getPath());
+            hdfsDataUnits.add(hdfsDataUnit);
         }
+        if (!valid) {
+            return result;
+        }
+        CountOrphanTransactionsConfig countOrphanTransactionsConfig = new CountOrphanTransactionsConfig();
+        countOrphanTransactionsConfig.setInput(hdfsDataUnits);
+        countOrphanTransactionsConfig.setJoinKeys(Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
+        SparkJobResult sparkJobResult = SparkUtils.runJob(customerSpace, yarnConfiguration, sparkJobService,
+                livySessionManager, CountOrphanTransactionsJob.class, countOrphanTransactionsConfig);
+        result = Long.parseLong(sparkJobResult.getOutput());
+        log.info(String.format("There are %d orphan transactions.", result));
+        return result;
     }
 
     private long countOrphansInRedshift(OrphanRecordsType orphanRecordsType) {
@@ -393,9 +406,51 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     log.info("There is no contact batch store, return 0 as the number of orphan contacts.");
                     return 0L;
                 }
-            case TRANSACTION:
             default:
                 return 0;
+        }
+    }
+
+    private long countRawEntitiesInHdfs(TableRoleInCollection tableRole) {
+        try {
+            String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, inactive);
+            if (StringUtils.isBlank(tableName)) {
+                log.info(String.format("Cannot find table role %s in version %s", tableRole.name(), inactive));
+                tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, active);
+                if (StringUtils.isBlank(tableName)) {
+                    log.info(String.format("Cannot find table role %s in version %s", tableRole.name(), active));
+                    return 0L;
+                }
+            }
+            tableNames.putIfAbsent(tableRole, tableName);
+            Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+            if (table == null) {
+                log.error("Cannot find table " + tableName);
+                return 0L;
+            }
+
+            Long result;
+            String hdfsPath = table.getExtracts().get(0).getPath();
+            if (tableRole.equals(TableRoleInCollection.ConsolidatedProduct)) {
+                log.info("Count products in HDFS " + hdfsPath);
+                result = ProductUtils.countProducts(yarnConfiguration, hdfsPath,
+                        Arrays.asList(ProductType.Bundle.name(), ProductType.Hierarchy.name()), ProductStatus.Active.name());
+            } else {
+                if (!hdfsPath.endsWith("*.avro")) {
+                    if (hdfsPath.endsWith("/")) {
+                        hdfsPath += "*.avro";
+                    } else {
+                        hdfsPath += "/*.avro";
+                    }
+                }
+                log.info("Count records in HDFS " + hdfsPath);
+                result = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
+            }
+            log.info(String.format("Table role %s has %d entities.", tableRole.name(), result));
+            return result;
+        } catch (Exception ex) {
+            log.error("Fail to count raw entities in table.", ex);
+            return 0L;
         }
     }
 
@@ -412,6 +467,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     inactive.name()));
             return 0L;
         }
+        tableNames.putIfAbsent(entity.getServingStore(), servingStore);
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);
 

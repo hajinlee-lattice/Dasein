@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.CountOrphanTransactionsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
@@ -87,7 +88,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = ProcessDimensionConfig.class, name = ProcessDimensionConfig.NAME), //
         @JsonSubTypes.Type(value = AggDailyActivityConfig.class, name = AggDailyActivityConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateAccountLookupConfig.class, name = GenerateAccountLookupConfig.NAME), //
-        @JsonSubTypes.Type(value = MergeActivityMetricsJobConfig.class, name = MergeActivityMetricsJobConfig.NAME)
+        @JsonSubTypes.Type(value = MergeActivityMetricsJobConfig.class, name = MergeActivityMetricsJobConfig.NAME),
+        @JsonSubTypes.Type(value = CountOrphanTransactionsConfig.class, name = CountOrphanTransactionsConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 
