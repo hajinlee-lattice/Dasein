@@ -110,7 +110,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     @JsonProperty("launchUnscored")
     @Column(name = "LAUNCH_UNSCORED", nullable = false)
-    private boolean launchUnscored;
+    private Boolean launchUnscored;
 
     @JsonProperty("launchType")
     @Column(name = "LAUNCH_TYPE", nullable = false)

@@ -141,6 +141,10 @@ public class PlayLaunchChannelEntityMgrImpl
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "No lookupIdMap found by Id: " + playLaunchChannel.getLookupIdMap().getId() });
         }
+        if (playLaunchChannel.isLaunchUnscored() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "launchUnscored cannot be empty when creating a PlayLaunchChannel" });
+        }
         verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, playLaunchChannel);
         if (playLaunchChannel.getIsAlwaysOn() != null && playLaunchChannel.getIsAlwaysOn()
                 && validateAlwaysOnExpiration(playLaunchChannel)) {
