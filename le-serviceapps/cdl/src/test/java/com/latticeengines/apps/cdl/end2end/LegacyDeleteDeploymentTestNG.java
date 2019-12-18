@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -126,7 +127,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         Assert.assertNotNull(extracts);
         List<String> paths = new ArrayList<>();
         for (Extract e : extracts) {
-            paths.add(e.getPath());
+            paths.add(PathUtils.toAvroGlob(e.getPath()));
         }
         return AvroUtils.getDataFromGlob(yarnConfiguration, paths);
     }
