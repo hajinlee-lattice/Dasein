@@ -192,9 +192,9 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
                         }
                     } catch (Exception e) {
                         // unable to retrieve report from cluster. consider not running
-                        log.warn("Workflow {} labeled running, but unable to retrieve state from YARN. COnsider not running.", job.getPid());
+                        log.warn("Workflow {} labeled running, but unable to retrieve state from YARN. Consider running.", job.getPid());
                         log.error("{}", e.toString());
-                        return false;
+                        return true;
                     }
                 }
                 return true;
