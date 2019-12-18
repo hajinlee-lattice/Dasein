@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -24,7 +27,11 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
+@Component(LegacyDeleteByDateRangeStep.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteByDateRangeStepConfiguration> {
+
+    static final String BEAN_NAME = "legacyDeleteByDateRangeStep";
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
