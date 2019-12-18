@@ -67,12 +67,12 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                 .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        sqlContains(sqlQuery, String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
-                BUCKETED_NOMINAL_ATTR));
+        sqlContains(sqlQuery,
+                String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, BUCKETED_NOMINAL_ATTR));
         // test idempotent
         sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        sqlContains(sqlQuery, String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
-                BUCKETED_NOMINAL_ATTR));
+        sqlContains(sqlQuery,
+                String.format("select (%s.%s>>?)&? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, BUCKETED_NOMINAL_ATTR));
     }
 
     @Test(groups = "functional")
@@ -295,7 +295,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, expectedPattern);
     }
 
-    @DataProvider(name = "bitEncodedData", parallel = false)
+    @DataProvider(name = "bitEncodedData")
     private Object[][] provideBitEncodedData() {
         String equalPattern = String.format("(%s.%s>>?)&? = ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
         String notNullPattern = String.format("(%s.%s>>?)&? != ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR);
@@ -377,7 +377,14 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
-        sqlContains(sqlQuery, String.format("order by %s.%s asc", ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("order by %s.%s asc nulls last", ACCOUNT, ATTR_ACCOUNT_NAME));
+
+        query = Query.builder().select(BusinessEntity.Account, "AccountId", ATTR_ACCOUNT_NAME, "City") //
+                .where(nameIsCity) //
+                .orderBy(true, BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
+                .build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query, SQL_USER);
+        sqlContains(sqlQuery, String.format("order by %s.%s desc nulls last", ACCOUNT, ATTR_ACCOUNT_NAME));
     }
 
     @Test(groups = "functional")
