@@ -512,6 +512,7 @@ public class TestPlayCreationHelper {
         channel.setLaunchType(channelConfig.getLaunchType() != null ? channelConfig.getLaunchType() : LaunchType.FULL);
         channel.setIsAlwaysOn(channelConfig.isAlwaysOn());
         channel.setBucketsToLaunch(channelConfig.getBucketsToLaunch());
+        channel.setLaunchUnscored(false);
         channel.setCronScheduleExpression(
                 StringUtils.isNotBlank(channelConfig.getCronSchedule()) ? channelConfig.getCronSchedule()
                         : TestPlayChannelConfig.DEFAULT_CRON_EXPRESSION);

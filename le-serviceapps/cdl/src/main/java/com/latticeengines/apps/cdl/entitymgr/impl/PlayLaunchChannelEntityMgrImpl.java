@@ -141,7 +141,7 @@ public class PlayLaunchChannelEntityMgrImpl
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "No lookupIdMap found by Id: " + playLaunchChannel.getLookupIdMap().getId() });
         }
-        if (playLaunchChannel.isLaunchUnscored() == null) {
+        if (playLaunchChannel.getLaunchUnscored() == null) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "launchUnscored cannot be empty when creating a PlayLaunchChannel" });
         }
@@ -179,8 +179,8 @@ public class PlayLaunchChannelEntityMgrImpl
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
         }
-        if (updatedChannel.isLaunchUnscored() != null) {
-            existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
+        if (updatedChannel.getLaunchUnscored() != null) {
+            existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.getLaunchUnscored());
         }
 
         // When always-on is off and was not changed
