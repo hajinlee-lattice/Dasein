@@ -98,6 +98,9 @@ public enum JobStatus {
             if (jobState == YarnApplicationState.ACCEPTED) {
                 return JobStatus.PENDING;
             }
+            if (YarnUtils.FAILED_STATE.contains(jobState)) {
+                return JobStatus.FAILED;
+            }
 
             if (YarnUtils.FAILED_STATUS.contains(status)) {
                 return JobStatus.FAILED;
