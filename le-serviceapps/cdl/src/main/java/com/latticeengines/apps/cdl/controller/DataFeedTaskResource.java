@@ -99,7 +99,7 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace, entity);
     }
 
-    @RequestMapping(value = "/{entity}/{source}/{feedType}/list", method = RequestMethod.GET, headers = "Accept" +
+    @RequestMapping(value = "/{entity}/{excludeSource}/{excludeFeedType}/list", method = RequestMethod.GET, headers = "Accept" +
             "=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
