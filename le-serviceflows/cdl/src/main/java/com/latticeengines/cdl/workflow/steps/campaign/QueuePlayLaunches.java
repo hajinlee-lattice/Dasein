@@ -115,13 +115,13 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                                 + getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class))
                         : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
-                        ? (" AddedAccounts: " + getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
+                        ? (" AddedContacts: " + getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class))
                         : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class))
-                        ? (" AddedAccounts: " + getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class))
+                        ? (" RemovedAccounts: " + getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class))
                         : "") //
                 + (StringUtils.isNotBlank(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
-                        ? (" AddedAccounts: " + getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
+                        ? (" RemovedContacts: " + getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class))
                         : "");
     }
 
