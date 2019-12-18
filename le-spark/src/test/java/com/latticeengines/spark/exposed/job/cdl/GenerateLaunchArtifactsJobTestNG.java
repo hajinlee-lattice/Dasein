@@ -40,8 +40,10 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
 
     private DataUnit positiveAccounts;
     private DataUnit negativeAccounts;
+    private DataUnit negativeExtraAccounts;
     private DataUnit positiveContacts;
     private DataUnit negativeContacts;
+    private DataUnit negativeExtraContacts;
     private DataUnit accountData;
     private DataUnit contactData;
 
@@ -98,6 +100,13 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
             negativeAccounts = HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
             logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
 
+            fileName = "negativeExtraAccounts";
+            createAvroFromJson(fileName, String
+                    .format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sDelta.json", fileName),
+                    deltaAccountSchema, DeltaAccount.class, yarnConfiguration);
+            negativeExtraAccounts = HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
+
             fileName = "positiveContacts";
             createAvroFromJson(fileName, String
                     .format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sDelta.json", fileName),
@@ -110,6 +119,13 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
                     .format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sDelta.json", fileName),
                     deltaContactSchema, DeltaContact.class, yarnConfiguration);
             negativeContacts = HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
+
+            fileName = "negativeExtraContacts";
+            createAvroFromJson(fileName, String
+                    .format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sDelta.json", fileName),
+                    deltaContactSchema, DeltaContact.class, yarnConfiguration);
+            negativeExtraContacts = HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
             logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
 
             fileName = "account";
@@ -194,6 +210,26 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     }
 
     @Test(groups = "functional")
+    public void testGenerateLaunchArtifactsForExtraNegativeAccountEntity() {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
+        config.setAccountsData(accountData);
+        config.setContactsData(contactData);
+        config.setPositiveDelta(positiveAccounts);
+        config.setNegativeDelta(negativeExtraAccounts);
+        config.setMainEntity(BusinessEntity.Account);
+        config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("TestGenerateLaunchArtifactsForExtraNegativeAccountEntity Results: " + JsonUtils.serialize(result));
+
+        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 4);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 4);
+        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 5);
+    }
+
+    @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForContactEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
         config.setAccountsData(accountData);
@@ -213,6 +249,28 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 7);
         Assert.assertEquals(result.getTargets().get(3).getCount().intValue(), 5);
         Assert.assertEquals(result.getTargets().get(4).getCount().intValue(), 4);
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateLaunchArtifactsForExtraNegativeContactEntity() {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
+        config.setAccountsData(accountData);
+        config.setContactsData(contactData);
+        config.setPositiveDelta(positiveContacts);
+        config.setNegativeDelta(negativeExtraContacts);
+        config.setMainEntity(BusinessEntity.Contact);
+        config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("TestGenerateLaunchArtifactsForExtraNegativeContactEntity Results: " + JsonUtils.serialize(result));
+
+        Assert.assertEquals(result.getTargets().size(), 5);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 3);
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
+        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 7);
+        Assert.assertEquals(result.getTargets().get(3).getCount().intValue(), 5);
+        Assert.assertEquals(result.getTargets().get(4).getCount().intValue(), 5);
     }
 
     interface AvroExportable {
