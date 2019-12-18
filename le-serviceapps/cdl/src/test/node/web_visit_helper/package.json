@@ -1,0 +1,17 @@
+{
+    "name": "web_visit_helper",
+    "version": "0.0.1",
+    "dependencies": {
+        "avsc": "^5.4.16",
+        "commander": "^4.0.1",
+        "csvtojson": "^2.0.10",
+        "fs-extra": "^8.1.0",
+        "json2csv": "^4.5.4",
+        "moment": "^2.24.0",
+        "recursive-readdir": "^2.2.2",
+        "snappy": "^6.2.3"
+    },
+    "bin": {
+        "wvctl": "./index.js"
+    }
+}
