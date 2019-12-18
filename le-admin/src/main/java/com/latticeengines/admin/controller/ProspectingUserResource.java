@@ -1,4 +1,4 @@
-"hasRole('adminconsole')"package com.latticeengines.admin.controller;
+package com.latticeengines.admin.controller;
 
 import javax.inject.Inject;
 
