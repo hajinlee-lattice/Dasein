@@ -17,4 +17,6 @@ public class StringTemplates {
     public static final String ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION = "Number of visits to ${PathPatternId.PathPatternName} from <#if SourceMediumId.SourceMedium == '__others__'>all other sources<#else>${SourceMediumId.SourceMedium}</#if> ${" + ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN + "}";
 
     public static final String ACTIVITY_METRICS_GROUP_ATTRNAME = "am_${GroupId}__${RollupDimIds?join(\"_\")}__${" + ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN + "}";
+
+    public static final String ACTIVITY_METRICS_ATTR_SECONDARY_DISPLAYNAME = "(%s to %s)";
 }

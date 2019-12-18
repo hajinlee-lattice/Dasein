@@ -167,13 +167,13 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         map.put("RollupDimIds", Collections.singletonList(PATTERN_ID));
 
         TimeFilter timeFilter = TimeFilter.within(2, PERIOD);
-        map.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTemplate(timeFilter));
+        map.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
         String attr1 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, map).toLowerCase();
         ColumnMetadata cm1 = new ColumnMetadata(attr1, "String");
         cm1.setEntity(BusinessEntity.WebVisitProfile);
 
         timeFilter = TimeFilter.between(2, 4, PERIOD);
-        map.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTemplate(timeFilter));
+        map.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
         String attr2 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, map).toLowerCase();
         ColumnMetadata cm2 = new ColumnMetadata(attr2, "String");
         cm2.setEntity(BusinessEntity.WebVisitProfile);

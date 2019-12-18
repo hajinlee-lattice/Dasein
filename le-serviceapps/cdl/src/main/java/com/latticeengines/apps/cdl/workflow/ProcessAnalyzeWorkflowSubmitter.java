@@ -1164,16 +1164,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     // remove members not needed to generate metrics groups
     private void cleanupMetricsGroups(Map<String, ActivityMetricsGroup> groups) {
-        groups.values().forEach(group -> {
-            removeMetricsGroupTmpl(group);
-            cleanupMetricsGroupStream(group);
-        });
-    }
-
-    private void removeMetricsGroupTmpl(ActivityMetricsGroup group) {
-        group.setDisplayNameTmpl(null);
-        group.setDescriptionTmpl(null);
-        group.setSubCategoryTmpl(null);
+        groups.values().forEach(this::cleanupMetricsGroupStream);
     }
 
     private void cleanupMetricsGroupStream(ActivityMetricsGroup group) {
@@ -1181,6 +1172,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         AtlasStream originStream = group.getStream();
         strippedStream.setStreamId(originStream.getStreamId());
         strippedStream.setPeriods(originStream.getPeriods());
+        strippedStream.setName(originStream.getName());
         group.setStream(strippedStream);
     }
 
