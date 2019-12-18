@@ -123,13 +123,13 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String customerSpace, String entity,
-                                                                      String source, String feedType) {
+                                                                      String excludeSource, String excludeFeedType) {
         DataFeed datafeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         if (datafeed == null) {
             return null;
         }
         return dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(entity, datafeed,
-                source, feedType);
+                excludeSource, excludeFeedType);
     }
 
     @Override

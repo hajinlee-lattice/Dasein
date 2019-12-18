@@ -301,9 +301,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String entity, DataFeed datafeed,
-                                                                      String source, String feedType) {
+                                                                      String excludeSource, String excludeFeedType) {
         List<DataFeedTask> dataFeedTasks =
-                datafeedTaskDao.findByEntityAndDataFeedExcludeOne(entity, datafeed, source, feedType);
+                datafeedTaskDao.findByEntityAndDataFeedExcludeOne(entity, datafeed, excludeSource, excludeFeedType);
         if (dataFeedTasks != null) {
             for (DataFeedTask dataFeedTask : dataFeedTasks) {
                 TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());

@@ -41,16 +41,16 @@ public class DataFeedTaskDaoImpl extends BaseDaoImpl<DataFeedTask> implements Da
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public List<DataFeedTask> findByEntityAndDataFeedExcludeOne(String entity, DataFeed dataFeed, String source,
-                                                                String feedType) {
+    public List<DataFeedTask> findByEntityAndDataFeedExcludeOne(String entity, DataFeed dataFeed, String excludeSource,
+                                                                String excludeFeedType) {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where entity=:entity and dataFeed=:dataFeed and not " +
                 "(source=:source and feedType=:feedType)", getEntityClass().getSimpleName());
         Query<DataFeedTask> query = session.createQuery(queryStr);
         query.setParameter("entity", entity);
         query.setParameter("dataFeed", dataFeed);
-        query.setParameter("source", source);
-        query.setParameter("feedType", feedType);
+        query.setParameter("source", excludeSource);
+        query.setParameter("feedType", excludeFeedType);
 
         return query.getResultList();
     }

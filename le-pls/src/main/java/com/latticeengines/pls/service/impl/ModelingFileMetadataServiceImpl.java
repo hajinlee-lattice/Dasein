@@ -1189,7 +1189,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         // 4e. Fetch all other DataFeedTask templates for Other Systems that are the same System Object and extract
         // the fieldTypes used for each field.
-        // Add Other System processing.
         List<DataFeedTask> tasks =
                 dataFeedProxy.getDataFeedTaskWithSameEntityExcludeOne(customerSpace.toString(),
                 entityType.getEntity().name(), source, feedType);

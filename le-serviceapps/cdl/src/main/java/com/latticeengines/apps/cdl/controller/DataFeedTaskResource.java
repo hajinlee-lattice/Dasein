@@ -105,11 +105,11 @@ public class DataFeedTaskResource {
     @ApiOperation(value = "Get data feed task")
     public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(@PathVariable String customerSpace,
                                                                       @PathVariable String entity,
-                                                                      @PathVariable String source,
-                                                                      @PathVariable String feedType) {
+                                                                      @PathVariable String excludeSource,
+                                                                      @PathVariable String excludeFeedType) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataFeedTaskService.getDataFeedTaskWithSameEntityExcludeOne(customerSpace, entity, source,
-                feedType);
+        return dataFeedTaskService.getDataFeedTaskWithSameEntityExcludeOne(customerSpace, entity, excludeSource,
+                excludeFeedType);
     }
 
     @RequestMapping(value = "/byuniqueids", method = RequestMethod.POST, headers = "Accept=application/json")

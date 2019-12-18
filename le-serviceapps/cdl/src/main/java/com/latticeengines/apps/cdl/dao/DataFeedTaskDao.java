@@ -17,6 +17,6 @@ public interface DataFeedTaskDao extends BaseDao<DataFeedTask> {
     void update(DataFeedTask datafeedTask, Status status, Date lastImported);
 
     List<DataFeedTask> findByEntityAndDataFeedExcludeOne(String entity, DataFeed datafeed,
-                                                         String source, String feedType);
+                                                         String excludeSource, String excludeFeedType);
 
 }

@@ -139,11 +139,9 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         datafeed.setStatus(DataFeed.Status.ProcessAnalyzing);
         datafeedEntityMgr.update(datafeed);
         List<DataFeedTask> tasks =
-                datafeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(BusinessEntity.Account.name(), dataFeed, "SFDC",
-                "VisiDB");
+                datafeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(BusinessEntity.Account.name(), dataFeed, "SFDC", "VisiDB");
         Assert.assertTrue(CollectionUtils.isEmpty(tasks));
-        tasks = datafeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(BusinessEntity.Account.name(), dataFeed
-                , "", "VisiDB");
+        tasks = datafeedTaskEntityMgr.getDataFeedTaskWithSameEntityExcludeOne(BusinessEntity.Account.name(), dataFeed, "", "VisiDB");
         Assert.assertNotNull(tasks);
         Assert.assertEquals(tasks.size(), 1);
     }

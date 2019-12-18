@@ -24,6 +24,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -263,8 +264,14 @@ public class ImportWorkflowUtils {
                     templateData.setExistingTemplateNames(new ArrayList<>());
                 }
                 templateData.getExistingTemplateNames().add(templateName);
+                UserDefinedType userDefinedType =
+                        MetadataResolver.getFieldTypeFromPhysicalType(attr.getPhysicalDataType());
                 if (templateData.getFieldType() == null) {
-                    templateData.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attr.getPhysicalDataType()));
+                    templateData.setFieldType(userDefinedType);
+                } else {
+                    Preconditions.checkState(templateData.getFieldType().equals(userDefinedType), String.format("the field " +
+                            "type %s for %s is not consistent in template %s", userDefinedType, attrName,
+                            templateName));
                 }
             }
         }
