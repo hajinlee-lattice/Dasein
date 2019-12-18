@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "featureflagsadmin", description = "REST resource for managing feature flags")
 @RestController
 @RequestMapping(value = "/featureflags")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport')or hasRole('QA') or hasRole('TENANT_CONSOLE')")
+@PostAuthorize("hasRole('adminconsole')")
 public class FeatureFlagResource {
 
     @Inject

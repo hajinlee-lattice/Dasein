@@ -1,4 +1,4 @@
-package com.latticeengines.admin.controller;
+"hasRole('adminconsole')"package com.latticeengines.admin.controller;
 
 import javax.inject.Inject;
 
@@ -29,7 +29,7 @@ public class ProspectingUserResource {
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Register or validate a new user in the current tenant")
-    @PreAuthorize("hasRole('Platform Operations')")
+    @PreAuthorize("hasRole('adminconsole')")
     public RegistrationResult addPrevisionUser(@RequestBody UserRegistration userReg) {
         RegistrationResult result = prospectingUserService.createUser(userReg);
         if (!result.isValid()) {

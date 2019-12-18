@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "serviceadmin", description = "REST resource for managing Lattice services across all tenants")
 @RestController
 @RequestMapping(value = "/services")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('QA') or hasRole('TENANT_CONSOLE')")
+@PostAuthorize("hasRole('adminconsole')")
 public class ServiceResource {
 
     @Inject
