@@ -90,7 +90,12 @@ public class GenerateDimensionMetadata
 
         if (MapUtils.isEmpty(config.dimensions)) {
             log.info("No pivot dimensions need processing, skip generating dimension metadata");
-            recordStreamSkippedForAgg();
+
+            // create an artificial metadata map
+            Map<String, Map<String, DimensionMetadata>> streamDimensionMetadatas = new HashMap<>();
+            addEmptyMetadata(streamDimensionMetadatas);
+            addBooleanPivotMetadata(streamDimensionMetadatas, configuration.getActivityStreamMap());
+            saveDimensionMetadataMap(streamDimensionMetadatas);
             return null;
         }
 
@@ -119,7 +124,10 @@ public class GenerateDimensionMetadata
         });
 
         allocateDimensionIdsAndOverrideMap(dimensionMetadataMap);
+        saveDimensionMetadataMap(dimensionMetadataMap);
+    }
 
+    private void saveDimensionMetadataMap(@NotNull Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
         log.info("Final dimension metadata map = {}", JsonUtils.serialize(dimensionMetadataMap));
         putObjectInContext(STREAM_DIMENSION_METADATA_MAP, dimensionMetadataMap);
         recordStreamSkippedForAgg();
@@ -285,30 +293,38 @@ public class GenerateDimensionMetadata
             streamDimensionMetadatas.get(streamId).put(dimName, metadata);
         });
 
-        // add empty metadata for dimension without data
+        // add artificial metadata
+        addEmptyMetadata(streamDimensionMetadatas);
+        addBooleanPivotMetadata(streamDimensionMetadatas, configuration.getActivityStreamMap());
+        return streamDimensionMetadatas;
+    }
+
+    // add empty metadata for dimension without data
+    private void addEmptyMetadata(@NotNull Map<String, Map<String, DimensionMetadata>> metadataMap) {
         emptyMetadataDimensions.forEach((streamId, dimNames) -> {
             DimensionMetadata metadata = new DimensionMetadata();
             metadata.setDimensionValues(Collections.emptyList());
-            streamDimensionMetadatas.putIfAbsent(streamId, new HashMap<>());
-            dimNames.forEach(dimName -> streamDimensionMetadatas.get(streamId).put(dimName, metadata));
+            metadataMap.putIfAbsent(streamId, new HashMap<>());
+            dimNames.forEach(dimName -> metadataMap.get(streamId).put(dimName, metadata));
         });
+    }
 
-        // add metadata for Usage=Pivot & GeneratorOption=BOOLEAN
-        configuration.getActivityStreamMap().values().stream() //
+    // add metadata for Usage=Pivot & GeneratorOption=BOOLEAN
+    private void addBooleanPivotMetadata(@NotNull Map<String, Map<String, DimensionMetadata>> metadataMap,
+            @NotNull Map<String, AtlasStream> streamMap) {
+        streamMap.values().stream() //
                 .filter(Objects::nonNull) //
                 .filter(stream -> CollectionUtils.isNotEmpty(stream.getDimensions())) //
                 .forEach(stream -> {
                     String streamId = stream.getStreamId();
-                    streamDimensionMetadatas.putIfAbsent(streamId, new HashMap<>());
+                    metadataMap.putIfAbsent(streamId, new HashMap<>());
                     stream.getDimensions().stream().filter(this::isPivotBooleanDimension).forEach(dim -> {
                         DimensionMetadata metadata = new DimensionMetadata();
                         metadata.setCardinality(2L);
                         metadata.setDimensionValues(getBooleanDimensionValues(dim.getName()));
-                        streamDimensionMetadatas.get(streamId).put(dim.getName(), metadata);
+                        metadataMap.get(streamId).put(dim.getName(), metadata);
                     });
                 });
-
-        return streamDimensionMetadatas;
     }
 
     private List<Map<String, Object>> getBooleanDimensionValues(String dimensionAttr) {
