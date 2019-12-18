@@ -15,8 +15,6 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val mainEntity = config.getMainEntity
     val accountId = InterfaceName.AccountId.name()
     val contactId = InterfaceName.ContactId.name()
-    val accountAlias = "account"
-    val contactAlias = "contact"
 
     val accountsDf = loadHdfsUnit(spark, config.getAccountsData.asInstanceOf[HdfsDataUnit])
     val contactsDf = if (config.getContactsData != null) loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
@@ -30,15 +28,15 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
       distinctNegativeAccountsDf = negativeDeltaDf.select(negativeDeltaDf(accountId)).distinct()
     }
 
-    val addedAccountsData = accountsDf.alias(accountAlias).join(distinctPositiveAccountsDf, Seq(accountId)).select(accountAlias + ".*")
-    val removedAccountsData = accountsDf.alias(accountAlias).join(distinctNegativeAccountsDf, Seq(accountId)).select(accountAlias + ".*")
-    val fullContactsData = contactsDf.alias(contactAlias).join(distinctPositiveAccountsDf, Seq(accountId)).select(contactAlias + ".*")
+    val addedAccountsData = accountsDf.join(distinctPositiveAccountsDf, Seq(accountId))
+    val removedAccountsData = accountsDf.join(distinctNegativeAccountsDf, Seq(accountId), "right")
+    val fullContactsData = contactsDf.join(distinctPositiveAccountsDf, Seq(accountId))
 
     lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData)
 
     if (mainEntity == BusinessEntity.Contact) {
-      val addedContactsData = contactsDf.alias(contactAlias).join(positiveDeltaDf, Seq(contactId)).select(contactAlias + ".*")
-      val removedContactsData = contactsDf.alias(contactAlias).join(negativeDeltaDf, Seq(contactId)).select(contactAlias + ".*")
+      val addedContactsData = contactsDf.join(positiveDeltaDf.select(contactId), Seq(contactId))
+      val removedContactsData = contactsDf.join(negativeDeltaDf.select(contactId), Seq(contactId), "right")
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)
     }
   }
