@@ -515,6 +515,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunchChannel.setUpdatedBy(CREATED_BY);
         playLaunchChannel.setLaunchType(LaunchType.FULL);
         playLaunchChannel.setId(NamingUtils.randomSuffix("pl", 16));
+        playLaunchChannel.setLaunchUnscored(false);
         playLaunchChannel.setCronScheduleExpression(CRON_EXPRESSION);
         return playLaunchChannel;
     }

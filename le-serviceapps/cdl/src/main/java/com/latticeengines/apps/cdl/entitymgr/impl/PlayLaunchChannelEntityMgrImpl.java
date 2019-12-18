@@ -141,6 +141,10 @@ public class PlayLaunchChannelEntityMgrImpl
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "No lookupIdMap found by Id: " + playLaunchChannel.getLookupIdMap().getId() });
         }
+        if (playLaunchChannel.isLaunchUnscored() == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "launchUnscored cannot be empty when creating a PlayLaunchChannel" });
+        }
         verifyChannelConfigHasSameDestinationAsLookupIdMap(lookupIdMap, playLaunchChannel);
         if (playLaunchChannel.getIsAlwaysOn() != null && playLaunchChannel.getIsAlwaysOn()
                 && validateAlwaysOnExpiration(playLaunchChannel)) {
@@ -164,9 +168,6 @@ public class PlayLaunchChannelEntityMgrImpl
             PlayLaunchChannel updatedChannel) {
         if (updatedChannel.getBucketsToLaunch() != null) {
             existingPlayLaunchChannel.setBucketsToLaunch(updatedChannel.getBucketsToLaunch());
-        }
-        if (updatedChannel.isLaunchUnscored()) {
-            existingPlayLaunchChannel.setLaunchUnscored(updatedChannel.isLaunchUnscored());
         }
         if (updatedChannel.getMaxAccountsToLaunch() != null) {
             if (updatedChannel.getMaxAccountsToLaunch() < 0) {

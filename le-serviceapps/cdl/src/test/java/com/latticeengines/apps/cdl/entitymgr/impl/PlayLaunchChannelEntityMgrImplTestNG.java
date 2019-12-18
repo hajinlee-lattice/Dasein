@@ -386,6 +386,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel.setLaunchType(LaunchType.FULL);
         channel.setId(NamingUtils.randomSuffix("pl", 16));
         channel.setMaxAccountsToLaunch(MAX_ACCOUNTS_TO_LAUNCH);
+        channel.setLaunchUnscored(false);
         channel.setExpirationDate(Date.from(new Date().toInstant().plus(Duration.ofHours(2))));
         return channel;
     }
