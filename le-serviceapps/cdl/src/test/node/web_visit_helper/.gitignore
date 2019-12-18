@@ -1,0 +1,6 @@
+node_modules/
+records/
+stats/
+tmp/
+example_data/
+tmp_data/
