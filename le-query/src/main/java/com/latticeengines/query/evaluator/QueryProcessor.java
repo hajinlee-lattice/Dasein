@@ -83,7 +83,7 @@ public class QueryProcessor {
         }
 
         boolean useAlias = !( //
-                Boolean.TRUE.equals(query.getDistinct()) && Boolean.TRUE.equals(query.getCount()) //
+        Boolean.TRUE.equals(query.getDistinct()) && Boolean.TRUE.equals(query.getCount()) //
         );
         sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups(), useAlias));
         if (query.getPageFilter() != null && !query.containEntityForExists()) {
@@ -105,7 +105,7 @@ public class QueryProcessor {
      */
     private SQLQuery<?> from(AttributeRepository repository, Query query, String sqlUser) {
         SubQuery subQuery = query.getSubQuery();
-        SQLQuery<?> sqlQuery = null;
+        SQLQuery<?> sqlQuery;
 
         if (query.hasPreprocessed()) {
             sqlQuery = (SQLQuery<?>) query.getSubQuery().getSubQueryExpression();
@@ -192,7 +192,7 @@ public class QueryProcessor {
         private static final String LEFT = "left";
 
         JoinedEntityVisitor(SQLQuery<?> sqlQuery, BusinessEntity mainEntity, Set<BusinessEntity> joinedEntities,
-                            AttributeRepository repository, Map<BusinessEntity, String> joinHints) {
+                AttributeRepository repository, Map<BusinessEntity, String> joinHints) {
             this.sqlQuery = sqlQuery;
             this.mainEntity = mainEntity;
             this.joinedEntities = joinedEntities;
@@ -214,12 +214,12 @@ public class QueryProcessor {
                 String joinMethod = joinHints.getOrDefault(entity, "");
                 if (StringUtils.isBlank(joinMethod)) {
                     switch (cardinality) {
-                        case ONE_TO_MANY:
-                        case ONE_TO_ONE:
-                            joinMethod = LEFT;
-                            break;
-                        default:
-                            joinMethod = JOIN;
+                    case ONE_TO_MANY:
+                    case ONE_TO_ONE:
+                        joinMethod = LEFT;
+                        break;
+                    default:
+                        joinMethod = JOIN;
                     }
                 }
                 if (LEFT.equals(joinMethod)) {
@@ -292,9 +292,9 @@ public class QueryProcessor {
                     ComparableExpression<String> resolved = Expressions
                             .asComparable(resolver.resolveForSelect(lookup, false));
                     if (sort.getDescending()) {
-                        sqlQuery = sqlQuery.orderBy(resolved.desc());
+                        sqlQuery = sqlQuery.orderBy(resolved.desc().nullsLast());
                     } else {
-                        sqlQuery = sqlQuery.orderBy(resolved.asc());
+                        sqlQuery = sqlQuery.orderBy(resolved.asc().nullsLast());
                     }
                 }
             }
