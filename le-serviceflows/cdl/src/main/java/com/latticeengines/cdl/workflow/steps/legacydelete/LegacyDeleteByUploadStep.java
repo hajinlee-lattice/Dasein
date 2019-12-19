@@ -110,9 +110,6 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
     @Override
     protected boolean shouldContinue(TransformationProgress lastTransactionProgress,
                                      PipelineTransformationRequest lastTransactionRequest, int currentIndex) {
-        if (currentIndex >= actionList.size() - 1) {
-            return false;
-        }
         cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, lastTransactionProgress.getVersion());
         cleanupTable = metadataProxy.getTable(customerSpace.toString(), cleanupTableName);
         if (cleanupTable == null) {
@@ -126,7 +123,7 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
             return false;
         }
         masterTable = cleanupTable;
-        return true;
+        return currentIndex < actionList.size() - 1;
     }
 
     @Override

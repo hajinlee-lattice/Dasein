@@ -11,16 +11,20 @@ public class LegacyDeleteTransactionWorkFlowConfiguration extends BaseCDLWorkflo
                 new LegacyDeleteTransactionWorkFlowConfiguration();
         private LegacyDeleteByUploadStepConfiguration legacyDeleteByUploadStepConfiguration =
                 new LegacyDeleteByUploadStepConfiguration();
+        private LegacyDeleteByDateRangeStepConfiguration legacyDeleteByDateRangeStepConfiguration =
+                new LegacyDeleteByDateRangeStepConfiguration();
 
         public Builder Customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             legacyDeleteByUploadStepConfiguration.setCustomerSpace(customerSpace);
+            legacyDeleteByDateRangeStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             legacyDeleteByUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            legacyDeleteByDateRangeStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -28,7 +32,9 @@ public class LegacyDeleteTransactionWorkFlowConfiguration extends BaseCDLWorkflo
             configuration.setContainerConfiguration("legacyDeleteTransactionWorkFlow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             legacyDeleteByUploadStepConfiguration.setEntity(BusinessEntity.Transaction);
+            legacyDeleteByDateRangeStepConfiguration.setEntity(BusinessEntity.Transaction);
             configuration.add(legacyDeleteByUploadStepConfiguration);
+            configuration.add(legacyDeleteByDateRangeStepConfiguration);
             return configuration;
         }
     }

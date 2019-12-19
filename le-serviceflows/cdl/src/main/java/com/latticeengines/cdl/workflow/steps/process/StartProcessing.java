@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByDateRangeActionConfiguration;
 import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
@@ -527,11 +528,17 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setLegacyDeleteByDateRangeActions(List<Action> actions) {
-        Set<Action> legacyDeleteByDateRangeActions = new HashSet<>();
+        Map<BusinessEntity, Set<Action>> legacyDeleteByDateRangeActions = new HashMap<>();
         if (CollectionUtils.isNotEmpty(actions)) {
             for (Action action : actions) {
                 if (ActionType.LEGACY_DELETE_DATERANGE.equals(action.getType())) {
-                    legacyDeleteByDateRangeActions.add(action);
+                    LegacyDeleteByDateRangeActionConfiguration config = (LegacyDeleteByDateRangeActionConfiguration) action.getActionConfiguration();
+                    Set<Action> actionSet = legacyDeleteByDateRangeActions.get(config.getEntity());
+                    if (actionSet == null) {
+                        actionSet = new HashSet<>();
+                    }
+                    actionSet.add(action);
+                    legacyDeleteByDateRangeActions.put(config.getEntity(), actionSet);
                 }
             }
         }

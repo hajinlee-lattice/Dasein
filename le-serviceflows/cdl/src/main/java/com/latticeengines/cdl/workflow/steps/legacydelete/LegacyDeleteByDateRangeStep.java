@@ -5,9 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -47,6 +49,10 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
         }
         if (getAvroDir() == null) {
             log.info("transaction table is empty.");
+            if (noImport()) {
+                log.error("cannot clean up transaction table with no import.");
+                throw new IllegalStateException("cannot clean up transaction table with no import, PA failed");
+            }
             return;
         }
         Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
@@ -105,5 +111,11 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
         String avroDir = table.getExtracts().get(0).getPath();
         log.info("avroDir: " + avroDir);
         return avroDir;
+    }
+
+    private boolean noImport() {
+        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
+                BusinessEntity.class, List.class);
+        return MapUtils.isEmpty(entityImportsMap) || !entityImportsMap.containsKey(configuration.getEntity());
     }
 }
