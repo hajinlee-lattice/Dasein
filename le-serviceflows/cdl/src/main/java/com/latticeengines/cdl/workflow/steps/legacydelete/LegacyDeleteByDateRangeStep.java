@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -35,6 +37,8 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
 
     static final String BEAN_NAME = "legacyDeleteByDateRangeStep";
 
+    private static Logger log = LoggerFactory.getLogger(LegacyDeleteByDateRangeStep.class);
+
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
@@ -55,7 +59,7 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
             }
             return;
         }
-        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYUOLOAD_ACTIONS,
+        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYDATERANGE_ACTIONS,
                 BusinessEntity.class, Set.class);
         log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
         if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {

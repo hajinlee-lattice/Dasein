@@ -104,7 +104,6 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         log.info("There are " + recordsAfterDelete.size() + " rows in avro after delete.");
         Assert.assertEquals(originalNumRecords, recordsAfterDelete.size() + numRecordsInCsv);
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, avroDir));
-        verifyActionRegistration();
     }
 
     private void cleanupByDateRange() throws ParseException {
