@@ -155,6 +155,9 @@ public class AggActivityStreamToDaily
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
+        if (shortCutMode) {
+            return;
+        }
         List<?> rawList = JsonUtils.deserialize(result.getOutput(), List.class);
         List<String> streamIdsInOutput = JsonUtils.convertList(rawList, String.class);
         Preconditions.checkNotNull(streamIdsInOutput);
