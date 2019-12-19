@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -69,6 +70,8 @@ public class AggActivityStreamToDaily
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
+    private boolean shortCutMode = false;
+
     // TODO handle skipped stream (ACTIVITY_STREAMS_SKIP_AGG ctx)
 
     @Override
@@ -76,65 +79,78 @@ public class AggActivityStreamToDaily
         if (MapUtils.isEmpty(stepConfiguration.getActivityStreamMap())) {
             return null;
         }
-
-        Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
-        Map<String, Table> rawStreamTableNames = getTablesFromMapCtxKey(customerSpace.toString(),
-                RAW_ACTIVITY_STREAM_TABLE_NAME);
-        Set<String> skippedStreamIds = getSkippedStreamIds();
-
-        AggDailyActivityConfig config = new AggDailyActivityConfig();
-        // set dimensions
-        config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
-        // dimension value -> short ID
-        config.dimensionValueIdMap = getMapObjectFromContext(STREAM_DIMENSION_VALUE_ID_MAP, String.class, String.class);
-        Set<AtlasStream> notSkippedStream = streams.values().stream().filter(stream -> {
-            String streamId = stream.getStreamId();
-            if (skippedStreamIds.contains(streamId)) {
-                return false;
-            }
-            Map<String, DimensionCalculator> calculatorMap = new HashMap<>();
-            Set<String> hashDimensions = new HashSet<>();
-            List<String> additionalDimAttrs = new ArrayList<>(getEntityIds(stream));
-            stream.getDimensions().forEach(dimension -> {
-                calculatorMap.put(dimension.getName(), dimension.getCalculator());
-                if (dimension.getGenerator().getOption() == HASH) {
-                    hashDimensions.add(dimension.getName());
-                } else if (dimension.getUsages() != null && dimension.getUsages().contains(Dedup)) {
-                    additionalDimAttrs.add(dimension.getName());
-                }
-            });
-
-            config.attrDeriverMap.put(streamId,
-                    stream.getAttributeDerivers() == null ? Collections.emptyList() : stream.getAttributeDerivers());
-            config.dimensionCalculatorMap.put(streamId, calculatorMap);
-            config.hashDimensionMap.put(streamId, hashDimensions);
-            config.additionalDimAttrMap.put(streamId, additionalDimAttrs);
-            return true;
-        }).collect(Collectors.toSet());
-        if (notSkippedStream.isEmpty()) {
-            log.info("All streams are skipped for daily aggregation, skipping step entirely");
+        Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
+        String customer = customerSpace.toString();
+        Map<String, Table> aggDailyStreamTables = MapUtils.isEmpty(dailyTableNames) ? Collections.emptyMap() :
+                dailyTableNames.entrySet().stream().map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
+                        .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        shortCutMode = MapUtils.isEmpty(aggDailyStreamTables) ? false : aggDailyStreamTables.values().stream().noneMatch(Objects::isNull);
+        if (shortCutMode) {
+            log.info(String.format("Found aggregate daily stream tables: %s in context, going thru short-cut mode.",
+                    aggDailyStreamTables.values()));
+            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames, AggregatedActivityStream, inactive);
             return null;
-        }
+        } else {
+            Map<String, AtlasStream> streams = stepConfiguration.getActivityStreamMap();
+            Map<String, Table> rawStreamTableNames = getTablesFromMapCtxKey(customerSpace.toString(),
+                    RAW_ACTIVITY_STREAM_TABLE_NAME);
+            Set<String> skippedStreamIds = getSkippedStreamIds();
 
-        // set input
-        List<DataUnit> units = new ArrayList<>();
-        rawStreamTableNames.forEach((streamId, table) -> {
-            Preconditions.checkArgument(CollectionUtils.size(table.getExtracts()) == 1,
-                    String.format("Table %s should only have one extract, got %d", table.getName(),
-                            CollectionUtils.size(table.getExtracts())));
-            Extract extract = table.getExtracts().get(0);
-            config.rawStreamInputIdx.put(streamId, units.size());
-            HdfsDataUnit unit = new HdfsDataUnit();
-            unit.setName(streamId);
-            unit.setPath(extract.getPath());
-            unit.setCount(extract.getProcessedRecords());
-            // TODO maybe centralize partition key somewhere
-            unit.setPartitionKeys(Collections.singletonList(__StreamDateId.name()));
-            units.add(unit);
-        });
-        config.setInput(units);
-        log.info("Agg daily activity stream config = {}", JsonUtils.serialize(config));
-        return config;
+            AggDailyActivityConfig config = new AggDailyActivityConfig();
+            // set dimensions
+            config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
+            // dimension value -> short ID
+            config.dimensionValueIdMap = getMapObjectFromContext(STREAM_DIMENSION_VALUE_ID_MAP, String.class, String.class);
+            Set<AtlasStream> notSkippedStream = streams.values().stream().filter(stream -> {
+                String streamId = stream.getStreamId();
+                if (skippedStreamIds.contains(streamId)) {
+                    return false;
+                }
+                Map<String, DimensionCalculator> calculatorMap = new HashMap<>();
+                Set<String> hashDimensions = new HashSet<>();
+                List<String> additionalDimAttrs = new ArrayList<>(getEntityIds(stream));
+                stream.getDimensions().forEach(dimension -> {
+                    calculatorMap.put(dimension.getName(), dimension.getCalculator());
+                    if (dimension.getGenerator().getOption() == HASH) {
+                        hashDimensions.add(dimension.getName());
+                    } else if (dimension.getUsages() != null && dimension.getUsages().contains(Dedup)) {
+                        additionalDimAttrs.add(dimension.getName());
+                    }
+                });
+
+                config.attrDeriverMap.put(streamId,
+                        stream.getAttributeDerivers() == null ? Collections.emptyList() : stream.getAttributeDerivers());
+                config.dimensionCalculatorMap.put(streamId, calculatorMap);
+                config.hashDimensionMap.put(streamId, hashDimensions);
+                config.additionalDimAttrMap.put(streamId, additionalDimAttrs);
+                return true;
+            }).collect(Collectors.toSet());
+            if (notSkippedStream.isEmpty()) {
+                log.info("All streams are skipped for daily aggregation, skipping step entirely");
+                return null;
+            }
+
+            // set input
+            List<DataUnit> units = new ArrayList<>();
+            rawStreamTableNames.forEach((streamId, table) -> {
+                Preconditions.checkArgument(CollectionUtils.size(table.getExtracts()) == 1,
+                        String.format("Table %s should only have one extract, got %d", table.getName(),
+                                CollectionUtils.size(table.getExtracts())));
+                Extract extract = table.getExtracts().get(0);
+                config.rawStreamInputIdx.put(streamId, units.size());
+                HdfsDataUnit unit = new HdfsDataUnit();
+                unit.setName(streamId);
+                unit.setPath(extract.getPath());
+                unit.setCount(extract.getProcessedRecords());
+                // TODO maybe centralize partition key somewhere
+                unit.setPartitionKeys(Collections.singletonList(__StreamDateId.name()));
+                units.add(unit);
+            });
+            config.setInput(units);
+            log.info("Agg daily activity stream config = {}", JsonUtils.serialize(config));
+            return config;
+        }
     }
 
     @Override
