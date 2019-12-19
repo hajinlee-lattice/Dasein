@@ -71,6 +71,7 @@ public class AggActivityStreamToDaily
     private DataCollectionProxy dataCollectionProxy;
 
     private boolean shortCutMode = false;
+    private DataCollection.Version inactive;
 
     // TODO handle skipped stream (ACTIVITY_STREAMS_SKIP_AGG ctx)
 
@@ -88,7 +89,7 @@ public class AggActivityStreamToDaily
         if (shortCutMode) {
             log.info(String.format("Found aggregate daily stream tables: %s in context, going thru short-cut mode.",
                     aggDailyStreamTables.values()));
-            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
             dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames, AggregatedActivityStream, inactive);
             return null;
         } else {
