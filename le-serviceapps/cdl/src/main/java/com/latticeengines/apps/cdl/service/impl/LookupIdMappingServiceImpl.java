@@ -27,6 +27,8 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DropBox;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -65,7 +67,8 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
         if ((externalSystemType == null || externalSystemType == CDLExternalSystemType.FILE_SYSTEM)
                 && !toReturn.containsKey(CDLExternalSystemType.FILE_SYSTEM.name())) {
-            // Every tenant should have an AWS S3 connection, set one up if its missing for this tenant
+            // Every tenant should have an AWS S3 connection, set one up if its missing for
+            // this tenant
             log.info("No FileSystem connection found, creating it now");
             LookupIdMap awsS3 = new LookupIdMap();
             awsS3.setDescription("Lattice S3 dropfolder connection");
@@ -86,6 +89,13 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdsMap.getOrgId(),
                 lookupIdsMap.getExternalSystemType());
         if (existingLookupIdMap == null) {
+            if (lookupIdsMap.getExternalSystemName() == null) {
+                throw new LedpException(LedpCode.LEDP_32000,
+                        new String[] { "Cannot register new system without external system name. Supported systems ("
+                                + Arrays.stream(CDLExternalSystemName.values())
+                                        .map(CDLExternalSystemName::getDisplayName).collect(Collectors.joining(", "))
+                                + ")" });
+            }
             existingLookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
         } else {
             existingLookupIdMap.setIsRegistered(true);
@@ -192,19 +202,19 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             DropBox dropbox = dropBoxEntityMgr.getDropBox();
             if (dropbox != null && StringUtils.isNotBlank(dropbox.getDropBox()))
                 switch (lookupIdMap.getExternalSystemType()) {
-                    case MAP:
-                        lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
-                                pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
-                        break;
-                    case ADS:
-                        lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
-                                pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
-                        break;
-                    case FILE_SYSTEM:
-                        lookupIdMap.setExportFolder(
-                                new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket, dropbox.getDropBox())
-                                        .replace(getProtocolPrefix(), ""));
-                        break;
+                case MAP:
+                    lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
+                            pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
+                    break;
+                case ADS:
+                    lookupIdMap.setExportFolder(getUIFriendlyExportFolder(
+                            pathBuilder.getS3AtlasFileExportsDir(s3CustomerExportBucket, dropbox.getDropBox())));
+                    break;
+                case FILE_SYSTEM:
+                    lookupIdMap.setExportFolder(
+                            new HdfsToS3PathBuilder().getS3CampaignExportDir(s3CustomerBucket, dropbox.getDropBox())
+                                    .replace(getProtocolPrefix(), ""));
+                    break;
                 default:
                     break;
                 }
