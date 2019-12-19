@@ -24,6 +24,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -240,6 +242,41 @@ public class ImportWorkflowUtils {
             map.put(definition.getColumnName(), definition);
         }
         return map;
+    }
+
+    public static Map<String, OtherTemplateData> generateOtherTemplateDataMap(List<DataFeedTask> tasks) {
+        Map<String, OtherTemplateData> templateDataMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(tasks)) {
+            return templateDataMap;
+        }
+        List<Table> tables =
+                tasks.stream().filter(task -> task.getImportTemplate() != null).map(DataFeedTask::getImportTemplate).collect(Collectors.toList());
+        for (Table table : tables) {
+            String templateName = table.getName();
+            for (Attribute attr : table.getAttributes()) {
+                String attrName = attr.getName();
+                templateDataMap.putIfAbsent(attrName, new OtherTemplateData());
+                OtherTemplateData templateData = templateDataMap.get(attrName);
+                if (StringUtils.isBlank(templateData.getFieldName())) {
+                    templateData.setFieldName(attrName);
+                }
+                if (CollectionUtils.isEmpty(templateData.getExistingTemplateNames())) {
+                    templateData.setExistingTemplateNames(new ArrayList<>());
+                }
+                templateData.getExistingTemplateNames().add(templateName);
+                UserDefinedType userDefinedType =
+                        MetadataResolver.getFieldTypeFromPhysicalType(attr.getPhysicalDataType());
+                if (templateData.getFieldType() == null) {
+                    templateData.setFieldType(userDefinedType);
+                } else {
+                    Preconditions.checkState(templateData.getFieldType().equals(userDefinedType), String.format("the field " +
+                            "type %s for %s is not consistent in template %s", userDefinedType, attrName,
+                            templateName));
+                }
+            }
+        }
+
+        return templateDataMap;
     }
 
     private static FieldDefinition getFieldDefinitionFromAttribute(Attribute attribute) {

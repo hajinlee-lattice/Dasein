@@ -300,6 +300,21 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String entity, DataFeed datafeed,
+                                                                      String excludeSource, String excludeFeedType) {
+        List<DataFeedTask> dataFeedTasks =
+                datafeedTaskDao.findByEntityAndDataFeedExcludeOne(entity, datafeed, excludeSource, excludeFeedType);
+        if (dataFeedTasks != null) {
+            for (DataFeedTask dataFeedTask : dataFeedTasks) {
+                TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
+                TableEntityMgr.inflateTable(dataFeedTask.getImportData());
+            }
+        }
+        return dataFeedTasks;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<DataFeedTask> getDataFeedTaskByUniqueIds(List<String> uniqueIds) {
         List<DataFeedTask> dataFeedTasks = datafeedTaskRepository.findByUniqueIdIn(uniqueIds);
         if (CollectionUtils.isNotEmpty(dataFeedTasks)) {
