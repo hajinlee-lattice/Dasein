@@ -87,8 +87,7 @@ public class AggActivityStreamToDaily
                         .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         shortCutMode = MapUtils.isEmpty(aggDailyStreamTables) ? false : aggDailyStreamTables.values().stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
-            log.info(String.format("Found aggregate daily stream tables: %s in context, going thru short-cut mode.",
-                    aggDailyStreamTables.values()));
+            log.info(String.format("Found aggregate daily stream tables: %s in context, going thru short-cut mode.", dailyTableNames.values()));
             inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
             dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames, AggregatedActivityStream, inactive);
             return null;
