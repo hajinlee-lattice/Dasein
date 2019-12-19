@@ -156,7 +156,7 @@ public class CampaignFrontEndQueryBuilder {
         }
         addSort();
         setLimit();
-        if (mainEntity == BusinessEntity.Contact && isSuppressAccountsWithoutContacts) {
+        if (mainEntity == BusinessEntity.Contact) {
             filterAccountsWithoutContacts();
         }
         return campaignFrontEndQuery;
