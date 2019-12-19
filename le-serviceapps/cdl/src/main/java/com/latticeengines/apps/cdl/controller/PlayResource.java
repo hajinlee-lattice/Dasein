@@ -329,6 +329,9 @@ public class PlayResource {
         if (state == LaunchState.UnLaunched) {
             return playLaunchChannelService.createNewLaunchForChannelByState(play, channel, state, isAutoLaunch);
         }
+        if (state == LaunchState.Failed) {
+            return playLaunchChannelService.createNewLaunchForChannelByState(play, channel, state, isAutoLaunch);
+        }
 
         return playLaunchChannelService.queueNewLaunchForChannel(play, channel, addAccountsTable, completeContactsTable,
                 removeAccountsTable, addContactsTable, removeContactsTable, isAutoLaunch);
