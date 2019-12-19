@@ -329,7 +329,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Thread.sleep(1000);
         Assert.assertNotNull(retrieved);
         Assert.assertEquals(retrieved.getId(), channel1.getId());
-        Assert.assertFalse(retrieved.isLaunchUnscored());
+        Assert.assertFalse(retrieved.getLaunchUnscored());
 
         PlayLaunchChannel retrieved2 = playLaunchChannelEntityMgr.findById(channel2.getId());
 

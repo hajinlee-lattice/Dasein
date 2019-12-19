@@ -266,7 +266,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setLaunchState(state != null ? state : LaunchState.UnLaunched);
         playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
         playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
-        playLaunch.setLaunchUnscored(playLaunchChannel.isLaunchUnscored());
+        playLaunch.setLaunchUnscored(playLaunchChannel.getLaunchUnscored());
         playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
         playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
         playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
@@ -397,7 +397,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                 .map(RatingBucketCoverage::getCount).reduce(0L, (a, b) -> a + b);
 
         accountsToLaunch = accountsToLaunch
-                + (channel.isLaunchUnscored()
+                + (channel.getLaunchUnscored()
                         ? coverageResponse.getRatingModelsCoverageMap().get(play.getRatingEngine().getId())
                                 .getUnscoredAccountCount()
                         : 0L);

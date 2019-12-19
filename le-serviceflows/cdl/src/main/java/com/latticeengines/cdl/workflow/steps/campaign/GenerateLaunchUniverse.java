@@ -95,7 +95,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
                 : launch.getBucketsToLaunch();
         String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
-        boolean launchUnScored = launch == null ? channel.isLaunchUnscored() : launch.isLaunchUnscored();
+        boolean launchUnScored = launch == null ? channel.getLaunchUnscored() : launch.isLaunchUnscored();
         CDLExternalSystemName externalSystemName = channel.getLookupIdMap().getExternalSystemName();
 
         // 1) setup queries from play and channel settings

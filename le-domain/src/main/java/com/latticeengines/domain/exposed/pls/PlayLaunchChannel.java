@@ -325,7 +325,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.bucketsToLaunch = JsonUtils.serialize(bucketsToLaunch);
     }
 
-    public Boolean isLaunchUnscored() {
+    public Boolean getLaunchUnscored() {
         return launchUnscored;
     }
 
