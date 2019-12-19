@@ -72,7 +72,6 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
         public Builder microServiceHostPort(String microServiceHostPort) {
             cdlModelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
-            cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
             cdlEventTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             exportScoreTrainingFile.setMicroServiceHostPort(microServiceHostPort);
             exportBucketTool.setMicroServiceHostPort(microServiceHostPort);
@@ -90,7 +89,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             configuration.setCustomerSpace(customerSpace);
             cdlModelWorkflowBuilder.customer(customerSpace);
             matchDataCloudWorkflowBuilder.customer(customerSpace);
-            cdlEventTable.setCustomerSpace(customerSpace);
+            cdlEventTable.setCustomer(customerSpace.toString());
             cdlEventTableTupleFilter.setCustomerSpace(customerSpace);
             exportScoreTrainingFile.setCustomerSpace(customerSpace);
             exportBucketTool.setCustomerSpace(customerSpace);
