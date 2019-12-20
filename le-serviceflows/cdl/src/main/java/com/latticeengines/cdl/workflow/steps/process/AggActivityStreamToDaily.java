@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -80,7 +81,11 @@ public class AggActivityStreamToDaily
             return null;
         }
         Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
-        shortCutMode = isShortCutMode(dailyTableNames);
+        String customer = customerSpace.toString();
+        Map<String, Table> aggDailyStreamTables = MapUtils.isEmpty(dailyTableNames) ? Collections.emptyMap() :
+                dailyTableNames.entrySet().stream().map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
+                        .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        shortCutMode = MapUtils.isEmpty(aggDailyStreamTables) ? false : aggDailyStreamTables.values().stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
             log.info(String.format("Found aggregate daily stream tables: %s in context, going thru short-cut mode.", dailyTableNames.values()));
             inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
@@ -175,7 +180,7 @@ public class AggActivityStreamToDaily
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
         // link table to role in collection
-        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         Map<String, String> dailyTableNames = exportToS3AndAddToContext(dailyAggTables,
                 AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames,
