@@ -6,7 +6,9 @@ import java.util.List;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public abstract class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<ConsolidateCollectionParameters> {
 
@@ -30,6 +32,12 @@ public abstract class ConsolidateCollectionFlow extends TypesafeDataFlowBuilder<
     {
         List<String> groupByKeys = parameters.getGroupBy();
         String sortByKey = parameters.getSortBy();
+
+        //FIX-ME: assume the first group-by key is domain
+        String domainField = groupByKeys.get(0);
+        src = src.apply(new DomainCleanupFunction(domainField, true), new FieldList(domainField),
+                new FieldMetadata(domainField, String.class));
+
         return src.groupByAndLimit(new FieldList(groupByKeys), new FieldList(sortByKey), //
                 1, true, false);
     }
