@@ -74,7 +74,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
-            cdlEventTable.setCustomerSpace(customerSpace);
+            cdlEventTable.setCustomer(customerSpace.toString());
             addStandardAttributes.setCustomerSpace(customerSpace);
             match.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
@@ -90,7 +90,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             generateRatingStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             match.microServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);

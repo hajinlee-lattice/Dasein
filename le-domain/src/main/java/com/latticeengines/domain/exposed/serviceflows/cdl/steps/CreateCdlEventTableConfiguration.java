@@ -3,8 +3,9 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
-public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfiguration {
+public class CreateCdlEventTableConfiguration extends SparkJobStepConfiguration {
 
     @JsonProperty
     private String sourceSchemaInterpretation;
@@ -24,9 +25,8 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
     @JsonProperty
     private boolean exportKeyColumnsOnly;
 
-    public CreateCdlEventTableConfiguration() {
-        setBeanName("createCdlEventTableFlow");
-    }
+    @JsonProperty
+    private String targetTableName;
 
     public String getSourceSchemaInterpretation() {
         return sourceSchemaInterpretation;
@@ -74,6 +74,14 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
 
     public void setExportKeyColumnsOnly(boolean exportKeyColumnsOnly) {
         this.exportKeyColumnsOnly = exportKeyColumnsOnly;
+    }
+
+    public String getTargetTableName() {
+        return targetTableName;
+    }
+
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
     }
 
 }
