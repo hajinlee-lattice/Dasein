@@ -294,7 +294,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 
     protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet(REMATCH_TABLE_NAME,
-            DELETED_TABLE_NAME, CATALOG_TABLE_NAME);
+            DELETED_TABLE_NAME, CATALOG_TABLE_NAME, AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME);
 
     // extra context keys to be carried over in restarted PA, beyond table names
     // above
