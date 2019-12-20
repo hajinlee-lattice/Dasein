@@ -852,11 +852,14 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         createBucketFiles(minTs, periodInMS, bucketCount, bucketFiles);
 
         boolean[] bucketCreated = new boolean[bucketCount];
-
         List<List<GenericRecord>> bucketBuffers = new ArrayList<>();
         for (int i = 0; i < bucketCount; ++i) {
 
             bucketBuffers.add(new ArrayList<>());
+
+            long bucketTs = minTs + periodInMS * i;
+            File bucket = bucketFiles.get(bucketTs);
+            bucketCreated[i] = bucket.exists() && bucket.length() > 0;
 
         }
 
@@ -986,6 +989,18 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         }
 
+        for (int i = 0; i < bucketCount; ++i) {
+
+            long bucketTs = minTs + periodInMS * i;
+            File bucket = bucketFiles.get(bucketTs);
+            if (bucket.exists() && bucket.length() > 0) {
+
+                log.info("\tbucket file " + bucket.getName() + ", length is " + bucket.length());
+
+            }
+
+        }
+
     }
 
     private boolean ingestConsumedWorker(CollectionWorker worker, Map<String, Map<Long, File>> bucketGroups) {
@@ -1090,7 +1105,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                         log.info("\tappending to local file: " + bucketFile.getName());
                         AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
 
-                        log.info("\tuploading local file: " + bucketFile.getName());
+                        log.info("\tuploading local file: " + bucketFile.getName() + ", length is " + bucketFile.length());
                         s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
 
                     } else {
@@ -1098,13 +1113,13 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                         log.info("\tappending to local file: " + tmpFile.getName());
                         AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
 
-                        log.info("\tuploading local file: " + tmpFile.getName());
+                        log.info("\tuploading local file: " + tmpFile.getName() + ", length is " + tmpFile.length());
                         s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
                     }
 
                 } else {
 
-                    log.info("\tuploading local file: " + bucketFile.getName());
+                    log.info("\tuploading local file: " + bucketFile.getName() + ", length is " + bucketFile.length());
                     s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
 
                 }
