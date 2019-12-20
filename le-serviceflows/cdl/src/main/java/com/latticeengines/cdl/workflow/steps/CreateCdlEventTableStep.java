@@ -1,7 +1,10 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -15,25 +18,28 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.spark.CreateCdlEventTableJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
+import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
+import com.latticeengines.spark.exposed.job.cdl.CreateCdlEventTableJob;
 
 @Component("createCdlEventTableStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConfiguration> {
+public class CreateCdlEventTableStep
+        extends RunSparkJob<CreateCdlEventTableConfiguration, CreateCdlEventTableJobConfig> {
 
     private static Logger log = LoggerFactory.getLogger(CreateCdlEventTableStep.class);
 
@@ -48,15 +54,21 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     private DataCollection.Version version;
     private String accountFeatureTable;
+    private Table inputTable = null;
+    private Table apsTable = null;
+    private Table accountTable = null;
 
     @Override
-    public void onConfigurationInitialized() {
+    protected Class<CreateCdlEventTableJob> getJobClz() {
+        return CreateCdlEventTableJob.class;
+    }
+
+    @Override
+    protected CreateCdlEventTableJobConfig configureJob(CreateCdlEventTableConfiguration stepConfiguration) {
+        CreateCdlEventTableJobConfig jobConfig = new CreateCdlEventTableJobConfig();
+        jobConfig.eventColumn = configuration.getEventColumn();
+
         CreateCdlEventTableConfiguration configuration = getConfiguration();
-        if (StringUtils.isBlank(configuration.getTargetTableName())) {
-            String targetTableName = NamingUtils.timestampWithRandom("CdlEventTable");
-            configuration.setTargetTableName(targetTableName);
-            log.info("Generated a new target table name: " + targetTableName);
-        }
         version = configuration.getDataCollectionVersion();
         if (version == null) {
             version = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
@@ -64,22 +76,23 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         } else {
             log.info("Use the version specified in configuration: " + version);
         }
-        configuration.setApplyTableProperties(true);
-        configuration.setDataFlowParams(createDataFlowParameters());
-    }
 
-    private DataFlowParameters createDataFlowParameters() {
-        Table inputTable = getAndSetInputTable();
+        inputTable = getAndSetInputTable();
         if (inputTable == null) {
             throw new IllegalArgumentException("No input table.");
         }
-        Table apsTable = getAndSetApsTable();
-        Table accountTable = getAndSetAccountTable();
+        apsTable = getAndSetApsTable();
+        accountTable = getAndSetAccountTable();
 
-        CreateCdlEventTableParameters parameters = new CreateCdlEventTableParameters(inputTable.getName(),
-                apsTable != null ? apsTable.getName() : null, accountTable.getName());
-        parameters.setEventColumn(configuration.getEventColumn());
-        return parameters;
+        List<DataUnit> inputUnits = new ArrayList<>();
+        inputUnits.add(inputTable.toHdfsDataUnit("inputTable"));
+        inputUnits.add(accountTable.toHdfsDataUnit("accountTable"));
+        if (apsTable != null) {
+            inputUnits.add(apsTable.toHdfsDataUnit("apsTable"));
+        }
+        jobConfig.setInput(inputUnits);
+
+        return jobConfig;
     }
 
     private Table getAndSetAccountTable() {
@@ -91,11 +104,10 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
                 log.info("Use account feature table instead.");
             }
         }
-        Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
-                roleInCollection, version);
+        Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomer(), roleInCollection, version);
         if (accountTable == null) {
-            accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
-                    roleInCollection, version.complement());
+            accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomer(), roleInCollection,
+                    version.complement());
             if (accountTable != null) {
                 log.info("Found Account table in version " + version.complement());
             }
@@ -115,7 +127,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
             }
         }
         if (changedCount > 0) {
-            String customerSpace = configuration.getCustomerSpace().toString();
+            String customerSpace = configuration.getCustomer();
             boolean updateVersion = false;
             String tableName = dataCollectionProxy.getTableName(customerSpace, roleInCollection, version);
             if (accountTable.getName().equals(tableName)) {
@@ -127,14 +139,13 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
                 updateComplementVersion = true;
             }
 
-            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), accountTable.getName(),
-                    accountTable);
+            metadataProxy.updateTable(configuration.getCustomer(), accountTable.getName(), accountTable);
             if (updateVersion) {
-                dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
+                dataCollectionProxy.upsertTable(configuration.getCustomer(), accountTable.getName(), //
                         roleInCollection, version);
             }
             if (updateComplementVersion) {
-                dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
+                dataCollectionProxy.upsertTable(configuration.getCustomer(), accountTable.getName(), //
                         roleInCollection, version.complement());
             }
 
@@ -144,7 +155,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     }
 
     private String getAccountFeatureTable() {
-        String customerSpace = getConfiguration().getCustomerSpace().toString();
+        String customerSpace = getConfiguration().getCustomer();
         Table featureTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AccountFeatures,
                 version);
         if (featureTable == null) {
@@ -169,7 +180,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     }
 
     private Table getApsTable() {
-        String customerSpace = configuration.getCustomerSpace().toString();
+        String customerSpace = configuration.getCustomer();
         Table apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState,
                 version);
         if (apsTable == null) {
@@ -189,7 +200,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         if (inputTable == null) {
             String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
             if (StringUtils.isNotBlank(inputTableName)) {
-                inputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), inputTableName);
+                inputTable = metadataProxy.getTable(configuration.getCustomer(), inputTableName);
             }
         }
         if (inputTable == null) {
@@ -210,15 +221,20 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
                     attribute.setLogicalDataType(LogicalDataType.Event);
                 }
             }
-            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), inputTable.getName(), inputTable);
+            metadataProxy.updateTable(configuration.getCustomer(), inputTable.getName(), inputTable);
         }
         return inputTable;
     }
 
     @Override
-    public void onExecutionCompleted() {
-        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getTargetTableName());
+    protected void postJobExecution(SparkJobResult result) {
+        String targetTableName = configuration.getTargetTableName();
+        if (targetTableName == null) {
+            targetTableName = NamingUtils.timestampWithRandom("CdlEventTable");
+        }
+        Table eventTable = toTable(targetTableName, result.getTargets().get(0));
+        overlayMetadata(eventTable);
+        metadataProxy.createTable(getConfiguration().getCustomer(), targetTableName, eventTable);
         if (StringUtils.isNotEmpty(accountFeatureTable)) {
             putObjectInContext(EVENT_TABLE, eventTable);
             putObjectInContext(MATCH_RESULT_TABLE, eventTable);
@@ -232,6 +248,16 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
             putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, eventTable.getName());
         }
         addToListInContext(TEMPORARY_CDL_TABLES, eventTable.getName(), String.class);
+    }
+
+    private void overlayMetadata(Table targetTable) {
+        Map<String, Attribute> attributeMap = new HashMap<>();
+        accountTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
+        inputTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
+        if (apsTable != null) {
+            apsTable.getAttributes().forEach(attr -> attributeMap.put(attr.getName(), attr));
+        }
+        super.overlayTableSchema(targetTable, attributeMap);
     }
 
 }
