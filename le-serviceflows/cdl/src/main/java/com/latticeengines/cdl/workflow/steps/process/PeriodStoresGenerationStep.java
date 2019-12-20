@@ -5,11 +5,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -79,6 +82,16 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             log.info("No daily stores found for tenant {}. Skip generating period stores", customerSpace);
             return null;
         }
+        Map<String, String> periodStoreTableNames = getMapObjectFromContext(PERIOD_STORE_TABLE_NAME, String.class, String.class);
+        String customer = customerSpace.toString();
+        Map<String, Table> aggDailyStreamTables = periodStoreTableNames.entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        boolean shortCutMode = MapUtils.isEmpty(aggDailyStreamTables) ? false : aggDailyStreamTables.values().stream().noneMatch(Objects::isNull);
+        if (shortCutMode) {
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), periodStoreTableNames, TableRoleInCollection.PeriodStores, inactive);
+            return null;
+        }
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> metadata = new HashMap<>();
         for (Map.Entry<String, Table> entry : dailyStoreTables.entrySet()) {
@@ -116,6 +129,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 putStringValueInContext(ctxKey, periodStoreTable.getName());
             }
         });
+        putObjectInContext(PERIOD_STORE_TABLE_NAME, signatureTableNames);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
     }
 }
