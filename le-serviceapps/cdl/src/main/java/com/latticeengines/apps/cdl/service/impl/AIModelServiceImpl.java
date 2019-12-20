@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -369,6 +370,14 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     private Map<String, ColumnMetadata> getIterationMetadataAsMap(String customerSpace, RatingEngine ratingEngine,
             AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
+        StopWatch stopWatch = new StopWatch();
+        StopWatch splitter = new StopWatch();
+
+        log.info("Iteration metadata compilation(Split: 0 ms Total: 0 ms): Start");
+
+        stopWatch.start();
+        splitter.start();
+
         if (!aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40034,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
@@ -394,22 +403,49 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     new String[] { "Event table metadata", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
 
+        log.info(String.format(
+                "Iteration metadata compilation (Split: %d ms Total: %d ms): Validation & Object Procurement",
+                splitter.getTime(), stopWatch.getTime()));
+        stopWatch.suspend();
+        splitter.reset();
+
+        stopWatch.resume();
+        splitter.start();
         Map<String, Predictor> predictors = extractPredictorsFromSummary(modelSummary);
+        log.info(String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Predictor extraction",
+                splitter.getTime(), stopWatch.getTime()));
+        stopWatch.suspend();
+        splitter.reset();
 
         Set<Category> selectedCategories = CollectionUtils.isEmpty(dataStores)
                 || ratingEngine.getType() != RatingEngineType.CUSTOM_EVENT
                         ? new HashSet<>(Arrays.asList(Category.values()))
                         : CustomEventModelingDataStoreUtil.getCategoriesByDataStores(dataStores);
 
+        stopWatch.resume();
+        splitter.start();
         Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
                 modelSummary);
+        log.info(String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Build Feature Importance",
+                splitter.getTime(), stopWatch.getTime()));
+        stopWatch.suspend();
+        splitter.reset();
 
+        stopWatch.resume();
+        splitter.start();
         Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy
                 .getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
                         table.getName())
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey).block();
+        log.info(
+                String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Retrieve Iteration Metadata",
+                        splitter.getTime(), stopWatch.getTime()));
+        stopWatch.suspend();
+        splitter.reset();
 
+        stopWatch.resume();
+        splitter.start();
         Map<String, ColumnMetadata> modelingAttributes = servingStoreService
                 .getAllowedModelingAttrs(customerSpace, BusinessEntity.Account,
                         dataCollectionService.getActiveVersion(customerSpace), false)
@@ -422,14 +458,20 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
                     cm.setSubcategory(Category.SUB_CAT_OTHER);
                     return toReturn;
-
                 }, () -> iterationAttributes).block();
+        log.info(String.format(
+                "Iteration metadata compilation (Split: %d ms Total: %d ms): Retrieve Modeling metadata from Attr Admin and final compilation",
+                splitter.getTime(), stopWatch.getTime()));
+        stopWatch.suspend();
+        splitter.reset();
 
         if (MapUtils.isEmpty(modelingAttributes)) {
             throw new LedpException(LedpCode.LEDP_40036,
                     new String[] { "Modeling Attributes", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
 
+        stopWatch.resume();
+        splitter.start();
         modelingAttributes.forEach((k, cm) -> {
             if (importanceOrdering.containsKey(cm.getAttrName())) {
                 // could move this into le-metadata as a decorator
@@ -440,6 +482,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                     predictors.getOrDefault(cm.getAttrName(), new Predictor()).getUncertaintyCoefficient());
             cm.setEntity(BusinessEntity.Account);
         });
+        log.info(String.format(
+                "Iteration metadata compilation: " + "Setting Importance Ordering (Split: %d ms Total: %d ms)",
+                splitter.getTime(), stopWatch.getTime()));
 
         if (MapUtils.isNotEmpty(importanceOrdering)) {
             log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
