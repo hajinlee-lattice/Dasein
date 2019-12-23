@@ -20,7 +20,7 @@ public interface DataUnitEntityMgr {
 
     void cleanupTenant(String tenantId);
 
-    List<DataUnit> deleteAllByName(String name);
+    List<DataUnit> deleteAllByName(String tenantId, String name);
 
     DataUnit renameTableName(String tenantId, DataUnit dataUnit, String tableName);
 
