@@ -100,7 +100,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val periodIdColumnName: String = InterfaceName.PeriodId.name()
     val bounds = translator.translateRange(timeFilter)
 
-    val timeRangeStr: String = ActivityMetricsGroupUtils.timeFilterToTimeRangeTemplate(timeFilter)
+    val timeRangeStr: String = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter)
 
     (df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight)), timeRangeStr)
   }

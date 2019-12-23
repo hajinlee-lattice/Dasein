@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,17 +27,17 @@ public class ActivityMetricsGroupUtils {
             Pattern.compile("am_(?<groupId>[^_]+)__(?<rollupDims>.*)__(?<timeRange>.*)");
     private static final Pattern VALID_GROUPID_CHAR = Pattern.compile("[0-9a-zA-Z]+");
     private static final Character FILL_CHAR = 'x';
-    private static final BiMap<String, Character> RELATION_LETTER = new ImmutableBiMap.Builder<String, Character>() //
-            .put(ComparisonType.WITHIN.toString(), 'w') //
-            .put(ComparisonType.BETWEEN.toString(), 'b') //
+    private static final BiMap<String, String> RELATION_STR = new ImmutableBiMap.Builder<String, String>() //
+            .put(ComparisonType.WITHIN.toString(), "w") //
+            .put(ComparisonType.BETWEEN.toString(), "b") //
             .build();
-    private static final BiMap<String, Character> PERIOD_LETTER = new ImmutableBiMap.Builder<String, Character>() //
-            .put(PeriodStrategy.Template.Week.toString(), 'w').build();
+    private static final BiMap<String, String> PERIOD_STR = new ImmutableBiMap.Builder<String, String>() //
+            .put(PeriodStrategy.Template.Week.toString(), "w").build();
 
     // (operator in timeRange tmpl) <--> (description)
-    private static final BiMap<Character, String> RELATION_DESCRIPTION = new ImmutableBiMap.Builder<Character, String>()
-            .put('w', "in last") // within
-            .put('b', "between") // between
+    private static final BiMap<String, String> RELATION_DESCRIPTION = new ImmutableBiMap.Builder<String, String>()
+            .put("w", "in last") // within
+            .put("b", "between") // between
             .build();
 
     private static final String SINGLE_VAL_TIME_RANGE_DESC = "${operator} ${params?join(\"_\")} ${period}";
@@ -76,12 +77,53 @@ public class ActivityMetricsGroupUtils {
         }
     }
 
-    public static String timeFilterToTimeRangeTemplate(TimeFilter timeFilter) {
+    public static String timeFilterToTimeRangeTmpl(TimeFilter timeFilter) {
         Map<String, Object> map = new HashMap<>();
-        map.put("operator", getValueFromBiMap(RELATION_LETTER, timeFilter.getRelation().toString()));
-        map.put("period", getValueFromBiMap(PERIOD_LETTER, timeFilter.getPeriod()));
+        map.put("operator", getValueFromBiMap(RELATION_STR, timeFilter.getRelation().toString()));
+        map.put("period", getValueFromBiMap(PERIOD_STR, timeFilter.getPeriod()));
         map.put("params", timeFilter.getValues());
         return TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_TIME_RANGE, map);
+    }
+
+    public static TimeFilter timeRangeTmplToTimeFilter(String timeRange) {
+        String[] fragments = timeRange.split("_");
+        String op = fragments[0];
+        switch (op) {
+            case "w":
+                try {
+                    return parseSingleVars(fragments);
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException("Cannot parse " + timeRange);
+                }
+            case "b":
+                try {
+                    return parseTwoVals(fragments);
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException("Cannot parse " + timeRange);
+                }
+            default:
+                throw new IllegalArgumentException("Unknown operator " + op);
+        }
+    }
+
+    private static TimeFilter parseSingleVars(String[] fragments) throws ParseException {
+        if (fragments.length != 3) {
+            throw new ParseException("Wrong number of fragments.", 0);
+        }
+        ComparisonType op = ComparisonType.getByName((String) getValueFromBiMap(RELATION_STR.inverse(), fragments[0].toLowerCase()));
+        String period = (String) getValueFromBiMap(PERIOD_STR.inverse(), fragments[fragments.length - 1]);
+        List<Object> vals = Collections.singletonList(Long.parseLong(fragments[1]));
+        return new TimeFilter(op, period, vals);
+    }
+
+    private static TimeFilter parseTwoVals(String[] fragments) throws ParseException {
+        if (fragments.length != 4) {
+            throw new ParseException("Wrong number of fragments.", 0);
+        }
+        ComparisonType op = ComparisonType.getByName((String) getValueFromBiMap(RELATION_STR.inverse(), fragments[0].toLowerCase()));
+        String period = (String) getValueFromBiMap(PERIOD_STR.inverse(), fragments[fragments.length - 1]);
+        List<Object> vals = Arrays.asList(Long.parseLong(fragments[1]), Long.parseLong(fragments[2]));
+        return new TimeFilter(op, period, vals);
     }
 
     public static String timeRangeTmplToDescription(String timeRange) {
@@ -98,11 +140,11 @@ public class ActivityMetricsGroupUtils {
                 throw new IllegalArgumentException("Unknown operator " + op);
         }
         String[] fragments = timeRange.split("_");
-        Character operatorLetter = fragments[0].charAt(0);
-        Character periodLetter = fragments[fragments.length - 1].charAt(0);
+        String operatorLetter = fragments[0].substring(0, 1);
+        String periodLetter = fragments[fragments.length - 1].substring(0, 1);
         Map<String, Object> map = new HashMap<>();
         map.put("operator", getValueFromBiMap(RELATION_DESCRIPTION, operatorLetter).toString().toLowerCase());
-        map.put("period", getValueFromBiMap(PERIOD_LETTER.inverse(), periodLetter).toString().toLowerCase());
+        map.put("period", getValueFromBiMap(PERIOD_STR.inverse(), periodLetter).toString().toLowerCase());
         map.put("params", ArrayUtils.subarray(fragments, 1, fragments.length - 1));
         return TemplateUtils.renderByMap(descTemplate, map);
     }
