@@ -82,16 +82,15 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             log.info("No daily stores found for tenant {}. Skip generating period stores", customerSpace);
             return null;
         }
-        Map<String, String> periodStoreTableNames = getMapObjectFromContext(PERIOD_STORE_TABLE_NAME, String.class, String.class);
-        String customer = customerSpace.toString();
-        Map<String, Table> aggDailyStreamTables = periodStoreTableNames.entrySet().stream()
-                .map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-        boolean shortCutMode = MapUtils.isEmpty(aggDailyStreamTables) ? false : aggDailyStreamTables.values().stream().noneMatch(Objects::isNull);
-        if (shortCutMode) {
-            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), periodStoreTableNames, TableRoleInCollection.PeriodStores, inactive);
-            return null;
+        Map<String, String> periodStoreTableNames = getMapObjectFromContext(PERIOD_STORE_SIGNATURE_TABLE_NAME, String.class, String.class);
+        if(periodStoreTableNames != null){
+            if (isShortCutMode(periodStoreTableNames)) {
+                log.info("Period stores have been created before retry. Skip generating period stores", customerSpace);
+                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), periodStoreTableNames, TableRoleInCollection.PeriodStores, inactive);
+                return null;
+            }
         }
+
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> metadata = new HashMap<>();
         for (Map.Entry<String, Table> entry : dailyStoreTables.entrySet()) {
@@ -114,10 +113,20 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         return config;
     }
 
+    private boolean isShortCutMode(Map<String, String> periodStoreTableNames) {
+        String customer = customerSpace.toString();
+        Map<String, Table> periodStoreTables = periodStoreTableNames.entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        boolean shortCutMode = MapUtils.isEmpty(periodStoreTables) ? false : periodStoreTables.values().stream().noneMatch(Objects::isNull);
+        return shortCutMode;
+    }
+
     @Override
     protected void postJobExecution(SparkJobResult result) {
         Map<String, Details> metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<String, String> signatureTableNames = new HashMap<>();
+        Map<String, String> ctxKeyTableNames = new HashMap<>();
         metadata.forEach((streamId, details) -> {
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
                 String period = details.getLabels().get(offset);
@@ -126,10 +135,11 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
                 signatureTableNames.put(details.getLabels().get(offset), tableName); // use period name as signature
-                putStringValueInContext(ctxKey, periodStoreTable.getName());
+                ctxKeyTableNames.put(ctxKey, periodStoreTable.getName());
             }
         });
-        putObjectInContext(PERIOD_STORE_TABLE_NAME, signatureTableNames);
+        putObjectInContext(PERIOD_STORE_SIGNATURE_TABLE_NAME, signatureTableNames);
+        putObjectInContext(PERIOD_STORE_CTXKEY_TABLE_NAME, ctxKeyTableNames);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
     }
 }

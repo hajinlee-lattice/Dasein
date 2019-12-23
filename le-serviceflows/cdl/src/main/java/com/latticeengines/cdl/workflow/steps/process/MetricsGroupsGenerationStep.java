@@ -107,7 +107,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         }
         inputMetadata.setMetadata(detailsMap);
         log.info("Fetching periodStore tables with names {}", periodStoreTableCtxNames);
-        List<DataUnit> inputs = getTableSummariesFromCtxKeys(customerSpace.toString(), periodStoreTableCtxNames).stream().filter(Objects::nonNull)
+        List<DataUnit> inputs = getTablesFromMapCtxKey(customerSpace.toString(), PERIOD_STORE_CTXKEY_TABLE_NAME).values().stream().filter(Objects::nonNull)
                 .map(table -> table.partitionedToHdfsDataUnit(table.getName(), Collections.singletonList(InterfaceName.PeriodId.name()))
                 ).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(inputs)) {
