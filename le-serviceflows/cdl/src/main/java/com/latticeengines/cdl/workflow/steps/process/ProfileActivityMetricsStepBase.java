@@ -65,9 +65,10 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         int profileStep = 0;
         int bucketStep = 1;
         List<TransformationStepConfig> steps = new ArrayList<>();
+        Map<String, String> mergedMetricsGroupTableNames = getMapObjectFromContext(MERGED_METRICS_GROUP_TABLE_NAME, String.class, String.class);
         for (String servingEntity : servingEntities) {
-            String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, String.format("%s_%s", getEntityLevel().name(), servingEntity));
-            String tableName = getStringValueFromContext(tableCtxName);
+            String tableCtxName = String.format("%s_%s", getEntityLevel().name(), servingEntity);
+            String tableName = mergedMetricsGroupTableNames.get(tableCtxName);
             if (noNeedToProfile(tableCtxName, tableName)) {
                 log.info("No need to profile {}", servingEntity);
                 continue;
