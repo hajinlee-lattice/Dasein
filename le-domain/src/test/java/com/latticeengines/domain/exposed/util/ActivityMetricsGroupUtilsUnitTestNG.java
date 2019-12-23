@@ -54,8 +54,8 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
     }
 
     @Test(groups = "unit", dataProvider = "timeFilterProvider")
-    public void testTimeFilterToTimeRangeInGroupId(TimeFilter timeFilter, String expected) {
-        String generated = ActivityMetricsGroupUtils.timeFilterToTimeRangeTemplate(timeFilter);
+    public void testTimeFilterToTimeRangeTmpl(TimeFilter timeFilter, String expected) {
+        String generated = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter);
         Assert.assertEquals(generated, expected);
     }
 
@@ -63,6 +63,14 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
     public void testTimeFilterToDescription(String timeRange, String expected) {
         String generated = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
         Assert.assertEquals(generated, expected);
+    }
+
+    @Test(groups = "unit", dataProvider = "timeRangeToTimeFilterProvider", dependsOnMethods = "testTimeFilterToTimeRangeTmpl")
+    public void testTimeRangeToTimeFilter(String timeRange, TimeFilter expected) {
+        TimeFilter generated = ActivityMetricsGroupUtils.timeRangeTmplToTimeFilter(timeRange);
+        String translated = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(generated);
+        String expectedTmpl = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(expected);
+        Assert.assertEquals(translated, expectedTmpl);
     }
 
     @DataProvider(name = "groupNameProvider")
@@ -93,6 +101,16 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
                 {"b_2_4_w", "between 2 and 4 week"}};
     }
 
+    @DataProvider(name = "timeRangeToTimeFilterProvider")
+    public Object[][] timeRangeToTimeFilterProvider() {
+        return new Object[][]{ //
+                {"w_2_w", new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(), Collections.singletonList(2))}, //
+                {"w_4_w", new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(), Collections.singletonList(4))}, //
+                {"b_2_4_w", new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Week.toString(), Arrays.asList(2, 4))}, //
+                {"b_4_12_w", new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Week.toString(), Arrays.asList(4, 12))}
+        };
+    }
+
     @DataProvider(name = "invalidAttrNames")
     public Object[][] provideInvalidAttrNames() {
         return new Object[][]{ //
@@ -102,5 +120,4 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
                 {"am__twv__id1_id2__b_2_3_w"}, //
         };
     }
-
 }

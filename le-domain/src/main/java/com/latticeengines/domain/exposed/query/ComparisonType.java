@@ -43,6 +43,15 @@ public enum ComparisonType {
     public static final Set<ComparisonType> VAGUE_TYPES = //
             ImmutableSet.of(LATEST_DAY);
 
+    public static ComparisonType getByName(String name) {
+        for (ComparisonType type : values()) {
+            if (type.name().equals(name)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException(String.format("There is no comparison type %s in ComparisonType", name));
+    }
+
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;
     }

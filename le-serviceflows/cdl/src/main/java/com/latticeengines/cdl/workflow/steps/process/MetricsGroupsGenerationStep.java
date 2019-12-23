@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -25,7 +27,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -37,6 +41,7 @@ import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -51,6 +56,11 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private ActivityStoreProxy activityStoreProxy;
+
+    private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
 
     private DataCollection.Version inactive;
 
@@ -75,6 +85,11 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
+        streamMetadataCache = new ConcurrentHashMap<>();
+        streams.forEach(this::updateStreamMetadataCache);
+        putStringValueInContext(ACTIVITY_STREAM_METADATA_CACHE, JsonUtils.serialize(streamMetadataCache));
+        // TODO - add stream metadata to spark job
+
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> detailsMap = new HashMap<>();
         List<String> periodStoreTableCtxNames = new ArrayList<>();
@@ -95,7 +110,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         log.info("Fetching periodStore tables with names {}", periodStoreTableCtxNames);
         List<DataUnit> inputs = getTableSummariesFromCtxKeys(customerSpace.toString(), periodStoreTableCtxNames).stream().filter(Objects::nonNull)
                 .map(table -> table.partitionedToHdfsDataUnit(table.getName(), Collections.singletonList(InterfaceName.PeriodId.name()))
-        ).collect(Collectors.toList());
+                ).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(inputs)) {
             log.warn("No period store tables found. Skip metrics generation.");
             return null;
@@ -149,5 +164,12 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
         log.info("Stream IDs skipped for metrics processing = {}", skippedStreamIds);
         return skippedStreamIds;
+    }
+
+    private void updateStreamMetadataCache(AtlasStream stream) {
+        String signature = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class).getDimensionMetadataSignature();
+        if (!streamMetadataCache.containsKey(stream.getStreamId())) {
+            streamMetadataCache.put(stream.getStreamId(), activityStoreProxy.getDimensionMetadataInStream(customerSpace.toString(), stream.getName(), signature));
+        }
     }
 }
