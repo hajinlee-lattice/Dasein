@@ -584,8 +584,8 @@ public class ModelingFileUploadResource {
     @ResponseBody
     @ApiOperation(value = "upload a new Spec to S3")
     public String uploadSpecToS3(
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
+            @RequestParam(value = "systemType") String systemType, //
+            @RequestParam(value = "systemObject") String systemObject, //
             @RequestParam("file") MultipartFile file) {
         try {
             InputStream stream = file.getInputStream();

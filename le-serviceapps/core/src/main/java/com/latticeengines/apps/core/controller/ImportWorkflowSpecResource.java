@@ -40,8 +40,8 @@ public class ImportWorkflowSpecResource {
     @ApiOperation("get import workflow spec")
     public ImportWorkflowSpec getImportWorkflowSpec(
             @PathVariable String customerSpace, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject) {
+            @RequestParam(value = "systemType") String systemType, //
+            @RequestParam(value = "systemObject") String systemObject) {
         ImportWorkflowSpec spec;
         try {
             spec = importWorkflowSpecService.loadSpecFromS3(systemType, systemObject);
@@ -100,8 +100,8 @@ public class ImportWorkflowSpecResource {
     @ApiOperation("put the spec to s3")
     public void putSpecToS3(
             @PathVariable String customerSpace, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject, //
+            @RequestParam(value = "systemType") String systemType, //
+            @RequestParam(value = "systemObject") String systemObject, //
             @RequestBody ImportWorkflowSpec importWorkflowSpec) {
         try {
             importWorkflowSpecService.putSpecToS3(systemType, systemObject, importWorkflowSpec);
@@ -115,8 +115,8 @@ public class ImportWorkflowSpecResource {
     @ApiOperation("delete spec from s3")
     public void deleteSpecFromS3(
         @PathVariable String customerSpace, //
-        @RequestParam(value = "systemType", required = true) String systemType, //
-        @RequestParam(value = "systemObject", required = true) String systemObject) {
+        @RequestParam(value = "systemType") String systemType, //
+        @RequestParam(value = "systemObject") String systemObject) {
         try {
             importWorkflowSpecService.cleanupSpecFromS3(systemType, systemObject);
         } catch (Exception e) {

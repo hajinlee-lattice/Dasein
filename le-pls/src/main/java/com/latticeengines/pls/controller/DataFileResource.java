@@ -267,8 +267,8 @@ public class DataFileResource {
     @ResponseBody
     @ApiOperation(value = "Get spec info from s3")
     public void downloadSpecFromS3(
-            @RequestParam(value = "systemType", required = true) String systemType,
-            @RequestParam(value = "systemObject", required = true) String systemObject,
+            @RequestParam(value = "systemType") String systemType,
+            @RequestParam(value = "systemObject") String systemObject,
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
         try {
