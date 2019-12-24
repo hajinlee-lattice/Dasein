@@ -107,12 +107,6 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             log.info("No groups to merge for tenant {}. Skip merging metrics groups", customerSpace);
             return null;
         }
-        groups.forEach(group -> {
-            activityMetricsServingEntities.add(CategoryUtils.getEntity(group.getCategory()).get(0).getServingStore().name());
-            String mergedTableLabel = getMergedLabel(group);
-            mergedTablesMap.putIfAbsent(mergedTableLabel, new ArrayList<>());
-            mergedTablesMap.get(mergedTableLabel).add(group);
-        });
         // for profiling merged tables
         putObjectInContext(ACTIVITY_MERGED_METRICS_SERVING_ENTITIES, activityMetricsServingEntities);
         Map<String, String> mergedMetricsGroupTableNames = getMapObjectFromContext(MERGED_METRICS_GROUP_TABLE_NAME, String.class, String.class);
@@ -130,6 +124,12 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
             return null;
         } else {
+            groups.forEach(group -> {
+                activityMetricsServingEntities.add(CategoryUtils.getEntity(group.getCategory()).get(0).getServingStore().name());
+                String mergedTableLabel = getMergedLabel(group);
+                mergedTablesMap.putIfAbsent(mergedTableLabel, new ArrayList<>());
+                mergedTablesMap.get(mergedTableLabel).add(group);
+            });
             ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
             Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
             AtomicInteger index = new AtomicInteger();
