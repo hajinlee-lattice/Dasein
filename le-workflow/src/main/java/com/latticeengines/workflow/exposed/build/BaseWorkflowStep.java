@@ -320,6 +320,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected YarnClient yarnClient;
 
     @Autowired
+    protected ModelProxy modelProxy;
 
     @Autowired
     protected JobProxy jobProxy;
