@@ -60,15 +60,16 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
+import com.latticeengines.serviceflows.workflow.dataflow.LivySessionManager;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.spark.exposed.job.cdl.CountOrphanTransactionsJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("generateProcessingReport")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GenerateProcessingReport extends BaseSparkStep<ProcessStepConfiguration> {
+public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfiguration> {
 
     protected static final Logger log = LoggerFactory.getLogger(GenerateProcessingReport.class);
 
@@ -92,6 +93,9 @@ public class GenerateProcessingReport extends BaseSparkStep<ProcessStepConfigura
 
     @Inject
     private SparkJobService sparkJobService;
+
+    @Inject
+    private LivySessionManager livySessionManager;
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -137,7 +141,7 @@ public class GenerateProcessingReport extends BaseSparkStep<ProcessStepConfigura
 
     private BusinessEntity getOwnerEntity(TableRoleInCollection role) {
         BusinessEntity owner = Arrays.stream(BusinessEntity.values()).filter(entity -> //
-        role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
+                role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
                 .findFirst().orElse(null);
         if (owner == null) {
             switch (role) {
@@ -273,7 +277,7 @@ public class GenerateProcessingReport extends BaseSparkStep<ProcessStepConfigura
     }
 
     private void updateCollectionStatus(Map<BusinessEntity, Long> currentCnts,
-            Map<OrphanRecordsType, Long> orphanCnts) {
+                                        Map<OrphanRecordsType, Long> orphanCnts) {
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         detail.setAccountCount(currentCnts.get(BusinessEntity.Account));
         detail.setContactCount(currentCnts.get(BusinessEntity.Contact));
@@ -350,7 +354,8 @@ public class GenerateProcessingReport extends BaseSparkStep<ProcessStepConfigura
         CountOrphanTransactionsConfig countOrphanTransactionsConfig = new CountOrphanTransactionsConfig();
         countOrphanTransactionsConfig.setInput(hdfsDataUnits);
         countOrphanTransactionsConfig.setJoinKeys(Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
-        SparkJobResult sparkJobResult = runSparkJob(CountOrphanTransactionsJob.class, countOrphanTransactionsConfig);
+        SparkJobResult sparkJobResult = SparkUtils.runJob(customerSpace, yarnConfiguration, sparkJobService,
+                livySessionManager, CountOrphanTransactionsJob.class, countOrphanTransactionsConfig);
         result = Long.parseLong(sparkJobResult.getOutput());
         log.info(String.format("There are %d orphan transactions.", result));
         return result;
