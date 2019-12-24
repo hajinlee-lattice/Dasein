@@ -82,7 +82,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             log.info("No daily stores found for tenant {}. Skip generating period stores", customerSpace);
             return null;
         }
-        Map<String, String> periodStoreTableNames = getMapObjectFromContext(PERIOD_STORE_SIGNATURE_TABLE_NAME, String.class, String.class);
+        Map<String, String> periodStoreTableNames = getMapObjectFromContext(PERIOD_STORE_TABLE_NAME, String.class, String.class);
         if(periodStoreTableNames != null){
             if (isShortCutMode(periodStoreTableNames)) {
                 log.info("Period stores have been created before retry. Skip generating period stores", customerSpace);
@@ -135,11 +135,9 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
                 signatureTableNames.put(details.getLabels().get(offset), tableName); // use period name as signature
-                ctxKeyTableNames.put(ctxKey, periodStoreTable.getName());
             }
         });
-        putObjectInContext(PERIOD_STORE_SIGNATURE_TABLE_NAME, signatureTableNames);
-        putObjectInContext(PERIOD_STORE_CTXKEY_TABLE_NAME, ctxKeyTableNames);
+        putObjectInContext(PERIOD_STORE_TABLE_NAME, signatureTableNames);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
     }
 }
