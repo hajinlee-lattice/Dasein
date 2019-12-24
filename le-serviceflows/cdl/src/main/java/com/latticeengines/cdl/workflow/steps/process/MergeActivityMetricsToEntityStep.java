@@ -196,6 +196,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
             signatureTableNames.putIfAbsent(servingEntity, new HashMap<>());
             signatureTableNames.get(servingEntity).put(getEntityInLabel(mergedTableLabel).name(), tableName);
+            mergedMetricsGroupTableNames.put(mergedTableLabel, tableName);
         });
         // signature: entity (Account/Contact)
         // role: WebVisitProfile
