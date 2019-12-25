@@ -5,8 +5,10 @@ import static com.latticeengines.domain.exposed.query.EntityTypeUtils.generateFu
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,7 +42,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     @Inject
     private CDLProxy cdlProxy;
 
-    @BeforeClass(groups = { "end2end" })
+    @BeforeClass(groups = {"end2end"})
     @Override
     public void setup() throws Exception {
         Map<String, Boolean> featureFlagMap = new HashMap<>();
@@ -69,8 +71,13 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
 
-        // run PA with fake current time
-        processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
+        if (isLocalEnvironment()) {
+            // run PA with fake current time
+            processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
+        } else {
+            runTestWithRetry(getCandidateFailingSteps(), CURRENT_PA_TIME.toEpochMilli());
+        }
+
     }
 
     @Test(groups = "end2end", dependsOnMethods = "test", enabled = false)
@@ -128,6 +135,31 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         SimpleTemplateMetadata sm = new SimpleTemplateMetadata();
         sm.setEntityType(EntityType.WebVisitSourceMedium);
         cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(sm));
+    }
+
+    private List<String> getCandidateFailingSteps() {
+        return Arrays.asList(
+                "aggActivityStreamToDaily",
+                "periodStoresGenerationStep",
+                "metricsGroupsGenerationStep",
+                "mergeActivityMetricsToEntityStep",
+                "profileAccountActivityMetricsStep",
+                "profileContactActivityMetricsStep",
+                "combineStatistics", //
+                "exportToRedshift", //
+                "generateProcessingReport", // mimic failed in scoring
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "generateProcessingReport", //
+                "exportProcessAnalyzeToS3", //
+                "commitEntityMatch", //
+                "finishProcessing");
     }
 
 }
