@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -540,7 +541,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         importWorkflowSpec.setSystemType(systemType);
         importWorkflowSpec.setSystemObject(systemObject);
         String tenantId = MultiTenantContext.getShortTenantId();
-        importWorkflowSpecProxy.putSpecToS3(tenantId, systemType, systemObject, importWorkflowSpec);
+        importWorkflowSpecProxy.addSpecToS3(tenantId, systemType, systemObject, importWorkflowSpec);
         ImportWorkflowSpec importSpec = importWorkflowSpecProxy.getImportWorkflowSpec(tenantId, systemType,
                 systemObject);
         Assert.assertNotNull(importSpec);
@@ -548,6 +549,15 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         importSpec = importWorkflowSpecProxy.getImportWorkflowSpec(tenantId, systemType, systemObject);
 
         Assert.assertNull(importSpec);
+
+        // set type and object empty, will get all spec in S3
+        List<ImportWorkflowSpec> specList = importWorkflowSpecProxy.getSpecsByTypeAndObject(tenantId, "",
+                "");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(specList));
+        Assert.assertTrue(specList.size() > 0);
+        specList = importWorkflowSpecProxy.getSpecsByTypeAndObject(tenantId, systemType, systemObject);
+        Assert.assertTrue(CollectionUtils.isEmpty(specList));
+
     }
 
     private FieldDefinition generateFieldDefinition(String fieldName, UserDefinedType type, List<String> matchingColumns) {

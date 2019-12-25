@@ -76,6 +76,48 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
         return workflowSpec;
     }
 
+    @Override
+    public List<ImportWorkflowSpec> loadSpecsByTypeAndObject(String systemType, String systemObject) {
+        String fileSystemType = sanitizeName(systemType);
+        String fileSystemObject = sanitizeName(systemObject);
+        log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Folder + " System type: " + systemType + " System object: " + systemObject);
+        // Read in S3 file as InputStream.
+        Iterator<InputStream> specStreamIterator = s3Service.getObjectStreamIterator(s3Bucket, s3Folder,
+                new S3KeyFilter(){
+                    @Override
+                    public boolean accept(String key) {
+                        // key example: /import-sepcs/other-contacts-spec.json
+                        if (key.endsWith("/")) {
+                            return false;
+                        } else {
+                            String name = key.substring(key.lastIndexOf("/") + 1);
+                            int index = name.indexOf('-');
+                            String type = name.substring(0, index);
+                            String remainingPart = name.substring(index + 1);
+                            boolean result = true;
+                            if (StringUtils.isNotBlank(fileSystemType)) {
+                                result &= type.equals(fileSystemType);
+                            }
+                            if (StringUtils.isNotBlank(fileSystemObject)) {
+                                result &= remainingPart.startsWith(fileSystemObject);
+                            }
+                            return result;
+                        }
+                    }});
+        List<ImportWorkflowSpec> specList = new ArrayList<>();
+        while (specStreamIterator.hasNext()) {
+            try {
+                ImportWorkflowSpec workflowSpec = JsonUtils.deserialize(specStreamIterator.next(), ImportWorkflowSpec.class);
+                specList.add(workflowSpec);
+            } catch (Exception e) {
+                log.error("JSON deserialization of Spec file from S3 bucket " + s3Bucket + " and path " + s3Folder +
+                        " failed with error:", e);
+                throw e;
+            }
+        }
+        return specList;
+    }
+
     public Table tableFromRecord(String tableName, boolean writeAllDefinitions, FieldDefinitionsRecord record) {
         log.info(String.format("Generating Table named %s from record of system type %s and object %s",
                 tableName, record.getSystemObject(), record.getSystemType()));
@@ -127,7 +169,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     }
 
     @Override
-    public void putSpecToS3(String systemType, String systemObject, ImportWorkflowSpec importWorkflowSpec) throws Exception {
+    public void addSpecToS3(String systemType, String systemObject, ImportWorkflowSpec importWorkflowSpec) throws Exception {
         String fileSystemType = sanitizeName(systemType);
         String fileSystemObject = sanitizeName(systemObject);
         String key = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
@@ -138,7 +180,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     }
 
     @Override
-    public void cleanupSpecFromS3(String systemType, String systemObject) throws Exception {
+    public void deleteSpecFromS3(String systemType, String systemObject) throws Exception {
         String fileSystemType = sanitizeName(systemType);
         String fileSystemObject = sanitizeName(systemObject);
         String key = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";

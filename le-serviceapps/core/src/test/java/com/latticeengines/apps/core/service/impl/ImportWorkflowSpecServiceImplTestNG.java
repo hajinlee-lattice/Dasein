@@ -109,10 +109,10 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
         fakeSpec.setSystemName("fakeName");
         fakeSpec.setSystemType(fakeType);
         fakeSpec.setSystemName(fakeObject);
-        importWorkflowSpecService.putSpecToS3(fakeType, fakeObject, fakeSpec);
+        importWorkflowSpecService.addSpecToS3(fakeType, fakeObject, fakeSpec);
         ImportWorkflowSpec importSpec = importWorkflowSpecService.loadSpecFromS3(fakeType, fakeObject);
         Assert.assertNotNull(importSpec);
-        importWorkflowSpecService.cleanupSpecFromS3(fakeType, fakeObject);
+        importWorkflowSpecService.deleteSpecFromS3(fakeType, fakeObject);
         try {
             importSpec = importWorkflowSpecService.loadSpecFromS3(fakeType, fakeObject);
         } catch (Exception e) {

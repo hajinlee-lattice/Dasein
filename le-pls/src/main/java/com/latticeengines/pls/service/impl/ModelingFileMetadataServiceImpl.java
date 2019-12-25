@@ -1575,7 +1575,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<String> errors = new ArrayList<>();
         ImportWorkflowSpec importWorkflowSpec = validateIndividualSpec(systemType, systemObject, inputStream, errors);
         if (CollectionUtils.isEmpty(errors) && importWorkflowSpec != null) {
-            importWorkflowSpecProxy.putSpecToS3(MultiTenantContext.getShortTenantId(), systemType, systemObject, importWorkflowSpec);
+            importWorkflowSpecProxy.addSpecToS3(MultiTenantContext.getShortTenantId(), systemType, systemObject,
+                    importWorkflowSpec);
             return "uploaded to S3 successfully.";
         } else {
             return String.join("\n", errors);

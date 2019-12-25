@@ -34,6 +34,14 @@ public class ImportWorkflowSpecProxy extends MicroserviceRestApiProxy  {
         return get("get import workflow spec", url, ImportWorkflowSpec.class);
     }
 
+    public List<ImportWorkflowSpec> getSpecsByTypeAndObject(String customerSpace, String systemType,
+                                                            String systemObject) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/importworkflowspec/list" +
+                        "?systemType={systemType}&systemObject={systemObject}",
+                shortenCustomerSpace(customerSpace), systemType, systemObject);
+        return getList("get import workflow spec by type and object", url, ImportWorkflowSpec.class);
+    }
 
     public Table generateTable(String customerSpace, String tableName, Boolean writeAll,
                                FieldDefinitionsRecord record) {
@@ -61,7 +69,7 @@ public class ImportWorkflowSpecProxy extends MicroserviceRestApiProxy  {
         return getList("get import workflow spec with same object exclude one type", url, ImportWorkflowSpec.class);
     }
 
-    public void putSpecToS3(String customerSpace, String systemType, String systemObject, ImportWorkflowSpec spec) {
+    public void addSpecToS3(String customerSpace, String systemType, String systemObject, ImportWorkflowSpec spec) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/importworkflowspec" +
                         "?systemType={systemType}&systemObject={systemObject}",

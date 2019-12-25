@@ -96,15 +96,31 @@ public class ImportWorkflowSpecResource {
         return specs;
     }
 
+    @GetMapping(value = "/list")
+    @ResponseBody
+    @ApiOperation("get workflow spec by type and object")
+    public List<ImportWorkflowSpec> getImportWorkflowSpecs(
+            @PathVariable String customerSpace, //
+            @RequestParam(value = "systemType", required = false) String systemType, //
+            @RequestParam(value = "systemObject", required = false) String systemObject) {
+        try {
+            return importWorkflowSpecService.loadSpecsByTypeAndObject(systemType, systemObject);
+        } catch (Exception e) {
+            log.error(String.format("ImportWorkflowSpecService failed to return Spec for system type %s and system " +
+                    "object %s. Error was: %s", systemType, systemObject, e.toString()));
+            return null;
+        }
+    }
+
     @PostMapping(value = "")
-    @ApiOperation("put the spec to s3")
+    @ApiOperation("add the spec to s3")
     public void putSpecToS3(
             @PathVariable String customerSpace, //
             @RequestParam(value = "systemType") String systemType, //
             @RequestParam(value = "systemObject") String systemObject, //
             @RequestBody ImportWorkflowSpec importWorkflowSpec) {
         try {
-            importWorkflowSpecService.putSpecToS3(systemType, systemObject, importWorkflowSpec);
+            importWorkflowSpecService.addSpecToS3(systemType, systemObject, importWorkflowSpec);
         } catch (Exception e) {
             log.error(String.format("ImportWorkflowService failed to upload spec for system type %s and system " +
                     "object %s.\nError was: %s", systemType, systemObject, e.toString()));
@@ -118,7 +134,7 @@ public class ImportWorkflowSpecResource {
         @RequestParam(value = "systemType") String systemType, //
         @RequestParam(value = "systemObject") String systemObject) {
         try {
-            importWorkflowSpecService.cleanupSpecFromS3(systemType, systemObject);
+            importWorkflowSpecService.deleteSpecFromS3(systemType, systemObject);
         } catch (Exception e) {
             log.error(String.format("failed to delete spec with system type %s and system object %s.\n Error was: %s"
                     , systemType, systemObject, e.toString()));
