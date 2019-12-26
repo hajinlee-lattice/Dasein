@@ -383,7 +383,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         stream //
                 .forEach( //
                         segmentIdSingleRulesPair -> //
-                        processSingleSegmentIdSingleRulesPair(tenant, segmentMap, segmentIdAndSingleRulesCoverageMap, errorMap, //
+                        processSingleSegmentIdSingleRulesPair(tenant, segmentMap, segmentIdAndSingleRulesCoverageMap,
+                                errorMap, //
                                 segmentIdSingleRulesPair, request.isRestrictNotNullSalesforceId()));
     }
 
@@ -536,7 +537,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private CoverageInfo processSingleRatingId(Tenant tenant, MetadataSegment targetSegment, String ratingEngineId,
             boolean isRestrictNullLookupId, String lookupId, boolean loadContactCount,
-            boolean loadContactsCountByBucket, boolean applyEmailFilter) {
+            boolean loadContactsCountByBucket, boolean restrictContactsWithoutEmails) {
         try {
             MultiTenantContext.setTenant(tenant);
 
@@ -552,8 +553,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     createEntityFrontEndQuery(BusinessEntity.Account, //
                             isRestrictNullLookupId, querySegment, lookupId);
 
-            if (applyEmailFilter) {
-                Restriction newContactRestriction = applyEmailFilterToContactRestriction(
+            if (restrictContactsWithoutEmails) {
+                Restriction newContactRestriction = restrictContactsWithoutEmails(
                         accountFrontEndQuery.getContactRestriction().getRestriction());
                 accountFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
             }
@@ -626,8 +627,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                         isRestrictNullLookupId, querySegment, lookupId, ratingEngineId,
                                         bucketCoverage.getBucket());
 
-                                if (applyEmailFilter) {
-                                    Restriction newContactRestriction = applyEmailFilterToContactRestriction(
+                                if (restrictContactsWithoutEmails) {
+                                    Restriction newContactRestriction = restrictContactsWithoutEmails(
                                             contactFrontEndQuery.getContactRestriction().getRestriction());
                                     contactFrontEndQuery
                                             .setContactRestriction(new FrontEndRestriction(newContactRestriction));
@@ -647,8 +648,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                         FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
                                 isRestrictNullLookupId, querySegment, lookupId, ratingEngineId, null);
 
-                        if (applyEmailFilter) {
-                            Restriction newContactRestriction = applyEmailFilterToContactRestriction(
+                        if (restrictContactsWithoutEmails) {
+                            Restriction newContactRestriction = restrictContactsWithoutEmails(
                                     contactFrontEndQuery.getContactRestriction().getRestriction());
                             contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
                         }
@@ -673,11 +674,10 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     }
 
-    private Restriction applyEmailFilterToContactRestriction(Restriction contactRestriction) {
+    private Restriction restrictContactsWithoutEmails(Restriction contactRestriction) {
         Restriction emailFilter = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Email.name())
                 .isNotNull().build();
-        Restriction newContactRestriction = Restriction.builder().and(contactRestriction, emailFilter).build();
-        return newContactRestriction;
+        return Restriction.builder().and(contactRestriction, emailFilter).build();
     }
 
     private boolean hasContact(String customerSpace, DataCollection.Version version) {
@@ -1027,7 +1027,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             try {
                 CoverageInfo coverageInfo = processSingleRatingId(tenant, targetSegment, ratingModelId,
                         request.isRestrictNullLookupId(), request.getLookupId(), request.isLoadContactsCount(),
-                        request.isLoadContactsCountByBucket(), request.isApplyEmailFilter());
+                        request.isLoadContactsCountByBucket(), request.isRestrictContactsWithoutEmails());
                 response.getRatingModelsCoverageMap().put(ratingModelId, coverageInfo);
             } catch (Exception ex) {
                 log.info("Ignoring exception in getting coverage info for rating id: " + ratingModelId, ex);

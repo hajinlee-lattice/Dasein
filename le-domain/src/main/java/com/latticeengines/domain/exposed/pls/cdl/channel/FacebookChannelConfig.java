@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FacebookChannelConfig implements ChannelConfig {
+public class  FacebookChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.Facebook;
     private static final AudienceType audienceType = AudienceType.CONTACTS;
