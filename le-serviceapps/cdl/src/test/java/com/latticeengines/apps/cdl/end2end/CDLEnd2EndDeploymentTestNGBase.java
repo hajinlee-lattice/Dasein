@@ -537,11 +537,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void processAnalyzeSkipPublishToS3(Long currentPATimestamp) {
-        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        request.setSkipPublishToS3(true);
-        request.setSkipDynamoExport(true);
-        request.setCurrentPATimestamp(currentPATimestamp);
-        processAnalyze(request);
+        processAnalyze(getProcessRequest(currentPATimestamp));
     }
 
     void processAnalyze() {
@@ -1797,6 +1793,24 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(isLocalEnvironment());
         request.setFullRematch(isFullRematch);
+        runTestWithRetry(request, failingAtStep);
+    }
+
+    private ProcessAnalyzeRequest getProcessRequest(Long currentPATimestamp) {
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        request.setSkipPublishToS3(true);
+        request.setSkipDynamoExport(true);
+        request.setCurrentPATimestamp(currentPATimestamp);
+        return request;
+    }
+
+    void runTestWithRetry(List<String> candidateFailingSteps, Long currentPATimestamp) {
+        Random rand = new Random(System.currentTimeMillis());
+        String randomStepToFail = candidateFailingSteps.get(rand.nextInt(candidateFailingSteps.size()));
+        runTestWithRetry(getProcessRequest(currentPATimestamp), randomStepToFail);
+    }
+
+    private void runTestWithRetry(ProcessAnalyzeRequest request, String failingAtStep) {
         FailingStep failingStep = new FailingStep();
         failingStep.setName(failingAtStep);
         request.setFailingStep(failingStep);

@@ -217,7 +217,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CATALOG_TABLE_NAME = "CATALOG_TABLE_NAME";
     protected static final String RAW_ACTIVITY_STREAM_TABLE_NAME = "RAW_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME = "AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME";
+    protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
+    protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
+
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
     protected static final String PH_STATS_TABLE_NAME = "PH_STATS_TABLE_NAME";
@@ -295,7 +298,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 
     protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet(REMATCH_TABLE_NAME,
-            DELETED_TABLE_NAME, CATALOG_TABLE_NAME, AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME);
+            DELETED_TABLE_NAME, CATALOG_TABLE_NAME, AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, METRICS_GROUP_TABLE_NAME, MERGED_METRICS_GROUP_TABLE_NAME);
 
     // extra context keys to be carried over in restarted PA, beyond table names
     // above
@@ -580,6 +583,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     protected List<Table> getTableSummariesFromListKey(String customer, String tableNameListCtxKey) {
         List<String> tableNames = getListObjectFromContext(tableNameListCtxKey, String.class);
+        if (CollectionUtils.isNotEmpty(tableNames)) {
+            return tableNames.stream().map(name -> getTableSummary(customer, name)).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    protected List<Table> getTableSummaries(String customer, List<String> tableNames) {
         if (CollectionUtils.isNotEmpty(tableNames)) {
             return tableNames.stream().map(name -> getTableSummary(customer, name)).collect(Collectors.toList());
         } else {

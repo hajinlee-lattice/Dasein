@@ -83,6 +83,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     private PeriodProxy periodProxy;
 
     private DataCollection.Version inactive;
+    private boolean shortCutMode = false;
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
     private static TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>> streamMetadataCacheTypeRef = new TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>>() {
@@ -112,38 +113,52 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             mergedTablesMap.putIfAbsent(mergedTableLabel, new ArrayList<>());
             mergedTablesMap.get(mergedTableLabel).add(group);
         });
-
         // for profiling merged tables
         putObjectInContext(ACTIVITY_MERGED_METRICS_SERVING_ENTITIES, activityMetricsServingEntities);
+        Map<String, String> mergedMetricsGroupTableNames = getMapObjectFromContext(MERGED_METRICS_GROUP_TABLE_NAME, String.class, String.class);
+        shortCutMode = isShortCutMode(mergedMetricsGroupTableNames);
+        if (shortCutMode) {
+            Map<TableRoleInCollection, Map<String, String>> signatureTableNames = new HashMap<>();
+            for (Map.Entry<String, String> entry : mergedMetricsGroupTableNames.entrySet()) {
+                String mergedTableLabel = entry.getKey();
+                String tableName = entry.getValue();
+                TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
+                signatureTableNames.putIfAbsent(servingEntity, new HashMap<>());
+                signatureTableNames.get(servingEntity).put(getEntityInLabel(mergedTableLabel).name(), tableName);
+            }
+            log.info(String.format("Found merge activity metrics tables: %s in context, going thru short-cut mode.", mergedMetricsGroupTableNames.values()));
+            signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
+            return null;
+        } else {
+            ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+            Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+            AtomicInteger index = new AtomicInteger();
+            List<DataUnit> inputs = new ArrayList<>();
+            mergedTablesMap.forEach((mergedTableLabel, groupsToMerge) -> {
+                ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+                details.setStartIdx(index.get());
+                details.setLabels(groupsToMerge.stream().map(ActivityMetricsGroup::getGroupId).collect(Collectors.toList()));
+                detailsMap.put(mergedTableLabel, details);
+                index.addAndGet(groupsToMerge.size());
 
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        AtomicInteger index = new AtomicInteger();
-        List<DataUnit> inputs = new ArrayList<>();
-        mergedTablesMap.forEach((mergedTableLabel, groupsToMerge) -> {
-            ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
-            details.setStartIdx(index.get());
-            details.setLabels(groupsToMerge.stream().map(ActivityMetricsGroup::getGroupId).collect(Collectors.toList()));
-            detailsMap.put(mergedTableLabel, details);
-            index.addAndGet(groupsToMerge.size());
-
-            inputs.addAll(getMetricsGroupsDUs(groupsToMerge));
-        });
-        inputMetadata.setMetadata(detailsMap);
-        MergeActivityMetricsJobConfig config = new MergeActivityMetricsJobConfig();
-        config.inputMetadata = inputMetadata;
-        config.mergedTableLabels = new ArrayList<>(mergedTablesMap.keySet());
-        config.setInput(inputs);
-
-        return config;
+                inputs.addAll(getMetricsGroupsDUs(groupsToMerge));
+            });
+            inputMetadata.setMetadata(detailsMap);
+            MergeActivityMetricsJobConfig config = new MergeActivityMetricsJobConfig();
+            config.inputMetadata = inputMetadata;
+            config.mergedTableLabels = new ArrayList<>(mergedTablesMap.keySet());
+            config.setInput(inputs);
+            return config;
+        }
     }
 
     private List<DataUnit> getMetricsGroupsDUs(List<ActivityMetricsGroup> groupsToMerge) {
-        List<String> tableNames = groupsToMerge.stream().map(group -> String.format(METRICS_GROUP_TABLE_FORMAT, group.getGroupId())).collect(Collectors.toList());
+        Map<String, String> metricsGroupTableNames = getMapObjectFromContext(METRICS_GROUP_TABLE_NAME, String.class, String.class);
+        List<String> tableNames = groupsToMerge.stream().map(group -> metricsGroupTableNames.get(group.getGroupId())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(tableNames)) {
             return Collections.emptyList();
         } else {
-            return getTableSummariesFromCtxKeys(customerSpace.toString(), tableNames).stream()
+            return getTableSummaries(customerSpace.toString(), tableNames).stream()
                     .map(table -> table.toHdfsDataUnit(null)).collect(Collectors.toList());
         }
     }
@@ -156,11 +171,15 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
+        if (shortCutMode) {
+            return;
+        }
         String outputMetadataStr = result.getOutput();
         log.info("Generated output metadata: {}", outputMetadataStr);
         log.info("Generated {} merged tables", result.getTargets().size());
         Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<TableRoleInCollection, Map<String, String>> signatureTableNames = new HashMap<>();
+        Map<String, String> mergedMetricsGroupTableNames = new HashMap<>();
         outputMetadata.forEach((mergedTableLabel, details) -> {
             HdfsDataUnit output = result.getTargets().get(details.getStartIdx());
             String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, mergedTableLabel); // entity_servingEntity (Account_WebVisit)
@@ -177,10 +196,11 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
             signatureTableNames.putIfAbsent(servingEntity, new HashMap<>());
             signatureTableNames.get(servingEntity).put(getEntityInLabel(mergedTableLabel).name(), tableName);
-            putStringValueInContext(tableCtxName, tableName);
+            mergedMetricsGroupTableNames.put(mergedTableLabel, tableName);
         });
         // signature: entity (Account/Contact)
         // role: WebVisitProfile
+        putObjectInContext(MERGED_METRICS_GROUP_TABLE_NAME, mergedMetricsGroupTableNames);
         signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
     }
 
