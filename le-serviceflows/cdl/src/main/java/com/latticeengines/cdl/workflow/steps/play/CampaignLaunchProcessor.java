@@ -17,6 +17,8 @@ import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -101,7 +103,7 @@ public class CampaignLaunchProcessor {
         LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
                 launch.getDestinationOrgId(), launch.getDestinationSysType());
         CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
-        if (ChannelConfigUtil.shouldApplyEmailFilter(destinationSystemName, launch.getChannelConfig())) {
+        if (launch.getChannelConfig().isSuppressContactsWithoutEmails()) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
                     accountFrontEndQuery.getContactRestriction().getRestriction());
@@ -170,19 +172,18 @@ public class CampaignLaunchProcessor {
         MetadataSegment segment;
         if (play.getTargetSegment() != null) {
             segment = play.getTargetSegment();
-        } else {
+        } else if (ratingEngine != null) {
             log.info(String.format(
                     "No Target segment defined for Play %s, falling back to target segment of Rating Engine %s",
-                    play.getName(), ratingEngine.getSegment()));
-            if (ratingEngine != null) {
-                segment = play.getRatingEngine().getSegment();
-            }
+                    play.getName(), ratingEngine.getId()));
+            segment = play.getRatingEngine().getSegment();
+        } else {
             segment = null;
         }
 
         if (segment == null) {
-            throw new NullPointerException(String.format("No Target segment defined for Play %s or Rating Engine %s",
-                    play.getName(), ratingEngine.getId()));
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    String.format("No Target segment defined for Campaign %s or its Model", play.getName()) });
         }
 
         String segmentName = segment.getName();
@@ -258,19 +259,18 @@ public class CampaignLaunchProcessor {
         MetadataSegment segment;
         if (play.getTargetSegment() != null) {
             segment = play.getTargetSegment();
-        } else {
+        } else if (ratingEngine != null) {
             log.info(String.format(
                     "No Target segment defined for Play %s, falling back to target segment of Rating Engine %s",
-                    play.getName(), ratingEngine.getSegment()));
-            if (ratingEngine != null) {
-                segment = play.getRatingEngine().getSegment();
-            }
+                    play.getName(), ratingEngine.getId()));
+            segment = play.getRatingEngine().getSegment();
+        } else {
             segment = null;
         }
 
         if (segment == null) {
-            throw new NullPointerException(String.format("No Target segment defined for Play %s or Rating Engine %s",
-                    play.getName(), ratingEngine.getId()));
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    String.format("No Target segment defined for Campaign %s or its Model", play.getName()) });
         }
 
         String segmentName = segment.getName();
