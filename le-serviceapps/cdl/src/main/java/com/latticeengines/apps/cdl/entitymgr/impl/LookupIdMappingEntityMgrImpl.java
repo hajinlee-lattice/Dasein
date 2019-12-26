@@ -80,9 +80,6 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         Tenant tenant = MultiTenantContext.getTenant();
         lookupIdsMap.setTenant(tenant);
         lookupIdsMap.setId(UUID.randomUUID().toString());
-        Date time = new Date(System.currentTimeMillis());
-        lookupIdsMap.setCreated(time);
-        lookupIdsMap.setUpdated(time);
         lookupIdsMap.setIsRegistered(true);
         getDao().create(lookupIdsMap);
 
@@ -98,7 +95,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
                 mapping.setTenant(tenant);
                 mapping.setLookupIdMap(lookupIdsMap);
             });
-            
+
             exportFieldMetadataMappingDao.create(exportFieldMetadataMappings, true);
         }
         return lookupIdsMap;
