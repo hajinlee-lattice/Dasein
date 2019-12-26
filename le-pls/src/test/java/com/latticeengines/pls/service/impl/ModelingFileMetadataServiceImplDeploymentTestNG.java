@@ -314,15 +314,18 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         otherID1.setExternalSystemType(CDLExternalSystemType.CRM);
         otherID1.setFieldName("salesforce1");
         otherID1.setColumnName("column1");
+        otherID1.setFieldType(UserDefinedType.TEXT);
         otherIdsDefinitions.add(otherID1);
         FieldDefinition otherID2 = new FieldDefinition();
         otherID2.setFieldName("facebook");
         otherID2.setColumnName("column2");
+        otherID2.setFieldType(UserDefinedType.TEXT);
         otherID2.setExternalSystemType(CDLExternalSystemType.ERP);
         otherIdsDefinitions.add(otherID2);
         FieldDefinition otherID3 = new FieldDefinition();
         otherID3.setColumnName("id3");
         otherIdsDefinitions.add(otherID3);
+        otherID3.setFieldType(UserDefinedType.TEXT);
         log.info("Committing fieldDefinitionsRecord:\n" + JsonUtils.pprint(currentFieldDefinitionRecord));
 
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions(
