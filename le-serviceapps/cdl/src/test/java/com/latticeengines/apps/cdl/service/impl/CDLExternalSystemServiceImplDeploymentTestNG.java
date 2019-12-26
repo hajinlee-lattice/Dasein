@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -45,8 +46,8 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     public void setup() {
         super.setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId(), 3);
-        List<ColumnMetadata> cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
-                .collectList().block();
+        List<ColumnMetadata> cms = systemMetadataStore.getMetadata(BusinessEntity.Account,
+                DataCollection.Version.Blue, StoreFilter.ALL).collectList().block();
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }
 
@@ -84,7 +85,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
                 .collectList().block();
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
 
-        cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
+        cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue, StoreFilter.ALL)
                 .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.LookupId)).collectList().block();
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }

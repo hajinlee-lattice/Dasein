@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
@@ -55,14 +56,20 @@ public class ServingStoreServiceImpl implements ServingStoreService {
 
     @Override
     public ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity, DataCollection.Version version) {
-        return systemMetadataStore.getMetadataInParallel(entity, version);
+        return systemMetadataStore.getMetadataInParallel(entity, version, StoreFilter.ALL);
     }
 
     @Override
     public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity,
             DataCollection.Version version) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return getFullyDecoratedMetadata(customerSpace, entity, version);
+        return getFullyDecoratedMetadata(customerSpace, entity, version, StoreFilter.ALL);
+    }
+
+    @Override
+    public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version, StoreFilter filter) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        return getFullyDecoratedMetadata(customerSpace, entity, version, filter);
     }
 
     @Override
@@ -70,7 +77,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
-        return getFullyDecoratedMetadata(customerSpace, entity, version).sequential().collectList().block();
+        return getFullyDecoratedMetadata(customerSpace, entity, version, StoreFilter.ALL).sequential().collectList().block();
     }
 
     @Override
@@ -191,7 +198,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     private ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(String tenantId, BusinessEntity entity,
-                                                                   DataCollection.Version version) {
+                                                                   DataCollection.Version version, StoreFilter filter) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         TableRoleInCollection role = entity.getServingStore();
         List<String> tables = dataCollectionService.getTableNames(customerSpace, "", role, version);
@@ -201,7 +208,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         }
         ParallelFlux<ColumnMetadata> flux;
         if (CollectionUtils.isNotEmpty(tables)) {
-            flux = customizedMetadataStore.getMetadataInParallel(entity, version).map(cm -> {
+            flux = customizedMetadataStore.getMetadataInParallel(entity, version, filter).map(cm -> {
                 cm.setBitOffset(null);
                 cm.setNumBits(null);
                 cm.setPhysicalName(null);

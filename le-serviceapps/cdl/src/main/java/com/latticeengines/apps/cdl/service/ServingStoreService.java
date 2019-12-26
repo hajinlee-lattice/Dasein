@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -17,6 +18,8 @@ public interface ServingStoreService {
     ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity, DataCollection.Version version);
 
     ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version);
+    ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version,
+                                                           StoreFilter filter);
 
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups);
