@@ -49,7 +49,7 @@ public class LookupIdMappingResource {
 
     @PostMapping(value = "/register")
     @ResponseBody
-    @ApiOperation(value = "Deregister an org")
+    @ApiOperation(value = "Register an org")
     public LookupIdMap registerExternalSystem(@PathVariable String customerSpace,
             @RequestBody LookupIdMap lookupIdMap) {
         return lookupIdMappingService.registerExternalSystem(lookupIdMap);
@@ -103,8 +103,8 @@ public class LookupIdMappingResource {
     @GetMapping(value = "/org/{orgId}")
     @ResponseBody
     @ApiOperation(value = "Get lookup id map from org id")
-    public LookupIdMap getLookupIdMapByOrgId(@PathVariable String customerSpace,
-            @PathVariable String orgId, @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = true) //
+    public LookupIdMap getLookupIdMapByOrgId(@PathVariable String customerSpace, @PathVariable String orgId,
+            @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = true) //
             CDLExternalSystemType externalSystemType) {
         return lookupIdMappingService.getLookupIdMapByOrgId(orgId, externalSystemType);
     }

@@ -16,6 +16,7 @@ import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
@@ -65,6 +66,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         LookupIdMap duplicateLookupIdMap = new LookupIdMap();
         duplicateLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        duplicateLookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         duplicateLookupIdMap.setOrgId(orgId);
         duplicateLookupIdMap.setOrgName(orgName);
         // should be able to upsert duplicate entry
@@ -107,6 +109,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Map<String, List<LookupIdMap>> lookupIdsMapping;
         LookupIdMap lookupIdMap = new LookupIdMap();
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         lookupIdMap.setOrgId(orgId);
         lookupIdMap.setOrgName(orgName);
         if (doRegister) {
