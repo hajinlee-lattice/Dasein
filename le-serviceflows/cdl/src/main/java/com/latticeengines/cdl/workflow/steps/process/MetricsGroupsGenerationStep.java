@@ -63,6 +63,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
 
     private DataCollection.Version inactive;
+    private boolean shortCutMode = false;
 
     @Override
     protected Class<? extends AbstractSparkJob<DeriveActivityMetricGroupJobConfig>> getJobClz() {
@@ -84,12 +85,10 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             return null;
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-
         streamMetadataCache = new ConcurrentHashMap<>();
         streams.forEach(this::updateStreamMetadataCache);
         putStringValueInContext(ACTIVITY_STREAM_METADATA_CACHE, JsonUtils.serialize(streamMetadataCache));
         // TODO - add stream metadata to spark job
-
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> detailsMap = new HashMap<>();
         List<String> periodStoreTableCtxNames = new ArrayList<>();
@@ -115,18 +114,28 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             log.warn("No period store tables found. Skip metrics generation.");
             return null;
         }
-        validateInputTableCountMatch(groups, inputs, stepConfiguration);
-
-        DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
-        config.inputMetadata = inputMetadata;
-        config.activityMetricsGroups = groups;
-        config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
-        config.setInput(inputs);
-        return config;
+        Map<String, String> groupTableNames = getMapObjectFromContext(METRICS_GROUP_TABLE_NAME, String.class, String.class);
+        shortCutMode = isShortCutMode(groupTableNames);
+        if (shortCutMode) {
+            log.info(String.format("Found metrics group tables: %s in context, going thru short-cut mode.", groupTableNames.values()));
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), groupTableNames, TableRoleInCollection.MetricsGroup, inactive);
+            return null;
+        } else {
+            validateInputTableCountMatch(groups, inputs, stepConfiguration);
+            DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
+            config.inputMetadata = inputMetadata;
+            config.activityMetricsGroups = groups;
+            config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+            config.setInput(inputs);
+            return config;
+        }
     }
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
+        if (shortCutMode) {
+            return;
+        }
         String outputMetadataStr = result.getOutput();
         log.info("Generated output metadata: {}", outputMetadataStr);
         log.info("Generated {} output metrics tables", result.getTargets().size());
@@ -139,8 +148,8 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             Table metricsGroupTable = toTable(tableName, metricsGroupDU);
             metadataProxy.createTable(customerSpace.toString(), tableName, metricsGroupTable);
             signatureTableNames.put(groupId, tableName); // use groupId as signature
-            putStringValueInContext(ctxKey, metricsGroupTable.getName());
         });
+        putObjectInContext(METRICS_GROUP_TABLE_NAME, signatureTableNames);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.MetricsGroup, inactive);
     }
 
@@ -173,3 +182,4 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         }
     }
 }
+

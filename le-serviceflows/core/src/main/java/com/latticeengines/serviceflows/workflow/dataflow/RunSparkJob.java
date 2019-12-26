@@ -2,10 +2,13 @@ package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
@@ -95,4 +98,14 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
         resultTable.setAttributes(newAttrs);
     }
 
+    protected boolean isShortCutMode(Map<String, String> tableNames) {
+        String customer = customerSpace.toString();
+        if (MapUtils.isEmpty(tableNames)) {
+            return false;
+        }
+        Map<String, Table> tables = tableNames.entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        return MapUtils.isEmpty(tables) ? false : tables.values().stream().noneMatch(Objects::isNull);
+    }
 }
