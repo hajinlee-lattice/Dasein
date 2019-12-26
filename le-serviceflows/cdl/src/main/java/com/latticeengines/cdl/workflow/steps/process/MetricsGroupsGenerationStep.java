@@ -63,6 +63,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
 
     private DataCollection.Version inactive;
+    private String signature;
     private boolean shortCutMode = false;
 
     @Override
@@ -85,10 +86,10 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             return null;
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        signature = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class).getDimensionMetadataSignature();
         streamMetadataCache = new ConcurrentHashMap<>();
         streams.forEach(this::updateStreamMetadataCache);
         putStringValueInContext(ACTIVITY_STREAM_METADATA_CACHE, JsonUtils.serialize(streamMetadataCache));
-        // TODO - add stream metadata to spark job
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> detailsMap = new HashMap<>();
         List<String> periodStoreTableCtxNames = new ArrayList<>();
@@ -126,6 +127,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             config.inputMetadata = inputMetadata;
             config.activityMetricsGroups = groups;
             config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+            config.streamMetadata = streamMetadataCache;
             config.setInput(inputs);
             return config;
         }
@@ -176,7 +178,6 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     }
 
     private void updateStreamMetadataCache(AtlasStream stream) {
-        String signature = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class).getDimensionMetadataSignature();
         if (!streamMetadataCache.containsKey(stream.getStreamId())) {
             streamMetadataCache.put(stream.getStreamId(), activityStoreProxy.getDimensionMetadataInStream(customerSpace.toString(), stream.getName(), signature));
         }

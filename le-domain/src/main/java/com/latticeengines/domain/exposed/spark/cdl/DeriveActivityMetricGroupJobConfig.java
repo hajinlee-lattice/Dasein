@@ -2,9 +2,11 @@ package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implements Serializable {
@@ -22,6 +24,10 @@ public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implement
     @JsonProperty("evaluationDate")
     // period -> current period Id
     public String evaluationDate;
+
+    @JsonProperty("streamMetadataMap")
+    // streamId -> dimensions
+    public Map<String, Map<String, DimensionMetadata>> streamMetadata;
 
     @Override
     @JsonProperty("Name")

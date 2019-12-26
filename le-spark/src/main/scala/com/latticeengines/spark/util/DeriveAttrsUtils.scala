@@ -1,10 +1,14 @@
 package com.latticeengines.spark.util
 
+import com.latticeengines.common.exposed.util.AvroUtils
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
-import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver}
+import com.latticeengines.domain.exposed.cdl.activity.{ActivityMetricsGroup, AtlasStream, StreamAttributeDeriver}
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId}
 import com.latticeengines.domain.exposed.query.BusinessEntity
+import org.apache.avro.Schema.Type
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.LongType
 
 private[spark] object DeriveAttrsUtils {
 
@@ -79,5 +83,21 @@ private[spark] object DeriveAttrsUtils {
     var newDF: DataFrame = df
     df.columns.foreach((colName: String) => if (colName.startsWith(PARTITION_COL_PREFIX)) newDF = newDF.drop(colName))
     newDF
+  }
+
+  def fillZero(df: DataFrame, javaClass: String): DataFrame = {
+    val colType: Type = AvroUtils.getAvroType(javaClass)
+    colType match {
+      case Type.LONG => df.na.fill(0: Long)
+      case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported for null imputation")
+    }
+  }
+
+  def appendNullColumn(df: DataFrame, attrName: String, javaClass: String): DataFrame = {
+    val colType: Type = AvroUtils.getAvroType(javaClass)
+    colType match {
+      case Type.LONG => df.withColumn(attrName, lit(null).cast(LongType))
+      case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported for appending null columns")
+    }
   }
 }
