@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.MapDecorator;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import reactor.core.publisher.ParallelFlux;
@@ -57,6 +58,8 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant);
         loadViaMds();
         Thread.sleep(500);
+        loadViaMdsWithoutLDC();
+        Thread.sleep(500);
         loadViaLegacyWay();
         Thread.sleep(500);
         loadViaMds();
@@ -70,7 +73,19 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
                     BusinessEntity.Account, active);
             List<ColumnMetadata> cms = pFlux.sequential().collectList().block();
             Assert.assertNotNull(cms);
-            Assert.assertEquals(cms.size(), 21734L);
+            Assert.assertEquals(cms.size(), 37861L);
+        }
+    }
+
+    private void loadViaMdsWithoutLDC() {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        DataCollection.Version active = dataCollectionService.getActiveVersion(customerSpace);
+        try (PerformanceTimer timer = new PerformanceTimer("Load serving store without LDC schema.")) {
+            ParallelFlux<ColumnMetadata> pFlux = servingStoreService.getFullyDecoratedMetadata(
+                    BusinessEntity.Account, active, StoreFilter.NO_LDC);
+            List<ColumnMetadata> cms = pFlux.sequential().collectList().block();
+            Assert.assertNotNull(cms);
+            Assert.assertEquals(cms.size(), 23);
         }
     }
 

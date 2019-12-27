@@ -24,6 +24,9 @@ public interface ServingStoreService {
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups);
 
+    Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, StoreFilter filter);
+
     List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version);
     List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, DataCollection.Version version);
     // ========== END: Get Metadata Not From Cache ==========

@@ -73,6 +73,12 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
+            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                    DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
+                return null;
+            }
+
+            @Override
             public List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
                     DataCollection.Version version) {
                 return null;

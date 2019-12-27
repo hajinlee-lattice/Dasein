@@ -82,16 +82,16 @@ public class ServingStoreServiceImpl implements ServingStoreService {
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
+            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
+        filter = filter == null ? StoreFilter.ALL : filter;
         Flux<ColumnMetadata> flux;
         if (version == null) {
-            flux =
-                    getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace))
+            flux = getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace), filter)
                             .sequential();
         } else {
-            flux = getFullyDecoratedMetadata(entity, version).sequential();
+            flux = getFullyDecoratedMetadata(entity, version, filter).sequential();
         }
         flux = flux //
                 .doOnSubscribe(s -> {
@@ -112,6 +112,12 @@ public class ServingStoreServiceImpl implements ServingStoreService {
             flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
         }
         return flux;
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                                                     DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
+        return getDecoratedMetadata(customerSpace, entity, version, groups, StoreFilter.ALL);
     }
 
     @Override

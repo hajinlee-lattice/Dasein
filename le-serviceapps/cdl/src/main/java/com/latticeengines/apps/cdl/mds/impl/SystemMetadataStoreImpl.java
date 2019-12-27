@@ -144,10 +144,4 @@ public class SystemMetadataStoreImpl extends
         return namespace;
     }
 
-//    @Override
-//    protected Namespace2<BusinessEntity, DataCollection.Version> projectDecoratorNamespace(
-//            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
-//        return namespace;
-//    }
-
 }

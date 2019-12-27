@@ -34,19 +34,6 @@ public class CustomizedMetadataStoreImpl extends
         this.cdlNamespaceService = cdlNamespaceService;
     }
 
-//    @Override
-//    protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(
-//            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
-//        return cdlNamespaceService.prependTenantId(namespace);
-//    }
-//
-//    @Override
-//    protected Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> projectBaseNamespace(
-//            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
-//        return Namespace.as(namespace.getCoord1(), namespace.getCoord2(), StoreFilter.ALL);
-//    }
-
-
     @Override
     protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(
             Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> namespace) {
