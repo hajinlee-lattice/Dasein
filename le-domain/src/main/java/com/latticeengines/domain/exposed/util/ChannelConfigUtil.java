@@ -35,7 +35,7 @@ public class ChannelConfigUtil {
             FacebookChannelConfig facebookConfig = (FacebookChannelConfig) channelConfig;
             return facebookConfig.getAudienceType() == AudienceType.CONTACTS;
         case GoogleAds:
-            if(channelConfig == null){
+            if (channelConfig == null) {
                 log.info("Channel config object is null. Returning false by default");
                 return false;
             }
@@ -46,17 +46,12 @@ public class ChannelConfigUtil {
         }
     }
 
-    public static Boolean shouldApplyEmailFilter(CDLExternalSystemName destinationSystemName,
-            ChannelConfig channelConfig) {
-        return isContactAudienceType(destinationSystemName, channelConfig);
-    }
-
     public static Boolean shouldApplyAccountNameOrWebsiteFilter(CDLExternalSystemName destinationSystemName,
             ChannelConfig channelConfig) {
         switch (destinationSystemName) {
         case LinkedIn:
-            LinkedInChannelConfig linkedinConfig = (LinkedInChannelConfig) channelConfig;
-            return linkedinConfig.getAudienceType() == AudienceType.ACCOUNTS;
+            LinkedInChannelConfig linkedInConfig = (LinkedInChannelConfig) channelConfig;
+            return linkedInConfig.getAudienceType() == AudienceType.ACCOUNTS;
         case Facebook:
             FacebookChannelConfig fbConfig = (FacebookChannelConfig) channelConfig;
             return fbConfig.getAudienceType() == AudienceType.ACCOUNTS;

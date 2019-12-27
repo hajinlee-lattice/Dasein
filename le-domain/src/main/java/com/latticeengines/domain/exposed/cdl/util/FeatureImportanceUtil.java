@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,9 @@ public class FeatureImportanceUtil {
     }
 
     public Map<String, Integer> getFeatureImportance(String customerSpace, ModelSummary modelSummary) {
+
+        StopWatch stopWatch = new StopWatch();
+        StopWatch splitter = new StopWatch();
         try {
             String featureImportanceFilePathPattern = "{0}/{1}/models/{2}/{3}/{4}/rf_model.txt";
 
@@ -99,6 +103,10 @@ public class FeatureImportanceUtil {
                     filePathParts[2], // 3
                     ApplicationIdUtils.stripJobId(modelSummary.getApplicationId())); // 4
             featureImportanceFilePath = getS3Path(customerSpace, featureImportanceFilePath);
+
+            log.info("Feature Importance Compilation (Split: 0 ms Total: 0 ms): Start");
+            stopWatch.start();
+            splitter.start();
             if (!HdfsUtils.fileExists(yarnConfiguration, featureImportanceFilePath)) {
                 log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
                 throw new LedpException(LedpCode.LEDP_10011, new String[] { featureImportanceFilePath });
@@ -111,7 +119,14 @@ public class FeatureImportanceUtil {
                         new String[] { featureImportanceFilePath, modelSummary.getId(), customerSpace });
             }
 
-            List<AttrFeatureImportance> attrFI = Arrays.asList(featureImportanceRaw.split("\n")).stream().map(line -> {
+            log.info(String.format("Feature Importance Compilation (Split: %d ms Total: %d ms): Raw file procurement",
+                    splitter.getTime(), stopWatch.getTime()));
+            stopWatch.suspend();
+            splitter.reset();
+
+            stopWatch.resume();
+            splitter.start();
+            List<AttrFeatureImportance> attrFI = Arrays.stream(featureImportanceRaw.split("\n")).map(line -> {
                 try {
                     return new AttrFeatureImportance(Double.parseDouble(line.split(",")[1]), line.split(",")[0]);
                 } catch (NumberFormatException e) {
@@ -126,10 +141,22 @@ public class FeatureImportanceUtil {
             Map<String, Integer> importanceOrdering = Flux.fromIterable(attrFI).collect(HashMap<String, Integer>::new,
                     (map, afi) -> map.put(afi.getAttributeName(), i.getAndIncrement())).block();
 
+            log.info(String.format(
+                    "Feature Importance Compilation (Split: %d ms Total: %d ms): Extraction from raw file",
+                    splitter.getTime(), stopWatch.getTime()));
+            stopWatch.suspend();
+            splitter.reset();
+
+            stopWatch.resume();
+            splitter.start();
             return convertDerivedAttrNamesToParentAttrNames(importanceOrdering);
         } catch (Exception e) {
             log.error("Unable to populate feature importance due to " + e.getLocalizedMessage());
             return new HashMap<>();
+        } finally {
+            log.info(String.format(
+                    "Feature Importance Compilation (Split: %d ms Total: %d ms): Flattening into parent attributes",
+                    splitter.getTime(), stopWatch.getTime()));
         }
     }
 

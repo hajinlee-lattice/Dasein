@@ -13,11 +13,13 @@ public class RatingEnginesCoverageRequest {
 
     private boolean restrictNullLookupId;
 
+    private boolean restrictAccountsWithoutContacts;
+
+    private boolean restrictContactsWithoutEmails;
+
     private boolean loadContactsCount;
 
     private boolean loadContactsCountByBucket;
-    
-    private boolean applyEmailFilter;
 
     private String lookupId;
 
@@ -60,13 +62,13 @@ public class RatingEnginesCoverageRequest {
     public void setLookupId(String lookupId) {
         this.lookupId = lookupId;
     }
-    
-    public boolean isApplyEmailFilter() {
-        return applyEmailFilter;
+
+    public boolean isRestrictContactsWithoutEmails() {
+        return restrictContactsWithoutEmails;
     }
 
-    public void setApplyEmailFilter(boolean applyEmailFilter) {
-        this.applyEmailFilter = applyEmailFilter;
+    public void setRestrictContactsWithoutEmails(boolean restrictContactsWithoutEmails) {
+        this.restrictContactsWithoutEmails = restrictContactsWithoutEmails;
     }
 
 

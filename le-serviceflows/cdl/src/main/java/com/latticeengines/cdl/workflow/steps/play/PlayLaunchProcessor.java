@@ -347,7 +347,7 @@ public class PlayLaunchProcessor {
         LookupIdMap lookupIdMap = lookupIdMappingProxy.getLookupIdMapByOrgId(playLaunchContext.getTenant().getId(),
                 launch.getDestinationOrgId(), launch.getDestinationSysType());
         CDLExternalSystemName destinationSystemName = lookupIdMap.getExternalSystemName();
-        if (ChannelConfigUtil.shouldApplyEmailFilter(destinationSystemName, launch.getChannelConfig())) {
+        if (launch.getChannelConfig().isSuppressContactsWithoutEmails()) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newContactRestrictionForAccountQuery = applyEmailFilterToContactRestriction(
                     accountFrontEndQuery.getContactRestriction().getRestriction());
@@ -359,8 +359,7 @@ public class PlayLaunchProcessor {
             contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestrictionForContactQuery));
         }
 
-        if (ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName,
-                launch.getChannelConfig())) {
+        if (ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(destinationSystemName, launch.getChannelConfig())) {
             FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
             Restriction newAccountRestrictionForAccountQuery = applyAccountNameOrWebsiteFilterToAccountRestriction(
                     accountFrontEndQuery.getAccountRestriction().getRestriction());
@@ -376,8 +375,7 @@ public class PlayLaunchProcessor {
 
     private Restriction applyAccountNameOrWebsiteFilterToAccountRestriction(Restriction accountRestriction) {
         RestrictionBuilder websiteFilter = Restriction.builder()
-                .let(BusinessEntity.Account, InterfaceName.Website.name())
-                .isNotNull();
+                .let(BusinessEntity.Account, InterfaceName.Website.name()).isNotNull();
         RestrictionBuilder companyNameFilter = Restriction.builder()
                 .let(BusinessEntity.Account, InterfaceName.CompanyName.name()).isNotNull();
         return Restriction.builder()
@@ -421,22 +419,19 @@ public class PlayLaunchProcessor {
             ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
         }
 
-        MetadataSegment segment;
+        MetadataSegment segment = null;
         if (play.getTargetSegment() != null) {
             segment = play.getTargetSegment();
-        } else {
+        } else if (ratingEngine != null) {
             log.info(String.format(
                     "No Target segment defined for Play %s, falling back to target segment of Rating Engine %s",
                     play.getName(), ratingEngine.getSegment()));
-            if (ratingEngine != null) {
-                segment = play.getRatingEngine().getSegment();
-            }
-            segment = null;
+            segment = play.getRatingEngine().getSegment();
         }
 
         if (segment == null) {
-            throw new NullPointerException(String.format("No Target segment defined for Play %s or Rating Engine %s",
-                    play.getName(), ratingEngine.getId()));
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    String.format("No Target segment defined for Campaign %s or its Model", play.getName()) });
         }
 
         String segmentName = segment.getName();
