@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -403,7 +404,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     @Override
     public void downloadSpecFromS3(HttpServletRequest request, HttpServletResponse response, String mimeType,
                                    String systemType, String systemObject) throws IOException {
-        String specName = systemType.toLowerCase() + "-" + systemObject.toLowerCase() + "-spec.json";
+        String specName = ImportWorkflowSpecUtils.constructSpecName(systemType, systemObject);
         String key = s3Folder + "/" + specName;
         downloadS3File(request, response, mimeType, specName, key, s3SpecBucket);
 

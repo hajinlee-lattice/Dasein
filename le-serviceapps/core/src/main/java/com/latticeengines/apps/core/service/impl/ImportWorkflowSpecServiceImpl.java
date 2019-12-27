@@ -45,8 +45,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     private S3Service s3Service;
 
     public ImportWorkflowSpec loadSpecFromS3(String systemType, String systemObject) throws IOException {
-        String fileSystemType = sanitizeName(systemType);
-        String fileSystemObject = sanitizeName(systemObject);
+        String fileSystemType = ImportWorkflowSpecUtils.sanitizeName(systemType);
+        String fileSystemObject = ImportWorkflowSpecUtils.sanitizeName(systemObject);
         File specFile = null;
         try {
             specFile = File.createTempFile("temp-" + fileSystemType + "-" + fileSystemObject, ".json");
@@ -56,7 +56,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                     " and SystemObject " + systemObject, e);
         }
 
-        String s3Path = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
+        String s3Path = s3Folder + "/" + ImportWorkflowSpecUtils.constructSpecName(fileSystemType, fileSystemObject);
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
 
         // Read in S3 file as InputStream.
@@ -78,8 +78,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
 
     @Override
     public List<ImportWorkflowSpec> loadSpecsByTypeAndObject(String systemType, String systemObject) {
-        String fileSystemType = sanitizeName(systemType);
-        String fileSystemObject = sanitizeName(systemObject);
+        String fileSystemType = ImportWorkflowSpecUtils.sanitizeName(systemType);
+        String fileSystemObject = ImportWorkflowSpecUtils.sanitizeName(systemObject);
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Folder + " System type: " + systemType + " System object: " + systemObject);
         // Read in S3 file as InputStream.
         Iterator<InputStream> specStreamIterator = s3Service.getObjectStreamIterator(s3Bucket, s3Folder,
@@ -127,8 +127,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     @Override
     public List<ImportWorkflowSpec> loadSpecWithSameObjectExcludeTypeFromS3(String excludeSystemType,
                                                                             String systemObject) throws Exception {
-        String fileSystemType = sanitizeName(excludeSystemType);
-        String fileSystemObject = sanitizeName(systemObject);
+        String fileSystemType = ImportWorkflowSpecUtils.sanitizeName(excludeSystemType);
+        String fileSystemObject = ImportWorkflowSpecUtils.sanitizeName(systemObject);
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Folder);
 
         // Read in S3 file as InputStream.
@@ -170,9 +170,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
 
     @Override
     public void addSpecToS3(String systemType, String systemObject, ImportWorkflowSpec importWorkflowSpec) throws Exception {
-        String fileSystemType = sanitizeName(systemType);
-        String fileSystemObject = sanitizeName(systemObject);
-        String key = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
+        String key = s3Folder + "/" + ImportWorkflowSpecUtils.constructSpecName(systemType, systemObject);
         ByteArrayInputStream byteArrayInputStream =
                 new ByteArrayInputStream(JsonUtils.pprint(importWorkflowSpec).getBytes());
 
@@ -181,13 +179,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
 
     @Override
     public void deleteSpecFromS3(String systemType, String systemObject) throws Exception {
-        String fileSystemType = sanitizeName(systemType);
-        String fileSystemObject = sanitizeName(systemObject);
-        String key = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
+        String key = s3Folder + "/" + ImportWorkflowSpecUtils.constructSpecName(systemType, systemObject);
         s3Service.cleanupPrefix(s3Bucket, key);
     }
 
-    private String sanitizeName(String name) {
-        return name.replaceAll("\\s", "").toLowerCase();
-    }
 }

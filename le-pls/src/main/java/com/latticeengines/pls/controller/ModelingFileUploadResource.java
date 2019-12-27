@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +46,6 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
-import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -68,12 +65,10 @@ import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRe
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
-import com.latticeengines.pls.service.DataFileProviderService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -92,12 +87,6 @@ public class ModelingFileUploadResource {
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
-
-    @Inject
-    private DataFileProviderService dataFileProviderService;
-
-    @Inject
-    private ImportWorkflowSpecProxy importWorkflowSpecProxy;
 
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
@@ -590,49 +579,6 @@ public class ModelingFileUploadResource {
         }
     }
 
-    // API to upload a new Spec
-    @RequestMapping(value = "spec/upload", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "upload a new Spec to S3")
-    public String uploadSpecToS3(
-            @RequestParam(value = "systemType") String systemType, //
-            @RequestParam(value = "systemObject") String systemObject, //
-            @RequestParam("file") MultipartFile file) {
-        try {
-            InputStream stream = file.getInputStream();
-            return modelingFileMetadataService.uploadIndividualSpec(systemType, systemObject, stream);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    // API to list specs by systemType and systemObject
-    @RequestMapping(value = "spec/list", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "list the specs in system")
-    public List<ImportWorkflowSpec> listSpecs(
-            @RequestParam(value = "systemType", required = false) String systemType, //
-            @RequestParam(value = "systemObject", required = false) String systemObject) {
-
-        String customerSpace = MultiTenantContext.getShortTenantId();
-        return importWorkflowSpecProxy.getSpecsByTypeAndObject(customerSpace, systemType, systemObject);
-    }
-
-    // API to download a spec
-    @RequestMapping(value = "/spec/download", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get spec info from s3")
-    public void downloadSpecFromS3(
-            @RequestParam(value = "systemType") String systemType,
-            @RequestParam(value = "systemObject") String systemObject,
-            HttpServletRequest request, //
-            HttpServletResponse response) throws IOException {
-        try {
-            dataFileProviderService.downloadSpecFromS3(request, response, "application/csv", systemType, systemObject);
-        } catch(Exception e) {
-            throw e;
-        }
-    }
     private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
             SchemaInterpretation schemaInterpretation, String entity, MultipartFile file, boolean checkHeaderFormat, boolean outsizeFlag) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
