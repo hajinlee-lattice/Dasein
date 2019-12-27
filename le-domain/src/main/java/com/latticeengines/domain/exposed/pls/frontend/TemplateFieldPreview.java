@@ -15,6 +15,9 @@ public class TemplateFieldPreview {
     @JsonProperty("name_in_template")
     private String nameInTemplate;
 
+    @JsonProperty("display_name")
+    private String displayName;
+
     @JsonProperty("field_type")
     private UserDefinedType fieldType;
 
@@ -47,6 +50,14 @@ public class TemplateFieldPreview {
 
     public void setNameInTemplate(String nameInTemplate) {
         this.nameInTemplate = nameInTemplate;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public UserDefinedType getFieldType() {

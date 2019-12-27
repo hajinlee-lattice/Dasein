@@ -132,7 +132,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
             servingStore = Flux.<ColumnMetadata> empty().parallel().runOn(scheduler);
         }
         ThreadLocal<AtomicLong> amCounter = new ThreadLocal<>();
-        if (BusinessEntity.Account.equals(entity) && !StoreFilter.NO_LDC.equals(namespace.getCoord3())) {
+        if (BusinessEntity.Account.equals(entity) && !StoreFilter.NON_LDC.equals(namespace.getCoord3())) {
             // merge serving store and AM, for Account
             ParallelFlux<ColumnMetadata> amFlux = getLDCMetadataInParallel(version, amCounter);
             return ParallelFlux.from(servingStore, amFlux);

@@ -50,7 +50,7 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
     @Test(groups = "deployment-app")
     public void testCustomerAttrs() {
         Flux<ColumnMetadata> customerAccountAttrs = servingStoreProxy.getDecoratedMetadata(mainTestTenant.getId(),
-                BusinessEntity.Account, null, null, StoreFilter.NO_LDC);
+                BusinessEntity.Account, null, null, StoreFilter.NON_LDC);
         Map<String, String> nameMap = customerAccountAttrs
                 .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
                 .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
@@ -59,7 +59,7 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
         Assert.assertTrue(nameMap.containsKey(ACCOUNT_SYSTEM_ID));
         Assert.assertEquals(nameMap.get(ACCOUNT_SYSTEM_ID), "DefaultSystem Account ID");
         Flux<ColumnMetadata> customerContactAttrs = servingStoreProxy.getDecoratedMetadata(mainTestTenant.getId(),
-                BusinessEntity.Contact, null, null, StoreFilter.NO_LDC);
+                BusinessEntity.Contact, null, null, StoreFilter.NON_LDC);
         nameMap = customerContactAttrs
                 .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
                 .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)

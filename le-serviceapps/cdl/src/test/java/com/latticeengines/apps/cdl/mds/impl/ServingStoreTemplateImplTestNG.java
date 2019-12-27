@@ -82,7 +82,7 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
         DataCollection.Version active = dataCollectionService.getActiveVersion(customerSpace);
         try (PerformanceTimer timer = new PerformanceTimer("Load serving store without LDC schema.")) {
             ParallelFlux<ColumnMetadata> pFlux = servingStoreService.getFullyDecoratedMetadata(
-                    BusinessEntity.Account, active, StoreFilter.NO_LDC);
+                    BusinessEntity.Account, active, StoreFilter.NON_LDC);
             List<ColumnMetadata> cms = pFlux.sequential().collectList().block();
             Assert.assertNotNull(cms);
             Assert.assertEquals(cms.size(), 23);

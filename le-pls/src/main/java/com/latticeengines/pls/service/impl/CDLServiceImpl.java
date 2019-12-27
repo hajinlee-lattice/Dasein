@@ -889,7 +889,7 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, BusinessEntity entity) {
         return servingStoreProxy.getDecoratedMetadata(customerSpace, entity, null,
-                null, StoreFilter.NO_LDC)
+                null, StoreFilter.NON_LDC)
                 .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
                 .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
                 .block();

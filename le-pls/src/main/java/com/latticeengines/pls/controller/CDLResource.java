@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -437,8 +438,22 @@ public class CDLResource {
                 standardTable = SchemaRepository.instance().getSchema(
                         BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
             }
-            return cdlService.getTemplatePreview(customerSpace.toString(),
+            List<TemplateFieldPreview> fieldPreviews = cdlService.getTemplatePreview(customerSpace.toString(),
                     dataFeedTask.getImportTemplate(), standardTable);
+            if (CollectionUtils.isEmpty(fieldPreviews)) {
+                return fieldPreviews;
+            }
+            BusinessEntity entity = entityType == null ?
+                    BusinessEntity.getByName(dataFeedTask.getEntity()) : entityType.getEntity();
+            Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entity);
+            fieldPreviews.forEach(preview -> {
+                if (nameMapping.containsKey(preview.getNameInTemplate())) {
+                    preview.setDisplayName(nameMapping.get(preview.getNameInTemplate()));
+                } else {
+                    preview.setDisplayName(preview.getNameFromFile());
+                }
+            });
+            return fieldPreviews;
         } catch (RuntimeException e) {
             log.error("Get template preview Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
