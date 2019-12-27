@@ -348,9 +348,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.setStatus(dataFeedTask.getStatus());
         task.setS3ImportStatus(dataFeedTask.getS3ImportStatus());
         task.getImportTemplate().setUpdatedBy(dataFeedTask.getImportTemplate().getUpdatedBy());
-        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-        tableEntityMgr.update(task.getImportTemplate());
-        tableTypeHolder.setTableType(TableType.DATATABLE);
         deleteReferences(task.getImportTemplate());
         task.setTemplateDisplayName(dataFeedTask.getTemplateDisplayName());
         task.setFeedType(dataFeedTask.getFeedType());
