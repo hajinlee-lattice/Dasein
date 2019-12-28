@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -109,12 +108,6 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     @Value("${camille.zk.pod.id}")
     protected String podId;
-
-    @Value("${aws.s3.bucket}")
-    private String s3SpecBucket;
-
-    @Value("${aws.import.specs.s3.folder}")
-    private String s3Folder;
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
@@ -398,15 +391,6 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
             // no bundle file
             throw new RuntimeException("No bundle file found.");
         }
-
-    }
-
-    @Override
-    public void downloadSpecFromS3(HttpServletRequest request, HttpServletResponse response, String mimeType,
-                                   String systemType, String systemObject) throws IOException {
-        String specName = ImportWorkflowSpecUtils.constructSpecName(systemType, systemObject);
-        String key = s3Folder + "/" + specName;
-        downloadS3File(request, response, mimeType, specName, key, s3SpecBucket);
 
     }
 

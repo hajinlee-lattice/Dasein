@@ -76,6 +76,12 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
         return workflowSpec;
     }
 
+    /**
+     * load spec by system type and system object, if both type and object are blank, all specs return
+     * @param systemType
+     * @param systemObject
+     * @return
+     */
     @Override
     public List<ImportWorkflowSpec> loadSpecsByTypeAndObject(String systemType, String systemObject) {
         String fileSystemType = ImportWorkflowSpecUtils.sanitizeName(systemType);
@@ -94,14 +100,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                             int index = name.indexOf('-');
                             String type = name.substring(0, index);
                             String remainingPart = name.substring(index + 1);
-                            boolean result = true;
-                            if (StringUtils.isNotBlank(fileSystemType)) {
-                                result &= type.equals(fileSystemType);
-                            }
-                            if (StringUtils.isNotBlank(fileSystemObject)) {
-                                result &= remainingPart.startsWith(fileSystemObject);
-                            }
-                            return result;
+                            return (StringUtils.isBlank(fileSystemType) || type.equals(fileSystemType)) && (StringUtils.isBlank(fileSystemObject)
+                                    || remainingPart.startsWith(fileSystemObject));
                         }
                     }});
         List<ImportWorkflowSpec> specList = new ArrayList<>();

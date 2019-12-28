@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 
-public class ImportWorkflowSpecResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class ImportWorkflowResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private String systemType = "fakeType1";
     private String systemObject = "fakeObject1";
@@ -49,7 +49,7 @@ public class ImportWorkflowSpecResourceDeploymentTestNG extends PlsDeploymentTes
         importWorkflowSpec.setSystemType(systemType);
         importWorkflowSpec.setSystemObject(systemObject);
         String tenantId = MultiTenantContext.getShortTenantId();
-        String url = getRestAPIHostPort() + String.format("/pls/specs/upload?systemType=%s&systemObject=%s",
+        String url = getRestAPIHostPort() + String.format("/pls/importworkflow/specs/upload?systemType=%s&systemObject=%s",
                 systemType, systemObject);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -67,7 +67,7 @@ public class ImportWorkflowSpecResourceDeploymentTestNG extends PlsDeploymentTes
                 requestEntity, String.class);
 
         // test download
-        String downloadURL = getRestAPIHostPort() + String.format("/pls/specs/download?systemType=%s&systemObject=%s",
+        String downloadURL = getRestAPIHostPort() + String.format("/pls/importworkflow/specs/download?systemType=%s&systemObject=%s",
                 systemType, systemObject);
         headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.ALL));
@@ -92,11 +92,11 @@ public class ImportWorkflowSpecResourceDeploymentTestNG extends PlsDeploymentTes
     @Test(groups = "deployment", dependsOnMethods = "testUploadSpec")
     public void testListSpec() throws Exception {
         // set type and object empty, will get all spec in S3
-        String url = getRestAPIHostPort() + "/pls/specs/list";
+        String url = getRestAPIHostPort() + "/pls/importworkflow/specs/list";
         List<?> specList = restTemplate.getForObject(url, List.class);
         Assert.assertTrue(CollectionUtils.isNotEmpty(specList));
         Assert.assertTrue(specList.size() > 0);
-        url = getRestAPIHostPort() + String.format("/pls/specs/list?systemType=%s&systemObject=%s",
+        url = getRestAPIHostPort() + String.format("/pls/importworkflow/specs/list?systemType=%s&systemObject=%s",
                 systemType, systemObject);
         specList = restTemplate.getForObject(url, List.class);
         Assert.assertTrue(CollectionUtils.isEmpty(specList));
@@ -105,7 +105,7 @@ public class ImportWorkflowSpecResourceDeploymentTestNG extends PlsDeploymentTes
     @Test(groups = "deployment", dependsOnMethods = "testListSpec")
     public void testOperationByExternalUser() throws Exception {
         switchToExternalUser();
-        String url = getRestAPIHostPort() + "/pls/specs/list";
+        String url = getRestAPIHostPort() + "/pls/importworkflow/specs/list";
         try {
             List<?> specList = restTemplate.getForObject(url, List.class);
         } catch (Exception e) {

@@ -469,13 +469,13 @@
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
-    <security:http use-expressions="true" pattern="/pls/specs/**"
+    <security:http use-expressions="true" pattern="/pls/importworkflow/**"
                    entry-point-ref="restAuthenticationEntryPoint"
                    authentication-manager-ref="authenticationManager"
                    create-session="stateless">
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-        <security:intercept-url pattern="/pls/specs/**" access="hasRole('View_PLS_Spec')"/>
+        <security:intercept-url pattern="/pls/importworkflow/**" access="hasRole('View_PLS_Spec')"/>
     </security:http>
 
 </beans>

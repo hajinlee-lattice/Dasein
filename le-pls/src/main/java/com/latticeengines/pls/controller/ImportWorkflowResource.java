@@ -19,30 +19,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
-import com.latticeengines.pls.service.DataFileProviderService;
-import com.latticeengines.pls.service.ModelingFileMetadataService;
-import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
+import com.latticeengines.pls.service.ImportWorkflowService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "specs", description = "REST resource for operations on import workflow spec")
+@Api(value = "importworkflow", description = "REST resource for operations on import workflow spec")
 @RestController
-@RequestMapping("/specs")
+@RequestMapping("/importworkflow")
 @PreAuthorize("hasRole('View_PLS_Spec')")
-public class ImportWorkflowSpecResource {
+public class ImportWorkflowResource {
 
     @Inject
-    private ModelingFileMetadataService modelingFileMetadataService;
-
-    @Inject
-    private DataFileProviderService dataFileProviderService;
-
-    @Inject
-    private ImportWorkflowSpecProxy importWorkflowSpecProxy;
+    private ImportWorkflowService importWorkflowService;
 
     // API to upload a new Spec
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/specs/upload", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "upload a new Spec to S3")
     public String uploadSpecToS3(
@@ -51,14 +43,14 @@ public class ImportWorkflowSpecResource {
             @RequestParam("file") MultipartFile file) {
         try {
             InputStream stream = file.getInputStream();
-            return modelingFileMetadataService.uploadIndividualSpec(systemType, systemObject, stream);
+            return importWorkflowService.uploadIndividualSpec(systemType, systemObject, stream);
         } catch (Exception e) {
             return null;
         }
     }
 
     // API to list specs by systemType and systemObject
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    @RequestMapping(value = "/specs/list", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "list the specs in system")
     public List<ImportWorkflowSpec> listSpecs(
@@ -66,11 +58,11 @@ public class ImportWorkflowSpecResource {
             @RequestParam(value = "systemObject", required = false) String systemObject) {
 
         String customerSpace = MultiTenantContext.getShortTenantId();
-        return importWorkflowSpecProxy.getSpecsByTypeAndObject(customerSpace, systemType, systemObject);
+        return importWorkflowService.getSpecsByTypeAndObject(customerSpace, systemType, systemObject);
     }
 
     // API to download a spec
-    @RequestMapping(value = "/download", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/specs/download", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get spec info from s3")
     public void downloadSpecFromS3(
@@ -79,7 +71,7 @@ public class ImportWorkflowSpecResource {
             HttpServletRequest request, //
             HttpServletResponse response) throws IOException {
         try {
-            dataFileProviderService.downloadSpecFromS3(request, response, MediaType.APPLICATION_JSON, systemType, systemObject);
+            importWorkflowService.downloadSpecFromS3(request, response, MediaType.APPLICATION_JSON, systemType, systemObject);
         } catch(Exception e) {
             throw e;
         }

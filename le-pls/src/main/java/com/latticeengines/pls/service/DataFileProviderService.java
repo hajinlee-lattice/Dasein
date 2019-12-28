@@ -44,7 +44,4 @@ public interface DataFileProviderService {
                                String filter) throws IOException;
     void downloadCurrentBundleFileV2(HttpServletRequest request, HttpServletResponse response, String mimeType,
                                      String tenantId) throws Exception;
-
-    void downloadSpecFromS3(HttpServletRequest request, HttpServletResponse response, String mimeType, String systemType,
-                            String systemObject) throws IOException;
 }
