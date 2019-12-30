@@ -1290,7 +1290,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             setCDLExternalSystem(cdlExternalSystem, entityType.getEntity());
         }
 
-        // 5. Generate new table from FieldDefinitionsRecord,
+        // 5. Generate new table from FieldDefinitionsRecord.
         // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
         String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
         Table newTable = ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(newTableName, false, commitRequest);

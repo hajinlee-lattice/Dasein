@@ -304,7 +304,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFieldDefinitionValidate_noExistingTemplate")
-    public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
+    public void testCDLExternalSystem() {
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
         // test for cdl external system
         List<FieldDefinition> otherIdsDefinitions =
@@ -331,24 +331,28 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions(
                 defaultSystemName, systemType, systemObject, fileName, false,
                 currentFieldDefinitionRecord);
+        Assert.assertNotNull(commitRecord);
         // verify CDL external system
         CDLExternalSystem cdlExternalSystem =
                 cdlExternalSystemProxy.getCDLExternalSystem(MultiTenantContext.getShortTenantId(),
-                BusinessEntity.Contact.toString());
+                        BusinessEntity.Contact.toString());
         Assert.assertNotNull(cdlExternalSystem.getCRMIdList());
         Assert.assertEquals(cdlExternalSystem.getCRMIdList().size(), 1);
         Assert.assertNotNull(cdlExternalSystem.getERPIdList());
         Assert.assertEquals(cdlExternalSystem.getERPIdList().size(), 1);
+    }
 
-
+    @Test(groups = "deployment", dependsOnMethods = "testCDLExternalSystem")
+    public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
         FetchFieldDefinitionsResponse  fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions(
                 defaultSystemName, systemType, systemObject, fileName);
         setValidateRequestFromFetchResponse(fetchResponse);
-        Assert.assertNotNull(commitRecord);
+
         log.info("Committing validate request:\n" + JsonUtils.pprint(validateRequest));
 
         //the second round test after the fetch api
-        currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
+        FieldDefinitionsRecord currentFieldDefinitionRecord =
+                validateRequest.getCurrentFieldDefinitionsRecord();
         Map<String, List<FieldDefinition>> fieldDefinitionMap =
                 currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
         Map<String, FieldDefinition> customNameToCustomFieldDefinition =
