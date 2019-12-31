@@ -90,6 +90,7 @@ import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.pls.util.CDLExternalSystemUtils;
 import com.latticeengines.pls.util.EntityMatchGAConverterUtils;
 import com.latticeengines.pls.util.ImportWorkflowUtils;
 import com.latticeengines.pls.util.SystemIdsUtils;
@@ -1280,31 +1281,33 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     cdlService);
         }
 
-        // 4. Generate new table from FieldDefinitionsRecord,
-        MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
+        // 4. Update the CDL External System data structures.
+        // Set external system column name, this step will reset the field name(appending "_ID"), so the step
+        // should be before generating table
+        if (BusinessEntity.Account.equals(entityType.getEntity()) ||
+                BusinessEntity.Contact.equals(entityType.getEntity())) {
+            CDLExternalSystem cdlExternalSystem = CDLExternalSystemUtils.processOtherID(entityType, commitRequest);
+            setCDLExternalSystem(cdlExternalSystem, entityType.getEntity());
+        }
+
+        // 5. Generate new table from FieldDefinitionsRecord.
         // TODO(jwinter): Figure out if the prefex should always be "SourceFile".
         String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
         Table newTable = ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(newTableName, false, commitRequest);
         // TODO(jwinter): Figure out how to properly set the Table display name.
         printTableAttributes("New Table", newTable);
 
-        // 5. Delete old table associated with the source file from the database if it exists.
+        // 6. Delete old table associated with the source file from the database if it exists.
         if (sourceFile.getTableName() != null) {
             metadataProxy.deleteTable(customerSpace.toString(), sourceFile.getTableName());
         }
 
-        // 6. Associate the new table with the source file and add new table to the database.
+        // 7. Associate the new table with the source file and add new table to the database.
         metadataProxy.createTable(customerSpace.toString(), newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
 
-        // 7. Update the CDL External System data structures.
-        // TODO(jwinter): Complete this work.
-        // Set external system column name
-        if (BusinessEntity.Account.equals(entityType.getEntity()) ||
-                BusinessEntity.Contact.equals(entityType.getEntity())) {
-            setCDLExternalSystem(resolver.getExternalSystem(), entityType.getEntity());
-        }
+
 
         // 8. Create or Update the DataFeedTask
         String taskId = createOrUpdateDataFeedTask(newTable, customerSpace, source, feedType, entityType);
