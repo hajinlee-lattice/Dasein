@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -162,8 +163,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         message.setMessage(String.format("Workflow Request Id %s has been launched to %s", workflowRequestId,
                 lookupIdMap.getOrgId()));
         message.setEventDetail(null);
-        List<DataIntegrationStatusMonitorMessage> messages = new ArrayList<>();
-        messages.add(message);
+        List<DataIntegrationStatusMonitorMessage> messages = Collections.singletonList(message);
         log.info(String.format("Creating status monitor for launchId %s with workflowRequestId %s", playLaunchId,
                 workflowRequestId));
         dataIntegrationMonitoringProxy.createOrUpdateStatus(messages);
