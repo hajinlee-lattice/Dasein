@@ -267,11 +267,13 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder activeRawStreamTables(Map<String, String> rawStreamTables) {
             processActivityStreamWorkflowBuilder.activeRawStreamTables(rawStreamTables);
+            matchEntityWorkflowBuilder.activeRawStreamTables(rawStreamTables);
             return this;
         }
 
         public Builder activityStreams(Map<String, AtlasStream> streams) {
             processActivityStreamWorkflowBuilder.activityStreams(streams);
+            matchEntityWorkflowBuilder.activityStreams(streams);
             return this;
         }
 
@@ -282,6 +284,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder activityStreamImports(Map<String, List<ActivityImport>> activityStreamImports) {
             processActivityStreamWorkflowBuilder.activityStreamImports(activityStreamImports);
+            matchEntityWorkflowBuilder.activityStreamImports(activityStreamImports);
             return this;
         }
 
@@ -330,6 +333,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder fullRematch(boolean fullRematch) {
             processStepConfiguration.setFullRematch(fullRematch);
             processActivityStreamWorkflowBuilder.setRematchMode(fullRematch);
+            matchEntityWorkflowBuilder.setRematchMode(fullRematch);
             return this;
         }
 
@@ -348,6 +352,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Contact));
             processProductWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Product));
             processActivityStreamWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
+            matchEntityWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             processTransactionWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Transaction));
             return this;
         }

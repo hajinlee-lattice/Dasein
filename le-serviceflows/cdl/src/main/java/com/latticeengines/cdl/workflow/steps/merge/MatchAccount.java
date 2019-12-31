@@ -49,7 +49,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             return null;
         }
 
-    List<TransformationStepConfig> steps = new ArrayList<>();
+        List<TransformationStepConfig> steps = new ArrayList<>();
         String convertBatchStoreTableName = getConvertBatchStoreTableName();
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
