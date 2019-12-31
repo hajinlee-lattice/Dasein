@@ -77,37 +77,20 @@ public class ImportWorkflowSpecResource {
         return table;
     }
 
-    @GetMapping(value = "/list/{systemObject}")
-    @ResponseBody
-    @ApiOperation("get workflow spec with same object excluding one type")
-    public List<ImportWorkflowSpec> getImportWorkflowSpecWithSameObjectExcludeType(
-            @PathVariable String customerSpace, //
-            @PathVariable String systemObject, //
-            @RequestParam(value = "excludeSystemType", required = false) String excludeSystemType) {
-        List<ImportWorkflowSpec> specs;
-        try {
-            specs = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(excludeSystemType, systemObject);
-        } catch (Exception e) {
-            log.error(String.format(
-                    "ImportWorkflowSpecService failed to return Spec for non-system Type %s and system object %s.\n" +
-                            "Error was: %s", excludeSystemType, systemObject, e.toString()));
-            return null;
-        }
-        return specs;
-    }
-
     @GetMapping(value = "/list")
     @ResponseBody
-    @ApiOperation("get workflow spec by type and object")
+    @ApiOperation("get workflow spec by type/excludeSystemType and object")
     public List<ImportWorkflowSpec> getImportWorkflowSpecs(
             @PathVariable String customerSpace, //
             @RequestParam(value = "systemType", required = false) String systemType, //
-            @RequestParam(value = "systemObject", required = false) String systemObject) {
+            @RequestParam(value = "systemObject", required = false) String systemObject, //
+            @RequestParam(value = "excludeSystemType", required = false) String excludeSystemType) {
         try {
-            return importWorkflowSpecService.loadSpecsByTypeAndObject(systemType, systemObject);
+            return importWorkflowSpecService.loadSpecsByTypeAndObject(systemType, systemObject, excludeSystemType);
         } catch (Exception e) {
-            log.error(String.format("ImportWorkflowSpecService failed to return Spec for system type %s and system " +
-                    "object %s. Error was: %s", systemType, systemObject, e.toString()));
+            log.error(String.format("ImportWorkflowSpecService failed to return Spec for system type %s, system " +
+                    "object %s and exclude system type %s. Error was: %s", systemType, systemObject,
+                    excludeSystemType, e.toString()));
             return null;
         }
     }

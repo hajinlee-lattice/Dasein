@@ -73,12 +73,15 @@ public class ImportWorkflowServiceImpl implements ImportWorkflowService {
                 systemType,
                 systemObject);
         List<ImportWorkflowSpec> specList =
-                importWorkflowSpecProxy.getSpecWithSameObjectExcludeTypeFromS3(customerSpace.toString(), systemType,
-                        systemObject);
+                importWorkflowSpecProxy.getSpecsByTypeAndObject(customerSpace.toString(), null,
+                        systemObject, systemType);
         Map<String, Map<String, FieldDefinition>> specWithSameObjectMap = new HashMap<>();
         specList.forEach(spec ->
                 specWithSameObjectMap.put(spec.getSystemType(),
-                        spec.getFieldDefinitionsRecordsMap().values().stream().flatMap(List::stream).collect(Collectors.toMap(FieldDefinition::getFieldName, e -> e))));
+                        spec.getFieldDefinitionsRecordsMap().values()
+                                .stream()
+                                .flatMap(List::stream)
+                                .collect(Collectors.toMap(FieldDefinition::getFieldName, e -> e))));
 
         Map<String, List<FieldDefinition>> currentFieldDefinitionsMap;
         if (existingSpec == null) {
@@ -87,7 +90,10 @@ public class ImportWorkflowServiceImpl implements ImportWorkflowService {
             currentFieldDefinitionsMap = existingSpec.getFieldDefinitionsRecordsMap();
         }
         Map<String, FieldDefinition> fieldNameToDefinition =
-                currentFieldDefinitionsMap.values().stream().flatMap(List::stream).collect(Collectors.toMap(FieldDefinition::getFieldName, e -> e));
+                currentFieldDefinitionsMap.values()
+                        .stream()
+                        .flatMap(List::stream)
+                        .collect(Collectors.toMap(FieldDefinition::getFieldName, e -> e));
         ImportWorkflowSpec importSpec = null;
         if (specInputStream != null) {
             try {
@@ -190,6 +196,6 @@ public class ImportWorkflowServiceImpl implements ImportWorkflowService {
 
     @Override
     public List<ImportWorkflowSpec> getSpecsByTypeAndObject(String customerSpace, String systemType, String systemObject) {
-        return importWorkflowSpecProxy.getSpecsByTypeAndObject(customerSpace, systemType, systemObject);
+        return importWorkflowSpecProxy.getSpecsByTypeAndObject(customerSpace, systemType, systemObject, null);
     }
 }

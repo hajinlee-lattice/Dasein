@@ -141,7 +141,11 @@ public class ImportWorkflowSpecUtils {
     }
 
     public static String sanitizeName(String name) {
-        return name.replaceAll("\\s", "").toLowerCase();
+        if (StringUtils.isNotBlank(name)) {
+            return name.replaceAll("\\s", "").toLowerCase();
+        } else {
+            return name;
+        }
     }
 
     public static String constructSpecName(String systemType, String systemObject) {
