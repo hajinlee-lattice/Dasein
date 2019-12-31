@@ -21,6 +21,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
@@ -40,6 +42,7 @@ import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.util.ImportWorkflowUtilsTestNG;
+import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 
 public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -68,6 +71,9 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
 
     @Inject
     private CDLService cdlService;
+
+    @Inject
+    private CDLExternalSystemProxy cdlExternalSystemProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -298,20 +304,55 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFieldDefinitionValidate_noExistingTemplate")
-    public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
+    public void testCDLExternalSystem() {
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
+        // test for cdl external system
+        List<FieldDefinition> otherIdsDefinitions =
+                currentFieldDefinitionRecord.getFieldDefinitionsRecords(FieldDefinitionSectionName.Other_IDs.getName());
+        // add some other ID definition
+        FieldDefinition otherID1 = new FieldDefinition();
+        otherID1.setExternalSystemType(CDLExternalSystemType.CRM);
+        otherID1.setFieldName("salesforce1");
+        otherID1.setColumnName("column1");
+        otherID1.setFieldType(UserDefinedType.TEXT);
+        otherIdsDefinitions.add(otherID1);
+        FieldDefinition otherID2 = new FieldDefinition();
+        otherID2.setFieldName("facebook");
+        otherID2.setColumnName("column2");
+        otherID2.setFieldType(UserDefinedType.TEXT);
+        otherID2.setExternalSystemType(CDLExternalSystemType.ERP);
+        otherIdsDefinitions.add(otherID2);
+        FieldDefinition otherID3 = new FieldDefinition();
+        otherID3.setColumnName("id3");
+        otherIdsDefinitions.add(otherID3);
+        otherID3.setFieldType(UserDefinedType.TEXT);
         log.info("Committing fieldDefinitionsRecord:\n" + JsonUtils.pprint(currentFieldDefinitionRecord));
+
         FieldDefinitionsRecord commitRecord = modelingFileMetadataService.commitFieldDefinitions(
                 defaultSystemName, systemType, systemObject, fileName, false,
                 currentFieldDefinitionRecord);
+        Assert.assertNotNull(commitRecord);
+        // verify CDL external system
+        CDLExternalSystem cdlExternalSystem =
+                cdlExternalSystemProxy.getCDLExternalSystem(MultiTenantContext.getShortTenantId(),
+                        BusinessEntity.Contact.toString());
+        Assert.assertNotNull(cdlExternalSystem.getCRMIdList());
+        Assert.assertEquals(cdlExternalSystem.getCRMIdList().size(), 1);
+        Assert.assertNotNull(cdlExternalSystem.getERPIdList());
+        Assert.assertEquals(cdlExternalSystem.getERPIdList().size(), 1);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testCDLExternalSystem")
+    public void testFieldDefinitionValidate_withExistingTemplate() throws Exception {
         FetchFieldDefinitionsResponse  fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions(
                 defaultSystemName, systemType, systemObject, fileName);
         setValidateRequestFromFetchResponse(fetchResponse);
-        Assert.assertNotNull(commitRecord);
+
         log.info("Committing validate request:\n" + JsonUtils.pprint(validateRequest));
 
         //the second round test after the fetch api
-        currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
+        FieldDefinitionsRecord currentFieldDefinitionRecord =
+                validateRequest.getCurrentFieldDefinitionsRecord();
         Map<String, List<FieldDefinition>> fieldDefinitionMap =
                 currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
         Map<String, FieldDefinition> customNameToCustomFieldDefinition =
