@@ -77,10 +77,15 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         }
         try (PerformanceTimer timer = new PerformanceTimer("Metadata table cleanup task at step delete tables")) {
             if (CollectionUtils.isNotEmpty(tablesToDelete)) {
-                log.info(String.format("Size of table needs to be deleted is %d and scan index is %d.", tablesToDelete.size(), lastIndex));
                 tablesToDelete.forEach(table -> {
                     cleanupTable(table);
                 });
+                if (lastIndex >= tablesToDelete.size()) {
+                    lastIndex -= tablesToDelete.size();
+                } else {
+                    lastIndex = 0;
+                }
+                log.info(String.format("Size of table needs to be deleted is %d and scan index is %d.", tablesToDelete.size(), lastIndex));
             } else {
                 log.info(String.format("No tables needs to clean up after scan %d records and scan index is %d.", batchSize * searchCount, lastIndex));
             }
