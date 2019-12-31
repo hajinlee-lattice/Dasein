@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
@@ -209,7 +210,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             List<String> extractPaths = ExtractUtils.getExtractPaths(yarnConfiguration, entity);
             deleteByName(name);
             deleteExtractsInBackend(extractPaths);
-            deleteExternalStorage(name);
+            if (!TableType.IMPORTTABLE.equals(entity.getTableType())) {
+                deleteExternalStorage(name);
+            }
         }
     }
 
@@ -505,7 +508,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     private void deleteExternalStorage(String tableName) {
         try {
-            List<DataUnit> dataUnits = dataUnitEntityMgr.deleteAllByName(tableName);
+            List<DataUnit> dataUnits = dataUnitEntityMgr.deleteAllByName(MultiTenantContext.getShortTenantId(), tableName);
             log.info("Deleted " + dataUnits.size() + " data units associated with table " + tableName);
             for (DataUnit unit : dataUnits) {
                 if (DataUnit.StorageType.Redshift.equals(unit.getStorageType())) {
