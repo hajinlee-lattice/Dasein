@@ -159,8 +159,8 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
-    public List<DataUnit> deleteAllByName(String name) {
-        List<DataUnitEntity> entities = repository.findByName(name);
+    public List<DataUnit> deleteAllByName(String tenantId, String name) {
+        List<DataUnitEntity> entities = repository.findByTenantIdAndName(tenantId, name);
         List<DataUnit> units = convertList(entities, false);
         repository.deleteAll(entities);
         return units;
