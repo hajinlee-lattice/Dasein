@@ -1,7 +1,5 @@
 package com.latticeengines.proxy.exposed;
 
-import static org.testng.Assert.assertTrue;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -14,8 +12,12 @@ import org.testng.annotations.Test;
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
 public class RestApiClientTestNG extends AbstractTestNGSpringContextTests {
 
-    private static final String PUBLIC_URL = "https://app.lattice-engines.com";
-    private static final String PRIVATE_URL = "https://lpi-app-1206577515.us-east-1.elb.amazonaws.com";
+    /*-
+     * use stack a endpoint for now as functional test might run before stack b deployment
+     * FIXME add deployment test for proxy project
+     */
+    private static final String PUBLIC_URL = "https://testapp.lattice-engines.com";
+    private static final String PRIVATE_URL = "https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com";
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -31,17 +33,10 @@ public class RestApiClientTestNG extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(StringUtils.isNotEmpty(page), String.format("Website %s gives empty page", PRIVATE_URL));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", expectedExceptions = { ResourceAccessException.class })
     public void testFailSSL() {
-        boolean thrown = false;
-        try {
-            RestApiClient client = RestApiClient.newExternalClient(applicationContext, PRIVATE_URL);
-            client.setMaxAttempts(3);
-            client.get("/");
-        } catch (Exception e) {
-            assertTrue(e instanceof ResourceAccessException);
-            thrown = true;
-        }
-        assertTrue(thrown);
+        RestApiClient client = RestApiClient.newExternalClient(applicationContext, PRIVATE_URL);
+        client.setMaxAttempts(3);
+        client.get("/");
     }
 }
