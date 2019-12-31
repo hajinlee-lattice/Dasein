@@ -138,7 +138,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         if (StringUtils.isNotBlank(request.getModelGuid())) {
             modelSummaryService.updateLastUpdateTime(request.getModelGuid());
         }
-        if (StringUtils.isNotBlank(request.getRatingEngineId())) {
+        if (StringUtils.isNotBlank(request.getRatingEngineId()) && !request.isPublished()) {
             registerAction(request);
         }
     }
