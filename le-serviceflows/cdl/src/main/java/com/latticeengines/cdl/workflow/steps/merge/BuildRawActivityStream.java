@@ -19,12 +19,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(BuildRawActivityStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Lazy
-public class BuildRawActivityStream extends BaseActivityStreamStep {
+public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivityStreamStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(BuildRawActivityStream.class);
 

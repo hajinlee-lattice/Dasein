@@ -24,7 +24,8 @@ import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 /**
  * Base class for {@link AtlasStream} processing
  */
-public abstract class BaseActivityStreamStep extends BaseMergeImports<ProcessActivityStreamStepConfiguration> {
+public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStepConfiguration>
+        extends BaseMergeImports<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseActivityStreamStep.class);
     private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
@@ -177,10 +178,10 @@ public abstract class BaseActivityStreamStep extends BaseMergeImports<ProcessAct
      */
 
     private boolean needAppendRawStream(Integer matchedImportIdx, String activeBatchTable) {
-        return matchedImportIdx != null && StringUtils.isNotBlank(activeBatchTable);
+        return matchedImportIdx != null || StringUtils.isNotBlank(activeBatchTable);
     }
 
     private boolean needAppendRawStream(String matchedImportTable, String activeBatchTable) {
-        return StringUtils.isNotBlank(matchedImportTable) && StringUtils.isNotBlank(activeBatchTable);
+        return StringUtils.isNotBlank(matchedImportTable) || StringUtils.isNotBlank(activeBatchTable);
     }
 }

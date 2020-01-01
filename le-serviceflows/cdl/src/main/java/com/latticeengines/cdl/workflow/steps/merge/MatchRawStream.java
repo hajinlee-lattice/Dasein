@@ -32,10 +32,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 
 @Component(MatchRawStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class MatchRawStream extends BaseActivityStreamStep {
+public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStreamStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(MatchRawStream.class);
 
     static final String BEAN_NAME = "matchRawStream";
