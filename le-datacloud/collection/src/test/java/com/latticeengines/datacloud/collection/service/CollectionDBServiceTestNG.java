@@ -167,7 +167,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         boolean finished = false;
         while (!finished) {
             finished = collectionDBService.collect();
-            Thread.sleep(15000);
+            Thread.sleep(5000);
         }
 
         collectionDBService.ingest();
@@ -188,16 +188,26 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             Thread.sleep(15000);
         }
 
+        List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start,
+                new Timestamp(System.currentTimeMillis()));
+        Assert.assertNotNull(workers);
     }
 
     @Test(groups = "functional")
-    public void testVendorConfig() {
+    public void testVendorConfig() throws Exception {
+
+        List<VendorConfig> orgVendorConfigs = vendorConfigMgr.findAll();
+        long maxPid = Long.MIN_VALUE;
+        for (VendorConfig vendorConfig: orgVendorConfigs) {
+            if (maxPid < vendorConfig.getPid())
+                maxPid = vendorConfig.getPid();
+        }
 
         List<VendorConfig> manualCraftedConfigs = new ArrayList<>();
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         for (int i = 0; i < 10; ++i) {
             VendorConfig vendorConfig = new VendorConfig();
-            vendorConfig.setPid(1024 + i);
+            vendorConfig.setPid(0);
             vendorConfig.setVendor(((Integer)i).toString());
             vendorConfig.setGroupBy("domain");
             vendorConfig.setSortBy("CollectedAt");
@@ -211,34 +221,35 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             manualCraftedConfigs.add(vendorConfig);
             vendorConfigMgr.createOrUpdate(vendorConfig);
         }
+        List<VendorConfig> vendorConfigsAfterInsertion = vendorConfigMgr.findAll();
+        Assert.assertTrue(orgVendorConfigs == null || orgVendorConfigs.size() + 10 == vendorConfigsAfterInsertion.size());
 
-        VendorConfig vendorConfig0 = manualCraftedConfigs.get(0);
-        System.out.println(vendorConfig0.getPid());
-        System.out.println(vendorConfig0.getCollectingFreq());
-        System.out.println(vendorConfig0.getConsolidationPeriod());
-        System.out.println(vendorConfig0.getDomainCheckField());
-        System.out.println(vendorConfig0.getDomainField());
-        System.out.println(vendorConfig0.getGroupBy());
-        System.out.println(vendorConfig0.getLastConsolidated());
-        System.out.println(vendorConfig0.getMaxActiveTasks());
-        System.out.println(vendorConfig0.getSortBy());
-        System.out.println(vendorConfig0.getVendor());
-
-        for (VendorConfig vendorConfig: manualCraftedConfigs) {
-            vendorConfigMgr.delete(vendorConfig);
+        VendorConfig vendorConfig0 = null;
+        for (VendorConfig vendorConfig: vendorConfigsAfterInsertion) {
+            if (vendorConfig.getPid() > maxPid) {
+                vendorConfig0 = vendorConfig;
+                break;
+            }
         }
-        manualCraftedConfigs.clear();
+        Assert.assertTrue(vendorConfig0 != null);
+        Assert.assertEquals(vendorConfig0.getCollectingFreq(), 86400L);
+        Assert.assertEquals(vendorConfig0.getConsolidationPeriod(), 10240);
+        Assert.assertEquals(vendorConfig0.getDomainCheckField(), "CannotBeAbsent");
+        Assert.assertEquals(vendorConfig0.getDomainField(), "URL");
+        Assert.assertEquals(vendorConfig0.getGroupBy(), "domain");
+        Assert.assertEquals(vendorConfig0.getMaxActiveTasks(), 1);
+        Assert.assertEquals(vendorConfig0.getSortBy(), "CollectedAt");
+        Assert.assertEquals(vendorConfig0.getVendor(), "0");
+
+        for (VendorConfig vendorConfig: vendorConfigsAfterInsertion) {
+            if (vendorConfig.getPid() > maxPid)
+                vendorConfigMgr.delete(vendorConfig);
+        }
+        Thread.sleep(10000);
+        List<VendorConfig> vendorConfigsAfterDel = vendorConfigMgr.findAll();
+        Assert.assertTrue(orgVendorConfigs == null || orgVendorConfigs.size() == vendorConfigsAfterDel.size());
 
         for (VendorConfig vendorConfig: vendorConfigMgr.findAll()) {
-            System.out.println(vendorConfig.getPid());
-            System.out.println(vendorConfig.getCollectingFreq());
-            System.out.println(vendorConfig.getConsolidationPeriod());
-            System.out.println(vendorConfig.getDomainCheckField());
-            System.out.println(vendorConfig.getDomainField());
-            System.out.println(vendorConfig.getGroupBy());
-            System.out.println(vendorConfig.getLastConsolidated());
-            System.out.println(vendorConfig.getMaxActiveTasks());
-            System.out.println(vendorConfig.getSortBy());
             System.out.println(vendorConfig.getVendor());
         }
 
@@ -287,7 +298,11 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         }
         s3Service.cleanupPrefix("latticeengines-dev-datacloud", S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ALEXA + "_RAW").toString());
 
+        int tasksToIngest = collectionDBService.getIngestionTaskCount();
+        Assert.assertEquals(orbWorkers.length + alexaWorkers.length, tasksToIngest);
         collectionDBService.ingest();
+        int tasksToIngestAfter = collectionDBService.getIngestionTaskCount();
+        Assert.assertEquals(tasksToIngestAfter, 0);
 
         for (CollectionWorker worker: consumedWorkers) {
             worker.setStatus(CollectionWorker.STATUS_CONSUMED);
