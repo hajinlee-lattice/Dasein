@@ -5,14 +5,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -113,15 +110,6 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         return config;
     }
 
-    private boolean isShortCutMode(Map<String, String> periodStoreTableNames) {
-        String customer = customerSpace.toString();
-        Map<String, Table> periodStoreTables = periodStoreTableNames.entrySet().stream()
-                .map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-        boolean shortCutMode = MapUtils.isEmpty(periodStoreTables) ? false : periodStoreTables.values().stream().noneMatch(Objects::isNull);
-        return shortCutMode;
-    }
-
     @Override
     protected void postJobExecution(SparkJobResult result) {
         Map<String, Details> metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
@@ -134,7 +122,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 String tableName = TableUtils.getFullTableName(ctxKey, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
                 Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
-                signatureTableNames.put(details.getLabels().get(offset), tableName); // use period name as signature
+                signatureTableNames.put(ctxKey, tableName); // use period name as signature
             }
         });
         putObjectInContext(PERIOD_STORE_TABLE_NAME, signatureTableNames);
