@@ -159,7 +159,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         Assert.assertNotNull(workers);
     }
 
-    @Test(groups = "testCollection")
+    @Test(groups = "testCollection", enabled = false)
     public void testCollectionDBService() throws Exception {
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
@@ -310,7 +310,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         }
     }
 
-    @Test(groups = "testDomainCleanup")
+    @Test(groups = "testDomainCleanup", enabled = false)
     public void testDomainCleanup() {
         String domain = "verena.solutions";
         log.info(domain);
