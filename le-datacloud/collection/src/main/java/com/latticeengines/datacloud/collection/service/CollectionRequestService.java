@@ -19,8 +19,6 @@ public interface CollectionRequestService {
 
     int consumeFinished(List<CollectionRequest> processed, Set<String> domains, Set<String> emptyDomains);
 
-    Timestamp getEarliestTime(String vendor, String status);
-
     List<CollectionRequest> getReady(String vendor, int upperLimit);
 
     List<CollectionRequest> getProcessed(String workerId);

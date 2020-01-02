@@ -14,8 +14,6 @@ public interface CollectionWorkerMgr extends BaseEntityMgrRepository<CollectionW
 
     List<CollectionWorker> getWorkerByStatus(List<String> status);
 
-    List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after);
-
     List<CollectionWorker> getActiveWorker(String vendor);
 
     void cleanupWorkerBetween(Timestamp start, Timestamp end);

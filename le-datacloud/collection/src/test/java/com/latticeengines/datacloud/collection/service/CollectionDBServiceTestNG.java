@@ -24,6 +24,7 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +38,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.DomainUtils;
+import com.latticeengines.datacloud.core.util.S3PathBuilder;
 import com.latticeengines.ldc_collectiondb.entity.CollectionWorker;
+import com.latticeengines.ldc_collectiondb.entity.VendorConfig;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionRequestMgr;
+import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
+import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 
 @DirtiesContext
 @ContextConfiguration(locations = {"classpath:test-datacloud-collection-context.xml"})
@@ -57,6 +64,15 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     @Inject
     S3Service s3Service;
+
+    @Inject
+    CollectionWorkerMgr collectionWorkerMgr;
+
+    @Inject
+    CollectionRequestMgr collectionRequestMgr;
+
+    @Inject
+    VendorConfigMgr vendorConfigMgr;
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
@@ -143,7 +159,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         Assert.assertNotNull(workers);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "testCollection")
     public void testCollectionDBService() throws Exception {
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
@@ -161,7 +177,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     }
 
-    @Test(groups = "testCollection")
+    @Test(groups = "functional")
     public void testCollection() throws Exception {
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
@@ -174,14 +190,119 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     }
 
-    @Test(groups = "testIngestion")
-    public void testIngestion() throws Exception {
+    @Test(groups = "functional")
+    public void testVendorConfig() {
 
-        collectionDBService.ingest();
+        List<VendorConfig> manualCraftedConfigs = new ArrayList<>();
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        for (int i = 0; i < 10; ++i) {
+            VendorConfig vendorConfig = new VendorConfig();
+            vendorConfig.setPid(1024 + i);
+            vendorConfig.setVendor(((Integer)i).toString());
+            vendorConfig.setGroupBy("domain");
+            vendorConfig.setSortBy("CollectedAt");
+            vendorConfig.setCollectingFreq(86400L);
+            vendorConfig.setConsolidationPeriod(10240);
+            vendorConfig.setDomainCheckField("CannotBeAbsent");
+            vendorConfig.setDomainField("URL");
+            vendorConfig.setMaxActiveTasks(1);
+            vendorConfig.setLastConsolidated(ts);
+
+            manualCraftedConfigs.add(vendorConfig);
+            vendorConfigMgr.createOrUpdate(vendorConfig);
+        }
+
+        VendorConfig vendorConfig0 = manualCraftedConfigs.get(0);
+        System.out.println(vendorConfig0.getPid());
+        System.out.println(vendorConfig0.getCollectingFreq());
+        System.out.println(vendorConfig0.getConsolidationPeriod());
+        System.out.println(vendorConfig0.getDomainCheckField());
+        System.out.println(vendorConfig0.getDomainField());
+        System.out.println(vendorConfig0.getGroupBy());
+        System.out.println(vendorConfig0.getLastConsolidated());
+        System.out.println(vendorConfig0.getMaxActiveTasks());
+        System.out.println(vendorConfig0.getSortBy());
+        System.out.println(vendorConfig0.getVendor());
+
+        for (VendorConfig vendorConfig: manualCraftedConfigs) {
+            vendorConfigMgr.delete(vendorConfig);
+        }
+        manualCraftedConfigs.clear();
+
+        for (VendorConfig vendorConfig: vendorConfigMgr.findAll()) {
+            System.out.println(vendorConfig.getPid());
+            System.out.println(vendorConfig.getCollectingFreq());
+            System.out.println(vendorConfig.getConsolidationPeriod());
+            System.out.println(vendorConfig.getDomainCheckField());
+            System.out.println(vendorConfig.getDomainField());
+            System.out.println(vendorConfig.getGroupBy());
+            System.out.println(vendorConfig.getLastConsolidated());
+            System.out.println(vendorConfig.getMaxActiveTasks());
+            System.out.println(vendorConfig.getSortBy());
+            System.out.println(vendorConfig.getVendor());
+        }
 
     }
 
     @Test(groups = "functional")
+    public void testIngestion() throws Exception {
+
+        List<CollectionWorker> consumedWorkers = collectionWorkerMgr.getWorkerByStatus(Arrays.asList(CollectionWorker.STATUS_CONSUMED));
+        for (CollectionWorker worker: consumedWorkers) {
+            worker.setStatus(CollectionWorker.STATUS_INGESTED);
+            collectionWorkerMgr.update(worker);
+        }
+
+        String[] orbWorkers = StringUtils.split("05C2CBC5-ADC4-44FD-9408-FA83C350C2E6,271894B8-89EB-4797-A32D-0AA1F0065F49," +
+                "286B89BB-F874-40A9-B2C2-575B2D6EE245,3713D933-62FF-49F0-8912-DB6B6532C890", ',');
+        String[] alexaWorkers = StringUtils.split("0420DB2A-C938-4C25-BEB9-C2165BF14354,09C3FA50-CE87-452D-BEE5-1209C929D45D," +
+                "6B744B27-3AD0-4313-82C2-3F171398E5F5,8B7BB325-E1AE-48B0-B0A0-BF1A7D16B89D,B01DB53F-D787-426E-8F64-56D974E593A3," +
+                "C51AD6B8-8CA5-4A0F-B742-0805C3A84E54", ',');
+
+        for (String workerId: orbWorkers) {
+            CollectionWorker worker = new CollectionWorker();
+            worker.setWorkerId(workerId);
+            worker.setStatus(CollectionWorker.STATUS_CONSUMED);
+            worker.setRecordsCollected(8192);
+            worker.setSpawnTime(new Timestamp(System.currentTimeMillis()));
+            worker.setTaskArn("");
+            worker.setTerminationTime(new Timestamp(System.currentTimeMillis()));
+            worker.setVendor(VendorConfig.VENDOR_ORBI_V2);
+
+            collectionWorkerMgr.createOrUpdate(worker);
+        }
+        s3Service.cleanupPrefix("latticeengines-dev-datacloud", S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ORBI_V2 + "_RAW").toString());
+
+        for (String workerId: alexaWorkers) {
+            CollectionWorker worker = new CollectionWorker();
+            worker.setWorkerId(workerId);
+            worker.setStatus(CollectionWorker.STATUS_CONSUMED);
+            worker.setRecordsCollected(8192);
+            worker.setSpawnTime(new Timestamp(System.currentTimeMillis()));
+            worker.setTaskArn("");
+            worker.setTerminationTime(new Timestamp(System.currentTimeMillis()));
+            worker.setVendor(VendorConfig.VENDOR_ALEXA);
+
+            collectionWorkerMgr.createOrUpdate(worker);
+        }
+        s3Service.cleanupPrefix("latticeengines-dev-datacloud", S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ALEXA + "_RAW").toString());
+
+        collectionDBService.ingest();
+
+        for (CollectionWorker worker: consumedWorkers) {
+            worker.setStatus(CollectionWorker.STATUS_CONSUMED);
+            collectionWorkerMgr.update(worker);
+        }
+    }
+
+    @Test(groups = "testDomainCleanup")
+    public void testDomainCleanup() {
+        String domain = "verena.solutions";
+        log.info(domain);
+        log.info(DomainUtils.parseDomain(domain));
+    }
+
+    @Test(groups = "functional", enabled = false)
     public void testAvroSchema() throws Exception {
         String schemaStr = AvroUtils.buildSchema("builtwith.avsc");
         Assert.assertNotNull(schemaStr);

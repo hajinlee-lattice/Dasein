@@ -94,40 +94,6 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
     }
 
     @Override
-    public Timestamp getEarliestTime(String vendor, String status) {
-
-        /*
-        //query
-        Class<CollectionRequest> reqType = CollectionRequest.class;
-        EntityManager entityManager = collectionRequestReaderRepository.getEntityManager();//FIXME: appropriate to use reader repo here?
-
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Timestamp> query = builder.createQuery(Timestamp.class);
-        Root<CollectionRequest> reqTable = query.from(reqType);
-        query
-                .select(builder.least(reqTable.get("requestedTime").as(Timestamp.class)))
-                .where(builder.and(
-                        builder.equal(reqTable.get("vendor"), vendor),
-                        builder.equal(reqTable.get("status"), status)));
-        Timestamp ts = entityManager.createQuery(query).getSingleResult();*/
-
-        List<CollectionRequest> resultList = readerRepository
-                .findByVendorAndStatusOrderByRequestedTimeAsc(vendor, status, PageRequest.of(0, 1));
-
-        if (resultList.size() == 0) {
-
-            return new Timestamp(System.currentTimeMillis());
-
-        }
-
-        Timestamp ts = resultList.get(0).getRequestedTime();
-        resultList.clear();
-
-        return ts;
-
-    }
-
-    @Override
     public void cleanupRequestBetween(Timestamp start, Timestamp end) {
         repository.removeByRequestedTimeBetween(start, end);
     }
