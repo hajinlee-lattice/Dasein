@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.end2end;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.REAL_TIME_MATCH_RECORD_LIMIT;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -247,44 +246,5 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
     @Override
     protected String saveToCheckPoint() {
         return CHECK_POINT;
-    }
-
-    @Override
-    protected List<String> getCandidateFailingSteps() {
-        return Arrays.asList(
-                "entityMatchCheckpoint", //
-                "mergeAccount", //
-                "mergeAccount", //
-                "mergeAccount", //
-                "mergeAccount", //
-                "enrichAccount", //
-                "profileAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "generateBucketedAccount", //
-                "mergeContact", //
-                "mergeContact", //
-                "mergeContact", //
-                "mergeContact", //
-                "profileContact", //
-                "profileContact", //
-                "combineStatistics", //
-                "exportToRedshift", //
-                "exportToDynamo", //
-                "generateProcessingReport", // mimic failed in scoring
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "generateProcessingReport", //
-                "exportProcessAnalyzeToS3", //
-                "commitEntityMatch", //
-                "finishProcessing");
     }
 }
