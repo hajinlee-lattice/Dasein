@@ -267,7 +267,7 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         return CHECK_POINT;
     }
 
-    private List<String> getCandidateFailingSteps() {
+    protected List<String> getCandidateFailingSteps() {
         return Arrays.asList(
                 "matchAccount", //
                 "matchContact", //
@@ -281,8 +281,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
                 "profileAccount", //
                 "profileAccount", //
                 "profileAccount", //
-                "filterAccountFeature", //
-                "filterAccountExport", //
                 "generateBucketedAccount", //
                 "generateBucketedAccount", //
                 "generateBucketedAccount", //
@@ -307,7 +305,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
                 "generateProcessingReport", //
                 "generateProcessingReport", //
                 "exportProcessAnalyzeToS3", //
-                "commitEntityMatch", //
                 "finishProcessing");
     }
 
