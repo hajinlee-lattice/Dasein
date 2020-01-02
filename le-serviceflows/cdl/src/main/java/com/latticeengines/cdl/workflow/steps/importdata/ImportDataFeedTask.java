@@ -52,7 +52,7 @@ public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfi
         AppSubmission submission = eaiProxy.submitEaiJob(importConfig);
         String applicationId = submission.getApplicationIds().get(0);
         dataFeedTask.setActiveJob(applicationId);
-        dataFeedProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask);
+        dataFeedProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask, true);
         saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
         waitForAppId(applicationId);
     }

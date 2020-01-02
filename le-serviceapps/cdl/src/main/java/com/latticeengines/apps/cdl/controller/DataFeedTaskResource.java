@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,9 +50,10 @@ public class DataFeedTaskResource {
     @RequestMapping(value = "", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
-    public void updateDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask) {
+    public void updateDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask,
+                                   @RequestParam(required = false) Boolean updateTaskOnly) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask);
+        dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, Boolean.TRUE.equals(updateTaskOnly));
     }
 
     @RequestMapping(value = "/s3status/{source}/{dataFeedType}/{status}", method = RequestMethod.PUT,

@@ -44,7 +44,7 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     void deleteByTaskId(Long taskId);
 
-    void updateDataFeedTask(DataFeedTask dataFeedTask);
+    void updateDataFeedTask(DataFeedTask dataFeedTask, boolean updateTaskOnly);
 
     void update(DataFeedTask task, Date startTime);
 
