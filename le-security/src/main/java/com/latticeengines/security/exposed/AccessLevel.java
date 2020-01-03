@@ -108,7 +108,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_RATING_ENGINES, //
             GrantedRight.EDIT_PLS_RATING_ENGINES, //
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
-            GrantedRight.VIEW_PLS_REMODEL //
+            GrantedRight.VIEW_PLS_REMODEL, //
+            GrantedRight.VIEW_PLS_SPEC //
     ) //
     ), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -150,7 +151,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_SSO_CONFIG, //
-            GrantedRight.VIEW_PLS_SSO_CONFIG //
+            GrantedRight.VIEW_PLS_SSO_CONFIG, //
+            GrantedRight.VIEW_PLS_SPEC //
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -193,7 +195,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_SSO_CONFIG, //
-            GrantedRight.VIEW_PLS_SSO_CONFIG //
+            GrantedRight.VIEW_PLS_SSO_CONFIG, //
+            GrantedRight.VIEW_PLS_SPEC //
     )); //
 
     private List<GrantedRight> grantedRights;

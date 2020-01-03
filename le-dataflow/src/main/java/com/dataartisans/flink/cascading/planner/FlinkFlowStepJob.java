@@ -71,6 +71,12 @@ import scala.concurrent.duration.FiniteDuration;
 public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
     private static final Logger LOG = LoggerFactory.getLogger(FlinkFlowStepJob.class);
     private static final int accumulatorUpdateIntervalSecs = 10;
+    /*-
+     * dynamically choose unused port in range [ MIN_LOCAL_CLUSTER_PORT, MAX_LOCAL_CLUSTER_PORT ]
+     * TODO move to constructor/config
+     */
+    private static final int MIN_LOCAL_CLUSTER_PORT = 8081;
+    private static final int MAX_LOCAL_CLUSTER_PORT = 15081;
     private static final Object lock = new Object();
     @SuppressWarnings("unused")
     private static final FiniteDuration DEFAULT_TIMEOUT = new FiniteDuration(60, TimeUnit.SECONDS);
@@ -327,6 +333,8 @@ public class FlinkFlowStepJob extends FlowStepJob<Configuration> {
                 configuration.setString(AkkaOptions.FRAMESIZE, "1g");
                 LOG.info("Creating a new Flink MiniCluster.");
                 configuration.setString(RestOptions.ADDRESS, "localhost");
+                configuration.setString(RestOptions.BIND_PORT,
+                        String.format("%d-%d", MIN_LOCAL_CLUSTER_PORT, MAX_LOCAL_CLUSTER_PORT));
                 MiniClusterConfiguration miniConf =
                         new MiniClusterConfiguration(configuration, 1, RpcServiceSharing.DEDICATED, null);
                 localCluster = new MiniCluster(miniConf);
