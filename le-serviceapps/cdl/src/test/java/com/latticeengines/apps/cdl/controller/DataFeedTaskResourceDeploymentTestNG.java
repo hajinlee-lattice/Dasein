@@ -100,12 +100,16 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Test(groups = "deployment", dependsOnMethods = "testCreateOrUpdateDataFeedTask")
     public void testUpdateDataFeedTask() throws IOException {
         log.info("Updating DataFeedTask for " + mainCustomerSpace);
-        dataFeedTask.setSourceConfig(DATA_FEED_TASK_SOURCE_CONFIG + "Test");
+        dataFeedTask.setSourceConfig(DATA_FEED_TASK_SOURCE_CONFIG + "Test1");
         dataFeedProxy.updateDataFeedTask(mainCustomerSpace, dataFeedTask);
 
         DataFeedTask dfTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, dataFeedTask.getUniqueId());
-
         assertNotNull(dfTask);
+        assertEquals(dfTask.getSourceConfig(), DATA_FEED_TASK_SOURCE_CONFIG + "Test1");
+
+        dataFeedTask.setSourceConfig(DATA_FEED_TASK_SOURCE_CONFIG + "Test");
+        dataFeedProxy.updateDataFeedTask(mainCustomerSpace, dataFeedTask, true);
+        dfTask = dataFeedProxy.getDataFeedTask(mainCustomerSpace, dataFeedTask.getUniqueId());
         assertEquals(dfTask.getSourceConfig(), DATA_FEED_TASK_SOURCE_CONFIG + "Test");
     }
 

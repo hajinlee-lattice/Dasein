@@ -475,16 +475,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
     }
 
-    @Override
-    public void update(Table table) {
-        Table existing = tableDao.findByName(table.getName());
-        if (existing == null) {
-            throw new RuntimeException(String.format("No such table with name %s", table.getName()));
-        }
-        existing.setUpdatedBy(table.getUpdatedBy());
-        tableDao.update(existing);
-    }
-
     private void deleteExtractsInBackend(List<String> extractPaths) {
         final ImmutableList<String> finalPaths = ImmutableList.copyOf(extractPaths);
         Runnable runnable = () -> finalPaths.forEach(p -> {
