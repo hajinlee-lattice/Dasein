@@ -4,12 +4,18 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -20,12 +26,17 @@ import com.latticeengines.proxy.exposed.ProxyUtils;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 
 @Component("periodTransactionProxy")
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy implements PeriodTransactionProxy {
 
     private static final Logger log = LoggerFactory.getLogger(PeriodTransactionProxyImpl.class);
 
-    public PeriodTransactionProxyImpl() {
-        super("/objectapi");
+    private final PeriodTransactionProxyImpl _periodTransactionProxyImpl;
+
+    @Inject
+    public PeriodTransactionProxyImpl(PeriodTransactionProxyImpl periodTransactionProxy) {
+        super("objectapi/customerspaces");
+        this._periodTransactionProxyImpl = periodTransactionProxy;
     }
 
     @Override
@@ -58,6 +69,32 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
     @Override
     public List<PeriodTransaction> getPeriodTransactionsForSegmentAccounts(String customerSpace,
             String spendAnalyticsSegment, String periodName) {
+        return _periodTransactionProxyImpl.getPeriodTransactionsForSegmentAccountsFromCache(customerSpace,
+                spendAnalyticsSegment, periodName);
+    }
+
+    @Override
+    public List<ProductHierarchy> getProductHierarchy(String customerSpace, DataCollection.Version version) {
+        return _periodTransactionProxyImpl.getProductHierarchy(customerSpace, version);
+    }
+
+    @Override
+    public DataPage getAllSpendAnalyticsSegments(String customerSpace) {
+        return _periodTransactionProxyImpl.getAllSpendAnalyticsSegmentsFromCache(customerSpace);
+    }
+
+    @Override
+    public List<String> getFinalAndFirstTransactionDate(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/transaction/maxmindate",
+                ProxyUtils.shortenCustomerSpace(customerSpace));
+
+        log.info("getFinalAndFirstTransactionDate url " + url);
+        return getList("getFinalAndFirstTransactionDate", url, String.class);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|%s|SpAnSeg_Txn_Data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #spendAnalyticsSegment, #periodName)")
+    public List<PeriodTransaction> getPeriodTransactionsForSegmentAccountsFromCache(String customerSpace,
+            String spendAnalyticsSegment, String periodName) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegment/{spendAnalyticsSegment}",
                 ProxyUtils.shortenCustomerSpace(customerSpace), spendAnalyticsSegment);
@@ -69,36 +106,26 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
         if (periodName != null) {
             url += ("?periodname=" + periodName);
         }
-        log.info("getPeriodTransactionsForSegmentAccounts url " + url);
+        log.info("Missed cache for getPeriodTransactionsForSegmentAccounts url " + url);
         return getList("getPeriodTransactionsForSegmentAccounts", url, PeriodTransaction.class);
     }
 
-    @Override
-    public List<ProductHierarchy> getProductHierarchy(String customerSpace, DataCollection.Version version) {
+    @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|Spend_Analytics_Segments\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace))")
+    public DataPage getAllSpendAnalyticsSegmentsFromCache(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegments",
+                ProxyUtils.shortenCustomerSpace(customerSpace));
+        log.info("Missed cache for getProductHierarchy url " + url);
+        return get("getProductHierarchy", url, DataPage.class);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|Product_Hierarchy\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #version)")
+    public List<ProductHierarchy> getProductHierarchyFromCache(String customerSpace, DataCollection.Version version) {
         String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/producthierarchy",
                 ProxyUtils.shortenCustomerSpace(customerSpace));
         if (version != null) {
             url += ("?version=" + version);
         }
-        log.info("getProductHierarchy url " + url);
+        log.info("Missed cache for getProductHierarchy url " + url);
         return getList("getProductHierarchy", url, ProductHierarchy.class);
-    }
-
-    @Override
-    public DataPage getAllSpendAnalyticsSegments(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegments",
-                ProxyUtils.shortenCustomerSpace(customerSpace));
-
-        log.info("getProductHierarchy url " + url);
-        return get("getProductHierarchy", url, DataPage.class);
-    }
-
-    @Override
-    public List<String> getFinalAndFirstTransactionDate(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/transaction/maxmindate",
-                ProxyUtils.shortenCustomerSpace(customerSpace));
-
-        log.info("getFinalAndFirstTransactionDate url " + url);
-        return getList("getFinalAndFirstTransactionDate", url, String.class);
     }
 }
