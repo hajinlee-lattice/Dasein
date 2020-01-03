@@ -140,4 +140,15 @@ public class ImportWorkflowSpecUtils {
                 .build();
     }
 
+    public static String sanitizeName(String name) {
+        if (StringUtils.isNotBlank(name)) {
+            return name.replaceAll("\\s", "").toLowerCase();
+        } else {
+            return name;
+        }
+    }
+
+    public static String constructSpecName(String systemType, String systemObject) {
+        return sanitizeName(systemType) + "-" + sanitizeName(systemObject) + "-spec.json";
+    }
 }

@@ -272,6 +272,12 @@ public enum GrantedRight implements GrantedAuthority {
         public String getAuthority() {
             return "View_PLS_SSO_Config";
         }
+    }, //
+    VIEW_PLS_SPEC {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Spec";
+        }
     }; //
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();
