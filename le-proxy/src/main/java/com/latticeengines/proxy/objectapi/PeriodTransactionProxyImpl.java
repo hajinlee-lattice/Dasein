@@ -75,7 +75,7 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
 
     @Override
     public List<ProductHierarchy> getProductHierarchy(String customerSpace, DataCollection.Version version) {
-        return _periodTransactionProxyImpl.getProductHierarchy(customerSpace, version);
+        return _periodTransactionProxyImpl.getProductHierarchyFromCache(customerSpace, version);
     }
 
     @Override

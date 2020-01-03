@@ -491,7 +491,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
 
         return modelingAttributes;
-
     }
 
     @Override
