@@ -197,7 +197,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 updateAttrConfig(finalTemplate, attrConfigs, entity, customerSpace);
                 log.info(String.format("DataFeedTask %s template has been updated by user: %s",
                         dataFeedTask.getUniqueId(), user));
-                metadataProxy.updateImportTable(customerSpace.toString(), finalTemplate.getName(), finalTemplate);
                 if (sendEmail) {
                     sendS3TemplateChangeEmail(customerSpace.toString(), dataFeedTask, user, false);
                 }
