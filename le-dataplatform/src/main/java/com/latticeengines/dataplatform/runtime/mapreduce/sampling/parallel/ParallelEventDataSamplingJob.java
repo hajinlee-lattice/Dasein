@@ -103,7 +103,7 @@ public class ParallelEventDataSamplingJob extends MRJobCustomizationBase {
             properties.put("mapreduce.reduce.java.opts",
                     String.format("-Xmx%dm", (int) (Integer.parseInt(memSize) * 0.8)));
             properties.put("mapreduce.reduce.memory.totalbytes",
-                    "" + (int) (Integer.parseInt(memSize) * 1024 * 1024 * 0.8));
+                    "" + (long) (Integer.parseInt(memSize) * 1024L * 1024L * 0.8));
         }
         log.info("mapreduce.reduce.java.opts=" + properties.get("mapreduce.reduce.java.opts"));
         log.info("mapreduce.reduce.memory.totalbytes=" + properties.get("mapreduce.reduce.memory.totalbytes"));
