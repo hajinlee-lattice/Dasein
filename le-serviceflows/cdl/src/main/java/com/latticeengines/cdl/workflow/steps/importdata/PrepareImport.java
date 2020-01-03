@@ -175,6 +175,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             }
             parser.close();
             if (needUpdateTask) {
+                log.info("Attribute possible name changed, so need to udpate data feed task.");
                 dataFeedTask.setImportTemplate(template);
                 dataFeedProxy.updateDataFeedTask(customerSpace, dataFeedTask);
             }
