@@ -146,6 +146,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         DatabaseUtils.retry("Update DataFeedTask", 10,
                 RollbackException.class, "RollbackException detected when", null,
                 input -> dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask));
+        mdService.updateDataFeedTaskImportTemplate(CustomerSpace.parse(customerSpace), dataFeedTask);
     }
 
     @Override

@@ -473,7 +473,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     @Override
-    public void update(Table table) {
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void updateUpdatedBy(Table table) {
         Table existing = tableDao.findByName(table.getName());
         if (existing == null) {
             throw new RuntimeException(String.format("No such table with name %s", table.getName()));

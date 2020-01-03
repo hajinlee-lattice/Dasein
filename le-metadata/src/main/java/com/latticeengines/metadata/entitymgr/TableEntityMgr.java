@@ -62,7 +62,7 @@ public interface TableEntityMgr {
 
     void fixAttributes(String name, List<AttributeFixer> attributeFixerList);
 
-    void update(Table table);
+    void updateUpdatedBy(Table table);
 
     void updateTableRetentionPolicy(String tableName, RetentionPolicy retentionPolicy);
 
