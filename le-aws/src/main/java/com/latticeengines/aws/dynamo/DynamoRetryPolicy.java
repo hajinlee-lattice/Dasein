@@ -16,6 +16,8 @@ import com.amazonaws.services.dynamodbv2.model.LimitExceededException;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.dynamodbv2.model.ResourceInUseException;
 import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodbv2.model.TransactionCanceledException;
+import com.amazonaws.services.dynamodbv2.model.TransactionConflictException;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
@@ -36,11 +38,13 @@ public class DynamoRetryPolicy extends ExceptionClassifierRetryPolicy {
         RETRY_EXCEPTIONS.put(LimitExceededException.class, true);
         RETRY_EXCEPTIONS.put(ProvisionedThroughputExceededException.class, true);
         RETRY_EXCEPTIONS.put(ItemCollectionSizeLimitExceededException.class, true);
+        RETRY_EXCEPTIONS.put(TransactionConflictException.class, true);
         RETRY_EXCEPTIONS.put(InternalServerErrorException.class, true);
         // exceptions that cannot be retried
         RETRY_EXCEPTIONS.put(ResourceInUseException.class, false);
         RETRY_EXCEPTIONS.put(ResourceNotFoundException.class, false);
         RETRY_EXCEPTIONS.put(ConditionalCheckFailedException.class, false);
+        RETRY_EXCEPTIONS.put(TransactionCanceledException.class, false);
 
         /*-
          * some error don't have explicit exception instance, just have specific error code
