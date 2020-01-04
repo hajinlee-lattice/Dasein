@@ -3,20 +3,27 @@ package com.latticeengines.apps.cdl.end2end;
 
 import static org.testng.Assert.assertFalse;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -40,12 +47,17 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
     private int numRecordsInCsv = 0;
     private int originalNumRecords;
     private String avroDir;
+    private SourceFile cleanupTemplate;
+    private int originalRecordsCount;
+    private int templateSize;
+    private int dayPeriod;
 
     @Test(groups = "end2end")
     public void testDeleteContactByUpload() throws Exception {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         legacyDeleteByUpload();
+        prepareCleanupTemplate();
         cleanupByDateRange();
         processAnalyze();
         verifyCleanup();
@@ -70,8 +82,8 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
             numRecordsInCsv++;
             if (numRecordsInCsv == 10 || numRecordsInCsv == 20) {
 
-                log.info("There are " + numRecordsInCsv + " rows in csv.");
-                String fileName = "contact_delete_" + numRecordsInCsv + ".csv";
+                log.info("There are {} rows in csv.", numRecordsInCsv);
+                String fileName = String.format("%s_delete_%s.csv", BusinessEntity.Contact.name(), numRecordsInCsv);
                 Resource source = new ByteArrayResource(sb.toString().getBytes()) {
                     @Override
                     public String getFilename() {
@@ -101,8 +113,12 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
     private void verifyCleanup() throws IOException {
         Table table2 = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedContact);
         List<GenericRecord> recordsAfterDelete = getRecords(table2);
-        log.info("There are " + recordsAfterDelete.size() + " rows in avro after delete.");
+        log.info("There are " + recordsAfterDelete.size() + " rows in contact avro after delete.");
         Assert.assertEquals(originalNumRecords, recordsAfterDelete.size() + numRecordsInCsv);
+        Table table3 = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+        List<GenericRecord> transactionRecordsAfterDelete = getRecords(table3);
+        log.info("There are " + transactionRecordsAfterDelete.size() + " rows in transaction avro after delete.");
+        Assert.assertTrue(transactionRecordsAfterDelete.size() + templateSize <= originalRecordsCount);
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, avroDir));
     }
 
@@ -118,6 +134,44 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         cdlProxy.legacyDeleteByDateRange(customerSpace, transactionDate,
                 transactionDate, BusinessEntity.Transaction, MultiTenantContext.getEmailAddress());
 
+    }
+
+    private void prepareCleanupTemplate() throws IOException {
+        Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+        List<GenericRecord> recordsBeforeDelete = getRecords(table);
+        Assert.assertTrue(recordsBeforeDelete.size() > 0);
+        String filename = "Cleanup_Template_Transaction.csv";
+        originalRecordsCount = recordsBeforeDelete.size();
+        templateSize = 0;
+        if (recordsBeforeDelete.size() > 100) {
+            templateSize = 100;
+        } else if (recordsBeforeDelete.size() > 10) {
+            templateSize = 10;
+        } else {
+            templateSize = 1;
+        }
+        CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(filename),
+                LECSVFormat.format.withHeader("AccountId", "ProductId", "TransactionTime"));
+        Set<Integer> dayPeriods = new HashSet<>();
+        //get records from last
+        for(int i = recordsBeforeDelete.size() - 1; i >= recordsBeforeDelete.size() - templateSize; i--) {
+            csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
+                    recordsBeforeDelete.get(i).get("ProductId").toString(),
+                    recordsBeforeDelete.get(i).get("TransactionTime").toString());
+            dayPeriods.add(Integer.parseInt(recordsBeforeDelete.get(i).get("TransactionDayPeriod").toString()));
+        }
+        List<Integer> sortPeriods = new ArrayList<>(dayPeriods);
+        Collections.sort(sortPeriods);
+        dayPeriod = sortPeriods.get(0);
+        csvPrinter.flush();
+        csvPrinter.close();
+        Resource csvResrouce = new FileSystemResource(filename);
+        cleanupTemplate = uploadDeleteCSV(filename, SchemaInterpretation.DeleteTransactionTemplate,
+                CleanupOperationType.BYUPLOAD_ACPD, csvResrouce);
+        ApplicationId appId = cdlProxy.legacyDeleteByUpload(customerSpace, cleanupTemplate,
+                BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_ACPD, MultiTenantContext.getEmailAddress());
+        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+        Assert.assertEquals(JobStatus.COMPLETED, status);
     }
 
     private List<GenericRecord> getRecords(Table table) {

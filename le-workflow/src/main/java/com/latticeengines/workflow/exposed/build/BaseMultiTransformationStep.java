@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.workflow.BaseMultiTransformationStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 
@@ -107,6 +108,13 @@ public abstract class BaseMultiTransformationStep<T extends BaseMultiTransformat
     protected String appendEngineConf(TransformerConfig conf,
                                       TransformationFlowParameters.EngineConfiguration engineConf) {
         ObjectNode on = OM.valueToTree(conf);
+        on.set("EngineConfig", OM.valueToTree(engineConf));
+        return JsonUtils.serialize(on);
+    }
+
+    protected String appendEngineConf(SparkJobConfig jobConfig,
+                                      TransformationFlowParameters.EngineConfiguration engineConf) {
+        ObjectNode on = OM.valueToTree(jobConfig);
         on.set("EngineConfig", OM.valueToTree(engineConf));
         return JsonUtils.serialize(on);
     }
