@@ -80,7 +80,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.aws.dynamo.DynamoRetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -119,11 +119,14 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
-        EntityMatchConfigurationService configService = Mockito.mock(EntityMatchConfigurationService.class);
+        long expiredAt = System.currentTimeMillis() / 1000 + 1800; // 30min
+        EntityMatchConfigurationService configService = Mockito.mock(EntityMatchConfigurationServiceImpl.class);
         Mockito.when(configService.getNumShards(STAGING)).thenReturn(TEST_NUM_STAGING_SHARDS);
-        Mockito.when(configService.getRetryTemplate(Mockito.any())).thenReturn(RetryUtils.getRetryTemplate(3));
+        Mockito.when(configService.getRetryTemplate(Mockito.any()))
+                .thenReturn(DynamoRetryUtils.getSimpleRetryTemplate(3));
         Mockito.when(configService.getTableName(STAGING)).thenReturn(stagingTableName);
         Mockito.when(configService.getTableName(SERVING)).thenReturn(servingTableName);
+        Mockito.when(configService.getExpiredAt()).thenReturn(expiredAt);
         FieldUtils.writeField(entityRawSeedService, "entityMatchConfigurationService", configService, true);
     }
 

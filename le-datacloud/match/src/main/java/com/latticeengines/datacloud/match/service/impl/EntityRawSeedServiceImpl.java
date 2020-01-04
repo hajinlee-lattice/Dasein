@@ -3,9 +3,14 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.N;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.S;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.SS;
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder._;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_not_exists;
 import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.if_not_exists;
 import static com.latticeengines.common.exposed.util.ValidationUtils.checkNotNull;
+import static com.latticeengines.datacloud.match.util.EntityMatchDynamoUtils.attributeValues;
+import static com.latticeengines.datacloud.match.util.EntityMatchDynamoUtils.buildLookupPKey;
+import static com.latticeengines.datacloud.match.util.EntityMatchDynamoUtils.getSeedId;
+import static com.latticeengines.datacloud.match.util.EntityMatchDynamoUtils.primaryKey;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_ONE;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
@@ -42,11 +47,20 @@ import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.CancellationReason;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
+import com.amazonaws.services.dynamodbv2.model.Put;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import com.amazonaws.services.dynamodbv2.model.ReturnValuesOnConditionCheckFailure;
+import com.amazonaws.services.dynamodbv2.model.TransactWriteItem;
+import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsRequest;
+import com.amazonaws.services.dynamodbv2.model.TransactionCanceledException;
+import com.amazonaws.services.dynamodbv2.model.Update;
+import com.amazonaws.services.dynamodbv2.xspec.Condition;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import com.amazonaws.services.dynamodbv2.xspec.PutItemExpressionSpec;
 import com.amazonaws.services.dynamodbv2.xspec.UpdateAction;
+import com.amazonaws.services.dynamodbv2.xspec.UpdateItemExpressionSpec;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
@@ -58,6 +72,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityTransactUpdateResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import reactor.core.publisher.Flux;
@@ -219,22 +234,9 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         checkNotNull(env, tenant, rawSeed);
 
         PrimaryKey key = getPrimaryKey(env, tenant, rawSeed, version);
-        ExpressionSpecBuilder builder = new ExpressionSpecBuilder()
-                .addUpdate(S(ATTR_SEED_ID).set(rawSeed.getId()))
-                .addUpdate(S(ATTR_SEED_ENTITY).set(rawSeed.getEntity()))
-                // increase the version by 1
-                .addUpdate(N(ATTR_SEED_VERSION).add(1));
-
-        if (setTTL) {
-            builder.addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
-        }
-
-        getStringAttributes(rawSeed) //
-                .forEach((attrName, attrValue) -> builder
-                        .addUpdate(getStringAttrUpdateAction(rawSeed.getEntity(), attrName, attrValue)));
-        // set does not matter, just add to set
-        getStringSetAttributes(rawSeed)
-                .forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).append(attrValue)));
+        Map<String, String> strAttrMap = getStringAttributes(rawSeed);
+        Map<String, Set<String>> strSetAttrMap = getStringSetAttributes(rawSeed);
+        ExpressionSpecBuilder builder = updateSpecBuilder(rawSeed, strAttrMap, strSetAttrMap, setTTL);
 
         // TODO There is a trade-off on getting back the entire old item or only the updated attributes.
         //      decide whether we want more detailed report or safe bandwidth
@@ -247,6 +249,35 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         Preconditions.checkNotNull(result);
         Preconditions.checkNotNull(result.getUpdateItemResult());
         return fromAttributeMap(result.getUpdateItemResult().getAttributes());
+    }
+
+    @Override
+    public EntityTransactUpdateResult transactUpdate(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityRawSeed seed, List<EntityLookupEntry> entries, boolean setTTL, int version) {
+        checkNotNull(env, tenant, seed);
+        if (entries == null) {
+            entries = Collections.emptyList();
+        }
+
+        List<TransactWriteItem> items = new ArrayList<>();
+        // update seed
+        items.add(getUpdateSeedItem(env, tenant, seed, getStringAttributes(seed), getStringSetAttributes(seed), version,
+                setTTL));
+        // setup lookup mapping (lookupEntry -> seedId)
+        items.addAll(getSetLookupMappingItems(env, tenant, entries, seed.getId(), version, setTTL));
+
+        try {
+            TransactWriteItemsRequest req = new TransactWriteItemsRequest().withTransactItems(items);
+            getRetryTemplate(env).execute(ctx -> dynamoItemService.transactWriteItems(req));
+        } catch (TransactionCanceledException e) {
+            List<CancellationReason> reasons = e.getCancellationReasons();
+            log.debug("Txn conflict updating seed = {}, entries = {}, reasons = {}", seed, entries, reasons);
+            Preconditions.checkArgument(reasons.size() == 1 + entries.size(), String.format(
+                    "Cancellation reason list size should be 1 + %d, got %d instead", entries.size(), reasons.size()));
+            return parseConflictResponse(entries, reasons);
+        }
+
+        return new EntityTransactUpdateResult(true, seed, null);
     }
 
     @Override
@@ -283,6 +314,139 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
                 .collect(Collectors.toList());
         dynamoItemService.batchWrite(getTableName(env), batchItems);
         return true;
+    }
+
+    /*
+     * handling txn conflict (extract old seed & lookup entries already mapped to
+     * other seed)
+     */
+    private EntityTransactUpdateResult parseConflictResponse(@NotNull List<EntityLookupEntry> entries,
+            @NotNull List<CancellationReason> reasons) {
+        EntityRawSeed seedBeforeTxn = null;
+        Map<EntityLookupEntry, String> conflictEntries = new HashMap<>();
+        for (int i = 0; i < reasons.size(); i++) {
+            CancellationReason reason = reasons.get(i);
+            if (reason == null || reason.getCode() == null) {
+                // not causing conflict
+                continue;
+            }
+
+            if (i == 0) {
+                /*-
+                 * seed conflict
+                 * FIXME cannot return old value of type SS, probably aws sdk bug,
+                 *       ignore for now since they won't cause conflict anyways
+                 */
+                seedBeforeTxn = fromAttributeMap(reason.getItem(), true);
+                continue;
+            }
+
+            // entries mapped to other entity
+            String mappedSeedId = getSeedId(reason.getItem());
+            if (StringUtils.isNotBlank(mappedSeedId)) {
+                conflictEntries.put(entries.get(i - 1), mappedSeedId);
+            }
+        }
+        return new EntityTransactUpdateResult(false, seedBeforeTxn, conflictEntries);
+    }
+
+    /*
+     * txn write items for lookup mapping
+     */
+    private List<TransactWriteItem> getSetLookupMappingItems(@NotNull EntityMatchEnvironment env,
+            @NotNull Tenant tenant, @NotNull List<EntityLookupEntry> entries, @NotNull String seedId, int version,
+            boolean setTTL) {
+        if (CollectionUtils.isEmpty(entries)) {
+            return Collections.emptyList();
+        }
+        return entries.stream().map(entry -> {
+            Map<String, AttributeValue> pk = primaryKey(
+                    buildLookupPKey(env, tenant, entry, version, numStagingShards()));
+            Map<String, AttributeValue> item = new HashMap<>(pk);
+            item.put(ATTR_SEED_ID, new AttributeValue(seedId));
+            if (setTTL) {
+                AttributeValue val = new AttributeValue();
+                val.withN(String.valueOf(getExpiredAt()));
+                item.put(ATTR_EXPIRED_AT, val);
+            }
+
+            String condExpr = String.format("attribute_not_exists(%s) or %s = :seedId", ATTR_SEED_ID, ATTR_SEED_ID);
+            Put setLookupMapping = new Put() //
+                    .withTableName(getTableName(env)) //
+                    .withItem(item) //
+                    .withConditionExpression(condExpr) //
+                    .withExpressionAttributeValues(Collections.singletonMap(":seedId", new AttributeValue(seedId))) //
+                    .withReturnValuesOnConditionCheckFailure(ReturnValuesOnConditionCheckFailure.ALL_OLD);
+            return new TransactWriteItem().withPut(setLookupMapping);
+        }).collect(Collectors.toList());
+    }
+
+    /*
+     * txn write item for updating seed
+     */
+    private TransactWriteItem getUpdateSeedItem(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityRawSeed seed, @NotNull Map<String, String> strAttrMap,
+            @NotNull Map<String, Set<String>> strSetAttrMap, int version, boolean setTTL) {
+        ExpressionSpecBuilder builder = updateSpecBuilder(seed, strAttrMap, strSetAttrMap, setTTL);
+        if (MapUtils.isNotEmpty(strAttrMap)) {
+            builder.withCondition(updateCondition(strAttrMap));
+        }
+        UpdateItemExpressionSpec spec = builder.buildForUpdate();
+
+        Update update = new Update() //
+                .withTableName(getTableName(env)) //
+                .withKey(primaryKey(getPrimaryKey(env, tenant, seed, version))) //
+                .withUpdateExpression(spec.getUpdateExpression()) //
+                .withConditionExpression(spec.getConditionExpression()) //
+                .withExpressionAttributeNames(spec.getNameMap()) //
+                .withExpressionAttributeValues(attributeValues(spec.getValueMap()))
+                .withReturnValuesOnConditionCheckFailure(ReturnValuesOnConditionCheckFailure.ALL_OLD);
+        return new TransactWriteItem().withUpdate(update);
+    }
+
+    /*
+     * generate update condition for first win string attrs in seed
+     */
+    private Condition updateCondition(@NotNull Map<String, String> strAttrMap) {
+        return strAttrMap.entrySet().stream() //
+                .filter(entry -> !entry.getKey().startsWith(PREFIX_SEED_ATTRIBUTES)) // add condition for lookup entry
+                .reduce(null, (condition, entry) -> {
+                    String attrName = entry.getKey();
+                    String attrVal = entry.getValue();
+                    // (attrVal is null || attrVal)
+                    Condition cond = _(S(attrName).notExists().or(S(attrName).eq(attrVal)));
+                    return condition == null ? cond : condition.and(cond);
+                }, (c1, c2) -> {
+                    // null-safe AND
+                    if (c1 == null) {
+                        return c2;
+                    } else if (c2 == null) {
+                        return c1;
+                    } else {
+                        return c1.and(c2);
+                    }
+                });
+    }
+
+    /*
+     * base update spec for updating seed
+     */
+    private ExpressionSpecBuilder updateSpecBuilder(@NotNull EntityRawSeed rawSeed,
+            @NotNull Map<String, String> strAttrMap, @NotNull Map<String, Set<String>> strSetAttrMap, boolean setTTL) {
+        ExpressionSpecBuilder builder = new ExpressionSpecBuilder().addUpdate(S(ATTR_SEED_ID).set(rawSeed.getId()))
+                .addUpdate(S(ATTR_SEED_ENTITY).set(rawSeed.getEntity()))
+                // increase the version by 1
+                .addUpdate(N(ATTR_SEED_VERSION).add(1));
+
+        if (setTTL) {
+            builder.addUpdate(N(ATTR_EXPIRED_AT).set(getExpiredAt()));
+        }
+
+        strAttrMap.forEach((attrName, attrValue) -> builder
+                .addUpdate(getStringAttrUpdateAction(rawSeed.getEntity(), attrName, attrValue)));
+        // set does not matter, just add to set
+        strSetAttrMap.forEach((attrName, attrValue) -> builder.addUpdate(SS(attrName).append(attrValue)));
+        return builder;
     }
 
     /*
@@ -334,14 +498,18 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
      */
     @VisibleForTesting
     protected EntityRawSeed fromAttributeMap(Map<String, AttributeValue> map) {
+        return fromAttributeMap(map, false);
+    }
+
+    private EntityRawSeed fromAttributeMap(Map<String, AttributeValue> map, boolean ignoreLookupParsingError) {
         if (MapUtils.isEmpty(map)) {
             return null;
         }
 
         String seedId = map.get(ATTR_SEED_ID).getS();
         String entity = map.get(ATTR_SEED_ENTITY).getS();
-        int version = map.containsKey(ATTR_SEED_VERSION)
-            ? Integer.parseInt(map.get(ATTR_SEED_VERSION).getN()) : INITIAL_SEED_VERSION;
+        int version = map.containsKey(ATTR_SEED_VERSION) ? Integer.parseInt(map.get(ATTR_SEED_VERSION).getN())
+                : INITIAL_SEED_VERSION;
         List<EntityLookupEntry> entries = new ArrayList<>();
         Map<String, String> attributes = new HashMap<>();
         map.forEach((seedAttrName, value) -> {
@@ -359,7 +527,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
             List<EntityLookupEntry> lookupEntries = parseLookupEntries(entity, seedAttrName, value);
             if (CollectionUtils.isNotEmpty(lookupEntries)) {
                 entries.addAll(lookupEntries);
-            } else {
+            } else if (!ignoreLookupParsingError) {
                 log.error("Failed to parse lookup entries. Seed ID = {}, entity = {}, attrName = {}, attrValue = {}",
                         seedId, entity, seedAttrName, value);
             }
@@ -490,7 +658,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     }
 
     /*
-     * Build all string attributes. Returns Map<attributeName, attributeValue>.
+     * Build all string attributes. Returns Map<attributeName, attributeValues>.
      */
     @VisibleForTesting
     protected Map<String, String> getStringAttributes(@NotNull EntityRawSeed seed) {
@@ -507,7 +675,8 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     }
 
     /*
-     * Build all string set attributes. Returns Map<attributeName, Set<attributeValue>>.
+     * Build all string set attributes. Returns Map<attributeName,
+     * Set<attributeValues>>.
      */
     @VisibleForTesting
     protected Map<String, Set<String>> getStringSetAttributes(@NotNull EntityRawSeed seed) {
