@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthTicketDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSessionEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
@@ -38,8 +39,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         implements GlobalSessionManagementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionManagementServiceImpl.class);
-
-    public static final int TicketInactivityTimeoutInMinute = 1440;
 
     @Autowired
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
@@ -87,7 +86,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
-        if ((int) (timeElapsed / (1000 * 60)) > TicketInactivityTimeoutInMinute) {
+        if ((int) (timeElapsed / (1000 * 60)) > GlobalAuthTicketDao.TicketInactivityTimeoutInMinute) {
             throw new Exception("The requested ticket has expired.");
         }
 
@@ -155,6 +154,11 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     }
 
+    @Override
+    public List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenant) {
+        return gaTicketEntityMgr.findTicketsByUserIdAndTenant(userId, tenant);
+    }
+
     private Session attachSession(Ticket ticket, Tenant tenant) throws Exception {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant.getId());
         if (tenantData == null) {
@@ -169,7 +173,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
-        if ((int) (timeElapsed / (1000 * 60)) > TicketInactivityTimeoutInMinute) {
+        if ((int) (timeElapsed / (1000 * 60)) > GlobalAuthTicketDao.TicketInactivityTimeoutInMinute) {
             LOGGER.warn("The requested ticket has expired.");
             return null;
         }

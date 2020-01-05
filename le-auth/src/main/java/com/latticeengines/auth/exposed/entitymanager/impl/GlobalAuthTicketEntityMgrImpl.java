@@ -1,6 +1,7 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,7 @@ import com.latticeengines.auth.exposed.dao.GlobalAuthTicketDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 
 @Component("globalAuthTicketEntityMgr")
@@ -49,5 +51,11 @@ public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     public void update(GlobalAuthTicket gaTicket) {
         gaTicket.setLastModificationDate(new Date(System.currentTimeMillis()));
         getDao().update(gaTicket);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenantData) {
+        return gaTicketDao.findTicketsByUserIdAndTenant(userId, tenantData);
     }
 }

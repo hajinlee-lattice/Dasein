@@ -81,4 +81,9 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant.getId());
         return tenantData != null;
     }
+
+    @Override
+    public GlobalAuthTenant findByTenantId(String tenantId) {
+        return gaTenantEntityMgr.findByTenantId(tenantId);
+    }
 }

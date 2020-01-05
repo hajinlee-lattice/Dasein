@@ -12,7 +12,6 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -50,9 +49,6 @@ public class SessionServiceImpl implements SessionService {
 
     @Inject
     private SamlGlobalAuthenticationService samlGlobalAuthenticationService;
-
-    @Inject
-    private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
