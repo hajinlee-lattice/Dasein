@@ -48,15 +48,12 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
     /* services */
     private final DynamoItemService dynamoItemService;
     private final EntityMatchConfigurationService entityMatchConfigurationService;
-    private final int numStagingShards;
 
     @Inject
     public EntityLookupEntryServiceImpl(
             DynamoItemService dynamoItemService, EntityMatchConfigurationService entityMatchConfigurationService) {
         this.dynamoItemService = dynamoItemService;
         this.entityMatchConfigurationService = entityMatchConfigurationService;
-        // NOTE this will not be changed at runtime
-        numStagingShards = entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
     }
 
     @Override
@@ -64,7 +61,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
             int version) {
         checkNotNull(env, tenant, lookupEntry);
-        PrimaryKey key = buildLookupPKey(env, tenant, lookupEntry, version, numStagingShards);
+        PrimaryKey key = buildLookupPKey(env, tenant, lookupEntry, version, numStagingShards());
         String tableName = getTableName(env);
         Item item = getRetryTemplate(env).execute(ctx -> dynamoItemService.getItem(tableName, key));
         return getSeedId(item);
@@ -80,7 +77,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
         }
         List<PrimaryKey> keys = lookupEntries
                 .stream()
-                .map(entry -> buildLookupPKey(env, tenant, entry, version, numStagingShards))
+                .map(entry -> buildLookupPKey(env, tenant, entry, version, numStagingShards()))
                 .collect(Collectors.toList());
         // dedup, batchGet does not allow duplicate entries
         Set<PrimaryKey> uniqueKeys = new HashSet<>(keys);
@@ -131,7 +128,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
         long expiredAt = getExpiredAt();
         Map<PrimaryKey, String> seedIdMap = pairs
                 .stream()
-                .map(pair -> Pair.of(buildLookupPKey(env, tenant, pair.getKey(), version, numStagingShards),
+                .map(pair -> Pair.of(buildLookupPKey(env, tenant, pair.getKey(), version, numStagingShards()),
                         pair.getValue()))
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (v1, v2) -> v1));
         List<Item> items = seedIdMap
@@ -152,7 +149,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
             int version) {
         checkNotNull(env, tenant, lookupEntry);
-        PrimaryKey key = buildLookupPKey(env, tenant, lookupEntry, version, numStagingShards);
+        PrimaryKey key = buildLookupPKey(env, tenant, lookupEntry, version, numStagingShards());
         return getRetryTemplate(env).execute(ctx -> dynamoItemService.deleteItem(getTableName(env), key));
     }
 
@@ -162,7 +159,7 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
     private boolean conditionalSet(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant, @NotNull EntityLookupEntry lookupEntry,
             @NotNull String seedId, @NotNull PutItemExpressionSpec expressionSpec, boolean setTTL, int version) {
-        PrimaryKey key = buildLookupPKey(env, tenant, lookupEntry, version, numStagingShards);
+        PrimaryKey key = buildLookupPKey(env, tenant, lookupEntry, version, numStagingShards());
         Item item = new Item()
                 .withPrimaryKey(key)
                 .withString(ATTR_SEED_ID, seedId);
@@ -216,6 +213,10 @@ public class EntityLookupEntryServiceImpl implements EntityLookupEntryService {
 
     private RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env) {
         return entityMatchConfigurationService.getRetryTemplate(env);
+    }
+
+    private int numStagingShards() {
+        return entityMatchConfigurationService.getNumShards(EntityMatchEnvironment.STAGING);
     }
 
     /*

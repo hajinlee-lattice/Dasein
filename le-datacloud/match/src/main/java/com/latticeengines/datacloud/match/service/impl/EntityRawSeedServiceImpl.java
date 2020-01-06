@@ -359,7 +359,7 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         if (CollectionUtils.isEmpty(entries)) {
             return Collections.emptyList();
         }
-        return entries.stream().map(entry -> {
+        return entries.stream().distinct().map(entry -> {
             Map<String, AttributeValue> pk = primaryKey(
                     buildLookupPKey(env, tenant, entry, version, numStagingShards()));
             Map<String, AttributeValue> item = new HashMap<>(pk);

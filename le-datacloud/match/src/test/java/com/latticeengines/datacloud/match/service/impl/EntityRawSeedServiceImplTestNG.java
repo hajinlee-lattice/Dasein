@@ -56,6 +56,10 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,12 +68,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +96,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityTransactUpdateResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
@@ -111,6 +118,9 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Inject
     private EntityRawSeedServiceImpl entityRawSeedService;
 
+    @Inject
+    private EntityLookupEntryServiceImpl entityLookupEntryService;
+
     @Value("${datacloud.match.entity.staging.table}")
     private String stagingTableName;
 
@@ -128,6 +138,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         Mockito.when(configService.getTableName(SERVING)).thenReturn(servingTableName);
         Mockito.when(configService.getExpiredAt()).thenReturn(expiredAt);
         FieldUtils.writeField(entityRawSeedService, "entityMatchConfigurationService", configService, true);
+        FieldUtils.writeField(entityLookupEntryService, "entityMatchConfigurationService", configService, true);
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
@@ -173,7 +184,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testScanAndBatchCreate() throws InterruptedException {
         Tenant tenant = newTestTenant();
-        List<String> seedIds = Arrays.asList("testScan1", "testScan2", "testScan3", "testScan4", "testScan5",
+        List<String> seedIds = asList("testScan1", "testScan2", "testScan3", "testScan4", "testScan5",
                 "testScan6", "testScan7");
         List<EntityRawSeed> scanSeeds = new ArrayList<>();
         EntityMatchEnvironment env = STAGING;
@@ -344,6 +355,55 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         }
     }
 
+    @Test(groups = "functional", dataProvider = "transactUpdate", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testTransactUpdate(TxnUpdateTestCase testCase) throws Exception {
+        int version = TEST_VERSION_1;
+        if (testCase.currentState != null) {
+            Assert.assertEquals(testCase.currentState.getId(), testCase.currentState.getId());
+        }
+        Assert.assertEquals(testCase.seedToUpdate.getId(), testCase.finalState.getId());
+
+        String seedId = testCase.seedToUpdate.getId();
+        String entity = testCase.seedToUpdate.getEntity();
+        Map<EntityLookupEntry, String> expectedEntriesMapToOtherSeed = testCase.currentLookupMapping.entrySet() //
+                .stream() //
+                .filter(entry -> !seedId.equals(entry.getValue())) //
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        // lookup entries exist before txn update
+        List<Pair<EntityLookupEntry, String>> lookupEntries = testCase.currentLookupMapping.entrySet() //
+                .stream() //
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue())) //
+                .collect(Collectors.toList());
+        for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
+            Tenant tenant = newTestTenant();
+            // setup seed & lookup mappings
+            if (testCase.currentState != null) {
+                boolean currStateSet = entityRawSeedService.setIfNotExists(env, tenant, testCase.currentState, true,
+                        version);
+                Assert.assertTrue(currStateSet);
+            }
+            if (CollectionUtils.isNotEmpty(lookupEntries)) {
+                entityLookupEntryService.set(env, tenant, lookupEntries, true, version);
+            }
+
+            // update with txn
+            EntityTransactUpdateResult result = entityRawSeedService.transactUpdate(env, tenant, testCase.seedToUpdate,
+                    testCase.entriesToSetMapping, true, version);
+            Assert.assertNotNull(result);
+            Assert.assertEquals(result.isSucceeded(), testCase.shouldSucceed);
+            Thread.sleep(500L);
+
+            // check update result and lookup mappings
+            verifyExpectedEntriesInSeed(testCase, result);
+            verifyTargetSeedMappings(env, tenant, seedId, version, testCase, result);
+            verifyEntriesMappedToOtherSeeds(env, tenant, version, result, expectedEntriesMapToOtherSeed);
+
+            // check seed state after update
+            EntityRawSeed seedAfterUpdate = entityRawSeedService.get(env, tenant, entity, seedId, version);
+            Assert.assertTrue(equalsDisregardPriority(seedAfterUpdate, testCase.finalState));
+        }
+    }
+
     @Test(groups = "functional", dataProvider = "entityMatchEnvironment", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testClear(EntityMatchEnvironment env) {
         String seedId = TEST_SEED_ID;
@@ -435,30 +495,45 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional", dataProvider = "updateAttributes", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testUpdateAttributes(String entity, String[] currAttrs, String[] attrsToUpdate) {
-        int version = TEST_VERSION_1;
-        String seedId = UUID.randomUUID().toString();
-        Tenant tenant = new Tenant(EntityRawSeedServiceImplTestNG.class.getSimpleName() + UUID.randomUUID().toString());
-        EntityRawSeed currState = currAttrs == null ? null
-                : TestEntityMatchUtils.newSeedFromAttrs(seedId, entity, currAttrs);
-        EntityRawSeed seedToUpdate = TestEntityMatchUtils.newSeedFromAttrs(seedId, entity, attrsToUpdate);
+        for (int i = 0; i < 2; i++) {
+            int version = TEST_VERSION_1;
+            String seedId = UUID.randomUUID().toString();
+            Tenant tenant = new Tenant(
+                    EntityRawSeedServiceImplTestNG.class.getSimpleName() + UUID.randomUUID().toString());
+            EntityRawSeed currState = currAttrs == null ? null
+                    : TestEntityMatchUtils.newSeedFromAttrs(seedId, entity, currAttrs);
+            EntityRawSeed seedToUpdate = TestEntityMatchUtils.newSeedFromAttrs(seedId, entity, attrsToUpdate);
 
-        for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
-            if (currState != null) {
-                boolean setSucceeded = entityRawSeedService.setIfNotExists(env, tenant, currState, true, version);
-                Assert.assertTrue(setSucceeded, String.format("Seed(ID=%s,entity=%s) should not exist in tenant=%s",
+            for (EntityMatchEnvironment env : EntityMatchEnvironment.values()) {
+                if (currState != null) {
+                    boolean setSucceeded = entityRawSeedService.setIfNotExists(env, tenant, currState, true, version);
+                    Assert.assertTrue(setSucceeded, String.format("Seed(ID=%s,entity=%s) should not exist in tenant=%s",
+                            seedId, entity, tenant.getId()));
+                }
+
+                // update attributes
+                if (i == 0) {
+                    // optimistic locking version
+                    entityRawSeedService.updateIfNotSet(env, tenant, seedToUpdate, true, version);
+                } else {
+                    // dynamo txn version
+                    EntityTransactUpdateResult result = entityRawSeedService.transactUpdate(env, tenant, seedToUpdate,
+                            null, true, version);
+                    Assert.assertNotNull(result);
+                    Assert.assertTrue(result.isSucceeded());
+                    Assert.assertTrue(MapUtils.isEmpty(result.getEntriesMapToOtherSeeds()),
+                            String.format("Should not have any lookup entries mapped to other seed, got %s instead",
+                                    result.getEntriesMapToOtherSeeds()));
+                }
+
+                EntityRawSeed finalState = entityRawSeedService.get(env, tenant, entity, seedId, version);
+                Assert.assertNotNull(finalState, String.format("Seed(ID=%s,entity=%s) should exist in tenant=%s",
+                        seedId, entity, tenant.getId()));
+                Map<String, String> expectedFinalAttributes = getUpdatedAttributes(currState, seedToUpdate);
+                Assert.assertEquals(finalState.getAttributes(), expectedFinalAttributes, String.format(
+                        "Attributes in the final state does not match the expected result. Seed(ID=%s,entity=%s), tenant=%s",
                         seedId, entity, tenant.getId()));
             }
-
-            // update attributes
-            entityRawSeedService.updateIfNotSet(env, tenant, seedToUpdate, true, version);
-
-            EntityRawSeed finalState = entityRawSeedService.get(env, tenant, entity, seedId, version);
-            Assert.assertNotNull(finalState,
-                    String.format("Seed(ID=%s,entity=%s) should exist in tenant=%s", seedId, entity, tenant.getId()));
-            Map<String, String> expectedFinalAttributes = getUpdatedAttributes(currState, seedToUpdate);
-            Assert.assertEquals(finalState.getAttributes(), expectedFinalAttributes, String.format(
-                    "Attributes in the final state does not match the expected result. Seed(ID=%s,entity=%s), tenant=%s",
-                    seedId, entity, tenant.getId()));
         }
     }
 
@@ -708,6 +783,210 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         };
     }
 
+    @DataProvider(name = "transactUpdate")
+    private Object[][] transactUpdateTestCases() {
+        return new Object[][] { //
+                /*-
+                 * Case #1: Update empty/null seed
+                 */
+                { new TxnUpdateTestCase(null, emptyMap(), emptyList(), EMPTY, EMPTY, true, emptyList()) }, //
+                { new TxnUpdateTestCase(EMPTY, emptyMap(), emptyList(), EMPTY, EMPTY, true, emptyList()) }, //
+                /*-
+                 * lookup entries update
+                 */
+                { new TxnUpdateTestCase( //
+                        TestEntityMatchUtils.changeId(EMPTY, TEST_SEED_ID), emptyMap(), //
+                        asList(DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1), //
+                        newSeed(TEST_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1), //
+                        newSeed(TEST_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        null, emptyMap(), //
+                        asList(DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1), //
+                        newSeed(TEST_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1), //
+                        newSeed(TEST_SEED_ID, DC_FACEBOOK_1, DC_FACEBOOK_2, DC_GOOGLE_1), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        TestEntityMatchUtils.changeId(EMPTY, TEST_SEED_ID), emptyMap(), //
+                        asList(DUNS_1, SFDC_5, NC_FACEBOOK_1, DC_GOOGLE_1), //
+                        newSeed(TEST_SEED_ID, DUNS_1, SFDC_5, NC_FACEBOOK_1, DC_GOOGLE_1), //
+                        newSeed(TEST_SEED_ID, DUNS_1, SFDC_5, NC_FACEBOOK_1, DC_GOOGLE_1), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        TestEntityMatchUtils.changeId(EMPTY, TEST_SEED_ID), emptyMap(), //
+                        asList(SFDC_1, MKTO_1, ELOQUA_1), //
+                        newSeed(TEST_SEED_ID, SFDC_1, MKTO_1, ELOQUA_1), //
+                        newSeed(TEST_SEED_ID, SFDC_1, MKTO_1, ELOQUA_1), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        null, emptyMap(), //
+                        asList(DUNS_3, MKTO_2, ELOQUA_3), //
+                        newSeed(TEST_SEED_ID, DUNS_3, MKTO_2, ELOQUA_3), //
+                        newSeed(TEST_SEED_ID, DUNS_3, MKTO_2, ELOQUA_3), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        null, emptyMap(), //
+                        asList(NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5), true, emptyList()) }, //
+                // extra attributes
+                { new TxnUpdateTestCase( //
+                        null, emptyMap(), emptyList(), //
+                        TestEntityMatchUtils.newSeed(TEST_SEED_ID, "key1", "val1", "key2", "val2"), //
+                        TestEntityMatchUtils.newSeed(TEST_SEED_ID, "key1", "val1", "key2", "val2"), true,
+                        emptyList()) }, //
+                /*-
+                 * Case #2: no conflict with existing seed & lookup
+                 */
+                // adding domain/country, name/country
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5), //
+                        mapping(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5), //
+                        asList(MKTO_3, DUNS_5, NC_GOOGLE_2, NC_NETFLIX_2, DC_FACEBOOK_1, DC_FACEBOOK_2), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_2, NC_NETFLIX_2, DC_FACEBOOK_1, DC_FACEBOOK_2), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, MKTO_3, DUNS_5, NC_GOOGLE_2, NC_NETFLIX_2,
+                                DC_FACEBOOK_1, DC_FACEBOOK_2),
+                        true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, DUNS_4, MKTO_1), //
+                        mapping(TEST_SEED_ID, DUNS_4, MKTO_1), //
+                        asList(DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3), //
+                        newSeed(TEST_SEED_ID, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3), //
+                        newSeed(TEST_SEED_ID, DUNS_4, MKTO_1, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3), true,
+                        emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, SFDC_1, ELOQUA_3), //
+                        mapping(TEST_SEED_ID, SFDC_1, ELOQUA_3), //
+                        asList(DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3), //
+                        newSeed(TEST_SEED_ID, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3), //
+                        newSeed(TEST_SEED_ID, SFDC_1, ELOQUA_3, DC_GOOGLE_1, DC_GOOGLE_2, DC_GOOGLE_3), true,
+                        emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        // some overlap
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_2), //
+                        mapping(TEST_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_2), //
+                        asList(NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_1), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_1), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_GOOGLE_2, NC_FACEBOOK_1, NC_FACEBOOK_2), true,
+                        emptyList()) }, //
+                // adding duns
+                { new TxnUpdateTestCase( //
+                        // name country in current state
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1), //
+                        mapping(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1), //
+                        asList(NC_GOOGLE_1, DUNS_1), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, DUNS_1), //
+                        newSeed(TEST_SEED_ID, NC_GOOGLE_1, NC_NETFLIX_1, DUNS_1), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        // external system ID in current state
+                        newSeed(TEST_SEED_ID, MKTO_1, SFDC_5, ELOQUA_3), //
+                        mapping(TEST_SEED_ID, MKTO_1, SFDC_5, ELOQUA_3), //
+                        asList(ELOQUA_3, DUNS_4), //
+                        newSeed(TEST_SEED_ID, DUNS_4), //
+                        newSeed(TEST_SEED_ID, MKTO_1, SFDC_5, ELOQUA_3, DUNS_4), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        // domain country in current state
+                        newSeed(TEST_SEED_ID, DC_GOOGLE_1, DC_FACEBOOK_2, DC_GOOGLE_2), //
+                        mapping(TEST_SEED_ID, DC_GOOGLE_1, DC_FACEBOOK_2, DC_GOOGLE_2), //
+                        singletonList(DUNS_2), newSeed(TEST_SEED_ID, DUNS_2), //
+                        newSeed(TEST_SEED_ID, DC_GOOGLE_1, DC_FACEBOOK_2, DC_GOOGLE_2, DUNS_2), true, emptyList()) }, //
+                { new TxnUpdateTestCase( //
+                        // all types in current state
+                        newSeed(TEST_SEED_ID, MKTO_1, DC_GOOGLE_1, NC_FACEBOOK_1, SFDC_5, DC_GOOGLE_2, ELOQUA_4), //
+                        mapping(TEST_SEED_ID, MKTO_1, DC_GOOGLE_1, NC_FACEBOOK_1, SFDC_5, DC_GOOGLE_2, ELOQUA_4), //
+                        singletonList(DUNS_5), newSeed(TEST_SEED_ID, DUNS_5), //
+                        newSeed(TEST_SEED_ID, MKTO_1, DC_GOOGLE_1, NC_FACEBOOK_1, SFDC_5, DC_GOOGLE_2, ELOQUA_4,
+                                DUNS_5),
+                        true, emptyList()) }, //
+                /*
+                 * Case #3: has conflict
+                 */
+                // conflict in DUNS
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, DUNS_5), //
+                        mapping(TEST_SEED_ID, DUNS_5), //
+                        singletonList(DUNS_1), newSeed(TEST_SEED_ID, DUNS_1), //
+                        newSeed(TEST_SEED_ID, DUNS_5), false, singletonList(DUNS_5)) }, //
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, DUNS_4, DC_GOOGLE_2, NC_FACEBOOK_1), // has other lookup entries
+                        mapping(TEST_SEED_ID, DUNS_4, DC_GOOGLE_2, NC_FACEBOOK_1), //
+                        singletonList(DUNS_2), newSeed(TEST_SEED_ID, DUNS_2), //
+                        newSeed(TEST_SEED_ID, DUNS_4, DC_GOOGLE_2, NC_FACEBOOK_1), false, singletonList(DUNS_4)) }, //
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, DUNS_4, NC_GOOGLE_2, MKTO_1), //
+                        mapping(TEST_SEED_ID, DUNS_4, NC_GOOGLE_2, MKTO_1), //
+                        /*-
+                         * DUNS_2, SFDC_1 & NC_GOOGLE_1 are all NOT updated (atomic)
+                         */
+                        asList(DUNS_2, NC_GOOGLE_1, SFDC_1), newSeed(TEST_SEED_ID, DUNS_2, NC_GOOGLE_1, SFDC_1), //
+                        newSeed(TEST_SEED_ID, DUNS_4, NC_GOOGLE_2, MKTO_1), false, asList(DUNS_4, MKTO_1)) }, //
+                // conflict in external system
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, SFDC_1), //
+                        mapping(TEST_SEED_ID, SFDC_1), //
+                        singletonList(SFDC_2), newSeed(TEST_SEED_ID, SFDC_2), //
+                        newSeed(TEST_SEED_ID, SFDC_1), false, singletonList(SFDC_1)) }, //
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, SFDC_1, MKTO_1, ELOQUA_4, NC_GOOGLE_1, NC_GOOGLE_2, DC_FACEBOOK_2), //
+                        mapping(TEST_SEED_ID, SFDC_1, MKTO_1, ELOQUA_4, NC_GOOGLE_1, NC_GOOGLE_2, DC_FACEBOOK_2), //
+                        asList(SFDC_2, MKTO_3), newSeed(TEST_SEED_ID, SFDC_2, MKTO_3), //
+                        newSeed(TEST_SEED_ID, SFDC_1, MKTO_1, ELOQUA_4, NC_GOOGLE_1, NC_GOOGLE_2, DC_FACEBOOK_2), false,
+                        asList(SFDC_1, MKTO_1)) }, //
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, SFDC_1, MKTO_1, NC_GOOGLE_1), //
+                        mapping(TEST_SEED_ID, SFDC_1, MKTO_1, NC_GOOGLE_1), //
+                        asList(SFDC_2, MKTO_3, ELOQUA_1, DUNS_1, NC_GOOGLE_2, DC_GOOGLE_2),
+                        newSeed(TEST_SEED_ID, SFDC_2, MKTO_3, ELOQUA_1, DUNS_1, NC_GOOGLE_2, DC_GOOGLE_2), //
+                        newSeed(TEST_SEED_ID, SFDC_1, MKTO_1, NC_GOOGLE_1), false, asList(SFDC_1, MKTO_1)) }, //
+                // conflict in DUNS & external system
+                { new TxnUpdateTestCase( //
+                        newSeed(TEST_SEED_ID, SFDC_1, DUNS_1, DC_GOOGLE_2, NC_GOOGLE_2), //
+                        mapping(TEST_SEED_ID, SFDC_1, DUNS_1, DC_GOOGLE_2, NC_GOOGLE_2), //
+                        asList(SFDC_2, DUNS_5, NC_FACEBOOK_1), newSeed(TEST_SEED_ID, SFDC_2, DUNS_5, NC_FACEBOOK_1), //
+                        newSeed(TEST_SEED_ID, SFDC_1, DUNS_1, DC_GOOGLE_2, NC_GOOGLE_2), false,
+                        asList(SFDC_1, DUNS_1)) }, //
+                // TODO add test cases only conflict on lookup mapping
+        };
+    }
+
+    private void verifyExpectedEntriesInSeed(TxnUpdateTestCase testCase, EntityTransactUpdateResult result) {
+        if (CollectionUtils.isEmpty(testCase.expectedEntriesInSeed)) {
+            return;
+        }
+
+        testCase.expectedEntriesInSeed.forEach(entry -> {
+            List<EntityLookupEntry> entries = result.getSeed().getLookupEntries();
+            Assert.assertTrue(entries.contains(entry),
+                    String.format("Entry %s should be in seed after update %s", entry, result.getSeed()));
+        });
+    }
+
+    private void verifyTargetSeedMappings(EntityMatchEnvironment env, Tenant tenant, String seedId, int version,
+            TxnUpdateTestCase testCase, EntityTransactUpdateResult result) {
+        if (result.isSucceeded() && CollectionUtils.isNotEmpty(testCase.entriesToSetMapping)) {
+            // should mapped to current seed
+            List<String> mappedIds = entityLookupEntryService.get(env, tenant, testCase.entriesToSetMapping, version);
+            Assert.assertNotNull(mappedIds);
+            mappedIds.forEach(id -> Assert.assertEquals(id, seedId));
+        }
+    }
+
+    private void verifyEntriesMappedToOtherSeeds(EntityMatchEnvironment env, Tenant tenant, int version,
+            EntityTransactUpdateResult result, Map<EntityLookupEntry, String> expectedEntriesMapToOtherSeed) {
+        Assert.assertEquals(result.getEntriesMapToOtherSeeds(), expectedEntriesMapToOtherSeed);
+        if (MapUtils.isNotEmpty(expectedEntriesMapToOtherSeed)) {
+            // make sure lookup mappings to other seeds are not modified
+            ArrayList<EntityLookupEntry> entriesMappedToOtherSeed = new ArrayList<>(
+                    expectedEntriesMapToOtherSeed.keySet());
+            List<String> mappedIds = entityLookupEntryService.get(env, tenant, entriesMappedToOtherSeed, version);
+            for (int i = 0; i < entriesMappedToOtherSeed.size(); i++) {
+                EntityLookupEntry entry = entriesMappedToOtherSeed.get(i);
+                Assert.assertEquals(mappedIds.get(i), expectedEntriesMapToOtherSeed.get(entry),
+                        String.format("Mapping for entry %s should not be modified", entry));
+            }
+        }
+    }
+
+    private Map<EntityLookupEntry, String> mapping(String seedId, EntityLookupEntry... entries) {
+        return Arrays.stream(entries).map(entry -> Pair.of(entry, seedId))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    }
+
     /*
      * Create a test raw seed with two external system (SFDC/Marketo), lattice accountID and domain set
      */
@@ -744,5 +1023,36 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     private Tenant newTestTenant() {
         return new Tenant(EntityRawSeedServiceImplTestNG.class.getSimpleName() + "_" + UUID.randomUUID().toString());
+    }
+
+    private class TxnUpdateTestCase {
+        EntityRawSeed currentState;
+        Map<EntityLookupEntry, String> currentLookupMapping;
+        List<EntityLookupEntry> entriesToSetMapping;
+        EntityRawSeed seedToUpdate;
+        EntityRawSeed finalState;
+        boolean shouldSucceed;
+        // entries in seed after update, only tested when there is conflict for now
+        List<EntityLookupEntry> expectedEntriesInSeed;
+
+        public TxnUpdateTestCase(EntityRawSeed currentState, Map<EntityLookupEntry, String> currentLookupMapping,
+                List<EntityLookupEntry> entriesToSetMapping, EntityRawSeed seedToUpdate, EntityRawSeed finalState,
+                boolean shouldSucceed, List<EntityLookupEntry> expectedEntriesInSeed) {
+            this.currentState = currentState;
+            this.currentLookupMapping = currentLookupMapping;
+            this.entriesToSetMapping = entriesToSetMapping;
+            this.seedToUpdate = seedToUpdate;
+            this.finalState = finalState;
+            this.shouldSucceed = shouldSucceed;
+            this.expectedEntriesInSeed = expectedEntriesInSeed;
+        }
+
+        @Override
+        public String toString() {
+            return "TxnUpdateTestCase{" + "currentState=" + currentState + ", currentLookupMapping="
+                    + currentLookupMapping + ", entriesToSetMapping=" + entriesToSetMapping + ", seedToUpdate="
+                    + seedToUpdate + ", finalState=" + finalState + ", shouldSucceed=" + shouldSucceed
+                    + ", expectedEntriesInSeed=" + expectedEntriesInSeed + '}';
+        }
     }
 }
