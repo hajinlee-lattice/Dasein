@@ -59,19 +59,6 @@ public class CollectionWorkerMgrImpl extends JpaEntityMgrRepositoryImpl<Collecti
 
     }
 
-    public List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after) {
-
-        List<String> statusList = Arrays.asList(
-                CollectionWorker.STATUS_CONSUMED,
-                CollectionWorker.STATUS_FAILED);
-
-        List<CollectionWorker> resultList = collectionWorkerRepository.findByStatusInAndVendorAndSpawnTimeIsAfter
-                (statusList, vendor, after);
-
-        return resultList;
-
-    }
-
     public List<CollectionWorker> getActiveWorker(String vendor) {
 
         List<String> statusList = Arrays.asList(
