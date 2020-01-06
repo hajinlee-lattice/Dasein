@@ -479,8 +479,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         if (existing == null) {
             throw new RuntimeException(String.format("No such table with name %s", table.getName()));
         }
-        existing.setUpdatedBy(table.getUpdatedBy());
-        tableDao.update(existing);
+        tableDao.updateUpdatedBy(table.getUpdatedBy(), existing.getPid());
     }
 
     private void deleteExtractsInBackend(List<String> extractPaths) {
